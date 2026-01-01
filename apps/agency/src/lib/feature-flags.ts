@@ -25,6 +25,12 @@ const DEFAULT_FLAGS: FeatureFlags = {
  * Returns default flags if document doesn't exist.
  */
 export async function getFeatureFlags(): Promise<FeatureFlags> {
+  // Return defaults if Firebase is not initialized (e.g., during Vercel build)
+  if (!db) {
+    console.warn('[FEATURE FLAGS] Firebase not available, using defaults');
+    return DEFAULT_FLAGS;
+  }
+
   try {
     const docRef = db.collection('settings').doc('features');
     const doc = await docRef.get();

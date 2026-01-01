@@ -13,33 +13,45 @@ import { initializeApp, getApps, cert, type App } from 'firebase-admin/app';
 import { getAuth, type Auth } from 'firebase-admin/auth';
 import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 
-let app: App;
-let auth: Auth;
-let db: Firestore;
+let app: App | null = null;
+let auth: Auth | null = null;
+let db: Firestore | null = null;
 
-if (!getApps().length) {
-  // Parse the private key (handle escaped newlines)
-  const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY
-    ? process.env.FIREBASE_ADMIN_PRIVATE_KEY.replace(/\\n/g, '\n')
-    : undefined;
+// Check if all required env vars are present
+const hasFirebaseCredentials =
+  process.env.FIREBASE_ADMIN_PROJECT_ID &&
+  process.env.FIREBASE_ADMIN_CLIENT_EMAIL &&
+  process.env.FIREBASE_ADMIN_PRIVATE_KEY;
 
-  app = initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
-      privateKey,
-    }),
-  });
+if (hasFirebaseCredentials) {
+  try {
+    if (!getApps().length) {
+    // Parse the private key (handle escaped newlines)
+      const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY!.replace(/\\n/g, '\n');
 
-  // Get Firestore and configure settings (must be done before any Firestore operations)
-  db = getFirestore(app);
-  db.settings({ ignoreUndefinedProperties: true });
+      app = initializeApp({
+        credential: cert({
+          projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+          privateKey,
+        }),
+      });
 
-  auth = getAuth(app);
+      // Get Firestore and configure settings (must be done before any Firestore operations)
+      db = getFirestore(app);
+      db.settings({ ignoreUndefinedProperties: true });
+
+      auth = getAuth(app);
+    } else {
+      app = getApps()[0];
+      db = getFirestore(app);
+      auth = getAuth(app);
+    }
+  } catch (error) {
+    console.warn('[Firebase Admin] Failed to initialize:', error);
+  }
 } else {
-  app = getApps()[0];
-  db = getFirestore(app);
-  auth = getAuth(app);
+  console.warn('[Firebase Admin] Missing credentials - running in limited mode');
 }
 
 export { auth, auth as adminAuth, db };
