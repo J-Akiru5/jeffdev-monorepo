@@ -63,6 +63,10 @@ export async function getFeatureFlags(): Promise<FeatureFlags> {
 export async function updateFeatureFlags(
   flags: Partial<FeatureFlags>
 ): Promise<{ success: boolean; error?: string }> {
+  if (!db) {
+    return { success: false, error: 'Firebase not available' };
+  }
+
   try {
     const docRef = db.collection('settings').doc('features');
     await docRef.set(
