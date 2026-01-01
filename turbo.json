@@ -1,6 +1,26 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
+  "globalEnv": [
+    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
+    "CLERK_SECRET_KEY",
+    "NEXT_PUBLIC_APP_URL",
+    "NEXT_PUBLIC_PRISM_URL",
+    "NEXT_PUBLIC_DOCS_URL",
+    "MONGODB_URI",
+    "COSMOS_CONNECTION_STRING",
+    "COSMOS_DATABASE_NAME",
+    "GEMINI_API_KEY",
+    "PAYPAL_CLIENT_ID",
+    "PAYPAL_CLIENT_SECRET",
+    "PAYPAL_MODE",
+    "PAYPAL_PLAN_*",
+    "NEXT_PUBLIC_PAYPAL_CLIENT_ID",
+    "NEXT_PUBLIC_FIREBASE_*",
+    "FIREBASE_*",
+    "R2_*",
+    "DOPPLER_*"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

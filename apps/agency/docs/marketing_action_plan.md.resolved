@@ -1,0 +1,51 @@
+# Client Acquisition Action Plan
+
+## 🎯 Objective
+Establish a steady stream of high-value global leads for JeffDev Web Development Services.
+
+## Phase 1: The "Digital Namecard" (Immediate)
+*Goal: Ensure your online presence builds instant trust.*
+
+- [x] **Website Audit**: Ensure your portfolio (jeffdev.studio) loads in <2s and looks premium on mobile. (Done - "Endgame" Design Implemented).
+- [ ] **Clutch.co Profile**: 
+    - Create a profile on [Clutch.co](https://clutch.co/get-listed).
+    - Request reviews from 3 past clients (even small projects count). High ratings here are critical for B2B trust.
+- [ ] **LinkedIn Optimization**:
+    - Headline: "Enterprise Web Development for High-Growth Startups" (Not "Freelancer").
+    - Profile Video: A 30s loom recording of you scrolling through your best site.
+
+## Phase 2: Targeted Outreach (Week 1-2)
+*Goal: Contact 50 qualified leads per week.*
+
+### 1. The "Funded Startup" Strategy
+Startups that just raised money need to scale fast.
+- **Source**: [Crunchbase](https://www.crunchbase.com/), [Apollo.io](https://apollo.io/) (Free tier), or TechCrunch.
+- **Filter**: "Seed Round" or "Series A" + "SaaS" / "Fintech" / "Healthtech".
+- **The Pitch**: Don't sell "websites." Sell "Speed to Market."
+  > "Hi [Name], saw you just raised your Seed round – congrats! I help SaaS founders ship their MVP 2x faster using a proprietary Next.js engine. Just launched [Link to cool project]. Open to a 5-min demo?"
+
+### 2. The "Agency White-Label" Strategy
+Big agencies often turn away work or need overflow help.
+- **Action**: Find boutique SEO/Marketing agencies in New York/London/Singapore.
+- **Pitch**: "I can be your technical execution partner. You handle design/marketing, I build the pixel-perfect Next.js frontend."
+
+## Phase 3: Content Engine (Ongoing)
+*Goal: Inbound leads.*
+
+- **LinkedIn**: Post 2x/week.
+    - Post 1: "How we reduced TTI (Time to Interactive) by 40% for a client." (Technical authority).
+    - Post 2: "Why we use Next.js 14 for enterprise apps." (Thought leadership).
+- **Product Hunt**: Package a small tool or template (e.g., "SaaS Landing Page Boilerplate") and launch it for free visibility.
+
+## Tools of the Trade
+| Tool | Purpose | Cost |
+| :--- | :--- | :--- |
+| **Apollo.io** | Finding founders' emails | Free Tier |
+| **Loom** | Sending video pitches (higher conversion) | Free |
+| **Clutch** | collecting B2B reviews | Free |
+| **Stripe Atlas** | If you need a US entity later | $500 |
+
+## Metrics to Track
+- **Outreach Volume**: Target 10 emails/day.
+- **Response Rate**: Target >10%.
+- **Discovery Calls**: Target 2 booked/week.

@@ -1,0 +1,125 @@
+# MCP Integration
+
+Connect Prism Engine to your favorite AI coding assistant using the Model Context Protocol (MCP).
+
+## What is MCP?
+
+The [Model Context Protocol](https://modelcontextprotocol.io) is an open standard that allows AI assistants to access external tools and data sources. Prism Engine implements an MCP server that provides your architectural rules to any compatible IDE.
+
+## Supported IDEs
+
+| IDE | Status | Protocol |
+|-----|--------|----------|
+| **Cursor** | ✅ Supported | MCP via stdio |
+| **Windsurf** | ✅ Supported | MCP via stdio |
+| **Claude Desktop** | ✅ Supported | MCP via stdio |
+| **VS Code + Continue** | 🔄 Coming Soon | MCP via HTTP |
+
+## Cursor Setup
+
+### 1. Locate Your Cursor Config
+
+Open your Cursor settings directory:
+- **Windows**: `%APPDATA%\Cursor\User\`
+- **macOS**: `~/Library/Application Support/Cursor/User/`
+- **Linux**: `~/.config/Cursor/User/`
+
+### 2. Edit `mcp.json`
+
+Create or edit the `mcp.json` file:
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "npx",
+      "args": ["tsx", "/path/to/jeffdev-monorepo/apps/prism-mcp-server/src/index.ts"],
+      "env": {
+        "MONGODB_URI": "your-connection-string"
+      }
+    }
+  }
+}
+```
+
+import { Callout } from 'nextra/components'
+
+<Callout type="warning">
+  Replace `/path/to/jeffdev-monorepo` with your actual monorepo path. On Windows, use forward slashes or escaped backslashes.
+</Callout>
+
+### 3. Restart Cursor
+
+Restart Cursor to load the MCP server. You should see "prism" in your MCP connections.
+
+## Available Tools
+
+Once connected, the AI assistant has access to these tools:
+
+### `get_rules`
+
+Fetches all active architectural rules.
+
+```typescript
+// AI can call this to understand your codebase constraints
+get_rules({ category: "architecture" })
+```
+
+**Returns**: Array of rule summaries with ID, name, category, and priority.
+
+### `get_rule_content`
+
+Gets the full content of a specific rule.
+
+```typescript
+// AI calls this when it needs detailed guidance
+get_rule_content({ ruleId: "rule-001" })
+```
+
+**Returns**: Complete rule content in Markdown format.
+
+### `validate_code`
+
+Checks code against active rules and reports violations.
+
+```typescript
+// AI uses this before suggesting code
+validate_code({ 
+  code: "import { Button } from '../../apps/agency/Button'",
+  filePath: "apps/prism-dashboard/src/page.tsx"
+})
+```
+
+**Returns**: List of violations or confirmation that code passes.
+
+## Available Resources
+
+Prism also exposes resources that the AI can read:
+
+| URI | Description |
+|-----|-------------|
+| `prism://rules/all` | All active rules as JSON |
+| `prism://rules/architecture` | Architecture rules only |
+| `prism://rules/styling` | Styling rules only |
+| `prism://rules/security` | Security rules only |
+
+## Troubleshooting
+
+### Server Not Connecting
+
+1. Check the path to `index.ts` is correct
+2. Ensure `MONGODB_URI` is set in the env block
+3. Check Cursor's MCP logs for errors
+
+### Rules Not Loading
+
+1. Verify your database has rules: `doppler run -- npm run db:seed -w packages/db`
+2. Check the MongoDB connection string is valid
+3. Ensure the `prism` database exists
+
+### AI Ignoring Rules
+
+The AI uses rules as *guidance*, not hard constraints. For strict enforcement:
+1. Increase the rule's priority (lower number = higher priority)
+2. Add "MUST" or "ALWAYS" language in the rule content
+3. Include specific code examples

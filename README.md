@@ -1,135 +1,201 @@
-# Turborepo starter
+<div align="center">
 
-This Turborepo starter is maintained by the Turborepo core team.
+# ◈ JeffDev Monorepo
 
-## Using this example
+**Enterprise-Grade Web Development Infrastructure**
 
-Run the following command:
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![Turborepo](https://img.shields.io/badge/Turborepo-2.7-EF4444?logo=turborepo)](https://turbo.build/)
 
-```sh
-npx create-turbo@latest
-```
+*Building the future of AI-assisted development*
 
-## What's inside?
+[Agency](https://jeffdev.studio) · [Prism Docs](https://prism.jeffdev.studio) · [Changelog](./CHANGELOG.md)
 
-This Turborepo includes the following packages/apps:
+</div>
 
-### Apps and Packages
+---
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+## Overview
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
+This monorepo powers **JeffDev Studio** — a premium web development agency — and **Prism Engine** — a context governance system for AI coding assistants.
 
 ```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+┌─────────────────────────────────────────────────────────────────┐
+│                     JeffDev Monorepo                            │
+├─────────────────────────────────────────────────────────────────┤
+│  apps/                                                          │
+│  ├── agency          → Marketing site + Admin CRM               │
+│  ├── prism-dashboard → SaaS platform for developers             │
+│  ├── prism-docs      → Documentation (Nextra)                   │
+│  └── prism-mcp-server→ AI context server (MCP)                  │
+├─────────────────────────────────────────────────────────────────┤
+│  packages/                                                      │
+│  ├── ui              → @jdstudio/ui component library           │
+│  ├── db              → Firebase + Cosmos DB clients             │
+│  └── config          → Shared TypeScript/ESLint configs         │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+---
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+## Tech Stack
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+| Layer | Technology |
+|-------|------------|
+| **Framework** | Next.js 16 (App Router) |
+| **UI** | React 19, Tailwind CSS, Headless UI |
+| **Database** | Firebase (Agency), Azure Cosmos DB (Prism) |
+| **Auth** | Clerk |
+| **AI Protocol** | Model Context Protocol (MCP) |
+| **Secrets** | Doppler |
+| **Monorepo** | Turborepo |
 
-### Develop
+---
 
-To develop all apps and packages, run the following command:
+## Applications
 
-```
-cd my-turborepo
+### 🏢 Agency (`apps/agency`)
+The JeffDev Studio marketing site and client management system.
+- **Port**: 3000
+- **Stack**: Next.js 16, Firebase, Tailwind
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+### 🔮 Prism Dashboard (`apps/prism-dashboard`)
+SaaS platform for developers to manage AI context rules.
+- **Port**: 3001
+- **Stack**: Next.js 16, Clerk Auth, Cosmos DB
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
+### 📚 Prism Docs (`apps/prism-docs`)
+Documentation for the Prism Engine.
+- **Port**: 3002
+- **Stack**: Nextra 4
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+### 🧠 Prism MCP Server (`apps/prism-mcp-server`)
+AI context server implementing the Model Context Protocol.
+- **Transport**: stdio
+- **Tools**: `get_architectural_rules`, `validate_code_pattern`
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
+---
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
+## Packages
 
-### Remote Caching
+### @jdstudio/ui
+Ghost Glow component library following the JeffDev Design System.
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+```tsx
+import { Button, Card, Badge } from "@jdstudio/ui";
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+<Card variant="interactive">
+  <Button variant="cyan">Deploy</Button>
+  <Badge variant="success">Active</Badge>
+</Card>
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+**Components**: Button, Card, Input, Badge, ProgressBar, DataTable
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+### @jeffdev/db
+Unified database clients for Firebase and Azure Cosmos DB with Zod schemas.
 
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 20+
+- npm 10+
+- [Doppler CLI](https://docs.doppler.com/docs/install-cli) (for secrets)
+
+### Installation
+
+```bash
+# Clone repository
+git clone https://github.com/jeffdev/jeffdev-monorepo.git
+cd jeffdev-monorepo
+
+# Install dependencies
+npm install
+
+# Link Doppler secrets
+doppler setup
+
+# Start all apps
+doppler run -- turbo dev
 ```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+### Development Ports
+
+| App | URL |
+|-----|-----|
+| Agency | http://localhost:3000 |
+| Prism Dashboard | http://localhost:3001 |
+| Prism Docs | http://localhost:3002 |
+
+---
+
+## Architecture
+
+```mermaid
+graph TB
+    subgraph Clients
+        CURSOR[Cursor/Windsurf]
+        WEB[Web Browser]
+    end
+    
+    subgraph Apps
+        AGENCY[Agency :3000]
+        DASH[Dashboard :3001]
+        DOCS[Docs :3002]
+        MCP[MCP Server]
+    end
+    
+    subgraph Data
+        FIREBASE[(Firebase)]
+        COSMOS[(Cosmos DB)]
+    end
+    
+    WEB --> AGENCY
+    WEB --> DASH
+    WEB --> DOCS
+    CURSOR --> MCP
+    AGENCY --> FIREBASE
+    DASH --> COSMOS
+    MCP --> COSMOS
 ```
 
-## Useful Links
+---
 
-Learn more about the power of Turborepo:
+## Scripts
 
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+```bash
+# Development
+doppler run -- turbo dev              # Start all apps
+doppler run -- turbo dev --filter=agency  # Start agency only
+
+# Build
+turbo build                           # Build all apps
+turbo build --filter=prism-dashboard  # Build specific app
+
+# Type Checking
+turbo check-types                     # Check all packages
+
+# Database
+doppler run -- npm run db:seed -w packages/db  # Seed Cosmos DB
+```
+
+---
+
+## License
+
+**Proprietary © 2026 JeffDev Studio. All Rights Reserved.**
+
+This software is proprietary and confidential. Unauthorized copying, distribution, or use of this software is strictly prohibited. For licensing inquiries, contact [hello@jeffdev.studio](mailto:hello@jeffdev.studio).
+
+---
+
+<div align="center">
+
+Built with ❤️ by [JeffDev Studio](https://jeffdev.studio)
+
+</div>

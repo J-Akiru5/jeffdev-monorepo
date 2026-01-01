@@ -1,0 +1,9 @@
+{
+  "dependencyTypes": ["dev", "prod"],
+  "filter": ".",
+  "indent": "  ",
+  "semverRange": "^",
+  "sortAz": ["dependencies", "devDependencies", "peerDependencies", "scripts"],
+  "sortFirst": ["name", "description", "version", "author"],
+  "versionGroups": []
+}

@@ -1,0 +1,55 @@
+# Team Sync
+
+Share your architectural rules across your entire development team.
+
+import { Callout } from 'nextra/components'
+
+<Callout type="warning">
+  Team Sync is a **premium feature** coming in Prism v0.2. This page documents the planned functionality.
+</Callout>
+
+## The Problem
+
+When every developer has their own `.cursorrules` file:
+- Rules drift out of sync
+- New team members don't know the standards
+- AI assistants behave inconsistently
+
+## The Solution
+
+Prism Team Sync provides:
+- **Centralized Rule Management**: One source of truth
+- **Real-time Sync**: Rules update automatically across all IDEs
+- **Role-based Access**: Control who can edit rules
+- **Audit Trail**: See who changed what and when
+
+## How It Works
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│  Developer A    │     │  Developer B    │     │  Developer C    │
+│  (Cursor)       │     │  (Windsurf)     │     │  (Claude)       │
+└────────┬────────┘     └────────┬────────┘     └────────┬────────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │ MCP
+                                 ▼
+                    ┌─────────────────────────┐
+                    │    Prism Cloud Sync     │
+                    │    (Team Rule Store)    │
+                    └─────────────────────────┘
+```
+
+## Pricing (Planned)
+
+| Plan | Users | Price |
+|------|-------|-------|
+| **Solo** | 1 | Free |
+| **Team** | Up to 10 | $29/mo |
+| **Enterprise** | Unlimited | Contact Us |
+
+## Early Access
+
+Want early access to Team Sync? Join the waitlist:
+
+[Join Waitlist →](https://jeffdev.studio/prism/waitlist)

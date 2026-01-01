@@ -1,0 +1,111 @@
+# Security Rules
+
+Constraints for secure code practices.
+
+## Doppler Law
+
+```
+Category: security
+Priority: 4
+Tags: secrets, doppler, env
+```
+
+import { Callout } from 'nextra/components'
+
+<Callout type="error">
+  **NEVER** use, create, or read `.env` files manually in production.
+</Callout>
+
+### Secret Injection
+
+All secrets must be injected via Doppler:
+
+```bash
+# Local development
+doppler run -- turbo dev
+
+# CI/CD
+# Use Doppler integration token in GitHub Actions
+```
+
+### Frontend Leakage Prevention
+
+**Never** prefix private keys with `NEXT_PUBLIC_`:
+
+```typescript
+// ❌ WRONG - Exposes secret to browser
+NEXT_PUBLIC_DATABASE_KEY="secret"
+
+// ✅ CORRECT - Only public identifiers
+NEXT_PUBLIC_FIREBASE_PROJECT_ID="my-project"
+```
+
+---
+
+## Zod Validation Gate
+
+```
+Category: security
+Priority: 11
+Tags: validation, zod, server-actions, api
+```
+
+Every Server Action and API Route **MUST** validate inputs:
+
+```typescript
+import { z } from "zod";
+
+const schema = z.object({
+  email: z.string().email(),
+  content: z.string().max(5000),
+});
+
+export async function createEntry(formData: FormData) {
+  const parsed = schema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) {
+    throw new Error("Validation Failed");
+  }
+  // Proceed with validated data
+}
+```
+
+---
+
+## Input Sanitization
+
+For rich text rendering:
+
+```typescript
+import DOMPurify from "dompurify";
+
+// Only use dangerouslySetInnerHTML with sanitization
+<div dangerouslySetInnerHTML={{ 
+  __html: DOMPurify.sanitize(content) 
+}} />
+```
+
+---
+
+## Database Protection
+
+### Firebase Rules
+
+Default to deny:
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+    // Explicitly whitelist collections
+  }
+}
+```
+
+### Cosmos DB
+
+- Use singleton client from `packages/db`
+- Never concatenate strings into queries (injection risk)
+- Use parameterized queries

@@ -1,0 +1,102 @@
+# MCP Server API
+
+The Prism MCP Server exposes tools and resources via the Model Context Protocol.
+
+## Tools
+
+### `get_rules`
+
+Retrieve all active architectural rules, optionally filtered by category.
+
+**Input Schema:**
+
+```typescript
+{
+  category?: "architecture" | "styling" | "security" | "performance" | "testing" | "documentation"
+}
+```
+
+**Response:**
+
+```json
+[
+  {
+    "id": "rule-001",
+    "name": "No Cross-App Imports",
+    "category": "architecture",
+    "priority": 1
+  }
+]
+```
+
+---
+
+### `get_rule_content`
+
+Get the full content of a specific rule.
+
+**Input Schema:**
+
+```typescript
+{
+  ruleId: string  // Required
+}
+```
+
+**Response:**
+
+```markdown
+# No Cross-App Imports
+
+Category: architecture
+Priority: 1
+
+Never import code directly from one app to another...
+```
+
+---
+
+### `validate_code`
+
+Validate a code snippet against active rules.
+
+**Input Schema:**
+
+```typescript
+{
+  code: string,      // Required - The code to validate
+  filePath?: string  // Optional - For context
+}
+```
+
+**Response:**
+
+```text
+Found 1 violation(s):
+
+VIOLATION [rule-001]: Cross-app import detected. Use packages/ for shared code.
+```
+
+Or if valid:
+
+```text
+✅ No violations found. Code adheres to all active rules.
+```
+
+## Resources
+
+| URI | MIME Type | Description |
+|-----|-----------|-------------|
+| `prism://rules/all` | `application/json` | All active rules |
+| `prism://rules/architecture` | `application/json` | Architecture rules only |
+
+## Error Handling
+
+All tools return errors in this format:
+
+```json
+{
+  "content": [{ "type": "text", "text": "Error: Rule not found" }],
+  "isError": true
+}
+```

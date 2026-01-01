@@ -1,0 +1,38 @@
+{
+  "name": "prism-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3001",
+    "build": "next build",
+    "start": "next start --port 3001",
+    "lint": "eslint",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@clerk/nextjs": "^6.20.0",
+    "@clerk/themes": "^2.4.46",
+    "@google/generative-ai": "^0.24.1",
+    "@jdstudio/ui": "*",
+    "@jeffdev/db": "*",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.562.0",
+    "next": "16.1.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "tailwind-merge": "^3.4.0",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "*",
+    "@repo/typescript-config": "*",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^22.15.3",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "19.2.2",
+    "eslint": "^9.39.1",
+    "eslint-config-next": "16.1.1",
+    "tailwindcss": "^4",
+    "typescript": "^5.9.2"
+  }
+}

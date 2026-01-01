@@ -1,0 +1,93 @@
+# Getting Started
+
+Get Prism Engine running in under 5 minutes.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- **Node.js 20+** (LTS recommended)
+- **npm 10+** (comes with Node.js)
+- **Doppler CLI** (for secrets management)
+- **Azure Cosmos DB** account with MongoDB API enabled
+
+## Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/jeffdev/prism-engine
+cd prism-engine
+```
+
+### 2. Install Dependencies
+
+```bash
+npm install
+```
+
+This installs all workspaces in the monorepo:
+- `apps/prism-dashboard` - The SaaS web interface
+- `apps/prism-mcp-server` - The MCP server
+- `packages/db` - Shared database utilities
+
+### 3. Configure Doppler
+
+Prism uses [Doppler](https://doppler.com) for secrets management. Never commit `.env` files.
+
+```bash
+# Install Doppler CLI (if not installed)
+# Windows: winget install doppler
+# macOS: brew install dopplerhq/cli/doppler
+
+# Login and setup
+doppler login
+doppler setup  # Select your project and config
+```
+
+Required secrets in Doppler:
+
+| Secret | Description |
+|--------|-------------|
+| `MONGODB_URI` | Azure Cosmos DB connection string |
+| `CLERK_SECRET_KEY` | Clerk authentication secret |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk public key |
+
+### 4. Seed the Database
+
+Bootstrap your rules database with the core architectural rules:
+
+```bash
+doppler run -- npm run db:seed -w packages/db
+```
+
+You should see:
+```
+🌱 Starting Genesis Seeding...
+✅ Connected to Azure Cosmos DB (MongoDB API)
+✨ Successfully seeded 6 Core Rules.
+```
+
+### 5. Start Development
+
+```bash
+doppler run -- turbo dev
+```
+
+This starts all apps:
+- **Dashboard**: http://localhost:3001
+- **Docs**: http://localhost:3002
+- **Agency**: http://localhost:3000
+
+## Next Steps
+
+import { Cards, Card } from 'nextra/components'
+
+<Cards>
+  <Card title="Create Your First Rule" href="/guide/rules">
+    Learn to write architectural constraints
+  </Card>
+  <Card title="Connect Your IDE" href="/guide/mcp-integration">
+    Set up Cursor or Windsurf with Prism
+  </Card>
+</Cards>

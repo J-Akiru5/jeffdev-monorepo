@@ -1,0 +1,42 @@
+# Tech Stack Rules
+
+Infrastructure and framework constraints.
+
+## Core Stack Protocol
+
+```
+Category: architecture
+Priority: 2
+Tags: stack, backend, framework, infrastructure
+```
+
+### Framework
+
+| Layer | Technology | Version |
+|-------|------------|---------|
+| Frontend | Next.js (App Router) | 16.x |
+| UI Library | React | 19.x |
+| Runtime | Node.js (LTS) | 20.x |
+| Package Manager | npm | 10.x |
+
+### Data Layer
+
+| Use Case | Technology |
+|----------|------------|
+| Agency (Marketing/Admin) | Firebase Firestore |
+| Prism (SaaS) | Azure Cosmos DB (MongoDB API) |
+| Rate Limiting | Upstash Redis |
+| File Storage | Cloudflare R2 |
+
+### AI Stack
+
+- **SDK**: Vercel AI SDK
+- **Models**: Claude 3.5 Sonnet, GPT-4o
+- **Vectors**: Azure AI Search (prod), ChromaDB (dev)
+
+### Frontend Engineering
+
+- **Styling**: Tailwind CSS v4 + clsx + tailwind-merge
+- **Motion**: framer-motion + gsap + @studio-freight/lenis
+- **Validation**: Zod (mandatory for all forms & APIs)
+- **Auth**: Clerk (Prism), Firebase Auth (Agency)

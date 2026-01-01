@@ -1,0 +1,75 @@
+# Prism Engine
+
+**Context Governance for LLMs** — Stop AI hallucinations by deploying a Context Server that forces coding assistants to follow your Design System.
+
+## What is Prism Engine?
+
+Prism Engine is an **MCP Server** (Model Context Protocol) that provides architectural rules, coding standards, and design constraints to AI coding assistants like:
+
+- **Cursor**
+- **Windsurf**  
+- **Claude (via MCP)**
+- **GitHub Copilot** (coming soon)
+
+Instead of hoping your AI follows best practices, **Prism enforces them**.
+
+## Quick Start
+
+```bash
+# 1. Clone and install
+git clone https://github.com/jeffdev/prism-engine
+cd prism-engine
+npm install
+
+# 2. Configure your connection
+doppler setup  # Select your project
+
+# 3. Seed your rules database
+doppler run -- npm run db:seed -w packages/db
+
+# 4. Start the MCP server
+npm run dev -w apps/prism-mcp-server
+```
+
+## Core Features
+
+<Cards>
+  <Card title="Rule Management" href="/guide/rules">
+    Create, organize, and deploy architectural constraints
+  </Card>
+  <Card title="MCP Integration" href="/guide/mcp-integration">
+    Connect to Cursor, Windsurf, and Claude
+  </Card>
+  <Card title="Team Sync" href="/guide/team-sync">
+    Share rules across your entire development team
+  </Card>
+  <Card title="API Access" href="/api-reference">
+    Programmatic access to your rules library
+  </Card>
+</Cards>
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Your IDE (Cursor/Windsurf)              │
+└────────────────────────────┬────────────────────────────────┘
+                             │ MCP Protocol
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   Prism MCP Server                          │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │  get_rules  │  │validate_code│  │ get_rule_content    │  │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│            Azure Cosmos DB (MongoDB API)                    │
+│                    Rules Collection                         │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Built by JeffDev Studio
+
+Prism Engine is part of the [JeffDev](https://jeffdev.studio) ecosystem — enterprise-grade tools for Vibecoders who want AI that respects their architecture.

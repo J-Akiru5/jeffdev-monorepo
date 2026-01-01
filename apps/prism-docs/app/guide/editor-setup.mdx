@@ -1,0 +1,229 @@
+# Editor Setup
+
+Connect Prism Engine to your favorite development environment.
+
+import { Tabs } from 'nextra/components'
+import { Callout } from 'nextra/components'
+
+## Choose Your Editor
+
+<Tabs items={['Cursor', 'VS Code (Cline)', 'CLI / Custom Agent']}>
+
+<Tabs.Tab>
+
+## Cursor Setup
+
+Cursor has **native MCP support** — no extensions needed.
+
+### Step 1: Open MCP Settings
+
+1. Open **Cursor Settings** (`Ctrl+,` or gear icon)
+2. Navigate to **Features** → **MCP Servers**
+3. Click **+ Add New MCP Server**
+
+### Step 2: Configure Prism Engine
+
+| Field | Value |
+|-------|-------|
+| **Name** | `prism-engine` |
+| **Type** | `stdio` |
+| **Command** | `node` |
+| **Args** | `C:\path\to\jeffdev-monorepo\apps\prism-mcp-server\dist\index.js` |
+
+<Callout type="warning">
+Replace `C:\path\to\` with your actual monorepo path. Use forward slashes or escaped backslashes.
+</Callout>
+
+### Step 3: Add Environment Variables
+
+Click **+ Add Environment Variable**:
+
+| Key | Value |
+|-----|-------|
+| `MONGODB_URI` | Your Azure Cosmos DB connection string |
+
+To get your URI:
+```bash
+doppler secrets get MONGODB_URI --plain
+```
+
+### Step 4: Restart & Test
+
+1. Restart Cursor completely
+2. In the chat, type: *"What are the Prism design system rules?"*
+3. Cursor will call `get_architectural_rules` and return your rules from Cosmos DB
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+## VS Code + Cline
+
+VS Code doesn't have native MCP support yet, but **Cline** provides it.
+
+### What is Cline?
+
+[Cline](https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev) is a free, open-source autonomous coding agent that speaks MCP natively.
+
+### Step 1: Install Cline
+
+1. Open VS Code Extensions (`Ctrl+Shift+X`)
+2. Search for **"Cline"**
+3. Click **Install**
+
+### Step 2: Configure MCP Server
+
+1. Open Cline sidebar (robot icon)
+2. Click the **MCP** icon (plug/server symbol)
+3. Add this configuration:
+
+```json
+{
+  "mcpServers": {
+    "prism-engine": {
+      "command": "node",
+      "args": ["C:/path/to/jeffdev-monorepo/apps/prism-mcp-server/dist/index.js"],
+      "env": {
+        "MONGODB_URI": "mongodb+srv://your-connection-string"
+      }
+    }
+  }
+}
+```
+
+### Step 3: Use Prism with Cline
+
+Tell Cline:
+> "Read the tech-stack rule from Prism and create a new React component following those guidelines."
+
+Cline will:
+1. Query your Prism database
+2. Read the rules
+3. Generate code that follows them
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+## CLI / Custom Agent
+
+Build your own MCP client in Python or Node.js.
+
+### Why?
+
+- Run in CI/CD pipelines
+- Create Discord/Slack bots
+- Build custom "Antigravity" agents
+
+### Python Client
+
+Install the MCP SDK:
+```bash
+pip install mcp
+```
+
+Create `prism_client.py`:
+
+```python
+import asyncio
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+
+server_params = StdioServerParameters(
+    command="node",
+    args=["C:/dev/jeffdev-monorepo/apps/prism-mcp-server/dist/index.js"],
+    env={"MONGODB_URI": "mongodb+srv://..."}
+)
+
+async def get_rules(category: str = None):
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+
+            result = await session.call_tool(
+                "get_architectural_rules",
+                arguments={"category": category} if category else {}
+            )
+
+            return result.content[0].text
+
+if __name__ == "__main__":
+    rules = asyncio.run(get_rules("design"))
+    print(rules)
+```
+
+### Node.js Client
+
+```typescript
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+
+const transport = new StdioClientTransport({
+  command: "node",
+  args: ["./apps/prism-mcp-server/dist/index.js"],
+  env: { MONGODB_URI: process.env.MONGODB_URI }
+});
+
+const client = new Client({ name: "my-agent", version: "1.0.0" });
+
+await client.connect(transport);
+
+const result = await client.callTool({
+  name: "get_architectural_rules",
+  arguments: { category: "security" }
+});
+
+console.log(result.content[0].text);
+```
+
+### Use Cases
+
+| Scenario | Implementation |
+|----------|----------------|
+| **CI/CD Linting** | Run `validate_code_pattern` on PR diffs |
+| **Slack Bot** | Query rules via `/prism rules design` |
+| **Pre-commit Hook** | Validate staged files against rules |
+
+</Tabs.Tab>
+
+</Tabs>
+
+---
+
+## Troubleshooting
+
+### Server Not Connecting
+
+1. Check the path to `dist/index.js` is correct
+2. Ensure the server was built: `npm run build -w apps/prism-mcp-server`
+3. Verify `MONGODB_URI` is set correctly
+
+### "MONGODB_URI not set" Error
+
+The MCP server runs as a separate process and doesn't inherit Doppler secrets. You must pass the URI explicitly in your editor's MCP config.
+
+```bash
+# Get your URI
+doppler secrets get MONGODB_URI --plain
+```
+
+### Rules Not Loading
+
+1. Verify rules exist: `doppler run -- npm run db:seed -w packages/db`
+2. Check database connection in Azure Portal
+3. Ensure rules have `isActive: true` and `isPublic: true`
+
+---
+
+## Next Steps
+
+import { Cards, Card } from 'nextra/components'
+
+<Cards>
+  <Card title="Create Custom Rules" href="/guide/rules">
+    Add your own architectural constraints
+  </Card>
+  <Card title="Team Sync (Coming)" href="/guide/team-sync">
+    Share rules across your team
+  </Card>
+</Cards>

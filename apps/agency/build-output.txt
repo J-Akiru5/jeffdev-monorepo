@@ -1,0 +1,56 @@
+
+> jeffdev-agency@0.1.0 build
+> next build
+
+Γû▓ Next.js 16.1.1 (Turbopack)
+- Environments: .env.local, .env
+
+ΓÜá The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 4.2s
+  Running TypeScript ...
+  Collecting page data using 11 workers ...
+  Generating static pages using 11 workers (0/27) ...
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /admin/login. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /privacy. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /admin/messages. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /quote. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /admin/audit. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /_not-found. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /services. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /about. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /terms. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /admin/projects. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /admin. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+  Generating static pages using 11 workers (6/27) 
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /services/[slug]. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /services/[slug]. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /services/[slug]. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /services/[slug]. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+ΓÜá Unsupported metadata themeColor is configured in metadata export in /admin/projects. Please move it to viewport export instead.
+Read more: https://nextjs.org/docs/app/api-reference/functions/generate-viewport
+Error occurred prerendering page "/admin/projects". Read more: https://nextjs.org/docs/messages/prerender-error
+Error: Event handlers cannot be passed to Client Component props.
+  {onClick: function onClick, children: ...}
+            ^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+    at stringify (<anonymous>) {
+  digest: '1829341488'
+}
+Export encountered an error on /admin/projects/page: /admin/projects, exiting the build.
+Γ¿» Next.js build worker exited with code: 1 and signal: null

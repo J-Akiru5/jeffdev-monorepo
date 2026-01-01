@@ -1,0 +1,29 @@
+{
+  "name": "@jeffdev/db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./firebase": "./src/firebase.ts",
+    "./cosmos": "./src/cosmos.ts",
+    "./schema": "./src/schema.ts"
+  },
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "check-types": "tsc --noEmit",
+    "db:seed": "tsx scripts/seed.ts"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.6.0",
+    "mongodb": "^6.15.0",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "*",
+    "@repo/typescript-config": "*",
+    "@types/node": "^22.15.3",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.2"
+  }
+}

@@ -1,0 +1,106 @@
+# Creating Rules
+
+Rules are the core of Prism Engine. They define the architectural constraints that AI coding assistants must follow.
+
+## Rule Structure
+
+Every rule has the following properties:
+
+```typescript
+interface Rule {
+  name: string;        // Human-readable name
+  category: string;    // architecture, styling, security, etc.
+  tags: string[];      // For filtering and organization
+  content: string;     // The actual rule (markdown)
+  priority: number;    // 1-100 (1 = highest priority)
+  isActive: boolean;   // Enable/disable without deletion
+  isPublic: boolean;   // Share with community
+}
+```
+
+## Categories
+
+| Category | Use Case |
+|----------|----------|
+| `architecture` | Code structure, imports, monorepo boundaries |
+| `styling` | CSS, Tailwind, design system constraints |
+| `security` | Validation, sanitization, auth patterns |
+| `performance` | Optimization, caching, lazy loading |
+| `testing` | Test patterns, coverage requirements |
+| `documentation` | Comment style, README requirements |
+
+## Writing Effective Rules
+
+### Good Rule Example
+
+```markdown
+# No Cross-App Imports
+
+## What's Forbidden
+\`\`\`typescript
+// ❌ NEVER DO THIS
+import { Button } from "../../apps/agency/src/components/Button";
+\`\`\`
+
+## What's Allowed
+\`\`\`typescript
+// ✅ Use shared packages
+import { Button } from "@repo/ui/button";
+\`\`\`
+
+## Why?
+- Turborepo builds each app independently
+- Cross-app imports create hidden dependencies
+```
+
+### Rule Writing Tips
+
+import { Callout } from 'nextra/components'
+
+<Callout type="info">
+  Write rules as if explaining to a junior developer. The AI will follow them exactly.
+</Callout>
+
+1. **Be Specific**: Include code examples of what TO do and what NOT to do
+2. **Explain Why**: AI assistants perform better when they understand the reasoning
+3. **Use Patterns**: Show the correct pattern, not just the prohibition
+4. **Keep It Focused**: One rule = one constraint
+
+## Creating Rules via Dashboard
+
+1. Navigate to **Dashboard** → **Rules**
+2. Click **"Create Rule"**
+3. Fill in the form:
+   - Name, Category, Tags
+   - Content (supports Markdown)
+   - Priority (1 = highest)
+4. Click **Save**
+
+## Creating Rules via API
+
+```typescript
+import { getCollection } from "@jeffdev/db/cosmos";
+
+const rules = await getCollection("rules");
+
+await rules.insertOne({
+  name: "Use Zod for Validation",
+  category: "security",
+  tags: ["validation", "zod", "api"],
+  content: "All Server Actions and API routes must validate input with Zod...",
+  priority: 10,
+  isActive: true,
+  isPublic: false,
+  userId: "user_123",
+  createdAt: new Date().toISOString(),
+});
+```
+
+## Importing Existing Rules
+
+Have a `.cursorrules` file? Import it directly:
+
+```bash
+# Coming soon
+prism import --file .cursorrules
+```
