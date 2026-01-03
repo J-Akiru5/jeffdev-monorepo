@@ -1,11 +1,40 @@
 # Changelog
 
-All notable changes to the Prism Dashboard will be documented in this file.
+All notable changes to the Prism Context Engine Dashboard will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+---
+
+## [1.0.3] - 2026-01-03
+
+### ✨ Added
+- **Animated Landing Page**: GSAP ScrollTrigger-powered hero section with parallax effects
+- **Authentication System**: Complete Clerk integration with session management
+- **Subscription Management**: PayPal integration for Pro tier subscriptions with success/cancelled flows
+- **Pricing Page**: Tiered pricing (Free/Pro) with feature comparison
+- **API Endpoints**: Subscription verification and PayPal webhook handling
+- **Version Badge**: Live version display (v1.0.3) in hero section
+- **Global Navigation**: Links to docs.jeffdev.studio and jeffdev.studio
+
+### 🎨 Design & Branding
+- **Unified Branding**: Complete rebrand to "Prism Context Engine" across all UI
+- **JD Studio Endgame Theme**: 
+  - Void black (#050505) background
+  - Cyan (#06b6d4) primary, purple (#8b5cf6) accent
+  - Glass morphism with advanced backdrop-blur
+  - Inter font for UI, JetBrains Mono for code
+- **Responsive Footer**: 4-column layout with Products, Company, and CTA sections
+- **CSS Refinements**: Webkit vendor prefix fixes for cross-browser compatibility
+
+### 🔧 Technical Improvements
+- **SEO Optimization**: OpenGraph and Twitter card meta tags
+- **Version Management**: Package version updated to 1.0.3
+- **TypeScript Strict Mode**: Enhanced type safety
+- **Accessibility**: Improved semantic HTML and ARIA labels
 
 ---
 

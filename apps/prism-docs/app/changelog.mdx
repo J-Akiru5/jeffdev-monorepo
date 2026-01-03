@@ -1,24 +1,381 @@
 # Changelog
 
-Track all notable changes to the Prism Context Engine.
+All notable changes to Prism Context Engine across all applications.
 
 import { Callout } from 'nextra/components'
 
 <Callout type="info">
-  Version format follows [Semantic Versioning](https://semver.org/).
+  This changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) and [Semantic Versioning](https://semver.org/).
 </Callout>
 
 ---
 
+## 📦 Version 1.0.3 - January 3, 2026
+
+A comprehensive update bringing production-ready features, unified branding, and enhanced user experience across the entire platform.
+
+---
+
+## 🌐 Dashboard
+
+### ✨ Added
+- **Animated Landing Page**: GSAP ScrollTrigger-powered hero section with smooth parallax effects and scroll-based pinning
+- **Authentication System**: Complete Clerk integration with session management and protected routes
+- **Subscription Management**: PayPal integration supporting Free and Pro tier subscriptions
+  - Success/cancelled flow pages for seamless user experience
+  - Webhook handling for subscription events
+  - Real-time subscription status tracking
+- **Pricing Page**: Feature comparison table with tiered pricing (Free/Pro)
+- **API Endpoints**: 
+  - `/api/subscriptions` - PayPal subscription creation and verification
+  - Authentication verification endpoints
+- **Version Badge**: Live version display (v1.0.3) in hero section with pulse animation
+- **Global Navigation**: Seamless links to docs.jeffdev.studio and jeffdev.studio
+
+### 🎨 Design & Branding
+- **Unified Branding**: Complete rebrand to "Prism Context Engine" across all UI components
+- **JD Studio Endgame Theme**: 
+  - Void black (#050505) background for reduced eye strain
+  - Cyan (#06b6d4) primary with purple (#8b5cf6) accents
+  - Advanced glass morphism with backdrop-blur effects
+  - Inter font family for UI, JetBrains Mono for code/technical content
+- **Responsive Footer**: 4-column layout with Product, Company, and CTA sections
+- **CSS Refinements**: Webkit vendor prefix fixes ensuring cross-browser compatibility
+
+### 🔧 Technical Improvements
+- **SEO Optimization**: Comprehensive OpenGraph and Twitter card meta tags
+- **Version Management**: Package version synchronized across monorepo
+- **TypeScript Strict Mode**: Enhanced type safety and developer experience
+- **Accessibility**: Improved semantic HTML structure and ARIA labels
+- **Performance**: Optimized bundle size and lazy loading for hero animations
+
+---
+
+## 📚 Documentation Site
+
+### ✨ Added
+- **Search Integration**: Client-side search with instant results and codeblock indexing
+- **JD Studio Endgame Design**: 400+ lines of custom CSS matching agency branding
+- **Enhanced Footer**: 4-column footer structure with Dashboard, Company, and CTA links
+- **Meta Tags**: Comprehensive OpenGraph and Twitter card metadata for social sharing
+- **PWA Support**: 
+  - Multiple favicon sizes (16x16, 32x32, 180x180, 192x192, 512x512)
+  - Web app manifest with shortcuts and theme colors
+- **Kitchen/Recipe/Waiter Metaphor**: Clear explanation table for product concepts
+- **Changelog Navigation**: Dedicated changelog page in sidebar
+
+### 🎨 Design System
+- **Dark Theme**: Forced dark mode with cyan (#06b6d4) primary hue (189deg)
+- **Custom CSS**: Extensive Nextra theme overrides for brand consistency
+- **Typography**: Inter (UI) + JetBrains Mono (code) matching dashboard
+- **Glass Effects**: Sophisticated glass morphism components with backdrop-blur
+- **Gradient Text**: Cyan-to-purple gradient utilities for headlines
+- **Grid Background**: Dark grid pattern with subtle noise texture overlay
+
+### 🔍 Search Enhancements
+- **Provider**: Built-in Nextra search with codeblocks indexing enabled
+- **Configuration**: Optimized for instant client-side search
+- **Performance**: Search index generated at build time for zero runtime overhead
+
+### 📝 Content Improvements
+- **Landing Page**: Updated tagline "Context Operating System for Vibecoders"
+- **Branding**: All references standardized to "Prism Context Engine"
+- **Version Display**: v1.0.3 prominently shown in footer
+- **Architecture Diagrams**: ASCII diagrams showing data flow and MCP integration
+
+### 🔧 Technical Updates
+- **Nextra 4.x**: Latest documentation framework with enhanced features
+- **Next.js 16**: App Router with improved performance and caching
+- **Theme Config**: Custom configuration with logo, project links, and footer
+- **Viewport Meta**: Proper theme-color configuration for mobile browsers
+
+---
+
+## 🔌 MCP Server
+
+### ✨ Added
+- **Video Transcript Schema**: Comprehensive Zod schema for storing video-to-context transcripts
+- **Semantic Search Tool**: MCP tool enabling vector-based search across context rules and transcripts
+- **Branding Update**: All server descriptions updated to "Prism Context Engine"
+- **Connection Stability**: Improved error handling and reconnection logic
+
+### 🔧 Technical Improvements
+- **MCP Protocol**: Fully compliant Model Context Protocol v1.0 implementation
+- **Stdio Transport**: Reliable communication via stdin/stdout for editor integration
+- **TypeScript**: Strict type checking with comprehensive type definitions
+- **Version**: Package version updated to 1.0.3 with semver compliance
+
+### 📦 Integration
+- **IDE Support**: Compatible with Cursor, Windsurf, VS Code, and Claude Desktop
+- **Context Delivery**: Real-time context rule serving directly to AI coding assistants
+- **Dashboard Sync**: Automatic synchronization with dashboard rule changes
+- **Error Handling**: Graceful fallbacks and detailed error messages for debugging
+
+---
+
+## 🛠️ CLI Tool
+
+### ✨ Features
+- **Context Rule Templates**: Pre-built, production-ready templates:
+  - Next.js with App Router
+  - React with Vite
+  - React Native with Expo
+- **Design System Rules**: Four distinct aesthetic approaches:
+  - **8-bit Nostalgia**: Retro pixel-perfect design
+  - **Glassmorphic**: Modern frosted glass effects
+  - **Bare Minimum**: Minimalist brutalism
+  - **JD Studio**: Official Endgame theme
+- **Interactive CLI**: User-friendly prompts for template selection and customization
+- **File Generation**: Automatic creation of `.cursorrules` and `.windsurfrules` files
+- **Branding**: Updated to "Prism Context Engine - Context Governance for LLMs"
+
+### 🎨 Design System Templates
+- **JD Studio Theme**: 
+  - Void black (#050505) backgrounds
+  - Cyan (#06b6d4) and purple (#8b5cf6) accents
+  - Glass morphism patterns
+  - Typography hierarchy (Inter/JetBrains Mono)
+- **Glassmorphic**: Modern backdrop-blur with transparency layers
+- **8-bit Nostalgia**: Pixel fonts, primary color palettes, grid layouts
+- **Bare Minimum**: Brutalist approach with system fonts and high contrast
+
+### 🔧 Technical
+- **TypeScript**: Full type safety with strict mode enabled
+- **Commander.js**: Robust CLI argument parsing and help documentation
+- **Template Engine**: Markdown-based rule templates with variable interpolation
+- **Version**: Updated to 1.0.3 for consistency across ecosystem
+
+### 📦 Usage Examples
+```bash
+# Generate Next.js rules with JD Studio theme
+npx @prism/cli generate --template nextjs --style jdstudio
+
+# List all available templates
+npx @prism/cli list-templates
+
+# Interactive mode
+npx @prism/cli
+```
+
+---
+
+## 🔄 Cross-Platform Changes
+
+### Architecture Clarifications
+- **Dashboard**: Web-based SaaS at https://prism.jeffdev.studio (no local installation required)
+- **MCP Server**: Optional local installation for real-time IDE sync (`npm install -g @prism/mcp-server`)
+- **Manual Option**: Users can generate `.cursorrules` files from dashboard and paste them directly
+- **No Repo Cloning**: Users interact with the platform entirely through the web dashboard - no monorepo access needed
+
+### Workflow Options
+
+**Option A: Web Dashboard (Recommended)**
+1. Sign up at https://prism.jeffdev.studio
+2. Create project and upload videos or write rules manually
+3. Export `.cursorrules` file
+4. Paste into your project root
+
+**Option B: MCP Server (Advanced)**
+1. Install MCP server globally: `npm install -g @prism/mcp-server`
+2. Configure IDE with API key
+3. Real-time sync with dashboard changes
+4. AI assistant has live access to your evolving rules
+
+### Deployment Infrastructure
+- **Dashboard**: Deployed on Vercel with Doppler secrets management
+- **Docs**: Deployed on Vercel at docs.jeffdev.studio
+- **MCP Server**: Distributed via npm registry
+- **CLI**: Available via npx for zero-install experience
+
+---
+
+## 📊 Technical Stack
+
+### Dashboard & Docs
+- **Framework**: Next.js 16 (App Router)
+- **Styling**: Tailwind CSS with custom design tokens
+- **Authentication**: Clerk (Dashboard only)
+- **Database**: Azure Cosmos DB (MongoDB API)
+- **Payments**: PayPal SDK
+- **Animations**: GSAP with ScrollTrigger
+- **Documentation**: Nextra 4.x
+
+### MCP Server
+- **Runtime**: Node.js (ESM)
+- **Protocol**: Model Context Protocol v1.0
+- **Transport**: stdio (stdin/stdout)
+- **Language**: TypeScript (strict mode)
+
+### AI Processing
+- **Provider**: Azure OpenAI
+- **Models**: GPT-4o-mini for rule extraction
+- **Embeddings**: text-embedding-ada-002 for semantic search
+- **Video**: Mux for transcription and hosting
+
+---
+
+## 🐛 Bug Fixes (All Apps)
+
+- Fixed CSS vendor prefix ordering for webkit compatibility
+- Corrected Twitter card description syntax error
+- Resolved TypeScript import issues in theme config
+- Fixed footer layout alignment and spacing
+- Corrected viewport meta tag configuration for Next.js 14+
+- Fixed search index generation in production builds
+
+---
+
+## 📝 Documentation
+
+- Created comprehensive CHANGELOG.md files for all apps
+- Added inline code comments for complex animations
+- Updated README files with accurate architecture diagrams
+- Added troubleshooting guides for common MCP setup issues
+
+---
+
+## 🔮 Coming Soon
+
+- GitHub Copilot integration (Q1 2026)
+- Team collaboration features (Q1 2026)
+- Custom rule templates (Q2 2026)
+- VS Code extension for direct dashboard access (Q2 2026)
+- Slack integration for team notifications (Q2 2026)
+
+---
+
+For detailed per-app changelogs, see:
+- [Dashboard CHANGELOG](https://github.com/J-Akiru5/jeffdev-monorepo/blob/main/apps/prism-dashboard/CHANGELOG.md)
+- [MCP Server CHANGELOG](https://github.com/J-Akiru5/jeffdev-monorepo/blob/main/apps/prism-mcp-server/CHANGELOG.md)
+- [CLI CHANGELOG](https://github.com/J-Akiru5/jeffdev-monorepo/blob/main/packages/prism-cli/CHANGELOG.md)
+
+---
+
+## [1.0.3] - January 3, 2026
+
+### 🎉 Production Release - Design System Unification
+
+**Milestone**: Complete branding overhaul, enhanced search, and production-ready documentation.
+
+### ✨ Dashboard (Web App)
+
+#### Added
+- **Animated Landing Page**: GSAP ScrollTrigger-powered hero section with parallax effects and version badge
+- **Authentication System**: Complete Clerk integration with session management and protected routes
+- **Subscription Management**: PayPal integration for Pro tier subscriptions with success/cancelled flows
+- **Pricing Page**: Tiered pricing (Free/Pro) with feature comparison and CTAs
+- **API Endpoints**: Subscription verification and PayPal webhook handling for automated billing
+- **Global Navigation**: Seamless links to docs and agency site with glass morphism effects
+
+#### Design & Branding
+- **Unified Branding**: Complete rebrand to "Prism Context Engine" across all UI elements
+- **JD Studio Endgame Theme**: 
+  - Void black (#050505) background with subtle grid pattern
+  - Cyan (#06b6d4) primary, purple (#8b5cf6) accent colors
+  - Glass morphism with advanced backdrop-blur effects
+  - Inter font for UI, JetBrains Mono for code blocks
+- **Responsive Footer**: 4-column layout with Products, Company, and CTA sections
+- **CSS Refinements**: Webkit vendor prefix fixes for cross-browser compatibility
+
+#### Technical Improvements
+- **SEO Optimization**: Comprehensive OpenGraph and Twitter card meta tags
+- **Version Management**: Package version updated to 1.0.3 with live badge display
+- **TypeScript Strict Mode**: Enhanced type safety across all components
+- **Accessibility**: Improved semantic HTML and ARIA labels for screen readers
+
+---
+
+### 📚 Documentation Site
+
+#### Added
+- **FlexSearch Integration**: Nextra built-in search with codeblocks indexing for instant results
+- **JD Studio Endgame Design**: Complete design system overhaul matching agency branding
+- **Enhanced Footer**: 4-column footer with links to dashboard, company info, and CTAs
+- **Meta Tags**: Comprehensive OpenGraph, Twitter cards, and theme-color for social sharing
+- **PWA Support**: Multiple favicon sizes (16px, 32px, 180px, 192px, 512px) and web manifest
+- **Kitchen Metaphor**: Visual explanation of SaaS/Rules/MCP architecture
+
+#### Design System
+- **Dark Theme**: Forced dark mode with cyan (#06b6d4) primary hue
+- **Custom CSS**: 400+ lines of Nextra theme overrides for consistent branding
+- **Typography**: Inter (UI) + JetBrains Mono (code) matching dashboard
+- **Glass Effects**: Glass morphism components with backdrop-blur utilities
+- **Gradient Text**: Cyan-to-purple gradient utilities for headings
+- **Grid Background**: Dark grid with noise texture overlay for depth
+
+#### Search Enhancements
+- **Built-in Search**: Nextra FlexSearch with codeblocks indexing enabled
+- **Configuration**: Search placeholder customization and instant client-side results
+- **Performance**: Pre-built search index for zero-latency queries
+
+#### Content Improvements
+- **Landing Page**: Updated with "Context Operating System for Vibecoders" tagline
+- **Branding**: All references updated to "Prism Context Engine" for consistency
+- **Version Display**: v1.0.3 prominently shown in banner and footer
+
+#### Technical Updates
+- **Nextra 4.x**: Latest docs framework with enhanced MDX support
+- **Next.js 16**: App Router with improved performance and caching
+- **Theme Config**: Custom configuration with logo, links, and footer customization
+- **Viewport Meta**: Proper theme-color handling for mobile browsers
+
+---
+
+### 🔌 MCP Server
+
+#### Added
+- **Video Transcript Schema**: Comprehensive schema for storing video-to-context transcripts
+- **Semantic Search Tool**: MCP tool for searching context rules and transcripts with vector embeddings
+- **Branding Update**: All descriptions updated to "Prism Context Engine"
+
+#### Technical Improvements
+- **MCP Protocol**: Fully compliant Model Context Protocol implementation
+- **Stdio Transport**: Communication via stdin/stdout for seamless IDE integration
+- **TypeScript**: Strict type checking and improved developer experience
+- **Version**: Updated to 1.0.3 with changelog tracking
+
+#### Integration
+- Compatible with Cursor, Windsurf, VS Code, and Claude Desktop
+- Provides context rules directly to AI coding assistants
+- Real-time sync with dashboard changes via API polling
+
+---
+
+### 🛠️ CLI Tool
+
+#### Features
+- **Context Rule Templates**: Pre-built templates for Next.js, React, and React Native projects
+- **Design System Rules**: 8-bit nostalgia, glassmorphic, bare minimum, and JD Studio themes
+- **Interactive CLI**: Generate `.cursorrules` and `.windsurfrules` files from templates
+- **Branding**: Updated to "Prism Context Engine - Context Governance for LLMs"
+
+#### Design System Templates
+- **JD Studio**: Endgame theme with void black, cyan, and purple accents
+- **Glassmorphic**: Modern glass effects with backdrop-blur and translucency
+- **8-bit Nostalgia**: Retro pixel-perfect aesthetic with vibrant colors
+- **Bare Minimum**: Minimalist brutalism approach for clean interfaces
+
+#### Technical
+- **TypeScript**: Full type safety with strict mode enabled
+- **Commander.js**: Robust CLI argument parsing and validation
+- **Template Engine**: Markdown-based rule templates for easy customization
+- **Version**: Updated to 1.0.3
+
+#### Usage Examples
+```bash
+# Generate rules with specific template and style
+npx @prism/cli generate --template nextjs --style jdstudio
+
+# List all available templates
+npx @prism/cli list-templates
+
+# Show version
+npx @prism/cli --version
+```
+
+---
+
 ## [0.1.3] - January 3, 2026
-
-### 🎨 Brand Management & Video Context
-
-**Milestone**: Enterprise branding system and video-based rule extraction pipeline.
-
-### What's New
-
-#### Brand Management
 - Brand profile creation with colors, typography, voice, and imagery
 - Multi-IDE export (Cursor, Windsurf, VS Code, Claude, CSS, Tailwind)
 - Brand list and detail pages

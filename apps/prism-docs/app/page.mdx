@@ -18,9 +18,9 @@ Prism Context Engine is a complete **AI-powered context governance platform** th
 | 📜 **The Recipe** | Context Rules | The output file (e.g., `.cursorrules`) containing strict instructions |
 | 🍽️ **The Waiter** | MCP Protocol | Delivers the fresh Recipe directly to the IDE's table |
 
-### The "Hackathon" Twist
+### Video-to-Context Extraction
 
-**Video-to-Context**: Developers hate writing docs. Prism allows you to upload a screen recording (via Mux), and the Engine "watches" it to learn your project's architectural rules automatically.
+**Automated Documentation**: Upload a screen recording of your development workflow. Prism analyzes the video transcript using Azure OpenAI to automatically extract architectural rules, coding patterns, and best practices into actionable context that your AI coding assistant can understand.
 
 Works with:
 - **Cursor** ✅
@@ -33,24 +33,37 @@ Instead of hoping your AI follows best practices, **Prism enforces them**.
 
 ## Quick Start
 
+### Option A: Web Dashboard (Recommended)
+
 ```bash
-# 1. Clone and install
-git clone https://github.com/J-Akiru5/jeffdev-monorepo
-cd jeffdev-monorepo
-npm install
+# 1. Sign up at the web dashboard
+https://prism.jeffdev.studio/sign-up
 
-# 2. Configure environment
-# Add to Doppler or .env.local:
-# - AZURE_OPENAI_ENDPOINT
-# - AZURE_OPENAI_API_KEY
-# - MONGODB_URI
-# - MUX_TOKEN_ID, MUX_TOKEN_SECRET
+# 2. Create your first project and brand profile
+# 3. Upload a video or manually create rules
+# 4. Export .cursorrules file and paste into your project
+```
 
-# 3. Start all apps
-doppler run -- turbo dev
+### Option B: MCP Server (Advanced)
 
-# 4. Connect AI assistant
-npx prism connect
+For real-time sync with your IDE:
+
+```bash
+# 1. Install MCP server globally
+npm install -g @prism/mcp-server
+
+# 2. Configure your IDE (Cursor/Windsurf/VS Code)
+# Add to your MCP settings:
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": ["--api-key", "YOUR_API_KEY"]
+    }
+  }
+}
+
+# 3. Your AI assistant now has live access to your rules
 ```
 
 ## Core Features
@@ -145,6 +158,6 @@ Your AI assistant learns from your videos that you:
 
 Prism Context Engine is part of the [JeffDev](https://jeffdev.studio) ecosystem — enterprise-grade tools for developers who want AI that respects their architecture.
 
-**Current Version:** 1.0.0  
+**Current Version:** 1.0.3  
 **License:** MIT  
 **Support:** [GitHub Issues](https://github.com/J-Akiru5/jeffdev-monorepo/issues)

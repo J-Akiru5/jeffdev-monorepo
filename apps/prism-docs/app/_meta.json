@@ -1,0 +1,22 @@
+{
+  "index": {
+    "title": "Introduction",
+    "type": "page"
+  },
+  "guide": {
+    "title": "User Guide",
+    "type": "page"
+  },
+  "api-reference": {
+    "title": "API Reference",
+    "type": "page"
+  },
+  "rules": {
+    "title": "Context Rules",
+    "type": "page"
+  },
+  "changelog": {
+    "title": "Changelog",
+    "type": "page"
+  }
+}

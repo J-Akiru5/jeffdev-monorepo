@@ -1,7 +1,6 @@
-import type { DocsThemeConfig } from 'nextra-theme-docs'
 import Image from 'next/image'
 
-const config: DocsThemeConfig = {
+const config = {
   logo: (
     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
       <Image 
@@ -37,6 +36,9 @@ const config: DocsThemeConfig = {
   nextThemes: {
     defaultTheme: 'dark',
     forcedTheme: 'dark'
+  },
+  search: {
+    placeholder: 'Search documentation...'
   },
   sidebar: {
     defaultMenuCollapseLevel: 1,

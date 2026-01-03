@@ -41,6 +41,11 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  icons: {
+    icon: '/prism-icon.png',
+    shortcut: '/prism-icon.png',
+    apple: '/prism-icon.png',
+  },
 };
 
 export default function RootLayout({

@@ -1,6 +1,6 @@
 {
   "name": "@prism/cli",
-  "version": "0.1.0",
+  "version": "1.0.3",
   "description": "Thin local client for Prism Context Engine - Context Governance for LLMs",
   "type": "module",
   "main": "./dist/index.js",
