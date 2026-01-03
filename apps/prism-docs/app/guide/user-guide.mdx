@@ -68,22 +68,49 @@ The Brand Management system lets you define enterprise branding and export it in
 
 #### Video Context Pipeline
 
-Upload screen recordings to automatically extract architectural rules.
+Upload screen recordings to automatically extract architectural rules using AI.
+
+**How It Works:**
+1. Upload video to Mux (automatic transcription)
+2. Azure OpenAI GPT-4o-mini analyzes transcript
+3. Rules extracted with categories, priorities, and examples
+4. Vector embeddings generated for semantic search
 
 **Uploading a Video:**
-1. Navigate to a project detail page
-2. Scroll to the **"Video Context"** section
-3. Click **"Upload Context Video"**
-4. Select your video file (MP4, MOV, WEBM up to 500MB)
-5. The video uploads to Mux for processing
-6. Azure OpenAI processes the transcript to generate rules
-7. Rules appear in your project when processing completes
+1. Navigate to **Dashboard** → **Videos**
+2. Click **"Upload Video"**
+3. Select your video file (MP4, MOV, WEBM up to 500MB)
+4. Wait ~2 minutes for AI processing:
+   - Mux extracts VTT transcript from audio
+   - GPT-4o-mini identifies architectural patterns
+   - text-embedding-3-small generates 1536-dim embeddings
+   - Rules auto-saved to your project
+5. Review and edit extracted rules in **Dashboard** → **Rules**
+
+**Example Video Content:**
+> "When building React components, always use functional components with hooks. Avoid using 'any' types in TypeScript - prefer explicit interfaces. All API calls should be wrapped in try-catch blocks with proper error handling."
+
+**Expected Extraction:**
+- ✅ **Use Functional Components** (architecture, priority: 8)
+- ✅ **Avoid TypeScript 'any'** (architecture, priority: 9)
+- ✅ **Wrap API Calls in Try-Catch** (security, priority: 7)
 
 **Best Practices:**
-- Record yourself explaining your architecture or design decisions
-- Keep videos under 10 minutes for best results
-- Speak clearly about patterns and constraints
-- The AI extracts rules based on your explanations
+- Record yourself explaining architecture or design decisions
+- Keep videos 2-10 minutes for optimal processing
+- Speak clearly about specific patterns and constraints
+- Include code examples on screen when possible
+- One topic per video (better rule extraction)
+
+**Semantic Search:**
+After processing, you can search your videos using natural language:
+```bash
+# In IDE via MCP
+"How should I handle payment errors?"
+→ Finds relevant video segments about error handling
+```
+
+See [Video Processing Guide](/guide/video-processing) for detailed workflow.
 
 #### AI Kitchen (Component Generator)
 

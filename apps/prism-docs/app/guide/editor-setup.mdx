@@ -41,11 +41,20 @@ Click **+ Add Environment Variable**:
 | Key | Value |
 |-----|-------|
 | `MONGODB_URI` | Your Azure Cosmos DB connection string |
+| `AZURE_OPENAI_ENDPOINT` | Your Azure OpenAI endpoint (required for search) |
+| `AZURE_OPENAI_API_KEY` | Your Azure OpenAI API key (required for search) |
+| `AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME` | `text-embedding-3-small` (required for search) |
 
 To get your URI:
 ```bash
 doppler secrets get MONGODB_URI --plain
+doppler secrets get AZURE_OPENAI_ENDPOINT --plain
+doppler secrets get AZURE_OPENAI_API_KEY --plain
 ```
+
+<Callout type="info">
+The Azure OpenAI credentials are only required for the `search_video_transcript` tool. If you only need rules validation, you can omit them.
+</Callout>
 
 ### Step 4: Restart & Test
 
@@ -80,11 +89,14 @@ VS Code doesn't have native MCP support yet, but **Cline** provides it.
 ```json
 {
   "mcpServers": {
-    "prism-engine": {
+    "prism-context-engine": {
       "command": "node",
       "args": ["C:/path/to/jeffdev-monorepo/apps/prism-mcp-server/dist/index.js"],
       "env": {
-        "MONGODB_URI": "mongodb+srv://your-connection-string"
+        "MONGODB_URI": "mongodb+srv://your-connection-string",
+        "AZURE_OPENAI_ENDPOINT": "https://your-resource.openai.azure.com/",
+        "AZURE_OPENAI_API_KEY": "your-api-key",
+        "AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME": "text-embedding-3-small"
       }
     }
   }

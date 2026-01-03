@@ -27,7 +27,8 @@ async function testMux() {
     const mux = new Mux({ tokenId, tokenSecret });
     
     console.log('📡 Fetching Mux assets...\n');
-    const assets = await mux.video.assets.list({ limit: 5 });
+    const response = await mux.video.assets.list({ limit: 5 });
+    const assets = response.data; // The actual assets array is in .data
     
     console.log('✅ SUCCESS! Mux API is accessible\n');
     console.log('📊 Results:');
@@ -35,13 +36,13 @@ async function testMux() {
     
     if (assets.length > 0) {
       console.log('\n📹 Recent videos:\n');
-      assets.forEach((asset, index) => {
+      assets.forEach((asset: typeof assets[number], index: number) => {
         console.log(`${index + 1}. ${asset.id}`);
         console.log(`   Status: ${asset.status}`);
         console.log(`   Duration: ${asset.duration ? Math.round(asset.duration) + 's' : 'N/A'}`);
         console.log(`   Created: ${asset.created_at}`);
         
-        const hasTranscript = asset.tracks?.some(t => t.type === 'text');
+        const hasTranscript = asset.tracks?.some((t: { type?: string }) => t.type === 'text');
         console.log(`   Transcript: ${hasTranscript ? '✅ Available' : '❌ Not generated'}`);
         console.log('');
       });

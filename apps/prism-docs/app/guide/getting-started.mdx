@@ -6,18 +6,20 @@ Get Prism Context Engine running in under 5 minutes.
 
 Before you begin, ensure you have:
 
-- **Node.js 20+** (LTS recommended)
+- **Node.js 18+** (LTS recommended)
 - **npm 10+** (comes with Node.js)
 - **Doppler CLI** (for secrets management)
 - **Azure Cosmos DB** account with MongoDB API enabled
+- **Azure OpenAI** account (for AI-powered rule extraction)
+- **Mux** account (for video hosting and transcription)
 
 ## Installation
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/jeffdev/prism-engine
-cd prism-engine
+git clone https://github.com/J-Akiru5/jeffdev-monorepo
+cd jeffdev-monorepo
 ```
 
 ### 2. Install Dependencies
@@ -29,7 +31,9 @@ npm install
 This installs all workspaces in the monorepo:
 - `apps/prism-dashboard` - The SaaS web interface
 - `apps/prism-mcp-server` - The MCP server
+- `apps/prism-docs` - This documentation site
 - `packages/db` - Shared database utilities
+- `packages/ui` - Ghost Glow component library
 
 ### 3. Configure Doppler
 
@@ -49,9 +53,16 @@ Required secrets in Doppler:
 
 | Secret | Description |
 |--------|-------------|
-| `MONGODB_URI` | Azure Cosmos DB connection string |
+| `MONGODB_URI` | Azure Cosmos DB connection string (MongoDB API) |
 | `CLERK_SECRET_KEY` | Clerk authentication secret |
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk public key |
+| `AZURE_OPENAI_ENDPOINT` | Azure OpenAI endpoint URL |
+| `AZURE_OPENAI_API_KEY` | Azure OpenAI API key |
+| `AZURE_OPENAI_DEPLOYMENT_NAME` | GPT-4o-mini deployment name |
+| `AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME` | text-embedding-3-small deployment |
+| `MUX_TOKEN_ID` | Mux API token ID |
+| `MUX_TOKEN_SECRET` | Mux API token secret |
+| `MUX_WEBHOOK_SIGNING_SECRET` | Mux webhook signature verification secret |
 
 ### 4. Seed the Database
 
@@ -77,7 +88,35 @@ doppler run -- turbo dev
 This starts all apps:
 - **Dashboard**: http://localhost:3001
 - **Docs**: http://localhost:3002
-- **Agency**: http://localhost:3000
+- **Agency**: http://localhost:3000 (marketing site)
+
+## Quick Start: Your First Video
+
+The fastest way to see Prism in action is to upload a video of yourself explaining your architecture:
+
+1. **Sign in** to the dashboard at http://localhost:3001
+2. **Record or upload** a video (2-10 minutes recommended):
+   - Screen recording while explaining your code
+   - Architecture walkthrough
+   - Best practices demo
+3. **Wait ~2 minutes** for AI processing:
+   - Mux extracts transcript
+   - Azure OpenAI GPT-4o-mini identifies rules
+   - Embeddings generated for semantic search
+4. **Review extracted rules** in the dashboard
+5. **Use in your IDE** via MCP integration (see [MCP Integration](/guide/mcp-integration))
+
+### Example: Recording an Architecture Video
+
+```bash
+# What to say in your video:
+"When building React components, always use functional components with hooks.
+Avoid using 'any' types in TypeScript - prefer explicit interfaces.
+All API calls should be wrapped in try-catch blocks with proper error handling.
+Use semantic HTML elements like <nav>, <article>, and <aside> instead of divs."
+```
+
+Azure OpenAI will extract 4+ rules from this automatically!
 
 ## Next Steps
 

@@ -1,0 +1,432 @@
+@import "tailwindcss";
+
+/*
+ * ============================================
+ * PRISM CONTEXT ENGINE - DOCUMENTATION THEME
+ * ============================================
+ * Inherits JD Studio's "Endgame" Design System
+ * Dark Mode Only. The universe is #050505.
+ */
+
+/* ----------------------------------------
+   CSS CUSTOM PROPERTIES (Design Tokens)
+   ---------------------------------------- */
+:root {
+  /* Canvas (Backgrounds) */
+  --color-void: #050505;
+  --color-glass: rgba(10, 10, 10, 0.6);
+  --color-glass-heavy: rgba(10, 10, 10, 0.85);
+
+  /* Accents (Holographic) */
+  --color-cyan: #06b6d4;
+  --color-purple: #8b5cf6;
+  --color-emerald: #10b981;
+
+  /* Borders */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-active: rgba(255, 255, 255, 0.15);
+  --border-glow: rgba(255, 255, 255, 0.25);
+
+  /* Typography */
+  --tracking-tight: -0.02em;
+  --tracking-mono: -0.01em;
+
+  /* Nextra Theme Overrides */
+  --nextra-primary-hue: 189deg; /* Cyan */
+  --nextra-primary-saturation: 94%;
+  --nextra-navbar-height: 64px;
+  --nextra-banner-height: 0px;
+}
+
+/* ----------------------------------------
+   GLOBAL BASE STYLES
+   ---------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--color-void);
+  color: #ededed;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ----------------------------------------
+   NEXTRA THEME CUSTOMIZATION
+   ---------------------------------------- */
+
+/* Dark mode overrides */
+html.dark {
+  --nextra-bg: #050505;
+  --nextra-primary: var(--color-cyan);
+}
+
+/* Main content area */
+main {
+  background: var(--color-void);
+}
+
+/* Sidebar styling */
+aside nav {
+  background: rgba(10, 10, 10, 0.4);
+  backdrop-filter: blur(12px);
+  border-right: 1px solid var(--border-subtle);
+}
+
+/* Navigation links */
+aside nav a {
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.2s ease, background 0.2s ease;
+  border-radius: 6px;
+}
+
+aside nav a:hover {
+  color: var(--color-cyan);
+  background: rgba(6, 182, 212, 0.05);
+}
+
+aside nav a.active,
+aside nav a[aria-selected="true"] {
+  color: var(--color-cyan);
+  background: rgba(6, 182, 212, 0.1);
+  border-left: 2px solid var(--color-cyan);
+}
+
+/* Article content */
+article {
+  color: #ededed;
+}
+
+article h1,
+article h2,
+article h3,
+article h4 {
+  color: white;
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+}
+
+article h1 {
+  background: linear-gradient(135deg, var(--color-cyan), #67e8f9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+}
+
+article h2 {
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.5rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+/* Links */
+article a {
+  color: var(--color-cyan);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+article a:hover {
+  border-bottom-color: var(--color-cyan);
+}
+
+/* Code blocks */
+article pre {
+  background: var(--color-glass-heavy);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+article code {
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--color-cyan);
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.875em;
+  font-family: ui-monospace, monospace;
+}
+
+article pre code {
+  background: transparent;
+  padding: 0;
+  color: #ededed;
+}
+
+/* Tables */
+article table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1.5rem 0;
+}
+
+article table th {
+  background: var(--color-glass);
+  color: var(--color-cyan);
+  font-weight: 600;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-subtle);
+}
+
+article table td {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-subtle);
+}
+
+article table tr:hover {
+  background: rgba(6, 182, 212, 0.05);
+}
+
+/* Callouts */
+.nextra-callout {
+  background: var(--color-glass);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1.5rem 0;
+}
+
+.nextra-callout[data-type="info"] {
+  border-left: 4px solid var(--color-cyan);
+}
+
+.nextra-callout[data-type="warning"] {
+  border-left: 4px solid #f59e0b;
+}
+
+.nextra-callout[data-type="error"] {
+  border-left: 4px solid #ef4444;
+}
+
+/* Cards */
+.nextra-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.nextra-card {
+  background: var(--color-glass);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.nextra-card:hover {
+  border-color: var(--color-cyan);
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.15);
+  transform: translateY(-2px);
+}
+
+.nextra-card h3 {
+  color: white;
+  margin: 0 0 0.5rem 0;
+  font-size: 1.125rem;
+}
+
+.nextra-card p {
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+/* ----------------------------------------
+   SELECTION & FOCUS STATES
+   ---------------------------------------- */
+::selection {
+  background: rgba(6, 182, 212, 0.3);
+  color: white;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-cyan);
+  outline-offset: 2px;
+}
+
+/* ----------------------------------------
+   SCROLLBAR STYLING (Webkit)
+   ---------------------------------------- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-void);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-active);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-glow);
+}
+
+/* ----------------------------------------
+   BACKGROUND EFFECTS
+   ---------------------------------------- */
+.bg-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* Global grid background */
+.docs-grid-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.docs-grid-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 80% at 50% -20%, rgba(6, 182, 212, 0.15), transparent);
+}
+
+.docs-grid-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='1'%3E%3Cpath d='M0 0h60v60H0z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 60px 60px;
+}
+
+/* ----------------------------------------
+   GLASS MORPHISM UTILITIES
+   ---------------------------------------- */
+.glass {
+  background: var(--color-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+}
+
+.glass-heavy {
+  background: var(--color-glass-heavy);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-active);
+}
+
+/* ----------------------------------------
+   TEXT GRADIENTS
+   ---------------------------------------- */
+.text-gradient-cyan {
+  background: linear-gradient(135deg, var(--color-cyan), #67e8f9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-purple {
+  background: linear-gradient(135deg, var(--color-purple), #c4b5fd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-holographic {
+  background: linear-gradient(135deg, var(--color-cyan), var(--color-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ----------------------------------------
+   SEARCH MODAL
+   ---------------------------------------- */
+.nextra-search input {
+  background: var(--color-glass-heavy);
+  border: 1px solid var(--border-subtle);
+  color: white;
+}
+
+.nextra-search input:focus {
+  border-color: var(--color-cyan);
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.1);
+}
+
+/* ----------------------------------------
+   NAVBAR
+   ---------------------------------------- */
+nav.nextra-nav-container {
+  background: var(--color-glass-heavy);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+nav.nextra-nav-container a {
+  color: rgba(255, 255, 255, 0.8);
+  transition: color 0.2s ease;
+}
+
+nav.nextra-nav-container a:hover {
+  color: var(--color-cyan);
+}
+
+/* ----------------------------------------
+   ANIMATIONS
+   ---------------------------------------- */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ----------------------------------------
+   RESPONSIVE ADJUSTMENTS
+   ---------------------------------------- */
+@media (max-width: 768px) {
+  article h1 {
+    font-size: 2rem;
+  }
+
+  .nextra-cards {
+    grid-template-columns: 1fr;
+  }
+}

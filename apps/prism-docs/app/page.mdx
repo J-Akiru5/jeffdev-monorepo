@@ -1,14 +1,20 @@
 # Prism Context Engine
 
-**Context Governance for LLMs** — Stop AI hallucinations by deploying a Context Server that forces coding assistants to follow your Design System.
+**Context Governance for LLMs** — Extract architectural rules from video transcripts, enforce coding standards, and deploy constraints to AI coding assistants.
 
 ## What is Prism Context Engine?
 
-Prism Context Engine is an **MCP Server** (Model Context Protocol) that provides architectural rules, coding standards, and design constraints to AI coding assistants like:
+Prism Context Engine is a complete **AI-powered context governance platform** that:
 
-- **Cursor**
-- **Windsurf**  
-- **Claude (via MCP)**
+1. **Extracts Rules from Video** - Upload screen recordings, automatically extract architectural patterns using Azure OpenAI
+2. **Enforces Standards** - Deploy rules to AI coding assistants via MCP (Model Context Protocol)
+3. **Enables Semantic Search** - Find relevant architectural discussions using vector embeddings
+
+Works with:
+- **Cursor** ✅
+- **Windsurf** ✅
+- **Claude (via MCP)** ✅  
+- **VS Code** (via MCP extension)
 - **GitHub Copilot** (coming soon)
 
 Instead of hoping your AI follows best practices, **Prism enforces them**.
@@ -17,37 +23,44 @@ Instead of hoping your AI follows best practices, **Prism enforces them**.
 
 ```bash
 # 1. Clone and install
-git clone https://github.com/jeffdev/prism-engine
-cd prism-engine
+git clone https://github.com/J-Akiru5/jeffdev-monorepo
+cd jeffdev-monorepo
 npm install
 
-# 2. Configure your connection
-doppler setup  # Select your project
+# 2. Configure environment
+# Add to Doppler or .env.local:
+# - AZURE_OPENAI_ENDPOINT
+# - AZURE_OPENAI_API_KEY
+# - MONGODB_URI
+# - MUX_TOKEN_ID, MUX_TOKEN_SECRET
 
-# 3. Seed your rules database
-doppler run -- npm run db:seed -w packages/db
+# 3. Start all apps
+doppler run -- turbo dev
 
-# 4. Start the MCP server
-npm run dev -w apps/prism-mcp-server
+# 4. Connect AI assistant
+npx prism connect
 ```
 
 ## Core Features
 
 <Cards>
-  <Card title="User Guide" href="/guide/user-guide">
-    Complete guide to using the Dashboard and CLI
+  <Card title="Getting Started" href="/guide/getting-started">
+    Install, configure, and deploy your first rule
+  </Card>
+  <Card title="Video Processing" href="/guide/video-processing">
+    Extract architectural rules from screen recordings
   </Card>
   <Card title="Rule Management" href="/guide/rules">
-    Create, organize, and deploy architectural constraints
+    Create, organize, and deploy constraints
   </Card>
   <Card title="MCP Integration" href="/guide/mcp-integration">
     Connect to Cursor, Windsurf, and Claude
   </Card>
-  <Card title="Team Sync" href="/guide/team-sync">
-    Share rules across your entire development team
+  <Card title="Editor Setup" href="/guide/editor-setup">
+    Configure your IDE for MCP
   </Card>
-  <Card title="API Access" href="/api-reference">
-    Programmatic access to your rules library
+  <Card title="API Reference" href="/api-reference">
+    Programmatic access to rules and transcripts
   </Card>
 </Cards>
 
@@ -55,24 +68,71 @@ npm run dev -w apps/prism-mcp-server
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     Your IDE (Cursor/Windsurf)              │
+│              Video Upload (Mux)                             │
+│  Screen recordings → Automatic transcription                │
 └────────────────────────────┬────────────────────────────────┘
-                             │ MCP Protocol
+                             │ Webhook
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                   Prism MCP Server                          │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│  │  get_rules  │  │validate_code│  │ get_rule_content    │  │
-│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+│           Azure OpenAI Processing (GPT-4o-mini)             │
+│  Extract rules + Generate embeddings for search             │
 └────────────────────────────┬────────────────────────────────┘
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
 │            Azure Cosmos DB (MongoDB API)                    │
-│                    Rules Collection                         │
+│    Rules Collection + Video Transcripts + Embeddings        │
+└────────────────────────────┬────────────────────────────────┘
+                             │ MCP Protocol
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   Your IDE (Cursor/Windsurf)                │
+│  AI follows your rules automatically during coding          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
+## What Makes Prism Different?
+
+### 🎥 Video-First Context Capture
+Record your screen while discussing architecture. Prism automatically extracts rules from your explanations.
+
+### 🧠 AI-Powered Rule Extraction
+GPT-4o-mini analyzes transcripts to identify:
+- Architectural patterns
+- Code style conventions
+- Naming rules
+- Testing strategies
+- Security practices
+
+### 🔍 Semantic Search
+Vector embeddings enable finding relevant architectural discussions, not just keyword matching.
+
+### 🚀 Zero-Config MCP Integration
+`npx prism connect` and you're done. Your AI assistant now has context.
+
+## Real-World Example
+
+```typescript
+// Before Prism: Generic code
+const data = await fetch('/api/users');
+
+// After Prism: Enforces your standards
+const { data, error } = await api.users.list();
+if (error) {
+  toast.error(error.message);
+  return;
+}
+```
+
+Your AI assistant learns from your videos that you:
+- Use custom API wrapper with error handling
+- Show errors via toast notifications
+- Follow early return patterns
+
 ## Built by JeffDev Studio
 
-Prism Context Engine is part of the [JeffDev](https://jeffdev.studio) ecosystem — enterprise-grade tools for Vibecoders who want AI that respects their architecture.
+Prism Context Engine is part of the [JeffDev](https://jeffdev.studio) ecosystem — enterprise-grade tools for developers who want AI that respects their architecture.
+
+**Current Version:** 1.0.0  
+**License:** MIT  
+**Support:** [GitHub Issues](https://github.com/J-Akiru5/jeffdev-monorepo/issues)

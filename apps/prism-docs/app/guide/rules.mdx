@@ -68,6 +68,8 @@ import { Callout } from 'nextra/components'
 
 ## Creating Rules via Dashboard
 
+### Manual Creation
+
 1. Navigate to **Dashboard** → **Rules**
 2. Click **"Create Rule"**
 3. Fill in the form:
@@ -75,6 +77,28 @@ import { Callout } from 'nextra/components'
    - Content (supports Markdown)
    - Priority (1 = highest)
 4. Click **Save**
+
+### AI-Extracted Rules from Videos
+
+The fastest way to create rules is by **uploading a video**:
+
+1. Navigate to **Dashboard** → **Videos**
+2. Upload a screen recording or architecture walkthrough (2-10 minutes)
+3. Wait ~2 minutes for AI processing:
+   - Mux extracts transcript from audio
+   - Azure OpenAI GPT-4o-mini analyzes your explanations
+   - Rules are automatically generated with examples
+4. Review and edit extracted rules in **Dashboard** → **Rules**
+
+**Example Video Script:**
+> "When building React components, always use functional components with hooks. Avoid using 'any' types in TypeScript - prefer explicit interfaces. All API calls should be wrapped in try-catch blocks."
+
+**Extracted Rules:**
+- ✅ Use Functional Components (category: architecture, priority: 8)
+- ✅ Avoid TypeScript 'any' Type (category: architecture, priority: 9)
+- ✅ Wrap API Calls in Try-Catch (category: security, priority: 7)
+
+See [Video Processing Guide](/guide/video-processing) for detailed workflow.
 
 ## Creating Rules via API
 

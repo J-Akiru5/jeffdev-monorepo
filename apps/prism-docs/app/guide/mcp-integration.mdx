@@ -35,7 +35,10 @@ Create or edit the `mcp.json` file:
       "command": "npx",
       "args": ["tsx", "/path/to/jeffdev-monorepo/apps/prism-mcp-server/src/index.ts"],
       "env": {
-        "MONGODB_URI": "your-connection-string"
+        "MONGODB_URI": "your-cosmos-db-connection-string",
+        "AZURE_OPENAI_ENDPOINT": "https://your-resource.openai.azure.com/",
+        "AZURE_OPENAI_API_KEY": "your-api-key",
+        "AZURE_OPENAI_EMBEDDING_DEPLOYMENT_NAME": "text-embedding-3-small"
       }
     }
   }
@@ -48,6 +51,10 @@ import { Callout } from 'nextra/components'
   Replace `/path/to/jeffdev-monorepo` with your actual monorepo path. On Windows, use forward slashes or escaped backslashes.
 </Callout>
 
+<Callout type="info">
+  The `search_video_transcript` tool requires Azure OpenAI credentials for generating query embeddings. If you only need rules validation, you can omit the Azure OpenAI env vars.
+</Callout>
+
 ### 3. Restart Cursor
 
 Restart Cursor to load the MCP server. You should see "prism" in your MCP connections.
@@ -56,41 +63,69 @@ Restart Cursor to load the MCP server. You should see "prism" in your MCP connec
 
 Once connected, the AI assistant has access to these tools:
 
-### `get_rules`
+### `get_architectural_rules`
 
-Fetches all active architectural rules.
+Fetches all active architectural rules filtered by optional category.
 
 ```typescript
 // AI can call this to understand your codebase constraints
-get_rules({ category: "architecture" })
+get_architectural_rules({ category: "architecture" })
 ```
 
-**Returns**: Array of rule summaries with ID, name, category, and priority.
+**Parameters:**
+- `category` (optional): Filter by category (architecture, styling, security, performance, testing, documentation)
+- `tags` (optional): Array of tags to filter by
 
-### `get_rule_content`
+**Returns**: Array of rules with ID, name, category, tags, content, and priority.
 
-Gets the full content of a specific rule.
+### `validate_code_pattern`
 
-```typescript
-// AI calls this when it needs detailed guidance
-get_rule_content({ ruleId: "rule-001" })
-```
-
-**Returns**: Complete rule content in Markdown format.
-
-### `validate_code`
-
-Checks code against active rules and reports violations.
+Validates code against active architectural rules and reports violations.
 
 ```typescript
 // AI uses this before suggesting code
-validate_code({ 
+validate_code_pattern({ 
   code: "import { Button } from '../../apps/agency/Button'",
-  filePath: "apps/prism-dashboard/src/page.tsx"
+  filePath: "apps/prism-dashboard/src/page.tsx",
+  language: "typescript"
 })
 ```
 
-**Returns**: List of violations or confirmation that code passes.
+**Parameters:**
+- `code`: The code snippet to validate
+- `filePath` (optional): File path for context
+- `language` (optional): Programming language (typescript, javascript, python, etc.)
+
+**Returns**: Validation result with violations array and suggestions.
+
+### `search_video_transcript`
+
+**🆕 NEW:** Semantically search through video transcripts using AI embeddings.
+
+```typescript
+// AI can search your architecture videos for relevant context
+search_video_transcript({ 
+  query: "How should I handle API errors?",
+  topK: 3
+})
+```
+
+**Parameters:**
+- `query`: Natural language search query
+- `topK` (optional): Number of results to return (default: 3)
+
+**Returns**: Most relevant transcript snippets with:
+- Video title and asset ID
+- Matching text with timestamps
+- Similarity score
+- Link to full transcript
+
+**Example Use Case:**
+> "I'm implementing a payment flow. Let me search the architecture videos..."
+> AI calls `search_video_transcript({ query: "payment processing error handling" })`
+> Returns snippet from your Stripe integration video at 3:42
+
+See [Semantic Search Guide](/guide/semantic-search) for details on how vector search works.
 
 ## Available Resources
 

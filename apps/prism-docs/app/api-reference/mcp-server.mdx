@@ -4,15 +4,16 @@ The Prism MCP Server exposes tools and resources via the Model Context Protocol.
 
 ## Tools
 
-### `get_rules`
+### `get_architectural_rules`
 
-Retrieve all active architectural rules, optionally filtered by category.
+Retrieve all active architectural rules, optionally filtered by category and tags.
 
 **Input Schema:**
 
 ```typescript
 {
-  category?: "architecture" | "styling" | "security" | "performance" | "testing" | "documentation"
+  category?: "architecture" | "styling" | "security" | "performance" | "testing" | "documentation",
+  tags?: string[]  // Optional: Filter by tags
 }
 ```
 
@@ -21,74 +22,156 @@ Retrieve all active architectural rules, optionally filtered by category.
 ```json
 [
   {
-    "id": "rule-001",
+    "id": "67890abcdef12345",
     "name": "No Cross-App Imports",
     "category": "architecture",
-    "priority": 1
+    "tags": ["monorepo", "imports", "turborepo"],
+    "content": "# No Cross-App Imports\n\nNever import code directly...",
+    "priority": 1,
+    "isActive": true,
+    "createdAt": "2024-01-15T10:30:00.000Z"
   }
 ]
 ```
 
+**Example Usage:**
+
+```typescript
+// Get all architecture rules
+await session.callTool("get_architectural_rules", { 
+  category: "architecture" 
+});
+
+// Get rules tagged with "react"
+await session.callTool("get_architectural_rules", { 
+  tags: ["react", "components"] 
+});
+```
+
 ---
 
-### `get_rule_content`
+### `validate_code_pattern`
 
-Get the full content of a specific rule.
+Validate a code snippet against active architectural rules.
 
 **Input Schema:**
 
 ```typescript
 {
-  ruleId: string  // Required
+  code: string,       // Required - The code to validate
+  filePath?: string,  // Optional - File path for context
+  language?: string   // Optional - Programming language (typescript, javascript, python, etc.)
 }
 ```
 
-**Response:**
+**Response (with violations):**
 
-```markdown
-# No Cross-App Imports
+```json
+{
+  "isValid": false,
+  "violations": [
+    {
+      "ruleId": "67890abcdef12345",
+      "ruleName": "No Cross-App Imports",
+      "severity": "error",
+      "message": "Cross-app import detected in apps/prism-dashboard/src/page.tsx",
+      "suggestion": "Use shared packages (@repo/ui, @jeffdev/db) instead of direct app imports"
+    }
+  ],
+  "summary": "Found 1 violation(s)"
+}
+```
 
-Category: architecture
-Priority: 1
+**Response (valid code):**
 
-Never import code directly from one app to another...
+```json
+{
+  "isValid": true,
+  "violations": [],
+  "summary": "✅ No violations found. Code adheres to all active rules."
+}
+```
+
+**Example Usage:**
+
+```typescript
+await session.callTool("validate_code_pattern", {
+  code: "import { Button } from '../../apps/agency/Button';",
+  filePath: "apps/prism-dashboard/src/components/Header.tsx",
+  language: "typescript"
+});
 ```
 
 ---
 
-### `validate_code`
+### `search_video_transcript`
 
-Validate a code snippet against active rules.
+**🆕 NEW:** Semantically search through video transcripts using AI embeddings.
 
 **Input Schema:**
 
 ```typescript
 {
-  code: string,      // Required - The code to validate
-  filePath?: string  // Optional - For context
+  query: string,  // Required - Natural language search query
+  topK?: number   // Optional - Number of results to return (default: 3)
 }
 ```
 
 **Response:**
 
-```text
-Found 1 violation(s):
-
-VIOLATION [rule-001]: Cross-app import detected. Use packages/ for shared code.
+```json
+[
+  {
+    "videoTitle": "React Architecture Best Practices",
+    "assetId": "mux-asset-12345",
+    "snippet": "When handling API errors in React, always wrap your fetch calls in try-catch blocks. I prefer using a custom useApi hook that handles errors consistently across the app...",
+    "timestamp": "00:03:42",
+    "similarity": 0.89,
+    "url": "https://stream.mux.com/mux-asset-12345.m3u8"
+  },
+  {
+    "videoTitle": "Error Handling Patterns",
+    "assetId": "mux-asset-67890",
+    "snippet": "For payment processing, never expose raw error messages to users. Log the full error server-side, but return a sanitized message like 'Payment failed. Please try again.'",
+    "timestamp": "00:05:15",
+    "similarity": 0.85,
+    "url": "https://stream.mux.com/mux-asset-67890.m3u8"
+  }
+]
 ```
 
-Or if valid:
+**How It Works:**
+1. Your query is converted to a 1536-dimensional embedding via Azure OpenAI
+2. Cosine similarity calculated against all stored video embeddings
+3. Top K most relevant transcript snippets returned
+4. Results include timestamps for easy video navigation
 
-```text
-✅ No violations found. Code adheres to all active rules.
+**Example Usage:**
+
+```typescript
+// Find relevant architecture explanations
+await session.callTool("search_video_transcript", {
+  query: "How should I structure API error handling in React?",
+  topK: 5
+});
+
+// Search for specific patterns
+await session.callTool("search_video_transcript", {
+  query: "payment processing best practices Stripe"
+});
 ```
+
+**Requirements:**
+- Azure OpenAI credentials configured (for query embeddings)
+- Videos processed with embeddings (automatic on upload)
+
+See [Semantic Search Guide](/guide/semantic-search) for performance tuning.
+
+---
 
 ## Resources
 
-| URI | MIME Type | Description |
-|-----|-----------|-------------|
-| `prism://rules/all` | `application/json` | All active rules |
-| `prism://rules/architecture` | `application/json` | Architecture rules only |
+Resources are currently **not implemented** in the MCP server. Use tools instead.
 
 ## Error Handling
 
@@ -96,7 +179,19 @@ All tools return errors in this format:
 
 ```json
 {
-  "content": [{ "type": "text", "text": "Error: Rule not found" }],
+  "content": [{ 
+    "type": "text", 
+    "text": "Error: MONGODB_URI not set in environment" 
+  }],
   "isError": true
 }
 ```
+
+Common errors:
+
+| Error | Cause | Solution |
+|-------|-------|----------|
+| `MONGODB_URI not set` | Missing env variable | Add to MCP config env block |
+| `Failed to connect to database` | Invalid connection string | Verify Cosmos DB URI |
+| `Azure OpenAI credentials missing` | search_video_transcript called without Azure config | Add Azure OpenAI env vars |
+| `No transcripts found` | No videos uploaded | Upload videos via dashboard |
