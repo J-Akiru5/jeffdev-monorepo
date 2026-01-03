@@ -3,7 +3,7 @@
 /**
  * Admin Waitlist Page
  * -------------------
- * Direct view of the Prism Engine waitlist.
+ * Direct view of the Prism Context Engine waitlist.
  */
 
 import { useState, useEffect } from 'react';

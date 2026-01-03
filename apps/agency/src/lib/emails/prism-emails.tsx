@@ -17,7 +17,7 @@ export const prismWaitlistConfirmation = `
     <p style="color: #06b6d4; font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 40px;">Signal Locked</p>
     
     <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 30px; border-radius: 12px; text-align: left;">
-      <p style="margin: 0 0 20px 0;">You have successfully secured your position in the <strong>Prism Engine</strong> queue.</p>
+      <p style="margin: 0 0 20px 0;">You have successfully secured your position in the <strong>Prism Context Engine</strong> queue.</p>
       <p style="margin: 0 0 20px 0;">Something is forming...</p>
       <p style="margin: 0; color: rgba(255,255,255,0.5); font-size: 14px;">We will signal you when the paradigm shifts.</p>
     </div>

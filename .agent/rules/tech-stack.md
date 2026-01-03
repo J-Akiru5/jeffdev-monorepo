@@ -42,7 +42,7 @@ Access: S3 Compatible SDK (@aws-sdk/client-s3).
 
 Public Domain: Serve assets via cdn.jeffdev.studio to bypass Vercel bandwidth costs.
 
-3. ARTIFICIAL INTELLIGENCE (PRISM ENGINE)
+3. ARTIFICIAL INTELLIGENCE (PRISM CONTEXT ENGINE)
 A. Orchestration
 SDK: Vercel AI SDK (ai).
 

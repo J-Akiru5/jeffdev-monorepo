@@ -1,7 +1,7 @@
 import { ComponentGenerator } from '@/components/ai-kitchen';
 
 export const metadata = {
-  title: 'AI Kitchen | Prism Engine',
+  title: 'AI Kitchen | Prism Context Engine',
   description: 'Generate components with AI using your design system rules',
 };
 

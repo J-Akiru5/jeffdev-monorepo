@@ -3,7 +3,7 @@
 /**
  * Waitlist Actions
  * -----------------
- * Server actions for Prism Engine waitlist management.
+ * Server actions for Prism Context Engine waitlist management.
  */
 
 import { z } from 'zod';
@@ -28,7 +28,7 @@ export interface WaitlistEntry {
 }
 
 /**
- * Add an email to the Prism Engine waitlist.
+ * Add an email to the Prism Context Engine waitlist.
  */
 export async function joinWaitlist(data: {
   email: string;
@@ -60,7 +60,7 @@ export async function joinWaitlist(data: {
     // Send confirmation to user
     await sendEmail({
       to: validated.email,
-      subject: 'Transmission Received: Prism Engine',
+      subject: 'Transmission Received: Prism Context Engine',
       html: prismWaitlistConfirmation,
     });
 

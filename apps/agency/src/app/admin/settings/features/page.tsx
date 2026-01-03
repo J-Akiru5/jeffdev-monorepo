@@ -127,8 +127,8 @@ export default function FeaturesSettingsPage() {
       <div className="space-y-4">
         <FeatureToggle
           id="prismEngineEnabled"
-          label="Prism Engine (Full)"
-          description="Enable the full Prism Engine experience with pricing, registration, and dashboard access."
+          label="Prism Context Engine (Full)"
+          description="Enable the full Prism Context Engine experience with pricing, registration, and dashboard access."
           icon={<DollarSign className="h-5 w-5 text-emerald-400" />}
           enabled={flags.prismEngineEnabled}
           onToggle={handleToggle}
@@ -137,8 +137,8 @@ export default function FeaturesSettingsPage() {
 
         <FeatureToggle
           id="prismEngineTeaser"
-          label="Prism Engine Teaser"
-          description="Show the Coming Soon page and waitlist signup. Adds 'Prism Engine' link to navigation."
+          label="Prism Context Engine Teaser"
+          description="Show the Coming Soon page and waitlist signup. Adds 'Prism Context Engine' link to navigation."
           icon={<Sparkles className="h-5 w-5 text-purple-400" />}
           enabled={flags.prismEngineTeaser}
           onToggle={handleToggle}

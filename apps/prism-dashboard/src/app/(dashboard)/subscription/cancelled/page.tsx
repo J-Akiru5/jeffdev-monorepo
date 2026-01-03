@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { XCircle } from 'lucide-react';
 
 export const metadata = {
-  title: 'Subscription Cancelled | Prism Engine',
+  title: 'Subscription Cancelled | Prism Context Engine',
 };
 
 export default function SubscriptionCancelledPage() {

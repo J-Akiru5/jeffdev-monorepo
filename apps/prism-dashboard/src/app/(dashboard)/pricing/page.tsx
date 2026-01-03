@@ -1,8 +1,8 @@
 import { PricingGrid } from '@/components/subscription';
 
 export const metadata = {
-  title: 'Pricing | Prism Engine',
-  description: 'Choose your Prism Engine subscription plan',
+  title: 'Pricing | Prism Context Engine',
+  description: 'Choose your Prism Context Engine subscription plan',
 };
 
 export default function PricingPage() {

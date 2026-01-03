@@ -112,7 +112,7 @@ AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4o-mini
 # In Mux Dashboard (https://dashboard.mux.com):
 1. Go to "Settings" → "Access Tokens"
 2. Click "Generate new token"
-3. Name: "Prism Engine"
+3. Name: "Prism Context Engine"
 4. Permissions: 
    - ✅ Video: Read
    - ✅ Video: Write

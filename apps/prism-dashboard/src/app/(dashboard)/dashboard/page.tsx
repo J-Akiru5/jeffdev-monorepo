@@ -40,7 +40,7 @@ export default async function DashboardPage() {
       <div>
         <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
         <p className="text-sm text-white/50 mt-1">
-          Welcome to Prism Engine — your context governance platform.
+          Welcome to Prism Context Engine — your context governance platform.
         </p>
       </div>
 

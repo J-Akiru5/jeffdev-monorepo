@@ -18,6 +18,10 @@ const footerLinks = {
     { href: '/services/cloud-architecture', label: 'Cloud Architecture' },
     { href: '/services/ai-integration', label: 'AI Integration' },
   ],
+  products: [
+    { href: 'https://prism.jeffdev.studio', label: 'Prism Context Engine', external: true },
+    { href: 'https://prism.jeffdev.studio/guide/getting-started', label: 'Documentation', external: true },
+  ],
   company: [
     { href: '/about', label: 'About Studio' },
     { href: '/work', label: 'Case Studies' },
@@ -37,7 +41,7 @@ export function Footer() {
     <footer className="relative border-t border-white/[0.08] bg-void">
       {/* Main Footer Content */}
       <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-5">
           {/* Brand Column */}
           <div className="lg:col-span-1">
             <Link href="/" className="inline-flex items-center gap-2">
@@ -86,6 +90,27 @@ export function Footer() {
                   >
                     {link.label}
                   </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Products Column */}
+          <div>
+            <h3 className="font-mono text-xs uppercase tracking-wider text-white/30">
+              Products
+            </h3>
+            <ul className="mt-4 space-y-3">
+              {footerLinks.products.map((link) => (
+                <li key={link.href}>
+                  <a
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-cyan-400/80 transition-colors hover:text-cyan-400"
+                  >
+                    {link.label}
+                  </a>
                 </li>
               ))}
             </ul>

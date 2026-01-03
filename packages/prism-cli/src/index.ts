@@ -20,7 +20,7 @@ const program = new Command();
 
 program
   .name('prism')
-  .description('Prism Engine CLI - Context Governance for LLMs')
+  .description('Prism Context Engine CLI - Context Governance for LLMs')
   .version('0.1.0');
 
 program

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * @module prism-mcp-server
- * @description Prism Engine MCP Server - Context Governance for LLMs
+ * @description Prism Context Engine MCP Server - Context Governance for LLMs
  * 
  * This server implements the Model Context Protocol (MCP) to provide
  * architectural rules and context to AI coding assistants. It connects
@@ -164,7 +164,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: "get_architectural_rules",
         description:
-          "Fetch the critical coding standards and design rules from the Prism Engine. " +
+          "Fetch the critical coding standards and design rules from the Prism Context Engine. " +
           "Use this BEFORE writing any code to understand the project's constraints.",
         inputSchema: {
           type: "object" as const,

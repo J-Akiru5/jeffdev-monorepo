@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         plan_id: planId,
         application_context: {
-          brand_name: 'Prism Engine',
+          brand_name: 'Prism Context Engine',
           locale: 'en-US',
           shipping_preference: 'NO_SHIPPING',
           user_action: 'SUBSCRIBE_NOW',

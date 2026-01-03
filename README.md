@@ -19,7 +19,7 @@
 
 ## Overview
 
-This monorepo powers **JeffDev Studio** — a premium web development agency — and **Prism Engine** — a context governance system for AI coding assistants.
+This monorepo powers **JeffDev Studio** — a premium web development agency — and **Prism Context Engine** — a context governance system for AI coding assistants.
 
 **Current Version**: `0.1.3` (January 3, 2026)
 
@@ -76,7 +76,7 @@ SaaS platform for developers to manage AI context rules.
 - **Features**: Brand management, video context pipeline, AI component generator
 
 ### 📚 Prism Docs (`apps/prism-docs`)
-Documentation for the Prism Engine.
+Documentation for the Prism Context Engine.
 - **Port**: 3002
 - **Stack**: Nextra 4
 

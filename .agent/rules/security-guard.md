@@ -48,7 +48,7 @@ export async function createEntry(formData: FormData) {
 * **Validation:** Enforce schema validation in `firestore.rules` (e.g., `request.resource.data.title is string`).
 
 
-* **Prism Engine (Azure Cosmos):**
+* **Prism Context Engine (Azure Cosmos):**
 * **Connection:** Use the `packages/db` singleton client. Do not create new connections per request.
 * **NoSQL Injection:** Use parameterized queries or the Cosmos SDK's built-in binding. Never concat strings into a query.
 

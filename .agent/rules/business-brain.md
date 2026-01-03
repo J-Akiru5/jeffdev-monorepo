@@ -44,7 +44,7 @@ Phase 2 (Beta): $299/mo "Team Sync" Plan (Sync rules across 10+ devs).
 3. CONVERSION ARCHITECTURE ("THE SOVEREIGN PROMISE")
 Marketing to developers requires radical honesty, not hype.
 
-The Narrative: "Website builders (Wix/Bolt) lock you in. Prism Engine locks you out—into your own clean, enterprise-grade repo."
+The Narrative: "Website builders (Wix/Bolt) lock you in. Prism Context Engine locks you out—into your own clean, enterprise-grade repo."
 
 The "Anti-Hype" Voice:
 

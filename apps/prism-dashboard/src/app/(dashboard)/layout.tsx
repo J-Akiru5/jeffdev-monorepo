@@ -13,7 +13,7 @@ import {
 
 /**
  * Dashboard Layout
- * Provides sidebar navigation for the Prism Engine dashboard.
+ * Provides sidebar navigation for the Prism Context Engine dashboard.
  */
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
@@ -27,7 +27,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-cyan-500/20 to-violet-500/20 border border-white/10">
                 <Sparkles className="h-4 w-4 text-cyan-400" />
               </div>
-              <span className="font-semibold text-white">Prism Engine</span>
+              <span className="font-semibold text-white">Prism Context Engine</span>
             </Link>
           </div>
 

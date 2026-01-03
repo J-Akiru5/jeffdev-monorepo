@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Prism Engine - Coming Soon Page
+ * Prism Context Engine - Coming Soon Page
  * ---------------------------------
  * Cryptic teaser with 3D rotating prism.
  * "Something is forming..."

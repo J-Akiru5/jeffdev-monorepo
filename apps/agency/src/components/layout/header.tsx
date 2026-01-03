@@ -30,12 +30,8 @@ export function Header() {
 
   // Build navigation links based on feature flags
   const navLinks: NavLink[] = [
-    // Only show Pricing if Prism is enabled
-    ...(prismEngineEnabled ? [{ href: '/pricing', label: 'Pricing' }] : []),
-    // Show Prism teaser link if teaser is enabled but full Prism isn't
-    ...(!prismEngineEnabled && prismEngineTeaser
-      ? [{ href: '/prism', label: 'Prism Engine', highlight: true }]
-      : []),
+    // Prism Context Engine - always show as main product
+    { href: 'https://prism.jeffdev.studio', label: 'Prism Context Engine', highlight: true },
     { href: '/services', label: 'Services' },
     { href: '/work', label: 'Work' },
     { href: '/about', label: 'About' },

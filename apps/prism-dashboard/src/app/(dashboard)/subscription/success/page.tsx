@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { CheckCircle } from 'lucide-react';
 
 export const metadata = {
-  title: 'Subscription Successful | Prism Engine',
+  title: 'Subscription Successful | Prism Context Engine',
 };
 
 export default function SubscriptionSuccessPage() {

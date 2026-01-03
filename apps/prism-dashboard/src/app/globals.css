@@ -1,26 +1,142 @@
 @import "tailwindcss";
 
+/*
+ * ============================================
+ * PRISM CONTEXT ENGINE - DASHBOARD DESIGN SYSTEM
+ * ============================================
+ * Inherits JD Studio's "Endgame" Design System
+ * Dark Mode Only. The universe is #050505.
+ */
+
+/* ----------------------------------------
+   CSS CUSTOM PROPERTIES (Design Tokens)
+   ---------------------------------------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Canvas (Backgrounds) */
+  --color-void: #050505;
+  --color-glass: rgba(10, 10, 10, 0.6);
+  --color-glass-heavy: rgba(10, 10, 10, 0.85);
+
+  /* Accents (Holographic) */
+  --color-cyan: #06b6d4;
+  --color-purple: #8b5cf6;
+  --color-emerald: #10b981;
+
+  /* Borders */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-active: rgba(255, 255, 255, 0.15);
+  --border-glow: rgba(255, 255, 255, 0.25);
+
+  /* Typography */
+  --tracking-tight: -0.02em;
+  --tracking-mono: -0.01em;
 }
 
+/* ----------------------------------------
+   TAILWIND v4 THEME CONFIGURATION
+   ---------------------------------------- */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-void: var(--color-void);
+  --color-glass: var(--color-glass);
+  --color-glass-heavy: var(--color-glass-heavy);
+  --color-cyan-accent: var(--color-cyan);
+  --color-purple-accent: var(--color-purple);
+  --color-emerald-accent: var(--color-emerald);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ----------------------------------------
+   GLOBAL BASE STYLES
+   ---------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-void);
+  color: #ededed;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ----------------------------------------
+   SELECTION & FOCUS STATES
+   ---------------------------------------- */
+::selection {
+  background: rgba(6, 182, 212, 0.3);
+  color: white;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-cyan);
+  outline-offset: 2px;
+}
+
+/* ----------------------------------------
+   SCROLLBAR STYLING (Webkit)
+   ---------------------------------------- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-void);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-active);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-glow);
+}
+
+/* ----------------------------------------
+   GLASS MORPHISM UTILITIES
+   ---------------------------------------- */
+.glass {
+  background: var(--color-glass);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+}
+
+.glass-heavy {
+  background: var(--color-glass-heavy);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-active);
+}
+
+/* ----------------------------------------
+   TEXT GRADIENTS
+   ---------------------------------------- */
+.text-gradient-cyan {
+  background: linear-gradient(135deg, var(--color-cyan), #67e8f9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-purple {
+  background: linear-gradient(135deg, var(--color-purple), #c4b5fd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-holographic {
+  background: linear-gradient(135deg, var(--color-cyan), var(--color-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }

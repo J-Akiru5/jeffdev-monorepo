@@ -18,9 +18,9 @@ trigger: always_on
 
 
 * **Prism SaaS (`prism.jeffdev.studio`):**
-* *Template:* `%s | Prism Engine`
+* *Template:* `%s | Prism Context Engine`
 * *Voice:* Technical, Tool-focused.
-* *Good:* "Context Governance for LLMs | Prism Engine"
+* *Good:* "Context Governance for LLMs | Prism Context Engine"
 
 
 
@@ -83,13 +83,13 @@ export const metadata: Metadata = { robots: "noindex, nofollow" }
 ### B. Prism Product Schema (`apps/prism-dashboard`)
 
 * **Type:** `SoftwareApplication`.
-* **Why:** This makes "Prism Engine" show up as a Tool/App in search results, distinct from your agency services.
+* **Why:** This makes "Prism Context Engine" show up as a Tool/App in search results, distinct from your agency services.
 
 ```json
 {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  "name": "Prism Engine",
+  "name": "Prism Context Engine",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Cloud, VS Code",
   "offers": {
