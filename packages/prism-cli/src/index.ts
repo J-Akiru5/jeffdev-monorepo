@@ -14,6 +14,7 @@ import { login } from './commands/login.js';
 import { sync } from './commands/sync.js';
 import { serve } from './commands/serve.js';
 import { rules } from './commands/rules.js';
+import { connect } from './commands/connect.js';
 
 const program = new Command();
 
@@ -43,5 +44,10 @@ program
   .description('List your rules')
   .option('-c, --category <category>', 'Filter by category')
   .action(rules);
+
+program
+  .command('connect')
+  .description('Launch MCP server for IDE integration (stdio mode)')
+  .action(connect);
 
 program.parse();

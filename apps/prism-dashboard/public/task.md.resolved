@@ -1,0 +1,32 @@
+# Prism Engine MVP - Implementation Tasks
+
+## Current Sprint: Branding Feature + Keandrew Demo
+
+### Planning Phase
+- [x] Update implementation plan with branding feature
+  - [x] Gather Keandrew brand requirements
+  - [x] Research typography options (Plus Jakarta Sans selected)
+  - [x] Define Prism Rules schema for branding
+  - [x] Design multi-IDE export feature
+  - [x] Create Keandrew demo data structure
+
+### Phase 1: Context Kitchen (SaaS)
+- [ ] Project Baker Form
+- [ ] Azure OpenAI Transcript Processing
+- [ ] Project Dashboard Page
+
+### Phase 1.5: Enterprise Branding Feature (NEW)
+- [ ] Brand Fill-Out Form UI
+- [ ] Brand → Prism Rules generator
+- [ ] Multi-IDE export (Cursor, Windsurf, VS Code)
+- [ ] Design tokens output (CSS variables)
+- [ ] Brand guidelines PDF export
+
+### Phase 2: MCP Connection
+- [ ] `search_video_transcript` MCP Tool
+- [ ] `prism connect` CLI Command
+
+### Phase 3: Keandrew Demo
+- [ ] Keandrew brand identity rules
+- [ ] Keandrew component design rules
+- [ ] Demo data seeder script

@@ -3,11 +3,28 @@
  * 
  * POST /api/generate
  * Generates a component using Gemini AI
+ * 
+ * @security Clerk Auth + Zod Validation
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
+import { z } from 'zod';
 import { generateComponent, generateRulesFromComponent } from '@/lib/gemini';
+
+/**
+ * 🛡️ Zod Gate - Input Validation Schema
+ * Validates input types match the generateComponent function requirements.
+ */
+const GenerateRequestSchema = z.object({
+  prompt: z
+    .string()
+    .min(1, "Prompt cannot be empty")
+    .max(5000, "Prompt too long (max 5000 chars)"),
+  designSystem: z.enum(["jdstudio", "bare-minimum", "glassmorphic", "8bit-nostalgia"]),
+  stack: z.enum(["react", "nextjs", "react-native"]),
+  generateRules: z.boolean().optional().default(false),
+});
 
 export async function POST(request: NextRequest) {
   const { userId } = await auth();
@@ -18,15 +35,18 @@ export async function POST(request: NextRequest) {
   
   try {
     const body = await request.json();
-    const { prompt, designSystem, stack, generateRules } = body;
     
-    if (!prompt || !designSystem || !stack) {
+    // 🛡️ The Guard - Zod Validation
+    const parsed = GenerateRequestSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Missing required fields: prompt, designSystem, stack' },
+        { error: 'Validation failed', details: parsed.error.flatten() },
         { status: 400 }
       );
     }
     
+    const { prompt, designSystem, stack, generateRules } = parsed.data;
+
     // TODO: Check subscription limits
     // const subscription = await getSubscription(userId);
     // if (!canUseFeature(subscription.tier, 'aiGenerations', usage)) {

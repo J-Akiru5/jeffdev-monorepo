@@ -2,6 +2,7 @@
   "name": "@prism/cli",
   "version": "0.1.0",
   "description": "Thin local client for Prism Engine - Context Governance for LLMs",
+  "type": "module",
   "main": "./dist/index.js",
   "bin": {
     "prism": "./bin/prism.js"
@@ -9,7 +10,9 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [
     "mcp",
@@ -33,7 +36,8 @@
     "@repo/typescript-config": "*",
     "@types/eventsource": "^1.1.15",
     "@types/node": "^22.15.3",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vitest": "^4.0.16"
   },
   "files": [
     "dist",

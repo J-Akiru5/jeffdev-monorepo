@@ -1,0 +1,393 @@
+# User Guide
+
+Complete guide to using Prism Context Engine: from the web dashboard to the command-line interface.
+
+---
+
+## Prism Dashboard (Web Interface)
+
+The Prism Dashboard is a web-based interface for managing your context rules, brand profiles, and projects.
+
+### Accessing the Dashboard
+
+1. Navigate to your Prism Dashboard URL (e.g., `https://prism.jeffdev.studio`)
+2. Sign in with Clerk authentication
+3. You'll land on your dashboard homepage
+
+### Dashboard Features
+
+#### Projects
+
+Projects are containers for organizing your context rules and brand profiles.
+
+**Creating a Project:**
+1. Click **"New Project"** from the Projects page
+2. Fill in:
+   - Project name
+   - Slug (URL-friendly identifier)
+   - Design system (optional)
+   - Tech stack (e.g., `nextjs`, `react`, `vue`)
+3. Click **"Create Project"**
+
+**Managing Projects:**
+- View all projects from `/projects`
+- Click any project card to open its detail page
+- Each project can contain multiple rules and brand profiles
+
+#### Brand Management
+
+The Brand Management system lets you define enterprise branding and export it in multiple formats.
+
+**Creating a Brand Profile:**
+1. Navigate to **Brand Profiles** from the sidebar
+2. Click **"New Brand"**
+3. Fill in brand details:
+   - **Company Information**: Name, tagline, industry
+   - **Colors**: Primary, secondary, accent, background, surface, text colors
+   - **Typography**: Heading font, body font, monospace font, scale
+   - **Voice & Tone**: Personality traits, formality level, keywords
+   - **Spacing**: Unit size, border radius preferences
+4. Click **"Save Brand"**
+
+**Exporting Brand Rules:**
+1. Open a brand profile
+2. Click **"Export"** button
+3. Choose your export format:
+   - **Cursor** (`.cursorrules`) - For Cursor IDE
+   - **Windsurf** (`.windsurfrules`) - For Windsurf IDE
+   - **VS Code** (`settings.json`) - VS Code settings snippet
+   - **Claude** (`CLAUDE.md`) - Claude Desktop instructions
+   - **CSS** (`brand-tokens.css`) - CSS custom properties
+   - **Tailwind** (`tailwind.config.brand.js`) - Tailwind config extension
+4. The file will download automatically
+
+**Use Cases:**
+- Maintain consistent branding across AI-generated code
+- Share design tokens with your development team
+- Export to multiple IDEs for multi-tool workflows
+
+#### Video Context Pipeline
+
+Upload screen recordings to automatically extract architectural rules.
+
+**Uploading a Video:**
+1. Navigate to a project detail page
+2. Scroll to the **"Video Context"** section
+3. Click **"Upload Context Video"**
+4. Select your video file (MP4, MOV, WEBM up to 500MB)
+5. The video uploads to Mux for processing
+6. Azure OpenAI processes the transcript to generate rules
+7. Rules appear in your project when processing completes
+
+**Best Practices:**
+- Record yourself explaining your architecture or design decisions
+- Keep videos under 10 minutes for best results
+- Speak clearly about patterns and constraints
+- The AI extracts rules based on your explanations
+
+#### AI Kitchen (Component Generator)
+
+Generate production-ready components with your design system baked in.
+
+**Generating a Component:**
+1. Navigate to **AI Kitchen** from the sidebar
+2. Describe the component you want to create
+3. Specify any requirements:
+   - Component type (button, card, form, etc.)
+   - Design system constraints
+   - Specific styling needs
+4. Click **"Generate"**
+5. Review the generated code
+6. Copy or export the component
+
+**Component Generation Features:**
+- Powered by Google Gemini AI
+- Respects your brand colors and typography
+- Follows your design system rules
+- Generates accessible, production-ready code
+
+#### Pricing & Subscriptions
+
+Manage your Prism subscription and access levels.
+
+**Viewing Plans:**
+- Navigate to **Pricing** from the sidebar
+- Compare features across tiers:
+  - **Free**: Basic rule management
+  - **Pro**: Advanced features, AI Kitchen, video context
+  - **Enterprise**: Team sync, custom integrations
+
+**Subscribing:**
+1. Click **"Subscribe"** on your desired tier
+2. Complete payment via PayPal
+3. Access is granted immediately after payment confirmation
+
+---
+
+## Prism CLI (Command Line Interface)
+
+The Prism CLI is a command-line tool for managing rules locally and integrating with your IDE.
+
+### Installation
+
+```bash
+# Install globally via npm
+npm install -g @prism/cli
+
+# Or use npx (no installation needed)
+npx @prism/cli <command>
+```
+
+### Authentication
+
+Before using the CLI, you need to authenticate:
+
+```bash
+prism login
+```
+
+This command:
+1. Opens your browser to the Prism Dashboard authentication page
+2. Prompts you to sign in with Clerk
+3. Provides a token to paste back into the CLI
+4. Saves your authentication token locally
+
+**Token Storage:**
+- Saved to `~/.prism/config.json`
+- Never commit this file to version control
+
+### Commands
+
+#### `prism sync`
+
+Sync rules from Prism Cloud to your local cache.
+
+```bash
+prism sync
+```
+
+**What it does:**
+- Fetches all your rules from the Prism Dashboard
+- Saves them to `~/.prism/rules/rules.json`
+- Updates your last sync timestamp
+
+**Use cases:**
+- Keep local rules up-to-date before coding sessions
+- Share rules with team members (via shared config)
+- Offline development with cached rules
+
+#### `prism rules`
+
+List your cached rules.
+
+```bash
+# List all rules
+prism rules
+
+# Filter by category
+prism rules --category architecture
+prism rules --category styling
+prism rules --category security
+```
+
+**Output format:**
+```
+◈ Prism Rules (12 total)
+
+  architecture
+    • no-cross-app-imports
+    • monorepo-geography
+    • tech-stack-protocol
+
+  styling
+    • visual-constitution
+    • design-system
+
+  security
+    • security-guard
+    • zod-validation-gate
+```
+
+#### `prism connect`
+
+Launch the MCP server for IDE integration (stdio mode).
+
+```bash
+prism connect
+```
+
+**What it does:**
+- Starts the Prism MCP server in stdio mode
+- Connects to your Azure Cosmos DB
+- Makes rules available to IDEs via MCP protocol
+
+**Use cases:**
+- Configure in Cursor's `mcp.json`
+- Configure in Windsurf's MCP settings
+- Use with Claude Desktop
+
+**Configuration Example (Cursor):**
+
+Create or edit `~/.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism",
+      "args": ["connect"],
+      "env": {
+        "MONGODB_URI": "your-connection-string"
+      }
+    }
+  }
+}
+```
+
+#### `prism serve`
+
+Start MCP server with HTTP/SSE fallback (development mode).
+
+```bash
+# Default port (3100)
+prism serve
+
+# Custom port
+prism serve --port 4000
+```
+
+**Differences from `prism connect`:**
+- `connect`: stdio mode (for IDE integration)
+- `serve`: HTTP/SSE mode (for development/testing)
+
+**Use cases:**
+- Testing MCP server functionality
+- Development and debugging
+- Custom integrations requiring HTTP transport
+
+### Workflow Examples
+
+#### Daily Development Workflow
+
+```bash
+# 1. Sync latest rules from dashboard
+prism sync
+
+# 2. Verify rules are cached
+prism rules
+
+# 3. Start your IDE (Cursor/Windsurf) with MCP configured
+# The IDE will automatically use prism connect
+```
+
+#### Team Onboarding
+
+```bash
+# 1. Install CLI
+npm install -g @prism/cli
+
+# 2. Authenticate
+prism login
+
+# 3. Sync team rules
+prism sync
+
+# 4. Configure IDE (see editor-setup guide)
+# 5. Start coding with AI that follows your rules!
+```
+
+#### Offline Development
+
+```bash
+# Before going offline
+prism sync
+
+# Work offline with cached rules
+# Rules are available in ~/.prism/rules/rules.json
+
+# When back online, sync again
+prism sync
+```
+
+---
+
+## Integration Guide
+
+### Using Dashboard + CLI Together
+
+The Dashboard and CLI work together seamlessly:
+
+1. **Create rules in Dashboard** → Rich UI for writing and organizing rules
+2. **Sync to CLI** → `prism sync` downloads rules locally
+3. **IDE Integration** → `prism connect` makes rules available to your AI assistant
+
+### Best Practices
+
+- **Dashboard**: Use for creating, editing, and organizing rules
+- **CLI**: Use for syncing, listing, and IDE integration
+- **Video Context**: Use Dashboard for video uploads and rule generation
+- **Brand Export**: Use Dashboard for exporting brand rules in multiple formats
+- **Component Generation**: Use Dashboard's AI Kitchen for component creation
+
+---
+
+## Troubleshooting
+
+### CLI Authentication Issues
+
+**Problem**: `prism login` fails or token is invalid
+
+**Solution**:
+1. Verify you're signed in to the Dashboard
+2. Check your token in `~/.prism/config.json`
+3. Re-run `prism login` to refresh token
+
+### Sync Fails
+
+**Problem**: `prism sync` returns an error
+
+**Solution**:
+1. Check your internet connection
+2. Verify you're authenticated (`prism login`)
+3. Check Dashboard API is accessible
+4. Review error message for specific issues
+
+### IDE Integration Not Working
+
+**Problem**: IDE doesn't recognize Prism rules
+
+**Solution**:
+1. Verify `prism connect` works in terminal
+2. Check MCP configuration in IDE settings
+3. Ensure `MONGODB_URI` environment variable is set
+4. Restart IDE after configuration changes
+5. Check IDE logs for MCP connection errors
+
+### Rules Not Appearing
+
+**Problem**: Rules don't show up in `prism rules`
+
+**Solution**:
+1. Run `prism sync` to fetch latest rules
+2. Check `~/.prism/rules/rules.json` exists
+3. Verify rules exist in Dashboard
+4. Check file permissions on cache directory
+
+---
+
+## Next Steps
+
+import { Cards, Card } from 'nextra/components'
+
+<Cards>
+  <Card title="Editor Setup" href="/guide/editor-setup">
+    Configure Cursor, Windsurf, or VS Code
+  </Card>
+  <Card title="Creating Rules" href="/guide/rules">
+    Learn to write effective rules
+  </Card>
+  <Card title="MCP Integration" href="/guide/mcp-integration">
+    Deep dive into MCP protocol
+  </Card>
+</Cards>
+

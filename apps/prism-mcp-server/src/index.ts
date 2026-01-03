@@ -21,6 +21,8 @@ import {
   ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { MongoClient, type Collection, type Document, ObjectId } from "mongodb";
+import { generateQueryEmbedding } from "./lib/azure-openai.js";
+import { findTopKSimilar, extractRelevantSnippet } from "./lib/vector-search.js";
 
 // =============================================================================
 // CONFIGURATION
@@ -30,6 +32,11 @@ const SERVER_NAME = "jeffdev-prism-engine";
 const SERVER_VERSION = "1.0.0";
 const MONGODB_URI = process.env.MONGODB_URI;
 const DATABASE_NAME = process.env.COSMOS_DATABASE_NAME || "prism";
+
+// =============================================================================
+// UTILITY FUNCTIONS
+// =============================================================================
+// (Video transcript search utilities removed - will be re-implemented in Phase 3 with Azure OpenAI)
 
 // =============================================================================
 // DATABASE CONNECTION (Singleton)
@@ -194,6 +201,29 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ["code"],
         },
       },
+      {
+        name: "search_video_transcript",
+        description: "Semantic search across video transcripts using Azure OpenAI embeddings. Finds relevant architectural discussions from uploaded screen recordings.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            query: {
+              type: "string",
+              description: "Search query (e.g., 'TypeScript patterns', 'component architecture')",
+            },
+            projectId: {
+              type: "string",
+              description: "Optional project ID to filter results",
+            },
+            limit: {
+              type: "number",
+              description: "Maximum number of results (default: 5)",
+              default: 5,
+            },
+          },
+          required: ["query"],
+        },
+      },
     ],
   };
 });
@@ -246,6 +276,118 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           },
         ],
       };
+    }
+
+    case "search_video_transcript": {
+      const query = (args as Record<string, unknown>)?.query as string;
+      const projectId = (args as Record<string, unknown>)?.projectId as string | undefined;
+      const limit = ((args as Record<string, unknown>)?.limit as number) || 5;
+
+      if (!query) {
+        return {
+          content: [{ type: "text" as const, text: "Error: No search query provided." }],
+          isError: true,
+        };
+      }
+
+      try {
+        // Step 1: Generate embedding for search query
+        const queryEmbedding = await generateQueryEmbedding(query);
+
+        // Step 2: Fetch video transcripts from database
+        await getDB(); // Ensure client is connected
+        if (!client) {
+          throw new Error("Database connection not established");
+        }
+        const database = client.db(DATABASE_NAME);
+        const transcriptsCollection = database.collection("videoTranscripts");
+
+        const filter: Record<string, unknown> = {};
+        if (projectId) {
+          filter.projectId = projectId;
+        }
+
+        const transcriptsRaw = await transcriptsCollection.find(filter).toArray();
+        const transcripts = transcriptsRaw as unknown as Array<{
+          embedding?: number[];
+          transcriptText: string;
+          videoTitle: string;
+          duration: number;
+          muxPlaybackId: string;
+          createdAt: string;
+          extractedRules?: string[];
+        }>;
+
+        if (transcripts.length === 0) {
+          return {
+            content: [
+              {
+                type: "text" as const,
+                text: `No video transcripts found${projectId ? ` in project ${projectId}` : ""}.`,
+              },
+            ],
+          };
+        }
+
+        // Step 3: Find most similar transcripts using cosine similarity
+        const results = findTopKSimilar(
+          queryEmbedding,
+          transcripts,
+          Math.min(limit, 10) // Max 10 results
+        );
+
+        if (results.length === 0) {
+          return {
+            content: [
+              {
+                type: "text" as const,
+                text: `No relevant transcripts found for "${query}".`,
+              },
+            ],
+          };
+        }
+
+        // Step 4: Format results as markdown
+        const formatted = results
+          .map((result, index) => {
+            const similarity = Math.round(result.similarity * 100);
+            const snippet = extractRelevantSnippet(result.transcriptText, 200);
+            const duration = result.duration ? `${Math.floor(result.duration / 60)}:${String(Math.floor(result.duration % 60)).padStart(2, '0')}` : 'N/A';
+
+            return `### ${index + 1}. ${result.videoTitle}
+
+**Relevance:** ${similarity}% match
+**Duration:** ${duration}
+**Uploaded:** ${new Date(result.createdAt).toLocaleDateString()}
+
+**Snippet:**
+> ${snippet}
+
+**Playback:** https://stream.mux.com/${result.muxPlaybackId}
+${result.extractedRules && result.extractedRules.length > 0 ? `\n**Extracted Rules:** ${result.extractedRules.length} architectural patterns` : ''}`;
+          })
+          .join("\n\n---\n\n");
+
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: `# Video Transcript Search Results\n\n**Query:** "${query}"\n**Found:** ${results.length} relevant video(s)\n\n${formatted}`,
+            },
+          ],
+        };
+      } catch (error) {
+        console.error("[search_video_transcript] Error:", error);
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: `Error searching transcripts: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            },
+          ],
+          isError: true,
+        };
+      }
     }
 
     case "validate_code_pattern": {

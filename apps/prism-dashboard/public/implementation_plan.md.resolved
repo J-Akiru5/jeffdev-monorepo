@@ -1,0 +1,426 @@
+# Prism Engine MVP Implementation Plan
+
+**Target:** 48-Hour Hackathon Sprint  
+**Date:** 2026-01-03 (Updated)  
+**Objective:** Video-to-Context Pipeline + Enterprise Branding + Keandrew Demo
+
+---
+
+## Executive Summary
+
+This plan transforms the **Architect's Brief** into actionable tasks, now including the **Enterprise Branding Feature** and **Keandrew Photography Studio** as the demo brand.
+
+### What's New in This Update
+
+| Feature | Description |
+|---------|-------------|
+| **Prism Rules** | Universal rules format that works across all MCP-compatible IDEs |
+| **Brand Fill-Out Form** | Enterprise branding capture (colors, typography, voice, imagery) |
+| **Multi-IDE Export** | Dropdown to export for Cursor, Windsurf, VS Code, Claude |
+| **Keandrew Demo** | Replaces Seabird with photography studio brand |
+
+---
+
+## Prism Rules Schema
+
+> **Naming Convention:** "Prism Rules" = Universal context rules that work via MCP protocol
+
+```typescript
+// packages/db/src/schema.ts (NEW)
+
+export const PrismBrandSchema = z.object({
+  id: z.string(),
+  userId: z.string(),
+  
+  // Identity
+  companyName: z.string(),
+  tagline: z.string().optional(),
+  industry: z.enum(["photography", "tech", "agency", "ecommerce", "saas", "other"]),
+  
+  // Color System
+  colors: z.object({
+    primary: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
+    secondary: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
+    accent: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
+    background: z.string(),
+    surface: z.string(),
+    text: z.string(),
+    textMuted: z.string(),
+  }),
+  
+  // Typography
+  typography: z.object({
+    headingFont: z.string(),
+    bodyFont: z.string(),
+    monoFont: z.string().optional(),
+    scale: z.enum(["compact", "default", "spacious"]),
+  }),
+  
+  // Voice & Tone
+  voice: z.object({
+    personality: z.enum(["minimal", "warm", "bold", "playful", "corporate"]),
+    formality: z.enum(["casual", "balanced", "formal"]),
+    keywords: z.array(z.string()).max(10),
+  }),
+  
+  // Imagery
+  imagery: z.object({
+    style: z.enum(["photography", "illustration", "3d", "mixed"]),
+    mood: z.enum(["light", "dark", "moody", "vibrant"]),
+    subjects: z.array(z.string()),
+  }),
+  
+  // Design Tokens
+  spacing: z.object({
+    unit: z.number().default(4),
+    borderRadius: z.enum(["none", "sm", "md", "lg", "full"]),
+  }),
+  
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime().optional(),
+});
+```
+
+---
+
+## Phase 1.5: Enterprise Branding Feature
+
+### 1.5.1 Brand Fill-Out Form
+
+#### [NEW] [page.tsx](file:///c:/dev/Next%20Js/jeffdev-monorepo/apps/prism-dashboard/src/app/(dashboard)/brand/new/page.tsx)
+
+Multi-step form wizard:
+1. **Identity** - Company name, tagline, industry
+2. **Colors** - Primary, secondary, accent, background palette
+3. **Typography** - Font pairing selection (curated list)
+4. **Voice** - Personality, formality, brand keywords
+5. **Review** - Preview generated Prism Rules
+
+#### [NEW] [brand-form.tsx](file:///c:/dev/Next%20Js/jeffdev-monorepo/apps/prism-dashboard/src/components/brand/brand-form.tsx)
+
+Client component with multi-step state management.
+
+---
+
+### 1.5.2 Multi-IDE Export
+
+#### [NEW] [route.ts](file:///c:/dev/Next%20Js/jeffdev-monorepo/apps/prism-dashboard/src/app/api/brand/export/route.ts)
+
+```typescript
+// GET /api/brand/export?brandId=xxx&format=cursor|windsurf|vscode|claude
+
+export async function GET(request: NextRequest) {
+  const { brandId, format } = parseParams(request);
+  const brand = await getBrand(brandId);
+  
+  switch (format) {
+    case "cursor":
+      return generateCursorrules(brand);
+    case "windsurf":
+      return generateWindsurfrules(brand);
+    case "vscode":
+      return generateVSCodeSettings(brand);
+    case "claude":
+      return generateClaudeProject(brand);
+    case "css":
+      return generateCSSVariables(brand);
+    case "tailwind":
+      return generateTailwindConfig(brand);
+  }
+}
+```
+
+**Export Formats:**
+
+| Format | Output File | Description |
+|--------|-------------|-------------|
+| Cursor | `.cursorrules` | AI context rules |
+| Windsurf | `.windsurfrules` | Same format, different filename |
+| VS Code | `.vscode/settings.json` | Workspace settings |
+| Claude | `CLAUDE.md` | Project instructions |
+| CSS | `brand-tokens.css` | CSS custom properties |
+| Tailwind | `tailwind.config.ts` | Design tokens as Tailwind theme |
+
+---
+
+## Phase 3: Keandrew Demo
+
+### Brand Identity
+
+```yaml
+Company: Keandrew Photography Studio
+Industry: Photography
+Tagline: "Capturing Life's Authentic Moments"
+
+Services:
+  Studio:
+    - Portrait Sessions
+  Events:
+    - Weddings
+    - Birthday / Debut
+    - Burial / Memorial
+    - Coronation
+
+Target Audience:
+  - High-end clients (luxury weddings, corporate)
+  - Everyday families (casual, approachable)
+
+Mood: Minimal, Sophisticated, Modern
+```
+
+---
+
+### Color Palette
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| `--brand-black` | `#1A1A1A` | Primary text, headers |
+| `--brand-charcoal` | `#2D2D2D` | Secondary elements |
+| `--brand-grey` | `#6B6B6B` | Muted text |
+| `--brand-silver` | `#A3A3A3` | Borders, dividers |
+| `--brand-beige` | `#E8E0D5` | Accent, highlights |
+| `--brand-cream` | `#F5F2EE` | Background (light) |
+| `--brand-white` | `#FAFAFA` | Cards, surfaces |
+
+---
+
+### Typography
+
+| Role | Font | Fallback | Weight |
+|------|------|----------|--------|
+| Headings | **Plus Jakarta Sans** | system-ui | 600-700 |
+| Body | **Plus Jakarta Sans** | system-ui | 400-500 |
+| Accent | **Cormorant Garamond** | Georgia | 400 (italic for quotes) |
+
+> **Why Plus Jakarta Sans?** Modern, geometric sans-serif with character. Not generic like Roboto. Available on Google Fonts.
+
+> **Why Cormorant Garamond?** Elegant serif for testimonials, quotes, and accent text. Adds sophistication to photography brand.
+
+---
+
+### Keandrew Prism Rules (Seed Data)
+
+#### [NEW] [seed-keandrew.ts](file:///c:/dev/Next%20Js/jeffdev-monorepo/apps/prism-dashboard/scripts/seed-keandrew.ts)
+
+```typescript
+const KEANDREW_BRAND: PrismBrand = {
+  id: "demo-keandrew",
+  userId: "demo",
+  companyName: "Keandrew Photography Studio",
+  tagline: "Capturing Life's Authentic Moments",
+  industry: "photography",
+  
+  colors: {
+    primary: "#1A1A1A",
+    secondary: "#2D2D2D", 
+    accent: "#E8E0D5",
+    background: "#FAFAFA",
+    surface: "#FFFFFF",
+    text: "#1A1A1A",
+    textMuted: "#6B6B6B",
+  },
+  
+  typography: {
+    headingFont: "Plus Jakarta Sans",
+    bodyFont: "Plus Jakarta Sans",
+    monoFont: "JetBrains Mono",
+    scale: "spacious",
+  },
+  
+  voice: {
+    personality: "minimal",
+    formality: "balanced",
+    keywords: ["authentic", "timeless", "elegant", "moments", "memories"],
+  },
+  
+  imagery: {
+    style: "photography",
+    mood: "moody",
+    subjects: ["portraits", "weddings", "events", "families"],
+  },
+  
+  spacing: {
+    unit: 4,
+    borderRadius: "sm",
+  },
+};
+
+const KEANDREW_RULES: Rule[] = [
+  {
+    name: "Keandrew Color System",
+    category: "styling",
+    priority: 1,
+    tags: ["keandrew", "colors", "brand"],
+    content: `## Keandrew Color Palette
+
+### Primary Colors
+- **Black** \`#1A1A1A\` - Headlines, primary text, buttons
+- **Charcoal** \`#2D2D2D\` - Secondary text, hover states
+- **Grey** \`#6B6B6B\` - Muted text, captions
+
+### Accent Colors
+- **Beige** \`#E8E0D5\` - Highlights, accent borders, hover backgrounds
+- **Cream** \`#F5F2EE\` - Page background (light sections)
+- **White** \`#FAFAFA\` - Cards, elevated surfaces
+
+### Usage Rules
+1. NEVER use pure black (#000000) - always use #1A1A1A
+2. Beige is for ACCENT only, not large areas
+3. Maintain high contrast for accessibility
+4. Dark sections: #1A1A1A background with #FAFAFA text`,
+  },
+  
+  {
+    name: "Keandrew Typography",
+    category: "styling",
+    priority: 2,
+    tags: ["keandrew", "typography", "fonts"],
+    content: `## Keandrew Typography System
+
+### Font Stack
+\`\`\`css
+--font-heading: 'Plus Jakarta Sans', system-ui, sans-serif;
+--font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+--font-accent: 'Cormorant Garamond', Georgia, serif;
+\`\`\`
+
+### Hierarchy
+- **H1**: 48px / 600 weight / -0.02em tracking
+- **H2**: 36px / 600 weight / -0.01em tracking
+- **H3**: 24px / 600 weight / normal tracking
+- **Body**: 16px / 400 weight / 1.6 line-height
+- **Caption**: 14px / 400 weight / muted color
+
+### Rules
+1. Use Cormorant Garamond ONLY for testimonials and quotes
+2. Headlines are always semibold (600)
+3. Body text is always regular (400)
+4. NEVER use font weights below 400`,
+  },
+  
+  {
+    name: "Keandrew Component Patterns",
+    category: "architecture",
+    priority: 3,
+    tags: ["keandrew", "components", "ui"],
+    content: `## Keandrew Component Patterns
+
+### Buttons
+\`\`\`tsx
+// Primary Button
+<button className="bg-[#1A1A1A] text-white px-6 py-3 text-sm font-medium tracking-wide uppercase hover:bg-[#2D2D2D] transition-colors">
+  Book a Session
+</button>
+
+// Secondary Button
+<button className="border border-[#1A1A1A] text-[#1A1A1A] px-6 py-3 text-sm font-medium tracking-wide uppercase hover:bg-[#E8E0D5] transition-colors">
+  View Portfolio
+</button>
+\`\`\`
+
+### Cards
+- Border radius: 4px (rounded-sm)
+- Shadow: subtle, warm tint
+- Hover: slight scale (1.02) + shadow increase
+
+### Gallery Grid
+- Desktop: 3-4 columns
+- Tablet: 2 columns
+- Mobile: 1 column
+- Gap: 8px (minimal, let images breathe)`,
+  },
+  
+  {
+    name: "Keandrew Voice & Tone",
+    category: "documentation",
+    priority: 4,
+    tags: ["keandrew", "copywriting", "voice"],
+    content: `## Keandrew Voice Guidelines
+
+### Personality
+- **Minimal**: Say more with less
+- **Sophisticated**: Elegant, not pretentious
+- **Warm**: Approachable, not cold
+
+### Tone by Context
+| Context | Tone | Example |
+|---------|------|---------|
+| Headlines | Confident, Simple | "Your Story. Beautifully Told." |
+| Body Copy | Warm, Conversational | "We believe in capturing the moments that matter most..." |
+| CTAs | Direct, Inviting | "Book Your Session" not "Click Here" |
+
+### Words to USE
+✅ authentic, moments, timeless, elegant, memories, story, capture, celebrate
+
+### Words to AVOID
+❌ cheap, discount, amateur, quick, basic, simple (when meaning low-quality)`,
+  },
+];
+```
+
+---
+
+## Updated File Change Summary
+
+### New Files (12)
+
+| Path | Purpose |
+|------|---------|
+| `src/app/(dashboard)/projects/new/page.tsx` | Project Baker form |
+| `src/app/(dashboard)/projects/[slug]/page.tsx` | Project dashboard |
+| `src/app/(dashboard)/projects/actions.ts` | Server actions |
+| `src/app/(dashboard)/brand/new/page.tsx` | Brand fill-out form |
+| `src/components/brand/brand-form.tsx` | Multi-step wizard |
+| `src/app/api/brand/export/route.ts` | Multi-IDE export API |
+| `src/lib/azure-openai.ts` | Azure OpenAI client |
+| `packages/prism-cli/src/commands/connect.ts` | Connect command |
+| `scripts/seed-keandrew.ts` | Demo data seeder |
+| `src/app/(dashboard)/layout.tsx` | Dashboard layout |
+| `src/components/project-sidebar.tsx` | Navigation |
+| [packages/db/src/schema.ts](file:///c:/dev/Next%20Js/jeffdev-monorepo/packages/db/src/schema.ts) | Add PrismBrandSchema |
+
+### Modified Files (4)
+
+| Path | Changes |
+|------|---------|
+| [api/webhooks/mux/route.ts](file:///c:/dev/Next%20Js/jeffdev-monorepo/apps/prism-dashboard/src/app/api/webhooks/mux/route.ts) | Azure OpenAI processing |
+| [prism-mcp-server/src/index.ts](file:///c:/dev/Next%20Js/jeffdev-monorepo/apps/prism-mcp-server/src/index.ts) | `search_video_transcript` tool |
+| [packages/prism-cli/src/index.ts](file:///c:/dev/Next%20Js/jeffdev-monorepo/packages/prism-cli/src/index.ts) | `connect` command |
+| [.env.example](file:///c:/dev/Next%20Js/jeffdev-monorepo/apps/agency/.env.example) | Azure OpenAI + Mux variables |
+
+---
+
+## 48-Hour Sprint Schedule (Updated)
+
+| Hour | Task |
+|------|------|
+| 0-2 | Project Baker Form + Server Action |
+| 2-4 | Dashboard Layout + Project Page |
+| 4-6 | **Brand Fill-Out Form (NEW)** |
+| 6-8 | **Multi-IDE Export API (NEW)** |
+| 8-10 | Azure OpenAI Integration |
+| 10-12 | Mux Webhook → Rules Pipeline |
+| 12-14 | `search_video_transcript` MCP Tool |
+| 14-16 | `prism connect` CLI Command |
+| 16-18 | **Keandrew Demo Seeder (NEW)** |
+| 18-20 | Integration Testing |
+| 20-22 | Bug Fixes & Polish |
+| 22-24 | Demo Video Recording |
+
+---
+
+## Success Criteria (Updated)
+
+| Metric | Target |
+|--------|--------|
+| Project creation works | ✅ |
+| Brand fill-out form saves to DB | ✅ |
+| Multi-IDE export generates valid files | ✅ |
+| Video upload triggers rule generation | ✅ |
+| MCP tools return Keandrew rules | ✅ |
+| `prism connect` launches MCP server | ✅ |
+| Demo shows Keandrew brand context | ✅ |
+
+---
+
+*Implementation Plan v2.0 — Keandrew Edition*

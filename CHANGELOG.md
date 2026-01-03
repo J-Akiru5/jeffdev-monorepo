@@ -14,6 +14,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.1.3] - 2026-01-03
+
+### Added
+
+#### Prism Dashboard (`apps/prism-dashboard`)
+- **Brand Management System**: Enterprise branding capture and multi-IDE export
+  - Brand profile creation with colors, typography, voice, and imagery
+  - Export formats: Cursor, Windsurf, VS Code, Claude Desktop, CSS, Tailwind
+  - Brand list and detail pages with visual previews
+- **Video Context Pipeline**: Mux integration for video-based rule extraction
+  - Video upload component with Mux integration
+  - Azure OpenAI transcript processing
+  - Webhook handlers for automated rule generation
+- **AI Component Generator**: Gemini-powered component creation
+  - AI Kitchen interface for design system-aware components
+  - Component generation API endpoint
+- **Documentation**: CHANGELOG.md structure per documentation standards
+
+#### Documentation (`apps/prism-docs`)
+- Updated changelog with v0.1.3 release notes
+
+### Changed
+- Version bumped to 0.1.3 across all packages
+- Documentation organization aligned with standards
+
+---
+
 ## [0.1.0] - 2026-01-01
 
 ### 🎉 The Genesis Release
@@ -70,4 +97,5 @@ Cursor can now query architectural rules directly from the database.
 
 | Version | Date | Highlight |
 |---------|------|-----------|
+| 0.1.3 | 2026-01-03 | 🎨 Brand Management + Video Context Pipeline |
 | 0.1.0 | 2026-01-01 | 🌱 Genesis - MCP Server + DB Connected |

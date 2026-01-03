@@ -28,7 +28,7 @@ export {
   getAuthClient,
   type Firestore,
   type Auth,
-} from "./firebase.js";
+} from "./firebase";
 
 // Cosmos/MongoDB exports
 export {
@@ -36,11 +36,12 @@ export {
   getDatabase,
   getCollection,
   closeConnection,
+  ObjectId,
   type Db,
   type Collection,
   type Document,
   type MongoClient,
-} from "./cosmos.js";
+} from "./cosmos";
 
 // Schema exports
 export {
@@ -77,6 +78,7 @@ export {
   SubscriptionTierSchema,
   SubscriptionStatusSchema,
   UsageSchema,
+  VideoTranscriptSchema,
   type DesignSystem,
   type Stack,
   type PrismProject,
@@ -85,4 +87,5 @@ export {
   type SubscriptionTier,
   type SubscriptionStatus,
   type Usage,
-} from "./schema.js";
+  type VideoTranscript,
+} from "./schema";

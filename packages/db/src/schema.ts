@@ -304,3 +304,33 @@ export const UsageSchema = z.object({
 });
 
 export type Usage = z.infer<typeof UsageSchema>;
+
+/**
+ * Video transcript from Mux upload.
+ */
+export const VideoTranscriptSchema = z.object({
+  id: z.string().describe("Unique transcript identifier"),
+  projectId: z.string().describe("Parent project ID"),
+  userId: z.string().describe("Uploader's Clerk user ID"),
+  muxAssetId: z.string().describe("Mux asset ID"),
+  muxPlaybackId: z.string().describe("Mux playback ID"),
+  videoTitle: z.string().max(200).describe("Video title"),
+  duration: z.number().positive().describe("Duration in seconds"),
+  transcriptText: z.string().describe("Full transcript text"),
+  segments: z.array(
+    z.object({
+      start: z.number().describe("Segment start time in seconds"),
+      end: z.number().describe("Segment end time in seconds"),
+      text: z.string().describe("Segment text"),
+    })
+  ).describe("Timestamped transcript segments"),
+  embedding: z.array(z.number()).optional().describe("Vector embedding for semantic search (1536 dimensions)"),
+  extractedRules: z.array(z.string()).default([]).describe("Rule IDs extracted from video"),
+  language: z.string().optional().default("en").describe("Transcript language code"),
+  processingTime: z.number().optional().describe("AI processing time in milliseconds"),
+  confidence: z.enum(["high", "medium", "low"]).optional().describe("AI confidence in rule extraction"),
+  createdAt: z.string().datetime().describe("ISO 8601 timestamp"),
+  updatedAt: z.string().datetime().optional(),
+});
+
+export type VideoTranscript = z.infer<typeof VideoTranscriptSchema>;

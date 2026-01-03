@@ -8,7 +8,7 @@
  * const rules = await getCollection("rules").find({}).toArray();
  */
 
-import { MongoClient, type Db, type Collection, type Document } from "mongodb";
+import { MongoClient, ObjectId, type Db, type Collection, type Document } from "mongodb";
 
 let client: MongoClient | null = null;
 let database: Db | null = null;
@@ -97,3 +97,4 @@ export async function closeConnection(): Promise<void> {
 
 // Re-export types for consumers
 export type { Db, Collection, Document, MongoClient };
+export { ObjectId };

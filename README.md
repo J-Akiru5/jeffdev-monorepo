@@ -21,6 +21,14 @@
 
 This monorepo powers **JeffDev Studio** — a premium web development agency — and **Prism Engine** — a context governance system for AI coding assistants.
 
+**Current Version**: `0.1.3` (January 3, 2026)
+
+### What's New in v0.1.3
+
+- 🎨 **Brand Management System**: Enterprise branding capture with multi-IDE export (Cursor, Windsurf, VS Code, Claude, CSS, Tailwind)
+- 📹 **Video Context Pipeline**: Mux integration for video-based rule extraction
+- 🤖 **AI Component Generator**: Gemini-powered component creation with design system awareness
+
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                     JeffDev Monorepo                            │
@@ -65,6 +73,7 @@ The JeffDev Studio marketing site and client management system.
 SaaS platform for developers to manage AI context rules.
 - **Port**: 3001
 - **Stack**: Next.js 16, Clerk Auth, Cosmos DB
+- **Features**: Brand management, video context pipeline, AI component generator
 
 ### 📚 Prism Docs (`apps/prism-docs`)
 Documentation for the Prism Engine.
@@ -75,6 +84,7 @@ Documentation for the Prism Engine.
 AI context server implementing the Model Context Protocol.
 - **Transport**: stdio
 - **Tools**: `get_architectural_rules`, `validate_code_pattern`
+- **Version**: 0.1.3
 
 ---
 
