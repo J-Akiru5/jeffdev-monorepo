@@ -1,0 +1,358 @@
+# Cursor Integration
+
+Complete guide to integrating Prism with Cursor IDE.
+
+import { Callout, Steps, Tabs } from 'nextra/components'
+
+<Callout type="info">
+  **Cursor** is an AI-first code editor with built-in MCP support.
+</Callout>
+
+## Quick Setup
+
+<Steps>
+  ### Install Prism MCP Server
+
+  ```bash
+  npm install -g @prism/mcp-server
+  ```
+
+  ### Get Your API Key
+
+  Go to [Dashboard](https://prismcontext.com/dashboard) → **Settings** → **API Keys** → **Generate**
+
+  ### Configure Cursor
+
+  Create or edit `~/.cursor/mcp.json`:
+
+  ```json
+  {
+    "mcpServers": {
+      "prism": {
+        "command": "prism-mcp",
+        "args": ["--api-key", "YOUR_API_KEY"]
+      }
+    }
+  }
+  ```
+
+  ### Restart Cursor
+
+  Fully quit and restart Cursor for MCP to load.
+
+  ### Verify Connection
+
+  Open Cursor and check the MCP status indicator. You should see "prism" listed.
+</Steps>
+
+---
+
+## Configuration Options
+
+### Basic Configuration
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": ["--api-key", "YOUR_API_KEY"]
+    }
+  }
+}
+```
+
+### With Environment Variable
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "env": {
+        "PRISM_API_KEY": "YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+### Advanced Options
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": [
+        "--api-key", "YOUR_API_KEY",
+        "--project", "proj_abc123",
+        "--cache-ttl", "300",
+        "--log-level", "debug"
+      ]
+    }
+  }
+}
+```
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--api-key` | Your Prism API key | Required |
+| `--project` | Default project ID | None |
+| `--cache-ttl` | Cache duration in seconds | 300 |
+| `--log-level` | Logging verbosity | info |
+
+---
+
+## Using Prism in Cursor
+
+### Automatic Context
+
+Once connected, your rules are automatically available to Cursor's AI:
+
+```
+You: "Create a button component"
+
+Cursor AI: (automatically fetches your styling rules)
+"Based on your design system, here's a button component
+using Ghost Glow styling with cyan hover states..."
+```
+
+### Manual Tool Usage
+
+You can explicitly request rules in chat:
+
+```
+You: "Use @prism to get our form validation rules"
+
+Cursor AI: (calls prism_get_rules)
+"Here are your form validation rules..."
+```
+
+### Semantic Search
+
+Ask questions about your rules:
+
+```
+You: "What are our patterns for error handling?"
+
+Cursor AI: (calls prism_search_rules)
+"I found 3 relevant rules about error handling..."
+```
+
+---
+
+## Cursor Rules Directory
+
+For local rule files (no MCP):
+
+<Steps>
+  ### Export Rules
+
+  Export from Prism dashboard:
+  
+  **Rules** → **Export** → **Markdown**
+
+  ### Place in Cursor Directory
+
+  ```
+  ~/.cursor/rules/
+  ├── styling.md
+  ├── architecture.md
+  └── testing.md
+  ```
+
+  ### Or Project-Local
+
+  ```
+  your-project/
+  └── .cursor/
+      └── rules/
+          ├── components.md
+          └── api.md
+  ```
+</Steps>
+
+<Callout type="default">
+  Project-local rules take precedence over global rules.
+</Callout>
+
+---
+
+## Cursor Features with Prism
+
+### Composer
+
+When using Composer for multi-file edits:
+
+1. Rules are automatically included in context
+2. Generated code follows your patterns
+3. Consistency across all files
+
+### Chat
+
+In the chat panel:
+
+1. Ask questions about your codebase patterns
+2. Get code suggestions matching your rules
+3. Debug issues with your standards in mind
+
+### Cmd+K Inline
+
+For inline code generation:
+
+1. Select code or place cursor
+2. Press `Cmd+K` (Mac) or `Ctrl+K` (Windows)
+3. Your rules influence the generation
+
+---
+
+## Project-Specific Configuration
+
+### Override Default Project
+
+For a specific workspace, create `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": [
+        "--api-key", "YOUR_API_KEY",
+        "--project", "proj_specific123"
+      ]
+    }
+  }
+}
+```
+
+### Multiple Projects
+
+```json
+{
+  "mcpServers": {
+    "prism-frontend": {
+      "command": "prism-mcp",
+      "args": ["--api-key", "KEY", "--project", "proj_frontend"]
+    },
+    "prism-backend": {
+      "command": "prism-mcp",
+      "args": ["--api-key", "KEY", "--project", "proj_backend"]
+    }
+  }
+}
+```
+
+---
+
+## Troubleshooting
+
+### MCP Not Loading
+
+**Symptoms:** Prism not listed in MCP servers
+
+**Solutions:**
+1. Verify `mcp.json` is valid JSON
+2. Check file is in `~/.cursor/mcp.json`
+3. Restart Cursor completely (quit app)
+4. Check Cursor logs for errors
+
+### "Authentication Failed"
+
+**Symptoms:** 401 errors in logs
+
+**Solutions:**
+1. Verify API key is correct
+2. Check key hasn't expired
+3. Generate new key if needed
+
+### "No Rules Found"
+
+**Symptoms:** MCP works but returns empty
+
+**Solutions:**
+1. Verify you have rules in the dashboard
+2. Check `--project` matches your project
+3. Rules may be in draft state (publish them)
+
+### Slow Responses
+
+**Symptoms:** Long wait for AI responses
+
+**Solutions:**
+1. Increase `--cache-ttl` for fewer API calls
+2. Check network connection
+3. Prism API status at status.prismcontext.com
+
+---
+
+## Debug Mode
+
+Enable verbose logging:
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": [
+        "--api-key", "YOUR_API_KEY",
+        "--log-level", "debug"
+      ]
+    }
+  }
+}
+```
+
+View logs:
+- macOS: `~/Library/Logs/Cursor/mcp.log`
+- Windows: `%APPDATA%\Cursor\logs\mcp.log`
+
+---
+
+## Best Practices
+
+### 1. Use Project-Specific Keys
+
+Generate separate API keys per project for better security:
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "env": {
+        "PRISM_API_KEY": "${PRISM_KEY_PROJECT_A}"
+      }
+    }
+  }
+}
+```
+
+### 2. Cache Appropriately
+
+For stable rules, increase cache:
+
+```bash
+--cache-ttl 3600  # 1 hour for stable rules
+--cache-ttl 60    # 1 minute for rapid iteration
+```
+
+### 3. Combine with Local Rules
+
+Use both MCP and local rules:
+
+```
+~/.cursor/rules/         # Personal preferences
+.cursor/rules/           # Project-specific rules
+MCP: prism              # Team-shared rules
+```
+
+---
+
+## Related
+
+- [Windsurf Integration](/integrations/windsurf)
+- [VS Code Integration](/integrations/vscode)
+- [MCP Protocol](/concepts/mcp-protocol)
+- [Troubleshooting MCP](/troubleshooting/mcp-setup)

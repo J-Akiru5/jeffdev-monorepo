@@ -1,0 +1,225 @@
+# The Kitchen Metaphor
+
+Understanding Prism Context Engine through the Kitchen/Recipe/Waiter model.
+
+import { Callout } from 'nextra/components'
+
+## The Core Metaphor
+
+Prism Context Engine is best understood through a restaurant kitchen analogy:
+
+| Concept | Prism Equivalent | Real-World Analogy |
+|---------|------------------|-------------------|
+| 🍳 **The Kitchen** | SaaS Dashboard | Where the chef creates recipes |
+| 📜 **The Recipe** | Context Rules | Written instructions to follow |
+| 🍽️ **The Waiter** | MCP Protocol | Delivers recipes to the table |
+| 👨‍🍳 **The Chef** | You (Developer) | Creates and manages recipes |
+| 🧑‍🍳 **The Line Cook** | AI Assistant | Follows recipes to cook dishes |
+| 🍽️ **The Table** | Your IDE | Where the food (code) is served |
+
+---
+
+## The Kitchen (Dashboard)
+
+The **Kitchen** is where all preparation happens — it's the Prism web dashboard at [prism.jeffdev.studio](https://prism.jeffdev.studio).
+
+### What Happens in the Kitchen
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      THE KITCHEN                            │
+│                   (Prism Dashboard)                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  📹 Video Upload        📝 Rule Editor      🎨 Brand Setup  │
+│  ─────────────────     ─────────────────   ─────────────── │
+│  Record yourself       Write and edit      Define design    │
+│  explaining patterns   context rules       system tokens    │
+│                                                             │
+│  🤖 AI Extraction       📂 Organization     👥 Team Sharing │
+│  ─────────────────     ─────────────────   ─────────────── │
+│  Azure OpenAI turns    Group rules by      Collaborate on  │
+│  video into rules      project/category    shared recipes  │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Kitchen Activities
+
+| Activity | Description |
+|----------|-------------|
+| **Recipe Writing** | Manually write context rules in Markdown |
+| **Recipe Extraction** | Upload video → AI extracts rules automatically |
+| **Mise en Place** | Organize rules by category, priority, tags |
+| **Menu Planning** | Create brand profiles with design tokens |
+| **Kitchen Staff** | Invite team members to collaborate |
+
+---
+
+## The Recipe (Context Rules)
+
+**Recipes** are the actual instructions — your context rules that AI must follow.
+
+### Anatomy of a Recipe
+
+```markdown
+# Component Architecture Rule
+
+## Summary
+All React components must follow the compound pattern for complex UI.
+
+## Category
+architecture
+
+## Priority
+1 (Critical)
+
+## Tags
+react, components, patterns
+
+## The Rule
+
+### Use Compound Components for Complex UI
+
+When building components with multiple related parts (Modal, Dropdown, Tabs),
+use the compound component pattern:
+
+\`\`\`tsx
+// ✅ Compound Pattern
+<Modal>
+  <Modal.Trigger>Open</Modal.Trigger>
+  <Modal.Content>
+    <Modal.Header>Title</Modal.Header>
+    <Modal.Body>Content here</Modal.Body>
+    <Modal.Footer>
+      <Modal.Close>Cancel</Modal.Close>
+    </Modal.Footer>
+  </Modal.Content>
+</Modal>
+
+// ❌ Prop Drilling Anti-Pattern
+<Modal
+  trigger="Open"
+  title="Title"
+  content="Content here"
+  footer={<button>Cancel</button>}
+/>
+\`\`\`
+
+### Why?
+- Better composition and flexibility
+- Clearer component boundaries
+- Easier to extend without breaking changes
+```
+
+### Recipe Formats
+
+Prism exports recipes in multiple formats:
+
+| Format | File | For |
+|--------|------|-----|
+| Cursor | `.cursorrules` | Cursor IDE |
+| Windsurf | `.windsurfrules` | Windsurf IDE |
+| Claude | `CLAUDE.md` | Claude Desktop |
+| VS Code | MCP config | VS Code + MCP Extension |
+| Raw | `.md` / `.json` | Manual use |
+
+---
+
+## The Waiter (MCP Protocol)
+
+The **Waiter** is the delivery mechanism — the **Model Context Protocol (MCP)** that carries recipes from the kitchen to your IDE.
+
+### How the Waiter Works
+
+```
+┌──────────────┐                    ┌──────────────┐
+│   KITCHEN    │                    │    TABLE     │
+│  (Dashboard) │                    │    (IDE)     │
+└──────┬───────┘                    └──────▲───────┘
+       │                                   │
+       │  1. Chef updates recipe           │
+       │                                   │
+       ▼                                   │
+┌──────────────┐                    ┌──────┴───────┐
+│  PRISM API   │────────────────────│ MCP SERVER   │
+│  (Cloud)     │  2. Waiter fetches │ (Local)      │
+└──────────────┘     fresh recipes  └──────────────┘
+                                           │
+                                    3. Waiter serves
+                                       to line cook
+                                           │
+                                           ▼
+                                    ┌──────────────┐
+                                    │ AI ASSISTANT │
+                                    │ (Line Cook)  │
+                                    └──────────────┘
+```
+
+### Waiter Responsibilities
+
+| Task | Description |
+|------|-------------|
+| **Fetch** | Get latest rules from Prism cloud |
+| **Cache** | Store rules locally for speed |
+| **Serve** | Deliver rules to AI via MCP protocol |
+| **Refresh** | Update when rules change in dashboard |
+
+### MCP Protocol Explained
+
+MCP (Model Context Protocol) is an open standard that allows AI assistants to access external data sources. Prism implements an MCP server that:
+
+1. **Connects** to your Prism account via API key
+2. **Fetches** your project's context rules
+3. **Serves** them to your IDE's AI assistant
+4. **Updates** automatically when you change rules
+
+<Callout type="info">
+  **Analogy**: Think of MCP like a restaurant's POS system — orders (requests) go to the kitchen, and dishes (rules) come back to the table.
+</Callout>
+
+---
+
+## The Complete Flow
+
+Here's how all three components work together:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        YOUR WORKFLOW                            │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. RECORD          2. UPLOAD           3. EXTRACT              │
+│  ─────────          ─────────           ─────────               │
+│  "Our buttons       Video → Mux         Azure OpenAI            │
+│   use the Ghost     transcription       analyzes transcript     │
+│   Glow pattern..."                      and generates rules     │
+│                                                                 │
+│                                                                 │
+│  4. EDIT            5. DEPLOY           6. CODE                 │
+│  ─────────          ─────────           ─────────               │
+│  Review and         MCP Server          Ask AI to create        │
+│  refine rules       syncs rules         a button — it           │
+│  in dashboard       to your IDE         follows your rules!     │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Why This Metaphor?
+
+The Kitchen/Recipe/Waiter model helps you understand:
+
+1. **Separation of Concerns**: The kitchen (rule creation) is separate from the table (IDE usage)
+2. **Asynchronous Updates**: Recipes can be updated anytime; the waiter delivers fresh ones
+3. **Scalability**: One kitchen can serve many tables (one dashboard, many projects/IDEs)
+4. **Quality Control**: The chef (you) controls what the line cook (AI) produces
+
+---
+
+## Next Steps
+
+- [MCP Protocol Deep Dive](/concepts/mcp-protocol) — Technical details of the "waiter"
+- [Creating Rules](/rules/creating-rules) — Write effective "recipes"
+- [Video Processing](/video/upload) — Automatic rule extraction

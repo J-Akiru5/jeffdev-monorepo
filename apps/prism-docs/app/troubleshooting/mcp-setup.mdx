@@ -1,0 +1,438 @@
+# MCP Setup Troubleshooting
+
+Diagnosing and fixing Model Context Protocol connection issues.
+
+import { Callout, Steps, Tabs } from 'nextra/components'
+
+## Quick Diagnosis
+
+Run through this checklist first:
+
+```
+□ prism-mcp is installed globally
+□ API key is valid and not expired
+□ Config file is in correct location
+□ Config JSON is valid (no syntax errors)
+□ IDE has been fully restarted
+□ Network can reach api.prismcontext.com
+```
+
+---
+
+## Step-by-Step Diagnosis
+
+<Steps>
+  ### Check prism-mcp installation
+
+  ```bash
+  which prism-mcp
+  # Should output: /usr/local/bin/prism-mcp or similar
+  
+  prism-mcp --version
+  # Should output version number
+  ```
+
+  **If not found:**
+  ```bash
+  npm install -g @prism/mcp-server
+  ```
+
+  ### Verify API key
+
+  ```bash
+  curl https://api.prismcontext.com/v1/me \
+    -H "Authorization: Bearer YOUR_API_KEY"
+  ```
+
+  **Expected:** Your account info
+  **If 401:** Generate new key in dashboard
+
+  ### Test MCP server directly
+
+  ```bash
+  prism-mcp --api-key YOUR_KEY --log-level debug
+  ```
+
+  Server should start without errors. Press `Ctrl+C` to stop.
+
+  ### Validate config file
+
+  <Tabs items={['Cursor', 'Windsurf', 'Claude Desktop']}>
+    <Tabs.Tab>
+      ```bash
+      cat ~/.cursor/mcp.json | jq .
+      ```
+    </Tabs.Tab>
+    <Tabs.Tab>
+      ```bash
+      cat ~/.codeium/windsurf/mcp_config.json | jq .
+      ```
+    </Tabs.Tab>
+    <Tabs.Tab>
+      ```bash
+      # macOS
+      cat ~/Library/Application\ Support/Claude/claude_desktop_config.json | jq .
+      ```
+    </Tabs.Tab>
+  </Tabs>
+
+  Should output formatted JSON without errors.
+
+  ### Restart IDE completely
+
+  Not just reload—fully quit and reopen:
+  - **macOS:** Cmd+Q, then reopen
+  - **Windows:** Alt+F4 or right-click taskbar → Close
+</Steps>
+
+---
+
+## Common Errors
+
+### "Server failed to start"
+
+**Full error:**
+```
+MCP Error: Server "prism" failed to start
+```
+
+**Causes & Solutions:**
+
+1. **prism-mcp not in PATH**
+   ```bash
+   # Add to PATH
+   export PATH="$PATH:$(npm config get prefix)/bin"
+   ```
+
+2. **Wrong Node.js version**
+   ```bash
+   node --version  # Need 18+
+   nvm use 18
+   ```
+
+3. **Permission denied**
+   ```bash
+   chmod +x $(which prism-mcp)
+   ```
+
+---
+
+### "Connection refused"
+
+**Full error:**
+```
+Error: connect ECONNREFUSED 127.0.0.1:xxxx
+```
+
+**Causes & Solutions:**
+
+1. **Firewall blocking**
+   ```bash
+   # macOS: Allow in System Preferences → Security
+   # Windows: Check Windows Firewall settings
+   ```
+
+2. **Port conflict**
+   ```bash
+   # Check what's using the port
+   lsof -i :PORT_NUMBER
+   ```
+
+---
+
+### "Authentication failed"
+
+**Full error:**
+```
+Error: Authentication failed: Invalid API key
+```
+
+**Causes & Solutions:**
+
+1. **Key in wrong format**
+   ```json
+   // ✅ Correct
+   "args": ["--api-key", "sk_live_abc123..."]
+   
+   // ❌ Wrong (extra quotes)
+   "args": ["--api-key", "'sk_live_abc123...'"]
+   ```
+
+2. **Key expired**
+   - Go to Dashboard → Settings → API Keys
+   - Check expiration date
+   - Generate new key if needed
+
+3. **Environment variable not set**
+   ```bash
+   # If using env var
+   echo $PRISM_API_KEY
+   # Should output your key
+   ```
+
+---
+
+### "No tools available"
+
+**Symptoms:** MCP connects but no Prism tools appear
+
+**Causes & Solutions:**
+
+1. **No rules in account**
+   - Create at least one rule in dashboard
+   - Publish the rule (drafts aren't served)
+
+2. **Project filter too restrictive**
+   ```json
+   // Remove project filter temporarily
+   "args": ["--api-key", "KEY"]
+   // Instead of
+   "args": ["--api-key", "KEY", "--project", "proj_xxx"]
+   ```
+
+3. **API key has no permissions**
+   - Check key permissions in dashboard
+   - Ensure key has "read:rules" scope
+
+---
+
+### "Timeout" errors
+
+**Full error:**
+```
+Error: Request timeout after 30000ms
+```
+
+**Causes & Solutions:**
+
+1. **Network issues**
+   ```bash
+   # Test connectivity
+   ping api.prismcontext.com
+   curl -I https://api.prismcontext.com
+   ```
+
+2. **Proxy/VPN interference**
+   - Try disabling VPN
+   - Configure proxy settings:
+   ```json
+   "env": {
+     "HTTP_PROXY": "http://proxy:8080",
+     "HTTPS_PROXY": "http://proxy:8080"
+   }
+   ```
+
+3. **Large rule set**
+   - Use project filter to reduce rules
+   - Increase cache TTL:
+   ```json
+   "args": ["--api-key", "KEY", "--cache-ttl", "3600"]
+   ```
+
+---
+
+## IDE-Specific Issues
+
+### Cursor
+
+**Config location:** `~/.cursor/mcp.json`
+
+**Common issues:**
+
+1. **Multiple config files**
+   - Check for workspace-level `.cursor/mcp.json`
+   - Workspace config overrides global
+
+2. **Extension conflicts**
+   - Disable other AI extensions temporarily
+   - Check for Cursor updates
+
+3. **Logs location:**
+   ```
+   ~/Library/Logs/Cursor/  (macOS)
+   %APPDATA%\Cursor\logs\  (Windows)
+   ```
+
+---
+
+### Windsurf
+
+**Config location:** `~/.codeium/windsurf/mcp_config.json`
+
+**Common issues:**
+
+1. **Directory doesn't exist**
+   ```bash
+   mkdir -p ~/.codeium/windsurf
+   ```
+
+2. **Cascade not using MCP**
+   - Explicitly mention "use MCP tools" in prompt
+   - Check Cascade settings for MCP toggle
+
+3. **Logs location:**
+   ```
+   ~/Library/Logs/Windsurf/  (macOS)
+   ```
+
+---
+
+### Claude Desktop
+
+**Config location:**
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+**Common issues:**
+
+1. **File doesn't exist**
+   - Create it manually
+   - Restart Claude Desktop
+
+2. **Node not in PATH for Claude**
+   - Use absolute paths:
+   ```json
+   {
+     "mcpServers": {
+       "prism": {
+         "command": "/usr/local/bin/node",
+         "args": [
+           "/usr/local/lib/node_modules/@prism/mcp-server/bin/prism-mcp.js",
+           "--api-key",
+           "YOUR_KEY"
+         ]
+       }
+     }
+   }
+   ```
+
+3. **Logs location:**
+   ```
+   ~/Library/Logs/Claude/  (macOS)
+   ```
+
+---
+
+## Debug Mode
+
+Enable verbose logging for troubleshooting:
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": [
+        "--api-key", "YOUR_KEY",
+        "--log-level", "debug"
+      ]
+    }
+  }
+}
+```
+
+### Reading Debug Logs
+
+```
+[DEBUG] Starting MCP server...
+[DEBUG] Connecting to https://api.prismcontext.com
+[DEBUG] Authentication successful
+[DEBUG] Registering tools: prism_get_rules, prism_search_rules...
+[DEBUG] Ready to accept connections
+```
+
+**Red flags to look for:**
+- `[ERROR]` - Something failed
+- `Authentication failed` - Key issue
+- `Network error` - Connectivity issue
+- `Timeout` - Slow response
+
+---
+
+## Manual MCP Testing
+
+Test MCP protocol directly:
+
+```bash
+# Start server
+prism-mcp --api-key YOUR_KEY &
+
+# Send test request
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | prism-mcp --api-key YOUR_KEY
+
+# Expected response:
+# {"jsonrpc":"2.0","id":1,"result":{"tools":[{"name":"prism_get_rules",...}]}}
+```
+
+---
+
+## Network Debugging
+
+### Check API connectivity
+
+```bash
+# DNS resolution
+nslookup api.prismcontext.com
+
+# HTTPS connection
+curl -v https://api.prismcontext.com/v1/health
+
+# With proxy
+curl -v --proxy http://proxy:8080 https://api.prismcontext.com/v1/health
+```
+
+### Behind corporate firewall
+
+Required endpoints:
+- `api.prismcontext.com:443` (HTTPS)
+
+If blocked, contact IT to whitelist.
+
+---
+
+## Resetting Everything
+
+Nuclear option—start fresh:
+
+```bash
+# 1. Uninstall
+npm uninstall -g @prism/mcp-server
+
+# 2. Remove config files
+rm ~/.cursor/mcp.json
+rm ~/.codeium/windsurf/mcp_config.json
+rm ~/Library/Application\ Support/Claude/claude_desktop_config.json
+
+# 3. Reinstall
+npm install -g @prism/mcp-server
+
+# 4. Recreate config
+# (Follow quick setup guide)
+
+# 5. Restart IDE
+```
+
+---
+
+## Getting Help
+
+If still stuck:
+
+1. **Gather info:**
+   - IDE name and version
+   - OS name and version
+   - prism-mcp version
+   - Full error message
+   - Debug logs
+
+2. **Contact support:**
+   - Discord: [discord.gg/prismcontext](https://discord.gg/prismcontext)
+   - Email: support@prismcontext.com
+
+---
+
+## Related
+
+- [Common Issues](/troubleshooting/common-issues)
+- [API Keys](/troubleshooting/api-keys)
+- [MCP Protocol](/concepts/mcp-protocol)

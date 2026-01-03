@@ -1,0 +1,433 @@
+# Rule Templates
+
+Pre-built templates to jumpstart your context rules.
+
+import { Cards, Card, Tabs } from 'nextra/components'
+
+## Quick Start Templates
+
+Get started quickly with these battle-tested templates.
+
+<Cards>
+  <Card title="React Component" href="#react-component">
+    Standard React component patterns with TypeScript.
+  </Card>
+  <Card title="API Handler" href="#api-handler">
+    REST API endpoint structure and error handling.
+  </Card>
+  <Card title="Design System" href="#design-system">
+    Colors, typography, and component styling.
+  </Card>
+  <Card title="Testing" href="#testing">
+    Unit test structure and mocking patterns.
+  </Card>
+</Cards>
+
+---
+
+## React Component
+
+A template for consistent React component development.
+
+```markdown
+# React Component Rules
+
+## File Structure
+- One component per file
+- Name file same as component: `Button.tsx`
+- Place in `/components/{category}/` folder
+
+## Component Structure
+
+\```tsx
+import { type ReactNode } from 'react';
+import { cn } from '@/lib/utils';
+
+interface ComponentNameProps {
+  children: ReactNode;
+  className?: string;
+}
+
+export function ComponentName({ children, className }: ComponentNameProps) {
+  return (
+    <div className={cn('base-styles', className)}>
+      {children}
+    </div>
+  );
+}
+\```
+
+## Naming
+- PascalCase for component names
+- camelCase for props
+- Prefix handlers with `on`: `onClick`, `onSubmit`
+- Prefix booleans with `is`/`has`: `isLoading`, `hasError`
+
+## Props
+- Always define TypeScript interface
+- Use destructuring in function signature
+- Provide sensible defaults
+- `children` for composition
+
+## Styling
+- Use Tailwind CSS classes
+- Use `cn()` utility for conditional classes
+- Accept `className` prop for customization
+- No inline styles
+
+## Exports
+- Use named exports only
+- Export types if needed externally
+```
+
+---
+
+## API Handler
+
+A template for Next.js API routes.
+
+```markdown
+# API Handler Rules
+
+## File Location
+- Place in `app/api/{resource}/route.ts`
+- Use route groups for versioning: `app/api/(v1)/users/route.ts`
+
+## Structure
+
+\```typescript
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+
+const RequestSchema = z.object({
+  // Define request body schema
+});
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const validated = RequestSchema.parse(body);
+    
+    // Business logic here
+    
+    return NextResponse.json({ data: result });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Validation failed', details: error.errors },
+        { status: 400 }
+      );
+    }
+    
+    console.error('API Error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+\```
+
+## Response Format
+- Success: `{ data: ... }`
+- Error: `{ error: string, details?: any }`
+- Always include appropriate status codes
+
+## Error Handling
+- Validate input with Zod
+- Catch and log all errors
+- Never expose internal errors to client
+- Use appropriate HTTP status codes
+
+## Authentication
+- Check auth in middleware, not handlers
+- Access user from `request.auth` or headers
+- Return 401 for unauthenticated
+- Return 403 for unauthorized
+```
+
+---
+
+## Design System
+
+A template for design system rules.
+
+```markdown
+# Design System Rules
+
+## Color Palette
+
+### Semantic Colors
+| Name | Value | Usage |
+|------|-------|-------|
+| background | #050505 | Page backgrounds |
+| foreground | #ffffff | Primary text |
+| primary | #06b6d4 | Interactive elements |
+| accent | #8b5cf6 | Highlights, badges |
+| muted | #1a1a1a | Secondary backgrounds |
+| border | #262626 | Borders, dividers |
+
+### Usage
+\```css
+/* Backgrounds */
+.bg-background { background: #050505; }
+.bg-muted { background: #1a1a1a; }
+
+/* Text */
+.text-foreground { color: #ffffff; }
+.text-muted { color: #a1a1a1; }
+
+/* Interactive */
+.text-primary { color: #06b6d4; }
+.bg-primary { background: #06b6d4; }
+\```
+
+## Typography
+
+### Font Families
+- **Sans:** Inter (UI, body text)
+- **Mono:** JetBrains Mono (code)
+
+### Scale
+| Name | Size | Line Height | Usage |
+|------|------|-------------|-------|
+| xs | 12px | 16px | Captions |
+| sm | 14px | 20px | Secondary text |
+| base | 16px | 24px | Body text |
+| lg | 18px | 28px | Large text |
+| xl | 20px | 28px | Small headings |
+| 2xl | 24px | 32px | Section titles |
+| 3xl | 30px | 36px | Page titles |
+
+## Spacing
+- Base unit: 4px
+- Use multiples: 4, 8, 12, 16, 24, 32, 48, 64
+
+## Border Radius
+- Small: 4px (inputs)
+- Medium: 8px (buttons, cards)
+- Large: 16px (modals, large cards)
+- Full: 9999px (pills, avatars)
+
+## Shadows
+- None on dark backgrounds (use borders instead)
+- Subtle glow for focus states
+\```css
+.focus-ring {
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.5);
+}
+\```
+```
+
+---
+
+## Testing
+
+A template for testing patterns.
+
+```markdown
+# Testing Rules
+
+## File Structure
+- Test files next to source: `Button.tsx` → `Button.test.tsx`
+- E2E tests in `/e2e/` folder
+- Test utilities in `/test/` folder
+
+## Unit Test Structure
+
+\```typescript
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { Button } from './Button';
+
+describe('Button', () => {
+  it('renders children', () => {
+    render(<Button>Click me</Button>);
+    expect(screen.getByRole('button')).toHaveTextContent('Click me');
+  });
+
+  it('calls onClick when clicked', async () => {
+    const onClick = vi.fn();
+    render(<Button onClick={onClick}>Click</Button>);
+    
+    await userEvent.click(screen.getByRole('button'));
+    
+    expect(onClick).toHaveBeenCalledOnce();
+  });
+
+  it('is disabled when disabled prop is true', () => {
+    render(<Button disabled>Click</Button>);
+    expect(screen.getByRole('button')).toBeDisabled();
+  });
+});
+\```
+
+## Testing Library Preferences
+- Use `screen` queries over destructuring
+- Prefer `getByRole` over `getByTestId`
+- Use `userEvent` over `fireEvent`
+- Query by accessibility first
+
+## Mocking
+\```typescript
+// Mock modules
+vi.mock('@/lib/api', () => ({
+  fetchUser: vi.fn(),
+}));
+
+// Mock implementations
+const mockFetch = vi.mocked(fetchUser);
+mockFetch.mockResolvedValue({ id: '1', name: 'Test' });
+\```
+
+## Coverage Requirements
+- Statements: 80%
+- Branches: 75%
+- Functions: 80%
+- Lines: 80%
+```
+
+---
+
+## Framework-Specific Templates
+
+<Tabs items={['Next.js', 'React Native', 'Node.js']}>
+  <Tabs.Tab>
+```markdown
+# Next.js Rules
+
+## App Router
+- Use App Router (not Pages)
+- Server Components by default
+- Add 'use client' only when needed
+
+## Data Fetching
+- Fetch in Server Components
+- Use server actions for mutations
+- Revalidate with `revalidatePath`
+
+## File Conventions
+- `page.tsx` - Route pages
+- `layout.tsx` - Shared layouts
+- `loading.tsx` - Loading states
+- `error.tsx` - Error boundaries
+- `not-found.tsx` - 404 pages
+```
+  </Tabs.Tab>
+  
+  <Tabs.Tab>
+```markdown
+# React Native Rules
+
+## Styling
+- Use StyleSheet.create
+- No inline styles
+- Extract to separate style file if >10 styles
+
+## Navigation
+- Use React Navigation v6
+- Type all route params
+- Handle deep links
+
+## Performance
+- Use FlatList for lists
+- Memoize expensive components
+- Avoid anonymous functions in render
+```
+  </Tabs.Tab>
+  
+  <Tabs.Tab>
+```markdown
+# Node.js Rules
+
+## Error Handling
+- Use custom error classes
+- Centralized error handler
+- Log all errors with context
+
+## Structure
+- Controllers for route handlers
+- Services for business logic
+- Repositories for data access
+
+## Security
+- Validate all input
+- Sanitize output
+- Use parameterized queries
+```
+  </Tabs.Tab>
+</Tabs>
+
+---
+
+## Using Templates
+
+### From Dashboard
+
+1. Go to **Rules** → **New Rule**
+2. Click **Use Template**
+3. Select a template
+4. Customize for your project
+5. Save
+
+### From CLI
+
+```bash
+# List available templates
+prism templates list
+
+# Create rule from template
+prism rules create --template react-component
+
+# Create with customization
+prism rules create --template design-system --name "Our Design System"
+```
+
+---
+
+## Creating Custom Templates
+
+Save your rules as reusable templates:
+
+1. Create a well-structured rule
+2. Click **Save as Template**
+3. Add template metadata:
+   - Name
+   - Description
+   - Category
+   - Variables (placeholders)
+
+### Template Variables
+
+Use `{{variable}}` syntax for customizable parts:
+
+```markdown
+# {{project_name}} Component Rules
+
+Use {{css_framework}} for styling.
+Primary color: {{primary_color}}
+```
+
+When used, prompts for:
+- project_name
+- css_framework
+- primary_color
+
+---
+
+## Community Templates
+
+Browse templates shared by the community:
+
+1. Go to **Templates** → **Community**
+2. Filter by framework, category
+3. Preview and fork
+4. Customize for your needs
+
+---
+
+## Next Steps
+
+- [Exporting Rules](/rules/exporting) — Export to MCP/IDE
+- [Creating Rules](/rules/creating-rules) — Write custom rules
+- [Design System Example](/rules/design-system) — Complete example

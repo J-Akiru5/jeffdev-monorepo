@@ -1,22 +1,161 @@
 {
   "index": {
-    "title": "Introduction",
+    "title": "Prism Context Engine",
     "type": "page"
   },
-  "guide": {
-    "title": "User Guide",
-    "type": "page"
+  "---getting-started": {
+    "type": "separator",
+    "title": "Getting Started"
   },
-  "api-reference": {
-    "title": "API Reference",
-    "type": "page"
+  "introduction": "Introduction",
+  "installation": "Installation",
+  "quick-start": "Quick Start",
+  "---core-concepts": {
+    "type": "separator",
+    "title": "Core Concepts"
+  },
+  "concepts": {
+    "title": "Concepts",
+    "type": "menu",
+    "items": {
+      "context-governance": {
+        "title": "Context Governance",
+        "href": "/concepts/context-governance"
+      },
+      "kitchen-metaphor": {
+        "title": "Kitchen/Recipe/Waiter",
+        "href": "/concepts/kitchen-metaphor"
+      },
+      "mcp-protocol": {
+        "title": "MCP Protocol",
+        "href": "/concepts/mcp-protocol"
+      }
+    }
+  },
+  "---video-processing": {
+    "type": "separator",
+    "title": "Video Processing"
+  },
+  "video": {
+    "title": "Video",
+    "type": "menu",
+    "items": {
+      "upload": {
+        "title": "Upload Videos",
+        "href": "/video/upload"
+      },
+      "rule-extraction": {
+        "title": "Rule Extraction",
+        "href": "/video/rule-extraction"
+      },
+      "azure-openai": {
+        "title": "Azure OpenAI Setup",
+        "href": "/video/azure-openai"
+      }
+    }
+  },
+  "---rule-management": {
+    "type": "separator",
+    "title": "Rule Management"
   },
   "rules": {
-    "title": "Context Rules",
-    "type": "page"
+    "title": "Rules",
+    "type": "menu",
+    "items": {
+      "creating-rules": {
+        "title": "Creating Rules",
+        "href": "/rules/creating-rules"
+      },
+      "templates": {
+        "title": "Templates",
+        "href": "/rules/templates"
+      },
+      "exporting": {
+        "title": "Exporting Rules",
+        "href": "/rules/exporting"
+      }
+    }
   },
-  "changelog": {
-    "title": "Changelog",
-    "type": "page"
+  "---integrations": {
+    "type": "separator",
+    "title": "Integrations"
+  },
+  "integrations": {
+    "title": "IDE Setup",
+    "type": "menu",
+    "items": {
+      "cursor": {
+        "title": "Cursor",
+        "href": "/integrations/cursor"
+      },
+      "windsurf": {
+        "title": "Windsurf",
+        "href": "/integrations/windsurf"
+      },
+      "vscode": {
+        "title": "VS Code",
+        "href": "/integrations/vscode"
+      },
+      "claude-desktop": {
+        "title": "Claude Desktop",
+        "href": "/integrations/claude-desktop"
+      }
+    }
+  },
+  "---advanced": {
+    "type": "separator",
+    "title": "Advanced"
+  },
+  "advanced": {
+    "title": "Advanced",
+    "type": "menu",
+    "items": {
+      "semantic-search": {
+        "title": "Semantic Search",
+        "href": "/advanced/semantic-search"
+      },
+      "brand-profiles": {
+        "title": "Brand Profiles",
+        "href": "/advanced/brand-profiles"
+      },
+      "api-reference": {
+        "title": "API Reference",
+        "href": "/advanced/api-reference"
+      }
+    }
+  },
+  "---troubleshooting": {
+    "type": "separator",
+    "title": "Troubleshooting"
+  },
+  "troubleshooting": {
+    "title": "Troubleshooting",
+    "type": "menu",
+    "items": {
+      "common-issues": {
+        "title": "Common Issues",
+        "href": "/troubleshooting/common-issues"
+      },
+      "mcp-setup": {
+        "title": "MCP Setup",
+        "href": "/troubleshooting/mcp-setup"
+      },
+      "api-keys": {
+        "title": "API Keys",
+        "href": "/troubleshooting/api-keys"
+      }
+    }
+  },
+  "---resources": {
+    "type": "separator",
+    "title": "Resources"
+  },
+  "changelog": "Changelog",
+  "security": "Security & Privacy",
+  "guide": {
+    "display": "hidden"
+  },
+  "api-reference": {
+    "display": "hidden"
   }
 }

@@ -1,0 +1,145 @@
+# Introduction
+
+Welcome to **Prism Context Engine** — The Context Operating System for Vibecoders.
+
+import { Callout, Cards, Card, Steps } from 'nextra/components'
+
+<Callout type="info">
+  **New to Prism?** Start with [Quick Start](/quick-start) to get up and running in 5 minutes.
+</Callout>
+
+## What is Prism Context Engine?
+
+Prism Context Engine is an **AI-powered context governance platform** that eliminates "Context Pollution" — the phenomenon where AI coding assistants generate code that doesn't match your project's architecture, style, or patterns.
+
+### The Problem
+
+Every AI coding assistant (Cursor, Windsurf, Copilot, Claude) has the same issue:
+
+```
+You: "Create a login form"
+AI: *generates Bootstrap-looking component with inline styles*
+You: "No, use our design system with glass morphism and cyan accents"
+AI: *still doesn't quite get it*
+```
+
+**Context Pollution** happens when AI doesn't understand:
+- Your design system rules
+- Your architectural patterns
+- Your naming conventions
+- Your error handling strategies
+- Your testing preferences
+
+### The Solution
+
+Prism Context Engine captures your architectural decisions from **video recordings** and converts them into **actionable context rules** that AI assistants can follow.
+
+## How It Works
+
+<Steps>
+
+### Record Your Architecture
+
+Screen record yourself explaining your project's patterns, design system, and conventions. Just talk naturally — Prism handles the rest.
+
+### AI Extracts Rules
+
+Azure OpenAI analyzes your video transcript and automatically extracts:
+- Coding patterns and conventions
+- Design system rules
+- Component architecture decisions
+- Testing strategies
+
+### Deploy to Your IDE
+
+Export rules as `.cursorrules`, `.windsurfrules`, or connect via **MCP (Model Context Protocol)** for real-time sync.
+
+### AI Follows Your Rules
+
+Your AI assistant now understands your architecture. No more generic Bootstrap code.
+
+</Steps>
+
+## The Core Metaphor
+
+| Concept | Prism Equivalent | Description |
+|---------|------------------|-------------|
+| 🍳 **The Kitchen** | SaaS Dashboard | Where you (the Chef) mix ingredients and define recipes |
+| 📜 **The Recipe** | Context Rules | The strict instructions your AI must follow |
+| 🍽️ **The Waiter** | MCP Protocol | Delivers fresh recipes directly to your IDE |
+
+## Key Features
+
+<Cards>
+  <Card title="Video-to-Context" href="/video/upload">
+    Upload screen recordings, get structured rules automatically
+  </Card>
+  <Card title="MCP Integration" href="/integrations/cursor">
+    Real-time sync with Cursor, Windsurf, VS Code, and Claude
+  </Card>
+  <Card title="Semantic Search" href="/advanced/semantic-search">
+    Find relevant architectural discussions using AI-powered search
+  </Card>
+  <Card title="Brand Profiles" href="/advanced/brand-profiles">
+    Maintain consistent design systems across projects
+  </Card>
+</Cards>
+
+## Supported Editors
+
+| Editor | Status | Integration Method |
+|--------|--------|-------------------|
+| Cursor | ✅ Full Support | `.cursorrules` + MCP |
+| Windsurf | ✅ Full Support | `.windsurfrules` + MCP |
+| VS Code | ✅ Full Support | MCP Extension |
+| Claude Desktop | ✅ Full Support | MCP |
+| GitHub Copilot | 🚧 Coming Soon | — |
+
+## Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Prism Dashboard (Web)                    │
+│  • Video Upload (Mux)                                       │
+│  • Rule Management                                          │
+│  • Brand Profiles                                           │
+└────────────────────────────┬────────────────────────────────┘
+                             │ API / Webhook
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│              Azure OpenAI (GPT-4o-mini)                     │
+│  • Transcript Analysis                                      │
+│  • Rule Extraction                                          │
+│  • Embeddings for Semantic Search                           │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│              Azure Cosmos DB (MongoDB API)                  │
+│  • Rules Collection                                         │
+│  • Video Transcripts                                        │
+│  • Vector Embeddings                                        │
+└────────────────────────────┬────────────────────────────────┘
+                             │ MCP Protocol
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                Your IDE (Cursor/Windsurf/VS Code)           │
+│  AI assistant automatically follows your rules              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Installation" href="/installation">
+    Set up your account and connect your IDE
+  </Card>
+  <Card title="Quick Start" href="/quick-start">
+    Create your first context rule in 5 minutes
+  </Card>
+</Cards>
+
+---
+
+**Current Version:** 1.0.3  
+**Built by:** [JeffDev Studio](https://jeffdev.studio)

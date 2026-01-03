@@ -1,0 +1,465 @@
+# Brand Profiles
+
+Centralize your design system for consistent AI-generated code.
+
+import { Callout, Steps, Cards, Card } from 'nextra/components'
+
+## What are Brand Profiles?
+
+A **Brand Profile** is a structured collection of your design tokens—colors, typography, spacing, and component styles—that AI tools can reference when generating code.
+
+```
+┌─────────────────────────────────────────┐
+│          Brand Profile: Acme Corp       │
+├─────────────────────────────────────────┤
+│ Colors                                  │
+│   Primary: #06b6d4 (cyan)              │
+│   Secondary: #8b5cf6 (purple)          │
+│   Background: #050505 (void)           │
+│                                         │
+│ Typography                              │
+│   Headings: Inter, bold                │
+│   Body: Inter, regular                 │
+│   Code: JetBrains Mono                 │
+│                                         │
+│ Spacing                                 │
+│   Base: 4px                            │
+│   Scale: 4, 8, 12, 16, 24, 32, 48, 64  │
+│                                         │
+│ Components                              │
+│   Border radius: 8px                   │
+│   Shadows: none (use borders)          │
+│   Animation: 150ms ease                │
+└─────────────────────────────────────────┘
+```
+
+---
+
+## Benefits
+
+<Cards>
+  <Card title="Consistency" href="#">
+    Every generated component uses your exact design tokens.
+  </Card>
+  <Card title="Speed" href="#">
+    No need to specify colors/fonts every time you prompt.
+  </Card>
+  <Card title="Accuracy" href="#">
+    AI gets exact hex codes, not "use our brand blue."
+  </Card>
+  <Card title="Team Alignment" href="#">
+    Everyone's AI generates matching styles.
+  </Card>
+</Cards>
+
+---
+
+## Creating a Brand Profile
+
+<Steps>
+  ### Navigate to Brands
+
+  Go to **Dashboard** → **Brands** → **New Brand Profile**
+
+  ### Basic Information
+
+  ```
+  Name: Acme Corp Design System
+  Description: Primary brand for web applications
+  Version: 2.0
+  ```
+
+  ### Define Colors
+
+  Add your color palette:
+
+  | Name | Value | Usage |
+  |------|-------|-------|
+  | primary | #06b6d4 | Interactive elements |
+  | secondary | #8b5cf6 | Accents, highlights |
+  | background | #050505 | Page backgrounds |
+  | surface | #1a1a1a | Card backgrounds |
+  | border | #262626 | Borders, dividers |
+  | text | #ffffff | Primary text |
+  | text-muted | #a1a1a1 | Secondary text |
+
+  ### Define Typography
+
+  ```
+  Font Family (Sans): Inter
+  Font Family (Mono): JetBrains Mono
+  
+  Sizes:
+    xs: 12px / 16px
+    sm: 14px / 20px
+    base: 16px / 24px
+    lg: 18px / 28px
+    xl: 20px / 28px
+    2xl: 24px / 32px
+    3xl: 30px / 36px
+  ```
+
+  ### Define Spacing
+
+  ```
+  Base Unit: 4px
+  Scale: 1, 2, 3, 4, 6, 8, 12, 16
+  (Multiplied: 4, 8, 12, 16, 24, 32, 48, 64)
+  ```
+
+  ### Component Defaults
+
+  ```
+  Border Radius:
+    sm: 4px
+    md: 8px
+    lg: 16px
+    full: 9999px
+  
+  Transitions:
+    fast: 150ms ease
+    normal: 200ms ease
+    slow: 300ms ease
+  ```
+
+  ### Save Profile
+
+  Click **Save** to create the profile.
+</Steps>
+
+---
+
+## Brand Profile Schema
+
+Full JSON schema for brand profiles:
+
+```json
+{
+  "name": "Acme Corp",
+  "version": "2.0.0",
+  
+  "colors": {
+    "primary": {
+      "value": "#06b6d4",
+      "description": "Primary brand color, use for CTAs"
+    },
+    "secondary": {
+      "value": "#8b5cf6",
+      "description": "Accent color for highlights"
+    },
+    "background": {
+      "value": "#050505",
+      "description": "Page background"
+    },
+    "surface": {
+      "value": "#1a1a1a",
+      "description": "Elevated surface (cards, modals)"
+    },
+    "border": {
+      "value": "#262626",
+      "description": "Borders and dividers"
+    },
+    "text": {
+      "value": "#ffffff",
+      "description": "Primary text"
+    },
+    "textMuted": {
+      "value": "#a1a1a1",
+      "description": "Secondary/muted text"
+    },
+    "error": {
+      "value": "#ef4444",
+      "description": "Error states"
+    },
+    "success": {
+      "value": "#22c55e",
+      "description": "Success states"
+    },
+    "warning": {
+      "value": "#f59e0b",
+      "description": "Warning states"
+    }
+  },
+  
+  "typography": {
+    "fontFamily": {
+      "sans": "Inter, system-ui, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "fontSize": {
+      "xs": { "size": "12px", "lineHeight": "16px" },
+      "sm": { "size": "14px", "lineHeight": "20px" },
+      "base": { "size": "16px", "lineHeight": "24px" },
+      "lg": { "size": "18px", "lineHeight": "28px" },
+      "xl": { "size": "20px", "lineHeight": "28px" },
+      "2xl": { "size": "24px", "lineHeight": "32px" },
+      "3xl": { "size": "30px", "lineHeight": "36px" }
+    },
+    "fontWeight": {
+      "normal": "400",
+      "medium": "500",
+      "semibold": "600",
+      "bold": "700"
+    }
+  },
+  
+  "spacing": {
+    "base": "4px",
+    "scale": {
+      "1": "4px",
+      "2": "8px",
+      "3": "12px",
+      "4": "16px",
+      "6": "24px",
+      "8": "32px",
+      "12": "48px",
+      "16": "64px"
+    }
+  },
+  
+  "borderRadius": {
+    "sm": "4px",
+    "md": "8px",
+    "lg": "16px",
+    "full": "9999px"
+  },
+  
+  "shadows": {
+    "none": "none",
+    "glow": "0 0 20px rgba(6, 182, 212, 0.3)"
+  },
+  
+  "transitions": {
+    "fast": "150ms ease",
+    "normal": "200ms ease",
+    "slow": "300ms ease"
+  }
+}
+```
+
+---
+
+## Using Brand Profiles
+
+### In MCP
+
+AI tools automatically fetch your brand profile:
+
+```
+You: "Create a button component"
+
+AI: [Fetches brand profile]
+
+"Here's a button using your Acme Corp design system:
+- Cyan (#06b6d4) for primary variant
+- 8px border radius
+- Inter font family
+- 150ms hover transition"
+```
+
+### Explicit Reference
+
+Reference brand in prompts:
+
+```
+You: "Create a card using our brand profile colors"
+
+AI: Uses background #1a1a1a, border #262626, etc.
+```
+
+### In Rules
+
+Reference brand tokens in rules:
+
+```markdown
+## Button Styling
+
+Use brand profile colors:
+- Primary button: `{{brand.colors.primary}}`
+- Background: `{{brand.colors.surface}}`
+- Border: `{{brand.colors.border}}`
+```
+
+---
+
+## Multiple Brands
+
+Manage multiple brand profiles for:
+
+- Different products
+- Light/dark themes
+- Client projects
+- Sub-brands
+
+### Switching Brands
+
+```bash
+# Via MCP
+prism-mcp --api-key KEY --brand brand_abc123
+
+# Via API
+curl https://api.prismcontext.com/v1/brands/brand_abc123
+```
+
+### Brand Inheritance
+
+Create variants that inherit from a base:
+
+```json
+{
+  "name": "Acme Corp - Dark",
+  "extends": "brand_base123",
+  "overrides": {
+    "colors": {
+      "background": "#000000",
+      "surface": "#0a0a0a"
+    }
+  }
+}
+```
+
+---
+
+## Import/Export
+
+### Export to CSS
+
+```bash
+prism brands export --format css --output tokens.css
+```
+
+```css
+:root {
+  --color-primary: #06b6d4;
+  --color-secondary: #8b5cf6;
+  --color-background: #050505;
+  /* ... */
+}
+```
+
+### Export to Tailwind
+
+```bash
+prism brands export --format tailwind --output tailwind.config.js
+```
+
+```javascript
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#06b6d4',
+        secondary: '#8b5cf6',
+        background: '#050505',
+      }
+    }
+  }
+}
+```
+
+### Export to Design Tool
+
+- **Figma**: Export as Figma Tokens
+- **Sketch**: Export as Sketch Library
+- **Style Dictionary**: Export as SD format
+
+### Import from Figma
+
+1. Go to **Brands** → **Import**
+2. Connect Figma account
+3. Select file with Variables/Tokens
+4. Map tokens to brand profile
+
+---
+
+## API Reference
+
+### Get Brand
+
+```bash
+curl https://api.prismcontext.com/v1/brands/brand_123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### List Brands
+
+```bash
+curl https://api.prismcontext.com/v1/brands \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Create Brand
+
+```bash
+curl -X POST https://api.prismcontext.com/v1/brands \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "New Brand", "colors": {...}}'
+```
+
+### Update Brand
+
+```bash
+curl -X PATCH https://api.prismcontext.com/v1/brands/brand_123 \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"colors": {"primary": "#new-color"}}'
+```
+
+---
+
+## Best Practices
+
+### 1. Version Your Brands
+
+```json
+{
+  "name": "Acme Corp",
+  "version": "2.1.0"
+}
+```
+
+Track changes and allow rollback.
+
+### 2. Include Descriptions
+
+```json
+{
+  "colors": {
+    "primary": {
+      "value": "#06b6d4",
+      "description": "Use for CTAs, links, and focus states"
+    }
+  }
+}
+```
+
+AI uses descriptions for better decisions.
+
+### 3. Define Semantic Names
+
+```json
+{
+  "colors": {
+    "interactive": "#06b6d4",      // Not "cyan"
+    "decorative": "#8b5cf6",       // Not "purple"
+    "danger": "#ef4444"            // Not "red"
+  }
+}
+```
+
+Semantic names help AI understand usage.
+
+### 4. Keep in Sync
+
+- Update brand profile when design system changes
+- Use webhooks to sync with Figma
+- Version control your brand JSON
+
+---
+
+## Related
+
+- [Semantic Search](/advanced/semantic-search)
+- [Creating Rules](/rules/creating-rules)
+- [API Reference](/advanced/api-reference)

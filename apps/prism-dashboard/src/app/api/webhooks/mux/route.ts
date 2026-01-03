@@ -40,7 +40,18 @@ const MuxWebhookSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    // Get raw body for signature verification
+    const rawBody = await request.text();
+
+    // Step 1: Verify Mux webhook signature (mandatory in production)
+    const isValid = await verifyMuxSignature(request, rawBody);
+    if (!isValid) {
+      console.error("[Mux Webhook] ❌ Invalid signature - rejecting request");
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    }
+
+    // Parse the verified body
+    const body = JSON.parse(rawBody);
     
     // Validate webhook payload
     const parsed = MuxWebhookSchema.safeParse(body);
@@ -51,7 +62,7 @@ export async function POST(request: Request) {
     }
 
     const event = parsed.data;
-    console.log(`[Mux Webhook] Received: ${event.type}`);
+    console.log(`[Mux Webhook] ✅ Verified: ${event.type}`);
 
     // Handle different event types
     switch (event.type) {
@@ -249,13 +260,92 @@ ${extractedRule.examples?.good || extractedRule.examples?.bad ? '### Examples\n'
 }
 
 /**
- * Verify Mux webhook signature (recommended for production)
+ * Verify Mux webhook signature using HMAC-SHA256
  * @see https://docs.mux.com/guides/video/verify-webhook-signatures
+ * 
+ * Mux signature header format: t={timestamp},v1={signature}
+ * Signature is computed as HMAC-SHA256(secret, timestamp + "." + rawBody)
  */
-// async function verifyMuxSignature(request: Request, body: string): Promise<boolean> {
-//   const signature = request.headers.get("mux-signature");
-//   if (!signature || !process.env.MUX_WEBHOOK_SECRET) return false;
-//   
-//   // Implementation would use crypto.timingSafeEqual
-//   return true;
-// }
+async function verifyMuxSignature(request: Request, rawBody: string): Promise<boolean> {
+  const signatureHeader = request.headers.get("mux-signature");
+  const webhookSecret = process.env.MUX_WEBHOOK_SECRET;
+
+  // If no secret configured, allow in development but log warning
+  if (!webhookSecret) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[Mux Webhook] ⚠️ MUX_WEBHOOK_SECRET not set - skipping verification in development");
+      return true;
+    }
+    console.error("[Mux Webhook] ❌ MUX_WEBHOOK_SECRET is required in production");
+    return false;
+  }
+
+  if (!signatureHeader) {
+    console.error("[Mux Webhook] ❌ Missing mux-signature header");
+    return false;
+  }
+
+  // Parse the signature header: t={timestamp},v1={signature}
+  const parts = signatureHeader.split(",");
+  const timestampPart = parts.find((p) => p.startsWith("t="));
+  const signaturePart = parts.find((p) => p.startsWith("v1="));
+
+  if (!timestampPart || !signaturePart) {
+    console.error("[Mux Webhook] ❌ Invalid signature header format");
+    return false;
+  }
+
+  const timestamp = timestampPart.slice(2);
+  const receivedSignature = signaturePart.slice(3);
+
+  // Verify timestamp is recent (within 5 minutes) to prevent replay attacks
+  const timestampSeconds = parseInt(timestamp, 10);
+  const currentTime = Math.floor(Date.now() / 1000);
+  const tolerance = 300; // 5 minutes
+
+  if (currentTime - timestampSeconds > tolerance) {
+    console.error("[Mux Webhook] ❌ Timestamp too old - possible replay attack");
+    return false;
+  }
+
+  // Compute expected signature: HMAC-SHA256(secret, timestamp + "." + body)
+  const signedPayload = `${timestamp}.${rawBody}`;
+
+  // Use Web Crypto API for signature verification
+  const encoder = new TextEncoder();
+  const keyData = encoder.encode(webhookSecret);
+  const messageData = encoder.encode(signedPayload);
+
+  const key = await crypto.subtle.importKey(
+    "raw",
+    keyData,
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+
+  const signatureBuffer = await crypto.subtle.sign("HMAC", key, messageData);
+  const expectedSignature = Array.from(new Uint8Array(signatureBuffer))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+  // Timing-safe comparison
+  if (expectedSignature.length !== receivedSignature.length) {
+    console.error("[Mux Webhook] ❌ Signature length mismatch");
+    return false;
+  }
+
+  let mismatch = 0;
+  for (let i = 0; i < expectedSignature.length; i++) {
+    mismatch |= expectedSignature.charCodeAt(i) ^ receivedSignature.charCodeAt(i);
+  }
+
+  if (mismatch !== 0) {
+    console.error("[Mux Webhook] ❌ Signature mismatch");
+    return false;
+  }
+
+  console.log("[Mux Webhook] ✅ Signature verified successfully");
+  return true;
+}
+

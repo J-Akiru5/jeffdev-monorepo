@@ -1,0 +1,386 @@
+# Creating Rules
+
+Write effective context rules for your AI assistant.
+
+import { Callout, Steps, Cards, Card, Tabs } from 'nextra/components'
+
+## What is a Context Rule?
+
+A **context rule** is a markdown document that tells your AI assistant how to generate code for your project. Think of it as a recipe card for your codebase.
+
+```markdown
+# Button Component
+
+## Style
+- Use Ghost Glow design system
+- Primary color: cyan (#06b6d4)
+- Border radius: 8px
+
+## Structure
+- Always export as named export
+- Include TypeScript types
+- Use `className` prop with Tailwind
+
+## Example
+\```tsx
+export function Button({ children, variant = 'primary' }) {
+  return (
+    <button className="px-4 py-2 rounded-lg bg-cyan-500">
+      {children}
+    </button>
+  );
+}
+\```
+```
+
+---
+
+## Creating Your First Rule
+
+<Steps>
+  ### Open the Dashboard
+
+  Go to [prismcontext.com/dashboard](https://prismcontext.com/dashboard) and sign in.
+
+  ### Navigate to Rules
+
+  Click **Rules** in the left sidebar.
+
+  ### Click "New Rule"
+
+  Click the **+ New Rule** button in the top right.
+
+  ### Fill in Details
+
+  - **Title**: Give your rule a descriptive name
+  - **Category**: Select a category (Styling, Architecture, Testing, etc.)
+  - **Project**: Associate with a project (optional)
+  - **Content**: Write your rule in markdown
+
+  ### Save
+
+  Click **Save** to create the rule. It's now available in your MCP server.
+</Steps>
+
+---
+
+## Rule Anatomy
+
+A well-structured rule has these sections:
+
+### 1. Title & Purpose
+
+```markdown
+# Form Validation
+
+Standard patterns for form validation in our React apps.
+```
+
+### 2. Requirements
+
+```markdown
+## Requirements
+- Use Zod for schema validation
+- Display inline errors below fields
+- Validate on blur and submit
+```
+
+### 3. Examples
+
+```markdown
+## Example
+
+\```tsx
+const schema = z.object({
+  email: z.string().email('Invalid email'),
+  password: z.string().min(8, 'Min 8 characters'),
+});
+\```
+```
+
+### 4. Anti-Patterns
+
+```markdown
+## Don't Do This
+
+\```tsx
+// ❌ Don't use inline validation
+if (email.includes('@')) { ... }
+\```
+```
+
+---
+
+## Rule Categories
+
+<Cards>
+  <Card title="Styling" href="#">
+    Colors, typography, spacing, component styles, design tokens.
+  </Card>
+  <Card title="Architecture" href="#">
+    File structure, naming conventions, module boundaries, patterns.
+  </Card>
+  <Card title="Testing" href="#">
+    Test structure, coverage requirements, mocking strategies.
+  </Card>
+  <Card title="Documentation" href="#">
+    Comment styles, JSDoc requirements, README templates.
+  </Card>
+  <Card title="Security" href="#">
+    Input validation, authentication, authorization patterns.
+  </Card>
+  <Card title="Performance" href="#">
+    Optimization patterns, caching strategies, bundle splitting.
+  </Card>
+</Cards>
+
+---
+
+## Best Practices
+
+### Be Specific
+
+<Tabs items={['❌ Vague', '✅ Specific']}>
+  <Tabs.Tab>
+    ```markdown
+    # Colors
+    Use our brand colors.
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```markdown
+    # Colors
+    
+    ## Primary Palette
+    - Background: #050505 (void black)
+    - Primary: #06b6d4 (cyan)
+    - Accent: #8b5cf6 (purple)
+    - Text: #ffffff
+    
+    ## Usage
+    - Cyan for interactive elements
+    - Purple for accents and highlights
+    - Void black for backgrounds
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### Include Examples
+
+<Tabs items={['❌ No Example', '✅ With Example']}>
+  <Tabs.Tab>
+    ```markdown
+    # API Calls
+    Always handle errors properly.
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```markdown
+    # API Calls
+    
+    Always wrap API calls in try/catch and handle errors:
+    
+    \```typescript
+    async function fetchUser(id: string) {
+      try {
+        const res = await fetch(\`/api/users/\${id}\`);
+        if (!res.ok) throw new Error('Failed to fetch');
+        return res.json();
+      } catch (error) {
+        console.error('fetchUser failed:', error);
+        throw error;
+      }
+    }
+    \```
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### Explain Why
+
+<Tabs items={['❌ Just Rules', '✅ With Reasoning']}>
+  <Tabs.Tab>
+    ```markdown
+    # Imports
+    Use absolute imports.
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```markdown
+    # Imports
+    
+    Use absolute imports starting with `@/`:
+    
+    **Why:** Prevents messy relative paths like `../../../` and makes
+    refactoring easier. Our tsconfig is configured with this path alias.
+    
+    \```typescript
+    // ✅ Good
+    import { Button } from '@/components/ui/button';
+    
+    // ❌ Bad
+    import { Button } from '../../../components/ui/button';
+    \```
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### Prioritize
+
+```markdown
+# Component Rules (Priority: High)
+
+1. **Must:** Export as named exports
+2. **Must:** Include TypeScript types
+3. **Should:** Use composition over inheritance
+4. **May:** Include storybook stories
+```
+
+---
+
+## Rule Syntax
+
+Rules support standard Markdown plus:
+
+### Code Blocks with Language
+
+````markdown
+```typescript
+// TypeScript code
+const x: string = 'hello';
+```
+
+```css
+/* CSS code */
+.button { color: cyan; }
+```
+````
+
+### Callouts
+
+```markdown
+> **Note:** This is important information.
+
+> **Warning:** This could cause issues.
+
+> **Tip:** A helpful suggestion.
+```
+
+### Tables
+
+```markdown
+| Pattern | Use When | Example |
+|---------|----------|---------|
+| HOC | Cross-cutting concerns | withAuth() |
+| Hook | Reusable logic | useForm() |
+| Compound | Related components | Tabs/Tab |
+```
+
+### File References
+
+```markdown
+See `src/components/Button.tsx` for reference implementation.
+```
+
+---
+
+## Organizing Rules
+
+### By Feature
+
+```
+rules/
+├── auth/
+│   ├── authentication.md
+│   └── authorization.md
+├── forms/
+│   ├── validation.md
+│   └── submission.md
+└── components/
+    ├── buttons.md
+    └── cards.md
+```
+
+### By Type
+
+```
+rules/
+├── styling/
+│   ├── colors.md
+│   └── typography.md
+├── architecture/
+│   ├── file-structure.md
+│   └── naming.md
+└── testing/
+    ├── unit-tests.md
+    └── e2e-tests.md
+```
+
+---
+
+## Bulk Import
+
+### From Existing Docs
+
+If you have existing documentation:
+
+1. Go to **Rules** → **Import**
+2. Upload your markdown files
+3. Map to categories
+4. Review and save
+
+### From GitHub
+
+Connect your GitHub repo to auto-sync rules:
+
+```bash
+# In your repo, create .prism/rules/
+mkdir -p .prism/rules
+
+# Add your rule files
+echo "# My Rule" > .prism/rules/my-rule.md
+
+# Push to GitHub
+git add .prism && git commit -m "Add Prism rules" && git push
+```
+
+---
+
+## Rule Versioning
+
+Track changes to your rules:
+
+```
+v1.0.0 - Initial rule
+v1.1.0 - Added example
+v1.2.0 - Updated for React 18
+v2.0.0 - Major rewrite
+```
+
+View history in **Rules** → Select rule → **History** tab.
+
+---
+
+## Collaboration
+
+### Team Editing
+
+- All team members can propose rule changes
+- Admins approve changes before publishing
+- Comments and discussions on each rule
+
+### Review Process
+
+1. Member proposes change
+2. Creates "Draft" version
+3. Admin reviews diff
+4. Admin approves → Published
+5. MCP servers receive update
+
+---
+
+## Next Steps
+
+- [Templates](/rules/templates) — Start with pre-built templates
+- [Exporting](/rules/exporting) — Export rules for MCP/IDE
+- [Design System Example](/rules/design-system) — See a complete example

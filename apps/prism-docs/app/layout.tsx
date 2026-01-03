@@ -6,6 +6,7 @@ import { Inter, JetBrains_Mono } from 'next/font/google'
 import 'nextra-theme-docs/style.css'
 import './globals.css'
 import Image from 'next/image'
+import { DocsAssistant } from './components/docs-assistant'
 
 // Typography - Matching Agency Design System
 const inter = Inter({
@@ -242,6 +243,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {children}
           </Layout>
         </div>
+
+        {/* AI Docs Assistant */}
+        <DocsAssistant />
       </body>
     </html>
   )

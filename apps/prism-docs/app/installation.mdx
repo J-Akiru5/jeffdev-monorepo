@@ -1,0 +1,235 @@
+# Installation
+
+Get Prism Context Engine set up in your development environment.
+
+import { Callout, Steps, Tabs } from 'nextra/components'
+
+<Callout type="info">
+  **Fastest Path**: Use the [Web Dashboard](https://prism.jeffdev.studio) — no installation required for basic usage.
+</Callout>
+
+## Choose Your Setup
+
+Prism offers two ways to use context rules:
+
+| Method | Best For | Setup Time |
+|--------|----------|------------|
+| **Web Dashboard Only** | Quick exports, manual workflow | 2 minutes |
+| **MCP Server** | Real-time sync, automated workflow | 10 minutes |
+
+---
+
+## Option A: Web Dashboard (Recommended)
+
+The simplest way to use Prism. No local installation required.
+
+<Steps>
+
+### Create an Account
+
+1. Visit [prism.jeffdev.studio/sign-up](https://prism.jeffdev.studio/sign-up)
+2. Sign up with your email or GitHub
+3. Verify your email address
+
+### Create Your First Project
+
+1. Click **"New Project"** in the dashboard
+2. Enter your project name (e.g., "My SaaS App")
+3. Select your tech stack (Next.js, React, etc.)
+
+### Export Rules
+
+1. Create or generate rules (see [Creating Rules](/rules/creating-rules))
+2. Click **"Export"** → Choose your IDE format
+3. Download the `.cursorrules` or `.windsurfrules` file
+4. Place it in your project root
+
+</Steps>
+
+<Callout type="warning">
+  **Manual Workflow**: With this method, you'll need to re-export rules whenever they change.
+</Callout>
+
+---
+
+## Option B: MCP Server (Advanced)
+
+For real-time synchronization between the dashboard and your IDE.
+
+### Prerequisites
+
+- Node.js 18+ installed
+- npm or pnpm package manager
+- Prism account with API key
+
+### Installation
+
+<Tabs items={['npm', 'pnpm', 'yarn']}>
+  <Tabs.Tab>
+    ```bash
+    npm install -g @prism/mcp-server
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```bash
+    pnpm add -g @prism/mcp-server
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```bash
+    yarn global add @prism/mcp-server
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### Get Your API Key
+
+<Steps>
+
+### Open Dashboard Settings
+
+Navigate to [prism.jeffdev.studio/settings/api](https://prism.jeffdev.studio/settings/api)
+
+### Generate API Key
+
+1. Click **"Generate New Key"**
+2. Give it a name (e.g., "MacBook Pro")
+3. Copy the key immediately — it won't be shown again
+
+### Store Securely
+
+Save your API key somewhere safe. You'll need it for IDE configuration.
+
+</Steps>
+
+### Verify Installation
+
+```bash
+prism-mcp --version
+# Output: prism-mcp v1.0.3
+```
+
+---
+
+## IDE Configuration
+
+After installing the MCP server, configure your editor:
+
+### Cursor
+
+Add to `~/.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": ["--api-key", "YOUR_API_KEY"]
+    }
+  }
+}
+```
+
+[Full Cursor Setup Guide →](/integrations/cursor)
+
+### Windsurf
+
+Add to `~/.codeium/windsurf/mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": ["--api-key", "YOUR_API_KEY"]
+    }
+  }
+}
+```
+
+[Full Windsurf Setup Guide →](/integrations/windsurf)
+
+### VS Code
+
+1. Install the **MCP Extension** from marketplace
+2. Open Command Palette → "MCP: Configure Servers"
+3. Add Prism server configuration
+
+[Full VS Code Setup Guide →](/integrations/vscode)
+
+### Claude Desktop
+
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": ["--api-key", "YOUR_API_KEY"]
+    }
+  }
+}
+```
+
+[Full Claude Desktop Setup Guide →](/integrations/claude-desktop)
+
+---
+
+## Environment Variables (Alternative)
+
+Instead of passing the API key as an argument, you can use environment variables:
+
+```bash
+# Add to ~/.bashrc, ~/.zshrc, or ~/.profile
+export PRISM_API_KEY="your_api_key_here"
+```
+
+Then configure MCP without the `--api-key` argument:
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp"
+    }
+  }
+}
+```
+
+---
+
+## Verify Connection
+
+After configuration, verify your MCP connection:
+
+1. Open your IDE
+2. Start a new chat with AI
+3. Ask: "What Prism rules are available?"
+
+If configured correctly, the AI will list your project's context rules.
+
+---
+
+## Troubleshooting
+
+<Callout type="error">
+  **Connection Failed?** See [MCP Setup Troubleshooting](/troubleshooting/mcp-setup)
+</Callout>
+
+### Common Issues
+
+| Issue | Solution |
+|-------|----------|
+| `command not found: prism-mcp` | Reinstall with `-g` flag or check PATH |
+| `Invalid API key` | Regenerate key in dashboard |
+| `Connection timeout` | Check internet connection |
+| `No rules found` | Create rules in dashboard first |
+
+---
+
+## Next Steps
+
+- [Quick Start](/quick-start) — Create your first rule
+- [IDE Setup Guides](/integrations/cursor) — Detailed configuration
+- [Video Processing](/video/upload) — Extract rules from recordings

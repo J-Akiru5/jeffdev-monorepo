@@ -1,0 +1,418 @@
+# Common Issues
+
+Solutions to frequently encountered problems.
+
+import { Callout, Tabs } from 'nextra/components'
+
+## Installation Issues
+
+### npm install fails
+
+**Error:**
+```
+npm ERR! code EACCES
+npm ERR! permission denied
+```
+
+**Solution:**
+```bash
+# Fix npm permissions
+sudo chown -R $(whoami) ~/.npm
+sudo chown -R $(whoami) /usr/local/lib/node_modules
+
+# Or use nvm to manage Node.js
+nvm install 18
+nvm use 18
+```
+
+### "command not found: prism-mcp"
+
+**Cause:** Global npm packages not in PATH
+
+**Solution:**
+<Tabs items={['macOS/Linux', 'Windows']}>
+  <Tabs.Tab>
+    ```bash
+    # Add to ~/.zshrc or ~/.bashrc
+    export PATH="$PATH:$(npm config get prefix)/bin"
+    
+    # Reload shell
+    source ~/.zshrc
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```powershell
+    # Check npm global bin path
+    npm config get prefix
+    
+    # Add to PATH via System Environment Variables
+    # Usually: C:\Users\USERNAME\AppData\Roaming\npm
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### Node.js version error
+
+**Error:**
+```
+Error: prism-mcp requires Node.js >= 18
+```
+
+**Solution:**
+```bash
+# Using nvm
+nvm install 18
+nvm use 18
+
+# Or using volta
+volta install node@18
+
+# Verify
+node --version  # Should be 18.x or higher
+```
+
+---
+
+## Authentication Issues
+
+### "401 Unauthorized"
+
+**Causes:**
+1. Invalid API key
+2. Expired API key
+3. Malformed Authorization header
+
+**Solutions:**
+
+1. **Check API key:**
+   ```bash
+   # Test your key
+   curl https://api.prismcontext.com/v1/me \
+     -H "Authorization: Bearer YOUR_API_KEY"
+   ```
+
+2. **Generate new key:**
+   Go to **Dashboard** → **Settings** → **API Keys** → **Generate New Key**
+
+3. **Check header format:**
+   ```bash
+   # Correct
+   -H "Authorization: Bearer sk_live_abc123..."
+   
+   # Wrong
+   -H "Authorization: sk_live_abc123..."
+   -H "Bearer sk_live_abc123..."
+   ```
+
+### "403 Forbidden"
+
+**Causes:**
+1. Key doesn't have access to resource
+2. Project-scoped key accessing different project
+3. Rate limit exceeded
+
+**Solutions:**
+
+1. **Check key scope:**
+   Go to **Dashboard** → **Settings** → **API Keys** → View key details
+
+2. **Use correct project key:**
+   ```bash
+   prism-mcp --api-key PROJECT_SPECIFIC_KEY --project proj_abc123
+   ```
+
+---
+
+## MCP Connection Issues
+
+### MCP server not loading
+
+**Symptoms:**
+- IDE shows no MCP servers
+- "Connection failed" errors
+
+**Checklist:**
+
+1. **Verify config file location:**
+<Tabs items={['Cursor', 'Windsurf', 'Claude Desktop']}>
+  <Tabs.Tab>
+    `~/.cursor/mcp.json`
+  </Tabs.Tab>
+  <Tabs.Tab>
+    `~/.codeium/windsurf/mcp_config.json`
+  </Tabs.Tab>
+  <Tabs.Tab>
+    macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+    Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+  </Tabs.Tab>
+</Tabs>
+
+2. **Validate JSON:**
+   ```bash
+   # Check for JSON errors
+   cat ~/.cursor/mcp.json | jq .
+   ```
+
+3. **Test server manually:**
+   ```bash
+   prism-mcp --api-key YOUR_KEY --log-level debug
+   ```
+
+4. **Restart IDE completely** (not just reload)
+
+### "Tool not found"
+
+**Cause:** MCP server running but tools not registered
+
+**Solutions:**
+
+1. Check server logs for errors
+2. Verify API key has proper permissions
+3. Ensure rules exist in dashboard
+
+### Slow MCP responses
+
+**Causes:**
+1. Network latency
+2. Large rule sets
+3. Disabled caching
+
+**Solutions:**
+
+1. **Increase cache TTL:**
+   ```json
+   {
+     "args": ["--api-key", "KEY", "--cache-ttl", "600"]
+   }
+   ```
+
+2. **Use project filter:**
+   ```json
+   {
+     "args": ["--api-key", "KEY", "--project", "proj_specific"]
+   }
+   ```
+
+3. **Check network:**
+   ```bash
+   ping api.prismcontext.com
+   ```
+
+---
+
+## Dashboard Issues
+
+### Can't create rules
+
+**Causes:**
+1. Plan limits reached
+2. Missing required fields
+3. Content validation error
+
+**Solutions:**
+
+1. **Check plan limits:**
+   Go to **Settings** → **Billing** to see usage
+
+2. **Required fields:**
+   - Title (required)
+   - Category (required)
+   - Content (required, min 10 characters)
+
+### Rules not syncing
+
+**Symptoms:**
+- Rules show in dashboard but not in IDE
+- Old versions of rules appearing
+
+**Solutions:**
+
+1. **Force refresh in MCP:**
+   ```bash
+   # Restart MCP server
+   # Or clear cache
+   prism-mcp --api-key KEY --clear-cache
+   ```
+
+2. **Check publish status:**
+   Draft rules aren't synced—publish them first
+
+3. **Verify project association:**
+   Rule must be in the same project as your MCP config
+
+### Search returns no results
+
+**Causes:**
+1. Rules not indexed yet
+2. Query too specific
+3. Category filter too restrictive
+
+**Solutions:**
+
+1. **Wait for indexing:**
+   New rules take ~30 seconds to index
+
+2. **Broaden search:**
+   ```
+   Instead of: "handleAPIErrorWithRetry"
+   Try: "API error handling"
+   ```
+
+3. **Remove filters:**
+   Try searching without category filter
+
+---
+
+## Video Processing Issues
+
+### Upload fails
+
+**Causes:**
+1. File too large (>500MB)
+2. Unsupported format
+3. Network timeout
+
+**Solutions:**
+
+1. **Check file size:**
+   ```bash
+   ls -lh video.mp4
+   ```
+
+2. **Verify format:**
+   Supported: MP4, WebM, MOV, AVI
+
+3. **Try chunked upload:**
+   Use the CLI for large files:
+   ```bash
+   prism videos upload --file video.mp4 --chunked
+   ```
+
+### Processing stuck
+
+**Symptoms:**
+- Status shows "processing" for >30 minutes
+
+**Solutions:**
+
+1. **Check status:**
+   ```bash
+   curl https://api.prismcontext.com/v1/videos/vid_xxx \
+     -H "Authorization: Bearer KEY"
+   ```
+
+2. **Cancel and retry:**
+   ```bash
+   curl -X DELETE https://api.prismcontext.com/v1/videos/vid_xxx \
+     -H "Authorization: Bearer KEY"
+   ```
+
+3. **Contact support** if persists
+
+### Poor transcription quality
+
+**Causes:**
+1. Low audio quality
+2. Background noise
+3. Non-English content
+
+**Solutions:**
+
+1. **Improve audio:**
+   - Use external microphone
+   - Record in quiet environment
+   - Speak clearly
+
+2. **Specify language:**
+   ```json
+   {
+     "language": "en-US"
+   }
+   ```
+
+---
+
+## API Issues
+
+### Rate limit exceeded
+
+**Error:**
+```json
+{
+  "error": {
+    "code": "rate_limited",
+    "message": "Rate limit exceeded. Retry after 60 seconds."
+  }
+}
+```
+
+**Solutions:**
+
+1. **Check headers:**
+   ```
+   X-RateLimit-Remaining: 0
+   X-RateLimit-Reset: 1710936060
+   ```
+
+2. **Implement backoff:**
+   ```typescript
+   async function apiCall(retries = 3) {
+     try {
+       return await fetch(...);
+     } catch (e) {
+       if (e.status === 429 && retries > 0) {
+         await sleep(60000);
+         return apiCall(retries - 1);
+       }
+       throw e;
+     }
+   }
+   ```
+
+3. **Upgrade plan** for higher limits
+
+### Timeout errors
+
+**Cause:** Request took >30 seconds
+
+**Solutions:**
+
+1. **Reduce payload size:**
+   - Fetch fewer rules
+   - Use pagination
+   - Add filters
+
+2. **Use async endpoints:**
+   For long operations like video processing
+
+---
+
+## Getting Help
+
+### Before Contacting Support
+
+1. Check this troubleshooting guide
+2. Search the [FAQ](/faq)
+3. Check [status.prismcontext.com](https://status.prismcontext.com)
+
+### Information to Provide
+
+- Your account email
+- Error messages (full text)
+- Steps to reproduce
+- IDE and OS versions
+- MCP server logs
+
+### Contact Methods
+
+- **Discord**: [discord.gg/prismcontext](https://discord.gg/prismcontext)
+- **Email**: support@prismcontext.com
+- **GitHub Issues**: For CLI/MCP bugs
+
+---
+
+## Related
+
+- [MCP Setup](/troubleshooting/mcp-setup)
+- [API Keys](/troubleshooting/api-keys)
+- [Installation](/installation)

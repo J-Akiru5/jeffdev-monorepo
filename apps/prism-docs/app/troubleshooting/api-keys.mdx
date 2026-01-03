@@ -1,0 +1,416 @@
+# API Keys
+
+Managing and troubleshooting API keys for Prism Context Engine.
+
+import { Callout, Steps, Tabs } from 'nextra/components'
+
+## Overview
+
+API keys authenticate your requests to Prism services:
+- MCP server connections
+- REST API calls
+- CLI commands
+- Webhook validations
+
+---
+
+## Key Types
+
+| Type | Prefix | Use Case | Permissions |
+|------|--------|----------|-------------|
+| Live | `sk_live_` | Production | Full access |
+| Test | `sk_test_` | Development | Sandboxed |
+| Scoped | `sk_scoped_` | Limited access | Project-specific |
+
+---
+
+## Creating Keys
+
+<Steps>
+  ### Open API Keys Settings
+
+  Go to **Dashboard** → **Settings** → **API Keys**
+
+  ### Click "Generate New Key"
+
+  Click the **+ Generate Key** button.
+
+  ### Configure Key
+
+  - **Name**: Descriptive name (e.g., "Production MCP", "CI/CD")
+  - **Type**: Live, Test, or Scoped
+  - **Scopes**: Select permissions
+  - **Project**: Optional project restriction
+  - **Expiration**: Optional expiration date
+
+  ### Copy Key
+
+  <Callout type="warning">
+    Copy your key immediately! It's only shown once.
+  </Callout>
+
+  ```
+  sk_live_abc123def456...
+  ```
+
+  ### Store Securely
+
+  Store in a secure location:
+  - Environment variables
+  - Secrets manager
+  - Password manager
+</Steps>
+
+---
+
+## Key Scopes
+
+### Available Scopes
+
+| Scope | Description |
+|-------|-------------|
+| `rules:read` | Read rules |
+| `rules:write` | Create/update rules |
+| `rules:delete` | Delete rules |
+| `projects:read` | Read projects |
+| `projects:write` | Manage projects |
+| `brands:read` | Read brand profiles |
+| `brands:write` | Manage brands |
+| `videos:read` | View videos |
+| `videos:write` | Upload videos |
+| `search` | Use semantic search |
+
+### Recommended Scope Sets
+
+**MCP Server (read-only):**
+```
+rules:read, brands:read, search
+```
+
+**CI/CD Integration:**
+```
+rules:read, rules:write, projects:read
+```
+
+**Full Access:**
+```
+All scopes (default for Live keys)
+```
+
+---
+
+## Using Keys
+
+### Environment Variable
+
+```bash
+# In .env file (don't commit!)
+PRISM_API_KEY=sk_live_abc123...
+
+# In shell
+export PRISM_API_KEY=sk_live_abc123...
+```
+
+### MCP Configuration
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "env": {
+        "PRISM_API_KEY": "sk_live_abc123..."
+      }
+    }
+  }
+}
+```
+
+Or with args:
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": ["--api-key", "sk_live_abc123..."]
+    }
+  }
+}
+```
+
+### API Requests
+
+```bash
+curl https://api.prismcontext.com/v1/rules \
+  -H "Authorization: Bearer sk_live_abc123..."
+```
+
+### CLI
+
+```bash
+prism rules list --api-key sk_live_abc123...
+
+# Or with environment variable
+export PRISM_API_KEY=sk_live_abc123...
+prism rules list
+```
+
+---
+
+## Troubleshooting
+
+### "Invalid API key"
+
+**Causes:**
+1. Typo in key
+2. Extra whitespace
+3. Wrong key type (test vs live)
+
+**Debug:**
+```bash
+# Test key validity
+curl https://api.prismcontext.com/v1/me \
+  -H "Authorization: Bearer YOUR_KEY" \
+  -v
+```
+
+**Check for:**
+- Extra spaces: `"sk_live_abc... "` (trailing space)
+- Missing prefix: `abc123...` (no `sk_live_`)
+- Wrong quotes: `'sk_live_abc...'` vs `"sk_live_abc..."`
+
+---
+
+### "API key expired"
+
+**Symptoms:**
+```json
+{
+  "error": {
+    "code": "key_expired",
+    "message": "API key expired on 2024-03-01"
+  }
+}
+```
+
+**Solution:**
+1. Go to Dashboard → Settings → API Keys
+2. Delete expired key
+3. Generate new key
+4. Update all configurations
+
+<Callout type="default">
+  Set calendar reminders for key expiration dates!
+</Callout>
+
+---
+
+### "Insufficient permissions"
+
+**Symptoms:**
+```json
+{
+  "error": {
+    "code": "forbidden",
+    "message": "Key lacks required scope: rules:write"
+  }
+}
+```
+
+**Solution:**
+1. Check key scopes in dashboard
+2. Generate new key with required scopes
+3. Or use a different key with proper access
+
+---
+
+### "Key not found"
+
+**Symptoms:**
+```json
+{
+  "error": {
+    "code": "key_not_found",
+    "message": "API key does not exist"
+  }
+}
+```
+
+**Causes:**
+1. Key was deleted
+2. Key was revoked
+3. Using key from different account
+
+**Solution:**
+1. Check API Keys list in dashboard
+2. Generate new key if needed
+3. Verify you're logged into correct account
+
+---
+
+### "Rate limit exceeded"
+
+**Symptoms:**
+```json
+{
+  "error": {
+    "code": "rate_limited",
+    "message": "Rate limit exceeded"
+  },
+  "retry_after": 60
+}
+```
+
+**Solutions:**
+
+1. **Check usage:**
+   Dashboard → Settings → API Keys → View Usage
+
+2. **Implement backoff:**
+   ```typescript
+   async function apiCall() {
+     const res = await fetch(...);
+     if (res.status === 429) {
+       const retryAfter = res.headers.get('Retry-After');
+       await sleep(parseInt(retryAfter) * 1000);
+       return apiCall();
+     }
+     return res;
+   }
+   ```
+
+3. **Upgrade plan** for higher limits
+
+---
+
+## Security Best Practices
+
+### 1. Never Commit Keys
+
+```gitignore
+# .gitignore
+.env
+.env.local
+**/mcp.json
+```
+
+### 2. Use Environment Variables
+
+<Tabs items={['dotenv', 'System Env', 'Secrets Manager']}>
+  <Tabs.Tab>
+    ```bash
+    # .env (not committed)
+    PRISM_API_KEY=sk_live_abc123...
+    ```
+    
+    ```javascript
+    // Load in app
+    require('dotenv').config();
+    const key = process.env.PRISM_API_KEY;
+    ```
+  </Tabs.Tab>
+  
+  <Tabs.Tab>
+    ```bash
+    # Add to shell profile
+    export PRISM_API_KEY=sk_live_abc123...
+    ```
+  </Tabs.Tab>
+  
+  <Tabs.Tab>
+    ```javascript
+    // AWS Secrets Manager
+    const secret = await secretsManager.getSecret('prism-api-key');
+    
+    // HashiCorp Vault
+    const secret = await vault.read('secret/prism');
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### 3. Rotate Keys Regularly
+
+- Set expiration dates on keys
+- Rotate production keys quarterly
+- Rotate immediately if compromised
+
+### 4. Use Scoped Keys
+
+- Create keys with minimum required permissions
+- Use project-specific keys when possible
+- Different keys for different environments
+
+### 5. Monitor Usage
+
+- Check API key usage in dashboard
+- Set up alerts for unusual activity
+- Review access logs regularly
+
+---
+
+## Key Management
+
+### Viewing Keys
+
+Dashboard → Settings → API Keys
+
+Shows:
+- Key name
+- Last 4 characters
+- Created date
+- Last used
+- Expiration
+
+### Editing Keys
+
+You cannot edit existing keys. Instead:
+1. Create new key with desired settings
+2. Update your configurations
+3. Delete old key
+
+### Deleting Keys
+
+<Callout type="error">
+  Deleting a key immediately invalidates it. All services using it will fail.
+</Callout>
+
+1. Go to API Keys
+2. Click delete icon
+3. Confirm deletion
+4. Update all services using that key
+
+### Key Expiration
+
+**Setting expiration:**
+- When creating key, set expiration date
+- Keys can be set to never expire
+
+**Handling expiration:**
+1. Dashboard shows warning 30 days before
+2. Email notification 7 days before
+3. Generate replacement key before expiration
+4. Update configurations
+5. Old key stops working at midnight UTC on expiration date
+
+---
+
+## API Key Audit Log
+
+View all key activity:
+
+Dashboard → Settings → API Keys → Audit Log
+
+Shows:
+- Key created/deleted
+- Last used timestamp
+- IP addresses
+- Endpoints accessed
+
+---
+
+## Related
+
+- [Common Issues](/troubleshooting/common-issues)
+- [MCP Setup](/troubleshooting/mcp-setup)
+- [API Reference](/advanced/api-reference)

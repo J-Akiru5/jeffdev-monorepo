@@ -1,0 +1,419 @@
+# Semantic Search
+
+Advanced rule discovery using natural language queries.
+
+import { Callout, Steps, Tabs } from 'nextra/components'
+
+<Callout type="info">
+  Semantic search uses AI embeddings to find relevant rules even when keywords don't match exactly.
+</Callout>
+
+## Overview
+
+Traditional search matches keywords. Semantic search understands meaning.
+
+| Query | Keyword Search | Semantic Search |
+|-------|----------------|-----------------|
+| "button colors" | ✅ Finds rules with "button" and "colors" | ✅ Also finds "interactive element styling" |
+| "how to handle errors" | ❌ Might miss "exception patterns" | ✅ Finds error handling, exceptions, try/catch |
+| "make things pretty" | ❌ No exact match | ✅ Finds styling, design system, UI rules |
+
+---
+
+## How It Works
+
+```
+┌──────────────────┐
+│ Your Rules       │
+│ (Markdown text)  │
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│ Embedding Model  │ Convert text to vectors
+│ (1536 dimensions)│
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│ Vector Database  │ Store for fast similarity search
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│ Query: "error"   │ → Converted to vector
+│                  │ → Find similar vectors
+│                  │ → Return matching rules
+└──────────────────┘
+```
+
+### Embedding Process
+
+1. **Indexing**: When you create/update rules, they're converted to vectors
+2. **Storing**: Vectors stored in high-performance vector database
+3. **Querying**: Your search query becomes a vector
+4. **Matching**: Find rules with similar vectors (cosine similarity)
+
+---
+
+## Using Semantic Search
+
+### Dashboard Search
+
+In the dashboard:
+
+1. Click the search bar (or press `/`)
+2. Type your natural language query
+3. Results ranked by relevance
+
+### MCP Tool
+
+Via MCP servers:
+
+```json
+{
+  "tool": "prism_search_rules",
+  "parameters": {
+    "query": "How should I structure my API endpoints?",
+    "limit": 5
+  }
+}
+```
+
+### API
+
+```bash
+curl -X POST https://api.prismcontext.com/v1/search \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "form validation patterns",
+    "limit": 5,
+    "threshold": 0.7
+  }'
+```
+
+**Response:**
+
+```json
+{
+  "results": [
+    {
+      "rule_id": "rule_abc123",
+      "title": "Form Validation with Zod",
+      "score": 0.92,
+      "snippet": "Always validate forms using Zod schemas..."
+    },
+    {
+      "rule_id": "rule_def456",
+      "title": "Input Error Handling",
+      "score": 0.85,
+      "snippet": "Display validation errors inline..."
+    }
+  ]
+}
+```
+
+---
+
+## Search Parameters
+
+### Query
+
+Your natural language question or topic:
+
+```json
+{
+  "query": "What colors should I use for buttons?"
+}
+```
+
+### Limit
+
+Maximum results to return:
+
+```json
+{
+  "query": "...",
+  "limit": 10  // Default: 5, Max: 50
+}
+```
+
+### Threshold
+
+Minimum similarity score (0-1):
+
+```json
+{
+  "query": "...",
+  "threshold": 0.7  // Only results above 70% similarity
+}
+```
+
+### Category Filter
+
+Limit to specific categories:
+
+```json
+{
+  "query": "...",
+  "categories": ["styling", "components"]
+}
+```
+
+### Project Filter
+
+Search within specific project:
+
+```json
+{
+  "query": "...",
+  "project_id": "proj_abc123"
+}
+```
+
+---
+
+## Search Tips
+
+### Be Descriptive
+
+<Tabs items={['❌ Too Vague', '✅ Better']}>
+  <Tabs.Tab>
+    ```
+    "colors"
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```
+    "What colors should I use for interactive buttons and links?"
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### Ask Questions
+
+<Tabs items={['❌ Keywords', '✅ Question']}>
+  <Tabs.Tab>
+    ```
+    "error handling"
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```
+    "How should I handle errors in API calls?"
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### Include Context
+
+<Tabs items={['❌ Generic', '✅ Contextual']}>
+  <Tabs.Tab>
+    ```
+    "components"
+    ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```
+    "How should I structure React components in this project?"
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+---
+
+## Indexing Configuration
+
+### Auto-Indexing
+
+Rules are automatically indexed when:
+- Created in dashboard
+- Updated via API
+- Imported from files
+
+### Manual Re-Index
+
+Force re-indexing of all rules:
+
+```bash
+# Via CLI
+prism rules reindex --project proj_abc123
+
+# Via API
+curl -X POST https://api.prismcontext.com/v1/rules/reindex \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Index Status
+
+Check indexing status:
+
+```bash
+curl https://api.prismcontext.com/v1/rules/index-status \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+```json
+{
+  "total_rules": 150,
+  "indexed": 150,
+  "pending": 0,
+  "last_indexed": "2024-03-20T10:30:00Z"
+}
+```
+
+---
+
+## Embedding Models
+
+### Default Model
+
+Prism uses `text-embedding-3-small` by default:
+
+- **Dimensions**: 1536
+- **Max tokens**: 8191
+- **Performance**: Fast, good accuracy
+
+### Enterprise Options
+
+For enterprise customers:
+
+| Model | Dimensions | Accuracy | Speed |
+|-------|------------|----------|-------|
+| text-embedding-3-small | 1536 | Good | Fast |
+| text-embedding-3-large | 3072 | Better | Medium |
+| Custom (BYOM) | Variable | Custom | Variable |
+
+---
+
+## Performance Optimization
+
+### Chunking Large Rules
+
+Long rules are split for better matching:
+
+```
+Original rule: 5000 words
+│
+├── Chunk 1: Introduction (500 words)
+├── Chunk 2: Requirements (800 words)
+├── Chunk 3: Examples (1200 words)
+├── Chunk 4: Anti-patterns (600 words)
+└── Chunk 5: Best practices (500 words)
+
+Search matches the most relevant chunk(s)
+```
+
+### Caching
+
+Search results are cached:
+
+- **Default TTL**: 5 minutes
+- **Cache key**: Query + filters hash
+- **Invalidation**: On rule changes
+
+### Query Optimization
+
+The system optimizes queries automatically:
+
+```
+Query: "What are the colors?"
+→ Expanded: "colors color palette design tokens styling"
+→ Better matches across terminology
+```
+
+---
+
+## Monitoring
+
+### Search Analytics
+
+View search patterns:
+
+**Dashboard** → **Analytics** → **Search**
+
+- Most common queries
+- Queries with no results
+- Average result scores
+
+### Improving Results
+
+If searches aren't returning good results:
+
+1. **Add synonyms**: Include common terms in rules
+2. **Write clear titles**: Titles are weighted higher
+3. **Add summaries**: Include TL;DR sections
+4. **Use examples**: Examples improve matching
+
+---
+
+## API Reference
+
+### Search Endpoint
+
+```
+POST /v1/search
+```
+
+**Request:**
+
+```json
+{
+  "query": "string (required)",
+  "limit": "number (default: 5, max: 50)",
+  "threshold": "number (default: 0.5, range: 0-1)",
+  "categories": ["array of category strings"],
+  "project_id": "string",
+  "include_content": "boolean (default: false)"
+}
+```
+
+**Response:**
+
+```json
+{
+  "results": [
+    {
+      "rule_id": "string",
+      "title": "string",
+      "category": "string",
+      "score": "number (0-1)",
+      "snippet": "string (highlighted excerpt)",
+      "content": "string (if include_content: true)"
+    }
+  ],
+  "total": "number",
+  "query_time_ms": "number"
+}
+```
+
+---
+
+## Troubleshooting
+
+### No Results
+
+- Lower threshold (try 0.5 instead of 0.7)
+- Use more descriptive queries
+- Check rules exist in the category
+
+### Irrelevant Results
+
+- Increase threshold
+- Add category filter
+- Make query more specific
+
+### Slow Search
+
+- Reduce limit
+- Add category filter
+- Contact support for index optimization
+
+---
+
+## Related
+
+- [Brand Profiles](/advanced/brand-profiles)
+- [API Reference](/advanced/api-reference)
+- [Creating Rules](/rules/creating-rules)

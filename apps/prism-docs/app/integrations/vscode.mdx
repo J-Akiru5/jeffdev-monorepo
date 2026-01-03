@@ -1,0 +1,379 @@
+# VS Code Integration
+
+Using Prism Context Engine with Visual Studio Code.
+
+import { Callout, Steps, Tabs } from 'nextra/components'
+
+<Callout type="warning">
+  VS Code MCP support requires the MCP extension or GitHub Copilot integration.
+</Callout>
+
+## Integration Options
+
+| Method | Best For | Setup Effort |
+|--------|----------|--------------|
+| GitHub Copilot + Rules File | Most users | Easy |
+| MCP Extension | Full MCP features | Medium |
+| Manual Rules | Simple projects | Easy |
+
+---
+
+## Option 1: GitHub Copilot + Rules File
+
+The simplest way to use Prism with VS Code and GitHub Copilot.
+
+<Steps>
+  ### Export Rules from Dashboard
+
+  Go to **Dashboard** → **Rules** → **Export** → **VS Code Format**
+
+  ### Create Rules File
+
+  Save as `.github/copilot-instructions.md` in your project:
+
+  ```markdown
+  # Project Context Rules
+
+  ## Styling
+  - Use Tailwind CSS with our design tokens
+  - Primary color: cyan (#06b6d4)
+  - Background: void black (#050505)
+
+  ## Components
+  - Use TypeScript for all components
+  - Named exports only
+  - Include JSDoc comments
+  
+  ## Architecture
+  - Place components in /components
+  - Use server components by default
+  - Client components end with -client.tsx
+  ```
+
+  ### Configure VS Code Settings
+
+  Add to `.vscode/settings.json`:
+
+  ```json
+  {
+    "github.copilot.chat.codeGeneration.instructions": [
+      { "file": ".github/copilot-instructions.md" }
+    ]
+  }
+  ```
+
+  ### Use with Copilot
+
+  Copilot will now follow your rules when generating code.
+</Steps>
+
+---
+
+## Option 2: MCP Extension
+
+For full MCP protocol support:
+
+<Steps>
+  ### Install MCP Extension
+
+  1. Open VS Code Extensions (`Cmd+Shift+X` / `Ctrl+Shift+X`)
+  2. Search for "MCP" or "Model Context Protocol"
+  3. Install the official MCP extension
+
+  ### Install Prism MCP Server
+
+  ```bash
+  npm install -g @prism/mcp-server
+  ```
+
+  ### Configure MCP
+
+  Open Command Palette → "MCP: Configure Servers"
+
+  Add configuration:
+
+  ```json
+  {
+    "mcpServers": {
+      "prism": {
+        "command": "prism-mcp",
+        "args": ["--api-key", "YOUR_API_KEY"]
+      }
+    }
+  }
+  ```
+
+  ### Restart VS Code
+
+  Reload window for MCP to initialize.
+</Steps>
+
+---
+
+## Option 3: Manual Rules
+
+For simple setups without MCP:
+
+### Workspace Rules
+
+Create `.vscode/prism-rules.md`:
+
+```markdown
+# Prism Context Rules
+
+[Paste your exported rules here]
+```
+
+### User Snippets
+
+Add commonly needed patterns as snippets:
+
+```json
+// .vscode/snippets.code-snippets
+{
+  "React Component": {
+    "prefix": "rcomp",
+    "body": [
+      "interface ${1:Name}Props {",
+      "  $2",
+      "}",
+      "",
+      "export function ${1:Name}({ $3 }: ${1:Name}Props) {",
+      "  return (",
+      "    <div>$0</div>",
+      "  );",
+      "}"
+    ]
+  }
+}
+```
+
+---
+
+## Copilot Chat Commands
+
+Use these prompts with GitHub Copilot Chat:
+
+### Reference Rules
+
+```
+@workspace Read the rules in .github/copilot-instructions.md 
+and create a button component following those patterns.
+```
+
+### Ask About Patterns
+
+```
+@workspace What are our error handling patterns based on 
+the project rules?
+```
+
+### Generate with Rules
+
+```
+Based on our project rules in copilot-instructions.md,
+create a form validation utility.
+```
+
+---
+
+## VS Code Settings
+
+### Recommended Settings
+
+```json
+{
+  // Copilot instructions
+  "github.copilot.chat.codeGeneration.instructions": [
+    { "file": ".github/copilot-instructions.md" }
+  ],
+  
+  // Auto-include context
+  "github.copilot.chat.scopeSelection": true,
+  
+  // Better completions
+  "github.copilot.enable": {
+    "*": true,
+    "markdown": true,
+    "plaintext": false
+  }
+}
+```
+
+### Workspace Settings
+
+In `.vscode/settings.json`:
+
+```json
+{
+  "github.copilot.chat.codeGeneration.instructions": [
+    { "file": ".github/copilot-instructions.md" },
+    { "file": "docs/ARCHITECTURE.md" }
+  ]
+}
+```
+
+---
+
+## Sync with Prism Dashboard
+
+### Auto-Export Script
+
+Add to `package.json`:
+
+```json
+{
+  "scripts": {
+    "sync:rules": "prism rules export --format vscode --output .github/copilot-instructions.md"
+  }
+}
+```
+
+### Pre-Commit Hook
+
+Sync rules before commits:
+
+```bash
+# .husky/pre-commit
+npm run sync:rules
+git add .github/copilot-instructions.md
+```
+
+### GitHub Action
+
+Auto-sync on rule changes:
+
+```yaml
+# .github/workflows/sync-rules.yml
+name: Sync Prism Rules
+
+on:
+  repository_dispatch:
+    types: [prism-rules-updated]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Prism CLI
+        run: npm install -g @prism/cli
+      
+      - name: Export Rules
+        env:
+          PRISM_API_KEY: ${{ secrets.PRISM_API_KEY }}
+        run: prism rules export --format vscode --output .github/copilot-instructions.md
+      
+      - name: Commit Changes
+        run: |
+          git config user.name "Prism Bot"
+          git config user.email "bot@prismcontext.com"
+          git add .github/copilot-instructions.md
+          git diff --staged --quiet || git commit -m "Sync Prism rules"
+          git push
+```
+
+---
+
+## Extension Compatibility
+
+### GitHub Copilot
+
+✅ Fully supported via instruction files
+
+### Cody (Sourcegraph)
+
+Export rules for Cody:
+
+```bash
+prism rules export --format cody --output .sourcegraph/rules.md
+```
+
+### Continue
+
+Configure Continue with Prism:
+
+```json
+// ~/.continue/config.json
+{
+  "systemMessage": "Follow the rules in .prism/rules.md",
+  "models": [...],
+}
+```
+
+---
+
+## Troubleshooting
+
+### Rules Not Being Used
+
+**Symptoms:** Copilot ignores your rules
+
+**Solutions:**
+1. Verify file path in settings is correct
+2. Check file exists and has content
+3. Restart VS Code
+4. Try explicitly referencing: "@workspace read copilot-instructions.md"
+
+### MCP Not Connecting
+
+**Symptoms:** MCP extension shows error
+
+**Solutions:**
+1. Verify `prism-mcp` is installed globally
+2. Check API key is valid
+3. Try running `prism-mcp` manually
+4. Check extension logs
+
+### Outdated Rules
+
+**Symptoms:** Rules don't match dashboard
+
+**Solutions:**
+1. Run sync script manually
+2. Check GitHub Action logs
+3. Verify export completed successfully
+
+---
+
+## Best Practices
+
+### 1. Keep Rules Focused
+
+```markdown
+# Good: Specific and actionable
+## Button Variants
+- primary: cyan bg, white text
+- secondary: transparent bg, cyan border
+- ghost: no border, cyan text on hover
+```
+
+### 2. Include Examples
+
+```markdown
+## API Calls
+
+Always use the fetch wrapper:
+
+\```typescript
+import { api } from '@/lib/api';
+
+const user = await api.get('/users/123');
+\```
+```
+
+### 3. Update Regularly
+
+- Sync rules weekly at minimum
+- Use webhooks for real-time sync
+- Review rules during code reviews
+
+---
+
+## Related
+
+- [Cursor Integration](/integrations/cursor)
+- [Windsurf Integration](/integrations/windsurf)
+- [Claude Desktop](/integrations/claude-desktop)
+- [Creating Rules](/rules/creating-rules)

@@ -41,8 +41,10 @@ function FeatureToggle({
         </div>
       </div>
       <button
+        type="button"
         onClick={() => onToggle(id, !enabled)}
         disabled={isPending}
+        aria-label={`Toggle ${label}: Currently ${enabled ? 'enabled' : 'disabled'}`}
         className={cn(
           'relative h-6 w-11 rounded-full transition-colors',
           enabled ? 'bg-emerald-500' : 'bg-white/20',

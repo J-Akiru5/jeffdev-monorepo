@@ -1,0 +1,409 @@
+# Exporting Rules
+
+Export your context rules for use with MCP servers and IDEs.
+
+import { Callout, Steps, Tabs } from 'nextra/components'
+
+## Export Formats
+
+Prism supports multiple export formats for different use cases.
+
+| Format | Use Case | Extension |
+|--------|----------|-----------|
+| Markdown | Human-readable, Git storage | `.md` |
+| JSON | Programmatic access | `.json` |
+| MCP Bundle | Direct MCP integration | `.prism` |
+
+---
+
+## Export Methods
+
+### Dashboard Export
+
+<Steps>
+  ### Select Rules
+
+  Go to **Rules** and select the rules you want to export.
+
+  ### Click Export
+
+  Click the **Export** button in the toolbar.
+
+  ### Choose Format
+
+  Select your preferred format:
+  - **Markdown** — Individual `.md` files in a zip
+  - **JSON** — Single `.json` file with all rules
+  - **MCP Bundle** — Optimized for MCP servers
+
+  ### Download
+
+  Click **Download** to get your export.
+</Steps>
+
+### CLI Export
+
+```bash
+# Export all rules as markdown
+prism rules export --format markdown --output ./rules/
+
+# Export specific category as JSON
+prism rules export --format json --category styling --output ./styling-rules.json
+
+# Export as MCP bundle
+prism rules export --format mcp --output ./context.prism
+```
+
+### API Export
+
+```bash
+# Get all rules as JSON
+curl https://api.prismcontext.com/v1/rules \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -o rules.json
+
+# Get specific project rules
+curl https://api.prismcontext.com/v1/projects/proj_123/rules \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -o project-rules.json
+```
+
+---
+
+## Format Details
+
+### Markdown Format
+
+Individual files, perfect for version control:
+
+```
+exported-rules/
+├── styling/
+│   ├── colors.md
+│   ├── typography.md
+│   └── components.md
+├── architecture/
+│   ├── file-structure.md
+│   └── patterns.md
+└── testing/
+    └── unit-tests.md
+```
+
+Each file:
+
+```markdown
+---
+id: rule_abc123
+title: Color Palette
+category: styling
+created: 2024-01-15
+updated: 2024-03-20
+---
+
+# Color Palette
+
+## Primary Colors
+- Background: #050505
+- Primary: #06b6d4
+...
+```
+
+### JSON Format
+
+Single file with all rules:
+
+```json
+{
+  "version": "1.0",
+  "exported_at": "2024-03-20T10:30:00Z",
+  "rules": [
+    {
+      "id": "rule_abc123",
+      "title": "Color Palette",
+      "category": "styling",
+      "content": "# Color Palette\n\n## Primary Colors...",
+      "metadata": {
+        "created": "2024-01-15",
+        "updated": "2024-03-20",
+        "author": "user@example.com"
+      }
+    }
+  ]
+}
+```
+
+### MCP Bundle Format
+
+Optimized binary format for MCP servers:
+
+```
+context.prism (binary)
+├── manifest.json
+├── rules/
+│   └── [compressed rule data]
+└── embeddings/
+    └── [pre-computed vectors]
+```
+
+<Callout type="info">
+  MCP bundles include pre-computed embeddings for instant semantic search.
+</Callout>
+
+---
+
+## IDE Integration
+
+### Cursor
+
+<Tabs items={['Dashboard URL', 'Local File', 'MCP Server']}>
+  <Tabs.Tab>
+    Configure Cursor to fetch rules from Prism:
+    
+    **Settings** → **Rules** → **Add Rule Source**
+    
+    ```
+    URL: https://api.prismcontext.com/v1/rules/cursor
+    API Key: YOUR_API_KEY
+    ```
+  </Tabs.Tab>
+  
+  <Tabs.Tab>
+    Export rules and reference locally:
+    
+    1. Export as Markdown
+    2. Place in `.cursor/rules/` folder
+    3. Cursor auto-detects on restart
+    
+    ```
+    .cursor/
+    └── rules/
+        ├── styling.md
+        └── architecture.md
+    ```
+  </Tabs.Tab>
+  
+  <Tabs.Tab>
+    Use MCP server for dynamic rules:
+    
+    ```json
+    // ~/.cursor/mcp.json
+    {
+      "mcpServers": {
+        "prism": {
+          "command": "prism-mcp",
+          "args": ["--api-key", "YOUR_KEY"]
+        }
+      }
+    }
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### Windsurf
+
+<Tabs items={['Cascade Rules', 'MCP Server']}>
+  <Tabs.Tab>
+    Export rules as Windsurf-compatible format:
+    
+    ```bash
+    prism rules export --format windsurf --output .windsurf/rules/
+    ```
+    
+    Creates `.windsurfrules` files in the correct format.
+  </Tabs.Tab>
+  
+  <Tabs.Tab>
+    Configure MCP in Windsurf:
+    
+    ```json
+    // ~/.codeium/windsurf/mcp_config.json
+    {
+      "mcpServers": {
+        "prism": {
+          "command": "prism-mcp",
+          "args": ["--api-key", "YOUR_KEY"]
+        }
+      }
+    }
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+### VS Code
+
+Export as workspace settings:
+
+```bash
+prism rules export --format vscode --output .vscode/prism-rules.md
+```
+
+Add to VS Code settings:
+
+```json
+{
+  "github.copilot.chat.codeGeneration.instructions": [
+    { "file": ".vscode/prism-rules.md" }
+  ]
+}
+```
+
+### Claude Desktop
+
+Export rules for Claude:
+
+```bash
+prism rules export --format claude --output ~/claude-rules/
+```
+
+Reference in Claude Desktop config:
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": ["--api-key", "YOUR_KEY"]
+    }
+  }
+}
+```
+
+---
+
+## GitHub Integration
+
+### Auto-Sync to GitHub
+
+Connect your GitHub repo for automatic rule syncing:
+
+<Steps>
+  ### Connect Repository
+
+  Go to **Settings** → **Integrations** → **GitHub**
+  
+  Click **Connect GitHub** and authorize.
+
+  ### Select Repository
+
+  Choose the repo where rules should be stored.
+
+  ### Configure Path
+
+  Set the path for rule files (default: `.prism/rules/`).
+
+  ### Enable Sync
+
+  Toggle on **Auto-sync on change**.
+</Steps>
+
+### Sync Options
+
+| Option | Description |
+|--------|-------------|
+| Push on save | Export rules when saved in dashboard |
+| Pull on change | Import rules when changed in GitHub |
+| Two-way sync | Both directions enabled |
+| Branch | Target branch (default: `main`) |
+
+### CI/CD Integration
+
+Add to your workflow:
+
+```yaml
+# .github/workflows/prism-sync.yml
+name: Sync Prism Rules
+
+on:
+  push:
+    paths:
+      - '.prism/rules/**'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install Prism CLI
+        run: npm install -g @prism/cli
+      
+      - name: Sync Rules
+        env:
+          PRISM_API_KEY: ${{ secrets.PRISM_API_KEY }}
+        run: prism rules sync --source .prism/rules/
+```
+
+---
+
+## Offline Usage
+
+For air-gapped environments:
+
+### Export Complete Bundle
+
+```bash
+# Export everything needed for offline use
+prism rules export --format offline --output ./prism-offline/
+
+# Contents:
+# prism-offline/
+# ├── rules/           (all rules as markdown)
+# ├── embeddings/      (pre-computed vectors)
+# ├── config.json      (server configuration)
+# └── mcp-server       (standalone binary)
+```
+
+### Run Offline Server
+
+```bash
+cd prism-offline
+./mcp-server --offline
+
+# In your IDE config, point to local server
+```
+
+---
+
+## Scheduled Exports
+
+Set up automatic exports:
+
+```bash
+# Export rules daily at midnight
+prism rules schedule-export \
+  --format markdown \
+  --destination s3://my-bucket/rules/ \
+  --cron "0 0 * * *"
+
+# Export to GitHub on every change
+prism rules webhook \
+  --on change \
+  --destination github://owner/repo/.prism/rules/
+```
+
+---
+
+## Troubleshooting
+
+### "Export Failed"
+
+- Check you have rules to export
+- Verify API key permissions
+- Ensure output path is writable
+
+### "Invalid Format"
+
+- Use supported formats: `markdown`, `json`, `mcp`, `cursor`, `windsurf`, `vscode`, `claude`
+
+### "Sync Conflict"
+
+- Use `--force` to overwrite
+- Or resolve conflicts manually in GitHub
+
+---
+
+## Next Steps
+
+- [Cursor Setup](/integrations/cursor) — Full Cursor integration
+- [Windsurf Setup](/integrations/windsurf) — Full Windsurf integration
+- [MCP Protocol](/concepts/mcp-protocol) — How MCP works

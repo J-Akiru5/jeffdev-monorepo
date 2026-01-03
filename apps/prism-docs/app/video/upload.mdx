@@ -1,0 +1,229 @@
+# Upload Videos
+
+Transform video content into AI context rules.
+
+import { Callout, Steps, Cards, Card } from 'nextra/components'
+
+<Callout type="info">
+  Video-to-Context is a **Pro feature**. Upgrade to access this functionality.
+</Callout>
+
+## Overview
+
+Upload design videos, code walkthroughs, or architecture explanations and let Prism extract context rules automatically.
+
+### Supported Formats
+
+| Format | Extension | Max Size | Max Duration |
+|--------|-----------|----------|--------------|
+| MP4 | `.mp4` | 500MB | 30 minutes |
+| WebM | `.webm` | 500MB | 30 minutes |
+| MOV | `.mov` | 500MB | 30 minutes |
+| AVI | `.avi` | 500MB | 30 minutes |
+
+---
+
+## Upload Methods
+
+### Web Dashboard
+
+<Steps>
+  ### Navigate to Videos
+
+  Go to **Dashboard** → **Videos** in the left sidebar.
+
+  ### Click Upload
+
+  Click the **Upload Video** button or drag-and-drop a file.
+
+  ### Add Metadata
+
+  - **Title**: Name your video
+  - **Description**: What this video demonstrates
+  - **Project**: Associate with a project
+  - **Tags**: Add searchable tags
+
+  ### Start Processing
+
+  Click **Upload & Process**. Processing takes 2-5 minutes depending on video length.
+</Steps>
+
+### API Upload
+
+```bash
+curl -X POST https://api.prismcontext.com/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@design-system-walkthrough.mp4" \
+  -F "title=Design System Walkthrough" \
+  -F "project_id=proj_abc123"
+```
+
+**Response:**
+
+```json
+{
+  "id": "vid_xyz789",
+  "status": "processing",
+  "progress": 0,
+  "estimated_time": "3 minutes"
+}
+```
+
+---
+
+## Processing Pipeline
+
+```
+┌───────────────┐
+│ Video Upload  │
+└───────┬───────┘
+        │
+        ▼
+┌───────────────┐
+│   Chunking    │ Split into 60-second segments
+└───────┬───────┘
+        │
+        ▼
+┌───────────────┐
+│ Transcription │ Azure Speech-to-Text
+└───────┬───────┘
+        │
+        ▼
+┌───────────────┐
+│ Frame Extract │ Key frames every 5 seconds
+└───────┬───────┘
+        │
+        ▼
+┌───────────────┐
+│ Vision + Text │ GPT-4 Vision + transcript
+└───────┬───────┘
+        │
+        ▼
+┌───────────────┐
+│ Rule Draft    │ Auto-generated rules
+└───────┬───────┘
+        │
+        ▼
+┌───────────────┐
+│    Review     │ Human review & edit
+└───────────────┘
+```
+
+### Processing Status
+
+| Status | Description |
+|--------|-------------|
+| `queued` | Waiting in processing queue |
+| `processing` | Active transcription & analysis |
+| `analyzing` | AI extracting rules |
+| `review` | Ready for human review |
+| `completed` | Rules generated & saved |
+| `failed` | Error occurred (see error field) |
+
+---
+
+## Best Practices
+
+### Good Videos for Context Extraction
+
+<Cards>
+  <Card title="Design System Tours" href="#">
+    Walk through your component library, showing variants and usage patterns.
+  </Card>
+  <Card title="Architecture Overviews" href="#">
+    Explain your app structure, data flow, and key decisions.
+  </Card>
+  <Card title="Code Reviews" href="#">
+    Narrated code review showing good patterns and anti-patterns.
+  </Card>
+  <Card title="Onboarding Sessions" href="#">
+    Sessions where you explain coding standards to new team members.
+  </Card>
+</Cards>
+
+### Tips for Better Extraction
+
+<Callout type="default">
+  **Speak clearly** — Audio quality affects transcription accuracy
+</Callout>
+
+<Callout type="default">
+  **Show code on screen** — Frame extraction captures code snippets
+</Callout>
+
+<Callout type="default">
+  **Be explicit** — Say things like "we always use..." or "never do this..."
+</Callout>
+
+<Callout type="default">
+  **Keep videos focused** — One topic per video produces better rules
+</Callout>
+
+---
+
+## Viewing Processed Videos
+
+After processing completes:
+
+1. Go to **Dashboard** → **Videos**
+2. Click on the processed video
+3. View:
+   - **Transcript** — Full text with timestamps
+   - **Key Frames** — Extracted images
+   - **Generated Rules** — Draft rules to review
+
+### Edit Generated Rules
+
+Generated rules are drafts. Review and refine them:
+
+```markdown
+# Original (auto-generated)
+Use consistent spacing in components.
+
+# Refined (human-edited)
+Use 8px base unit for spacing:
+- `gap-2` (8px) between inline elements
+- `gap-4` (16px) between sections
+- `gap-8` (32px) between major blocks
+```
+
+---
+
+## Quota & Limits
+
+| Plan | Videos/Month | Max Duration | Storage |
+|------|--------------|--------------|---------|
+| Starter | 5 | 10 min each | 1 GB |
+| Pro | 50 | 30 min each | 10 GB |
+| Team | 200 | 60 min each | 50 GB |
+| Enterprise | Unlimited | Unlimited | Unlimited |
+
+---
+
+## Troubleshooting
+
+### Upload Fails
+
+- Check file size (max 500MB)
+- Ensure format is supported
+- Try a different browser
+
+### Poor Transcription
+
+- Ensure clear audio
+- Reduce background noise
+- Consider uploading subtitles separately
+
+### No Rules Generated
+
+- Video may lack actionable content
+- Try adding more explicit statements
+- Manual rule creation may be needed
+
+---
+
+## Next Steps
+
+- [Rule Extraction](/video/rule-extraction) — How AI extracts rules from video
+- [Azure OpenAI Setup](/video/azure-openai) — Configure AI services
+- [Creating Rules](/rules/creating-rules) — Manual rule creation

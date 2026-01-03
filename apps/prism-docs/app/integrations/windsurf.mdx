@@ -1,0 +1,355 @@
+# Windsurf Integration
+
+Complete guide to integrating Prism with Windsurf IDE.
+
+import { Callout, Steps, Tabs } from 'nextra/components'
+
+<Callout type="info">
+  **Windsurf** is Codeium's AI-native IDE with Cascade for multi-file editing.
+</Callout>
+
+## Quick Setup
+
+<Steps>
+  ### Install Prism MCP Server
+
+  ```bash
+  npm install -g @prism/mcp-server
+  ```
+
+  ### Get Your API Key
+
+  Go to [Dashboard](https://prismcontext.com/dashboard) → **Settings** → **API Keys** → **Generate**
+
+  ### Configure Windsurf
+
+  Create or edit the MCP config file:
+
+  <Tabs items={['macOS', 'Windows', 'Linux']}>
+    <Tabs.Tab>
+      Edit `~/.codeium/windsurf/mcp_config.json`:
+    </Tabs.Tab>
+    <Tabs.Tab>
+      Edit `%USERPROFILE%\.codeium\windsurf\mcp_config.json`:
+    </Tabs.Tab>
+    <Tabs.Tab>
+      Edit `~/.codeium/windsurf/mcp_config.json`:
+    </Tabs.Tab>
+  </Tabs>
+
+  ```json
+  {
+    "mcpServers": {
+      "prism": {
+        "command": "prism-mcp",
+        "args": ["--api-key", "YOUR_API_KEY"]
+      }
+    }
+  }
+  ```
+
+  ### Restart Windsurf
+
+  Fully quit and restart Windsurf for MCP to load.
+
+  ### Verify Connection
+
+  Check the MCP indicator in Windsurf's status bar.
+</Steps>
+
+---
+
+## Windsurf-Specific Features
+
+### Cascade Integration
+
+Cascade, Windsurf's multi-file agent, benefits from Prism rules:
+
+```
+You: "Refactor the auth module to use our patterns"
+
+Cascade: (fetches your architecture rules)
+"I'll refactor the auth module following your patterns:
+- Service layer separation
+- Repository pattern for data access
+- Error handling middleware..."
+```
+
+### Flows
+
+When creating Windsurf Flows:
+
+1. Include Prism rules fetch as first step
+2. Rules carry through the entire flow
+3. All generated code follows your patterns
+
+### Memories
+
+Windsurf's Memories combined with Prism:
+
+- Memories: Personal preferences learned over time
+- Prism: Team-wide standards that override
+- Perfect combination for consistent + personalized
+
+---
+
+## Configuration Options
+
+### Basic Configuration
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": ["--api-key", "YOUR_API_KEY"]
+    }
+  }
+}
+```
+
+### With Project Filter
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": [
+        "--api-key", "YOUR_API_KEY",
+        "--project", "proj_windsurf123"
+      ]
+    }
+  }
+}
+```
+
+### Full Configuration
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": [
+        "--api-key", "YOUR_API_KEY",
+        "--project", "proj_abc123",
+        "--cache-ttl", "300",
+        "--log-level", "info"
+      ],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}
+```
+
+---
+
+## Windsurf Rules Files
+
+Windsurf also supports local `.windsurfrules` files:
+
+### Export to Windsurf Format
+
+```bash
+prism rules export --format windsurf --output ./
+```
+
+Creates `.windsurfrules` file:
+
+```markdown
+You are a coding assistant. Follow these rules:
+
+## Styling
+- Use Tailwind CSS
+- Primary color: cyan (#06b6d4)
+- Background: void black (#050505)
+
+## Components
+- Use TypeScript
+- Export named exports
+- Include prop types
+```
+
+### Hierarchy
+
+```
+.windsurfrules (project root)     ← Highest priority
+└── src/
+    └── .windsurfrules            ← Component-specific
+MCP: prism                        ← Dynamic rules
+Windsurf Memories                 ← Lowest priority
+```
+
+---
+
+## Using Prism in Windsurf
+
+### Chat Mode
+
+```
+You: "Create a dashboard layout"
+
+Windsurf: (auto-fetches layout rules from Prism)
+"Based on your architecture rules, here's a dashboard
+layout using the container patterns you've defined..."
+```
+
+### Command Mode (Cmd+I)
+
+1. Select code
+2. Press `Cmd+I` (Mac) or `Ctrl+I` (Windows)
+3. Rules automatically included in context
+
+### Cascade Flows
+
+When Cascade proposes multi-file changes:
+
+1. Each file generation uses your rules
+2. Consistency across all changes
+3. Review changes with your patterns in mind
+
+---
+
+## Workspace-Specific Setup
+
+### Per-Workspace Config
+
+Create `.windsurf/mcp.json` in your project:
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": [
+        "--api-key", "YOUR_KEY",
+        "--project", "proj_this_workspace"
+      ]
+    }
+  }
+}
+```
+
+### Multiple Projects
+
+For monorepos:
+
+```json
+{
+  "mcpServers": {
+    "prism-web": {
+      "command": "prism-mcp",
+      "args": ["--api-key", "KEY", "--project", "proj_web"]
+    },
+    "prism-api": {
+      "command": "prism-mcp",
+      "args": ["--api-key", "KEY", "--project", "proj_api"]
+    }
+  }
+}
+```
+
+---
+
+## Troubleshooting
+
+### MCP Not Appearing
+
+**Symptoms:** No Prism in MCP list
+
+**Solutions:**
+1. Check config file path is correct for your OS
+2. Verify JSON syntax is valid
+3. Restart Windsurf completely
+4. Check `prism-mcp` is in PATH
+
+### "Connection Failed"
+
+**Symptoms:** MCP shows error state
+
+**Solutions:**
+1. Test manually: `prism-mcp --api-key YOUR_KEY`
+2. Check internet connection
+3. Verify API key is valid
+
+### Cascade Not Using Rules
+
+**Symptoms:** Generated code ignores your rules
+
+**Solutions:**
+1. Explicitly mention: "Use our Prism rules"
+2. Check rules exist in dashboard
+3. Verify project filter isn't excluding rules
+
+### Slow Performance
+
+**Solutions:**
+1. Increase cache TTL
+2. Check rule count (very large rulesets may be slow)
+3. Use project filter to limit scope
+
+---
+
+## Debug Mode
+
+Enable detailed logging:
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": [
+        "--api-key", "YOUR_KEY",
+        "--log-level", "debug"
+      ]
+    }
+  }
+}
+```
+
+Logs location:
+- macOS: `~/Library/Logs/Windsurf/`
+- Windows: `%APPDATA%\Windsurf\logs\`
+
+---
+
+## Best Practices
+
+### 1. Combine with .windsurfrules
+
+```bash
+# Export core rules to local file
+prism rules export --format windsurf --category styling
+
+# Use MCP for dynamic/team rules
+# Best of both worlds
+```
+
+### 2. Use Cascade Effectively
+
+Tell Cascade to use Prism:
+
+```
+"Refactor this module using our Prism architecture rules"
+```
+
+### 3. Flow Templates
+
+Save flows that include Prism:
+
+1. Create flow with rule-aware steps
+2. Save as template
+3. Reuse across projects
+
+---
+
+## Related
+
+- [Cursor Integration](/integrations/cursor)
+- [VS Code Integration](/integrations/vscode)
+- [MCP Protocol](/concepts/mcp-protocol)
+- [Troubleshooting MCP](/troubleshooting/mcp-setup)

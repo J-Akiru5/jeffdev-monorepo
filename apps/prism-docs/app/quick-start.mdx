@@ -1,0 +1,149 @@
+# Quick Start
+
+Create your first context rule in under 5 minutes.
+
+import { Callout, Steps, Cards, Card } from 'nextra/components'
+
+<Callout type="info">
+  **Prerequisites**: [Create a Prism account](https://prism.jeffdev.studio/sign-up) before starting.
+</Callout>
+
+## Your First Rule in 5 Minutes
+
+<Steps>
+
+### Log In to Dashboard
+
+Visit [prism.jeffdev.studio](https://prism.jeffdev.studio) and sign in.
+
+### Create a New Project
+
+1. Click **"+ New Project"** in the sidebar
+2. Name your project (e.g., "My Next.js App")
+3. Select your primary tech stack
+
+### Create Your First Rule
+
+1. Navigate to **Rules** → **"+ New Rule"**
+2. Give it a title: "TypeScript Strict Mode"
+3. Add the rule content:
+
+```markdown
+## TypeScript Configuration
+
+Always use strict TypeScript:
+- Enable `strict: true` in tsconfig.json
+- Never use `any` type — use `unknown` if type is truly unknown
+- Prefer interfaces over types for object shapes
+- Use const assertions for literal types
+```
+
+4. Click **"Save Rule"**
+
+### Export to Your IDE
+
+1. Click **"Export"** in the top right
+2. Select your IDE format:
+   - **Cursor** → Downloads `.cursorrules`
+   - **Windsurf** → Downloads `.windsurfrules`
+3. Move the file to your project root
+
+### Test It
+
+Open your IDE and ask the AI:
+
+> "Create a function that fetches user data"
+
+The AI should now follow your TypeScript strict mode rule!
+
+</Steps>
+
+---
+
+## Quick Rule Templates
+
+Don't want to write rules from scratch? Start with templates:
+
+<Cards>
+  <Card title="Next.js App Router" href="/rules/templates#nextjs">
+    Server components, API routes, file conventions
+  </Card>
+  <Card title="React Best Practices" href="/rules/templates#react">
+    Hooks, component patterns, state management
+  </Card>
+  <Card title="Design System (JD Studio)" href="/rules/templates#jdstudio">
+    Dark mode, glass morphism, Tailwind tokens
+  </Card>
+  <Card title="Testing Strategy" href="/rules/templates#testing">
+    Vitest, Playwright, coverage requirements
+  </Card>
+</Cards>
+
+---
+
+## Video-to-Context (Advanced)
+
+Want AI to extract rules from your explanations?
+
+<Steps>
+
+### Record Your Screen
+
+Use any screen recorder (Loom, OBS, QuickTime) to record yourself:
+- Explaining your architecture decisions
+- Walking through your design system
+- Demonstrating component patterns
+
+### Upload to Prism
+
+1. Go to **Video** → **"Upload"**
+2. Drop your video file (max 500MB)
+3. Wait for processing (2-5 minutes)
+
+### Review Extracted Rules
+
+Prism uses Azure OpenAI to analyze your transcript and generate rules automatically. Review and edit them before saving.
+
+</Steps>
+
+[Learn more about Video Processing →](/video/upload)
+
+---
+
+## Connect MCP for Real-Time Sync
+
+For automatic synchronization (no manual exports):
+
+```bash
+# Install MCP server
+npm install -g @prism/mcp-server
+
+# Configure your IDE (example for Cursor)
+# Add to ~/.cursor/mcp.json:
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": ["--api-key", "YOUR_API_KEY"]
+    }
+  }
+}
+```
+
+[Full MCP Setup Guide →](/installation#option-b-mcp-server-advanced)
+
+---
+
+## What's Next?
+
+<Cards>
+  <Card title="Creating Rules" href="/rules/creating-rules">
+    Learn rule syntax and best practices
+  </Card>
+  <Card title="IDE Integration" href="/integrations/cursor">
+    Connect Cursor, Windsurf, or VS Code
+  </Card>
+  <Card title="Video Processing" href="/video/upload">
+    Extract rules from screen recordings
+  </Card>
+</Cards>

@@ -1,0 +1,203 @@
+# Context Governance
+
+Understanding the core problem Prism Context Engine solves.
+
+import { Callout } from 'nextra/components'
+
+## What is Context Pollution?
+
+**Context Pollution** occurs when AI coding assistants generate code that doesn't align with your project's established patterns, design system, or architectural decisions.
+
+### The Symptoms
+
+You've probably experienced this:
+
+```typescript
+// You ask: "Create a button component"
+
+// AI generates:
+<button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+  Click me
+</button>
+
+// But YOUR design system uses:
+<button className="group relative overflow-hidden rounded-md border border-white/10 bg-black/20 px-6 py-2 transition-all hover:border-white/20">
+  <div className="absolute inset-0 -z-10 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100" />
+  <span className="font-mono text-sm uppercase tracking-wider text-white">
+    Click me
+  </span>
+</button>
+```
+
+The AI doesn't know about:
+- Your color palette (#050505 void background, cyan accents)
+- Your component patterns (Ghost Glow buttons)
+- Your typography rules (JetBrains Mono for technical text)
+- Your radius constraints (rounded-md, never rounded-xl)
+
+### The Cost
+
+Context Pollution leads to:
+
+| Problem | Impact |
+|---------|--------|
+| **Inconsistent UI** | Users notice mismatched components |
+| **Tech Debt** | Manual cleanup after every AI generation |
+| **Lost Productivity** | Re-explaining rules in every prompt |
+| **Team Friction** | Different devs get different outputs |
+
+---
+
+## What is Context Governance?
+
+**Context Governance** is the practice of defining, managing, and enforcing architectural rules that AI assistants must follow.
+
+### The Three Pillars
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    CONTEXT GOVERNANCE                       │
+├─────────────────┬─────────────────┬─────────────────────────┤
+│   DEFINITION    │   MANAGEMENT    │      ENFORCEMENT        │
+│                 │                 │                         │
+│ • Write rules   │ • Version rules │ • IDE integration       │
+│ • Extract from  │ • Organize by   │ • Real-time delivery    │
+│   video         │   project       │ • Validation            │
+│ • Templates     │ • Share w/ team │ • Feedback loop         │
+└─────────────────┴─────────────────┴─────────────────────────┘
+```
+
+### Definition
+
+Rules must be **written** before they can be enforced. Prism offers two paths:
+
+1. **Manual Writing**: Write rules in Markdown format
+2. **Video Extraction**: Record yourself explaining, AI extracts rules
+
+### Management
+
+Rules need **organization** to stay useful:
+
+- Group by category (styling, architecture, testing)
+- Version control changes
+- Share across team members
+- Associate with specific projects
+
+### Enforcement
+
+Rules are useless if AI doesn't follow them. Enforcement happens through:
+
+- **Static Files**: `.cursorrules`, `.windsurfrules` in project root
+- **MCP Protocol**: Real-time delivery to IDE
+- **Semantic Search**: AI finds relevant rules based on context
+
+---
+
+## How Prism Implements Context Governance
+
+### Rule Capture
+
+```
+┌──────────────────┐     ┌──────────────────┐
+│   Video Upload   │────▶│  Azure OpenAI    │
+│   (Mux)          │     │  Transcript      │
+└──────────────────┘     │  Analysis        │
+                         └────────┬─────────┘
+                                  │
+                                  ▼
+                         ┌──────────────────┐
+                         │   Structured     │
+                         │   Rules (JSON)   │
+                         └──────────────────┘
+```
+
+### Rule Storage
+
+Rules are stored in **Azure Cosmos DB** with:
+- Full-text search capability
+- Vector embeddings for semantic search
+- Version history
+- Team sharing permissions
+
+### Rule Delivery
+
+```
+┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
+│   Prism Cloud    │────▶│   MCP Server     │────▶│   Your IDE       │
+│   (Rules DB)     │     │   (Local)        │     │   (Cursor, etc)  │
+└──────────────────┘     └──────────────────┘     └──────────────────┘
+```
+
+---
+
+## Context Governance Best Practices
+
+<Callout type="info">
+  **Rule of Thumb**: If you've corrected AI twice on the same thing, write a rule for it.
+</Callout>
+
+### 1. Be Specific
+
+```markdown
+# ❌ Bad Rule
+Use our design system.
+
+# ✅ Good Rule
+## Button Components
+
+Use the Ghost Glow pattern for all buttons:
+- Background: `bg-black/20` with `backdrop-blur-md`
+- Border: `border border-white/10`, hover: `border-white/20`
+- Text: `font-mono text-sm uppercase tracking-wider`
+- Effect: Inner gradient glow on hover using `group-hover`
+```
+
+### 2. Include Examples
+
+Always show code examples:
+
+```markdown
+## API Error Handling
+
+Use this pattern for API calls:
+
+\`\`\`typescript
+const { data, error } = await api.users.list();
+if (error) {
+  toast.error(error.message);
+  return;
+}
+// proceed with data
+\`\`\`
+```
+
+### 3. Explain "Why"
+
+```markdown
+## No Inline Styles
+
+Never use inline `style` attributes.
+
+**Why**: Inline styles break our Tailwind-based design system,
+cannot be themed, and are harder to maintain.
+
+**Instead**: Use Tailwind classes or CSS modules.
+```
+
+### 4. Prioritize Rules
+
+Not all rules are equal. Prism supports priority levels:
+
+| Priority | Enforcement | Example |
+|----------|-------------|---------|
+| **Critical** | Must follow | "Never use `any` type" |
+| **Important** | Should follow | "Prefer named exports" |
+| **Suggested** | Nice to have | "Add JSDoc comments" |
+
+---
+
+## Next Steps
+
+- [Kitchen/Recipe/Waiter Metaphor](/concepts/kitchen-metaphor) — Understand Prism's architecture model
+- [MCP Protocol](/concepts/mcp-protocol) — How rules reach your IDE
+- [Creating Rules](/rules/creating-rules) — Write effective context rules

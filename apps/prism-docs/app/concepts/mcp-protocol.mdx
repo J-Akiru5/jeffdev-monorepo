@@ -1,0 +1,315 @@
+# MCP Protocol
+
+Understanding Model Context Protocol and how Prism uses it.
+
+import { Callout, Tabs } from 'nextra/components'
+
+## What is MCP?
+
+**MCP (Model Context Protocol)** is an open protocol that allows AI assistants to access external tools, data, and context. Think of it as a standardized "plugin system" for AI.
+
+### Without MCP
+
+```
+┌──────────────┐     ┌──────────────┐
+│  You (IDE)   │────▶│ AI Assistant │
+│              │◀────│              │
+└──────────────┘     └──────────────┘
+        │
+        │  "Use our design system"
+        │  "Follow our patterns"
+        │  "Here's 500 lines of context..."
+        ▼
+   😫 Manual prompt stuffing every time
+```
+
+### With MCP
+
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│  You (IDE)   │────▶│ AI Assistant │────▶│  MCP Server  │
+│              │◀────│              │◀────│  (Prism)     │
+└──────────────┘     └──────────────┘     └──────────────┘
+        │                                        │
+        │  "Create a button"                     │
+        │                                        │
+        │                               Automatically fetches
+        │                               your context rules
+        ▼                                        ▼
+   😎 AI already knows your patterns    📜 Fresh rules delivered
+```
+
+---
+
+## How Prism Uses MCP
+
+Prism implements an MCP server (`@prism/mcp-server`) that:
+
+### 1. Authenticates with Your Account
+
+```bash
+prism-mcp --api-key YOUR_API_KEY
+```
+
+The MCP server connects to Prism cloud using your API key.
+
+### 2. Fetches Your Rules
+
+When your IDE's AI assistant starts, it queries the MCP server:
+
+```
+AI: "What tools/context do you have?"
+MCP: "I have context rules for: styling, architecture, testing..."
+```
+
+### 3. Delivers Rules on Demand
+
+When you ask the AI to generate code, it requests relevant rules:
+
+```
+AI: "I need styling rules for this button request"
+MCP: "Here are the styling rules: [Ghost Glow pattern, color tokens, etc.]"
+```
+
+### 4. Enables Semantic Search
+
+For complex questions, the MCP server searches your rules:
+
+```
+AI: "User is asking about error handling patterns"
+MCP: *searches embeddings* "Here are 3 relevant rules about error handling"
+```
+
+---
+
+## MCP Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                      YOUR MACHINE                           │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌──────────────┐     stdio      ┌──────────────┐          │
+│  │   Your IDE   │◀─────────────▶│  MCP Server  │          │
+│  │  (Cursor,    │                │  (prism-mcp) │          │
+│  │   Windsurf)  │                └──────┬───────┘          │
+│  └──────────────┘                       │                   │
+│                                         │ HTTPS             │
+│                                         │                   │
+└─────────────────────────────────────────┼───────────────────┘
+                                          │
+                                          ▼
+                               ┌──────────────────┐
+                               │  Prism Cloud     │
+                               │  (API + Rules)   │
+                               └──────────────────┘
+```
+
+### Communication Flow
+
+| Step | From | To | Protocol | Data |
+|------|------|----|----------|------|
+| 1 | IDE | MCP Server | stdio | Query for tools |
+| 2 | MCP Server | Prism Cloud | HTTPS | Fetch rules |
+| 3 | Prism Cloud | MCP Server | HTTPS | Rules JSON |
+| 4 | MCP Server | IDE | stdio | Context for AI |
+
+---
+
+## MCP Tools Provided by Prism
+
+The Prism MCP server exposes these tools to your AI:
+
+### `prism_get_rules`
+
+Fetch all rules for a project.
+
+```json
+{
+  "tool": "prism_get_rules",
+  "parameters": {
+    "project_id": "optional",
+    "category": "optional (styling|architecture|testing)"
+  }
+}
+```
+
+### `prism_search_rules`
+
+Semantic search across your rules.
+
+```json
+{
+  "tool": "prism_search_rules",
+  "parameters": {
+    "query": "How should I handle API errors?",
+    "limit": 5
+  }
+}
+```
+
+### `prism_get_brand`
+
+Fetch brand profile (design tokens, colors, typography).
+
+```json
+{
+  "tool": "prism_get_brand",
+  "parameters": {
+    "brand_id": "optional"
+  }
+}
+```
+
+---
+
+## IDE Configuration
+
+<Tabs items={['Cursor', 'Windsurf', 'VS Code', 'Claude Desktop']}>
+  <Tabs.Tab>
+    **Cursor** uses `~/.cursor/mcp.json`:
+    
+    ```json
+    {
+      "mcpServers": {
+        "prism": {
+          "command": "prism-mcp",
+          "args": ["--api-key", "YOUR_API_KEY"]
+        }
+      }
+    }
+    ```
+  </Tabs.Tab>
+  
+  <Tabs.Tab>
+    **Windsurf** uses `~/.codeium/windsurf/mcp_config.json`:
+    
+    ```json
+    {
+      "mcpServers": {
+        "prism": {
+          "command": "prism-mcp",
+          "args": ["--api-key", "YOUR_API_KEY"]
+        }
+      }
+    }
+    ```
+  </Tabs.Tab>
+  
+  <Tabs.Tab>
+    **VS Code** requires the MCP extension:
+    
+    1. Install "MCP" extension from marketplace
+    2. Open Command Palette → "MCP: Configure Servers"
+    3. Add Prism configuration
+    
+    ```json
+    {
+      "mcpServers": {
+        "prism": {
+          "command": "prism-mcp",
+          "args": ["--api-key", "YOUR_API_KEY"]
+        }
+      }
+    }
+    ```
+  </Tabs.Tab>
+  
+  <Tabs.Tab>
+    **Claude Desktop** uses `claude_desktop_config.json`:
+    
+    **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+    **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+    
+    ```json
+    {
+      "mcpServers": {
+        "prism": {
+          "command": "prism-mcp",
+          "args": ["--api-key", "YOUR_API_KEY"]
+        }
+      }
+    }
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+---
+
+## Debugging MCP
+
+### Check MCP Status
+
+Most IDEs show MCP server status in their UI. Look for:
+- A plugin/extension icon
+- "MCP" or "Tools" panel
+- Server connection indicators
+
+### Manual Testing
+
+You can test the MCP server directly:
+
+```bash
+# Start in debug mode
+prism-mcp --api-key YOUR_API_KEY --debug
+
+# In another terminal, send a test request
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | prism-mcp
+```
+
+### Common Issues
+
+<Callout type="error">
+  **"Tool not found"** — MCP server isn't running. Restart your IDE.
+</Callout>
+
+<Callout type="error">
+  **"Authentication failed"** — API key is invalid or expired. Generate a new one.
+</Callout>
+
+<Callout type="error">
+  **"No rules found"** — You haven't created any rules yet. Add rules in the dashboard.
+</Callout>
+
+---
+
+## Security Considerations
+
+### API Key Storage
+
+- Never commit API keys to version control
+- Use environment variables when possible
+- Rotate keys periodically
+
+### Data Flow
+
+- Rules are fetched over HTTPS (encrypted)
+- No code leaves your machine — only rule queries
+- MCP server runs locally on your machine
+
+### Permissions
+
+- MCP server only reads rules — it cannot modify them
+- Each API key has project-level access controls
+- Team admins can revoke keys at any time
+
+---
+
+## MCP Protocol Specification
+
+Prism follows the official MCP specification:
+
+- **Transport**: stdio (standard input/output)
+- **Protocol**: JSON-RPC 2.0
+- **Authentication**: API key in server args or environment variable
+- **Caching**: Local cache with 5-minute TTL
+
+For full protocol details, see [modelcontextprotocol.io](https://modelcontextprotocol.io).
+
+---
+
+## Next Steps
+
+- [Cursor Setup](/integrations/cursor) — Full Cursor configuration
+- [Windsurf Setup](/integrations/windsurf) — Full Windsurf configuration
+- [Troubleshooting MCP](/troubleshooting/mcp-setup) — Fix common issues

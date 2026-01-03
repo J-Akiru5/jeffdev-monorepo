@@ -1,0 +1,347 @@
+# Security & Privacy
+
+How Prism Context Engine protects your data.
+
+import { Callout, Cards, Card } from 'nextra/components'
+
+## Overview
+
+Prism Context Engine is designed with security and privacy as core principles. Your rules, code context, and team data are protected at every level.
+
+<Cards>
+  <Card title="Encrypted Transit" href="#">
+    All data encrypted with TLS 1.3 in transit.
+  </Card>
+  <Card title="Encrypted at Rest" href="#">
+    AES-256 encryption for stored data.
+  </Card>
+  <Card title="SOC 2 Type II" href="#">
+    Compliant with SOC 2 security standards.
+  </Card>
+  <Card title="GDPR Ready" href="#">
+    Full GDPR compliance for EU customers.
+  </Card>
+</Cards>
+
+---
+
+## Architecture Security
+
+### Data Flow
+
+```
+┌─────────────────┐     TLS 1.3      ┌─────────────────┐
+│   Your IDE      │─────────────────▶│  MCP Server     │
+│   (local)       │                  │  (local)        │
+└─────────────────┘                  └────────┬────────┘
+                                              │
+                                              │ TLS 1.3
+                                              │
+                                              ▼
+                                     ┌─────────────────┐
+                                     │  Prism Cloud    │
+                                     │  (API)          │
+                                     └────────┬────────┘
+                                              │
+                                              │ Encrypted
+                                              │
+                                              ▼
+                                     ┌─────────────────┐
+                                     │  Azure Cosmos   │
+                                     │  (AES-256)      │
+                                     └─────────────────┘
+```
+
+### What We Store
+
+| Data | Stored | Purpose |
+|------|--------|---------|
+| Rules/Content | ✅ Yes | Core functionality |
+| Video Files | ✅ Yes | Transcription/extraction |
+| API Keys | ✅ Yes (hashed) | Authentication |
+| Your Code | ❌ No | Never transmitted to our servers |
+| Search Queries | ✅ Yes (30 days) | Analytics & improvement |
+| Usage Metrics | ✅ Yes | Billing & analytics |
+
+<Callout type="info">
+  **Your actual source code never leaves your machine.** Only rule queries and metadata are transmitted.
+</Callout>
+
+---
+
+## Authentication & Access Control
+
+### API Key Security
+
+- Keys are hashed with bcrypt before storage
+- We never store or can retrieve plain-text keys
+- Keys can be scoped to specific permissions
+- All key usage is logged
+
+### Multi-Factor Authentication
+
+- MFA available for all accounts
+- Required for admin actions
+- TOTP and WebAuthn supported
+
+### Role-Based Access Control
+
+| Role | Permissions |
+|------|-------------|
+| Owner | Full access, billing, delete org |
+| Admin | Manage team, rules, projects |
+| Editor | Create/edit rules, view all |
+| Viewer | Read-only access |
+
+---
+
+## Data Protection
+
+### Encryption
+
+**In Transit:**
+- TLS 1.3 for all API communications
+- Certificate pinning for mobile apps
+- HSTS enforced
+
+**At Rest:**
+- AES-256 encryption for all stored data
+- Azure managed encryption keys
+- Optional customer-managed keys (Enterprise)
+
+### Data Residency
+
+| Plan | Data Location |
+|------|---------------|
+| Starter/Pro | US (Azure East) |
+| Team | US or EU (choice) |
+| Enterprise | Custom regions |
+
+### Backup & Recovery
+
+- Automated daily backups
+- Point-in-time recovery (30 days)
+- Geo-redundant storage
+- Regular recovery testing
+
+---
+
+## MCP Server Security
+
+### Local Execution
+
+The MCP server runs locally on your machine:
+
+```
+Your Machine
+├── IDE (Cursor, Windsurf, etc.)
+├── MCP Server (prism-mcp)
+│   ├── Local caching
+│   ├── API key storage
+│   └── Network requests to Prism Cloud
+└── Your Code (never transmitted)
+```
+
+### What the MCP Server Does
+
+✅ **Does:**
+- Fetch rules from Prism Cloud
+- Cache rules locally
+- Provide rules to your IDE's AI
+
+❌ **Does NOT:**
+- Read your source code
+- Transmit your code anywhere
+- Store your code
+
+### Network Requests
+
+MCP server makes requests only to:
+- `api.prismcontext.com` — Fetch rules
+- `telemetry.prismcontext.com` — Anonymous usage stats (opt-out available)
+
+---
+
+## Compliance
+
+### SOC 2 Type II
+
+We maintain SOC 2 Type II certification covering:
+- Security
+- Availability
+- Processing Integrity
+- Confidentiality
+
+Request our SOC 2 report: security@prismcontext.com
+
+### GDPR
+
+For EU customers:
+- Data Processing Agreement (DPA) available
+- Right to access, correct, delete data
+- Data portability supported
+- EU data residency option
+
+### HIPAA
+
+<Callout type="warning">
+  Prism is not currently HIPAA compliant. Do not store PHI in rules.
+</Callout>
+
+---
+
+## Security Practices
+
+### Infrastructure
+
+- Azure cloud hosting with enterprise SLAs
+- DDoS protection via Azure Front Door
+- Web Application Firewall (WAF)
+- Regular penetration testing
+
+### Development
+
+- Secure SDLC practices
+- Dependency scanning (Dependabot)
+- Static code analysis (CodeQL)
+- Required code reviews
+
+### Monitoring
+
+- 24/7 automated monitoring
+- Intrusion detection systems
+- Anomaly detection on API usage
+- Real-time alerting
+
+---
+
+## Vulnerability Reporting
+
+Found a security issue? We appreciate responsible disclosure.
+
+### Reporting Process
+
+1. Email: security@prismcontext.com
+2. Include:
+   - Description of vulnerability
+   - Steps to reproduce
+   - Potential impact
+   - Your contact info
+
+### Response Timeline
+
+| Stage | Timeline |
+|-------|----------|
+| Acknowledgment | 24 hours |
+| Triage | 3 business days |
+| Fix (critical) | 7 days |
+| Fix (high) | 30 days |
+| Fix (medium/low) | 90 days |
+
+### Bug Bounty
+
+We offer rewards for qualifying vulnerabilities:
+- Critical: $500-$2000
+- High: $200-$500
+- Medium: $50-$200
+
+---
+
+## Privacy Policy
+
+### Data Collection
+
+We collect only what's necessary:
+- Account information (email, name)
+- Rules and content you create
+- Usage analytics (anonymized)
+- Support communications
+
+### Data Use
+
+Your data is used for:
+- Providing the service
+- Improving the product
+- Billing and support
+- Legal compliance
+
+### Data Sharing
+
+We do NOT:
+- Sell your data
+- Share with advertisers
+- Use for training AI models without consent
+- Share with third parties except:
+  - Service providers (Azure, Stripe)
+  - Legal requirements
+
+### Data Retention
+
+| Data Type | Retention |
+|-----------|-----------|
+| Account | Until deletion |
+| Rules | Until deletion |
+| Videos | 90 days after processing |
+| Logs | 30 days |
+| Backups | 30 days |
+
+### Your Rights
+
+- Access your data
+- Export your data
+- Correct inaccuracies
+- Delete your account
+- Opt-out of analytics
+
+To exercise rights: privacy@prismcontext.com
+
+---
+
+## Best Practices for Users
+
+### API Key Security
+
+```markdown
+✅ DO:
+- Store keys in environment variables
+- Use scoped keys with minimum permissions
+- Rotate keys regularly
+- Delete unused keys
+
+❌ DON'T:
+- Commit keys to version control
+- Share keys via chat/email
+- Use same key for all environments
+```
+
+### Rule Content
+
+```markdown
+✅ DO:
+- Include only necessary context
+- Use generic examples
+- Reference documentation
+
+❌ DON'T:
+- Include secrets or credentials
+- Include customer/user data
+- Include proprietary business logic
+```
+
+---
+
+## Contact
+
+**Security Team:** security@prismcontext.com
+
+**Privacy Team:** privacy@prismcontext.com
+
+**DPA Requests:** legal@prismcontext.com
+
+---
+
+## Related
+
+- [API Keys](/troubleshooting/api-keys)
+- [MCP Protocol](/concepts/mcp-protocol)
+- [API Reference](/advanced/api-reference)

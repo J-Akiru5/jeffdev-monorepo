@@ -1,0 +1,377 @@
+# Claude Desktop Integration
+
+Using Prism Context Engine with Claude Desktop.
+
+import { Callout, Steps, Tabs } from 'nextra/components'
+
+<Callout type="info">
+  Claude Desktop has native MCP support, making it ideal for Prism integration.
+</Callout>
+
+## Quick Setup
+
+<Steps>
+  ### Install Prism MCP Server
+
+  ```bash
+  npm install -g @prism/mcp-server
+  ```
+
+  ### Get Your API Key
+
+  Go to [Dashboard](https://prismcontext.com/dashboard) → **Settings** → **API Keys** → **Generate**
+
+  ### Locate Config File
+
+  <Tabs items={['macOS', 'Windows']}>
+    <Tabs.Tab>
+      ```bash
+      ~/Library/Application Support/Claude/claude_desktop_config.json
+      ```
+    </Tabs.Tab>
+    <Tabs.Tab>
+      ```bash
+      %APPDATA%\Claude\claude_desktop_config.json
+      ```
+    </Tabs.Tab>
+  </Tabs>
+
+  ### Add Prism Configuration
+
+  Edit the config file:
+
+  ```json
+  {
+    "mcpServers": {
+      "prism": {
+        "command": "prism-mcp",
+        "args": ["--api-key", "YOUR_API_KEY"]
+      }
+    }
+  }
+  ```
+
+  ### Restart Claude Desktop
+
+  Fully quit and restart Claude for MCP to load.
+
+  ### Verify Connection
+
+  Start a new conversation and ask Claude about available tools.
+</Steps>
+
+---
+
+## Configuration Options
+
+### Basic Setup
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": ["--api-key", "YOUR_API_KEY"]
+    }
+  }
+}
+```
+
+### With Node.js Path (if needed)
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "/usr/local/bin/node",
+      "args": [
+        "/usr/local/lib/node_modules/@prism/mcp-server/bin/prism-mcp.js",
+        "--api-key",
+        "YOUR_API_KEY"
+      ]
+    }
+  }
+}
+```
+
+### Project-Specific
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": [
+        "--api-key", "YOUR_API_KEY",
+        "--project", "proj_myproject123"
+      ]
+    }
+  }
+}
+```
+
+### Full Configuration
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": [
+        "--api-key", "YOUR_API_KEY",
+        "--project", "proj_abc123",
+        "--cache-ttl", "600",
+        "--log-level", "info"
+      ],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}
+```
+
+---
+
+## Using Prism in Claude Desktop
+
+### Automatic Tool Discovery
+
+Once connected, Claude can use Prism tools:
+
+```
+You: "What context rules do I have available?"
+
+Claude: I'll check your Prism rules using the available tool.
+
+[Uses prism_get_rules tool]
+
+"You have 12 rules across 3 categories:
+- Styling (5 rules)
+- Architecture (4 rules)
+- Testing (3 rules)"
+```
+
+### Code Generation with Rules
+
+```
+You: "Create a React form component following my project rules"
+
+Claude: [Fetches styling and component rules from Prism]
+
+"Based on your rules, here's a form component using 
+your design system tokens and patterns..."
+```
+
+### Semantic Search
+
+```
+You: "What do my rules say about error handling?"
+
+Claude: [Uses prism_search_rules with "error handling" query]
+
+"I found 3 relevant rules about error handling:
+1. Always use custom error classes
+2. Log errors with context
+3. Display user-friendly messages..."
+```
+
+---
+
+## Available MCP Tools
+
+Claude can use these Prism tools:
+
+### prism_get_rules
+
+Fetch all or filtered rules:
+
+```
+"Get my styling rules"
+→ prism_get_rules(category: "styling")
+```
+
+### prism_search_rules
+
+Semantic search across rules:
+
+```
+"What are my patterns for API calls?"
+→ prism_search_rules(query: "API calls patterns")
+```
+
+### prism_get_brand
+
+Fetch brand/design tokens:
+
+```
+"What colors should I use?"
+→ prism_get_brand()
+```
+
+---
+
+## Multiple Projects
+
+Configure multiple Prism instances:
+
+```json
+{
+  "mcpServers": {
+    "prism-work": {
+      "command": "prism-mcp",
+      "args": ["--api-key", "WORK_KEY", "--project", "proj_work"]
+    },
+    "prism-personal": {
+      "command": "prism-mcp",
+      "args": ["--api-key", "PERSONAL_KEY", "--project", "proj_personal"]
+    }
+  }
+}
+```
+
+Tell Claude which to use:
+
+```
+You: "Use my work Prism rules to create a component"
+
+Claude: [Uses prism-work server]
+```
+
+---
+
+## Best Practices
+
+### 1. Start Conversations with Context
+
+```
+You: "I'm working on my Next.js project. Please use my 
+Prism rules for all code suggestions in this conversation."
+
+Claude: "I'll use your Prism context rules for this session. 
+Let me fetch your current rules to understand your patterns."
+```
+
+### 2. Reference Specific Categories
+
+```
+You: "Following my testing rules, write tests for this function"
+```
+
+### 3. Ask for Explanations
+
+```
+You: "Create a card component and explain how it follows my rules"
+
+Claude: "Here's a card component following your design system:
+- Uses #050505 background (from your color palette rule)
+- 16px border radius (from your spacing rule)
+- Cyan accent border (from your interactive elements rule)
+..."
+```
+
+---
+
+## Troubleshooting
+
+### MCP Not Loading
+
+**Symptoms:** Claude doesn't mention Prism tools
+
+**Solutions:**
+1. Verify config file path
+2. Check JSON syntax is valid
+3. Ensure prism-mcp is in PATH
+4. Restart Claude Desktop completely
+
+### "Failed to start server"
+
+**Symptoms:** Error message about MCP server
+
+**Solutions:**
+1. Test manually: `prism-mcp --api-key YOUR_KEY`
+2. Check Node.js is installed (v18+)
+3. Try specifying full path to node and script
+
+### Tools Not Working
+
+**Symptoms:** Claude tries to use tools but fails
+
+**Solutions:**
+1. Check API key is valid
+2. Verify project ID exists
+3. Check Prism dashboard for rules
+
+### Permission Errors (macOS)
+
+```bash
+# Grant terminal full disk access
+System Preferences → Security → Privacy → Full Disk Access
+# Add Terminal.app
+```
+
+---
+
+## Debug Mode
+
+Enable verbose logging:
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": [
+        "--api-key", "YOUR_KEY",
+        "--log-level", "debug"
+      ]
+    }
+  }
+}
+```
+
+View logs:
+- macOS: `~/Library/Logs/Claude/mcp.log`
+- Windows: `%APPDATA%\Claude\logs\mcp.log`
+
+---
+
+## Claude Desktop Features
+
+### Artifacts with Prism
+
+When Claude creates artifacts:
+
+```
+You: "Create a landing page component using my design system"
+
+Claude: [Creates artifact using your Prism rules]
+```
+
+### Projects (Claude Pro)
+
+For Claude Pro users with Projects:
+
+1. Create a project for your codebase
+2. Include key files
+3. Prism rules supplement project knowledge
+
+### Long Conversations
+
+For extended sessions:
+
+```
+You: "Let's continue working on my app. Remember to use 
+my Prism rules from earlier."
+
+Claude: [Re-fetches rules to ensure currency]
+```
+
+---
+
+## Related
+
+- [Cursor Integration](/integrations/cursor)
+- [Windsurf Integration](/integrations/windsurf)
+- [VS Code Integration](/integrations/vscode)
+- [MCP Protocol](/concepts/mcp-protocol)

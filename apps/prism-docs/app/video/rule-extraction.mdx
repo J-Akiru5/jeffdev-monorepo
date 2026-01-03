@@ -1,0 +1,284 @@
+# Rule Extraction
+
+How Prism AI extracts context rules from your videos.
+
+import { Callout, Steps } from 'nextra/components'
+
+## Overview
+
+Rule extraction is the magic that turns your video content into structured AI context. Using a combination of speech-to-text, computer vision, and large language models, Prism identifies patterns, preferences, and guidelines in your videos.
+
+---
+
+## Extraction Pipeline
+
+### Stage 1: Transcription
+
+Your video audio is transcribed using Azure Speech-to-Text:
+
+```
+Input: "...and we always use cyan for interactive elements, purple for 
+        accents, and the void black background..."
+
+Output: {
+  "text": "and we always use cyan for interactive elements...",
+  "timestamp": "00:01:23",
+  "confidence": 0.94
+}
+```
+
+### Stage 2: Frame Analysis
+
+Key frames are extracted every 5 seconds and analyzed:
+
+```
+Frame at 00:01:25:
+- Detected: Code editor with CSS
+- Colors visible: #06b6d4, #8b5cf6, #050505
+- UI elements: Button component, Card component
+```
+
+### Stage 3: Context Fusion
+
+GPT-4 combines transcript + frames:
+
+```
+Transcript: "we always use cyan for interactive elements"
+Frame: Button with #06b6d4 hover state
+       
+→ Rule: "Use cyan (#06b6d4) for interactive elements like buttons"
+```
+
+### Stage 4: Rule Generation
+
+AI generates structured rules:
+
+```markdown
+## Styling: Colors
+
+### Primary Interactive Color
+Use cyan (#06b6d4) for interactive elements:
+- Button hover/active states
+- Links and clickable text
+- Focus indicators
+- Toggle switches (active)
+
+**Do:**
+```css
+.button:hover {
+  background-color: #06b6d4;
+}
+```
+
+**Don't:**
+```css
+.button:hover {
+  background-color: blue; /* Too generic */
+}
+```
+```
+
+---
+
+## Rule Types Extracted
+
+<Steps>
+  ### Styling Rules
+  
+  Colors, typography, spacing, and visual patterns detected in your videos.
+  
+  - Color palettes
+  - Typography scales
+  - Spacing systems
+  - Component styles
+
+  ### Architecture Rules
+  
+  Code structure and organization patterns explained in your walkthroughs.
+  
+  - File organization
+  - Naming conventions
+  - Module boundaries
+  - Data flow patterns
+
+  ### Testing Rules
+  
+  Testing patterns and requirements mentioned in code reviews.
+  
+  - Test file locations
+  - Coverage requirements
+  - Mock strategies
+  - Test naming
+
+  ### Documentation Rules
+  
+  Documentation standards discussed in onboarding videos.
+  
+  - Comment styles
+  - JSDoc requirements
+  - README structure
+  - API documentation
+</Steps>
+
+---
+
+## Confidence Scores
+
+Each extracted rule has a confidence score:
+
+| Confidence | Meaning | Action |
+|------------|---------|--------|
+| 90-100% | High certainty, explicit statement | Auto-approve |
+| 70-89% | Good certainty, clear pattern | Quick review |
+| 50-69% | Moderate certainty, inferred | Careful review |
+| Below 50% | Low certainty, needs verification | Manual edit |
+
+<Callout type="warning">
+  Always review rules before publishing. AI extraction is helpful but not perfect.
+</Callout>
+
+---
+
+## Extraction Settings
+
+Configure how rules are extracted:
+
+### Strictness Level
+
+```
+Conservative:  Only explicit statements ("we always...", "never do...")
+Balanced:      Explicit + clear patterns shown on screen
+Aggressive:    Include inferred patterns and context
+```
+
+### Rule Categories
+
+Enable/disable extraction by category:
+
+```json
+{
+  "extract_styling": true,
+  "extract_architecture": true,
+  "extract_testing": false,
+  "extract_documentation": true
+}
+```
+
+### Minimum Confidence
+
+Set threshold for auto-generated rules:
+
+```json
+{
+  "min_confidence": 70,  // Only generate rules above 70% confidence
+  "auto_publish": false  // Always require human review
+}
+```
+
+---
+
+## Manual Hints
+
+Help the AI extract better rules by adding hints:
+
+### Pre-Video Hints
+
+Add context before processing:
+
+```json
+{
+  "project_type": "Next.js",
+  "design_system": "Ghost Glow",
+  "focus_areas": ["styling", "components"]
+}
+```
+
+### In-Video Markers
+
+Say these phrases to help extraction:
+
+- **"Rule:"** — Explicit rule statement follows
+- **"Always"** / **"Never"** — Strong pattern indicator
+- **"Example of"** — Demonstrates a pattern
+- **"Don't do this"** — Anti-pattern follows
+
+---
+
+## Reviewing Extracted Rules
+
+After extraction, review in the dashboard:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Extracted Rules (7 rules, 3 need review)                    │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│ ✅ Use cyan for interactive elements        [94%] Approved  │
+│ ✅ 8px base spacing unit                    [91%] Approved  │
+│ ⚠️  Card border radius should be 16px       [72%] Review    │
+│ ⚠️  Use JetBrains Mono for code             [68%] Review    │
+│ ⚠️  Form validation pattern                 [55%] Review    │
+│ ✅ Never use inline styles                  [89%] Approved  │
+│ ✅ Components in /components folder         [96%] Approved  │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Actions
+
+- **Approve** — Publish rule as-is
+- **Edit** — Modify before publishing
+- **Reject** — Delete rule
+- **Merge** — Combine with existing rule
+
+---
+
+## Batch Processing
+
+Process multiple videos at once:
+
+```bash
+# Upload multiple videos
+for video in ./videos/*.mp4; do
+  curl -X POST https://api.prismcontext.com/v1/videos \
+    -H "Authorization: Bearer $API_KEY" \
+    -F "file=@$video" \
+    -F "batch_id=batch_123"
+done
+
+# Check batch status
+curl https://api.prismcontext.com/v1/batches/batch_123
+```
+
+---
+
+## Extraction Accuracy Tips
+
+### For Better Styling Rules
+
+- Show your design system in action
+- Hover over elements to show states
+- Zoom in on specific code snippets
+- Mention exact values ("8px", "#06b6d4")
+
+### For Better Architecture Rules
+
+- Show your folder structure
+- Explain file naming conventions
+- Walk through a complete feature
+- Discuss data flow diagrams
+
+### For Better Testing Rules
+
+- Show your test file organization
+- Run tests on screen
+- Explain your mocking strategy
+- Show coverage reports
+
+---
+
+## Next Steps
+
+- [Azure OpenAI Setup](/video/azure-openai) — Configure AI services
+- [Creating Rules](/rules/creating-rules) — Manual rule creation
+- [Rule Templates](/rules/templates) — Pre-built rule templates

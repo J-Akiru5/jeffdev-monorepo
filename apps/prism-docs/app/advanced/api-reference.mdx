@@ -1,0 +1,573 @@
+# API Reference
+
+Complete REST API documentation for Prism Context Engine.
+
+import { Callout, Tabs } from 'nextra/components'
+
+## Base URL
+
+```
+https://api.prismcontext.com/v1
+```
+
+## Authentication
+
+All API requests require authentication via Bearer token:
+
+```bash
+curl https://api.prismcontext.com/v1/rules \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+Get your API key from **Dashboard** → **Settings** → **API Keys**.
+
+---
+
+## Rate Limits
+
+| Plan | Requests/min | Requests/day |
+|------|--------------|--------------|
+| Starter | 60 | 1,000 |
+| Pro | 300 | 10,000 |
+| Team | 600 | 50,000 |
+| Enterprise | Custom | Custom |
+
+Rate limit headers:
+```
+X-RateLimit-Limit: 60
+X-RateLimit-Remaining: 45
+X-RateLimit-Reset: 1710936000
+```
+
+---
+
+## Rules
+
+### List Rules
+
+Get all rules for your account.
+
+```
+GET /rules
+```
+
+**Query Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `project_id` | string | Filter by project |
+| `category` | string | Filter by category |
+| `limit` | number | Results per page (default: 20, max: 100) |
+| `offset` | number | Pagination offset |
+
+**Example:**
+
+```bash
+curl "https://api.prismcontext.com/v1/rules?category=styling&limit=10" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "id": "rule_abc123",
+      "title": "Color Palette",
+      "category": "styling",
+      "content": "# Color Palette\n\n...",
+      "created_at": "2024-01-15T10:30:00Z",
+      "updated_at": "2024-03-20T14:45:00Z"
+    }
+  ],
+  "pagination": {
+    "total": 45,
+    "limit": 10,
+    "offset": 0
+  }
+}
+```
+
+---
+
+### Get Rule
+
+Get a single rule by ID.
+
+```
+GET /rules/{rule_id}
+```
+
+**Example:**
+
+```bash
+curl https://api.prismcontext.com/v1/rules/rule_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+**Response:**
+
+```json
+{
+  "id": "rule_abc123",
+  "title": "Color Palette",
+  "category": "styling",
+  "content": "# Color Palette\n\n## Primary Colors\n...",
+  "project_id": "proj_xyz789",
+  "tags": ["design", "colors"],
+  "metadata": {
+    "author": "user@example.com",
+    "version": "1.2.0"
+  },
+  "created_at": "2024-01-15T10:30:00Z",
+  "updated_at": "2024-03-20T14:45:00Z"
+}
+```
+
+---
+
+### Create Rule
+
+Create a new rule.
+
+```
+POST /rules
+```
+
+**Request Body:**
+
+```json
+{
+  "title": "Form Validation",
+  "category": "architecture",
+  "content": "# Form Validation\n\nAlways use Zod...",
+  "project_id": "proj_xyz789",
+  "tags": ["forms", "validation"]
+}
+```
+
+**Example:**
+
+```bash
+curl -X POST https://api.prismcontext.com/v1/rules \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Form Validation",
+    "category": "architecture",
+    "content": "# Form Validation\n\nAlways use Zod..."
+  }'
+```
+
+**Response:**
+
+```json
+{
+  "id": "rule_new456",
+  "title": "Form Validation",
+  "category": "architecture",
+  "created_at": "2024-03-21T09:00:00Z"
+}
+```
+
+---
+
+### Update Rule
+
+Update an existing rule.
+
+```
+PATCH /rules/{rule_id}
+```
+
+**Request Body:**
+
+```json
+{
+  "title": "Updated Title",
+  "content": "# Updated Content..."
+}
+```
+
+**Example:**
+
+```bash
+curl -X PATCH https://api.prismcontext.com/v1/rules/rule_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"content": "# Updated Content..."}'
+```
+
+---
+
+### Delete Rule
+
+Delete a rule.
+
+```
+DELETE /rules/{rule_id}
+```
+
+**Example:**
+
+```bash
+curl -X DELETE https://api.prismcontext.com/v1/rules/rule_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+---
+
+## Search
+
+### Semantic Search
+
+Search rules using natural language.
+
+```
+POST /search
+```
+
+**Request Body:**
+
+```json
+{
+  "query": "How should I handle API errors?",
+  "limit": 5,
+  "threshold": 0.7,
+  "categories": ["architecture", "testing"],
+  "project_id": "proj_xyz789"
+}
+```
+
+**Example:**
+
+```bash
+curl -X POST https://api.prismcontext.com/v1/search \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "error handling patterns", "limit": 5}'
+```
+
+**Response:**
+
+```json
+{
+  "results": [
+    {
+      "rule_id": "rule_abc123",
+      "title": "Error Handling",
+      "category": "architecture",
+      "score": 0.92,
+      "snippet": "...always use try/catch blocks and log errors..."
+    }
+  ],
+  "total": 3,
+  "query_time_ms": 45
+}
+```
+
+---
+
+## Projects
+
+### List Projects
+
+```
+GET /projects
+```
+
+### Get Project
+
+```
+GET /projects/{project_id}
+```
+
+### Create Project
+
+```
+POST /projects
+```
+
+```json
+{
+  "name": "My Web App",
+  "description": "Main marketing website"
+}
+```
+
+### Update Project
+
+```
+PATCH /projects/{project_id}
+```
+
+### Delete Project
+
+```
+DELETE /projects/{project_id}
+```
+
+---
+
+## Brands
+
+### List Brands
+
+```
+GET /brands
+```
+
+### Get Brand
+
+```
+GET /brands/{brand_id}
+```
+
+**Response:**
+
+```json
+{
+  "id": "brand_abc123",
+  "name": "Acme Corp",
+  "version": "2.0.0",
+  "colors": {
+    "primary": { "value": "#06b6d4" },
+    "secondary": { "value": "#8b5cf6" }
+  },
+  "typography": {
+    "fontFamily": {
+      "sans": "Inter",
+      "mono": "JetBrains Mono"
+    }
+  }
+}
+```
+
+### Create Brand
+
+```
+POST /brands
+```
+
+### Update Brand
+
+```
+PATCH /brands/{brand_id}
+```
+
+### Delete Brand
+
+```
+DELETE /brands/{brand_id}
+```
+
+---
+
+## Videos
+
+### Upload Video
+
+```
+POST /videos
+```
+
+Use `multipart/form-data`:
+
+```bash
+curl -X POST https://api.prismcontext.com/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "file=@video.mp4" \
+  -F "title=Design System Tour" \
+  -F "project_id=proj_xyz789"
+```
+
+**Response:**
+
+```json
+{
+  "id": "vid_abc123",
+  "status": "processing",
+  "progress": 0,
+  "estimated_time": "3 minutes"
+}
+```
+
+### Get Video Status
+
+```
+GET /videos/{video_id}
+```
+
+**Response:**
+
+```json
+{
+  "id": "vid_abc123",
+  "title": "Design System Tour",
+  "status": "completed",
+  "duration": 245,
+  "transcript_url": "https://...",
+  "rules_generated": 7
+}
+```
+
+### List Videos
+
+```
+GET /videos
+```
+
+### Delete Video
+
+```
+DELETE /videos/{video_id}
+```
+
+---
+
+## Webhooks
+
+### List Webhooks
+
+```
+GET /webhooks
+```
+
+### Create Webhook
+
+```
+POST /webhooks
+```
+
+```json
+{
+  "url": "https://your-app.com/webhook",
+  "events": ["rule.created", "rule.updated", "rule.deleted"]
+}
+```
+
+**Available Events:**
+
+| Event | Description |
+|-------|-------------|
+| `rule.created` | New rule created |
+| `rule.updated` | Rule modified |
+| `rule.deleted` | Rule deleted |
+| `project.created` | New project |
+| `brand.updated` | Brand profile changed |
+| `video.completed` | Video processing done |
+
+### Webhook Payload
+
+```json
+{
+  "event": "rule.updated",
+  "timestamp": "2024-03-21T10:30:00Z",
+  "data": {
+    "rule_id": "rule_abc123",
+    "title": "Updated Rule"
+  }
+}
+```
+
+### Delete Webhook
+
+```
+DELETE /webhooks/{webhook_id}
+```
+
+---
+
+## Error Handling
+
+### Error Response Format
+
+```json
+{
+  "error": {
+    "code": "validation_error",
+    "message": "Invalid request body",
+    "details": [
+      { "field": "title", "message": "Title is required" }
+    ]
+  }
+}
+```
+
+### Error Codes
+
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+| `unauthorized` | 401 | Invalid or missing API key |
+| `forbidden` | 403 | Insufficient permissions |
+| `not_found` | 404 | Resource not found |
+| `validation_error` | 400 | Invalid request data |
+| `rate_limited` | 429 | Too many requests |
+| `internal_error` | 500 | Server error |
+
+---
+
+## SDKs
+
+### JavaScript/TypeScript
+
+```bash
+npm install @prism/sdk
+```
+
+```typescript
+import { PrismClient } from '@prism/sdk';
+
+const prism = new PrismClient({ apiKey: 'YOUR_API_KEY' });
+
+// Get rules
+const rules = await prism.rules.list({ category: 'styling' });
+
+// Search
+const results = await prism.search('error handling');
+
+// Create rule
+const rule = await prism.rules.create({
+  title: 'New Rule',
+  content: '# Content...'
+});
+```
+
+### Python
+
+```bash
+pip install prism-sdk
+```
+
+```python
+from prism import PrismClient
+
+prism = PrismClient(api_key='YOUR_API_KEY')
+
+# Get rules
+rules = prism.rules.list(category='styling')
+
+# Search
+results = prism.search('error handling')
+```
+
+---
+
+## OpenAPI Spec
+
+Download the full OpenAPI specification:
+
+```bash
+curl https://api.prismcontext.com/v1/openapi.json -o openapi.json
+```
+
+Import into Postman, Insomnia, or other API clients.
+
+---
+
+## Related
+
+- [Semantic Search](/advanced/semantic-search)
+- [Brand Profiles](/advanced/brand-profiles)
+- [MCP Protocol](/concepts/mcp-protocol)

@@ -1,0 +1,295 @@
+# Azure OpenAI Setup
+
+Configure Azure OpenAI services for video processing.
+
+import { Callout, Steps, Tabs } from 'nextra/components'
+
+<Callout type="info">
+  Azure OpenAI is optional. Prism Cloud uses managed AI services by default.
+</Callout>
+
+## Overview
+
+For enterprise customers who need data residency control or want to use their own Azure subscription, Prism supports Bring Your Own Azure (BYOA) configuration.
+
+---
+
+## Why Use Your Own Azure?
+
+| Feature | Prism Managed | BYOA Azure |
+|---------|--------------|------------|
+| Setup | Instant | 30-60 minutes |
+| Data Residency | US regions | Your choice |
+| Costs | Included in plan | Your Azure bill |
+| Model Access | Standard | Custom/preview models |
+| Rate Limits | Shared | Dedicated |
+| Compliance | SOC 2 | Your compliance scope |
+
+---
+
+## Required Azure Services
+
+### 1. Azure OpenAI
+
+For rule extraction and semantic analysis.
+
+**Required Models:**
+- `gpt-4-turbo` or `gpt-4o` — Text analysis
+- `gpt-4-vision` — Frame analysis (optional)
+- `text-embedding-ada-002` or `text-embedding-3-small` — Embeddings
+
+### 2. Azure Speech Services
+
+For video transcription.
+
+**Required Features:**
+- Speech-to-Text (Whisper model recommended)
+
+### 3. Azure Blob Storage (Optional)
+
+For video file storage if you don't want Prism to store files.
+
+---
+
+## Setup Guide
+
+<Steps>
+  ### Create Azure OpenAI Resource
+
+  1. Go to [Azure Portal](https://portal.azure.com)
+  2. Create resource → "Azure OpenAI"
+  3. Select your subscription and region
+  4. Choose pricing tier (S0 recommended)
+  5. Wait for deployment (~5 minutes)
+
+  ### Deploy Required Models
+
+  In your Azure OpenAI resource:
+
+  1. Go to **Model deployments** → **Deploy model**
+  2. Deploy these models:
+  
+  | Model | Deployment Name | Recommended TPM |
+  |-------|-----------------|-----------------|
+  | gpt-4o | `gpt-4o` | 30K |
+  | text-embedding-3-small | `embeddings` | 120K |
+
+  ### Get Credentials
+
+  From your Azure OpenAI resource:
+
+  1. Go to **Keys and Endpoint**
+  2. Copy:
+     - **Endpoint**: `https://YOUR-RESOURCE.openai.azure.com/`
+     - **Key 1**: Your API key
+
+  ### Create Speech Service
+
+  1. Create resource → "Speech"
+  2. Select same region as OpenAI (recommended)
+  3. Choose pricing tier (S0 recommended)
+  4. Copy the **Key** and **Region**
+
+  ### Configure in Prism
+
+  Go to **Dashboard** → **Settings** → **Azure Integration**:
+
+  ```json
+  {
+    "azure_openai_endpoint": "https://YOUR-RESOURCE.openai.azure.com/",
+    "azure_openai_key": "your-key-here",
+    "azure_openai_deployment": "gpt-4o",
+    "azure_embedding_deployment": "embeddings",
+    "azure_speech_key": "your-speech-key",
+    "azure_speech_region": "eastus"
+  }
+  ```
+</Steps>
+
+---
+
+## Environment Variables
+
+For self-hosted or MCP server configuration:
+
+<Tabs items={['Dashboard', 'MCP Server', 'Docker']}>
+  <Tabs.Tab>
+    Configure in **Settings** → **Azure Integration** UI.
+  </Tabs.Tab>
+  
+  <Tabs.Tab>
+    ```bash
+    # .env or shell
+    export AZURE_OPENAI_ENDPOINT="https://YOUR-RESOURCE.openai.azure.com/"
+    export AZURE_OPENAI_KEY="your-key-here"
+    export AZURE_OPENAI_DEPLOYMENT="gpt-4o"
+    export AZURE_EMBEDDING_DEPLOYMENT="embeddings"
+    export AZURE_SPEECH_KEY="your-speech-key"
+    export AZURE_SPEECH_REGION="eastus"
+    
+    # Start MCP server with Azure
+    prism-mcp --api-key YOUR_PRISM_KEY
+    ```
+  </Tabs.Tab>
+  
+  <Tabs.Tab>
+    ```yaml
+    # docker-compose.yml
+    services:
+      prism-worker:
+        image: prism/worker:latest
+        environment:
+          - AZURE_OPENAI_ENDPOINT=https://YOUR-RESOURCE.openai.azure.com/
+          - AZURE_OPENAI_KEY=your-key-here
+          - AZURE_OPENAI_DEPLOYMENT=gpt-4o
+          - AZURE_EMBEDDING_DEPLOYMENT=embeddings
+          - AZURE_SPEECH_KEY=your-speech-key
+          - AZURE_SPEECH_REGION=eastus
+    ```
+  </Tabs.Tab>
+</Tabs>
+
+---
+
+## Model Configuration
+
+### GPT-4 Settings
+
+Recommended parameters for rule extraction:
+
+```json
+{
+  "model": "gpt-4o",
+  "temperature": 0.3,
+  "max_tokens": 4000,
+  "top_p": 0.95
+}
+```
+
+<Callout type="default">
+  Lower temperature (0.3) produces more consistent, deterministic rules.
+</Callout>
+
+### Embedding Settings
+
+For semantic search:
+
+```json
+{
+  "model": "text-embedding-3-small",
+  "dimensions": 1536
+}
+```
+
+---
+
+## Cost Estimation
+
+### Azure OpenAI
+
+| Operation | Tokens | Cost (approx) |
+|-----------|--------|---------------|
+| 10 min video analysis | ~50K | $0.50 |
+| 1000 rule embeddings | ~100K | $0.01 |
+| 100 semantic searches | ~10K | $0.001 |
+
+### Azure Speech
+
+| Operation | Duration | Cost (approx) |
+|-----------|----------|---------------|
+| Transcription | 1 hour | $0.70 |
+| Real-time | 1 hour | $1.00 |
+
+---
+
+## Testing Your Setup
+
+### Test Azure OpenAI
+
+```bash
+curl https://YOUR-RESOURCE.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2024-02-01 \
+  -H "Content-Type: application/json" \
+  -H "api-key: YOUR-KEY" \
+  -d '{
+    "messages": [{"role": "user", "content": "Say hello"}],
+    "max_tokens": 100
+  }'
+```
+
+### Test Azure Speech
+
+```bash
+curl --location \
+  "https://YOUR-REGION.api.cognitive.microsoft.com/speechtotext/transcriptions:transcribe?api-version=2024-05-15-preview" \
+  --header "Ocp-Apim-Subscription-Key: YOUR-KEY" \
+  --form "audio=@test-audio.wav" \
+  --form "definition={\"locales\":[\"en-US\"]}"
+```
+
+### Test in Prism
+
+1. Go to **Settings** → **Azure Integration**
+2. Click **Test Connection**
+3. Verify all services show green status
+
+---
+
+## Troubleshooting
+
+### "401 Unauthorized"
+
+- Check API key is correct
+- Ensure key hasn't been rotated
+- Verify endpoint URL format
+
+### "404 Deployment Not Found"
+
+- Deployment name must match exactly
+- Model may still be deploying
+- Check Azure portal for deployment status
+
+### "429 Rate Limit"
+
+- Increase TPM quota in Azure portal
+- Enable Prism's rate limiting
+- Consider separate deployments for video vs search
+
+### "Transcription Failed"
+
+- Check audio format (WAV/MP3 required)
+- Verify Speech service region matches
+- Check Speech service quota
+
+---
+
+## Security Best Practices
+
+### Key Rotation
+
+Rotate Azure keys monthly:
+
+1. Generate new key in Azure portal
+2. Update in Prism settings
+3. Delete old key after 24 hours
+
+### Network Security
+
+For enterprise:
+
+1. Enable Private Endpoints for Azure OpenAI
+2. Configure VNet integration
+3. Use Managed Identities instead of keys
+
+### Access Control
+
+- Use separate Azure resources for dev/prod
+- Grant minimal permissions to Prism
+- Enable Azure Monitor logging
+
+---
+
+## Next Steps
+
+- [Upload Videos](/video/upload) — Start processing videos
+- [Rule Extraction](/video/rule-extraction) — How extraction works
+- [API Reference](/advanced/api-reference) — Full API documentation
