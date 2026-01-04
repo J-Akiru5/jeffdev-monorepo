@@ -141,7 +141,7 @@ npm run build
 
 ### "MONGODB_URI not set"
 ```bash
-export MONGODB_URI="mongodb+srv://username:password@cluster.mongodb.net/"
+export MONGODB_URI="mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/"
 export COSMOS_DATABASE_NAME="prism"
 ```
 
