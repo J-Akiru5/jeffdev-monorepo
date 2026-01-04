@@ -6,7 +6,6 @@ import {
   ArrowLeft, 
   Download, 
   Settings, 
-  Trash2, 
   FileJson,
   Video,
   Sparkles
@@ -108,11 +107,7 @@ export default async function ProjectPage({ params }: Props) {
           <h2 className="text-sm font-medium text-white mb-4">
             📹 Video Context
           </h2>
-          <VideoContextUploader 
-            onUploadComplete={(assetId: string) => {
-              console.log("Video uploaded:", assetId);
-            }}
-          />
+          <VideoContextUploader />
         </div>
 
         {/* Rules List */}
