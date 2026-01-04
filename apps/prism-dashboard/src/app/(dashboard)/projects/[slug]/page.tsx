@@ -107,7 +107,7 @@ export default async function ProjectPage({ params }: Props) {
           <h2 className="text-sm font-medium text-white mb-4">
             📹 Video Context
           </h2>
-          <VideoContextUploader />
+          <VideoContextUploader projectId={project._id.toString()} />
         </div>
 
         {/* Rules List */}

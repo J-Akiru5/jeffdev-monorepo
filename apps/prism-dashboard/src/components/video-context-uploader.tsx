@@ -13,8 +13,10 @@ import { Card, CardHeader, CardContent } from "@jdstudio/ui";
  * <VideoContextUploader projectId="prj_abc123" />
  */
 export function VideoContextUploader({ 
+  projectId,
   onUploadComplete 
 }: { 
+    projectId?: string;
   onUploadComplete?: (assetId: string) => void;
 }) {
   const [status, setStatus] = useState<"idle" | "uploading" | "processing" | "success" | "error">("idle");
@@ -25,7 +27,11 @@ export function VideoContextUploader({
   const initializeUpload = async () => {
     try {
       setStatus("uploading");
-      const res = await fetch("/api/upload/mux", { method: "POST" });
+      const res = await fetch("/api/upload/mux", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectId }),
+      });
       
       if (!res.ok) {
         throw new Error("Failed to initialize upload");

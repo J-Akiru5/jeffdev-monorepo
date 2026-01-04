@@ -1,0 +1,360 @@
+# Prism Admin - Unified Admin Panel Architecture
+
+## Agent Instructions
+
+You are building `apps/prism-admin` — a unified admin panel for the JeffDev monorepo. This document contains everything you need to build a production-ready admin interface.
+
+---
+
+## 1. Overview
+
+### Purpose
+A centralized admin dashboard that manages:
+- **Prism Dashboard users** (subscriptions, usage)
+- **Agency projects** (client overview)
+- **Prism Docs** (content management)
+- **System analytics** (AI generations, revenue)
+
+### Target Users
+- Founder (`founder` role)
+- Admins (`admin` role)
+
+---
+
+## 2. Tech Stack (Monorepo Compatible)
+
+| Layer | Technology | Version | Notes |
+|-------|------------|---------|-------|
+| **Framework** | Next.js | 16.x | App Router, Server Actions |
+| **Runtime** | React | 19.x | Use `useActionState`, `useOptimistic` |
+| **Auth** | Clerk | Latest | RBAC via Custom Claims |
+| **Database** | Azure Cosmos DB | MongoDB API | Shared via `@jeffdev/db` |
+| **Styling** | Tailwind CSS | 4.x | Use `@tailwindcss/postcss` |
+| **UI Components** | `@jdstudio/ui` | Workspace | Shared component library |
+| **Icons** | Lucide React | Latest | Consistent with design system |
+| **Validation** | Zod | 4.x | All forms and API inputs |
+| **Analytics** | Novu | Optional | In-app notifications |
+| **Payments** | PayPal REST API | - | Subscription webhooks only |
+
+---
+
+## 3. Authentication & Authorization
+
+### Clerk Setup
+
+```typescript
+// middleware.ts
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+
+const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
+
+export default clerkMiddleware(async (auth, req) => {
+  if (isAdminRoute(req)) {
+    const { userId, sessionClaims } = await auth();
+    const role = sessionClaims?.metadata?.role as string;
+    
+    if (!userId || !["founder", "admin"].includes(role)) {
+      return Response.redirect(new URL("/unauthorized", req.url));
+    }
+  }
+});
+```
+
+### Role Hierarchy
+```
+founder > admin > (no access for employee/user)
+```
+
+### Setting Roles (Clerk Dashboard or API)
+```typescript
+// Via Clerk Backend API
+await clerkClient.users.updateUserMetadata(userId, {
+  publicMetadata: {
+    role: "admin"
+  }
+});
+```
+
+---
+
+## 4. File Structure
+
+```
+apps/prism-admin/
+├── package.json
+├── next.config.ts
+├── tailwind.config.js
+├── postcss.config.mjs
+├── middleware.ts              # Clerk RBAC guard
+├── src/
+│   ├── app/
+│   │   ├── layout.tsx         # Admin shell with sidebar
+│   │   ├── page.tsx           # Redirect to /dashboard
+│   │   ├── globals.css
+│   │   ├── (auth)/
+│   │   │   ├── sign-in/[[...sign-in]]/page.tsx
+│   │   │   └── unauthorized/page.tsx
+│   │   ├── (admin)/
+│   │   │   ├── layout.tsx     # Admin sidebar + header
+│   │   │   ├── dashboard/
+│   │   │   │   └── page.tsx   # Overview stats
+│   │   │   ├── users/
+│   │   │   │   ├── page.tsx   # User list
+│   │   │   │   └── [id]/page.tsx  # User detail
+│   │   │   ├── subscriptions/
+│   │   │   │   └── page.tsx   # Subscription management
+│   │   │   ├── agency/
+│   │   │   │   └── page.tsx   # Agency projects viewer
+│   │   │   ├── docs/
+│   │   │   │   └── page.tsx   # Docs content manager
+│   │   │   └── analytics/
+│   │   │       └── page.tsx   # Usage analytics
+│   │   └── api/
+│   │       ├── users/
+│   │       │   └── route.ts   # User CRUD
+│   │       ├── subscriptions/
+│   │       │   ├── route.ts   # Subscription management
+│   │       │   └── override/route.ts  # Manual tier override
+│   │       └── webhooks/
+│   │           └── paypal/route.ts  # PayPal IPN
+│   └── components/
+│       ├── admin-sidebar.tsx
+│       ├── admin-header.tsx
+│       ├── user-table.tsx
+│       └── stats-card.tsx
+```
+
+---
+
+## 5. Database Collections
+
+### Cosmos DB (via `@jeffdev/db`)
+
+#### Users Collection (Prism)
+```typescript
+interface PrismUser {
+  _id: ObjectId;
+  clerkId: string;          // Clerk userId
+  email: string;
+  tier: "free" | "pro" | "team" | "enterprise";
+  tierOverride?: boolean;   // Admin manually set tier
+  aiGenerationsUsed: number;
+  aiGenerationsReset: Date; // Monthly reset
+  projectCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+#### Subscriptions Collection
+```typescript
+interface Subscription {
+  _id: ObjectId;
+  userId: string;           // Clerk userId
+  paypalSubscriptionId: string;
+  tier: "pro" | "team" | "enterprise";
+  status: "active" | "cancelled" | "past_due";
+  currentPeriodEnd: Date;
+  createdAt: Date;
+}
+```
+
+#### Audit Logs Collection
+```typescript
+interface AuditLog {
+  _id: ObjectId;
+  adminId: string;          // Clerk userId of admin
+  action: string;           // "tier_override" | "user_suspend" | etc.
+  targetUserId?: string;
+  metadata: Record<string, unknown>;
+  createdAt: Date;
+}
+```
+
+---
+
+## 6. Key Features
+
+### 6.1 Dashboard Overview
+- Total users (by tier)
+- Monthly revenue
+- AI generations this month
+- Active projects count
+- Recent signups chart
+
+### 6.2 User Management
+- List all Prism users with search/filter
+- View user details (projects, usage)
+- Suspend/unsuspend accounts
+- Override subscription tier (founder only)
+
+### 6.3 Subscription Management
+- View all active subscriptions
+- Manual tier override (with audit log)
+- PayPal webhook receiver
+
+### 6.4 Agency Viewer
+- Read-only view of Agency projects
+- Client contact info
+- Invoice status
+
+### 6.5 Docs Manager (Future)
+- Edit MDX content via UI
+- Trigger docs rebuild
+
+---
+
+## 7. API Routes
+
+### GET /api/users
+```typescript
+// List users with pagination and filters
+const params = {
+  page: 1,
+  limit: 20,
+  tier: "pro",
+  search: "email@example.com"
+};
+```
+
+### POST /api/subscriptions/override
+```typescript
+// Founder only: Override user tier
+const body = {
+  userId: "user_xxx",
+  tier: "team",
+  reason: "Beta tester reward"
+};
+```
+
+### POST /api/webhooks/paypal
+```typescript
+// PayPal IPN handler
+// Verify signature, update subscription status
+```
+
+---
+
+## 8. Branding Guidelines
+
+### Colors (Design System)
+```css
+--bg-void: #050505;
+--bg-surface: #0a0a0a;
+--border-subtle: rgba(255, 255, 255, 0.05);
+--border-active: rgba(255, 255, 255, 0.15);
+--accent-cyan: #06b6d4;
+--accent-purple: #8b5cf6;
+--accent-emerald: #10b981;
+```
+
+### Typography
+- **Headings:** Inter (Variable), semibold to black
+- **Mono:** JetBrains Mono (for IDs, counts, code)
+
+### Components
+- Use `@jdstudio/ui` for: Button, GlassPanel, MetricTile, Badge
+- Table styling: Dark background, subtle borders, hover states
+
+---
+
+## 9. Implementation Order
+
+### Step 1: Scaffold App (15 min)
+```bash
+cd apps
+mkdir prism-admin
+cd prism-admin
+npx create-next-app@latest . --typescript --tailwind --app --src-dir
+```
+
+### Step 2: Configure Monorepo
+- Add to [turbo.json](file:///c:/dev/Next%20Js/jeffdev-monorepo/turbo.json) tasks
+- Link `@jeffdev/db` and `@jdstudio/ui`
+- Set up Tailwind with shared config
+
+### Step 3: Auth Setup (30 min)
+- Install `@clerk/nextjs`
+- Create middleware for admin routes
+- Build sign-in and unauthorized pages
+
+### Step 4: Admin Shell (1 hr)
+- Create sidebar with navigation
+- Create header with user menu
+- Build dashboard overview page
+
+### Step 5: User Management (2 hrs)
+- User list with table
+- User detail page
+- Suspend/override actions
+
+### Step 6: Subscription Management (1.5 hrs)
+- Subscription list
+- Manual override form
+- PayPal webhook handler
+
+### Step 7: Analytics (1 hr)
+- Usage charts (optional: use Recharts)
+- Revenue summary
+
+---
+
+## 10. Environment Variables
+
+```bash
+# Clerk
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_xxx
+CLERK_SECRET_KEY=sk_xxx
+
+# Database (from Doppler)
+COSMOS_ENDPOINT=xxx
+COSMOS_KEY=xxx
+
+# PayPal
+PAYPAL_CLIENT_ID=xxx
+PAYPAL_CLIENT_SECRET=xxx
+PAYPAL_WEBHOOK_ID=xxx
+
+# URLs
+NEXT_PUBLIC_ADMIN_URL=https://admin.jeffdev.studio
+NEXT_PUBLIC_DASHBOARD_URL=https://prism.jeffdev.studio
+```
+
+---
+
+## 11. Security Checklist
+
+- [ ] All routes protected by Clerk middleware
+- [ ] Role check: `founder` or `admin` only
+- [ ] Tier override requires `founder` role
+- [ ] All mutations create audit logs
+- [ ] PayPal webhook signature verification
+- [ ] No `.env` files — use Doppler
+
+---
+
+## 12. Deployment
+
+### Vercel Project
+- **Name:** `prism-admin`
+- **Root Directory:** `apps/prism-admin`
+- **Framework:** Next.js
+- **Environment:** Link Doppler integration
+
+### Domain
+- Primary: `admin.jeffdev.studio` or `admin.prism.jeffdev.studio`
+
+---
+
+## Quick Reference for Agent
+
+```
+When building this app:
+1. Use @jeffdev/db for all database access
+2. Use @jdstudio/ui for all components
+3. Follow the JD Studio design system (dark void theme)
+4. Use Server Actions for mutations
+5. Always validate with Zod
+6. Log all admin actions to audit_logs collection
+7. Test with founder role first
+```

@@ -178,3 +178,69 @@ function getStackPrompt(stack: string): string {
   
   return prompts[stack] || prompts['nextjs'];
 }
+
+/**
+ * Enhance a rule using Gemini AI
+ * Improves clarity, adds examples, and makes the rule more actionable.
+ */
+export interface EnhanceRuleResult {
+  enhancedContent: string;
+  suggestions: string[];
+  processingTime: number;
+}
+
+export async function enhanceRuleWithAI(
+  ruleName: string,
+  ruleContent: string,
+  category: string
+): Promise<EnhanceRuleResult> {
+  const startTime = Date.now();
+  const model = getGeminiModel();
+
+  const prompt = `You are an expert software architect enhancing development rules for AI coding assistants.
+
+Given this rule:
+- **Name:** ${ruleName}
+- **Category:** ${category}
+- **Current Content:**
+${ruleContent}
+
+Your task:
+1. Improve clarity and conciseness
+2. Add concrete code examples (good vs bad) if missing
+3. Make the rule more actionable and specific
+4. Ensure it's suitable for AI assistants like Cursor, Windsurf, or Claude
+
+Respond with ONLY valid JSON:
+{
+  "enhancedContent": "The improved rule content in markdown format with examples",
+  "suggestions": ["Suggestion 1 for further improvement", "Suggestion 2", ...]
+}`;
+
+  try {
+    const result = await model.generateContent(prompt);
+    const response = result.response.text();
+
+    // Extract JSON from response (might be wrapped in markdown code blocks)
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error("Failed to extract JSON from Gemini response");
+    }
+
+    const parsed = JSON.parse(jsonMatch[0]) as {
+      enhancedContent: string;
+      suggestions: string[];
+    };
+
+    return {
+      ...parsed,
+      processingTime: Date.now() - startTime,
+    };
+  } catch (error) {
+    console.error("[Gemini] Enhancement failed:", error);
+    throw new Error(
+      `Failed to enhance rule: ${error instanceof Error ? error.message : "Unknown error"}`
+    );
+  }
+}
+
