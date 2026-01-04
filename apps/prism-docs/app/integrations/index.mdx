@@ -1,0 +1,48 @@
+# IDE Integrations
+
+Connect Prism Context Engine to your favorite code editor and AI assistant.
+
+Prism supports real-time rule synchronization via **MCP (Model Context Protocol)**, as well as manual export for editors that don't support MCP yet.
+
+## Supported Editors
+
+| Editor | MCP Support | Manual Export | Status |
+|--------|-------------|---------------|--------|
+| Cursor | ✅ Yes | ✅ Yes | Full Support |
+| Windsurf | ✅ Yes | ✅ Yes | Full Support |
+| VS Code | ✅ Yes | ✅ Yes | Full Support |
+| Claude Desktop | ✅ Yes | ❌ | Full Support |
+| GitHub Copilot | ❌ | ❌ | Coming Soon |
+
+## Setup Guides
+
+<Cards>
+  <Card title="Cursor" href="/integrations/cursor">
+    Configure Cursor with MCP and .cursorrules
+  </Card>
+  <Card title="Windsurf" href="/integrations/windsurf">
+    Set up Windsurf with MCP integration
+  </Card>
+  <Card title="VS Code" href="/integrations/vscode">
+    Install the MCP extension for VS Code
+  </Card>
+  <Card title="Claude Desktop" href="/integrations/claude-desktop">
+    Connect Claude Desktop to Prism
+  </Card>
+</Cards>
+
+## Integration Methods
+
+### MCP (Recommended)
+
+The **Model Context Protocol** provides real-time synchronization:
+- Rules update automatically when you change them in the dashboard
+- No need to re-export files
+- Works across all your projects
+
+### Manual Export
+
+For quick setup or editors without MCP:
+- Export `.cursorrules` or `.windsurfrules` from dashboard
+- Place the file in your project root
+- Re-export when rules change

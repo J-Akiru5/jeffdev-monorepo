@@ -68,23 +68,25 @@ npm install -g @prism/mcp-server
 
 ## Core Features
 
+import { Rocket, Video, FileCode, Plug, Settings, Code } from 'lucide-react'
+
 <Cards>
-  <Card title="Getting Started" href="/guide/getting-started">
-    Install, configure, and deploy your first rule
+  <Card icon={<Rocket size={20} />} title="Quick Start" href="/quick-start">
+    Deploy your first rule in 5 minutes
   </Card>
-  <Card title="Video Processing" href="/guide/video-processing">
-    Extract architectural rules from screen recordings
+  <Card icon={<Video size={20} />} title="Video Processing" href="/video">
+    Extract rules from screen recordings
   </Card>
-  <Card title="Rule Management" href="/guide/rules">
+  <Card icon={<FileCode size={20} />} title="Rule Management" href="/rules">
     Create, organize, and deploy constraints
   </Card>
-  <Card title="MCP Integration" href="/guide/mcp-integration">
+  <Card icon={<Plug size={20} />} title="IDE Integrations" href="/integrations">
     Connect to Cursor, Windsurf, and Claude
   </Card>
-  <Card title="Editor Setup" href="/guide/editor-setup">
-    Configure your IDE for MCP
+  <Card icon={<Settings size={20} />} title="Advanced" href="/advanced">
+    Semantic search and brand profiles
   </Card>
-  <Card title="API Reference" href="/api-reference">
+  <Card icon={<Code size={20} />} title="API Reference" href="/advanced/api-reference">
     Programmatic access to rules and transcripts
   </Card>
 </Cards>

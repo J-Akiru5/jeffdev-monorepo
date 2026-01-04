@@ -1,7 +1,9 @@
 {
+  "index": "Overview",
   "creating-rules": "Creating Rules",
   "templates": "Templates",
   "exporting": "Exporting",
+  "security": "Security Rules",
   "design-system": "Design System Example",
   "tech-stack": "Tech Stack Example"
 }

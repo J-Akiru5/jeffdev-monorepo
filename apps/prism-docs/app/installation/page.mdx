@@ -2,11 +2,7 @@
 
 Get Prism Context Engine set up in your development environment.
 
-import { Callout, Steps, Tabs } from 'nextra/components'
-
-<Callout type="info">
-  **Fastest Path**: Use the [Web Dashboard](https://prism.jeffdev.studio) — no installation required for basic usage.
-</Callout>
+> **Fastest Path**: Use the [Web Dashboard](https://prism.jeffdev.studio) — no installation required for basic usage.
 
 ## Choose Your Setup
 
@@ -23,32 +19,26 @@ Prism offers two ways to use context rules:
 
 The simplest way to use Prism. No local installation required.
 
-<Steps>
-
-### Create an Account
+### Step 1: Create an Account
 
 1. Visit [prism.jeffdev.studio/sign-up](https://prism.jeffdev.studio/sign-up)
 2. Sign up with your email or GitHub
 3. Verify your email address
 
-### Create Your First Project
+### Step 2: Create Your First Project
 
 1. Click **"New Project"** in the dashboard
 2. Enter your project name (e.g., "My SaaS App")
 3. Select your tech stack (Next.js, React, etc.)
 
-### Export Rules
+### Step 3: Export Rules
 
 1. Create or generate rules (see [Creating Rules](/rules/creating-rules))
 2. Click **"Export"** → Choose your IDE format
 3. Download the `.cursorrules` or `.windsurfrules` file
 4. Place it in your project root
 
-</Steps>
-
-<Callout type="warning">
-  **Manual Workflow**: With this method, you'll need to re-export rules whenever they change.
-</Callout>
+> ⚠️ **Manual Workflow**: With this method, you'll need to re-export rules whenever they change.
 
 ---
 
@@ -64,43 +54,36 @@ For real-time synchronization between the dashboard and your IDE.
 
 ### Installation
 
-<Tabs items={['npm', 'pnpm', 'yarn']}>
-  <Tabs.Tab>
-    ```bash
-    npm install -g @prism/mcp-server
-    ```
-  </Tabs.Tab>
-  <Tabs.Tab>
-    ```bash
-    pnpm add -g @prism/mcp-server
-    ```
-  </Tabs.Tab>
-  <Tabs.Tab>
-    ```bash
-    yarn global add @prism/mcp-server
-    ```
-  </Tabs.Tab>
-</Tabs>
+**npm:**
+```bash
+npm install -g @prism/mcp-server
+```
+
+**pnpm:**
+```bash
+pnpm add -g @prism/mcp-server
+```
+
+**yarn:**
+```bash
+yarn global add @prism/mcp-server
+```
 
 ### Get Your API Key
 
-<Steps>
-
-### Open Dashboard Settings
+#### Step 1: Open Dashboard Settings
 
 Navigate to [prism.jeffdev.studio/settings/api](https://prism.jeffdev.studio/settings/api)
 
-### Generate API Key
+#### Step 2: Generate API Key
 
 1. Click **"Generate New Key"**
 2. Give it a name (e.g., "MacBook Pro")
 3. Copy the key immediately — it won't be shown again
 
-### Store Securely
+#### Step 3: Store Securely
 
 Save your API key somewhere safe. You'll need it for IDE configuration.
-
-</Steps>
 
 ### Verify Installation
 

@@ -287,6 +287,8 @@ export function DocsAssistant({ className }: DocsAssistantProps) {
               type="submit"
               disabled={!input.trim() || isLoading}
               className="docs-assistant-send-btn"
+              aria-label="Send message"
+              title="Send message"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="22" y1="2" x2="11" y2="13" />

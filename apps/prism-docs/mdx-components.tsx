@@ -1,37 +1,75 @@
 import { useMDXComponents as getThemeComponents } from 'nextra-theme-docs'
+import { Callout, Steps, Tabs } from 'nextra/components'
 import Link from 'next/link'
-import type { ReactNode } from 'react'
+import type { ReactNode, ReactElement } from 'react'
 
-// Custom Card Component for Nextra 4
+// Icon wrapper for Card component
+function CardIcon({ children }: { children: ReactNode }) {
+  return (
+    <div className="card-icon-container">
+      {children}
+    </div>
+  )
+}
+
+// Custom Card Component for Nextra 4 - Windsurf Style
 function Card({ 
   title, 
   href, 
+  icon,
   children 
 }: { 
   title: string
   href: string
+    icon?: ReactElement
   children?: ReactNode 
 }) {
   return (
     <Link
       href={href}
-      className="group block rounded-lg border border-white/10 bg-white/[0.02] p-4 transition-all hover:border-white/20 hover:bg-white/[0.04]"
+      className="nextra-card group"
     >
-      <h3 className="mb-2 font-semibold text-white group-hover:text-cyan-400 transition-colors">
-        {title} <span className="inline-block transition-transform group-hover:translate-x-1">→</span>
-      </h3>
-      {children && (
-        <span className="text-sm text-white/60 block">{children}</span>
+      {icon && (
+        <CardIcon>{icon}</CardIcon>
       )}
+      <div className="card-content">
+        <h3 className="card-title">
+          {title}
+        </h3>
+        {children && (
+          <span className="card-description">{children}</span>
+        )}
+      </div>
     </Link>
   )
 }
 
-// Cards Grid Container
+// Cards Grid Container - Windsurf 2x3 Layout
 function Cards({ children }: { children: ReactNode }) {
   return (
-    <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div className="nextra-cards">
       {children}
+    </div>
+  )
+}
+
+// Feature Card - For larger feature highlights
+function FeatureCard({
+  icon,
+  title,
+  description,
+}: {
+  icon?: ReactElement
+  title: string
+  description: string
+}) {
+  return (
+    <div className="feature-card">
+      {icon && (
+        <div className="feature-icon">{icon}</div>
+      )}
+      <h4 className="feature-title">{title}</h4>
+      <p className="feature-description">{description}</p>
     </div>
   )
 }
@@ -45,6 +83,11 @@ export function useMDXComponents(components?: Record<string, React.ComponentType
     ...themeComponents,
     Card,
     Cards,
+    FeatureCard,
+    Callout,
+    Steps,
+    Tabs,
     ...components
   }
 }
+

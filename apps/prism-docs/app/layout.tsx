@@ -108,7 +108,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* Content Layer */}
         <div className="relative z-10">
           <Layout
-            banner={<Banner storageKey="prism-docs-banner">🎉 Prism Context Engine v1.0.3 - Now with FlexSearch &amp; Azure OpenAI!</Banner>}
+            banner={<Banner storageKey="prism-docs-banner">Prism Context Engine v1.0.3 - Now with FlexSearch &amp; Azure OpenAI!</Banner>}
             navbar={
               <Navbar 
                 logo={
@@ -237,7 +237,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 </div>
               </Footer>
             }
-            sidebar={{ defaultMenuCollapseLevel: 1 }}
+            sidebar={{ defaultMenuCollapseLevel: 2, toggleButton: true }}
             editLink="Edit on GitHub"
           >
             {children}
