@@ -47,20 +47,26 @@ export async function POST(request: Request) {
       // No body is fine for this endpoint
     }
 
-    // Create Mux direct upload
-    // Note: Auto-generated captions should be configured in Mux Dashboard settings
-    // or enabled via asset update after creation
+    // Create Mux direct upload with auto-generated captions enabled
     const upload = await mux.video.uploads.create({
       cors_origin: process.env.NEXT_PUBLIC_PRISM_URL || "*",
       new_asset_settings: {
         playback_policies: ["public"],
+        // Enable auto-generated captions (transcription)
+        // Note: TypeScript types may be outdated, but this is a valid Mux API parameter
+        generated_subtitles: [
+          {
+            language_code: "en",
+            name: "English CC",
+          },
+        ],
         // Store user context in passthrough for webhook processing
         passthrough: JSON.stringify({
           userId,
           ...metadata,
           uploadedAt: new Date().toISOString(),
         }),
-      },
+      } as Record<string, unknown>,
     });
 
     console.log(`[Mux] Created upload ${upload.id} for user ${userId}`);

@@ -118,6 +118,8 @@ function ClientCard({ client }: { client: {
         </div>
         <button 
           onClick={(e) => e.preventDefault()}
+          title="More options" 
+          aria-label="Client options menu"
           className="p-1.5 rounded-md hover:bg-white/10 text-white/40 hover:text-white transition-colors"
         >
           <MoreVertical className="h-4 w-4" />

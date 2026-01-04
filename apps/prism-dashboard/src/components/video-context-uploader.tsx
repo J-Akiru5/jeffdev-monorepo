@@ -1,8 +1,9 @@
 "use client";
 
 import MuxUploader from "@mux/mux-uploader-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent } from "@jdstudio/ui";
+import { toast } from "sonner";
 
 /**
  * @component VideoContextUploader
@@ -23,10 +24,26 @@ export function VideoContextUploader({
   const [uploadUrl, setUploadUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Warn user if they try to leave during upload
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (status === "uploading") {
+        e.preventDefault();
+        e.returnValue = "Video is still uploading. Are you sure you want to leave?";
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [status]);
+
   // Fetch a signed upload URL from our API
   const initializeUpload = async () => {
     try {
       setStatus("uploading");
+      toast.loading("Initializing upload...", { id: "upload" });
+
       const res = await fetch("/api/upload/mux", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -39,19 +56,27 @@ export function VideoContextUploader({
       
       const data = await res.json();
       setUploadUrl(data.url);
+      toast.success("Ready to upload! Select your video.", { id: "upload" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Upload initialization failed");
       setStatus("error");
+      toast.error("Failed to initialize upload", { id: "upload" });
     }
   };
 
   const handleSuccess = () => {
     setStatus("processing");
+    toast.loading("Video uploaded! Processing transcript...", { id: "upload" });
     console.log("✅ Upload complete, processing transcript...");
     
     // After Mux processes the video, the webhook will handle the rest
     setTimeout(() => {
       setStatus("success");
+      toast.success("Video uploaded! Rules will be extracted automatically.", {
+        id: "upload",
+        description: "This may take a few minutes. Check back soon.",
+        duration: 5000,
+      });
       onUploadComplete?.("uploaded");
     }, 2000);
   };
@@ -60,6 +85,7 @@ export function VideoContextUploader({
     console.error("❌ Upload failed");
     setError("Video upload failed. Please try again.");
     setStatus("error");
+    toast.error("Upload failed. Please try again.", { id: "upload" });
   };
 
   return (
@@ -118,6 +144,9 @@ export function VideoContextUploader({
               <div className="h-2 w-2 animate-pulse rounded-full bg-cyan-400" />
               <span className="font-mono text-xs">Uploading to Mux...</span>
             </div>
+            <p className="text-center text-xs text-amber-400/70">
+              ⚠️ Please don&apos;t leave this page while uploading
+            </p>
           </div>
         )}
 
@@ -148,7 +177,7 @@ export function VideoContextUploader({
             <div className="text-center">
               <p className="font-mono text-sm text-emerald-400">Video Context Captured!</p>
               <p className="font-mono text-xs text-white/40 mt-1">
-                Rules will be generated when transcript is ready
+                Rules will be generated when transcript is ready (1-3 mins)
               </p>
             </div>
             <button
@@ -186,3 +215,4 @@ export function VideoContextUploader({
     </Card>
   );
 }
+

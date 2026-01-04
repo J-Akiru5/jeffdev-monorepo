@@ -108,7 +108,7 @@ export default async function UsersPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button className="p-1.5 rounded-md hover:bg-white/10 text-white/40 hover:text-white transition-colors">
+                    <button title="More options" aria-label="User options menu" className="p-1.5 rounded-md hover:bg-white/10 text-white/40 hover:text-white transition-colors">
                       <MoreVertical className="h-4 w-4" />
                     </button>
                   </td>
@@ -135,7 +135,7 @@ export default async function UsersPage() {
                     </div>
                   </div>
                 </div>
-                <button className="p-2 rounded-md hover:bg-white/10 text-white/40">
+                <button title="More options" aria-label="User options menu" className="p-2 rounded-md hover:bg-white/10 text-white/40">
                   <MoreVertical className="h-5 w-5" />
                 </button>
               </div>
