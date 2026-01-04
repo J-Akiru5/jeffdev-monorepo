@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { 
   MetricTile, 
-  GridBackground, 
   SectionHeader, 
   GlassPanel,
   Button,
@@ -46,8 +45,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="relative space-y-10">
-      <GridBackground variant="neon" />
-
       {/* Hero Section */}
       <div className="relative z-10 pt-4">
         <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3 py-1 mb-6">
@@ -71,12 +68,16 @@ export default async function DashboardPage() {
           </div>
           
           <div className="flex gap-3">
-            <Button variant="secondary" className="hidden md:flex">
-              Documentation
+            <Button variant="secondary" className="hidden md:flex" asChild>
+              <Link href="https://docs.prism.jeffdev.studio" target="_blank">
+                Documentation
+              </Link>
             </Button>
-            <Button variant="primary" className="shadow-glow-cyan/20">
-              <Plus className="mr-2 h-4 w-4" />
-              New Project
+            <Button variant="primary" className="shadow-glow-cyan/20" asChild>
+              <Link href="/projects/new">
+                <Plus className="mr-2 h-4 w-4" />
+                New Project
+              </Link>
             </Button>
           </div>
         </div>

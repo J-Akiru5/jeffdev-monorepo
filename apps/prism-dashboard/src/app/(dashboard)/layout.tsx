@@ -7,9 +7,9 @@ import {
   Palette, 
   Sparkles, 
   CreditCard,
-  Settings,
-  Video
+  Settings
 } from "lucide-react";
+import { GridBackground } from "@jdstudio/ui";
 
 /**
  * Dashboard Layout
@@ -17,7 +17,8 @@ import {
  */
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-[#050505]">
+    <div className="relative flex min-h-screen bg-[#050505]">
+      <GridBackground variant="neon" />
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex fixed left-0 top-0 z-40 h-screen w-64 flex-col border-r border-white/5 bg-[#050505]/95 backdrop-blur-xl">
         {/* Logo */}
@@ -36,7 +37,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <NavItem href="/projects" icon={FolderKanban}>Projects</NavItem>
           <NavItem href="/brand" icon={Palette}>Branding</NavItem>
           <NavItem href="/generate" icon={Sparkles}>AI Kitchen</NavItem>
-          <NavItem href="/videos" icon={Video}>Video Context</NavItem>
           
           <div className="my-4 border-t border-white/5" />
           
