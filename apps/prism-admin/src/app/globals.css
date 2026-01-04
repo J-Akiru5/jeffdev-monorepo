@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+/*
+ * ============================================
+ * PRISM ADMIN - MISSION CONTROL DESIGN SYSTEM
+ * ============================================
+ * Distinct from marketing: darker, amber accents, data-dense
+ */
+
+:root {
+  /* Canvas (Darker than marketing) */
+  --color-void: #030303;
+  --color-surface: #080808;
+  --color-glass: rgba(8, 8, 8, 0.85);
+  --color-elevated: #0c0c0c;
+
+  /* Admin Accents (Amber/Orange) */
+  --color-amber: #f59e0b;
+  --color-amber-light: #fbbf24;
+  --color-amber-dark: #d97706;
+  --color-orange: #fb923c;
+
+  /* Status Colors */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #06b6d4;
+
+  /* Borders */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-active: rgba(255, 255, 255, 0.12);
+  --border-amber: rgba(245, 158, 11, 0.4);
+}
+
+@theme inline {
+  --color-void: var(--color-void);
+  --color-surface: var(--color-surface);
+  --color-elevated: var(--color-elevated);
+  --color-amber: var(--color-amber);
+  --color-amber-light: var(--color-amber-light);
+  --color-amber-dark: var(--color-amber-dark);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background: var(--color-void);
+  color: #e5e5e5;
+  line-height: 1.5;
+}
+
+::selection {
+  background: rgba(245, 158, 11, 0.3);
+  color: white;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-amber);
+  outline-offset: 2px;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-void);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-active);
+  border-radius: 3px;
+}
+
+/* Admin-specific utilities */
+.glass-admin {
+  background: var(--color-glass);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+}
+
+.text-gradient-amber {
+  background: linear-gradient(135deg, var(--color-amber), var(--color-orange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Data table styles */
+.admin-table {
+  @apply w-full text-sm;
+}
+
+.admin-table th {
+  @apply text-left text-xs font-medium text-white/50 uppercase tracking-wider px-4 py-3 border-b border-white/5;
+}
+
+.admin-table td {
+  @apply px-4 py-3 border-b border-white/5;
+}
+
+.admin-table tr:hover {
+  @apply bg-white/[0.02];
+}
+
+/* Mobile bottom nav safe area */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

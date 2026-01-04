@@ -7,6 +7,7 @@
     "NEXT_PUBLIC_APP_URL",
     "NEXT_PUBLIC_PRISM_URL",
     "NEXT_PUBLIC_DOCS_URL",
+    "NEXT_PUBLIC_ADMIN_URL",
     "MONGODB_URI",
     "COSMOS_CONNECTION_STRING",
     "COSMOS_DATABASE_NAME",
@@ -21,11 +22,15 @@
     "PAYPAL_CLIENT_SECRET",
     "PAYPAL_MODE",
     "PAYPAL_PLAN_*",
+    "PAYPAL_API_URL",
     "NEXT_PUBLIC_PAYPAL_CLIENT_ID",
     "NEXT_PUBLIC_FIREBASE_*",
     "FIREBASE_*",
     "R2_*",
-    "DOPPLER_*"
+    "DOPPLER_*",
+    "ZOHO_*",
+    "RESEND_*",
+    "ADMIN_EMAIL"
   ],
   "tasks": {
     "build": {

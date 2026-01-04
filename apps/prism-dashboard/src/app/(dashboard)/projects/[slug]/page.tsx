@@ -104,9 +104,17 @@ export default async function ProjectPage({ params }: Props) {
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Video Uploader */}
         <div>
-          <h2 className="text-sm font-medium text-white mb-4">
-            📹 Video Context
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-medium text-white">
+              📹 Video Context
+            </h2>
+            <Link
+              href={`/projects/${slug}/videos`}
+              className="text-xs text-cyan-400 hover:text-cyan-300"
+            >
+              View All Videos →
+            </Link>
+          </div>
           <VideoContextUploader projectId={project._id.toString()} />
         </div>
 
