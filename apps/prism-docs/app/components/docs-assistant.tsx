@@ -299,7 +299,7 @@ export function DocsAssistant({ className }: DocsAssistantProps) {
 
           {/* Footer */}
           <div className="docs-assistant-footer">
-            <span>Powered by Gemini 1.5 Flash</span>
+            <span>Powered by Gemini 2.5 Flash</span>
           </div>
         </div>
       )}
