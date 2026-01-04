@@ -26,10 +26,16 @@
   --border-subtle: rgba(255, 255, 255, 0.08);
   --border-active: rgba(255, 255, 255, 0.15);
   --border-glow: rgba(255, 255, 255, 0.25);
+  --border-neon-cyan: rgba(6, 182, 212, 0.5);
+  --border-neon-purple: rgba(139, 92, 246, 0.5);
 
   /* Typography */
   --tracking-tight: -0.02em;
   --tracking-mono: -0.01em;
+
+  /* Shadows */
+  --shadow-glow-cyan: 0 0 20px rgba(6, 182, 212, 0.15);
+  --shadow-glow-purple: 0 0 20px rgba(139, 92, 246, 0.15);
 }
 
 /* ----------------------------------------
@@ -42,6 +48,9 @@
   --color-cyan-accent: var(--color-cyan);
   --color-purple-accent: var(--color-purple);
   --color-emerald-accent: var(--color-emerald);
+  
+  --shadow-glow-cyan: var(--shadow-glow-cyan);
+  --shadow-glow-purple: var(--shadow-glow-purple);
 }
 
 /* ----------------------------------------

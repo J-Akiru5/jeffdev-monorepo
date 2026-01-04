@@ -27,3 +27,7 @@ export { Input, inputVariants, type InputProps } from "./input";
 export { Badge, badgeVariants, type BadgeProps } from "./badge";
 export { ProgressBar } from "./progress-bar";
 export { DataTable } from "./data-table";
+export { MetricTile, type MetricTileProps } from "./metric-tile";
+export { GridBackground } from "./grid-background";
+export { SectionHeader } from "./section-header";
+export { GlassPanel } from "./glass-panel";

@@ -5,6 +5,7 @@
     "title": "Getting Started"
   },
   "introduction": "Introduction",
+  "changelog-page": "Changelog",
   "installation": "Installation",
   "quick-start": "Quick Start",
   "---core-concepts": {
@@ -41,7 +42,7 @@
     "type": "separator",
     "title": "Resources"
   },
-  "changelog-page": "Changelog",
+
   "security-page": "Security & Privacy",
   "guide": {
     "display": "hidden"

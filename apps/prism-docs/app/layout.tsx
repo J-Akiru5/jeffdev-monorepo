@@ -131,111 +131,105 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             pageMap={pageMap}
             docsRepositoryBase="https://github.com/J-Akiru5/jeffdev-monorepo/tree/main/apps/prism-docs"
             footer={
-              <Footer>
-                <div className="w-full">
-                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8 py-12">
-                  {/* Brand */}
-                  <div className="col-span-1">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Image
-                        src="/prism-icon.png"
-                        alt="Prism Context Engine"
-                        width={24}
-                        height={24}
-                      />
-                      <span className="text-gradient-cyan font-bold">Prism Context Engine</span>
-                    </div>
-                    <p className="text-white/40 text-sm">
-                      The Context Operating System for developers who ship fast.
-                    </p>
-                    <p className="text-white/30 text-xs mt-2 font-mono">
-                      v1.0.3
-                    </p>
-                  </div>
-
-                  {/* Product */}
-                  <div>
-                    <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Product</h3>
-                    <ul className="space-y-2">
-                      <li>
-                        <a href="https://prism.jeffdev.studio" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
-                          Dashboard
-                        </a>
-                      </li>
-                      <li>
-                        <a href="https://prism.jeffdev.studio/pricing" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
-                          Pricing
-                        </a>
-                      </li>
-                      <li>
-                        <a href="/api-reference" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
-                          API Reference
-                        </a>
-                      </li>
-                      <li>
-                        <a href="/guide" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
-                          User Guide
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-
-                  {/* Company */}
-                  <div>
-                    <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Company</h3>
-                    <ul className="space-y-2">
-                      <li>
-                        <a href="https://jeffdev.studio" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
-                          About JD Studio
-                        </a>
-                      </li>
-                      <li>
-                        <a href="https://jeffdev.studio/contact" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
-                          Contact
-                        </a>
-                      </li>
-                      <li>
-                        <a href="https://github.com/J-Akiru5/jeffdev-monorepo" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
-                          GitHub
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-
-                  {/* CTA */}
-                  <div>
-                    <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Get Started</h3>
-                    <p className="text-white/60 text-sm mb-4">
-                      Ready to eliminate context pollution?
-                    </p>
-                    <a
-                      href="https://prism.jeffdev.studio/sign-up"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block glass px-6 py-2 rounded-md hover:border-cyan-500/50 transition-all text-sm font-mono uppercase tracking-wider text-white"
-                    >
-                      Start Free →
-                    </a>
-                  </div>
-                    </div>
-
-                    <div className="border-t border-white/5 pt-8 pb-4 flex flex-col md:flex-row justify-between items-center gap-4">
-                      <p className="text-white/30 text-xs font-mono">
-                        © {new Date().getFullYear()} JD Studio. Built with Prism Context Engine.
+              <div className="w-full bg-[#050505] border-t border-white/5">
+                {/* Main Footer Content */}
+                <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 w-full">
+                    {/* Brand Column */}
+                    <div className="lg:col-span-1">
+                      <div className="flex items-center gap-3 mb-6">
+                        <Image
+                          src="/prism-icon.png"
+                          alt="Prism Context Engine"
+                          width={28}
+                          height={28}
+                        />
+                        <span className="text-white font-semibold text-lg">Prism Context Engine</span>
+                      </div>
+                      <p className="text-white/50 text-sm leading-relaxed mb-6">
+                        The Context Operating System for developers who ship fast. Eliminate AI hallucinations with governed context rules.
                       </p>
-                      <div className="flex gap-6 mt-4 md:mt-0">
-                        <a href="https://jeffdev.studio/terms" target="_blank" rel="noopener noreferrer" className="text-white/30 hover:text-white/60 text-xs transition-colors">
-                          Terms
-                        </a>
-                        <a href="https://jeffdev.studio/privacy" target="_blank" rel="noopener noreferrer" className="text-white/30 hover:text-white/60 text-xs transition-colors">
-                          Privacy
+                      <div className="space-y-2 text-sm">
+                        <a href="mailto:hello@jeffdev.studio" className="flex items-center gap-2 text-white/40 hover:text-cyan-400 transition-colors">
+                          <span>✉</span> hello@jeffdev.studio
                         </a>
                       </div>
                     </div>
+
+                    {/* Documentation Column */}
+                    <div>
+                      <h4 className="text-white/40 text-xs font-medium uppercase tracking-widest mb-6">Documentation</h4>
+                      <ul className="space-y-3">
+                        <li>
+                          <a href="/introduction" className="text-white/70 hover:text-cyan-400 text-sm transition-colors">Introduction</a>
+                        </li>
+                        <li>
+                          <a href="/quick-start" className="text-white/70 hover:text-cyan-400 text-sm transition-colors">Quick Start</a>
+                        </li>
+                        <li>
+                          <a href="/video" className="text-white/70 hover:text-cyan-400 text-sm transition-colors">Video Processing</a>
+                        </li>
+                        <li>
+                          <a href="/integrations" className="text-white/70 hover:text-cyan-400 text-sm transition-colors">IDE Integrations</a>
+                        </li>
+                      </ul>
+                    </div>
+
+                    {/* Product Column */}
+                    <div>
+                      <h4 className="text-white/40 text-xs font-medium uppercase tracking-widest mb-6">Product</h4>
+                      <ul className="space-y-3">
+                        <li>
+                          <a href="https://prism.jeffdev.studio" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-cyan-400 text-sm transition-colors">Dashboard</a>
+                        </li>
+                        <li>
+                          <a href="https://prism.jeffdev.studio/pricing" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-cyan-400 text-sm transition-colors">Pricing</a>
+                        </li>
+                        <li>
+                          <a href="/advanced/api-reference" className="text-white/70 hover:text-cyan-400 text-sm transition-colors">API Reference</a>
+                        </li>
+                        <li>
+                          <a href="/changelog-page" className="text-white/70 hover:text-cyan-400 text-sm transition-colors">Changelog</a>
+                        </li>
+                      </ul>
+                    </div>
+
+                    {/* CTA Column */}
+                    <div>
+                      <h4 className="text-white/40 text-xs font-medium uppercase tracking-widest mb-6">Start a Project</h4>
+                      <p className="text-white/50 text-sm leading-relaxed mb-6">
+                        Ready to eliminate context pollution? Let&apos;s get you started.
+                      </p>
+                      <a
+                        href="https://prism.jeffdev.studio/sign-up"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 border border-white/20 px-5 py-2.5 text-sm font-medium text-white hover:border-cyan-500/50 hover:text-cyan-400 transition-all"
+                      >
+                        GET_STARTED <span className="text-xs">↗</span>
+                      </a>
+                    </div>
                   </div>
                 </div>
-              </Footer>
+
+                {/* Bottom Bar */}
+                <div className="border-t border-white/5">
+                  <div className="max-w-7xl mx-auto px-6 lg:px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div className="flex items-center gap-6 text-xs">
+                      <a href="https://prism.jeffdev.studio/terms" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white/60 transition-colors">
+                        Terms of Service
+                      </a>
+                      <a href="https://prism.jeffdev.studio/privacy" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white/60 transition-colors">
+                        Privacy Policy
+                      </a>
+                    </div>
+                    <div className="flex items-center gap-4 text-xs text-white/30">
+                      <span>© {new Date().getFullYear()} JD Studio.</span>
+                      <span className="font-mono text-[10px] text-white/20">DTI: VL1927082895984</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             }
             sidebar={{ defaultMenuCollapseLevel: 2, toggleButton: true }}
             editLink="Edit on GitHub"

@@ -30,7 +30,7 @@ export default function PrivacyPage() {
 
           <div className="prose prose-invert prose-sm max-w-none space-y-8">
             {/* Section 1 */}
-            <section className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+            <section className="rounded-lg border border-white/10 bg-white/2 p-6">
               <h2 className="text-xl font-bold text-white mb-4">1. Introduction</h2>
               <p className="text-white/70 leading-relaxed">
                 Prism Context Engine, operated by JeffDev Web Development Services (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;), 
@@ -44,7 +44,7 @@ export default function PrivacyPage() {
             </section>
 
             {/* Section 2 */}
-            <section className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+            <section className="rounded-lg border border-white/10 bg-white/2 p-6">
               <h2 className="text-xl font-bold text-white mb-4">2. Information We Collect</h2>
               
               <div className="space-y-6">
@@ -103,7 +103,7 @@ export default function PrivacyPage() {
             </section>
 
             {/* Section 3 */}
-            <section className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+            <section className="rounded-lg border border-white/10 bg-white/2 p-6">
               <h2 className="text-xl font-bold text-white mb-4">3. How We Use Your Information</h2>
               <p className="text-white/70 leading-relaxed mb-4">
                 We use your information to:
@@ -120,7 +120,7 @@ export default function PrivacyPage() {
             </section>
 
             {/* Section 4 */}
-            <section className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+            <section className="rounded-lg border border-white/10 bg-white/2 p-6">
               <h2 className="text-xl font-bold text-white mb-4">4. Third-Party Services</h2>
               <p className="text-white/70 leading-relaxed mb-4">
                 We use the following third-party services to provide our platform:
@@ -139,7 +139,7 @@ export default function PrivacyPage() {
             </section>
 
             {/* Section 5 */}
-            <section className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+            <section className="rounded-lg border border-white/10 bg-white/2 p-6">
               <h2 className="text-xl font-bold text-white mb-4">5. AI Training Policy</h2>
               <div className="rounded-md border border-emerald-500/20 bg-emerald-500/5 p-4 mb-4">
                 <p className="text-emerald-400 font-medium">
@@ -154,7 +154,7 @@ export default function PrivacyPage() {
             </section>
 
             {/* Section 6 */}
-            <section className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+            <section className="rounded-lg border border-white/10 bg-white/2 p-6">
               <h2 className="text-xl font-bold text-white mb-4">6. Data Security</h2>
               <p className="text-white/70 leading-relaxed mb-4">
                 We implement industry-standard security measures:
@@ -173,7 +173,7 @@ export default function PrivacyPage() {
             </section>
 
             {/* Section 7 */}
-            <section className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+            <section className="rounded-lg border border-white/10 bg-white/2 p-6">
               <h2 className="text-xl font-bold text-white mb-4">7. Data Retention</h2>
               <ul className="list-disc list-inside text-white/70 space-y-2">
                 <li><strong className="text-white">Active accounts:</strong> Data retained for the duration of your subscription</li>
@@ -184,7 +184,7 @@ export default function PrivacyPage() {
             </section>
 
             {/* Section 8 */}
-            <section className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+            <section className="rounded-lg border border-white/10 bg-white/2 p-6">
               <h2 className="text-xl font-bold text-white mb-4">8. Your Rights</h2>
               <p className="text-white/70 leading-relaxed mb-4">
                 You have the right to:
@@ -205,7 +205,7 @@ export default function PrivacyPage() {
             </section>
 
             {/* Section 9 */}
-            <section className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+            <section className="rounded-lg border border-white/10 bg-white/2 p-6">
               <h2 className="text-xl font-bold text-white mb-4">9. Cookies</h2>
               <p className="text-white/70 leading-relaxed">
                 We use essential cookies for authentication and session management. 
@@ -215,7 +215,7 @@ export default function PrivacyPage() {
             </section>
 
             {/* Section 10 */}
-            <section className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+            <section className="rounded-lg border border-white/10 bg-white/2 p-6">
               <h2 className="text-xl font-bold text-white mb-4">10. Changes to This Policy</h2>
               <p className="text-white/70 leading-relaxed">
                 We may update this Privacy Policy periodically. We will notify you of significant 

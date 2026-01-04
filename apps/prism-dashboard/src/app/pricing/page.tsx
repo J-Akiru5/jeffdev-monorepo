@@ -153,7 +153,7 @@ export default function PublicPricingPage() {
               className={`relative flex flex-col rounded-lg border p-6 ${
                 plan.popular
                   ? 'border-cyan-500/50 bg-gradient-to-b from-cyan-500/10 to-transparent'
-                  : 'border-white/10 bg-white/[0.02]'
+                : 'border-white/10 bg-white/2'
               }`}
             >
               {plan.popular && (
@@ -270,9 +270,9 @@ export default function PublicPricingPage() {
             {faqs.map((faq) => (
               <details
                 key={faq.question}
-                className="group rounded-lg border border-white/10 bg-white/[0.02] overflow-hidden"
+                className="group rounded-lg border border-white/10 bg-white/2 overflow-hidden"
               >
-                <summary className="cursor-pointer p-4 flex items-center justify-between font-medium text-white hover:bg-white/[0.02] transition-colors">
+                <summary className="cursor-pointer p-4 flex items-center justify-between font-medium text-white hover:bg-white/2 transition-colors">
                   {faq.question}
                   <ChevronDown className="h-5 w-5 text-white/40 transition-transform group-open:rotate-180" />
                 </summary>
@@ -305,7 +305,7 @@ export default function PublicPricingPage() {
             </Link>
             <Link
               href="https://jeffdev.studio/contact"
-              className="rounded-md border border-white/10 bg-white/[0.02] px-8 py-4 transition-all hover:bg-white/[0.05] hover:border-white/20 active:scale-95"
+              className="rounded-md border border-white/10 bg-white/2 px-8 py-4 transition-all hover:bg-white/5 hover:border-white/20 active:scale-95"
             >
               <span className="font-mono text-sm uppercase tracking-wider text-white/80">
                 Talk to Sales

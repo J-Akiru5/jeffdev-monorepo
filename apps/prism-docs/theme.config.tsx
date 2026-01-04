@@ -32,7 +32,7 @@ const config = {
     </>
   ),
   primaryHue: 189, // Cyan
-  darkMode: true,
+  darkMode: false,
   nextThemes: {
     defaultTheme: 'dark',
     forcedTheme: 'dark'

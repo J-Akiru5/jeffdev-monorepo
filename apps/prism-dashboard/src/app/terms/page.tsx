@@ -30,7 +30,7 @@ export default function TermsPage() {
 
           <div className="prose prose-invert prose-sm max-w-none space-y-8">
             {/* Section 1 */}
-            <section className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+            <section className="rounded-lg border border-white/10 bg-white/2 p-6">
               <h2 className="text-xl font-bold text-white mb-4">1. Services</h2>
               <p className="text-white/70 leading-relaxed">
                 Prism Context Engine, operated by JeffDev Web Development Services (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;), 
@@ -46,7 +46,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 2 */}
-            <section className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+            <section className="rounded-lg border border-white/10 bg-white/2 p-6">
               <h2 className="text-xl font-bold text-white mb-4">2. Subscription Tiers</h2>
               <p className="text-white/70 leading-relaxed mb-4">
                 We offer four subscription tiers: Free, Pro, Team, and Enterprise. Each tier has specific 
@@ -61,7 +61,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 3 */}
-            <section className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+            <section className="rounded-lg border border-white/10 bg-white/2 p-6">
               <h2 className="text-xl font-bold text-white mb-4">3. Payment Terms</h2>
               <p className="text-white/70 leading-relaxed mb-4">
                 All payments are processed securely through PayPal. By subscribing to a paid plan:
@@ -79,7 +79,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 4 */}
-            <section className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+            <section className="rounded-lg border border-white/10 bg-white/2 p-6">
               <h2 className="text-xl font-bold text-white mb-4">4. Intellectual Property</h2>
               <div className="space-y-4">
                 <div>
@@ -107,7 +107,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 5 */}
-            <section className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+            <section className="rounded-lg border border-white/10 bg-white/2 p-6">
               <h2 className="text-xl font-bold text-white mb-4">5. Data Processing</h2>
               <p className="text-white/70 leading-relaxed mb-4">
                 When you upload videos for context extraction:
@@ -121,7 +121,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 6 */}
-            <section className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+            <section className="rounded-lg border border-white/10 bg-white/2 p-6">
               <h2 className="text-xl font-bold text-white mb-4">6. Usage Restrictions</h2>
               <p className="text-white/70 leading-relaxed mb-4">
                 You agree not to:
@@ -136,7 +136,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 7 */}
-            <section className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+            <section className="rounded-lg border border-white/10 bg-white/2 p-6">
               <h2 className="text-xl font-bold text-white mb-4">7. Limitation of Liability</h2>
               <p className="text-white/70 leading-relaxed">
                 We build systems to the best of our ability using industry-standard security practices. 
@@ -155,7 +155,7 @@ export default function TermsPage() {
             </section>
 
             {/* Section 8 */}
-            <section className="rounded-lg border border-white/10 bg-white/[0.02] p-6">
+            <section className="rounded-lg border border-white/10 bg-white/2 p-6">
               <h2 className="text-xl font-bold text-white mb-4">8. Termination</h2>
               <div className="space-y-4">
                 <div>
