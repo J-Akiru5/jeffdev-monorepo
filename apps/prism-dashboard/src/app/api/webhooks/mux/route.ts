@@ -39,9 +39,20 @@ const MuxWebhookSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  console.log("[Mux Webhook] 📥 Received webhook request");
+
   try {
     // Get raw body for signature verification
     const rawBody = await request.text();
+    console.log(`[Mux Webhook] Body length: ${rawBody.length} chars`);
+
+    // Log the event type early for debugging
+    try {
+      const previewBody = JSON.parse(rawBody);
+      console.log(`[Mux Webhook] Event type: ${previewBody.type}`);
+    } catch {
+      console.log("[Mux Webhook] Could not preview body");
+    }
 
     // Step 1: Verify Mux webhook signature (mandatory in production)
     const isValid = await verifyMuxSignature(request, rawBody);

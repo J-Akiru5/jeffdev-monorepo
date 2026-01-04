@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
 import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 import { 
   LayoutDashboard, 
   Users, 
@@ -20,7 +21,19 @@ import {
  */
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const user = await currentUser();
+  
+  if (!user) {
+    redirect("/sign-in");
+  }
+  
   const role = (user?.publicMetadata as { role?: string })?.role || "user";
+  
+  // Check if user has admin access
+  const allowedRoles = ["founder", "admin", "partner"];
+  if (!allowedRoles.includes(role)) {
+    redirect("/unauthorized");
+  }
+  
   const isFounder = role === "founder";
   const isAdmin = role === "admin" || isFounder;
 

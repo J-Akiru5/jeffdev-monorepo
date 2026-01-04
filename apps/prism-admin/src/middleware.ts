@@ -10,20 +10,16 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
 
-  // Protect admin routes
+  // Protect admin routes - just require authentication
+  // Role check happens in layout.tsx where we have access to full user metadata
   if (isAdminRoute(req)) {
-    const { userId, sessionClaims } = await auth();
+    const { userId } = await auth();
 
     if (!userId) {
       return NextResponse.redirect(new URL("/sign-in", req.url));
     }
-
-    const role = (sessionClaims?.metadata as { role?: string })?.role;
-    const allowedRoles = ["founder", "admin", "partner"];
-
-    if (!role || !allowedRoles.includes(role)) {
-      return NextResponse.redirect(new URL("/unauthorized", req.url));
-    }
+    
+    // Let authenticated users through - role check in layout
   }
 
   return NextResponse.next();
