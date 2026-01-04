@@ -164,10 +164,19 @@ async function handleTrackReady(data: z.infer<typeof MuxWebhookSchema>["data"]) 
     
     console.log(`[Mux] ✅ Extracted ${aiResult.rules.length} rules (confidence: ${aiResult.confidence})`);
 
-    // Step 2.5: Generate embedding for semantic search
-    console.log(`[Mux] Generating embedding for semantic search...`);
-    const embedding = await generateEmbedding(transcript.fullText);
-    console.log(`[Mux] ✅ Generated ${embedding.length}-dimensional embedding`);
+    // Step 2.5: Generate embedding for semantic search (optional - may fail if not configured)
+    let embedding: number[] = [];
+    try {
+      if (process.env.AZURE_OPENAI_EMBEDDING_DEPLOYMENT) {
+        console.log(`[Mux] Generating embedding for semantic search...`);
+        embedding = await generateEmbedding(transcript.fullText);
+        console.log(`[Mux] ✅ Generated ${embedding.length}-dimensional embedding`);
+      } else {
+        console.log(`[Mux] ⏭️ Skipping embeddings - AZURE_OPENAI_EMBEDDING_DEPLOYMENT not configured`);
+      }
+    } catch (embeddingError) {
+      console.warn(`[Mux] ⚠️ Failed to generate embedding, continuing without it:`, embeddingError);
+    }
 
     // Step 3: Store VideoTranscript document
     const transcriptsCollection = await getCollection("videoTranscripts");
@@ -181,7 +190,7 @@ async function handleTrackReady(data: z.infer<typeof MuxWebhookSchema>["data"]) 
       segments: transcript.segments,
       duration: transcript.duration,
       language: transcript.language || 'en',
-      embedding, // Add vector embedding for semantic search
+      embedding: embedding.length > 0 ? embedding : undefined, // Only add if generated
       extractedRules: [], // Will populate with rule IDs after inserting rules
       userId: metadata.userId,
       projectId: metadata.projectId,
