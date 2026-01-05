@@ -1,0 +1,53 @@
+{
+  "index": "Prism Context Engine",
+  "---getting-started": {
+    "type": "separator",
+    "title": "Getting Started"
+  },
+  "introduction": "Introduction",
+  "changelog-page": "Changelog",
+  "installation": "Installation",
+  "quick-start": "Quick Start",
+  "---core-concepts": {
+    "type": "separator",
+    "title": "Core Concepts"
+  },
+  "concepts": "Concepts",
+  "---video-processing": {
+    "type": "separator",
+    "title": "Video Processing"
+  },
+  "video": "Video",
+  "---rule-management": {
+    "type": "separator",
+    "title": "Rule Management"
+  },
+  "rules": "Rules",
+  "---integrations": {
+    "type": "separator",
+    "title": "Integrations"
+  },
+  "integrations": "IDE Setup",
+  "---advanced": {
+    "type": "separator",
+    "title": "Advanced"
+  },
+  "advanced": "Advanced",
+  "---troubleshooting": {
+    "type": "separator",
+    "title": "Troubleshooting"
+  },
+  "troubleshooting": "Troubleshooting",
+  "---resources": {
+    "type": "separator",
+    "title": "Resources"
+  },
+
+  "security-page": "Security & Privacy",
+  "guide": {
+    "display": "hidden"
+  },
+  "api-reference": {
+    "display": "hidden"
+  }
+}

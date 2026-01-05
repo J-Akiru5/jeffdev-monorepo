@@ -1,0 +1,165 @@
+# Prism Context Engine
+
+**The Context Operating System for Vibecoders** — Eliminate "Context Pollution" by orchestrating the flow of rules, design systems, and tech stacks between the Cloud and local AI Agents.
+
+## What is Prism Context Engine?
+
+Prism Context Engine is a complete **AI-powered context governance platform** that:
+
+1. **Extracts Rules from Video** - Upload screen recordings, automatically extract architectural patterns using Azure OpenAI
+2. **Enforces Standards** - Deploy rules to AI coding assistants via MCP (Model Context Protocol)
+3. **Enables Semantic Search** - Find relevant architectural discussions using vector embeddings
+
+### The Core Metaphor
+
+| Concept | Prism Equivalent | Description |
+|---------|------------------|-------------|
+| 🍳 **The Kitchen** | SaaS Dashboard | Where the "Chef" (Developer) mixes ingredients (Next.js, Tailwind, Glassmorphism) |
+| 📜 **The Recipe** | Context Rules | The output file (e.g., `.cursorrules`) containing strict instructions |
+| 🍽️ **The Waiter** | MCP Protocol | Delivers the fresh Recipe directly to the IDE's table |
+
+### Video-to-Context Extraction
+
+**Automated Documentation**: Upload a screen recording of your development workflow. Prism analyzes the video transcript using Azure OpenAI to automatically extract architectural rules, coding patterns, and best practices into actionable context that your AI coding assistant can understand.
+
+Works with:
+- **Cursor** ✅
+- **Windsurf** ✅
+- **Claude (via MCP)** ✅  
+- **VS Code** (via MCP extension)
+- **GitHub Copilot** (coming soon)
+
+Instead of hoping your AI follows best practices, **Prism enforces them**.
+
+## Quick Start
+
+### Option A: Web Dashboard (Recommended)
+
+```bash
+# 1. Sign up at the web dashboard
+https://prism.jeffdev.studio/sign-up
+
+# 2. Create your first project and brand profile
+# 3. Upload a video or manually create rules
+# 4. Export .cursorrules file and paste into your project
+```
+
+### Option B: MCP Server (Advanced)
+
+For real-time sync with your IDE:
+
+```bash
+# 1. Install MCP server globally
+npm install -g @prism/mcp-server
+
+# 2. Configure your IDE (Cursor/Windsurf/VS Code)
+# Add to your MCP settings:
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": ["--api-key", "YOUR_API_KEY"]
+    }
+  }
+}
+
+# 3. Your AI assistant now has live access to your rules
+```
+
+## Core Features
+
+import { Rocket, Video, FileCode, Plug, Settings, Code } from 'lucide-react'
+
+<Cards>
+  <Card icon={<Rocket size={20} />} title="Quick Start" href="/quick-start">
+    Deploy your first rule in 5 minutes
+  </Card>
+  <Card icon={<Video size={20} />} title="Video Processing" href="/video">
+    Extract rules from screen recordings
+  </Card>
+  <Card icon={<FileCode size={20} />} title="Rule Management" href="/rules">
+    Create, organize, and deploy constraints
+  </Card>
+  <Card icon={<Plug size={20} />} title="IDE Integrations" href="/integrations">
+    Connect to Cursor, Windsurf, and Claude
+  </Card>
+  <Card icon={<Settings size={20} />} title="Advanced" href="/advanced">
+    Semantic search and brand profiles
+  </Card>
+  <Card icon={<Code size={20} />} title="API Reference" href="/advanced/api-reference">
+    Programmatic access to rules and transcripts
+  </Card>
+</Cards>
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              Video Upload (Mux)                             │
+│  Screen recordings → Automatic transcription                │
+└────────────────────────────┬────────────────────────────────┘
+                             │ Webhook
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│           Azure OpenAI Processing (GPT-4o-mini)             │
+│  Extract rules + Generate embeddings for search             │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│            Azure Cosmos DB (MongoDB API)                    │
+│    Rules Collection + Video Transcripts + Embeddings        │
+└────────────────────────────┬────────────────────────────────┘
+                             │ MCP Protocol
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   Your IDE (Cursor/Windsurf)                │
+│  AI follows your rules automatically during coding          │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## What Makes Prism Different?
+
+### 🎥 Video-First Context Capture
+Record your screen while discussing architecture. Prism automatically extracts rules from your explanations.
+
+### 🧠 AI-Powered Rule Extraction
+GPT-4o-mini analyzes transcripts to identify:
+- Architectural patterns
+- Code style conventions
+- Naming rules
+- Testing strategies
+- Security practices
+
+### 🔍 Semantic Search
+Vector embeddings enable finding relevant architectural discussions, not just keyword matching.
+
+### 🚀 Zero-Config MCP Integration
+`npx prism connect` and you're done. Your AI assistant now has context.
+
+## Real-World Example
+
+```typescript
+// Before Prism: Generic code
+const data = await fetch('/api/users');
+
+// After Prism: Enforces your standards
+const { data, error } = await api.users.list();
+if (error) {
+  toast.error(error.message);
+  return;
+}
+```
+
+Your AI assistant learns from your videos that you:
+- Use custom API wrapper with error handling
+- Show errors via toast notifications
+- Follow early return patterns
+
+## Built by JeffDev Studio
+
+Prism Context Engine is part of the [JeffDev](https://jeffdev.studio) ecosystem — enterprise-grade tools for developers who want AI that respects their architecture.
+
+**Current Version:** 1.0.3  
+**License:** MIT  
+**Support:** [GitHub Issues](https://github.com/J-Akiru5/jeffdev-monorepo/issues)

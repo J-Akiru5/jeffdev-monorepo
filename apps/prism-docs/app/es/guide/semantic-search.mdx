@@ -1,0 +1,213 @@
+# Semantic Video Search
+
+Find relevant architectural discussions using AI-powered vector search.
+
+## Overview
+
+Prism Context Engine uses **Azure OpenAI embeddings** to enable semantic search across all your video transcripts. Instead of exact keyword matching, it understands the _meaning_ of your query.
+
+## How It Works
+
+```
+Query: "React hooks best practices"
+         ↓
+    [Generate embedding]
+         ↓
+   [Cosine similarity search]
+         ↓
+    Find videos discussing:
+    - useEffect cleanup
+    - Custom hook patterns
+    - Hook dependencies
+    - Performance optimization
+```
+
+## Using Search in Your IDE
+
+### From Cursor/Windsurf
+
+Ask your AI assistant:
+```
+"Search my video transcripts for React state management patterns"
+```
+
+The MCP tool `search_video_transcript` will:
+1. Generate embedding for your query
+2. Find top 5 most relevant videos
+3. Return snippets with timestamps
+4. Link to full playback
+
+### Example Response
+
+```markdown
+# Video Transcript Search Results
+
+**Query:** "React state management"
+**Found:** 3 relevant video(s)
+
+### 1. React Architecture Patterns - Dec 2024
+
+**Relevance:** 94% match
+**Duration:** 15:32
+**Uploaded:** 12/15/2024
+
+**Snippet:**
+> For state management, we use React Context API for simple cases,
+> and only reach for Redux when we have complex global state...
+
+**Playback:** https://stream.mux.com/xyz123
+**Extracted Rules:** 5 architectural patterns
+
+---
+
+### 2. TypeScript + React Best Practices
+
+**Relevance:** 87% match
+...
+```
+
+## Search from Dashboard
+
+1. Go to **Dashboard** → **Search Transcripts**
+2. Enter your query
+3. Filter by:
+   - Project ID
+   - Date range
+   - Minimum relevance score
+4. Click result to view full transcript
+
+## Search Capabilities
+
+### Semantic Understanding
+
+Finds relevant content even with different wording:
+
+| You Search For | It Finds Videos About |
+|---|---|
+| "error handling" | try-catch blocks, error boundaries, toast notifications |
+| "component structure" | folder organization, feature-based architecture, barrel exports |
+| "TypeScript patterns" | type safety, interfaces, generics, utility types |
+| "testing strategies" | unit tests, Vitest, mocking, coverage |
+
+### Relevance Scoring
+
+Results ranked by cosine similarity (0-100%):
+- **90-100%**: Highly relevant, directly discusses topic
+- **70-89%**: Related, mentions topic in context
+- **50-69%**: Tangentially related
+- **< 50%**: Not shown (filtered out)
+
+## API Usage
+
+### JavaScript/TypeScript
+
+```typescript
+import { generateQueryEmbedding } from '@/lib/azure-openai';
+import { findTopKSimilar } from '@/lib/vector-search';
+
+// 1. Generate query embedding
+const queryEmbedding = await generateQueryEmbedding(
+  "React hooks best practices"
+);
+
+// 2. Fetch transcripts from database
+const transcripts = await db.collection("videoTranscripts")
+  .find({ projectId: "my-project" })
+  .toArray();
+
+// 3. Find most similar
+const results = findTopKSimilar(queryEmbedding, transcripts, 5);
+
+// 4. Use results
+results.forEach(result => {
+  console.log(result.videoTitle, result.similarity);
+});
+```
+
+### MCP Tool (from CLI)
+
+```bash
+# Test search directly
+echo '{"method":"tools/call","params":{"name":"search_video_transcript","arguments":{"query":"React hooks"}}}' | \
+  npx prism connect
+```
+
+## Advanced Search Techniques
+
+### Specific Queries
+
+✅ **Good**: "How do we handle API errors in this codebase?"
+❌ **Bad**: "errors"
+
+### Combined Concepts
+
+✅ **Good**: "TypeScript interface design for API responses"
+❌ **Bad**: "TypeScript"
+
+### Use Cases
+
+✅ **Good**: "What's our pattern for form validation?"
+❌ **Bad**: "forms"
+
+## Performance
+
+### Query Time
+- Embedding generation: ~200ms
+- Database search: ~50ms
+- Total: < 300ms
+
+### Accuracy
+- Azure OpenAI `text-embedding-3-small` model
+- 1536 dimensions
+- Cosine similarity metric
+
+## Limitations
+
+### Not Indexed
+- Individual words (search finds concepts, not grep)
+- Code syntax (use IDE search for exact code)
+- File names (unless mentioned in discussion)
+
+### Language Support
+Currently supports:
+- English ✅
+- Spanish (experimental)
+- Other languages (requires Mux to support transcription)
+
+## Cost
+
+Per search query:
+- **Embedding generation**: $0.00002 (2 cents per 1000 queries)
+- **Database query**: Included in Cosmos DB costs
+
+**Effectively free** for typical usage.
+
+## Troubleshooting
+
+### "No results found"
+- Try broader query
+- Check if videos exist for that topic
+- Verify projectId filter isn't too restrictive
+
+### "Low relevance scores"
+- Videos may not deeply discuss that topic
+- Try different wording
+- Check if content was properly transcribed
+
+### "Search is slow"
+- Ensure Cosmos DB region is close to Azure OpenAI
+- Check if you have many transcripts (> 1000)
+- Consider pagination
+
+## Privacy & Security
+
+- Embeddings never leave your Azure subscription
+- Transcripts stored in your Cosmos DB
+- Search queries not logged by OpenAI
+- MCP communication over stdio (local only)
+
+## Next Steps
+
+- [Video Processing Guide](/guide/video-processing)
+- [MCP Integration](/guide/mcp-integration)
+- [API Reference](/api-reference/mcp-server)

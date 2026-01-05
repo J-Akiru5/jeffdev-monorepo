@@ -1,0 +1,99 @@
+# Database API
+
+The `@jeffdev/db` package provides shared database access for all Prism ecosystem apps.
+
+## Installation
+
+```bash
+npm install @jeffdev/db
+```
+
+## Firebase (Agency)
+
+For the Agency marketing site and admin panel.
+
+```typescript
+import { firestore, auth } from "@jeffdev/db/firebase";
+
+// Get Firestore instance
+const db = firestore();
+const users = await db.collection("users").get();
+
+// Get Auth instance
+const authClient = auth();
+const user = await authClient.getUser(uid);
+```
+
+## Cosmos DB (Prism)
+
+For the Prism SaaS platform.
+
+```typescript
+import { getCollection, getDatabase, closeConnection } from "@jeffdev/db/cosmos";
+
+// Get a typed collection
+const rules = await getCollection<Rule>("rules");
+
+// Query documents
+const activeRules = await rules.find({ isActive: true }).toArray();
+
+// Insert a document
+await rules.insertOne({
+  name: "My Rule",
+  category: "architecture",
+  content: "...",
+  // ...
+});
+
+// Close connection on shutdown
+await closeConnection();
+```
+
+## Zod Schemas
+
+Type-safe validation for all data models.
+
+```typescript
+import { 
+  UserSchema, 
+  RuleSchema, 
+  ProjectSchema,
+  type User,
+  type Rule 
+} from "@jeffdev/db/schema";
+
+// Validate data
+const user = UserSchema.parse(rawData);
+
+// Type inference
+const rule: Rule = {
+  id: "rule-001",
+  name: "Example",
+  category: "architecture",
+  content: "...",
+  priority: 1,
+  isActive: true,
+  createdBy: "user_123",
+  createdAt: new Date().toISOString(),
+};
+```
+
+## Available Schemas
+
+| Schema | Description |
+|--------|-------------|
+| `UserSchema` | Firebase/Clerk user profile |
+| `UserRoleSchema` | Role enum (founder, admin, partner, employee) |
+| `RuleSchema` | Prism architectural rule |
+| `RuleCategorySchema` | Rule category enum |
+| `RuleSetSchema` | Collection of rules |
+| `ProjectSchema` | Agency client project |
+| `InvoiceSchema` | Billing invoice |
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `AGENCY_FIREBASE_KEY` | Firebase Admin SDK service account JSON |
+| `MONGODB_URI` | Azure Cosmos DB connection string |
+| `COSMOS_DATABASE_NAME` | Database name (default: "prism") |

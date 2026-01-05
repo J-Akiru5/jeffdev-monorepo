@@ -1,0 +1,55 @@
+# Design System Rules
+
+Core visual constraints for the JeffDev ecosystem.
+
+## Visual Constitution
+
+```
+Category: styling
+Priority: 1
+Tags: design, ui, system, tailwind
+```
+
+### Core Philosophy
+
+- **Vibe**: Precision Engineering, Stealth Luxury, "Operating System" feel
+- **The "Void" Law**: The universe is `#050505`. There is no light mode.
+
+### Color Palette
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `bg-void` | `#050505` | Base background |
+| `bg-glass` | `rgba(10, 10, 10, 0.6)` + blur | Cards, panels |
+| `primary-cyan` | `#06b6d4` | Primary accent |
+| `primary-purple` | `#8b5cf6` | Secondary accent |
+| `border-subtle` | `rgba(255, 255, 255, 0.08)` | Dividers |
+
+### Typography
+
+- **Headings**: Inter (tracking: -0.02em, weights: 600-900)
+- **Code/Data**: JetBrains Mono (tags, dates, IDs, code snippets)
+
+### Geometry
+
+- **Radius**: `rounded-md` (6px) or `rounded-sm` (4px)
+- **Never**: Use `rounded-xl` or `rounded-2xl` unless for massive modals
+
+### Component Patterns
+
+**Buttons (Ghost Glow)**:
+```tsx
+<button className="group relative overflow-hidden rounded-md border border-white/10 bg-black/20 px-6 py-2 transition-all hover:border-white/20 active:scale-95">
+  <div className="absolute inset-0 -z-10 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100" />
+  <span className="font-mono text-sm uppercase tracking-wider text-white">
+    Execute_
+  </span>
+</button>
+```
+
+**Cards (Glass Panels)**:
+```tsx
+<div className="border border-white/[0.05] bg-white/[0.02] rounded-md p-6">
+  {/* Content */}
+</div>
+```
