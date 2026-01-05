@@ -4,9 +4,10 @@ import { Banner, Head } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import 'nextra-theme-docs/style.css'
-import './globals.css'
+import '@/app/globals.css'
 import Image from 'next/image'
-import { DocsAssistant } from './components/docs-assistant'
+import { DocsAssistant } from '@/app/components/docs-assistant'
+import { LanguageSwitcher } from '@/app/components/language-switcher'
 
 // Typography - Matching Agency Design System
 const inter = Inter({
@@ -93,11 +94,42 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const pageMap = await getPageMap()
+export default async function RootLayout({ 
+  children, 
+  params 
+}: { 
+  children: React.ReactNode; 
+  params: Promise<{ lang: string }> 
+}) {
+  const { lang } = await params
+  
+  // Fix for Nextra Dynamic Route i18n
+  // 1. Unwrap the [lang] folder so the sidebar shows the content directly
+  // 2. Recursively replace [lang] placeholder with actual locale
+  const originalPageMap = await getPageMap()
+  
+  const localizePageMap = (map: any[]): any[] => {
+    return map.map(item => {
+      const newItem = { ...item }
+      if (newItem.route) {
+        newItem.route = newItem.route.replace('/[lang]', `/${lang}`)
+      }
+      if (newItem.children) {
+        newItem.children = localizePageMap(newItem.children)
+      }
+      return newItem
+    })
+  }
+
+  // Find the [lang] folder item and use its children as the root map
+  // This restores the original sidebar structure
+  const langItem = originalPageMap.find((item: any) => item.name === '[lang]')
+  const pageMap = langItem && langItem.children 
+    ? localizePageMap(langItem.children) 
+    : localizePageMap(originalPageMap)
 
   return (
-    <html lang="en" dir="ltr" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
+    <html lang={lang} dir="ltr" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
       <Head />
       <body className="bg-void font-sans antialiased">
         {/* Global Grid Background - Matching Agency Design */}
@@ -126,7 +158,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   </div>
                 }
                 projectLink="https://github.com/J-Akiru5/jeffdev-monorepo"
-              />
+              >
+                <LanguageSwitcher />
+              </Navbar>
             }
             pageMap={pageMap}
             docsRepositoryBase="https://github.com/J-Akiru5/jeffdev-monorepo/tree/main/apps/prism-docs"

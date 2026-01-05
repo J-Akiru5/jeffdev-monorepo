@@ -80,6 +80,16 @@ const config = {
     defaultTheme: 'dark',
     forcedTheme: 'dark'
   },
+  i18n: [
+    { locale: 'en-US', text: 'English (US)' },
+    { locale: 'tl', text: 'Tagalog' },
+    { locale: 'ja', text: '日本語' },
+    { locale: 'es', text: 'Español' },
+    { locale: 'id', text: 'Bahasa Indonesia' },
+    { locale: 'en-GB', text: 'English (UK)' },
+    { locale: 'ru', text: 'Русский' },
+    { locale: 'nl', text: 'Nederlands' }
+  ],
   search: {
     placeholder: 'Search documentation...'
   },

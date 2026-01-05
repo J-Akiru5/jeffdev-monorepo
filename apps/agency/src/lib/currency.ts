@@ -2,7 +2,7 @@
  * Currency Utilities
  * ------------------
  * Core functions for currency formatting and conversion.
- * All base prices are stored in PHP and converted to USD when needed.
+ * USD is the default currency. PHP is used for geo-detected PH users.
  */
 
 export type CurrencyCode = 'PHP' | 'USD';

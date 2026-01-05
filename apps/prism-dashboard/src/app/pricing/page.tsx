@@ -25,7 +25,7 @@ const plans = [
   {
     name: 'Pro',
     tagline: 'For serious developers',
-    price: { monthly: 990, annual: 9900 },
+    price: { monthly: 18, annual: 180 },
     features: [
       'Unlimited rules',
       'Unlimited components',
@@ -43,7 +43,7 @@ const plans = [
   {
     name: 'Team',
     tagline: 'Collaborate with your team',
-    price: { monthly: 2990, annual: 29900 },
+    price: { monthly: 54, annual: 540 },
     features: [
       'Everything in Pro',
       'Unlimited projects',
@@ -178,7 +178,7 @@ export default function PublicPricingPage() {
                 ) : (
                   <div className="flex items-baseline gap-1">
                     <span className="text-3xl font-bold text-white">
-                      ₱{plan.price.monthly.toLocaleString()}
+                          ${plan.price.monthly}
                     </span>
                     <span className="text-white/60">/month</span>
                   </div>
