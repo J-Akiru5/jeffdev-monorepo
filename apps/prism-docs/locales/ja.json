@@ -1,0 +1,65 @@
+{
+  "common": {
+    "search_placeholder": "ドキュメントを検索...",
+    "edit_on_github": "GitHubで編集",
+    "give_feedback": "質問がありますか？フィードバックをお寄せください →",
+    "on_this_page": "このページの内容",
+    "copy_page": "ページをコピー",
+    "scroll_to_top": "トップに戻る"
+  },
+  "nav": {
+    "documentation": "ドキュメント",
+    "introduction": "はじめに",
+    "quick_start": "クイックスタート",
+    "video_processing": "動画処理",
+    "integrations": "IDE連携",
+    "product": "製品",
+    "dashboard": "ダッシュボード",
+    "pricing": "料金",
+    "api_reference": "APIリファレンス",
+    "changelog": "変更履歴"
+  },
+  "footer": {
+    "start_project": "プロジェクトを開始",
+    "ready_to_start": "コンテキスト汚染を排除する準備はできましたか？始めましょう。",
+    "get_started": "始める",
+    "terms": "利用規約",
+    "privacy": "プライバシーポリシー"
+  },
+  "home": {
+    "title": "Prism Context Engine",
+    "tagline": "Vibecoders のための Context Operating System",
+    "description": "Cloud とローカル AI エージェント間のルール、デザインシステム、技術スタックの流れをオーケストレーションすることで「コンテキスト汚染」を排除します。",
+    "what_is_prism": "Prism Context Engine とは？",
+    "prism_description": "Prism Context Engine は、以下を実現する AI パワードのコンテキストガバナンスプラットフォームです：",
+    "feature_1": "動画からルールを抽出 - 画面録画をアップロードし、Azure OpenAI を使用してアーキテクチャパターンを自動的に抽出",
+    "feature_2": "標準を強制 - MCP（Model Context Protocol）を介して AI コーディングアシスタントにルールをデプロイ",
+    "feature_3": "セマンティック検索を有効化 - ベクトル埋め込みを使用して関連するアーキテクチャの議論を検索",
+    "core_features": "主要機能",
+    "architecture": "アーキテクチャ",
+    "what_makes_different": "Prism の特徴",
+    "video_first": "ビデオファーストのコンテキストキャプチャ",
+    "video_first_desc": "アーキテクチャについて話し合いながら画面を録画。Prism が説明から自動的にルールを抽出します。",
+    "ai_powered": "AI パワードのルール抽出",
+    "ai_powered_desc": "GPT-4o-mini がトランスクリプトを分析し、アーキテクチャパターン、コードスタイル規約、命名規則、テスト戦略、セキュリティプラクティスを特定します。",
+    "semantic_search": "セマンティック検索",
+    "semantic_search_desc": "ベクトル埋め込みにより、キーワードマッチングだけでなく、関連するアーキテクチャの議論を見つけることができます。",
+    "zero_config": "ゼロ設定 MCP 統合",
+    "zero_config_desc": "npx prism connect で完了。AI アシスタントにコンテキストが追加されます。",
+    "built_by": "JeffDev Studio 制作"
+  },
+  "cards": {
+    "quick_start": "クイックスタート",
+    "quick_start_desc": "5分で最初のルールをデプロイ",
+    "video_processing": "動画処理",
+    "video_processing_desc": "画面録画からルールを抽出",
+    "rule_management": "ルール管理",
+    "rule_management_desc": "制約を作成、整理、デプロイ",
+    "ide_integrations": "IDE連携",
+    "ide_integrations_desc": "Cursor、Windsurf、Claudeに接続",
+    "advanced": "高度な機能",
+    "advanced_desc": "セマンティック検索とブランドプロファイル",
+    "api_reference": "APIリファレンス",
+    "api_reference_desc": "ルールとトランスクリプトへのプログラマティックアクセス"
+  }
+}

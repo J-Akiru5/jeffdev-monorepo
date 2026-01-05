@@ -1,0 +1,165 @@
+# Prism Context Engine
+
+**Ang Context Operating System para sa mga Vibecoder** — Alisin ang "Context Pollution" sa pamamagitan ng pag-oorkestra ng daloy ng mga patakaran, design system, at tech stack sa pagitan ng Cloud at lokal na AI Agent.
+
+## Ano ang Prism Context Engine?
+
+Ang Prism Context Engine ay isang kumpletong **AI-powered na platform para sa context governance** na:
+
+1. **Kumukuha ng mga Patakaran mula sa Video** - Mag-upload ng mga screen recording, awtomatikong i-extract ang mga pattern ng arkitektura gamit ang Azure OpenAI
+2. **Nagpapatupad ng mga Pamantayan** - I-deploy ang mga patakaran sa AI coding assistant sa pamamagitan ng MCP (Model Context Protocol)
+3. **Nagpapahintulot ng Semantic Search** - Maghanap ng mga kaugnay na diskusyon sa arkitektura gamit ang vector embeddings
+
+### Ang Pangunahing Metapora
+
+| Konsepto | Prism Equivalent | Deskripsyon |
+|---------|------------------|-------------|
+| 🍳 **Ang Kusina** | SaaS Dashboard | Kung saan ang "Chef" (Developer) ay naghahalo ng mga sangkap (Next.js, Tailwind, Glassmorphism) |
+| 📜 **Ang Resipe** | Context Rules | Ang output file (hal., `.cursorrules`) na naglalaman ng mahigpit na mga tagubilin |
+| 🍽️ **Ang Waiter** | MCP Protocol | Naghahatid ng sariwang Resipe direkta sa mesa ng IDE |
+
+### Video-to-Context Extraction
+
+**Automated na Dokumentasyon**: Mag-upload ng screen recording ng iyong development workflow. Sinusuri ng Prism ang video transcript gamit ang Azure OpenAI upang awtomatikong i-extract ang mga patakaran sa arkitektura, coding pattern, at best practices sa actionable na context na maiintindihan ng iyong AI coding assistant.
+
+Gumagana sa:
+- **Cursor** ✅
+- **Windsurf** ✅
+- **Claude (sa pamamagitan ng MCP)** ✅  
+- **VS Code** (sa pamamagitan ng MCP extension)
+- **GitHub Copilot** (malapit na)
+
+Sa halip na umasa na susundin ng iyong AI ang best practices, **ipinapatupad ng Prism ang mga ito**.
+
+## Mabilis na Pagsisimula
+
+### Opsyon A: Web Dashboard (Inirerekomenda)
+
+```bash
+# 1. Mag-sign up sa web dashboard
+https://prism.jeffdev.studio/sign-up
+
+# 2. Gumawa ng iyong unang proyekto at brand profile
+# 3. Mag-upload ng video o manual na gumawa ng mga patakaran
+# 4. I-export ang .cursorrules file at i-paste sa iyong proyekto
+```
+
+### Opsyon B: MCP Server (Advanced)
+
+Para sa real-time na sync sa iyong IDE:
+
+```bash
+# 1. I-install ang MCP server globally
+npm install -g @prism/mcp-server
+
+# 2. I-configure ang iyong IDE (Cursor/Windsurf/VS Code)
+# Idagdag sa iyong MCP settings:
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": ["--api-key", "YOUR_API_KEY"]
+    }
+  }
+}
+
+# 3. May live access na ang iyong AI assistant sa iyong mga patakaran
+```
+
+## Mga Pangunahing Feature
+
+import { Rocket, Video, FileCode, Plug, Settings, Code } from 'lucide-react'
+
+<Cards>
+  <Card icon={<Rocket size={20} />} title="Mabilis na Pagsisimula" href="/tl/quick-start">
+    I-deploy ang iyong unang patakaran sa loob ng 5 minuto
+  </Card>
+  <Card icon={<Video size={20} />} title="Pagpoproseso ng Video" href="/tl/video">
+    I-extract ang mga patakaran mula sa screen recording
+  </Card>
+  <Card icon={<FileCode size={20} />} title="Pamamahala ng Patakaran" href="/tl/rules">
+    Gumawa, mag-organisa, at mag-deploy ng mga hadlang
+  </Card>
+  <Card icon={<Plug size={20} />} title="Integrasyon ng IDE" href="/tl/integrations">
+    Kumonekta sa Cursor, Windsurf, at Claude
+  </Card>
+  <Card icon={<Settings size={20} />} title="Advanced" href="/tl/advanced">
+    Semantic search at brand profile
+  </Card>
+  <Card icon={<Code size={20} />} title="Sanggunian ng API" href="/tl/advanced/api-reference">
+    Programmatic na pag-access sa mga patakaran at transcript
+  </Card>
+</Cards>
+
+## Arkitektura
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              Pag-upload ng Video (Mux)                      │
+│  Mga screen recording → Awtomatikong transcription          │
+└────────────────────────────┬────────────────────────────────┘
+                             │ Webhook
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│           Azure OpenAI Processing (GPT-4o-mini)             │
+│  I-extract ang mga patakaran + Gumawa ng embeddings         │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│            Azure Cosmos DB (MongoDB API)                    │
+│    Rules Collection + Video Transcripts + Embeddings        │
+└────────────────────────────┬────────────────────────────────┘
+                             │ MCP Protocol
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   Ang Iyong IDE (Cursor/Windsurf)           │
+│  Awtomatikong sinusunod ng AI ang iyong mga patakaran       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Ano ang Nagpapaiba sa Prism?
+
+### 🎥 Video-First na Pagkuha ng Context
+I-record ang iyong screen habang tinatalakay ang arkitektura. Awtomatikong kinukuha ng Prism ang mga patakaran mula sa iyong mga paliwanag.
+
+### 🧠 AI-Powered na Pag-extract ng Patakaran
+Sinusuri ng GPT-4o-mini ang mga transcript upang matukoy ang:
+- Mga pattern ng arkitektura
+- Code style convention
+- Mga naming rule
+- Testing strategy
+- Security practice
+
+### 🔍 Semantic Search
+Ang vector embeddings ay nagbibigay-daan sa paghahanap ng mga kaugnay na diskusyon sa arkitektura, hindi lamang keyword matching.
+
+### 🚀 Zero-Config na MCP Integration
+`npx prism connect` at tapos na. May context na ang iyong AI assistant.
+
+## Halimbawa sa Totoong Buhay
+
+```typescript
+// Bago ang Prism: Generic na code
+const data = await fetch('/api/users');
+
+// Pagkatapos ng Prism: Ipinapatupad ang iyong mga pamantayan
+const { data, error } = await api.users.list();
+if (error) {
+  toast.error(error.message);
+  return;
+}
+```
+
+Natututo ang iyong AI assistant mula sa iyong mga video na:
+- Gumagamit ka ng custom API wrapper na may error handling
+- Ipinapakita ang mga error sa pamamagitan ng toast notification
+- Sinusunod ang early return pattern
+
+## Ginawa ng JeffDev Studio
+
+Ang Prism Context Engine ay bahagi ng [JeffDev](https://jeffdev.studio) ecosystem — enterprise-grade na mga tool para sa mga developer na nais ng AI na nirerespeto ang kanilang arkitektura.
+
+**Kasalukuyang Bersyon:** 1.0.3  
+**Lisensya:** MIT  
+**Suporta:** [GitHub Issues](https://github.com/J-Akiru5/jeffdev-monorepo/issues)

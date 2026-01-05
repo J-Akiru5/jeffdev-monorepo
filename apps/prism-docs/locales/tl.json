@@ -1,0 +1,65 @@
+{
+  "common": {
+    "search_placeholder": "Maghanap sa dokumentasyon...",
+    "edit_on_github": "I-edit sa GitHub",
+    "give_feedback": "May tanong? Magbigay ng feedback →",
+    "on_this_page": "Sa Pahinang Ito",
+    "copy_page": "Kopyahin ang pahina",
+    "scroll_to_top": "Bumalik sa itaas"
+  },
+  "nav": {
+    "documentation": "Dokumentasyon",
+    "introduction": "Panimula",
+    "quick_start": "Mabilis na Pagsisimula",
+    "video_processing": "Pagpoproseso ng Video",
+    "integrations": "Integrasyon ng IDE",
+    "product": "Produkto",
+    "dashboard": "Dashboard",
+    "pricing": "Presyo",
+    "api_reference": "Sanggunian ng API",
+    "changelog": "Talaan ng Pagbabago"
+  },
+  "footer": {
+    "start_project": "Magsimula ng Proyekto",
+    "ready_to_start": "Handa ka na bang alisin ang context pollution? Simulan na natin.",
+    "get_started": "MAGSIMULA",
+    "terms": "Mga Tuntunin ng Serbisyo",
+    "privacy": "Patakaran sa Privacy"
+  },
+  "home": {
+    "title": "Prism Context Engine",
+    "tagline": "Ang Context Operating System para sa mga Vibecoder",
+    "description": "Alisin ang \"Context Pollution\" sa pamamagitan ng pag-oorkestra ng daloy ng mga patakaran, design system, at tech stack sa pagitan ng Cloud at lokal na AI Agent.",
+    "what_is_prism": "Ano ang Prism Context Engine?",
+    "prism_description": "Ang Prism Context Engine ay isang kumpletong AI-powered na platform para sa context governance na:",
+    "feature_1": "Kumukuha ng mga Patakaran mula sa Video - Mag-upload ng mga screen recording, awtomatikong i-extract ang mga pattern ng arkitektura gamit ang Azure OpenAI",
+    "feature_2": "Nagpapatupad ng mga Pamantayan - I-deploy ang mga patakaran sa AI coding assistant sa pamamagitan ng MCP (Model Context Protocol)",
+    "feature_3": "Nagpapahintulot ng Semantic Search - Maghanap ng mga kaugnay na diskusyon sa arkitektura gamit ang vector embeddings",
+    "core_features": "Mga Pangunahing Feature",
+    "architecture": "Arkitektura",
+    "what_makes_different": "Ano ang Nagpapaiba sa Prism?",
+    "video_first": "Video-First na Pagkuha ng Context",
+    "video_first_desc": "I-record ang iyong screen habang tinatalakay ang arkitektura. Awtomatikong kinukuha ng Prism ang mga patakaran mula sa iyong mga paliwanag.",
+    "ai_powered": "AI-Powered na Pag-extract ng Patakaran",
+    "ai_powered_desc": "Sinusuri ng GPT-4o-mini ang mga transcript upang matukoy ang mga pattern ng arkitektura, code style convention, naming rule, testing strategy, at security practice.",
+    "semantic_search": "Semantic Search",
+    "semantic_search_desc": "Ang vector embeddings ay nagbibigay-daan sa paghahanap ng mga kaugnay na diskusyon sa arkitektura, hindi lamang keyword matching.",
+    "zero_config": "Zero-Config na MCP Integration",
+    "zero_config_desc": "npx prism connect at tapos na. May context na ang iyong AI assistant.",
+    "built_by": "Ginawa ng JeffDev Studio"
+  },
+  "cards": {
+    "quick_start": "Mabilis na Pagsisimula",
+    "quick_start_desc": "I-deploy ang iyong unang patakaran sa loob ng 5 minuto",
+    "video_processing": "Pagpoproseso ng Video",
+    "video_processing_desc": "I-extract ang mga patakaran mula sa screen recording",
+    "rule_management": "Pamamahala ng Patakaran",
+    "rule_management_desc": "Gumawa, mag-organisa, at mag-deploy ng mga hadlang",
+    "ide_integrations": "Integrasyon ng IDE",
+    "ide_integrations_desc": "Kumonekta sa Cursor, Windsurf, at Claude",
+    "advanced": "Advanced",
+    "advanced_desc": "Semantic search at brand profile",
+    "api_reference": "Sanggunian ng API",
+    "api_reference_desc": "Programmatic na pag-access sa mga patakaran at transcript"
+  }
+}

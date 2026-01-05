@@ -1,0 +1,165 @@
+# Prism Context Engine
+
+**Vibecoders のための Context Operating System** — Cloud とローカル AI エージェント間のルール、デザインシステム、技術スタックの流れをオーケストレーションすることで「コンテキスト汚染」を排除します。
+
+## Prism Context Engine とは？
+
+Prism Context Engine は、以下を実現する完全な **AI パワードのコンテキストガバナンスプラットフォーム** です：
+
+1. **動画からルールを抽出** - 画面録画をアップロードし、Azure OpenAI を使用してアーキテクチャパターンを自動的に抽出
+2. **標準を強制** - MCP（Model Context Protocol）を介して AI コーディングアシスタントにルールをデプロイ
+3. **セマンティック検索を有効化** - ベクトル埋め込みを使用して関連するアーキテクチャの議論を検索
+
+### 核となるメタファー
+
+| コンセプト | Prism における対応 | 説明 |
+|---------|------------------|-------------|
+| 🍳 **キッチン** | SaaS ダッシュボード | 「シェフ」（開発者）が材料（Next.js、Tailwind、Glassmorphism）を混ぜ合わせる場所 |
+| 📜 **レシピ** | コンテキストルール | 厳密な指示を含む出力ファイル（例：`.cursorrules`） |
+| 🍽️ **ウェイター** | MCP プロトコル | 新鮮なレシピを IDE のテーブルに直接届ける |
+
+### 動画からコンテキストへの抽出
+
+**自動ドキュメント化**: 開発ワークフローの画面録画をアップロードします。Prism は Azure OpenAI を使用して動画のトランスクリプトを分析し、アーキテクチャルール、コーディングパターン、ベストプラクティスを AI コーディングアシスタントが理解できるアクションable なコンテキストに自動的に抽出します。
+
+対応ツール：
+- **Cursor** ✅
+- **Windsurf** ✅
+- **Claude（MCP 経由）** ✅  
+- **VS Code**（MCP 拡張機能経由）
+- **GitHub Copilot**（近日対応）
+
+AI がベストプラクティスに従うことを願うのではなく、**Prism がそれを強制します**。
+
+## クイックスタート
+
+### オプション A: Web ダッシュボード（推奨）
+
+```bash
+# 1. Web ダッシュボードでサインアップ
+https://prism.jeffdev.studio/sign-up
+
+# 2. 最初のプロジェクトとブランドプロファイルを作成
+# 3. 動画をアップロードするか、手動でルールを作成
+# 4. .cursorrules ファイルをエクスポートしてプロジェクトに貼り付け
+```
+
+### オプション B: MCP サーバー（上級者向け）
+
+IDE とのリアルタイム同期に：
+
+```bash
+# 1. MCP サーバーをグローバルにインストール
+npm install -g @prism/mcp-server
+
+# 2. IDE を設定（Cursor/Windsurf/VS Code）
+# MCP 設定に追加：
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism-mcp",
+      "args": ["--api-key", "YOUR_API_KEY"]
+    }
+  }
+}
+
+# 3. AI アシスタントがルールにライブアクセスできるようになりました
+```
+
+## 主要機能
+
+import { Rocket, Video, FileCode, Plug, Settings, Code } from 'lucide-react'
+
+<Cards>
+  <Card icon={<Rocket size={20} />} title="クイックスタート" href="/ja/quick-start">
+    5分で最初のルールをデプロイ
+  </Card>
+  <Card icon={<Video size={20} />} title="動画処理" href="/ja/video">
+    画面録画からルールを抽出
+  </Card>
+  <Card icon={<FileCode size={20} />} title="ルール管理" href="/ja/rules">
+    制約を作成、整理、デプロイ
+  </Card>
+  <Card icon={<Plug size={20} />} title="IDE 連携" href="/ja/integrations">
+    Cursor、Windsurf、Claude に接続
+  </Card>
+  <Card icon={<Settings size={20} />} title="高度な機能" href="/ja/advanced">
+    セマンティック検索とブランドプロファイル
+  </Card>
+  <Card icon={<Code size={20} />} title="API リファレンス" href="/ja/advanced/api-reference">
+    ルールとトランスクリプトへのプログラマティックアクセス
+  </Card>
+</Cards>
+
+## アーキテクチャ
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│              動画アップロード（Mux）                         │
+│  画面録画 → 自動トランスクリプション                         │
+└────────────────────────────┬────────────────────────────────┘
+                             │ Webhook
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│           Azure OpenAI 処理（GPT-4o-mini）                  │
+│  ルールを抽出 + 検索用の埋め込みを生成                       │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│            Azure Cosmos DB（MongoDB API）                   │
+│    ルールコレクション + 動画トランスクリプト + 埋め込み       │
+└────────────────────────────┬────────────────────────────────┘
+                             │ MCP プロトコル
+                             ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   あなたの IDE（Cursor/Windsurf）            │
+│  AI がコーディング中に自動的にルールに従います               │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Prism の特徴
+
+### 🎥 ビデオファーストのコンテキストキャプチャ
+アーキテクチャについて話し合いながら画面を録画。Prism が説明から自動的にルールを抽出します。
+
+### 🧠 AI パワードのルール抽出
+GPT-4o-mini がトランスクリプトを分析して以下を特定：
+- アーキテクチャパターン
+- コードスタイル規約
+- 命名規則
+- テスト戦略
+- セキュリティプラクティス
+
+### 🔍 セマンティック検索
+ベクトル埋め込みにより、キーワードマッチングだけでなく、関連するアーキテクチャの議論を見つけることができます。
+
+### 🚀 ゼロ設定 MCP 統合
+`npx prism connect` で完了。AI アシスタントにコンテキストが追加されます。
+
+## 実際の例
+
+```typescript
+// Prism 導入前: 汎用コード
+const data = await fetch('/api/users');
+
+// Prism 導入後: あなたの標準を強制
+const { data, error } = await api.users.list();
+if (error) {
+  toast.error(error.message);
+  return;
+}
+```
+
+AI アシスタントは動画から以下を学習：
+- エラーハンドリング付きのカスタム API ラッパーを使用
+- toast 通知でエラーを表示
+- early return パターンに従う
+
+## JeffDev Studio 制作
+
+Prism Context Engine は [JeffDev](https://jeffdev.studio) エコシステムの一部です — アーキテクチャを尊重する AI を求める開発者のためのエンタープライズグレードツール。
+
+**現在のバージョン:** 1.0.3  
+**ライセンス:** MIT  
+**サポート:** [GitHub Issues](https://github.com/J-Akiru5/jeffdev-monorepo/issues)
