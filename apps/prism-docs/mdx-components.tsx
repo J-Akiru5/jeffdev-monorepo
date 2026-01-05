@@ -2,6 +2,7 @@ import { useMDXComponents as getThemeComponents } from 'nextra-theme-docs'
 import { Callout, Steps, Tabs } from 'nextra/components'
 import Link from 'next/link'
 import type { ReactNode, ReactElement } from 'react'
+import { TranslatedContent, useLocale } from '@/app/components/translated-content'
 
 // Icon wrapper for Card component
 function CardIcon({ children }: { children: ReactNode }) {
@@ -84,6 +85,7 @@ export function useMDXComponents(components?: Record<string, React.ComponentType
     Card,
     Cards,
     FeatureCard,
+    TranslatedContent,
     Callout,
     Steps,
     Tabs,
