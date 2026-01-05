@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Prism Context Engine 🔮
 
-## Getting Started
+> ⚠️ **BETA** — Prism Context Engine is currently in beta. Some features are still being refined.
 
-First, run the development server:
+The Context Operating System for developers who ship fast. Deploy a Context Server that forces Cursor, Windsurf, and Claude to follow your Design System.
+
+## Features
+
+- 🎬 **Video to Context** — Record architecture decisions, AI extracts rules
+- 🎨 **Brand Wizard** — 5-step brand identity builder
+- 📤 **Multi-IDE Export** — Cursor, Windsurf, VS Code, Claude
+- 🔌 **MCP Integration** — Model Context Protocol for IDE sync
+- 🏗️ **Project Baker** — Create projects with tech stack & vibe
+
+## Quick Start
 
 ```bash
+# Install dependencies
+npm install
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3001](http://localhost:3001) to view the dashboard.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.example` to `.env.local` and configure:
 
-## Learn More
+```bash
+# Clerk Auth
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
 
-To learn more about Next.js, take a look at the following resources:
+# Database
+MONGODB_URI=
+COSMOS_DATABASE_NAME=prism
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Azure OpenAI
+AZURE_OPENAI_ENDPOINT=
+AZURE_OPENAI_API_KEY=
+AZURE_OPENAI_DEPLOYMENT_NAME=
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Mux (Video)
+MUX_TOKEN_ID=
+MUX_TOKEN_SECRET=
+```
 
-## Deploy on Vercel
+## Architecture
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+src/
+├── app/
+│   ├── (dashboard)/     # Protected dashboard routes
+│   ├── api/             # API routes (MCP, auth, etc.)
+│   └── page.tsx         # Landing page
+├── components/
+│   ├── beta-badge.tsx   # Beta indicator
+│   ├── hero.tsx         # Animated hero
+│   └── layout/          # Navigation components
+└── lib/
+    ├── subscriptions.ts # Tier limits
+    └── subscription-actions.ts
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Subscription Tiers
+
+| Tier | Rules | Projects | IDE Sync |
+|------|-------|----------|----------|
+| Free | 5 | 1 | ❌ |
+| Pro | ∞ | 10 | ✅ |
+| Team | ∞ | ∞ | ✅ |
+
+## License
+
+Proprietary — © 2026 JeffDev Studio

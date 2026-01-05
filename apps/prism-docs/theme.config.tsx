@@ -13,8 +13,51 @@ const config = {
       <span className="text-gradient-cyan" style={{ fontWeight: 700, fontSize: '1.1rem' }}>
         Prism Context Engine
       </span>
+      <span style={{
+        position: 'relative',
+        top: '-6px',
+        display: 'inline-flex',
+        alignItems: 'center',
+        borderRadius: '9999px',
+        background: 'linear-gradient(to right, rgba(6, 182, 212, 0.2), rgba(139, 92, 246, 0.2))',
+        border: '1px solid rgba(6, 182, 212, 0.3)',
+        padding: '2px 6px',
+        fontSize: '9px',
+        fontWeight: 700,
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+        color: '#22d3ee',
+        boxShadow: '0 0 10px rgba(6, 182, 212, 0.3)',
+        animation: 'pulse 2s ease-in-out infinite'
+      }}>
+        Beta
+      </span>
     </div>
   ),
+  banner: {
+    key: 'beta-notice',
+    text: (
+      <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '14px' }}>
+        <span style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          borderRadius: '9999px',
+          background: 'rgba(6, 182, 212, 0.2)',
+          border: '1px solid rgba(6, 182, 212, 0.3)',
+          padding: '2px 8px',
+          fontSize: '10px',
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+          color: '#22d3ee'
+        }}>
+          Beta
+        </span>
+        Prism Context Engine is currently in beta. Some features are still being refined.
+      </span>
+    ),
+    dismissible: true
+  },
   project: {
     link: 'https://github.com/J-Akiru5/jeffdev-monorepo'
   },
@@ -27,8 +70,8 @@ const config = {
   head: (
     <>
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta property="og:title" content="Prism Context Engine" />
-      <meta property="og:description" content="AI-powered context governance for LLMs" />
+      <meta property="og:title" content="Prism Context Engine (Beta)" />
+      <meta property="og:description" content="AI-powered context governance for LLMs - Currently in Beta" />
     </>
   ),
   primaryHue: 189, // Cyan

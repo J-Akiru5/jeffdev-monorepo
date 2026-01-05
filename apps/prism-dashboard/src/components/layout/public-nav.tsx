@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { clsx } from 'clsx';
+import { BetaBadge } from '@/components/beta-badge';
 
 export function PublicNav() {
   const pathname = usePathname();
@@ -26,6 +27,7 @@ export function PublicNav() {
             <span className="text-gradient-cyan font-bold text-lg">
               Prism Context Engine
             </span>
+            <BetaBadge />
           </Link>
 
           {/* Nav Links */}

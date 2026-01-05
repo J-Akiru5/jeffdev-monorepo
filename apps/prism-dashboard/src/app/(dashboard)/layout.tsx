@@ -10,6 +10,7 @@ import {
   Settings
 } from "lucide-react";
 import { GridBackground } from "@jdstudio/ui";
+import { BetaBadge } from "@/components/beta-badge";
 
 /**
  * Dashboard Layout
@@ -28,6 +29,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               <Sparkles className="h-4 w-4 text-cyan-400" />
             </div>
             <span className="font-semibold text-white tracking-tight">Prism Engine</span>
+            <BetaBadge />
           </Link>
         </div>
 
@@ -69,6 +71,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <Sparkles className="h-4 w-4 text-cyan-400" />
           </div>
           <span className="font-semibold text-white tracking-tight">Prism</span>
+          <BetaBadge />
         </Link>
         <UserButton 
           appearance={{
