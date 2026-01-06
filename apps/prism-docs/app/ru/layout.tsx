@@ -103,30 +103,19 @@ export default async function RootLayout({
 }) {
   const { lang } = await params
   
-  // Fix for Nextra Dynamic Route i18n
-  // 1. Unwrap the [lang] folder so the sidebar shows the content directly
-  // 2. Recursively replace [lang] placeholder with actual locale
+  // Get pageMap and filter to current locale only
+  // This ensures sidebar shows only the current locale's content
   const originalPageMap = await getPageMap()
   
-  const localizePageMap = (map: any[]): any[] => {
-    return map.map(item => {
-      const newItem = { ...item }
-      if (newItem.route) {
-        newItem.route = newItem.route.replace('/[lang]', `/${lang}`)
-      }
-      if (newItem.children) {
-        newItem.children = localizePageMap(newItem.children)
-      }
-      return newItem
-    })
-  }
+  // Find only THIS locale's content in the pageMap
+  // With physical locale folders, the locale name matches the folder name
+  const currentLocaleItem = originalPageMap.find(
+    (item: any) => item.name === lang
+  )
 
-  // Find the [lang] folder item and use its children as the root map
-  // This restores the original sidebar structure
-  const langItem = originalPageMap.find((item: any) => item.name === '[lang]')
-  const pageMap = langItem && langItem.children 
-    ? localizePageMap(langItem.children) 
-    : localizePageMap(originalPageMap)
+  // Use current locale's children as the sidebar
+  // This hides other locale folders from the navigation
+  const pageMap = currentLocaleItem?.children || []
 
   return (
     <html lang={lang} dir="ltr" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
@@ -194,17 +183,17 @@ export default async function RootLayout({
                     <div>
                       <h4 className="text-white/40 text-xs font-medium uppercase tracking-widest mb-6">Documentation</h4>
                       <ul className="space-y-3">
-                        <li>
-                          <a href="/introduction" className="text-white/70 hover:text-cyan-400 text-sm transition-colors">Introduction</a>
+                        <li key="intro">
+                          <a href={`/${lang}/introduction`} className="text-white/70 hover:text-cyan-400 text-sm transition-colors">Introduction</a>
                         </li>
-                        <li>
-                          <a href="/quick-start" className="text-white/70 hover:text-cyan-400 text-sm transition-colors">Quick Start</a>
+                        <li key="quick">
+                          <a href={`/${lang}/quick-start`} className="text-white/70 hover:text-cyan-400 text-sm transition-colors">Quick Start</a>
                         </li>
-                        <li>
-                          <a href="/video" className="text-white/70 hover:text-cyan-400 text-sm transition-colors">Video Processing</a>
+                        <li key="video">
+                          <a href={`/${lang}/video`} className="text-white/70 hover:text-cyan-400 text-sm transition-colors">Video Processing</a>
                         </li>
-                        <li>
-                          <a href="/integrations" className="text-white/70 hover:text-cyan-400 text-sm transition-colors">IDE Integrations</a>
+                        <li key="integ">
+                          <a href={`/${lang}/integrations`} className="text-white/70 hover:text-cyan-400 text-sm transition-colors">IDE Integrations</a>
                         </li>
                       </ul>
                     </div>
@@ -213,17 +202,17 @@ export default async function RootLayout({
                     <div>
                       <h4 className="text-white/40 text-xs font-medium uppercase tracking-widest mb-6">Product</h4>
                       <ul className="space-y-3">
-                        <li>
+                        <li key="dash">
                           <a href="https://prism.jeffdev.studio" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-cyan-400 text-sm transition-colors">Dashboard</a>
                         </li>
-                        <li>
+                        <li key="price">
                           <a href="https://prism.jeffdev.studio/pricing" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-cyan-400 text-sm transition-colors">Pricing</a>
                         </li>
-                        <li>
-                          <a href="/advanced/api-reference" className="text-white/70 hover:text-cyan-400 text-sm transition-colors">API Reference</a>
+                        <li key="api">
+                          <a href={`/${lang}/advanced/api-reference`} className="text-white/70 hover:text-cyan-400 text-sm transition-colors">API Reference</a>
                         </li>
-                        <li>
-                          <a href="/changelog-page" className="text-white/70 hover:text-cyan-400 text-sm transition-colors">Changelog</a>
+                        <li key="change">
+                          <a href={`/${lang}/changelog-page`} className="text-white/70 hover:text-cyan-400 text-sm transition-colors">Changelog</a>
                         </li>
                       </ul>
                     </div>

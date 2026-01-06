@@ -2,48 +2,47 @@
   "index": "Prism Context Engine",
   "---getting-started": {
     "type": "separator",
-    "title": "Getting Started"
+    "title": "はじめに"
   },
-  "introduction": "Introduction",
-  "changelog-page": "Changelog",
-  "installation": "Installation",
-  "quick-start": "Quick Start",
+  "introduction": "イントロダクション",
+  "changelog-page": "変更履歴",
+  "installation": "インストール",
+  "quick-start": "クイックスタート",
   "---core-concepts": {
     "type": "separator",
-    "title": "Core Concepts"
+    "title": "基本コンセプト"
   },
-  "concepts": "Concepts",
+  "concepts": "コンセプト",
   "---video-processing": {
     "type": "separator",
-    "title": "Video Processing"
+    "title": "動画処理"
   },
-  "video": "Video",
+  "video": "動画",
   "---rule-management": {
     "type": "separator",
-    "title": "Rule Management"
+    "title": "ルール管理"
   },
-  "rules": "Rules",
+  "rules": "ルール",
   "---integrations": {
     "type": "separator",
-    "title": "Integrations"
+    "title": "連携"
   },
-  "integrations": "IDE Setup",
+  "integrations": "IDE セットアップ",
   "---advanced": {
     "type": "separator",
-    "title": "Advanced"
+    "title": "高度な機能"
   },
-  "advanced": "Advanced",
+  "advanced": "高度",
   "---troubleshooting": {
     "type": "separator",
-    "title": "Troubleshooting"
+    "title": "トラブルシューティング"
   },
-  "troubleshooting": "Troubleshooting",
+  "troubleshooting": "トラブルシューティング",
   "---resources": {
     "type": "separator",
-    "title": "Resources"
+    "title": "リソース"
   },
-
-  "security-page": "Security & Privacy",
+  "security-page": "セキュリティとプライバシー",
   "guide": {
     "display": "hidden"
   },

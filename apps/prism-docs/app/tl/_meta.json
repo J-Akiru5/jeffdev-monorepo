@@ -2,32 +2,32 @@
   "index": "Prism Context Engine",
   "---getting-started": {
     "type": "separator",
-    "title": "Getting Started"
+    "title": "Pagsisimula"
   },
-  "introduction": "Introduction",
-  "changelog-page": "Changelog",
-  "installation": "Installation",
-  "quick-start": "Quick Start",
+  "introduction": "Panimula",
+  "changelog-page": "Talaan ng Pagbabago",
+  "installation": "Pag-install",
+  "quick-start": "Mabilis na Pagsisimula",
   "---core-concepts": {
     "type": "separator",
-    "title": "Core Concepts"
+    "title": "Mga Pangunahing Konsepto"
   },
-  "concepts": "Concepts",
+  "concepts": "Mga Konsepto",
   "---video-processing": {
     "type": "separator",
-    "title": "Video Processing"
+    "title": "Pagpoproseso ng Video"
   },
   "video": "Video",
   "---rule-management": {
     "type": "separator",
-    "title": "Rule Management"
+    "title": "Pamamahala ng Patakaran"
   },
-  "rules": "Rules",
+  "rules": "Mga Patakaran",
   "---integrations": {
     "type": "separator",
-    "title": "Integrations"
+    "title": "Mga Integrasyon"
   },
-  "integrations": "IDE Setup",
+  "integrations": "Setup ng IDE",
   "---advanced": {
     "type": "separator",
     "title": "Advanced"
@@ -35,15 +35,14 @@
   "advanced": "Advanced",
   "---troubleshooting": {
     "type": "separator",
-    "title": "Troubleshooting"
+    "title": "Pag-troubleshoot"
   },
-  "troubleshooting": "Troubleshooting",
+  "troubleshooting": "Pag-troubleshoot",
   "---resources": {
     "type": "separator",
-    "title": "Resources"
+    "title": "Mga Mapagkukunan"
   },
-
-  "security-page": "Security & Privacy",
+  "security-page": "Seguridad at Privacy",
   "guide": {
     "display": "hidden"
   },
