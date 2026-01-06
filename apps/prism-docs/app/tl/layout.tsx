@@ -103,10 +103,15 @@ export default async function RootLayout({
 }) {
   const { lang } = await params
   
-  // Get pageMap for current locale
-  // Since each locale has its own layout.tsx, getPageMap() already returns
-  // content scoped to this folder - no additional filtering needed
-  const pageMap = await getPageMap()
+  // List of all locale folder names to filter out from navigation
+  const LOCALE_FOLDERS = ['en-US', 'tl', 'ja', 'es', 'id', 'en-GB', 'ru', 'nl', 'api', 'components', 'hooks']
+
+  // Get pageMap and filter out locale folders and internal directories
+  // This ensures sidebar shows only content, not other locale folders
+  const rawPageMap = await getPageMap()
+  const pageMap = rawPageMap.filter((item: any) =>
+    !LOCALE_FOLDERS.includes(item.name)
+  )
 
   return (
     <html lang={lang} dir="ltr" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
