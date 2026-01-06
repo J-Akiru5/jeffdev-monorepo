@@ -103,23 +103,29 @@ export default async function RootLayout({
 }) {
   const { lang } = await params
   
-  // List of all locale folder names to filter out from navigation
-  const LOCALE_FOLDERS = ['en-US', 'tl', 'ja', 'es', 'id', 'en-GB', 'ru', 'nl', 'api', 'components', 'hooks']
+  // List of all locale folder names
+  const LOCALE_FOLDERS = ['en-US', 'tl', 'ja', 'es', 'id', 'en-GB', 'ru', 'nl']
 
-  // Get pageMap and filter out locale folders and internal directories
+  // Get pageMap from Nextra
   const rawPageMap = await getPageMap()
 
-  // Safety check: ensure rawPageMap is an array before filtering
-  // Filter out locale folders, but keep all content items
+  // Find the current locale's folder in the pageMap and use its children
+  // This ensures sidebar shows only this locale's content, not other locale folders
   let pageMap = rawPageMap
-  if (Array.isArray(rawPageMap) && rawPageMap.length > 0) {
-    const filtered = rawPageMap.filter((item: any) => {
-      // Keep items that are NOT locale folders
-      return item && item.name && !LOCALE_FOLDERS.includes(item.name)
-    })
-    // Only use filtered result if it has items, otherwise use original
-    if (filtered.length > 0) {
-      pageMap = filtered
+
+  if (Array.isArray(rawPageMap)) {
+    // Find the current locale folder item
+    const currentLocaleItem = rawPageMap.find((item: any) => item.name === lang)
+
+    if (currentLocaleItem && currentLocaleItem.children && Array.isArray(currentLocaleItem.children)) {
+      // Use the locale folder's children as the pageMap
+      pageMap = currentLocaleItem.children
+    } else {
+      // Fallback: filter out all locale folders and internal dirs from top level
+      const EXCLUDE = [...LOCALE_FOLDERS, 'api', 'components', 'hooks']
+      pageMap = rawPageMap.filter((item: any) =>
+        item && item.name && !EXCLUDE.includes(item.name)
+      )
     }
   }
 
