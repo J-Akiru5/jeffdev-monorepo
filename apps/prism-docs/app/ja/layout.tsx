@@ -145,7 +145,7 @@ export default async function RootLayout({
             pageMap={pageMap}
             docsRepositoryBase="https://github.com/J-Akiru5/jeffdev-monorepo/tree/main/apps/prism-docs"
             footer={
-              <div className="w-full bg-[#050505] border-t border-white/5">
+              <div key="prism-footer" className="w-full bg-[#050505] border-t border-white/5">
                 {/* Main Footer Content */}
                 <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8 w-full">
