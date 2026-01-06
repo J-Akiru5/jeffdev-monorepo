@@ -107,11 +107,21 @@ export default async function RootLayout({
   const LOCALE_FOLDERS = ['en-US', 'tl', 'ja', 'es', 'id', 'en-GB', 'ru', 'nl', 'api', 'components', 'hooks']
 
   // Get pageMap and filter out locale folders and internal directories
-  // This ensures sidebar shows only content, not other locale folders
   const rawPageMap = await getPageMap()
-  const pageMap = rawPageMap.filter((item: any) =>
-    !LOCALE_FOLDERS.includes(item.name)
-  )
+
+  // Safety check: ensure rawPageMap is an array before filtering
+  // Filter out locale folders, but keep all content items
+  let pageMap = rawPageMap
+  if (Array.isArray(rawPageMap) && rawPageMap.length > 0) {
+    const filtered = rawPageMap.filter((item: any) => {
+      // Keep items that are NOT locale folders
+      return item && item.name && !LOCALE_FOLDERS.includes(item.name)
+    })
+    // Only use filtered result if it has items, otherwise use original
+    if (filtered.length > 0) {
+      pageMap = filtered
+    }
+  }
 
   return (
     <html lang={lang} dir="ltr" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
