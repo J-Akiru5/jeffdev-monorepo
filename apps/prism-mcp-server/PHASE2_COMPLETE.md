@@ -165,7 +165,7 @@ Once Phase 2 is fully compiled:
 
 ## Testing Checklist
 
-- [x] TypeScript check passes for `@prism/cli`
+- [x] TypeScript check passes for `@prism-engine/cli`
 - [x] TypeScript check passes for `@jeffdev/db`
 - [ ] TypeScript check passes for `prism-mcp-server` (needs template fix)
 - [ ] `npx prism connect` launches server

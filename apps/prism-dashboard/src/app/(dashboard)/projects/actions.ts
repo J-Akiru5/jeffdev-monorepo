@@ -192,6 +192,8 @@ const CreateRuleSchema = z.object({
   category: z.string().min(1, "Category is required"),
   content: z.string().min(10, "Rule content must be at least 10 characters"),
   priority: z.coerce.number().min(1).max(100).default(50),
+  pattern: z.string().optional(), // Regex pattern for code validation
+  severity: z.enum(["error", "warning", "info"]).default("warning"),
 });
 
 export type CreateRuleState = {
@@ -237,7 +239,7 @@ export async function createRule(
     return { error: parsed.error.flatten().fieldErrors };
   }
 
-  const { name, category, content, priority } = parsed.data;
+  const { name, category, content, priority, pattern, severity } = parsed.data;
 
   // Create rule document
   const rulesCollection = await getCollection("rules");
@@ -248,6 +250,9 @@ export async function createRule(
     category,
     content,
     priority,
+    pattern: pattern || null,
+    severity: severity || "warning",
+    isActive: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   });

@@ -41,19 +41,51 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
   
-  // TODO: Fetch subscription from database
-  // const subscription = await db.subscriptions.findOne({ userId });
-  
-  // For now, return free tier
-  return NextResponse.json({
-    tier: 'free' as SubscriptionTier,
-    status: 'active',
-    limits: {
-      rules: 5,
-      components: 3,
-      aiGenerations: 10,
-    },
-  });
+  try {
+    // Fetch subscription from database
+    const { getCollection } = await import('@jeffdev/db/cosmos');
+    const subscriptions = await getCollection('subscriptions');
+    const subscription = await subscriptions.findOne({ userId });
+
+    if (!subscription) {
+      // No subscription found, return free tier defaults
+      return NextResponse.json({
+        tier: 'free' as SubscriptionTier,
+        status: 'active',
+        limits: {
+          rules: 5,
+          components: 3,
+          aiGenerations: 10,
+        },
+      });
+    }
+
+    // Return actual subscription data
+    const tier = (subscription.tier as SubscriptionTier) || 'free';
+    const { TIER_LIMITS } = await import('@/lib/subscriptions');
+    const limits = TIER_LIMITS[tier];
+
+    return NextResponse.json({
+      tier,
+      status: subscription.status || 'active',
+      limits: {
+        rules: limits.rules,
+        components: limits.components,
+        aiGenerations: limits.aiGenerations,
+      },
+    });
+  } catch (error) {
+    console.error('[subscriptions] GET error:', error);
+    return NextResponse.json({
+      tier: 'free' as SubscriptionTier,
+      status: 'active',
+      limits: {
+        rules: 5,
+        components: 3,
+        aiGenerations: 10,
+      },
+    });
+  }
 }
 
 export async function POST(request: NextRequest) {

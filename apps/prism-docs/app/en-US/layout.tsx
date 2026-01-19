@@ -111,20 +111,22 @@ export default async function RootLayout({
 
   // Find the current locale's folder in the pageMap and use its children
   // This ensures sidebar shows only this locale's content, not other locale folders
-  let pageMap = rawPageMap
+  let pageMap = rawPageMap || []
 
-  if (Array.isArray(rawPageMap)) {
+  if (Array.isArray(rawPageMap) && rawPageMap.length > 0) {
     // Find the current locale folder item
-    const currentLocaleItem = rawPageMap.find((item: any) => item.name === lang)
+    const currentLocaleItem = rawPageMap.find((item: any) =>
+      item && typeof item === 'object' && item.name === lang
+    )
 
-    if (currentLocaleItem && currentLocaleItem.children && Array.isArray(currentLocaleItem.children)) {
+    if (currentLocaleItem && 'children' in currentLocaleItem && Array.isArray(currentLocaleItem.children)) {
       // Use the locale folder's children as the pageMap
       pageMap = currentLocaleItem.children
     } else {
       // Fallback: filter out all locale folders and internal dirs from top level
       const EXCLUDE = [...LOCALE_FOLDERS, 'api', 'components', 'hooks']
       pageMap = rawPageMap.filter((item: any) =>
-        item && item.name && !EXCLUDE.includes(item.name)
+        item && typeof item === 'object' && item.name && !EXCLUDE.includes(item.name)
       )
     }
   }

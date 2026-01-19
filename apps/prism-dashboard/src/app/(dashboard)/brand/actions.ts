@@ -167,7 +167,7 @@ export async function createBrand(
 }
 
 /**
- * Get user's brands (including demo brands)
+ * Get user's brands
  */
 export async function getUserBrands() {
   const { userId } = await auth();
@@ -178,15 +178,131 @@ export async function getUserBrands() {
 
   const brandsCollection = await getCollection("brands");
   
-  // Include user's brands AND demo brands for showcase
+  // Only show user's own brands
   return brandsCollection
-    .find({ 
-      $or: [
-        { userId },
-        { userId: "demo-user" } // Include seeded demo brands
-      ]
-    })
+    .find({ userId })
     .sort({ createdAt: -1 })
     .limit(20)
     .toArray();
 }
+
+/**
+ * Get a single brand by slug
+ */
+export async function getBrand(slug: string) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return null;
+  }
+
+  const brandsCollection = await getCollection("brands");
+  return brandsCollection.findOne({ userId, slug });
+}
+
+/**
+ * Update an existing brand
+ */
+export async function updateBrand(
+  _prevState: BrandFormState,
+  formData: FormData
+): Promise<BrandFormState> {
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  const slug = formData.get("slug") as string;
+
+  // Parse all form data
+  const rawData = {
+    companyName: formData.get("companyName"),
+    tagline: formData.get("tagline") || undefined,
+    industry: formData.get("industry"),
+    colors: {
+      primary: formData.get("colors.primary"),
+      secondary: formData.get("colors.secondary"),
+      accent: formData.get("colors.accent"),
+      background: formData.get("colors.background"),
+      surface: formData.get("colors.surface"),
+      text: formData.get("colors.text"),
+      textMuted: formData.get("colors.textMuted"),
+    },
+    typography: {
+      headingFont: formData.get("typography.headingFont"),
+      bodyFont: formData.get("typography.bodyFont"),
+      monoFont: formData.get("typography.monoFont") || undefined,
+      scale: formData.get("typography.scale"),
+    },
+    voice: {
+      personality: formData.get("voice.personality"),
+      formality: formData.get("voice.formality"),
+      keywords: formData.get("voice.keywords") || "",
+    },
+    imagery: {
+      style: formData.get("imagery.style"),
+      mood: formData.get("imagery.mood"),
+    },
+    spacing: {
+      unit: formData.get("spacing.unit"),
+      borderRadius: formData.get("spacing.borderRadius"),
+    },
+  };
+
+  // Validate
+  const parsed = CompleteBrandSchema.safeParse(rawData);
+
+  if (!parsed.success) {
+    return { error: parsed.error.flatten().fieldErrors as Record<string, string[]> };
+  }
+
+  const data = parsed.data;
+
+  const brandsCollection = await getCollection("brands");
+
+  // Update brand
+  await brandsCollection.updateOne(
+    { userId, slug },
+    {
+      $set: {
+        companyName: data.companyName,
+        tagline: data.tagline,
+        industry: data.industry,
+        colors: data.colors,
+        typography: data.typography,
+        voice: {
+          personality: data.voice.personality,
+          formality: data.voice.formality,
+          keywords: data.voice.keywords,
+        },
+        imagery: data.imagery,
+        spacing: data.spacing,
+        updatedAt: new Date().toISOString(),
+      },
+    }
+  );
+
+  // Revalidate and redirect
+  revalidatePath("/brand");
+  revalidatePath(`/brand/${slug}`);
+  redirect(`/brand/${slug}`);
+}
+
+/**
+ * Delete a brand
+ */
+export async function deleteBrand(slug: string) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  const brandsCollection = await getCollection("brands");
+  await brandsCollection.deleteOne({ userId, slug });
+
+  revalidatePath("/brand");
+  redirect("/brand");
+}
+

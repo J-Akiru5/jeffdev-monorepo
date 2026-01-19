@@ -24,8 +24,8 @@ All notable changes to the Prism CLI will be documented in this file.
 
 ### 📦 Usage
 ```bash
-npx @prism/cli generate --template nextjs --style jdstudio
-npx @prism/cli list-templates
+npx @prism-engine/cli generate --template nextjs --style jdstudio
+npx @prism-engine/cli list-templates
 ```
 
 ---

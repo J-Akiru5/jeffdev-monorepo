@@ -1,0 +1,10 @@
+Scope: all 11 workspace projects
+Progress: resolved 1, reused 0, downloaded 0, added 0
+C:\dev\Next Js\jeffdev-monorepo\apps\agency:
+ ERR_PNPM_FETCH_404  GET https://registry.npmjs.org/@jdstudio%2Fui: Not Found - 404
+
+This error happened while installing a direct dependency of C:\dev\Next Js\jeffdev-monorepo\apps\agency
+
+@jdstudio/ui is not in the npm registry, or you have no permission to fetch it.
+
+No authorization header was set for the request.

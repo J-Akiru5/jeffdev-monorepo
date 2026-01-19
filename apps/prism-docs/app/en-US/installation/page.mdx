@@ -50,36 +50,37 @@ For real-time synchronization between the dashboard and your IDE.
 
 - Node.js 18+ installed
 - npm or pnpm package manager
-- Prism account with API key
+- Prism account with API key (Pro plan or above)
 
 ### Installation
 
 **npm:**
 ```bash
-npm install -g @prism/mcp-server
+npm install -g prism-mcp-server
 ```
 
 **pnpm:**
 ```bash
-pnpm add -g @prism/mcp-server
+pnpm add -g prism-mcp-server
 ```
 
 **yarn:**
 ```bash
-yarn global add @prism/mcp-server
+yarn global add prism-mcp-server
 ```
 
 ### Get Your API Key
 
 #### Step 1: Open Dashboard Settings
 
-Navigate to [prism.jeffdev.studio/settings/api](https://prism.jeffdev.studio/settings/api)
+Navigate to [prism.jeffdev.studio/settings](https://prism.jeffdev.studio/settings)
 
 #### Step 2: Generate API Key
 
-1. Click **"Generate New Key"**
-2. Give it a name (e.g., "MacBook Pro")
-3. Copy the key immediately — it won't be shown again
+1. Scroll to the **"API Access"** section
+2. Click **"Generate Key"**
+3. Give it a name (e.g., "MacBook Pro")
+4. Copy the key immediately — it won't be shown again
 
 #### Step 3: Store Securely
 
@@ -107,7 +108,10 @@ Add to `~/.cursor/mcp.json`:
   "mcpServers": {
     "prism": {
       "command": "prism-mcp",
-      "args": ["--api-key", "YOUR_API_KEY"]
+      "env": {
+        "PRISM_API_KEY": "pk_live_your_api_key_here",
+        "MONGODB_URI": "your_cosmos_connection_string"
+      }
     }
   }
 }
@@ -124,7 +128,10 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
   "mcpServers": {
     "prism": {
       "command": "prism-mcp",
-      "args": ["--api-key", "YOUR_API_KEY"]
+      "env": {
+        "PRISM_API_KEY": "pk_live_your_api_key_here",
+        "MONGODB_URI": "your_cosmos_connection_string"
+      }
     }
   }
 }
@@ -136,7 +143,7 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
 
 1. Install the **MCP Extension** from marketplace
 2. Open Command Palette → "MCP: Configure Servers"
-3. Add Prism server configuration
+3. Add Prism server configuration with environment variables
 
 [Full VS Code Setup Guide →](/integrations/vscode)
 
@@ -149,7 +156,10 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
   "mcpServers": {
     "prism": {
       "command": "prism-mcp",
-      "args": ["--api-key", "YOUR_API_KEY"]
+      "env": {
+        "PRISM_API_KEY": "pk_live_your_api_key_here",
+        "MONGODB_URI": "your_cosmos_connection_string"
+      }
     }
   }
 }
@@ -159,26 +169,16 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
 
 ---
 
-## Environment Variables (Alternative)
+## Environment Variables
 
-Instead of passing the API key as an argument, you can use environment variables:
+The MCP server uses these environment variables:
 
-```bash
-# Add to ~/.bashrc, ~/.zshrc, or ~/.profile
-export PRISM_API_KEY="your_api_key_here"
-```
-
-Then configure MCP without the `--api-key` argument:
-
-```json
-{
-  "mcpServers": {
-    "prism": {
-      "command": "prism-mcp"
-    }
-  }
-}
-```
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `PRISM_API_KEY` | Yes (Pro+) | Your API key from the dashboard |
+| `MONGODB_URI` | Yes | Azure Cosmos DB connection string |
+| `COSMOS_DATABASE_NAME` | No | Database name (default: `prism`) |
+| `PRISM_API_URL` | No | Dashboard URL (default: `https://prism.jeffdev.studio`) |
 
 ---
 
@@ -208,6 +208,7 @@ If configured correctly, the AI will list your project's context rules.
 | `Invalid API key` | Regenerate key in dashboard |
 | `Connection timeout` | Check internet connection |
 | `No rules found` | Create rules in dashboard first |
+| `API key validation failed` | Ensure you have a Pro plan or above |
 
 ---
 

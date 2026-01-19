@@ -23,16 +23,18 @@ export interface TierLimits {
   aiGenerations: number; // per month
   teamMembers: number;
   ideSync: boolean;
+  apiKeys: number;
 }
 
 export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
   free: {
     rules: 5,
-    components: 3,
+    components: 5,
     projects: 1,
     aiGenerations: 10,
     teamMembers: 0,
     ideSync: false,
+    apiKeys: 0,
   },
   pro: {
     rules: -1, // unlimited
@@ -41,6 +43,7 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
     aiGenerations: 500,
     teamMembers: 0,
     ideSync: true,
+    apiKeys: 1,
   },
   team: {
     rules: -1,
@@ -49,6 +52,7 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
     aiGenerations: 2000,
     teamMembers: 10,
     ideSync: true,
+    apiKeys: 5,
   },
   enterprise: {
     rules: -1,
@@ -57,6 +61,7 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
     aiGenerations: -1,
     teamMembers: -1,
     ideSync: true,
+    apiKeys: -1,
   },
 };
 

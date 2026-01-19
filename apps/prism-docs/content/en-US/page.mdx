@@ -50,7 +50,7 @@ For real-time sync with your IDE:
 
 ```bash
 # 1. Install MCP server globally
-npm install -g @prism/mcp-server
+npm install -g prism-mcp-server
 
 # 2. Configure your IDE (Cursor/Windsurf/VS Code)
 # Add to your MCP settings:
@@ -58,7 +58,10 @@ npm install -g @prism/mcp-server
   "mcpServers": {
     "prism": {
       "command": "prism-mcp",
-      "args": ["--api-key", "YOUR_API_KEY"]
+      "env": {
+        "PRISM_API_KEY": "pk_live_your_api_key",
+        "MONGODB_URI": "your_cosmos_connection_string"
+      }
     }
   }
 }

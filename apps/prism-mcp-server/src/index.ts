@@ -33,10 +33,67 @@ const SERVER_VERSION = "1.0.0";
 const MONGODB_URI = process.env.MONGODB_URI;
 const DATABASE_NAME = process.env.COSMOS_DATABASE_NAME || "prism";
 
+// API Key Authentication
+const PRISM_API_KEY = process.env.PRISM_API_KEY;
+const PRISM_API_URL = process.env.PRISM_API_URL || "https://prism.jeffdev.studio";
+
+// Cached auth state
+let authenticatedUserId: string | null = null;
+let authenticatedTier: string = "free";
+
 // =============================================================================
 // UTILITY FUNCTIONS
 // =============================================================================
 // (Video transcript search utilities removed - will be re-implemented in Phase 3 with Azure OpenAI)
+
+// =============================================================================
+// API KEY AUTHENTICATION
+// =============================================================================
+
+interface AuthResponse {
+  valid: boolean;
+  userId?: string;
+  tier?: string;
+  error?: string;
+  upgradeUrl?: string;
+}
+
+async function validateApiKey(): Promise<void> {
+  // If no API key provided, skip authentication (for local dev)
+  if (!PRISM_API_KEY) {
+    console.error(`[${SERVER_NAME}] No PRISM_API_KEY set. Running in unauthenticated mode.`);
+    console.error(`[${SERVER_NAME}] Set PRISM_API_KEY to enable subscription-based access.`);
+    return;
+  }
+
+  try {
+    console.error(`[${SERVER_NAME}] Validating API key...`);
+
+    const response = await fetch(`${PRISM_API_URL}/api/api-keys/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey: PRISM_API_KEY }),
+    });
+
+    const data = await response.json() as AuthResponse;
+
+    if (!data.valid) {
+      console.error(`[${SERVER_NAME}] ❌ API key validation failed: ${data.error}`);
+      if (data.upgradeUrl) {
+        console.error(`[${SERVER_NAME}] Upgrade your plan at: ${PRISM_API_URL}${data.upgradeUrl}`);
+      }
+      process.exit(1);
+    }
+
+    authenticatedUserId = data.userId || null;
+    authenticatedTier = data.tier || "free";
+
+    console.error(`[${SERVER_NAME}] ✅ Authenticated as user: ${authenticatedUserId} (${authenticatedTier} tier)`);
+  } catch (error) {
+    console.error(`[${SERVER_NAME}] ⚠️ Could not validate API key:`, error instanceof Error ? error.message : error);
+    console.error(`[${SERVER_NAME}] Continuing in unauthenticated mode.`);
+  }
+}
 
 // =============================================================================
 // DATABASE CONNECTION (Singleton)
@@ -185,7 +242,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         name: "validate_code_pattern",
         description:
           "Check if a code pattern follows the project's architectural rules. " +
-          "Use this to verify imports, component patterns, and security practices.",
+          "Matches code against regex patterns stored in the rules database.",
         inputSchema: {
           type: "object" as const,
           properties: {
@@ -196,6 +253,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             context: {
               type: "string",
               description: "What file or feature this code is for",
+            },
+            category: {
+              type: "string",
+              description: "Filter rules by category (architecture, styling, security, etc.)",
             },
           },
           required: ["code"],
@@ -393,6 +454,7 @@ ${result.extractedRules && result.extractedRules.length > 0 ? `\n**Extracted Rul
     case "validate_code_pattern": {
       const code = (args as Record<string, unknown>)?.code as string;
       const context = (args as Record<string, unknown>)?.context as string | undefined;
+      const category = (args as Record<string, unknown>)?.category as string | undefined;
       
       if (!code) {
         return {
@@ -403,62 +465,70 @@ ${result.extractedRules && result.extractedRules.length > 0 ? `\n**Extracted Rul
 
       const violations: string[] = [];
 
-      // Check for cross-app imports
-      if (code.includes("../../apps/") || code.includes("../apps/")) {
-        violations.push(
-          "❌ **VIOLATION: Cross-App Import Detected**\n" +
-          "   Never import from `../../apps/*`. Use shared packages instead:\n" +
-          "   ```typescript\n" +
-          "   // ✅ Correct\n" +
-          '   import { Button } from "@repo/ui/button";\n' +
-          "   ```"
-        );
+      // Fetch pattern-based rules from database
+      const rulesDb = await getDB();
+      const query: Record<string, unknown> = {
+        isActive: true,
+        pattern: { $exists: true, $ne: null }
+      };
+      if (category) query.category = category;
+
+      const patternRules = await rulesDb
+        .find(query)
+        .sort({ priority: 1 })
+        .toArray();
+
+      // Check code against each pattern rule
+      for (const rule of patternRules) {
+        if (!rule.pattern) continue;
+
+        try {
+          const regex = new RegExp(rule.pattern as string, "gi");
+          if (regex.test(code)) {
+            const severity = rule.severity === "error" ? "❌" : rule.severity === "warning" ? "⚠️" : "ℹ️";
+            const label = rule.severity === "error" ? "VIOLATION" : rule.severity === "warning" ? "WARNING" : "INFO";
+
+            violations.push(
+              `${severity} **${label}: ${rule.name}**\n` +
+              `   Category: ${rule.category}\n\n` +
+              `   ${rule.content}`
+            );
+          }
+        } catch (regexError) {
+          console.error(`[validate_code_pattern] Invalid regex in rule "${rule.name}":`, regexError);
+        }
       }
 
-      // Check for inline styles
-      if (code.includes("style={{") || code.includes("style:")) {
-        violations.push(
-          "⚠️ **WARNING: Inline Styles Detected**\n" +
-          "   Use Tailwind CSS classes instead of inline styles:\n" +
-          "   ```tsx\n" +
-          '   // ✅ Correct\n' +
-          '   <div className="bg-void text-white p-4">\n' +
-          "   ```"
-        );
-      }
+      // Fallback built-in checks (keep for backward compatibility)
+      if (patternRules.length === 0) {
+        // Cross-app imports
+        if (code.includes("../../apps/") || code.includes("../apps/")) {
+          violations.push(
+            "❌ **VIOLATION: Cross-App Import Detected**\n" +
+            "   Never import from `../../apps/*`. Use shared packages instead:\n" +
+            "   ```typescript\n" +
+            "   // ✅ Correct\n" +
+            '   import { Button } from "@repo/ui/button";\n' +
+            "   ```"
+          );
+        }
 
-      // Check for missing Zod validation in server code
-      if (
-        (code.includes("async function") || code.includes("export async")) &&
-        code.includes("formData") &&
-        !code.includes("z.") &&
-        !code.includes("zod")
-      ) {
-        violations.push(
-          "❌ **VIOLATION: Missing Zod Validation**\n" +
-          "   All Server Actions must validate input with Zod:\n" +
-          "   ```typescript\n" +
-          '   import { z } from "zod";\n' +
-          "   const schema = z.object({ ... });\n" +
-          "   const parsed = schema.safeParse(data);\n" +
-          "   ```"
-        );
-      }
-
-      // Check for env file usage
-      if (code.includes(".env") && !code.includes("process.env")) {
-        violations.push(
-          "⚠️ **WARNING: .env File Reference**\n" +
-          "   Use Doppler for secrets management, not .env files."
-        );
+        // Inline styles
+        if (code.includes("style={{") || code.includes("style:")) {
+          violations.push(
+            "⚠️ **WARNING: Inline Styles Detected**\n" +
+            "   Use Tailwind CSS classes instead of inline styles."
+          );
+        }
       }
 
       if (violations.length === 0) {
+        const ruleCount = patternRules.length;
         return {
           content: [
             {
               type: "text" as const,
-              text: `✅ **Code Validation Passed**\n\n${context ? `Context: ${context}\n\n` : ""}No architectural violations detected in the provided code.`,
+              text: `✅ **Code Validation Passed**\n\n${context ? `Context: ${context}\n\n` : ""}Checked against ${ruleCount} pattern rule(s). No violations detected.`,
             },
           ],
         };
@@ -487,6 +557,9 @@ ${result.extractedRules && result.extractedRules.length > 0 ? `\n**Extracted Rul
 // =============================================================================
 
 async function main() {
+  // Validate API key first
+  await validateApiKey();
+
   const transport = new StdioServerTransport();
 
   console.error(`[${SERVER_NAME}] Starting Prism MCP Server v${SERVER_VERSION}...`);

@@ -10,6 +10,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { z } from 'zod';
+import crypto from 'crypto';
+import { getCollection } from '@jeffdev/db';
 import { generateComponent, generateRulesFromComponent } from '@/lib/gemini';
 
 /**
@@ -71,8 +73,20 @@ export async function POST(request: NextRequest) {
       rules = rulesResult.rules;
     }
     
-    // TODO: Increment usage counter
-    // await incrementUsage(userId, 'aiGenerations');
+    // Log generation for usage tracking
+    try {
+      const generationsCollection = await getCollection('generations');
+      await generationsCollection.insertOne({
+        id: `gen_${crypto.randomBytes(12).toString('hex')}`,
+        userId,
+        type: 'component',
+        prompt: prompt.slice(0, 200), // Store first 200 chars of prompt
+        createdAt: new Date().toISOString(),
+      });
+    } catch (logError) {
+      // Don't fail the request if logging fails
+      console.error('[Generate] Failed to log generation:', logError);
+    }
     
     return NextResponse.json({
       success: true,

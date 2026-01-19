@@ -17,6 +17,7 @@ import {
   Button,
   Badge
 } from "@jdstudio/ui";
+import { UsageCard } from "@/components/usage-card";
 
 /**
  * Dashboard Home Page
@@ -116,6 +117,9 @@ export default async function DashboardPage() {
           trend={{ value: 0, direction: "neutral" }}
         />
       </div>
+
+      {/* Usage Stats */}
+      <UsageCard />
 
       {/* Quick Actions Row */}
       <div className="grid gap-6 md:grid-cols-2">

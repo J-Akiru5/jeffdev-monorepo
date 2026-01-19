@@ -7,7 +7,8 @@ import {
   Palette, 
   Sparkles, 
   CreditCard,
-  Settings
+  Settings,
+  Library
 } from "lucide-react";
 import { GridBackground } from "@jdstudio/ui";
 import { BetaBadge } from "@/components/beta-badge";
@@ -39,6 +40,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <NavItem href="/projects" icon={FolderKanban}>Projects</NavItem>
           <NavItem href="/brand" icon={Palette}>Branding</NavItem>
           <NavItem href="/generate" icon={Sparkles}>AI Kitchen</NavItem>
+          <NavItem href="/generate/library" icon={Library}>Component Library</NavItem>
           
           <div className="my-4 border-t border-white/5" />
           

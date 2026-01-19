@@ -334,3 +334,24 @@ export const VideoTranscriptSchema = z.object({
 });
 
 export type VideoTranscript = z.infer<typeof VideoTranscriptSchema>;
+
+// =============================================================================
+// API KEY SCHEMAS (MCP Authentication)
+// =============================================================================
+
+/**
+ * API key for MCP server authentication.
+ * Keys are stored as hashed values for security.
+ */
+export const ApiKeySchema = z.object({
+  id: z.string().describe("Unique key identifier"),
+  userId: z.string().describe("Owner's Clerk user ID"),
+  keyHash: z.string().describe("SHA-256 hash of the key (never store raw)"),
+  keyPrefix: z.string().describe("First 12 chars for identification (pk_live_xxxx)"),
+  name: z.string().max(50).describe("User-given name (e.g., 'MacBook Pro')"),
+  lastUsedAt: z.string().datetime().optional().describe("Last API call timestamp"),
+  createdAt: z.string().datetime().describe("Creation timestamp"),
+  revokedAt: z.string().datetime().optional().describe("Revocation timestamp"),
+});
+
+export type ApiKey = z.infer<typeof ApiKeySchema>;

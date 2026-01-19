@@ -18,7 +18,7 @@ function getGeminiModel() {
   
   const genAI = new GoogleGenerativeAI(apiKey);
   _gemini = genAI.getGenerativeModel({ 
-    model: 'gemini-2.5-flash-preview-05-20',
+    model: 'gemini-2.5-flash',
   });
   
   return _gemini;
@@ -197,28 +197,40 @@ export async function enhanceRuleWithAI(
   const startTime = Date.now();
   const model = getGeminiModel();
 
-  const prompt = `You are an expert software architect enhancing development rules for AI coding assistants.
+  const systemPrompt = `You are Prism, an expert software architecture documentation writer. Your task is to enhance architectural rules for a Context Engine that guides AI coding assistants.
 
-Given this rule:
-- **Name:** ${ruleName}
-- **Category:** ${category}
-- **Current Content:**
+When enhancing a rule:
+1. REWRITE the rule in a commanding tone starting with "You must...", "You should...", or "Never..."
+2. EXPAND the core idea into a clear, detailed explanation (2-4 paragraphs)
+3. IF multiple sub-rules are detected, FORMAT them as an enumerated list
+4. ADD a relevant code example in JavaScript or TypeScript
+5. INCLUDE both ✅ (correct) and ❌ (incorrect) patterns when applicable
+6. PRESERVE the original intent - do not change the meaning
+7. USE markdown formatting for readability
+
+Output Format:
+- Start with the commanding statement
+- Add explanation paragraphs
+- Use numbered lists for multiple sub-rules
+- Add code examples in fenced code blocks (use \`\`\`typescript or \`\`\`javascript)
+- Keep total length reasonable (300-500 words max)
+- Do NOT add meta-commentary like "Here's the enhanced version"`;
+
+  const userPrompt = `Enhance this architectural rule:
+
+Rule Title: ${ruleName}
+Category: ${category}
+Current Content:
 ${ruleContent}
-
-Your task:
-1. Improve clarity and conciseness
-2. Add concrete code examples (good vs bad) if missing
-3. Make the rule more actionable and specific
-4. Ensure it's suitable for AI assistants like Cursor, Windsurf, or Claude
 
 Respond with ONLY valid JSON:
 {
-  "enhancedContent": "The improved rule content in markdown format with examples",
-  "suggestions": ["Suggestion 1 for further improvement", "Suggestion 2", ...]
+  "enhancedContent": "The improved rule content in markdown format",
+  "suggestions": ["Optional suggestion for further improvement", "Another suggestion if applicable"]
 }`;
 
   try {
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent(`${systemPrompt}\n\n${userPrompt}`);
     const response = result.response.text();
 
     // Extract JSON from response (might be wrapped in markdown code blocks)
