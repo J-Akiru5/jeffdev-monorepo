@@ -34,7 +34,7 @@ importers:
         specifier: ^2.7.2
         version: 2.7.5
       typescript:
-        specifier: ^5.9.2
+        specifier: ^5.7.3
         version: 5.9.3
 
   apps/agency:
@@ -264,7 +264,7 @@ importers:
         specifier: ^4.1.18
         version: 4.1.18
       typescript:
-        specifier: ^5.9.2
+        specifier: ^5.7.3
         version: 5.9.3
 
   apps/prism-dashboard:
