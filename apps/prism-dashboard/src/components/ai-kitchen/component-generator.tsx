@@ -7,8 +7,8 @@
  * Features: Live preview, syntax highlighting, save to library, export
  */
 
-import { useState, useEffect } from 'react';
-import { Save, Download, Loader2, Library } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Save, Download, Loader2, Library, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { ComponentTabs } from '@/components/ui/component-tabs';
 import { Button } from '@jdstudio/ui';
@@ -26,6 +26,91 @@ interface LibraryStats {
   count: number;
   limit: number;
 }
+
+/**
+ * Custom dark-mode select component.
+ * Replaces native <select> which renders with OS white background on Chrome/Windows.
+ * Follows JDStudio Visual Constitution: bg-void, border-subtle, sharp radius.
+ */
+function CustomSelect<T extends string>({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: T;
+  onChange: (val: T) => void;
+  options: { value: T; label: string }[];
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Close on outside click
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedLabel = options.find((o) => o.value === value)?.label || value;
+
+  return (
+    <div ref={ref} className="relative">
+      <label className="block text-sm font-medium text-white/70 mb-2">
+        {label}
+      </label>
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center justify-between rounded-md border border-white/10 bg-white/5 px-3 py-2 text-left text-white transition-colors hover:border-white/20 focus:border-cyan-500 focus:outline-none"
+      >
+        <span>{selectedLabel}</span>
+        <ChevronDown
+          className={`h-4 w-4 text-white/50 transition-transform ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+
+      {open && (
+        <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-md border border-white/10 bg-[#0a0a0a] shadow-xl shadow-black/50">
+          {options.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => {
+                onChange(opt.value);
+                setOpen(false);
+              }}
+              className={`w-full px-3 py-2 text-left text-sm transition-colors hover:bg-white/10 ${opt.value === value
+                  ? 'bg-cyan-500/10 text-cyan-400'
+                  : 'text-white/80'
+                }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const DESIGN_SYSTEM_OPTIONS: { value: DesignSystem; label: string }[] = [
+  { value: 'jdstudio', label: 'JDStudio (Glassmorphic)' },
+  { value: 'bare-minimum', label: 'Bare Minimum' },
+  { value: 'glassmorphic', label: 'Glassmorphic' },
+  { value: '8bit-nostalgia', label: '8-Bit Nostalgia' },
+];
+
+const STACK_OPTIONS: { value: Stack; label: string }[] = [
+  { value: 'nextjs', label: 'Next.js' },
+  { value: 'react', label: 'React.js' },
+  { value: 'react-native', label: 'React Native' },
+];
 
 export function ComponentGenerator() {
   const [prompt, setPrompt] = useState('');
@@ -177,37 +262,20 @@ export function ComponentGenerator() {
       {/* Configuration */}
       <div className="grid gap-4 md:grid-cols-3">
         {/* Design System Select */}
-        <div>
-          <label className="block text-sm font-medium text-white/70 mb-2">
-            Design System
-          </label>
-          <select
-            value={designSystem}
-            onChange={(e) => setDesignSystem(e.target.value as DesignSystem)}
-            className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-white focus:border-cyan-500 focus:outline-none"
-          >
-            <option value="jdstudio">JDStudio (Glassmorphic)</option>
-            <option value="bare-minimum">Bare Minimum</option>
-            <option value="glassmorphic">Glassmorphic</option>
-            <option value="8bit-nostalgia">8-Bit Nostalgia</option>
-          </select>
-        </div>
+        <CustomSelect<DesignSystem>
+          label="Design System"
+          value={designSystem}
+          onChange={setDesignSystem}
+          options={DESIGN_SYSTEM_OPTIONS}
+        />
 
         {/* Stack Select */}
-        <div>
-          <label className="block text-sm font-medium text-white/70 mb-2">
-            Stack
-          </label>
-          <select
-            value={stack}
-            onChange={(e) => setStack(e.target.value as Stack)}
-            className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-white focus:border-cyan-500 focus:outline-none"
-          >
-            <option value="nextjs">Next.js</option>
-            <option value="react">React.js</option>
-            <option value="react-native">React Native</option>
-          </select>
-        </div>
+        <CustomSelect<Stack>
+          label="Stack"
+          value={stack}
+          onChange={setStack}
+          options={STACK_OPTIONS}
+        />
 
         {/* Generate Rules Toggle */}
         <div className="flex items-end">

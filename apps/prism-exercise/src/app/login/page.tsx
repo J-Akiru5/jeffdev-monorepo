@@ -28,8 +28,8 @@ export default function LoginPage() {
       setError(error.message);
       setLoading(false);
     } else {
-      router.push("/");
-      router.refresh();
+      // Force a full page reload to ensure cookies are set properly
+      window.location.href = "/";
     }
   };
 

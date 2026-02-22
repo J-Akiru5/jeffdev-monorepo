@@ -40,9 +40,8 @@ export default function SignupPage() {
 
       // With email confirmation disabled, user is auto-confirmed
       if (data.user) {
-        // Redirect to dashboard
-        router.push("/");
-        router.refresh();
+        // Force a full page reload to ensure cookies are set properly
+        window.location.href = "/";
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred during signup");

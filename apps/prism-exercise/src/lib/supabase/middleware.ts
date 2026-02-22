@@ -32,18 +32,27 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  // Refresh session - validates JWT
+  // IMPORTANT: Don't run queries here that select user data!
+  // Use getUser() instead of getSession() to validate JWT without DB query
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Public routes that don't require authentication
+  const isPublicRoute =
+    request.nextUrl.pathname.startsWith("/login") ||
+    request.nextUrl.pathname.startsWith("/signup") ||
+    request.nextUrl.pathname.startsWith("/auth");
+
+  // If user is authenticated and trying to access public routes, redirect to dashboard
+  if (user && isPublicRoute) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    return NextResponse.redirect(url);
+  }
+
   // Redirect to login if no user and accessing protected routes
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/signup") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
+  if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

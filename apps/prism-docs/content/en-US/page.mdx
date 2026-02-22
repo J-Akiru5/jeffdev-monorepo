@@ -48,25 +48,61 @@ https://prism.jeffdev.studio/sign-up
 
 For real-time sync with your IDE:
 
-```bash
-# 1. Install MCP server globally
-npm install -g prism-mcp-server
+> **Note:** The MCP server runs **locally on your machine** — you do NOT need to deploy it to Vercel or any cloud service.
 
-# 2. Configure your IDE (Cursor/Windsurf/VS Code)
-# Add to your MCP settings:
+```bash
+# 1. Install the Prism CLI globally
+npm install -g @prism-engine/cli
+
+# 2. Get your API Key from the Prism Dashboard
+#    Go to: https://prism.jeffdev.studio → Settings → API Keys → Generate Key
+
+# 3. Test the connection
+prism connect
+```
+
+#### VS Code Setup
+
+1. Open VS Code
+2. Press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac)
+3. Type **"Preferences: Open User Settings (JSON)"** and select it
+4. Add the following to your `settings.json`:
+
+```json
 {
-  "mcpServers": {
-    "prism": {
-      "command": "prism-mcp",
-      "env": {
-        "PRISM_API_KEY": "pk_live_your_api_key",
-        "MONGODB_URI": "your_cosmos_connection_string"
+  "mcp": {
+    "servers": {
+      "prism": {
+        "type": "stdio",
+        "command": "prism",
+        "args": ["connect"],
+        "env": {
+          "PRISM_API_KEY": "your_api_key_here"
+        }
       }
     }
   }
 }
+```
 
-# 3. Your AI assistant now has live access to your rules
+5. Restart VS Code — Prism is now connected.
+
+#### Cursor / Windsurf Setup
+
+Add to your Cursor or Windsurf MCP config (`.cursor/mcp.json` or equivalent):
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism",
+      "args": ["connect"],
+      "env": {
+        "PRISM_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
 ```
 
 ## Core Features
@@ -138,7 +174,7 @@ GPT-4o-mini analyzes transcripts to identify:
 Vector embeddings enable finding relevant architectural discussions, not just keyword matching.
 
 ### 🚀 Zero-Config MCP Integration
-`npx prism connect` and you're done. Your AI assistant now has context.
+`npm install -g @prism-engine/cli && prism connect` — your AI assistant now has context.
 
 ## Real-World Example
 

@@ -49,6 +49,15 @@ export async function POST(request: NextRequest) {
     
     const { prompt, designSystem, stack, generateRules } = parsed.data;
 
+    // 🔑 Pre-flight: verify GEMINI_API_KEY exists
+    if (!process.env.GEMINI_API_KEY) {
+      console.error('[Generate] GEMINI_API_KEY is not set in environment');
+      return NextResponse.json(
+        { error: 'AI service is not configured. Please contact support.' },
+        { status: 503 }
+      );
+    }
+
     // TODO: Check subscription limits
     // const subscription = await getSubscription(userId);
     // if (!canUseFeature(subscription.tier, 'aiGenerations', usage)) {
@@ -56,21 +65,36 @@ export async function POST(request: NextRequest) {
     // }
     
     // Generate component
-    const component = await generateComponent({
-      prompt,
-      designSystem,
-      stack,
-    });
+    let component;
+    try {
+      component = await generateComponent({
+        prompt,
+        designSystem,
+        stack,
+      });
+    } catch (genError) {
+      console.error('[Generate] Gemini API error:', genError);
+      const message = genError instanceof Error ? genError.message : 'Unknown Gemini error';
+      return NextResponse.json(
+        { error: `AI generation failed: ${message}` },
+        { status: 502 }
+      );
+    }
     
     // Optionally generate rules
     let rules = null;
     if (generateRules && component.code) {
-      const componentName = extractComponentName(component.code) || 'Component';
-      const rulesResult = await generateRulesFromComponent({
-        componentCode: component.code,
-        componentName,
-      });
-      rules = rulesResult.rules;
+      try {
+        const componentName = extractComponentName(component.code) || 'Component';
+        const rulesResult = await generateRulesFromComponent({
+          componentCode: component.code,
+          componentName,
+        });
+        rules = rulesResult.rules;
+      } catch (rulesError) {
+        // Don't fail the whole request if rules generation fails
+        console.error('[Generate] Rules generation failed:', rulesError);
+      }
     }
     
     // Log generation for usage tracking
@@ -95,9 +119,10 @@ export async function POST(request: NextRequest) {
     });
     
   } catch (error) {
-    console.error('Generation error:', error);
+    console.error('[Generate] Unhandled error:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to generate component' },
+      { error: `Failed to generate component: ${message}` },
       { status: 500 }
     );
   }
