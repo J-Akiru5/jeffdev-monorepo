@@ -122,3 +122,4 @@ Cached:    0 cached, 8 total
 Failed:    prism-docs#dev
 
  ERROR  run failed: command  exited (1)
+ΓÇëELIFECYCLEΓÇë Command failed with exit code 3221225786.
