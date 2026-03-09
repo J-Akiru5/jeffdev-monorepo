@@ -6,11 +6,15 @@
 
 import { Resend } from 'resend';
 
-if (!process.env.RESEND_API_KEY) {
-  throw new Error('Missing RESEND_API_KEY environment variable');
-}
+function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY;
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+  if (!apiKey) {
+    throw new Error('Missing RESEND_API_KEY environment variable');
+  }
+
+  return new Resend(apiKey);
+}
 
 // Brand sender names with display name for professional appearance
 export const EMAIL_ADDRESSES = {
@@ -49,6 +53,8 @@ export async function sendEmail({
   attachments,
 }: SendEmailParams) {
   try {
+    const resend = getResendClient();
+
     const { data, error } = await resend.emails.send({
       from,
       to,

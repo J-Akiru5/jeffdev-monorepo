@@ -7,6 +7,7 @@ import { FeatureFlagProvider } from '@/components/providers/feature-flag-provide
 import { getFeatureFlags } from '@/lib/feature-flags';
 import { CookieConsent } from '@/components/cookie-consent';
 import { AnalyticsProvider } from '@/components/analytics-provider';
+import { ChatAssistant } from '@jdstudio/ui/chat-assistant';
 import './globals.css';
 
 /**
@@ -151,6 +152,16 @@ export default async function RootLayout({
         {/* Vercel Analytics - Web Vitals Tracking */}
         <Analytics />
         <CookieConsent />
+        <ChatAssistant
+          apiEndpoint="/api/assistant"
+          title="JeffDev System Assistant"
+          welcomeMessage="How can I help you understand the JeffDev ecosystem today?"
+          suggestions={[
+            'What is the difference between Agency and Prism?',
+            'What is the turborepo structure?',
+            'What is the Doppler Law?'
+          ]}
+        />
       </body>
     </html>
   );

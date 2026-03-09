@@ -1,9 +1,9 @@
 /* ===========================================
-   Prism Docs Assistant - Syntaxure Labs Design System
+   Prism Chat Assistant - Syntaxure Labs Design System
    =========================================== */
 
 /* Floating Trigger Button */
-.docs-assistant-trigger {
+.chat-assistant-trigger {
   position: fixed;
   bottom: 24px;
   right: 24px;
@@ -24,19 +24,19 @@
   z-index: 9999;
 }
 
-.docs-assistant-trigger:hover {
+.chat-assistant-trigger:hover {
   transform: scale(1.05);
   box-shadow: 
     0 6px 24px rgba(6, 182, 212, 0.5),
     0 0 60px rgba(6, 182, 212, 0.3);
 }
 
-.docs-assistant-trigger:active {
+.chat-assistant-trigger:active {
   transform: scale(0.98);
 }
 
 /* Chat Panel */
-.docs-assistant-panel {
+.chat-assistant-panel {
   position: fixed;
   bottom: 96px;
   right: 24px;
@@ -71,7 +71,7 @@
 }
 
 /* Header */
-.docs-assistant-header {
+.chat-assistant-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -80,7 +80,7 @@
   background: rgba(26, 26, 26, 0.5);
 }
 
-.docs-assistant-header-title {
+.chat-assistant-header-title {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -89,17 +89,17 @@
   color: #ffffff;
 }
 
-.docs-assistant-header-title svg {
+.chat-assistant-header-title svg {
   color: #06b6d4;
 }
 
-.docs-assistant-header-actions {
+.chat-assistant-header-actions {
   display: flex;
   gap: 8px;
 }
 
-.docs-assistant-clear-btn,
-.docs-assistant-close-btn {
+.chat-assistant-clear-btn,
+.chat-assistant-close-btn {
   width: 32px;
   height: 32px;
   border-radius: 8px;
@@ -113,14 +113,14 @@
   transition: all 0.15s ease;
 }
 
-.docs-assistant-clear-btn:hover,
-.docs-assistant-close-btn:hover {
+.chat-assistant-clear-btn:hover,
+.chat-assistant-close-btn:hover {
   background: rgba(38, 38, 38, 0.8);
   color: #ffffff;
 }
 
 /* Messages Container */
-.docs-assistant-messages {
+.chat-assistant-messages {
   flex: 1;
   overflow-y: auto;
   padding: 20px;
@@ -129,25 +129,25 @@
   gap: 16px;
 }
 
-.docs-assistant-messages::-webkit-scrollbar {
+.chat-assistant-messages::-webkit-scrollbar {
   width: 6px;
 }
 
-.docs-assistant-messages::-webkit-scrollbar-track {
+.chat-assistant-messages::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.docs-assistant-messages::-webkit-scrollbar-thumb {
+.chat-assistant-messages::-webkit-scrollbar-thumb {
   background: rgba(38, 38, 38, 0.8);
   border-radius: 3px;
 }
 
-.docs-assistant-messages::-webkit-scrollbar-thumb:hover {
+.chat-assistant-messages::-webkit-scrollbar-thumb:hover {
   background: rgba(50, 50, 50, 0.8);
 }
 
 /* Welcome State */
-.docs-assistant-welcome {
+.chat-assistant-welcome {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -157,7 +157,7 @@
   padding: 20px;
 }
 
-.docs-assistant-welcome-icon {
+.chat-assistant-welcome-icon {
   width: 80px;
   height: 80px;
   border-radius: 20px;
@@ -168,31 +168,31 @@
   margin-bottom: 20px;
 }
 
-.docs-assistant-welcome-icon svg {
+.chat-assistant-welcome-icon svg {
   color: #06b6d4;
 }
 
-.docs-assistant-welcome h3 {
+.chat-assistant-welcome h3 {
   font-size: 18px;
   font-weight: 600;
   color: #ffffff;
   margin: 0 0 8px 0;
 }
 
-.docs-assistant-welcome p {
+.chat-assistant-welcome p {
   font-size: 14px;
   color: #a1a1a1;
   margin: 0 0 24px 0;
 }
 
-.docs-assistant-suggestions {
+.chat-assistant-suggestions {
   display: flex;
   flex-direction: column;
   gap: 8px;
   width: 100%;
 }
 
-.docs-assistant-suggestions button {
+.chat-assistant-suggestions button {
   padding: 12px 16px;
   background: rgba(26, 26, 26, 0.8);
   border: 1px solid rgba(38, 38, 38, 0.8);
@@ -204,13 +204,13 @@
   transition: all 0.15s ease;
 }
 
-.docs-assistant-suggestions button:hover {
+.chat-assistant-suggestions button:hover {
   background: rgba(38, 38, 38, 0.8);
   border-color: rgba(6, 182, 212, 0.3);
 }
 
 /* Message Bubble */
-.docs-assistant-message {
+.chat-assistant-message {
   display: flex;
   gap: 12px;
   animation: fadeIn 0.2s ease;
@@ -227,7 +227,7 @@
   }
 }
 
-.docs-assistant-message-avatar {
+.chat-assistant-message-avatar {
   width: 32px;
   height: 32px;
   border-radius: 8px;
@@ -237,83 +237,83 @@
   flex-shrink: 0;
 }
 
-.docs-assistant-message-user .docs-assistant-message-avatar {
+.chat-assistant-message-user .chat-assistant-message-avatar {
   background: rgba(139, 92, 246, 0.2);
   color: #8b5cf6;
 }
 
-.docs-assistant-message-assistant .docs-assistant-message-avatar {
+.chat-assistant-message-assistant .chat-assistant-message-avatar {
   background: rgba(6, 182, 212, 0.2);
   color: #06b6d4;
 }
 
-.docs-assistant-message-content {
+.chat-assistant-message-content {
   flex: 1;
   min-width: 0;
 }
 
-.docs-assistant-message-user .docs-assistant-message-content {
+.chat-assistant-message-user .chat-assistant-message-content {
   background: rgba(139, 92, 246, 0.1);
   border: 1px solid rgba(139, 92, 246, 0.2);
   border-radius: 12px;
   padding: 12px 16px;
 }
 
-.docs-assistant-message-user .docs-assistant-message-content p {
+.chat-assistant-message-user .chat-assistant-message-content p {
   margin: 0;
   font-size: 14px;
   color: #ffffff;
   line-height: 1.5;
 }
 
-.docs-assistant-message-assistant .docs-assistant-message-content {
+.chat-assistant-message-assistant .chat-assistant-message-content {
   font-size: 14px;
   color: #e5e5e5;
   line-height: 1.6;
 }
 
-.docs-assistant-message-assistant .docs-assistant-message-content p {
+.chat-assistant-message-assistant .chat-assistant-message-content p {
   margin: 0 0 12px 0;
 }
 
-.docs-assistant-message-assistant .docs-assistant-message-content p:last-child {
+.chat-assistant-message-assistant .chat-assistant-message-content p:last-child {
   margin-bottom: 0;
 }
 
-.docs-assistant-message-assistant .docs-assistant-message-content ul,
-.docs-assistant-message-assistant .docs-assistant-message-content ol {
+.chat-assistant-message-assistant .chat-assistant-message-content ul,
+.chat-assistant-message-assistant .chat-assistant-message-content ol {
   margin: 8px 0;
   padding-left: 20px;
 }
 
-.docs-assistant-message-assistant .docs-assistant-message-content li {
+.chat-assistant-message-assistant .chat-assistant-message-content li {
   margin: 4px 0;
 }
 
-.docs-assistant-message-assistant .docs-assistant-message-content h1,
-.docs-assistant-message-assistant .docs-assistant-message-content h2,
-.docs-assistant-message-assistant .docs-assistant-message-content h3,
-.docs-assistant-message-assistant .docs-assistant-message-content h4 {
+.chat-assistant-message-assistant .chat-assistant-message-content h1,
+.chat-assistant-message-assistant .chat-assistant-message-content h2,
+.chat-assistant-message-assistant .chat-assistant-message-content h3,
+.chat-assistant-message-assistant .chat-assistant-message-content h4 {
   color: #ffffff;
   margin: 16px 0 8px 0;
   font-weight: 600;
 }
 
-.docs-assistant-message-assistant .docs-assistant-message-content h1 {
+.chat-assistant-message-assistant .chat-assistant-message-content h1 {
   font-size: 18px;
 }
 
-.docs-assistant-message-assistant .docs-assistant-message-content h2 {
+.chat-assistant-message-assistant .chat-assistant-message-content h2 {
   font-size: 16px;
 }
 
-.docs-assistant-message-assistant .docs-assistant-message-content h3,
-.docs-assistant-message-assistant .docs-assistant-message-content h4 {
+.chat-assistant-message-assistant .chat-assistant-message-content h3,
+.chat-assistant-message-assistant .chat-assistant-message-content h4 {
   font-size: 15px;
 }
 
 /* Inline Code */
-.docs-assistant-inline-code {
+.chat-assistant-inline-code {
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
   background: rgba(6, 182, 212, 0.1);
@@ -323,7 +323,7 @@
 }
 
 /* Code Block */
-.docs-assistant-code-block {
+.chat-assistant-code-block {
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
   background: rgba(26, 26, 26, 0.8);
@@ -334,30 +334,30 @@
   margin: 12px 0;
 }
 
-.docs-assistant-code-block code {
+.chat-assistant-code-block code {
   color: #e5e5e5;
 }
 
 /* Links */
-.docs-assistant-link {
+.chat-assistant-link {
   color: #06b6d4;
   text-decoration: none;
   transition: color 0.15s ease;
 }
 
-.docs-assistant-link:hover {
+.chat-assistant-link:hover {
   color: #22d3ee;
   text-decoration: underline;
 }
 
 /* Typing Indicator */
-.docs-assistant-typing {
+.chat-assistant-typing {
   display: flex;
   gap: 4px;
   padding: 8px 0;
 }
 
-.docs-assistant-typing span {
+.chat-assistant-typing span {
   width: 8px;
   height: 8px;
   border-radius: 50%;
@@ -365,15 +365,15 @@
   animation: typing 1.4s infinite ease-in-out;
 }
 
-.docs-assistant-typing span:nth-child(1) {
+.chat-assistant-typing span:nth-child(1) {
   animation-delay: 0s;
 }
 
-.docs-assistant-typing span:nth-child(2) {
+.chat-assistant-typing span:nth-child(2) {
   animation-delay: 0.2s;
 }
 
-.docs-assistant-typing span:nth-child(3) {
+.chat-assistant-typing span:nth-child(3) {
   animation-delay: 0.4s;
 }
 
@@ -389,7 +389,7 @@
 }
 
 /* Error */
-.docs-assistant-error {
+.chat-assistant-error {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -403,7 +403,7 @@
 }
 
 /* Input Form */
-.docs-assistant-input-form {
+.chat-assistant-input-form {
   display: flex;
   gap: 12px;
   padding: 16px 20px;
@@ -411,7 +411,7 @@
   background: rgba(26, 26, 26, 0.5);
 }
 
-.docs-assistant-input {
+.chat-assistant-input {
   flex: 1;
   min-height: 40px;
   max-height: 120px;
@@ -427,21 +427,21 @@
   transition: all 0.15s ease;
 }
 
-.docs-assistant-input::placeholder {
+.chat-assistant-input::placeholder {
   color: #6b6b6b;
 }
 
-.docs-assistant-input:focus {
+.chat-assistant-input:focus {
   border-color: rgba(6, 182, 212, 0.5);
   box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.1);
 }
 
-.docs-assistant-input:disabled {
+.chat-assistant-input:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.docs-assistant-send-btn {
+.chat-assistant-send-btn {
   width: 40px;
   height: 40px;
   border-radius: 12px;
@@ -456,17 +456,17 @@
   flex-shrink: 0;
 }
 
-.docs-assistant-send-btn:hover:not(:disabled) {
+.chat-assistant-send-btn:hover:not(:disabled) {
   box-shadow: 0 4px 16px rgba(6, 182, 212, 0.4);
 }
 
-.docs-assistant-send-btn:disabled {
+.chat-assistant-send-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* Footer */
-.docs-assistant-footer {
+.chat-assistant-footer {
   padding: 8px 20px 12px;
   text-align: center;
   font-size: 11px;
@@ -476,7 +476,7 @@
 
 /* Mobile Responsive */
 @media (max-width: 480px) {
-  .docs-assistant-panel {
+  .chat-assistant-panel {
     bottom: 0;
     right: 0;
     width: 100%;
@@ -486,7 +486,7 @@
     border-radius: 0;
   }
 
-  .docs-assistant-trigger {
+  .chat-assistant-trigger {
     bottom: 16px;
     right: 16px;
     width: 48px;
