@@ -16,7 +16,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'About',
   description:
-    'JeffDev Studio is a web development agency building high-performance systems for startups and enterprises. Learn about our approach and the team behind the code.',
+    'Syntaxure Labs is a web development agency building high-performance systems for startups and enterprises. Learn about our approach and the team behind the code.',
 };
 
 const stats = [
@@ -61,7 +61,7 @@ export default function AboutPage() {
                   <span className="text-gradient-holographic">That Launch</span>
                 </h1>
                 <p className="mt-6 text-lg leading-relaxed text-white/60">
-                  JeffDev Studio is a new-breed development agency architecting
+                  Syntaxure Labs is a new-breed development agency architecting
                   high-performance systems for ambitious startups. We don&apos;t
                   just write code — we partner with founders to turn &apos;Zero
                   to One&apos; ideas into scalable reality.
