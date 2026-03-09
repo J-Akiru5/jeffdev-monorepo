@@ -35,7 +35,7 @@ export default function PrivacyPage() {
               <p className="text-white/70 leading-relaxed">
                 Prism Context Engine, operated by Syntaxure Labs (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;), 
                 is committed to protecting your privacy. This Privacy Policy explains how we collect, use, 
-                and safeguard your information when you use our platform at prism.syntaxurelabs.com (the &quot;Service&quot;).
+                and safeguard your information when you use our platform at prism.jeffdev.studio (the &quot;Service&quot;).
               </p>
               <p className="text-white/70 leading-relaxed mt-4">
                 We adhere to the &quot;Data Sanctity&quot; principle from our constitution: we are guardians of 
@@ -198,8 +198,8 @@ export default function PrivacyPage() {
               </ul>
               <p className="text-white/70 leading-relaxed mt-4">
                 To exercise these rights, contact us at{' '}
-                <a href="mailto:privacy@syntaxurelabs.com" className="text-cyan-400 hover:underline">
-                  privacy@syntaxurelabs.com
+                <a href="mailto:privacy@jeffdev.studio" className="text-cyan-400 hover:underline">
+                  privacy@jeffdev.studio
                 </a>.
               </p>
             </section>
@@ -233,14 +233,14 @@ export default function PrivacyPage() {
               <ul className="text-white/70 mt-4 space-y-2">
                 <li>
                   Email:{' '}
-                  <a href="mailto:privacy@syntaxurelabs.com" className="text-cyan-400 hover:underline">
-                    privacy@syntaxurelabs.com
+                  <a href="mailto:privacy@jeffdev.studio" className="text-cyan-400 hover:underline">
+                    privacy@jeffdev.studio
                   </a>
                 </li>
                 <li>
                   General inquiries:{' '}
-                  <a href="mailto:hello@syntaxurelabs.com" className="text-cyan-400 hover:underline">
-                    hello@syntaxurelabs.com
+                  <a href="mailto:hello@jeffdev.studio" className="text-cyan-400 hover:underline">
+                    hello@jeffdev.studio
                   </a>
                 </li>
               </ul>

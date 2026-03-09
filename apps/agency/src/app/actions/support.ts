@@ -37,7 +37,7 @@ export async function sendSupportRequest(formData: FormData): Promise<ActionResu
     const validated = supportSchema.parse(data);
 
     // Support email address
-    const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'support@syntaxurelabs.com';
+    const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'support@jeffdev.studio';
 
     // Send email to support
     await sendEmail({
@@ -156,7 +156,7 @@ function supportConfirmationTemplate(data: {
     
     <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.3); text-align: center;">
       <strong>Syntaxure Labs</strong> • Enterprise Web Solutions<br>
-      <a href="https://syntaxurelabs.com" style="color: #10b981; text-decoration: none;">syntaxurelabs.com</a>
+      <a href="https://jeffdev.studio" style="color: #10b981; text-decoration: none;">jeffdev.studio</a>
     </p>
   </div>
 </body>

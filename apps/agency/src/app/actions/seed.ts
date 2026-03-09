@@ -47,7 +47,7 @@ export async function bootstrapCurrentUserAsFounder(
       bio: 'Building the future, one line at a time',
       phone: '09519167103',
       location: 'Iloilo, Philippines',
-      website: 'https://syntaxurelabs.com',
+      website: 'https://jeffdev.studio',
       status: 'active',
       assignedProjects: [],
       permissions: ['*'],

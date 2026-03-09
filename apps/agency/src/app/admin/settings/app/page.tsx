@@ -12,7 +12,7 @@ export default function AppSettingsPage() {
   const [settings, setSettings] = useState({
     siteName: 'Syntaxure Labs',
     tagline: 'Premium Web Development Services',
-    supportEmail: 'support@syntaxurelabs.com',
+    supportEmail: 'support@jeffdev.studio',
     contactPhone: '+63 912 345 6789',
     social: {
       github: 'https://github.com/jeffdev',

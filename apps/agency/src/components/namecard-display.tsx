@@ -238,7 +238,7 @@ export function NamecardDisplay({ namecard }: NamecardDisplayProps) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={qrDataUrl} alt="QR Code" className="mx-auto rounded-md" />
             <p className="text-xs text-white/40 mt-4">
-              syntaxurelabs.com/card/{namecard.username}
+              jeffdev.studio/card/{namecard.username}
             </p>
           </div>
         </div>

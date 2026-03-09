@@ -27,7 +27,7 @@ export function PublicNav() {
           {/* Nav Links */}
           <div className="hidden md:flex items-center gap-8">
             <Link
-              href="https://docs.syntaxurelabs.com"
+              href="https://docs.jeffdev.studio"
               target="_blank"
               className="text-white/60 hover:text-cyan-400 transition-colors text-sm font-mono uppercase tracking-wider"
             >
@@ -43,7 +43,7 @@ export function PublicNav() {
               Pricing
             </Link>
             <Link
-              href="https://syntaxurelabs.com"
+              href="https://jeffdev.studio"
               target="_blank"
               className="text-white/60 hover:text-cyan-400 transition-colors text-sm font-mono uppercase tracking-wider"
             >

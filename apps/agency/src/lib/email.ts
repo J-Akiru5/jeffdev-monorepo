@@ -14,16 +14,16 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Brand sender names with display name for professional appearance
 export const EMAIL_ADDRESSES = {
-  contact: process.env.CONTACT_EMAIL || 'contact@syntaxurelabs.com',
-  hire: process.env.HIRE_EMAIL || 'hire@syntaxurelabs.com',
-  noreply: process.env.NOREPLY_EMAIL || 'noreply@syntaxurelabs.com',
+  contact: process.env.CONTACT_EMAIL || 'contact@jeffdev.studio',
+  hire: process.env.HIRE_EMAIL || 'hire@jeffdev.studio',
+  noreply: process.env.NOREPLY_EMAIL || 'noreply@jeffdev.studio',
 } as const;
 
 // Branded sender format for external emails
 export const BRANDED_SENDER = `Syntaxure Labs <${EMAIL_ADDRESSES.noreply}>`;
 
 // Base URL for assets in emails
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://syntaxurelabs.com';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://jeffdev.studio';
 const LOGO_URL = `${BASE_URL}/favicon/icon1.png`;
 
 interface EmailAttachment {
@@ -301,7 +301,7 @@ export function inviteEmailTemplate(data: {
     
     <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.3); text-align: center;">
       <strong>Syntaxure Labs</strong> • Enterprise Web Solutions<br>
-      <a href="https://syntaxurelabs.com" style="color: ${roleColor}; text-decoration: none;">syntaxurelabs.com</a>
+      <a href="https://jeffdev.studio" style="color: ${roleColor}; text-decoration: none;">jeffdev.studio</a>
     </p>
   </div>
 </body>
@@ -405,7 +405,7 @@ export function invoiceEmailTemplate(data: {
       <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.6);">
         <strong>Bank Transfer:</strong> Landbank • 1936-2091-96 • Jeff Edrick Martinez<br>
         <strong>GCash:</strong> +63 951 916 7103<br>
-        <strong>PayPal:</strong> contact@syntaxurelabs.com
+        <strong>PayPal:</strong> contact@jeffdev.studio
       </p>
     </div>
     
@@ -414,7 +414,7 @@ export function invoiceEmailTemplate(data: {
     <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.3); text-align: center;">
       <strong>Syntaxure Labs</strong> • Enterprise Web Solutions<br>
       DTI No: VLLP979818395984<br>
-      <a href="https://syntaxurelabs.com" style="color: ${accentColor}; text-decoration: none;">syntaxurelabs.com</a>
+      <a href="https://jeffdev.studio" style="color: ${accentColor}; text-decoration: none;">jeffdev.studio</a>
     </p>
   </div>
 </body>

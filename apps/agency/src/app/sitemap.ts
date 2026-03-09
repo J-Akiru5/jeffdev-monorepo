@@ -4,10 +4,10 @@ import { MetadataRoute } from 'next';
  * SITEMAP GENERATOR
  * -----------------
  * Generates a sitemap.xml for search engines.
- * Access at: https://syntaxurelabs.com/sitemap.xml
+ * Access at: https://jeffdev.studio/sitemap.xml
  */
 
-const BASE_URL = 'https://syntaxurelabs.com';
+const BASE_URL = 'https://jeffdev.studio';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static pages

@@ -169,10 +169,10 @@ export default async function PublicPaymentPage({ params, searchParams }: PagePr
           <p className="mt-2">
             Questions? Contact us at{' '}
             <a
-              href="mailto:hello@syntaxurelabs.com"
+              href="mailto:hello@jeffdev.studio"
               className="text-cyan-400 hover:underline"
             >
-              hello@syntaxurelabs.com
+              hello@jeffdev.studio
             </a>
           </p>
           <p className="mt-4">

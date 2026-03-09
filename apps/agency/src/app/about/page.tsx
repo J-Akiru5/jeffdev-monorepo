@@ -131,11 +131,11 @@ export default function AboutPage() {
                     Available for Q1 2026 projects
                   </div>
                   <a
-                    href="mailto:jeff@syntaxurelabs.com"
+                    href="mailto:jeff@jeffdev.studio"
                     className="flex items-center gap-3 text-sm text-white/50 transition-colors hover:text-cyan-400"
                   >
                     <Mail className="h-4 w-4" />
-                    jeff@syntaxurelabs.com
+                    jeff@jeffdev.studio
                   </a>
                 </div>
 

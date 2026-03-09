@@ -10,7 +10,7 @@ export default function EmailSettingsPage() {
   
   // Mock initial data
   const [apiKey, setApiKey] = useState('re_123456789...');
-  const [fromEmail, setFromEmail] = useState('notifications@syntaxurelabs.com');
+  const [fromEmail, setFromEmail] = useState('notifications@jeffdev.studio');
   const [templates, setTemplates] = useState({
     welcome: true,
     invoice: true,

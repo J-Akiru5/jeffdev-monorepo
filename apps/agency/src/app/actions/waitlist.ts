@@ -66,7 +66,7 @@ export async function joinWaitlist(data: {
 
     // Send notification to admin (Jeff)
     await sendEmail({
-      to: 'jeffmartinez@syntaxurelabs.com',
+      to: 'jeffmartinez@jeffdev.studio',
       subject: `[Prism] New Waitlist: ${validated.email}`,
       html: prismWaitlistNotification({ 
         email: validated.email, 

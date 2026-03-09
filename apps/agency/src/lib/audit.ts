@@ -30,7 +30,7 @@ export async function logAuditEvent(event: AuditEvent): Promise<void> {
       ...event,
       timestamp: new Date().toISOString(),
       // userEmail would come from session in a real implementation
-      userEmail: event.userEmail || 'admin@syntaxurelabs.com',
+      userEmail: event.userEmail || 'admin@jeffdev.studio',
     };
 
     await db.collection('audit_logs').add(auditLog);

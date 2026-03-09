@@ -166,7 +166,7 @@ export default async function SubscriptionPage() {
           ]}
           current={currentTier === "enterprise"}
           buttonLabel="Contact Sales"
-          href="mailto:enterprise@syntaxurelabs.com"
+          href="mailto:enterprise@jeffdev.studio"
         />
       </div>
 

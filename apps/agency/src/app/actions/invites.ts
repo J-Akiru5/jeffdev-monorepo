@@ -22,7 +22,7 @@ const USERS_COLLECTION = 'users';
 const FOUNDER_UID = process.env.FOUNDER_UID || 'founder-001';
 
 // Base URL for invite links
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://syntaxurelabs.com';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://jeffdev.studio';
 
 /**
  * Generate a secure invite token

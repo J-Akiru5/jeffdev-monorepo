@@ -70,7 +70,7 @@ const plans = [
       'Custom integrations',
     ],
     cta: 'Contact Sales',
-    href: 'https://syntaxurelabs.com/contact',
+    href: 'https://jeffdev.studio/contact',
   },
 ];
 
@@ -304,7 +304,7 @@ export default function PublicPricingPage() {
               </span>
             </Link>
             <Link
-              href="https://syntaxurelabs.com/contact"
+              href="https://jeffdev.studio/contact"
               className="rounded-md border border-white/10 bg-white/2 px-8 py-4 transition-all hover:bg-white/5 hover:border-white/20 active:scale-95"
             >
               <span className="font-mono text-sm uppercase tracking-wider text-white/80">
@@ -348,7 +348,7 @@ export default function PublicPricingPage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="https://docs.syntaxurelabs.com" target="_blank" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
+                  <Link href="https://docs.jeffdev.studio" target="_blank" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
                     Docs
                   </Link>
                 </li>
@@ -359,12 +359,12 @@ export default function PublicPricingPage() {
               <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Company</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link href="https://syntaxurelabs.com" target="_blank" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
+                  <Link href="https://jeffdev.studio" target="_blank" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
                     About Syntaxure Labs
                   </Link>
                 </li>
                 <li>
-                  <Link href="https://syntaxurelabs.com/contact" target="_blank" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
+                  <Link href="https://jeffdev.studio/contact" target="_blank" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
                     Contact
                   </Link>
                 </li>

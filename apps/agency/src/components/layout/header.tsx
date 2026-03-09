@@ -31,7 +31,7 @@ export function Header() {
   // Build navigation links based on feature flags
   const navLinks: NavLink[] = [
     // Prism Context Engine - always show as main product
-    { href: 'https://prism.syntaxurelabs.com', label: 'Prism Context Engine', highlight: true },
+    { href: 'https://prism.jeffdev.studio', label: 'Prism Context Engine', highlight: true },
     { href: '/services', label: 'Services' },
     { href: '/work', label: 'Work' },
     { href: '/about', label: 'About' },

@@ -196,8 +196,8 @@ export default function TermsPage() {
               <h2 className="text-xl font-bold text-white mb-4">Contact</h2>
               <p className="text-white/70 leading-relaxed">
                 For questions about these terms, contact us at{' '}
-                <a href="mailto:legal@syntaxurelabs.com" className="text-cyan-400 hover:underline">
-                  legal@syntaxurelabs.com
+                <a href="mailto:legal@jeffdev.studio" className="text-cyan-400 hover:underline">
+                  legal@jeffdev.studio
                 </a>
               </p>
             </section>

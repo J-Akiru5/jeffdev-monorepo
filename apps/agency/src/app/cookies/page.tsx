@@ -85,8 +85,8 @@ export default function CookiePolicyPage() {
               <h2>5. Contact Us</h2>
               <p>
                 If you have any questions about our use of cookies, please contact us at{' '}
-                <a href="mailto:contact@syntaxurelabs.com" className="text-cyan-400">
-                  contact@syntaxurelabs.com
+                <a href="mailto:contact@jeffdev.studio" className="text-cyan-400">
+                  contact@jeffdev.studio
                 </a>
                 .
               </p>

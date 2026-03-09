@@ -261,7 +261,7 @@ export async function sendInvoice(id: string) {
     const pdfBuffer = await generateInvoicePDFBuffer(invoice);
 
     // Prepare payment link
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://syntaxurelabs.com';
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jeffdev.studio';
     const paymentLink = `${baseUrl}/pay/${invoice.refNo}`;
 
     // Send email with PDF attachment

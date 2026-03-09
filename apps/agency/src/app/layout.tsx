@@ -50,11 +50,11 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: 'Syntaxure Labs' }],
   creator: 'Syntaxure Labs',
-  metadataBase: new URL('https://syntaxurelabs.com'),
+  metadataBase: new URL('https://jeffdev.studio'),
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://syntaxurelabs.com',
+    url: 'https://jeffdev.studio',
     siteName: 'Syntaxure Labs',
     title: 'Syntaxure Labs — Enterprise Web Development & SaaS Solutions',
     description:

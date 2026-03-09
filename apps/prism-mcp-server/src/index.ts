@@ -35,7 +35,7 @@ const DATABASE_NAME = process.env.COSMOS_DATABASE_NAME || "prism";
 
 // API Key Authentication
 const PRISM_API_KEY = process.env.PRISM_API_KEY;
-const PRISM_API_URL = process.env.PRISM_API_URL || "https://prism.syntaxurelabs.com";
+const PRISM_API_URL = process.env.PRISM_API_URL || "https://prism.jeffdev.studio";
 
 // Cached auth state
 let authenticatedUserId: string | null = null;

@@ -12,9 +12,9 @@ export const metadata: Metadata = {
   description:
     "Record your architecture. AI learns your rules. Deploy context directly to Cursor, Windsurf, and Claude via MCP. Eliminate context pollution.",
   keywords: ['MCP', 'Model Context Protocol', 'Cursor', 'Windsurf', 'Claude', 'AI coding assistant', 'video to context', 'architectural rules', 'design system'],
-  authors: [{ name: 'Syntaxure Labs', url: 'https://syntaxurelabs.com' }],
+  authors: [{ name: 'Syntaxure Labs', url: 'https://jeffdev.studio' }],
   creator: 'Syntaxure Labs',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_PRISM_URL || "https://prism.syntaxurelabs.com"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_PRISM_URL || "https://prism.jeffdev.studio"),
   openGraph: {
     title: 'Prism Context Engine - The Context Operating System for Vibecoders',
     description: 'Record your architecture. AI learns your rules. Deploy to your IDE.',

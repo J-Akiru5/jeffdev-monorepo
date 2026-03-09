@@ -25,7 +25,7 @@ export const prismWaitlistConfirmation = `
     <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
       <p style="font-size: 12px; color: rgba(255,255,255,0.3);">
         Syntaxure Labs • Prism Division<br>
-        <a href="https://syntaxurelabs.com/prism" style="color: #8b5cf6; text-decoration: none;">syntaxurelabs.com/prism</a>
+        <a href="https://jeffdev.studio/prism" style="color: #8b5cf6; text-decoration: none;">jeffdev.studio/prism</a>
       </p>
     </div>
   </div>
@@ -66,7 +66,7 @@ export function prismWaitlistNotification(data: { email: string; role?: string; 
     </div>
     
     <div style="margin-top: 20px; text-align: center;">
-      <a href="https://syntaxurelabs.com/admin/prism/waitlist" style="display: inline-block; background: #000; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">
+      <a href="https://jeffdev.studio/admin/prism/waitlist" style="display: inline-block; background: #000; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">
         View Waitlist
       </a>
     </div>

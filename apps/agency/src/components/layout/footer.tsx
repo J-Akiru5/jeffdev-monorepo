@@ -20,8 +20,8 @@ const footerLinks = {
     { href: '/services/ai-integration', label: 'AI Integration' },
   ],
   products: [
-    { href: 'https://prism.syntaxurelabs.com', label: 'Prism Context Engine', external: true },
-    { href: 'https://prism.syntaxurelabs.com/guide/getting-started', label: 'Documentation', external: true },
+    { href: 'https://prism.jeffdev.studio', label: 'Prism Context Engine', external: true },
+    { href: 'https://prism.jeffdev.studio/guide/getting-started', label: 'Documentation', external: true },
   ],
   company: [
     { href: '/about', label: 'About Studio' },
@@ -58,11 +58,11 @@ export function Footer() {
             {/* Contact Info */}
             <div className="mt-6 space-y-2">
               <a
-                href="mailto:hello@syntaxurelabs.com"
+                href="mailto:hello@jeffdev.studio"
                 className="flex items-center gap-2 text-sm text-white/50 transition-colors hover:text-cyan-400"
               >
                 <Mail className="h-4 w-4" />
-                hello@syntaxurelabs.com
+                hello@jeffdev.studio
               </a>
               <div className="flex items-center gap-2 text-sm text-white/50">
                 <MapPin className="h-4 w-4" />

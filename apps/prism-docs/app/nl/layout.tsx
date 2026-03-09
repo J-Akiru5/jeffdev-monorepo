@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   description: 'AI-powered context governance for LLMs. Extract architectural rules from video transcripts, enforce coding standards, and deploy constraints to AI coding assistants via MCP.',
   applicationName: 'Prism Context Engine',
   keywords: ['MCP', 'Model Context Protocol', 'AI', 'LLM', 'Cursor', 'Windsurf', 'Copilot', 'architectural rules', 'code standards', 'video transcripts', 'Azure OpenAI'],
-  authors: [{ name: 'Syntaxure Labs', url: 'https://syntaxurelabs.com' }],
+  authors: [{ name: 'Syntaxure Labs', url: 'https://jeffdev.studio' }],
   creator: 'Syntaxure Labs',
   publisher: 'Syntaxure Labs',
   metadataBase: new URL(process.env.NEXT_PUBLIC_DOCS_URL || 'http://localhost:3002'),
@@ -185,8 +185,8 @@ export default async function RootLayout({
                         The Context Operating System for developers who ship fast. Eliminate AI hallucinations with governed context rules.
                       </p>
                       <div className="space-y-2 text-sm">
-                        <a href="mailto:hello@syntaxurelabs.com" className="flex items-center gap-2 text-white/40 hover:text-cyan-400 transition-colors">
-                          <span>✉</span> hello@syntaxurelabs.com
+                        <a href="mailto:hello@jeffdev.studio" className="flex items-center gap-2 text-white/40 hover:text-cyan-400 transition-colors">
+                          <span>✉</span> hello@jeffdev.studio
                         </a>
                       </div>
                     </div>
@@ -215,10 +215,10 @@ export default async function RootLayout({
                       <h4 className="text-white/40 text-xs font-medium uppercase tracking-widest mb-6">Product</h4>
                       <ul className="space-y-3">
                         <li key="dash">
-                          <a href="https://prism.syntaxurelabs.com" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-cyan-400 text-sm transition-colors">Dashboard</a>
+                          <a href="https://prism.jeffdev.studio" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-cyan-400 text-sm transition-colors">Dashboard</a>
                         </li>
                         <li key="price">
-                          <a href="https://prism.syntaxurelabs.com/pricing" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-cyan-400 text-sm transition-colors">Pricing</a>
+                          <a href="https://prism.jeffdev.studio/pricing" target="_blank" rel="noopener noreferrer" className="text-white/70 hover:text-cyan-400 text-sm transition-colors">Pricing</a>
                         </li>
                         <li key="api">
                           <a href={`/${lang}/advanced/api-reference`} className="text-white/70 hover:text-cyan-400 text-sm transition-colors">API Reference</a>
@@ -236,7 +236,7 @@ export default async function RootLayout({
                         Ready to eliminate context pollution? Let&apos;s get you started.
                       </p>
                       <a
-                        href="https://prism.syntaxurelabs.com/sign-up"
+                        href="https://prism.jeffdev.studio/sign-up"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 border border-white/20 px-5 py-2.5 text-sm font-medium text-white hover:border-cyan-500/50 hover:text-cyan-400 transition-all"
@@ -251,10 +251,10 @@ export default async function RootLayout({
                 <div className="border-t border-white/5">
                   <div className="max-w-7xl mx-auto px-6 lg:px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-6 text-xs">
-                      <a href="https://prism.syntaxurelabs.com/terms" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white/60 transition-colors">
+                      <a href="https://prism.jeffdev.studio/terms" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white/60 transition-colors">
                         Terms of Service
                       </a>
-                      <a href="https://prism.syntaxurelabs.com/privacy" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white/60 transition-colors">
+                      <a href="https://prism.jeffdev.studio/privacy" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-white/60 transition-colors">
                         Privacy Policy
                       </a>
                     </div>

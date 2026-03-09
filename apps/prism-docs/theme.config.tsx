@@ -101,7 +101,7 @@ const config = {
     text: (
       <span>
         {new Date().getFullYear()} ©{' '}
-        <a href="https://syntaxurelabs.com" target="_blank" rel="noopener noreferrer">
+        <a href="https://jeffdev.studio" target="_blank" rel="noopener noreferrer">
           Syntaxure Labs
         </a>
         . Built with Prism Context Engine.
