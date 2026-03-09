@@ -1,0 +1,58 @@
+
+> jeffdev-agency@0.1.0 build C:\dev\Next Js\jeffdev-monorepo\apps\agency
+> next build
+
+Γû▓ Next.js 16.1.3 (Turbopack)
+- Environments: .env.local, .env
+- Experiments (use with caution):
+  ┬╖ serverActions
+
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 2 errors:
+./packages/ui/src/chat-assistant.tsx:6:1
+Module not found: Can't resolve 'react-syntax-highlighter'
+  4 | import ReactMarkdown from 'react-markdown';
+  5 | import remarkGfm from 'remark-gfm';
+> 6 | import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  7 | import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+  8 | import './chat-assistant.css';
+  9 |
+
+
+
+Import trace:
+  Server Component:
+    ./packages/ui/src/chat-assistant.tsx
+    ./apps/agency/src/app/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+./packages/ui/src/chat-assistant.tsx:7:1
+Module not found: Can't resolve 'react-syntax-highlighter/dist/esm/styles/prism'
+   5 | import remarkGfm from 'remark-gfm';
+   6 | import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+>  7 | import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 | import './chat-assistant.css';
+   9 |
+  10 | interface Message {
+
+
+
+Import trace:
+  Server Component:
+    ./packages/ui/src/chat-assistant.tsx
+    ./apps/agency/src/app/layout.tsx
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (./packages/ui/src/chat-assistant.tsx:6:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (./packages/ui/src/chat-assistant.tsx:7:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+ΓÇëELIFECYCLEΓÇë Command failed with exit code 1.
