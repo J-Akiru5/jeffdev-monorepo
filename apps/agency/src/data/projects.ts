@@ -82,7 +82,7 @@ export const projects: Project[] = [
     id: 'vibecoder-engine',
     slug: 'vibecoder-engine',
     title: 'Vibecoder Engine',
-    client: 'JD Studio',
+    client: 'Syntaxure Labs',
     category: 'Internal Tool',
     tagline: 'AI-accelerated development workflow',
     description:

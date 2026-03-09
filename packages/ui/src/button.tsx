@@ -7,7 +7,7 @@ import { cn } from "./utils";
 
 /**
  * @component Button
- * @description Ghost Glow button following JeffDev Design System.
+ * @description Ghost Glow button following Syntaxure Labs Design System.
  * Uses Headless logic (Radix Slot) + Tailwind styling + CVA variants.
  *
  * @example

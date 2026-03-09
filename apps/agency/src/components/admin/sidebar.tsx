@@ -112,11 +112,11 @@ export function AdminSidebar() {
             <div className="relative h-8 w-8 overflow-hidden rounded-md">
               <img
                 src="/favicon.svg"
-                alt="JD Studio"
+                alt="Syntaxure Labs"
                 className="h-full w-full object-cover"
               />
             </div>
-            <span className="font-semibold text-white">JD Studio</span>
+            <span className="font-semibold text-white">Syntaxure Labs</span>
           </Link>
         )}
         <button

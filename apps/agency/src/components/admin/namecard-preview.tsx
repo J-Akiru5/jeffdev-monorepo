@@ -60,7 +60,7 @@ export function NamecardPreview({
           Live Preview
         </h3>
         <span className="text-[10px] text-white/30 truncate max-w-[150px]">
-          jeffdev.studio/card/{namecard.username || 'username'}
+          syntaxurelabs.com/card/{namecard.username || 'username'}
         </span>
       </div>
 
@@ -159,7 +159,7 @@ export function NamecardPreview({
           <div className="mb-2 text-center">
              <p className="text-[9px] text-white/20 uppercase tracking-widest font-semibold flex items-center justify-center gap-1">
                <span>Powered by</span> 
-               <span className='text-white/40'>JeffDev</span>
+               <span className='text-white/40'>Syntaxure Labs</span>
              </p>
           </div>
 

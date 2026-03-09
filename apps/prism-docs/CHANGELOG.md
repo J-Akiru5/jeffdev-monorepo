@@ -6,7 +6,7 @@ All notable changes to the Prism Context Engine documentation site will be docum
 
 ### ✨ Added
 - **FlexSearch Integration**: Switched from Pagefind to Nextra FlexSearch for better search performance
-- **JD Studio Endgame Design**: Complete design system overhaul matching agency branding
+- **Syntaxure Labs Endgame Design**: Complete design system overhaul matching agency branding
 - **Enhanced Footer**: 4-column footer with links to dashboard, company info, and CTAs
 - **Meta Tags**: Comprehensive OpenGraph and Twitter card metadata for social sharing
 - **PWA Support**: Multiple favicon sizes (16px, 32px, 180px, 192px, 512px) and web manifest

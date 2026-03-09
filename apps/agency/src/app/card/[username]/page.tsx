@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   return {
-    title: `${namecard.displayName} // JD Studio`,
+    title: `${namecard.displayName} // Syntaxure Labs`,
     description: namecard.tagline || `Connect with ${namecard.displayName}`,
     openGraph: {
       title: namecard.displayName,

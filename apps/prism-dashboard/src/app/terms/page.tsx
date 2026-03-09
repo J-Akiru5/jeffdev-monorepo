@@ -33,7 +33,7 @@ export default function TermsPage() {
             <section className="rounded-lg border border-white/10 bg-white/2 p-6">
               <h2 className="text-xl font-bold text-white mb-4">1. Services</h2>
               <p className="text-white/70 leading-relaxed">
-                Prism Context Engine, operated by JeffDev Web Development Services (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;), 
+                Prism Context Engine, operated by Syntaxure Labs (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;), 
                 is a SaaS platform that provides context governance for AI coding assistants. Our services include:
               </p>
               <ul className="list-disc list-inside text-white/70 mt-4 space-y-2">
@@ -93,7 +93,7 @@ export default function TermsPage() {
                   <h3 className="font-semibold text-white mb-2">Our Platform</h3>
                   <p className="text-white/70 leading-relaxed">
                     The Prism Context Engine platform, including its code, design, and features, remains 
-                    the intellectual property of JeffDev Web Development Services.
+                    the intellectual property of Syntaxure Labs.
                   </p>
                 </div>
                 <div>
@@ -196,8 +196,8 @@ export default function TermsPage() {
               <h2 className="text-xl font-bold text-white mb-4">Contact</h2>
               <p className="text-white/70 leading-relaxed">
                 For questions about these terms, contact us at{' '}
-                <a href="mailto:legal@jeffdev.studio" className="text-cyan-400 hover:underline">
-                  legal@jeffdev.studio
+                <a href="mailto:legal@syntaxurelabs.com" className="text-cyan-400 hover:underline">
+                  legal@syntaxurelabs.com
                 </a>
               </p>
             </section>
@@ -229,7 +229,7 @@ export default function TermsPage() {
           </div>
           <div className="text-center mt-6">
             <p className="text-white/30 text-xs font-mono">
-              © {new Date().getFullYear()} JD Studio. DTI: VLLP979818395984
+              © {new Date().getFullYear()} Syntaxure Labs. DTI: VLLP979818395984
             </p>
           </div>
         </div>

@@ -76,11 +76,11 @@ export default function ContactPage() {
                 {/* Contact Info */}
                 <div className="mt-10 space-y-4">
                   <a
-                    href="mailto:hello@jeffdev.studio"
+                    href="mailto:hello@syntaxurelabs.com"
                     className="flex items-center gap-3 text-white/70 transition-colors hover:text-cyan-400"
                   >
                     <Mail className="h-5 w-5" />
-                    hello@jeffdev.studio
+                    hello@syntaxurelabs.com
                   </a>
                   <div className="flex items-center gap-3 text-white/50">
                     <MapPin className="h-5 w-5" />

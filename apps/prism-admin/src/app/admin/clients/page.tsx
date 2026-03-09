@@ -76,7 +76,7 @@ export default async function ClientsPage() {
           </div>
           <h3 className="text-sm font-medium text-white mb-1">No clients yet</h3>
           <p className="text-xs text-white/40 max-w-sm mx-auto">
-            Connect Firebase to view Agency clients from JeffDev Studio.
+            Connect Firebase to view Agency clients from Syntaxure Labs.
           </p>
           <button className="mt-4 px-4 py-2 text-xs font-medium text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 rounded-lg transition-colors">
             Connect Firebase

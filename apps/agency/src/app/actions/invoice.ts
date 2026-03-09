@@ -261,14 +261,14 @@ export async function sendInvoice(id: string) {
     const pdfBuffer = await generateInvoicePDFBuffer(invoice);
 
     // Prepare payment link
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jeffdev.studio';
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://syntaxurelabs.com';
     const paymentLink = `${baseUrl}/pay/${invoice.refNo}`;
 
     // Send email with PDF attachment
     await sendEmail({
       to: invoice.clientEmail,
       from: BRANDED_SENDER,
-      subject: `Invoice ${invoice.refNo} from JD Studio`,
+      subject: `Invoice ${invoice.refNo} from Syntaxure Labs`,
       html: invoiceEmailTemplate({
         clientName: invoice.clientName,
         refNo: invoice.refNo,

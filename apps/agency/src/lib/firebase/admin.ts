@@ -13,9 +13,9 @@ import { initializeApp, getApps, cert, type App } from 'firebase-admin/app';
 import { getAuth, type Auth } from 'firebase-admin/auth';
 import { getFirestore, type Firestore } from 'firebase-admin/firestore';
 
-let app: App | null = null;
-let auth: Auth | null = null;
-let db: Firestore | null = null;
+let app: App = null as any;
+let auth: Auth = null as any;
+let db: Firestore = null as any;
 
 // Check if all required env vars are present
 const hasFirebaseCredentials =

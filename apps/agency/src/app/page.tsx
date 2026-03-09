@@ -7,7 +7,7 @@ import { CTA } from '@/components/sections/cta';
 /**
  * Homepage
  * --------
- * JeffDev Agency landing page featuring:
+ * Syntaxure Labs landing page featuring:
  * - Hero section with GSAP reveal
  * - Services grid (productized offerings)
  * - CTA banner with availability indicator

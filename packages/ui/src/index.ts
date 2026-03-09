@@ -1,6 +1,6 @@
 /**
  * @jdstudio/ui
- * JeffDev Studio Component Library
+ * Syntaxure Labs Component Library
  *
  * Ghost Glow aesthetic • Headless logic • Tailwind styling
  *
@@ -31,3 +31,4 @@ export { MetricTile, type MetricTileProps } from "./metric-tile";
 export { GridBackground } from "./grid-background";
 export { SectionHeader } from "./section-header";
 export { GlassPanel } from "./glass-panel";
+export { SyntaxureLogo } from "./logo";

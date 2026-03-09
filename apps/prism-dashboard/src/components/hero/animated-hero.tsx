@@ -235,7 +235,7 @@ export function AnimatedHero() {
                 </span>
               </Link>
               <Link
-                href="https://docs.jeffdev.studio"
+                href="https://docs.syntaxurelabs.com"
                 target="_blank"
                 className="rounded-md border border-white/10 bg-white/5 px-8 py-4 transition-all hover:bg-white/10 hover:border-white/20 active:scale-95"
               >

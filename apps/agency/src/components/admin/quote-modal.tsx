@@ -52,7 +52,7 @@ export function QuoteModal({ quote, onClose }: QuoteModalProps) {
     `Re: Quote Request - ${projectTypeLabels[quote.projectType] || quote.projectType} (${quote.refNo || quote.id})`
   );
   const mailtoBody = encodeURIComponent(
-    `Hi ${quote.name},\n\nThank you for your interest in our services.\n\nRegarding your ${projectTypeLabels[quote.projectType] || quote.projectType} project with a budget of ${quote.budget}:\n\n---\n\nBest regards,\nJD Studio`
+    `Hi ${quote.name},\n\nThank you for your interest in our services.\n\nRegarding your ${projectTypeLabels[quote.projectType] || quote.projectType} project with a budget of ${quote.budget}:\n\n---\n\nBest regards,\nSyntaxure Labs`
   );
   const mailtoLink = `mailto:${quote.email}?subject=${mailtoSubject}&body=${mailtoBody}`;
 

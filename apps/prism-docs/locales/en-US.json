@@ -46,7 +46,7 @@
     "semantic_search_desc": "Vector embeddings enable finding relevant architectural discussions, not just keyword matching.",
     "zero_config": "Zero-Config MCP Integration",
     "zero_config_desc": "npx prism connect and you're done. Your AI assistant now has context.",
-    "built_by": "Built by JeffDev Studio"
+    "built_by": "Built by Syntaxure Labs"
   },
   "cards": {
     "quick_start": "Quick Start",

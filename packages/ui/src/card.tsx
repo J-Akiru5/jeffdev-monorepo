@@ -6,7 +6,7 @@ import { cn } from "./utils";
 
 /**
  * @component Card
- * @description Glass Panel card component following JeffDev Design System.
+ * @description Glass Panel card component following Syntaxure Labs Design System.
  * Provides the "Void" aesthetic with subtle glass morphism.
  *
  * @example

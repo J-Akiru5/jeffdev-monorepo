@@ -4,7 +4,7 @@
  * Invoice PDF Template
  * ---------------------
  * Professional PDF invoice using @react-pdf/renderer.
- * Includes JeffDev Studio branding and payment details.
+ * Includes Syntaxure Labs branding and payment details.
  */
 
 import {
@@ -286,9 +286,9 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
         {/* Header */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.brand}>JEFFDEV STUDIO</Text>
+            <Text style={styles.brand}>SYNTAXURE LABS</Text>
             <Text style={styles.subBrand}>Dingle, Iloilo, Philippines</Text>
-            <Text style={styles.subBrand}>contact@jeffdev.studio</Text>
+            <Text style={styles.subBrand}>contact@syntaxurelabs.com</Text>
             <Text style={styles.subBrand}>+63 951 916 7103</Text>
             <Text style={styles.subBrand}>DTI No: VLLP979818395984</Text>
           </View>
@@ -434,7 +434,7 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
             </View>
             <View style={styles.paymentRow}>
               <Text style={styles.paymentLabel}>PayPal:</Text>
-              <Text style={styles.paymentValue}>contact@jeffdev.studio</Text>
+              <Text style={styles.paymentValue}>contact@syntaxurelabs.com</Text>
             </View>
           </View>
         </View>
@@ -448,7 +448,7 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
           <Text style={styles.footerText}>
             Thank you for your business!
           </Text>
-          <Text style={styles.footerUrl}>www.jeffdev.studio</Text>
+          <Text style={styles.footerUrl}>www.syntaxurelabs.com</Text>
         </View>
       </Page>
     </Document>

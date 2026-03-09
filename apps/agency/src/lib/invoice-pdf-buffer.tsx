@@ -309,12 +309,12 @@ function InvoicePDFDocument({ invoice }: { invoice: Invoice }) {
         {/* Full-width "Glass" Header */}
         <View style={styles.headerContainer}>
           <View style={styles.headerLeft}>
-            <Text style={styles.brand}>JEFFDEV STUDIO</Text>
+            <Text style={styles.brand}>SYNTAXURE LABS</Text>
             <Text style={styles.brandSubtitle}>Web Development Services</Text>
 
             <View style={{ marginTop: 8 }}>
               <Text style={styles.contactInfo}>Dingle, Iloilo, Philippines</Text>
-              <Text style={styles.contactInfo}>contact@jeffdev.studio</Text>
+              <Text style={styles.contactInfo}>contact@syntaxurelabs.com</Text>
               <Text style={styles.contactInfo}>DTI: VLLP979818395984</Text>
             </View>
           </View>
@@ -468,7 +468,7 @@ function InvoicePDFDocument({ invoice }: { invoice: Invoice }) {
             <Text style={styles.footerText}>
               This document serves as an internal Statement of Account. Official Receipt (OR) unavailable pending BIR registration.
             </Text>
-            <Text style={styles.footerLink}>www.jeffdev.studio</Text>
+            <Text style={styles.footerLink}>www.syntaxurelabs.com</Text>
           </View>
         </View>
       </Page>

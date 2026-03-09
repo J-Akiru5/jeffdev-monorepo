@@ -97,7 +97,7 @@ export async function createPayPalOrder(invoiceRefNo: string, amount?: number) {
           },
         ],
         application_context: {
-          brand_name: 'JD Studio',
+          brand_name: 'Syntaxure Labs',
           landing_page: 'BILLING',
           user_action: 'PAY_NOW',
           return_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pay/${invoice.refNo}/success`,

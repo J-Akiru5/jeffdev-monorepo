@@ -10,7 +10,7 @@ export default function EmailSettingsPage() {
   
   // Mock initial data
   const [apiKey, setApiKey] = useState('re_123456789...');
-  const [fromEmail, setFromEmail] = useState('notifications@jeffdev.studio');
+  const [fromEmail, setFromEmail] = useState('notifications@syntaxurelabs.com');
   const [templates, setTemplates] = useState({
     welcome: true,
     invoice: true,
@@ -66,7 +66,7 @@ export default function EmailSettingsPage() {
             </div>
             <div>
               <h2 className="text-lg font-semibold text-white">Resend Integration</h2>
-              <p className="text-sm text-white/40">Connected to JeffDev Production</p>
+              <p className="text-sm text-white/40">Connected to Syntaxure Labs Production</p>
             </div>
             <div className="ml-auto flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-400 border border-emerald-500/20">
               <CheckCircle className="h-3 w-3" />

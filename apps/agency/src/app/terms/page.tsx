@@ -6,7 +6,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Terms of Service',
-  description: 'Terms of service for JeffDev Web Development Services.',
+  description: 'Terms of service for Syntaxure Labs.',
 };
 
 export default function TermsPage() {
@@ -34,7 +34,7 @@ export default function TermsPage() {
             <div className="prose prose-invert mt-12 max-w-none prose-headings:font-semibold prose-headings:text-white prose-p:text-white/60 prose-strong:text-white prose-li:text-white/60">
               <h2>1. Services</h2>
               <p>
-                JeffDev Web Development Services (&ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;)
+                Syntaxure Labs (&ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;)
                 provides web development, software engineering, and related
                 consulting services. All projects are governed by individual
                 project agreements that specify scope, deliverables, timelines,
@@ -102,8 +102,8 @@ export default function TermsPage() {
               <h2>Contact</h2>
               <p>
                 For questions about these terms, contact us at{' '}
-                <a href="mailto:legal@jeffdev.studio" className="text-cyan-400">
-                  legal@jeffdev.studio
+                <a href="mailto:legal@syntaxurelabs.com" className="text-cyan-400">
+                  legal@syntaxurelabs.com
                 </a>
                 .
               </p>

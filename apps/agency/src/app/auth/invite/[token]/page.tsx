@@ -58,7 +58,7 @@ export default async function InviteAcceptPage({ params }: InvitePageProps) {
             You&apos;re Invited!
           </h1>
           <p className="text-white/50">
-            Join JD Studio as{' '}
+            Join Syntaxure Labs as{' '}
             <span className="text-cyan-400 font-medium capitalize">{invite.role}</span>
           </p>
         </div>

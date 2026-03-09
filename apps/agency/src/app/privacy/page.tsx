@@ -6,7 +6,7 @@ import { Footer } from '@/components/layout/footer';
 
 export const metadata: Metadata = {
   title: 'Privacy Policy',
-  description: 'How JeffDev Studio collects, uses, and protects your data.',
+  description: 'How Syntaxure Labs collects, uses, and protects your data.',
 };
 
 export default function PrivacyPolicyPage() {
@@ -34,7 +34,7 @@ export default function PrivacyPolicyPage() {
             <div className="prose prose-invert mt-12 max-w-none prose-headings:font-semibold prose-headings:text-white prose-p:text-white/60 prose-strong:text-white prose-li:text-white/60">
               <h2>1. Introduction</h2>
               <p>
-                JeffDev Studio (&ldquo;we,&rdquo; &ldquo;our,&rdquo; or &ldquo;us&rdquo;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you visit our website jeffdev.studio (the &ldquo;Site&rdquo;).
+                Syntaxure Labs (&ldquo;we,&rdquo; &ldquo;our,&rdquo; or &ldquo;us&rdquo;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you visit our website syntaxurelabs.com (the &ldquo;Site&rdquo;).
               </p>
 
               <h2>2. Information We Collect</h2>
@@ -101,8 +101,8 @@ export default function PrivacyPolicyPage() {
               <h2>7. Contact Us</h2>
               <p>
                 If you have any questions about this Privacy Policy, please contact us at{' '}
-                <a href="mailto:contact@jeffdev.studio" className="text-cyan-400">
-                  contact@jeffdev.studio
+                <a href="mailto:contact@syntaxurelabs.com" className="text-cyan-400">
+                  contact@syntaxurelabs.com
                 </a>
                 .
               </p>

@@ -12,9 +12,9 @@ export const metadata: Metadata = {
   description:
     "Record your architecture. AI learns your rules. Deploy context directly to Cursor, Windsurf, and Claude via MCP. Eliminate context pollution.",
   keywords: ['MCP', 'Model Context Protocol', 'Cursor', 'Windsurf', 'Claude', 'AI coding assistant', 'video to context', 'architectural rules', 'design system'],
-  authors: [{ name: 'JeffDev Studio', url: 'https://jeffdev.studio' }],
-  creator: 'JeffDev Studio',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_PRISM_URL || "https://prism.jeffdev.studio"),
+  authors: [{ name: 'Syntaxure Labs', url: 'https://syntaxurelabs.com' }],
+  creator: 'Syntaxure Labs',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_PRISM_URL || "https://prism.syntaxurelabs.com"),
   openGraph: {
     title: 'Prism Context Engine - The Context Operating System for Vibecoders',
     description: 'Record your architecture. AI learns your rules. Deploy to your IDE.',
@@ -44,9 +44,8 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
       { url: '/favicon.ico', sizes: 'any' },
-      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
     ],
     apple: '/apple-touch-icon.png',
   },

@@ -62,7 +62,7 @@ export function NamecardDisplay({ namecard }: NamecardDisplayProps) {
       'VERSION:3.0',
       `FN:${namecard.displayName}`,
       namecard.title ? `TITLE:${namecard.title}` : '',
-      'ORG:JD Studio',
+      'ORG:Syntaxure Labs',
       namecard.email ? `EMAIL:${namecard.email}` : '',
       namecard.phone ? `TEL:${namecard.phone}` : '',
       namecard.social?.website ? `URL:${namecard.social.website}` : '',
@@ -215,7 +215,7 @@ export function NamecardDisplay({ namecard }: NamecardDisplayProps) {
         {/* Footer */}
         <div className="px-6 py-3 border-t border-white/5 flex items-center justify-between">
           <span className="text-[10px] text-white/30 uppercase tracking-wider">
-            JD Studio
+            Syntaxure Labs
           </span>
           <span className="text-[10px] text-white/30 font-mono">
             @{namecard.username}
@@ -238,7 +238,7 @@ export function NamecardDisplay({ namecard }: NamecardDisplayProps) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={qrDataUrl} alt="QR Code" className="mx-auto rounded-md" />
             <p className="text-xs text-white/40 mt-4">
-              jeffdev.studio/card/{namecard.username}
+              syntaxurelabs.com/card/{namecard.username}
             </p>
           </div>
         </div>

@@ -22,7 +22,7 @@ const USERS_COLLECTION = 'users';
 const FOUNDER_UID = process.env.FOUNDER_UID || 'founder-001';
 
 // Base URL for invite links
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://jeffdev.studio';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://syntaxurelabs.com';
 
 /**
  * Generate a secure invite token
@@ -106,7 +106,7 @@ export async function createInvite(
       await sendEmail({
         to: data.email,
         from: BRANDED_SENDER,
-        subject: `You're invited to join JD Studio as ${data.role}`,
+        subject: `You're invited to join Syntaxure Labs as ${data.role}`,
         html: inviteEmailTemplate({
           email: data.email,
           role: data.role,
@@ -309,7 +309,7 @@ export async function resendInvite(
       await sendEmail({
         to: invite.email,
         from: BRANDED_SENDER,
-        subject: `Action Required: Accept Your Invitation to JD Studio`,
+        subject: `Action Required: Accept Your Invitation to Syntaxure Labs`,
         html: inviteEmailTemplate({
           email: invite.email,
           role: invite.role,

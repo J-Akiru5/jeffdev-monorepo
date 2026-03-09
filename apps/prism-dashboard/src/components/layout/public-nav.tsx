@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { clsx } from 'clsx';
 import { BetaBadge } from '@/components/beta-badge';
+import { SyntaxureLogo } from '@jdstudio/ui';
 
 export function PublicNav() {
   const pathname = usePathname();
@@ -17,13 +17,7 @@ export function PublicNav() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <Image
-              src="/prism-icon.png"
-              alt="Prism Context Engine"
-              width={32}
-              height={32}
-              className="transition-transform group-hover:scale-110"
-            />
+            <SyntaxureLogo className="h-8 w-8 transition-transform group-hover:scale-110" />
             <span className="text-gradient-cyan font-bold text-lg">
               Prism Context Engine
             </span>
@@ -33,7 +27,7 @@ export function PublicNav() {
           {/* Nav Links */}
           <div className="hidden md:flex items-center gap-8">
             <Link
-              href="https://docs.jeffdev.studio"
+              href="https://docs.syntaxurelabs.com"
               target="_blank"
               className="text-white/60 hover:text-cyan-400 transition-colors text-sm font-mono uppercase tracking-wider"
             >
@@ -49,7 +43,7 @@ export function PublicNav() {
               Pricing
             </Link>
             <Link
-              href="https://jeffdev.studio"
+              href="https://syntaxurelabs.com"
               target="_blank"
               className="text-white/60 hover:text-cyan-400 transition-colors text-sm font-mono uppercase tracking-wider"
             >

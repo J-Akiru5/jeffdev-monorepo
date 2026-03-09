@@ -4,7 +4,7 @@
  * Handles multi-step quote form submissions:
  * 1. Validates all steps with Zod
  * 2. Saves to Firestore
- * 3. Sends email notification to hire@jeffdev.studio
+ * 3. Sends email notification to hire@syntaxurelabs.com
  */
 
 'use server';

@@ -65,7 +65,7 @@ export async function sendInquiryResponse({
           <!-- Header -->
           <div style="text-align: center; margin-bottom: 40px;">
             <div style="display: inline-block; padding: 12px 16px; background: linear-gradient(135deg, #f59e0b20, #fb923c10); border: 1px solid #f59e0b30; border-radius: 8px;">
-              <span style="font-size: 18px; font-weight: 600; color: #ffffff;">JeffDev Studio</span>
+              <span style="font-size: 18px; font-weight: 600; color: #ffffff;">Syntaxure Labs</span>
             </div>
           </div>
           
@@ -86,7 +86,7 @@ export async function sendInquiryResponse({
           <!-- Footer -->
           <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #ffffff10; text-align: center;">
             <p style="color: #ffffff40; font-size: 12px; margin: 0;">
-              © ${new Date().getFullYear()} JeffDev Studio. All rights reserved.
+              © ${new Date().getFullYear()} Syntaxure Labs. All rights reserved.
             </p>
           </div>
         </div>

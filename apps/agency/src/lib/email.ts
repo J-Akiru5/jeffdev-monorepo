@@ -14,16 +14,16 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Brand sender names with display name for professional appearance
 export const EMAIL_ADDRESSES = {
-  contact: process.env.CONTACT_EMAIL || 'contact@jeffdev.studio',
-  hire: process.env.HIRE_EMAIL || 'hire@jeffdev.studio',
-  noreply: process.env.NOREPLY_EMAIL || 'noreply@jeffdev.studio',
+  contact: process.env.CONTACT_EMAIL || 'contact@syntaxurelabs.com',
+  hire: process.env.HIRE_EMAIL || 'hire@syntaxurelabs.com',
+  noreply: process.env.NOREPLY_EMAIL || 'noreply@syntaxurelabs.com',
 } as const;
 
 // Branded sender format for external emails
-export const BRANDED_SENDER = `JD Studio <${EMAIL_ADDRESSES.noreply}>`;
+export const BRANDED_SENDER = `Syntaxure Labs <${EMAIL_ADDRESSES.noreply}>`;
 
 // Base URL for assets in emails
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://jeffdev.studio';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://syntaxurelabs.com';
 const LOGO_URL = `${BASE_URL}/favicon/icon1.png`;
 
 interface EmailAttachment {
@@ -126,7 +126,7 @@ export function contactEmailTemplate(data: {
   </div>
   
   <div style="margin-top: 20px; text-align: center; color: #888; font-size: 12px;">
-    <p>JD Studio • Enterprise Web Solutions</p>
+    <p>Syntaxure Labs • Enterprise Web Solutions</p>
     <p>This is an automated notification from your contact form.</p>
   </div>
 </body>
@@ -222,7 +222,7 @@ export function quoteEmailTemplate(data: {
   </div>
   
   <div style="margin-top: 20px; text-align: center; color: #888; font-size: 12px;">
-    <p>JD Studio • Enterprise Web Solutions</p>
+    <p>Syntaxure Labs • Enterprise Web Solutions</p>
     <p>This is an automated notification from your quote form.</p>
   </div>
 </body>
@@ -232,7 +232,7 @@ export function quoteEmailTemplate(data: {
 
 /**
  * Invite Email Template
- * Sent when a team member is invited to join JD Studio
+ * Sent when a team member is invited to join Syntaxure Labs
  */
 export function inviteEmailTemplate(data: {
   email: string;
@@ -262,18 +262,18 @@ export function inviteEmailTemplate(data: {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>You're Invited to Join JD Studio</title>
+  <title>You're Invited to Join Syntaxure Labs</title>
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #e5e5e5; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #0a0a0a;">
   <div style="background: linear-gradient(135deg, ${roleColor}20 0%, #1a1a1a 100%); padding: 40px; border-radius: 12px 12px 0 0; text-align: center;">
-    <img src="${LOGO_URL}" alt="JD Studio" style="width: 48px; height: 48px; margin-bottom: 20px; border-radius: 8px;" />
+    <img src="${LOGO_URL}" alt="Syntaxure Labs" style="width: 48px; height: 48px; margin-bottom: 20px; border-radius: 8px;" />
     <h1 style="margin: 0 0 10px 0; color: white; font-size: 28px; font-weight: 700;">You're Invited!</h1>
-    <p style="margin: 0; color: rgba(255,255,255,0.7); font-size: 16px;">Join the JD Studio team</p>
+    <p style="margin: 0; color: rgba(255,255,255,0.7); font-size: 16px;">Join the Syntaxure Labs team</p>
   </div>
   
   <div style="background: #111111; padding: 40px; border-radius: 0 0 12px 12px; border: 1px solid rgba(255,255,255,0.1); border-top: none;">
     <p style="margin: 0 0 20px 0; font-size: 16px;">
-      ${data.inviterName ? `<strong>${data.inviterName}</strong> has invited you` : 'You have been invited'} to join JD Studio as a <span style="color: ${roleColor}; font-weight: 600; text-transform: capitalize;">${data.role}</span>.
+      ${data.inviterName ? `<strong>${data.inviterName}</strong> has invited you` : 'You have been invited'} to join Syntaxure Labs as a <span style="color: ${roleColor}; font-weight: 600; text-transform: capitalize;">${data.role}</span>.
     </p>
     
     ${data.projectName ? `
@@ -300,8 +300,8 @@ export function inviteEmailTemplate(data: {
     <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 30px 0;">
     
     <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.3); text-align: center;">
-      <strong>JD Studio</strong> • Enterprise Web Solutions<br>
-      <a href="https://jeffdev.studio" style="color: ${roleColor}; text-decoration: none;">jeffdev.studio</a>
+      <strong>Syntaxure Labs</strong> • Enterprise Web Solutions<br>
+      <a href="https://syntaxurelabs.com" style="color: ${roleColor}; text-decoration: none;">syntaxurelabs.com</a>
     </p>
   </div>
 </body>
@@ -339,11 +339,11 @@ export function invoiceEmailTemplate(data: {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoice ${data.refNo} from JD Studio</title>
+  <title>Invoice ${data.refNo} from Syntaxure Labs</title>
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #e5e5e5; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #0a0a0a;">
   <div style="background: linear-gradient(135deg, ${accentColor}20 0%, #1a1a1a 100%); padding: 40px; border-radius: 12px 12px 0 0; text-align: center;">
-    <img src="${LOGO_URL}" alt="JD Studio" style="width: 48px; height: 48px; margin-bottom: 20px; border-radius: 8px;" />
+    <img src="${LOGO_URL}" alt="Syntaxure Labs" style="width: 48px; height: 48px; margin-bottom: 20px; border-radius: 8px;" />
     <h1 style="margin: 0 0 10px 0; color: white; font-size: 28px; font-weight: 700;">Invoice</h1>
     <p style="margin: 0; color: ${accentColor}; font-family: monospace; font-size: 16px; letter-spacing: 1px;">${data.refNo}</p>
   </div>
@@ -405,16 +405,16 @@ export function invoiceEmailTemplate(data: {
       <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.6);">
         <strong>Bank Transfer:</strong> Landbank • 1936-2091-96 • Jeff Edrick Martinez<br>
         <strong>GCash:</strong> +63 951 916 7103<br>
-        <strong>PayPal:</strong> contact@jeffdev.studio
+        <strong>PayPal:</strong> contact@syntaxurelabs.com
       </p>
     </div>
     
     <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 30px 0;">
     
     <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.3); text-align: center;">
-      <strong>JD Studio</strong> • Enterprise Web Solutions<br>
+      <strong>Syntaxure Labs</strong> • Enterprise Web Solutions<br>
       DTI No: VLLP979818395984<br>
-      <a href="https://jeffdev.studio" style="color: ${accentColor}; text-decoration: none;">jeffdev.studio</a>
+      <a href="https://syntaxurelabs.com" style="color: ${accentColor}; text-decoration: none;">syntaxurelabs.com</a>
     </p>
   </div>
 </body>

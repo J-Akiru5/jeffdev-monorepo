@@ -6,7 +6,7 @@ import { cn } from "./utils";
 
 /**
  * @component Input
- * @description JeffDev styled input with bottom border focus pattern.
+ * @description Syntaxure Labs styled input with bottom border focus pattern.
  * Uses JetBrains Mono for user input as per Design System.
  *
  * @example

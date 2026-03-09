@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft, ArrowUpRight, MapPin, Mail, Calendar } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
@@ -15,7 +16,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'About',
   description:
-    'JeffDev Studio is a web development agency building high-performance systems for startups and enterprises. Learn about our approach and the team behind the code.',
+    'Syntaxure Labs is a web development agency building high-performance systems for startups and enterprises. Learn about our approach and the team behind the code.',
 };
 
 const stats = [
@@ -60,7 +61,7 @@ export default function AboutPage() {
                   <span className="text-gradient-holographic">That Launch</span>
                 </h1>
                 <p className="mt-6 text-lg leading-relaxed text-white/60">
-                  JeffDev Studio is a new-breed development agency architecting
+                  Syntaxure Labs is a new-breed development agency architecting
                   high-performance systems for ambitious startups. We don&apos;t
                   just write code — we partner with founders to turn &apos;Zero
                   to One&apos; ideas into scalable reality.
@@ -94,11 +95,14 @@ export default function AboutPage() {
 
                 {/* Avatar placeholder */}
                 <div className="mt-6 flex items-center gap-4">
-                  <div className="h-16 w-16 rounded-md bg-gradient-to-br from-cyan-500 to-purple-600 flex items-center justify-center">
-                    <span className="font-mono text-xl font-bold text-white">
-                      JM
-                    </span>
-                  </div>
+                  <Image
+                    src="/profilepic.webp"
+                    alt="Jeff Edrick Martinez"
+                    width={64}
+                    height={64}
+                    priority
+                    className="h-16 w-16 rounded-md object-cover"
+                  />
                   <div>
                     <h3 className="text-xl font-semibold text-white">
                       Jeff Edrick Martinez
@@ -127,11 +131,11 @@ export default function AboutPage() {
                     Available for Q1 2026 projects
                   </div>
                   <a
-                    href="mailto:jeff@jeffdev.studio"
+                    href="mailto:jeff@syntaxurelabs.com"
                     className="flex items-center gap-3 text-sm text-white/50 transition-colors hover:text-cyan-400"
                   >
                     <Mail className="h-4 w-4" />
-                    jeff@jeffdev.studio
+                    jeff@syntaxurelabs.com
                   </a>
                 </div>
 

@@ -30,13 +30,13 @@ const jetbrainsMono = JetBrains_Mono({
 /**
  * METADATA CONFIGURATION
  * ----------------------
- * SEO-optimized defaults for JeffDev Agency.
+ * SEO-optimized defaults for Syntaxure Labs.
  * Uses B2B language and professional positioning.
  */
 export const metadata: Metadata = {
   title: {
-    default: 'JD Studio — Enterprise Web Development & SaaS Solutions',
-    template: '%s // JD Studio',
+    default: 'Syntaxure Labs — Enterprise Web Development & SaaS Solutions',
+    template: '%s // Syntaxure Labs',
   },
   description:
     'We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises. Next.js, Firebase, and AI-powered solutions.',
@@ -46,17 +46,17 @@ export const metadata: Metadata = {
     'Next.js development',
     'enterprise web solutions',
     'cloud architecture',
-    'JD Studio',
+    'Syntaxure Labs',
   ],
-  authors: [{ name: 'JD Studio' }],
-  creator: 'JeffDev Web Development Services',
-  metadataBase: new URL('https://jeffdev.studio'),
+  authors: [{ name: 'Syntaxure Labs' }],
+  creator: 'Syntaxure Labs',
+  metadataBase: new URL('https://syntaxurelabs.com'),
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://jeffdev.studio',
-    siteName: 'JD Studio',
-    title: 'JD Studio — Enterprise Web Development & SaaS Solutions',
+    url: 'https://syntaxurelabs.com',
+    siteName: 'Syntaxure Labs',
+    title: 'Syntaxure Labs — Enterprise Web Development & SaaS Solutions',
     description:
       'We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises.',
     images: [
@@ -64,13 +64,13 @@ export const metadata: Metadata = {
         url: '/favicon/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'JD Studio',
+        alt: 'Syntaxure Labs',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'JD Studio — Enterprise Web Development & SaaS Solutions',
+    title: 'Syntaxure Labs — Enterprise Web Development & SaaS Solutions',
     description:
       'We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises.',
     images: ['/favicon/og-image.png'],

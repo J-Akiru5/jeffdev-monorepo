@@ -10,9 +10,9 @@ export default function AppSettingsPage() {
 
   // Mock initial data
   const [settings, setSettings] = useState({
-    siteName: 'JeffDev Agency',
+    siteName: 'Syntaxure Labs',
     tagline: 'Premium Web Development Services',
-    supportEmail: 'support@jeffdev.studio',
+    supportEmail: 'support@syntaxurelabs.com',
     contactPhone: '+63 912 345 6789',
     social: {
       github: 'https://github.com/jeffdev',
@@ -21,7 +21,7 @@ export default function AppSettingsPage() {
       instagram: 'https://instagram.com/jeffdev',
     },
     seo: {
-      defaultTitle: 'JeffDev | Enterprise Solutions',
+      defaultTitle: 'Syntaxure Labs | Enterprise Solutions',
       defaultDescription: 'Building the future of web.',
       keywords: 'web dev, agency, premium, enterprise',
     },

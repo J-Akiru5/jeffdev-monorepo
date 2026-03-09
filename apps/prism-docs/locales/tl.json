@@ -46,7 +46,7 @@
     "semantic_search_desc": "Ang vector embeddings ay nagbibigay-daan sa paghahanap ng mga kaugnay na diskusyon sa arkitektura, hindi lamang keyword matching.",
     "zero_config": "Zero-Config na MCP Integration",
     "zero_config_desc": "npx prism connect at tapos na. May context na ang iyong AI assistant.",
-    "built_by": "Ginawa ng JeffDev Studio"
+    "built_by": "Ginawa ng Syntaxure Labs"
   },
   "cards": {
     "quick_start": "Mabilis na Pagsisimula",

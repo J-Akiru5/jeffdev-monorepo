@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     template: "%s | Prism Admin",
     default: "Prism Admin - Mission Control",
   },
-  description: "Unified admin panel for JeffDev Studio products",
+  description: "Unified admin panel for Syntaxure Labs products",
   robots: { index: false, follow: false },
 };
 

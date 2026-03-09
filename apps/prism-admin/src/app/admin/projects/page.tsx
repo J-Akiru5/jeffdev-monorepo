@@ -42,7 +42,7 @@ export default async function ProjectsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Projects</h1>
-          <p className="text-sm text-white/50">Agency projects from JeffDev Studio</p>
+          <p className="text-sm text-white/50">Agency projects from Syntaxure Labs</p>
         </div>
         <div className="flex items-center gap-2 text-xs">
           <span className="px-2 py-1 rounded bg-white/5 text-white/40 flex items-center gap-1.5">
@@ -89,7 +89,7 @@ export default async function ProjectsPage() {
           </div>
           <h3 className="text-sm font-medium text-white mb-1">No projects yet</h3>
           <p className="text-xs text-white/40 max-w-sm mx-auto">
-            Connect Firebase to view Agency projects from JeffDev Studio.
+            Connect Firebase to view Agency projects from Syntaxure Labs.
           </p>
           <button className="mt-4 px-4 py-2 text-xs font-medium text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 rounded-lg transition-colors">
             Connect Firebase

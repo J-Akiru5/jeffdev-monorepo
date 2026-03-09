@@ -37,7 +37,7 @@ export async function sendSupportRequest(formData: FormData): Promise<ActionResu
     const validated = supportSchema.parse(data);
 
     // Support email address
-    const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'support@jeffdev.studio';
+    const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'support@syntaxurelabs.com';
 
     // Send email to support
     await sendEmail({
@@ -52,7 +52,7 @@ export async function sendSupportRequest(formData: FormData): Promise<ActionResu
     await sendEmail({
       to: validated.email,
       from: BRANDED_SENDER,
-      subject: 'We received your support request - JD Studio',
+      subject: 'We received your support request - Syntaxure Labs',
       html: supportConfirmationTemplate(validated),
     });
 
@@ -155,8 +155,8 @@ function supportConfirmationTemplate(data: {
     <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 25px 0;">
     
     <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.3); text-align: center;">
-      <strong>JD Studio</strong> • Enterprise Web Solutions<br>
-      <a href="https://jeffdev.studio" style="color: #10b981; text-decoration: none;">jeffdev.studio</a>
+      <strong>Syntaxure Labs</strong> • Enterprise Web Solutions<br>
+      <a href="https://syntaxurelabs.com" style="color: #10b981; text-decoration: none;">syntaxurelabs.com</a>
     </p>
   </div>
 </body>

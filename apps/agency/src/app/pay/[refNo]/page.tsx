@@ -54,7 +54,7 @@ export default async function PublicPaymentPage({ params, searchParams }: PagePr
         <div className="mb-8 text-center">
           <div className="mb-4 font-mono text-sm text-white/30">INVOICE</div>
           <h1 className="text-3xl font-bold text-cyan-400">{invoice.refNo}</h1>
-          <p className="mt-2 text-white/50">from JD Studio</p>
+          <p className="mt-2 text-white/50">from Syntaxure Labs</p>
         </div>
 
         {/* Status Banner */}
@@ -169,14 +169,14 @@ export default async function PublicPaymentPage({ params, searchParams }: PagePr
           <p className="mt-2">
             Questions? Contact us at{' '}
             <a
-              href="mailto:hello@jeffdev.studio"
+              href="mailto:hello@syntaxurelabs.com"
               className="text-cyan-400 hover:underline"
             >
-              hello@jeffdev.studio
+              hello@syntaxurelabs.com
             </a>
           </p>
           <p className="mt-4">
-            © {new Date().getFullYear()} JeffDev Web Development Services
+            © {new Date().getFullYear()} Syntaxure Labs
           </p>
         </div>
       </div>

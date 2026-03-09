@@ -12,10 +12,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Menu, X, ArrowUpRight, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useFeatureFlags } from '@/components/providers/feature-flag-provider';
+import { SyntaxureLogo } from '@jdstudio/ui';
 
 interface NavLink {
   href: string;
@@ -31,7 +31,7 @@ export function Header() {
   // Build navigation links based on feature flags
   const navLinks: NavLink[] = [
     // Prism Context Engine - always show as main product
-    { href: 'https://prism.jeffdev.studio', label: 'Prism Context Engine', highlight: true },
+    { href: 'https://prism.syntaxurelabs.com', label: 'Prism Context Engine', highlight: true },
     { href: '/services', label: 'Services' },
     { href: '/work', label: 'Work' },
     { href: '/about', label: 'About' },
@@ -64,17 +64,9 @@ export function Header() {
             href="/"
             className="group flex items-center gap-2 transition-opacity hover:opacity-80"
           >
-            <div className="relative h-8 w-8 overflow-hidden rounded-md">
-              <Image
-                src="/favicon.svg"
-                alt="JD Studio"
-                width={32}
-                height={32}
-                className="h-full w-full object-cover"
-              />
-            </div>
+            <SyntaxureLogo className="h-8 w-8" />
             <span className="hidden font-semibold tracking-tight text-white sm:block">
-              JD Studio
+              Syntaxure Labs
             </span>
           </Link>
 

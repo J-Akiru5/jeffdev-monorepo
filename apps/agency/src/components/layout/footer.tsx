@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Mail, MapPin, ArrowUpRight } from 'lucide-react';
+import { SyntaxureLogo } from '@jdstudio/ui';
 
 /**
  * Footer Component
@@ -19,8 +20,8 @@ const footerLinks = {
     { href: '/services/ai-integration', label: 'AI Integration' },
   ],
   products: [
-    { href: 'https://prism.jeffdev.studio', label: 'Prism Context Engine', external: true },
-    { href: 'https://prism.jeffdev.studio/guide/getting-started', label: 'Documentation', external: true },
+    { href: 'https://prism.syntaxurelabs.com', label: 'Prism Context Engine', external: true },
+    { href: 'https://prism.syntaxurelabs.com/guide/getting-started', label: 'Documentation', external: true },
   ],
   company: [
     { href: '/about', label: 'About Studio' },
@@ -45,15 +46,9 @@ export function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-1">
             <Link href="/" className="inline-flex items-center gap-2">
-              <div className="relative h-8 w-8 overflow-hidden rounded-md">
-                <img
-                  src="/favicon.svg"
-                  alt="JD Studio"
-                  className="h-full w-full object-cover"
-                />
-              </div>
+              <SyntaxureLogo className="h-8 w-8" />
               <span className="font-semibold tracking-tight text-white">
-                JD Studio
+                Syntaxure Labs
               </span>
             </Link>
             <p className="mt-4 text-sm leading-relaxed text-white/50">
@@ -63,11 +58,11 @@ export function Footer() {
             {/* Contact Info */}
             <div className="mt-6 space-y-2">
               <a
-                href="mailto:hello@jeffdev.studio"
+                href="mailto:hello@syntaxurelabs.com"
                 className="flex items-center gap-2 text-sm text-white/50 transition-colors hover:text-cyan-400"
               >
                 <Mail className="h-4 w-4" />
-                hello@jeffdev.studio
+                hello@syntaxurelabs.com
               </a>
               <div className="flex items-center gap-2 text-sm text-white/50">
                 <MapPin className="h-4 w-4" />
@@ -173,7 +168,7 @@ export function Footer() {
 
           {/* Copyright + DTI */}
           <div className="text-center text-xs text-white/30 md:text-right">
-            <p>© {currentYear} JD Studio.</p>
+            <p>© {currentYear} Syntaxure Labs.</p>
             <p className="mt-1 font-mono text-[10px] text-white/20">
               DTI: VLLP979818395984
             </p>

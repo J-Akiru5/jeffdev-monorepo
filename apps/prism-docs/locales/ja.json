@@ -46,7 +46,7 @@
     "semantic_search_desc": "ベクトル埋め込みにより、キーワードマッチングだけでなく、関連するアーキテクチャの議論を見つけることができます。",
     "zero_config": "ゼロ設定 MCP 統合",
     "zero_config_desc": "npx prism connect で完了。AI アシスタントにコンテキストが追加されます。",
-    "built_by": "JeffDev Studio 制作"
+    "built_by": "Syntaxure Labs 制作"
   },
   "cards": {
     "quick_start": "クイックスタート",
