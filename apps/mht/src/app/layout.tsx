@@ -44,6 +44,10 @@ export const metadata: Metadata = {
     title: 'Martinez Hybrid Technologies — Internet & Solar Energy',
     description:
       'Next-generation connectivity and sustainable power for Western Visayas.',
+    images: [{ url: '/api/og' }],
+  },
+  alternates: {
+    canonical: '/',
   },
   robots: { index: true, follow: true },
   icons: { icon: '/favicon.svg' },
@@ -82,6 +86,32 @@ export default function RootLayout({
 
         {/* Application Content */}
         <div className="relative z-10 min-h-screen flex flex-col">
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                "name": "Martinez Hybrid Technologies OPC",
+                "alternateName": ["Nexure Networks", "Joularix Solar"],
+                "url": "https://martinezhybrid.jeffdev.studio",
+                "logo": "https://martinezhybrid.jeffdev.studio/favicon.svg",
+                "contactPoint": {
+                  "@type": "ContactPoint",
+                  "telephone": "+63-951-916-7103",
+                  "contactType": "customer service",
+                  "areaServed": "Visayas",
+                  "availableLanguage": ["English", "Tagalog"]
+                },
+                "address": {
+                  "@type": "PostalAddress",
+                  "addressLocality": "Dingle",
+                  "addressRegion": "Iloilo",
+                  "addressCountry": "PH"
+                }
+              })
+            }}
+          />
           <Navbar />
           <main className="flex-1 pt-16">{children}</main>
           <Footer />
