@@ -1,35 +1,28 @@
 {
-  "name": "@jeffdev/prism-exercise",
+  "name": "nexure-website",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 3003 --turbopack",
+    "dev": "next dev --port 3004",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --max-warnings 0",
-    "check-types": "tsc --noEmit"
+    "lint": "eslint"
   },
   "dependencies": {
-    "@jeffdev/db": "workspace:*",
     "@jdstudio/ui": "workspace:*",
-    "@supabase/ssr": "^0.5.2",
-    "@supabase/supabase-js": "^2.49.1",
-    "@ducanh2912/next-pwa": "^10.2.9",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.23.26",
     "lucide-react": "^0.562.0",
     "next": "16.1.4",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "clsx": "^2.1.1",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/node": "^22.15.3",
     "@types/react": "^19.2.2",
     "@types/react-dom": "19.2.2",
-    "@types/dom-speech-recognition": "^0.0.4",
     "eslint": "^9.39.1",
     "eslint-config-next": "16.1.4",
     "tailwindcss": "^4.1.18",
