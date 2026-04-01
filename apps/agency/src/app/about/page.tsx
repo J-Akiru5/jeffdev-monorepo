@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, ArrowUpRight, MapPin, Mail, Calendar } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, MapPin, Mail, Calendar, Download } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { CTA } from '@/components/sections/cta';
@@ -218,6 +218,40 @@ export default function AboutPage() {
                   We invest in your success. Our best clients become long-term
                   partners who come back project after project.
                 </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Brand Assets Section */}
+        <section className="px-6 py-16 lg:px-8">
+          <div className="mx-auto max-w-5xl">
+            <h2 className="text-2xl font-bold text-white mb-8">Brand Assets</h2>
+            <div className="rounded-md border border-white/[0.06] bg-white/[0.02] p-8 md:p-12">
+              <div className="flex flex-col">
+                <div className="flex-1 flex items-center justify-center rounded-lg overflow-hidden border border-white/10 bg-[#050505]">
+                  <Image
+                    src="/syntaxure-business-card.png"
+                    alt="Syntaxure Labs Digital Business Card"
+                    width={1200}
+                    height={630}
+                    className="w-full h-auto object-cover"
+                  />
+                </div>
+                <div className="mt-6 flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold text-white">Digital Business Card</h3>
+                    <p className="text-sm text-white/50">High-resolution PNG</p>
+                  </div>
+                  <a
+                    href="/syntaxure-business-card.png"
+                    download
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-white/5 text-white transition-colors hover:bg-cyan-500 hover:text-white"
+                    title="Download Syntaxure Labs Business Card"
+                  >
+                    <Download className="h-5 w-5" />
+                  </a>
+                </div>
               </div>
             </div>
           </div>

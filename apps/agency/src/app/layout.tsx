@@ -62,19 +62,22 @@ export const metadata: Metadata = {
       'We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises.',
     images: [
       {
-        url: '/favicon/og-image.png',
+        url: '/api/og',
         width: 1200,
         height: 630,
         alt: 'Syntaxure Labs',
       },
     ],
   },
+  alternates: {
+    canonical: '/',
+  },
   twitter: {
     card: 'summary_large_image',
     title: 'Syntaxure Labs — Enterprise Web Development & SaaS Solutions',
     description:
       'We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises.',
-    images: ['/favicon/og-image.png'],
+    images: ['/api/og'],
   },
   robots: {
     index: true,
@@ -143,6 +146,27 @@ export default async function RootLayout({
           <FeatureFlagProvider flags={featureFlags}>
             <CurrencyProvider>
               <div className="relative z-10 min-h-screen flex flex-col">
+                <script
+                  type="application/ld+json"
+                  dangerouslySetInnerHTML={{
+                    __html: JSON.stringify({
+                      "@context": "https://schema.org",
+                      "@type": "ProfessionalService",
+                      "name": "Syntaxure Labs",
+                      "alternateName": ["JeffDev Studio"],
+                      "url": "https://jeffdev.studio",
+                      "logo": "https://jeffdev.studio/favicon.svg",
+                      "contactPoint": {
+                        "@type": "ContactPoint",
+                        "telephone": "+63-951-916-7103",
+                        "contactType": "customer service",
+                        "email": "contact@jeffdev.studio",
+                        "areaServed": "Global",
+                        "availableLanguage": ["English", "Tagalog"]
+                      }
+                    })
+                  }}
+                />
                 {children}
               </div>
             </CurrencyProvider>

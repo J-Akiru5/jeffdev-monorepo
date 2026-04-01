@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import { GlassCard } from '@/components/ui/glass-card';
 import { MHTLogo } from '@/components/ui/mht-logo';
 import Link from 'next/link';
@@ -20,6 +21,7 @@ import {
   Shield,
   Heart,
   ArrowRight,
+  Download,
 } from 'lucide-react';
 
 export const metadata: Metadata = {
@@ -295,6 +297,47 @@ export default function AboutPage() {
               </div>
             </GlassCard>
           </div>
+        </div>
+      </section>
+
+      {/* Brand Assets Section */}
+      <section className="py-16 sm:py-20" id="brand-assets">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-3">
+              Brand Assets
+            </h2>
+            <p className="text-slate-500 max-w-2xl mx-auto">
+              Official Martinez Hybrid Technologies media kits.
+            </p>
+          </div>
+
+          <GlassCard className="p-8 sm:p-12">
+            <div className="flex flex-col">
+              <div className="flex-1 flex items-center justify-center rounded-lg overflow-hidden border border-slate-200 bg-white relative min-h-[400px]">
+                <Image
+                  src="/nexure-business-card.png"
+                  alt="Nexure Networks Digital Business Card"
+                  fill
+                  className="object-cover shadow-sm"
+                />
+              </div>
+              <div className="mt-6 flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-slate-800">Digital Business Card</h3>
+                  <p className="text-sm text-slate-500">High-resolution PNG</p>
+                </div>
+                <a
+                  href="/nexure-business-card.png"
+                  download
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-blue-50 text-blue-600 transition-colors hover:bg-blue-600 hover:text-white"
+                  title="Download Digital Business Card"
+                >
+                  <Download className="h-5 w-5" />
+                </a>
+              </div>
+            </div>
+          </GlassCard>
         </div>
       </section>
 
