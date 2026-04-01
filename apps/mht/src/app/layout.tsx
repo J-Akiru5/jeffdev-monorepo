@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
+import { ChatAssistant } from '@jdstudio/ui/chat-assistant';
 import './globals.css';
 
 const inter = Inter({
@@ -85,6 +86,17 @@ export default function RootLayout({
           <main className="flex-1 pt-16">{children}</main>
           <Footer />
         </div>
+        <ChatAssistant 
+          apiEndpoint="/api/assistant" 
+          title="MHT Support" 
+          welcomeMessage="Welcome to Martinez Hybrid Technologies! How can I assist you with our Internet or Solar services today?"
+          suggestions={[
+            "How do I apply for Nexure Internet?",
+            "What happens during Joularix Solar free maintenance?",
+            "Are you available in Dingle, Iloilo?",
+            "How do I contact support?"
+          ]}
+        />
       </body>
     </html>
   );

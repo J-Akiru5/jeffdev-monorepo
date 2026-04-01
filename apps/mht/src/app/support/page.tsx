@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { GlassCard } from '@/components/ui/glass-card';
 import Link from 'next/link';
+import { FadeIn, FadeInStagger, FadeInItem } from '@/components/ui/fade-in';
 import {
   Phone,
   Mail,
@@ -32,7 +33,7 @@ export default function SupportPage() {
       {/* Hero */}
       <section className="py-16 sm:py-24" id="support-hero">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mb-12">
+          <FadeIn className="max-w-3xl mb-12">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 border border-green-100 mb-5">
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse-green" />
               <span className="text-xs font-semibold text-green-700 tracking-wide">
@@ -46,20 +47,26 @@ export default function SupportPage() {
               Our team and AI-powered support agents are here to help you with internet connectivity,
               solar services, billing, and more.
             </p>
-          </div>
+          </FadeIn>
 
           {/* Contact Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
-            <GlassCard className="p-6" hover>
+          <FadeInStagger className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-16">
+            <FadeInItem>
+              <GlassCard className="p-6 h-full" hover>
               <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100 text-blue-600 mb-4">
                 <Phone className="h-5 w-5" strokeWidth={1.5} />
               </div>
               <h3 className="text-sm font-semibold text-slate-800 mb-1">Phone</h3>
               <p className="text-xs text-slate-500 mb-3">Call us directly for urgent concerns.</p>
-              <p className="text-sm font-mono font-semibold text-blue-600">+63 XXX XXX XXXX</p>
+              <div className="space-y-1">
+                <p className="text-sm font-mono font-semibold text-blue-600">0951 916 7103</p>
+                <p className="text-sm font-mono font-semibold text-slate-500 text-xs">0998 386 0315 (Alt)</p>
+              </div>
             </GlassCard>
+            </FadeInItem>
 
-            <GlassCard className="p-6" hover>
+            <FadeInItem>
+              <GlassCard className="p-6 h-full" hover>
               <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100 text-blue-600 mb-4">
                 <Mail className="h-5 w-5" strokeWidth={1.5} />
               </div>
@@ -72,8 +79,10 @@ export default function SupportPage() {
                 martinezhybrid.opc@gmail.com
               </a>
             </GlassCard>
+            </FadeInItem>
 
-            <GlassCard className="p-6" hover>
+            <FadeInItem>
+              <GlassCard className="p-6 h-full" hover>
               <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-green-100 text-green-600 mb-4">
                 <Bot className="h-5 w-5" strokeWidth={1.5} />
               </div>
@@ -83,8 +92,10 @@ export default function SupportPage() {
                 Available Now
               </p>
             </GlassCard>
+            </FadeInItem>
 
-            <GlassCard className="p-6" hover>
+            <FadeInItem>
+              <GlassCard className="p-6 h-full" hover>
               <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-slate-100 text-slate-600 mb-4">
                 <MapPin className="h-5 w-5" strokeWidth={1.5} />
               </div>
@@ -92,25 +103,27 @@ export default function SupportPage() {
               <p className="text-xs text-slate-500 mb-3">Walk in during business hours.</p>
               <p className="text-sm font-medium text-slate-700">Dingle, Iloilo, Philippines</p>
             </GlassCard>
-          </div>
+            </FadeInItem>
+          </FadeInStagger>
         </div>
       </section>
 
       {/* FAQ / Quick Help */}
       <section className="py-12 sm:py-16 bg-gradient-to-b from-transparent to-blue-50/20" id="quick-help">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <FadeIn className="text-center mb-12">
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-3">
               Common Topics
             </h2>
             <p className="text-slate-500 max-w-xl mx-auto">
               Find quick answers to frequently asked questions by category.
             </p>
-          </div>
+          </FadeIn>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          <FadeInStagger className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
             {/* Nexure Networks FAQ */}
-            <GlassCard className="p-6 sm:p-8" accent="blue">
+            <FadeInItem>
+              <GlassCard className="p-6 sm:p-8 h-full" accent="blue">
               <div className="flex items-center gap-3 mb-6">
                 <Wifi className="h-5 w-5 text-blue-600" strokeWidth={1.5} />
                 <h3 className="text-lg font-bold text-slate-800">Nexure Networks</h3>
@@ -151,9 +164,11 @@ export default function SupportPage() {
                 ))}
               </div>
             </GlassCard>
+            </FadeInItem>
 
             {/* Joularix Solar FAQ */}
-            <GlassCard className="p-6 sm:p-8" accent="green">
+            <FadeInItem>
+            <GlassCard className="p-6 sm:p-8 h-full" accent="green">
               <div className="flex items-center gap-3 mb-6">
                 <Sun className="h-5 w-5 text-green-600" strokeWidth={1.5} />
                 <h3 className="text-lg font-bold text-slate-800">Joularix Solar</h3>
@@ -194,7 +209,8 @@ export default function SupportPage() {
                 ))}
               </div>
             </GlassCard>
-          </div>
+            </FadeInItem>
+          </FadeInStagger>
         </div>
       </section>
 
@@ -417,7 +433,7 @@ export default function SupportPage() {
                 <div className="mt-4 flex items-center gap-2 px-4 py-2.5 rounded-lg bg-amber-50 border border-amber-100">
                   <Phone className="h-4 w-4 text-amber-600" strokeWidth={1.5} />
                   <span className="text-sm font-mono font-semibold text-amber-700">
-                    +63 XXX XXX XXXX
+                    0951 916 7103
                   </span>
                 </div>
               </GlassCard>

@@ -3,6 +3,7 @@ import { JoularixFeatureGrid, SolarCalculator } from '@/components/joularix/joul
 import { PreLaunchBadge } from '@/components/nexure/nexure-components';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Sun, Leaf, TrendingDown, ShieldCheck } from 'lucide-react';
+import { FadeIn, FadeInStagger, FadeInItem } from '@/components/ui/fade-in';
 
 export const metadata: Metadata = {
   title: 'Joularix Solar — Smart Grid Solar Solutions',
@@ -21,7 +22,7 @@ export default function JoularixPage() {
       {/* Hero */}
       <section className="py-16 sm:py-24" id="joularix-hero">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl">
+          <FadeIn className="max-w-3xl">
             <div className="mb-6">
               <PreLaunchBadge division="Joularix Solar" />
             </div>
@@ -37,61 +38,73 @@ export default function JoularixPage() {
               Smart grid solar solutions that harness the abundant Philippine sun.
               From residential rooftops to commercial installations.
             </p>
-          </div>
+          </FadeIn>
         </div>
       </section>
 
       {/* Why Solar */}
       <section className="py-12 sm:py-16 border-t border-black/[0.04]" id="joularix-why">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-slate-800 mb-8">Why Go Solar?</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <FadeIn>
+            <h2 className="text-2xl font-bold text-slate-800 mb-8">Why Go Solar?</h2>
+          </FadeIn>
+          <FadeInStagger className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {whyData.map((item) => (
-              <GlassCard key={item.title} className="p-6" hover>
-                <item.icon className="h-8 w-8 text-green-600 mb-3" strokeWidth={1.5} />
-                <h3 className="text-base font-semibold text-slate-800 mb-2">{item.title}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">{item.desc}</p>
-              </GlassCard>
+              <FadeInItem key={item.title}>
+                <GlassCard className="p-6 h-full" hover>
+                  <item.icon className="h-8 w-8 text-green-600 mb-3" strokeWidth={1.5} />
+                  <h3 className="text-base font-semibold text-slate-800 mb-2">{item.title}</h3>
+                  <p className="text-sm text-slate-500 leading-relaxed">{item.desc}</p>
+                </GlassCard>
+              </FadeInItem>
             ))}
-          </div>
+          </FadeInStagger>
         </div>
       </section>
 
       {/* Features */}
       <section className="py-12 sm:py-16 bg-gradient-to-b from-transparent to-green-50/30" id="joularix-features">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-slate-800 mb-8">Our Solar Products</h2>
-          <JoularixFeatureGrid />
+          <FadeIn>
+            <h2 className="text-2xl font-bold text-slate-800 mb-8">Our Solar Products</h2>
+            <JoularixFeatureGrid />
+          </FadeIn>
         </div>
       </section>
 
       {/* Solar Calculator */}
       <section className="py-12 sm:py-16" id="joularix-calculator">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SolarCalculator />
+          <FadeIn>
+            <SolarCalculator />
+          </FadeIn>
         </div>
       </section>
 
       {/* Process */}
       <section className="py-12 sm:py-16 border-t border-black/[0.04]" id="joularix-process">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-slate-800 mb-8">How It Works</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-6">
+          <FadeIn>
+            <h2 className="text-2xl font-bold text-slate-800 mb-8">How It Works</h2>
+          </FadeIn>
+          <FadeInStagger className="grid grid-cols-1 sm:grid-cols-4 gap-6">
             {[
               { step: '01', title: 'Free Consultation', desc: 'We assess your energy needs and roof suitability.' },
               { step: '02', title: 'Custom Design', desc: 'Engineered system sized precisely for your consumption.' },
               { step: '03', title: 'Installation', desc: 'Professional installation by certified technicians.' },
               { step: '04', title: 'Monitoring', desc: 'Real-time production monitoring via your phone.' },
             ].map((item) => (
-              <div key={item.step} className="text-center sm:text-left">
-                <span className="inline-block text-sm font-mono font-bold text-green-600 bg-green-100 rounded-full px-3 py-1 mb-3">
-                  {item.step}
-                </span>
-                <h3 className="text-base font-semibold text-slate-800 mb-1">{item.title}</h3>
-                <p className="text-sm text-slate-500">{item.desc}</p>
-              </div>
+              <FadeInItem key={item.step}>
+                <div className="text-center sm:text-left h-full">
+                  <span className="inline-block text-sm font-mono font-bold text-green-600 bg-green-100 rounded-full px-3 py-1 mb-3">
+                    {item.step}
+                  </span>
+                  <h3 className="text-base font-semibold text-slate-800 mb-1">{item.title}</h3>
+                  <p className="text-sm text-slate-500">{item.desc}</p>
+                </div>
+              </FadeInItem>
             ))}
-          </div>
+          </FadeInStagger>
         </div>
       </section>
     </>

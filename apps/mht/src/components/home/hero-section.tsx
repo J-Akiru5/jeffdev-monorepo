@@ -22,8 +22,8 @@ export function HeroSection() {
 
           {/* ─── LEFT: Brand Identity ─── */}
           <motion.div
-            initial={{ opacity: 0, x: -32 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: 'easeOut' }}
           >
             {/* Status badge */}
@@ -84,9 +84,9 @@ export function HeroSection() {
           <div className="flex flex-col gap-5">
             {/* Nexure Networks Card */}
             <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.25 }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.25, ease: 'easeOut' }}
             >
               <GlassCard accent="blue" className="p-7 sm:p-8">
                 <div className="flex items-start justify-between mb-4">
@@ -130,9 +130,9 @@ export function HeroSection() {
 
             {/* Joularix Solar Card */}
             <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
             >
               <GlassCard accent="green" className="p-7 sm:p-8">
                 <div className="flex items-start justify-between mb-4">

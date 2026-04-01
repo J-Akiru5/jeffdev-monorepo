@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { PreLaunchBadge, NexureFeatureGrid, CoverageChecker } from '@/components/nexure/nexure-components';
 import { GlassCard } from '@/components/ui/glass-card';
 import { Wifi, Signal } from 'lucide-react';
+import { FadeIn, FadeInStagger, FadeInItem } from '@/components/ui/fade-in';
 
 export const metadata: Metadata = {
   title: 'Nexure Networks — Localized High-Speed Internet',
@@ -23,7 +24,7 @@ export default function NexurePage() {
           <div className="mb-8">
             <PreLaunchBadge division="Nexure Networks" />
           </div>
-          <div className="max-w-3xl">
+          <FadeIn className="max-w-3xl">
             <div className="flex items-center gap-3 mb-4">
               <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 text-blue-600">
                 <Wifi className="h-6 w-6" strokeWidth={2} />
@@ -36,27 +37,31 @@ export default function NexurePage() {
               Bringing reliable, high-speed internet to every household and business
               in Western Visayas. No data caps. No excuses.
             </p>
-          </div>
+          </FadeIn>
         </div>
       </section>
 
       {/* Why Nexure */}
       <section className="py-12 sm:py-16 border-t border-black/[0.04]" id="nexure-why">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-slate-800 mb-8">Why Choose Nexure?</h2>
-          <NexureFeatureGrid />
+          <FadeIn>
+            <h2 className="text-2xl font-bold text-slate-800 mb-8">Why Choose Nexure?</h2>
+            <NexureFeatureGrid />
+          </FadeIn>
         </div>
       </section>
 
       {/* Plans */}
       <section className="py-12 sm:py-16 bg-gradient-to-b from-transparent to-blue-50/30" id="nexure-plans">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">Internet Plans</h2>
-          <p className="text-slate-500 mb-8">Simple, transparent pricing. No hidden fees.</p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <FadeIn>
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">Internet Plans</h2>
+            <p className="text-slate-500 mb-8">Simple, transparent pricing. No hidden fees.</p>
+          </FadeIn>
+          <FadeInStagger className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {plans.map((plan, i) => (
+              <FadeInItem key={plan.name}>
               <GlassCard
-                key={plan.name}
                 accent={i === 1 ? 'blue' : 'none'}
                 className={`p-6 sm:p-8 ${i === 1 ? 'ring-2 ring-blue-200' : ''}`}
               >
@@ -78,15 +83,18 @@ export default function NexurePage() {
                   </button>
                 </a>
               </GlassCard>
+              </FadeInItem>
             ))}
-          </div>
+          </FadeInStagger>
         </div>
       </section>
 
       {/* Coverage Checker */}
       <section className="py-12 sm:py-16" id="nexure-coverage">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <CoverageChecker />
+          <FadeIn>
+            <CoverageChecker />
+          </FadeIn>
         </div>
       </section>
     </>
