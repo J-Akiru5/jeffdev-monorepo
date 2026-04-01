@@ -3,20 +3,23 @@
 import React from 'react';
 import { GlassCard } from '@/components/ui/glass-card';
 
-export function NetworkStatusPill() {
+/**
+ * Pre-launch status badge — shown on Nexure and Joularix pages
+ * while the company is in pre-launch phase.
+ */
+export function PreLaunchBadge({ division }: { division: string }) {
   return (
     <div
-      className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full glass-white text-sm"
-      id="network-status-pill"
+      className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/70 border border-amber-200/80 backdrop-blur-sm shadow-sm text-sm"
+      id="pre-launch-badge"
     >
       <span className="relative flex h-2.5 w-2.5">
-        <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75 animate-ping" />
-        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-500" />
+        <span className="absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75 animate-ping" />
+        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-amber-400" />
       </span>
-      <span className="font-medium text-slate-700">
-        Network Status:{' '}
-        <span className="text-green-600">100% Operational</span>{' '}
-        in Dingle, Iloilo
+      <span className="font-mono font-medium text-slate-600">
+        {division}:{' '}
+        <span className="text-amber-600">Pre-Launch Phase</span>
       </span>
     </div>
   );

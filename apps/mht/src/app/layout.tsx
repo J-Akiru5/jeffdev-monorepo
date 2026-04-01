@@ -60,16 +60,23 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="antialiased font-sans">
-        {/* Subtle background pattern */}
+        {/* Structured background — light twin of Syntaxure grid */}
         <div className="pointer-events-none fixed inset-0 z-0" aria-hidden="true">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-50/40 via-white to-green-50/30" />
+          {/* Base gradient canvas */}
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-blue-50/20" />
+
+          {/* Visible grid — Syntaxure-style but for light mode */}
           <div
-            className="absolute inset-0 opacity-[0.015]"
+            className="absolute inset-0 opacity-[0.055]"
             style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23000000' stroke-width='0.5'%3E%3Cpath d='M0 0h40v40H0z'/%3E%3C/g%3E%3C/svg%3E")`,
-              backgroundSize: '40px 40px',
+              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke='%23000000' stroke-width='0.75'%3E%3Cpath d='M0 0h60v60H0z'/%3E%3C/g%3E%3C/svg%3E")`,
+              backgroundSize: '60px 60px',
             }}
           />
+
+          {/* Radial light bloom — top center, mirrors Syntaxure's cyan but in blue/green */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(37,99,235,0.07),transparent)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_80%_80%,rgba(22,163,74,0.05),transparent)]" />
         </div>
 
         {/* Application Content */}

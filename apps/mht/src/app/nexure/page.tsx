@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
-import { NetworkStatusPill, NexureFeatureGrid, CoverageChecker } from '@/components/nexure/nexure-components';
+import { PreLaunchBadge, NexureFeatureGrid, CoverageChecker } from '@/components/nexure/nexure-components';
 import { GlassCard } from '@/components/ui/glass-card';
-import { Wifi, Globe, Headphones, Router, Signal } from 'lucide-react';
+import { Wifi, Signal } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Nexure Networks — Localized High-Speed Internet',
@@ -21,7 +21,7 @@ export default function NexurePage() {
       <section className="py-16 sm:py-24" id="nexure-hero">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8">
-            <NetworkStatusPill />
+            <PreLaunchBadge division="Nexure Networks" />
           </div>
           <div className="max-w-3xl">
             <div className="flex items-center gap-3 mb-4">

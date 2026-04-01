@@ -12,7 +12,7 @@ interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
 /**
  * @component GlassCard
  * @description Enterprise White Glassmorphism card for MHT.
- * Overrides the dark-mode GlassPanel from packages/ui.
+ * Features Syntaxure-inspired shimmer + accent glow micro-animations.
  */
 export function GlassCard({
   className,
@@ -27,13 +27,29 @@ export function GlassCard({
     none: '',
   };
 
+  const accentGlow = {
+    blue: 'card-glow-blue',
+    green: 'card-glow-green',
+    none: '',
+  };
+
   return (
     <div
       className={cn(
         'relative overflow-hidden rounded-xl',
-        'bg-white/65 backdrop-blur-xl',
-        'border border-white/80 shadow-[0_8px_32px_rgba(0,0,0,0.06)]',
-        hover && 'transition-all duration-300 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] hover:translate-y-[-2px]',
+        'bg-white/70 backdrop-blur-xl',
+        'border border-white/80 shadow-[0_4px_24px_rgba(0,0,0,0.05)]',
+        // Shimmer sweep on hover (CSS-only, via globals.css)
+        'card-shimmer',
+        hover && [
+          'transition-all duration-300',
+          'hover:bg-white/80',
+          'hover:border-white/90',
+          'hover:translate-y-[-2px]',
+          'hover:scale-[1.008]',
+          'active:scale-[0.998]',
+          accentGlow[accent],
+        ],
         accentBorder[accent],
         className
       )}

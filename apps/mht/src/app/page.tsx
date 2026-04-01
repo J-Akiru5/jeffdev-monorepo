@@ -2,36 +2,16 @@ import { HeroSection } from '@/components/home/hero-section';
 import { NexureFeatureGrid, CoverageChecker } from '@/components/nexure/nexure-components';
 import { JoularixFeatureGrid, SolarCalculator } from '@/components/joularix/joularix-components';
 import { GlassCard } from '@/components/ui/glass-card';
-import { Wifi, Sun, Shield, Clock, Users, Zap } from 'lucide-react';
+import { Wifi, Sun } from 'lucide-react';
 
 export default function HomePage() {
   return (
     <>
-      {/* Hero */}
+      {/* Hero — Two-column with credential strip */}
       <HeroSection />
 
-      {/* Trust Bar */}
-      <section className="py-12 border-y border-black/[0.04]" id="trust-bar">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
-            {[
-              { value: '500+', label: 'Active Subscribers', icon: Users },
-              { value: '99.8%', label: 'Uptime Guarantee', icon: Shield },
-              { value: '24/7', label: 'Local Support', icon: Clock },
-              { value: '50kW+', label: 'Solar Deployed', icon: Zap },
-            ].map((stat) => (
-              <div key={stat.label} className="flex flex-col items-center gap-2">
-                <stat.icon className="h-5 w-5 text-slate-400" strokeWidth={1.5} />
-                <p className="text-2xl sm:text-3xl font-bold text-slate-800">{stat.value}</p>
-                <p className="text-xs text-slate-500 font-medium">{stat.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Nexure Preview Section */}
-      <section className="py-16 sm:py-20" id="nexure-preview">
+      <section className="py-16 sm:py-20 border-t border-black/[0.04]" id="nexure-preview">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3 mb-3">
             <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-blue-100 text-blue-600">

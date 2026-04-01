@@ -177,6 +177,24 @@ body {
   50% { transform: translateY(-6px); }
 }
 
+/* Card shimmer — light sweep across the top border */
+@keyframes shimmer {
+  0%   { transform: translateX(-100%) skewX(-12deg); }
+  100% { transform: translateX(250%) skewX(-12deg); }
+}
+
+/* Subtle scale pop on card enter */
+@keyframes card-enter {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Glow pulse for active/accent elements */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  50%       { box-shadow: 0 0 20px 2px rgba(37, 99, 235, 0.12); }
+}
+
 .animate-fade-in-up {
   animation: fade-in-up 0.6s ease-out forwards;
 }
@@ -187,6 +205,46 @@ body {
 
 .animate-float {
   animation: float 3s ease-in-out infinite;
+}
+
+.animate-card-enter {
+  animation: card-enter 0.5s ease-out forwards;
+}
+
+/* ----------------------------------------
+   CARD SHIMMER EFFECT
+   Used inside GlassCard via ::before pseudo-element
+   ---------------------------------------- */
+.card-shimmer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 60%
+  );
+  transform: translateX(-100%) skewX(-12deg);
+  transition: none;
+  pointer-events: none;
+}
+
+.card-shimmer:hover::before {
+  animation: shimmer 0.65s ease-in-out;
+}
+
+/* Blue glow variant */
+.card-glow-blue:hover {
+  box-shadow: 0 12px 40px rgba(37, 99, 235, 0.12), 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* Green glow variant */
+.card-glow-green:hover {
+  box-shadow: 0 12px 40px rgba(22, 163, 74, 0.12), 0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
 /* ----------------------------------------
