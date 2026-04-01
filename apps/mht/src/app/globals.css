@@ -188,3 +188,57 @@ body {
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
+
+/* ----------------------------------------
+   LEGAL PROSE (Terms/Privacy Pages)
+   ---------------------------------------- */
+.legal-prose p {
+  margin-bottom: 0.75rem;
+}
+
+.legal-prose ul,
+.legal-prose ol {
+  padding-left: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.legal-prose ul {
+  list-style-type: disc;
+}
+
+.legal-prose ol {
+  list-style-type: decimal;
+}
+
+.legal-prose li {
+  margin-bottom: 0.375rem;
+  padding-left: 0.25rem;
+}
+
+.legal-prose li::marker {
+  color: var(--mht-blue);
+}
+
+.legal-prose strong {
+  color: var(--mht-text);
+  font-weight: 600;
+}
+
+.legal-prose a {
+  color: var(--mht-blue);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.2s;
+}
+
+.legal-prose a:hover {
+  color: var(--mht-blue-dark);
+}
+
+.legal-prose h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--mht-text);
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
