@@ -1,156 +1,205 @@
-# JeffDev Monorepo - AI Agent Guidelines
+# JeffDev Monorepo - Comprehensive AI Agent Guidelines
 
-## Architecture Overview
+## ⚡ Quick Start
 
-This is a **Turborepo monorepo** with 4 apps and 3 shared packages:
-
-**Apps:**
-- `apps/agency` (port 3000) - JeffDev Studio marketing + admin CRM (Firebase, Next.js 16)
-- `apps/prism-dashboard` (port 3001) - SaaS platform for AI context rules (Clerk auth, Cosmos DB)
-- `apps/prism-docs` (port 3002) - Documentation site (Nextra 4)
-- `apps/prism-mcp-server` - Model Context Protocol server (stdio transport)
-
-**Shared Packages:**
-- `@jdstudio/ui` - Ghost Glow component library (Button, Card, Badge, Input, ProgressBar, DataTable)
-- `@jeffdev/db` - Firebase/Cosmos DB clients with Zod schemas (`packages/db/src/schema.ts`)
-- `@repo/eslint-config`, `@repo/typescript-config` - Shared configs
-
-## Critical Build & Dev Workflows
-
-**Prerequisites:** Node.js >=18, Doppler CLI (for secrets)
+**Prerequisites:** Node.js >=18, Doppler CLI  
+**Environment:** All secrets via Doppler (never commit `.env`)
 
 ```bash
-# Root commands (run all apps in parallel)
 doppler run -- turbo dev        # Start all apps
-doppler run -- turbo build      # Build all apps
-turbo run lint                  # Lint all workspaces
-turbo run check-types           # TypeScript checks
-
-# App-specific commands
-cd apps/agency
-npm run dev                     # Start agency on :3000
-npm run test                    # Run Vitest + Playwright tests
-npm run test:unit:watch         # Watch mode for unit tests
-npm run test:e2e:ui             # Playwright UI mode
-
-cd apps/prism-dashboard
-npm run dev                     # Start Prism on :3001
+turbo run build                 # Build all workspaces
+turbo run lint                  # Lint all apps
 ```
 
-**Environment:** All secrets managed via **Doppler**. Do NOT commit `.env` files. Required vars listed in `turbo.json` globalEnv.
+See [.agent/skills/](./skills/) for detailed guides on:
+- **[Prism Development](../.agent/skills/prism-development.md)** - Building Prism SaaS apps
+- **[Firestore Server Boundaries](../.agent/skills/firestore-server-boundaries.md)** - Next.js 16 serialization
+- **[Design System](../.agent/skills/design-system-implementation.md)** - Ghost Glow UI patterns
+- **[Monorepo Structure](../.agent/skills/monorepo-structure.md)** - Turborepo patterns
 
-## Next.js 14+ Server/Client Boundary Rules
+---
 
-**🚨 CRITICAL:** Firestore `Timestamp` objects CANNOT pass from Server → Client Components.
+## 🏗️ Monorepo Architecture
+
+**Turborepo** with **7 apps** and **5 packages**:
+
+### Apps
+| App | Port | Purpose | Tech |
+|-----|------|---------|------|
+| **agency** | 3000 | Marketing site + Admin CRM | Next.js 16 + Firebase |
+| **prism-dashboard** | 3001 | SaaS platform for rules | Next.js 16 + Cosmos DB + Clerk |
+| **prism-mcp-server** | — | Model Context Protocol server | Node.js 20 + MCP SDK |
+| **prism-docs** | 3002 | Documentation site | Nextra 4 |
+| **prism-exercise** | 3003 | Practice platform | Next.js 16 + Supabase |
+| **prism-admin** | 3004 | System admin dashboard | Next.js 16 + Firebase |
+| **joularix, mht, nexure, tracker** | — | Additional specialized apps | Next.js 16 |
+
+### Shared Packages
+| Package | Purpose |
+|---------|---------|
+| **`@jdstudio/ui`** | Ghost Glow components (Button, Card, Badge, Input, etc.) |
+| **`@jeffdev/db`** | Firebase/Cosmos DB clients with Zod schemas |
+| **`@repo/eslint-config`** | Shared ESLint rules |
+| **`@repo/typescript-config`** | Shared TypeScript configs |
+| **`prism-cli`** | CLI for Prism context operations |
+
+---
+
+## 🎯 Core Development Patterns
+
+### 1️⃣ Next.js 16 Server/Client Boundaries
+
+**CRITICAL: Firestore `Timestamp` objects CANNOT pass Server → Client:**
 
 ```typescript
-// ❌ BAD - Will crash: "Classes or null prototypes are not supported"
-return snapshot.docs.map(doc => ({ ...doc.data() })); // createdAt is Timestamp!
+// ❌ CRASHES: "Only plain objects can be passed to Client Components"
+return snapshot.docs.map(doc => ({ ...doc.data() }));
 
-// ✅ GOOD - Always serialize Timestamps
+// ✅ CORRECT: Serialize at the boundary
 return snapshot.docs.map(doc => {
   const data = doc.data();
   return {
     ...data,
     createdAt: data.createdAt?.toDate?.() 
       ? data.createdAt.toDate().toISOString() 
-      : data.createdAt || new Date().toISOString(),
+      : new Date().toISOString(),
   };
 });
 ```
 
-**Files to watch:** `apps/agency/src/app/actions/*.ts` - all server actions returning Firestore data.
+**Watch files:** `apps/agency/src/app/actions/*.ts` (all server actions)
 
-**Force dynamic rendering** when Server Components need fresh data:
+### 2️⃣ Force Dynamic Rendering for Admin Pages
+
 ```typescript
 import { cookies } from 'next/headers';
-export default async function Page() {
-  await cookies(); // Forces dynamic rendering
-}
-```
-
-## Firestore Data Architecture (Agency App)
-
-**Required collections:**
-- `users` (key: Firebase Auth UID) - User profiles with RBAC roles (founder > admin > partner > employee)
-- `invites`, `projects`, `quotes`, `invoices`, `messages`, `notifications`, `subscriptions`, `audit_logs`, `calendar_events`, `services`, `feedback`
-
-**Bootstrap Founder:** If `users` collection missing or user doc doesn't exist:
-- UI defaults to `role: 'employee'` (bad state)
-- **Fix:** Go to `/admin/settings` → Click "Bootstrap as Founder" OR run `npx tsx apps/agency/scripts/seed-founder.ts`
-
-## Component Patterns
-
-**Admin Pages (Server Components):**
-```typescript
-import { cookies } from 'next/headers';
-import { SomeAction } from '@/app/actions/something';
-import { ClientComponent } from '@/components/admin/client-component';
 
 export default async function AdminPage() {
-  await cookies(); // Force dynamic
-  const data = await SomeAction();
-  return <ClientComponent data={data} />; // Data must be serializable!
+  await cookies(); // ⚡ Forces dynamic (no cache)
+  // ... fetch fresh data
 }
 ```
 
-**Client Components (*-client.tsx):**
+### 3️⃣ Component Architecture
+
+**Server Components (Pages):**
+- Call server actions to fetch data
+- Serialize Timestamps before passing to client
+- Use `revalidatePath()` to invalidate caches
+
+**Client Components (`*-client.tsx`):**
 - Always use `'use client';` directive
-- Use `toast` from `sonner` for user feedback
-- Use `startTransition` for non-urgent updates
+- Handle state with `useState` / `useTransition` / Zustand
+- Use `toast` from `sonner` for feedback
+- Wrap expensive updates in `startTransition`
 
-**Server Actions:**
-- Place in files with `'use server';` directive
+**Server Actions (`'use server'`):**
+- Place in dedicated `.ts` files
 - Return `{ success: boolean; error?: string }` pattern
-- Serialize all Firestore Timestamps before returning
-- Call `revalidatePath('/admin/route')` to refresh cached data
+- Validate inputs with **Zod**
+- Serialize all Timestamps
+- Call `revalidatePath()` to refresh UI
 
-## File Uploads (R2 Cloudflare Storage)
+---
 
-**Flow:**
-1. Client calls `getSignedUploadUrl(filename, filetype)` server action
-2. Server generates presigned PUT URL from R2
-3. Client uploads directly to R2
-4. Files served via `/api/file/[...path]` proxy route
+## 🔐 Security & Performance Essentials
+
+**See:** [.agent/rules/security-guard.md](.agent/rules/security-guard.md) and [.agent/rules/debbuging-armor.md](.agent/rules/debbuging-armor.md)
+
+### Input Validation
+- **Zod gates** on all server actions & API routes
+- Never use `dangerouslySetInnerHTML` (unless wrapped in `DOMPurify.sanitize()`)
+- Validate rich text **before** Zod parsing if needed
+
+### Database Isolation
+- **Firebase:** Whitelist collections in `firestore.rules`
+- **Cosmos DB:** Use SDK's parameterized queries (no string concat)
+- Always use `packages/db` singleton clients
+
+### Rate Limiting & Headers
+- Upstash Redis on sensitive API routes (max 10 req/10s)
+- Configure CSP, HSTS, and X-Content-Type-Options in `next.config.mjs`
+
+---
+
+## 📊 Data Architecture
+
+### Agency App (Firestore)
+**Collections:**
+- `users` (UID-keyed) → Profiles + RBAC (founder > admin > partner > employee)
+- `projects`, `invoices`, `messages`, `notifications`, `audit_logs`, `services`, `feedback`, etc.
+
+**Bootstrap Founder:**
+```bash
+npx tsx apps/agency/scripts/seed-founder.ts
+# OR go to /admin/settings → "Bootstrap as Founder"
+```
+
+### Prism Apps (Cosmos DB)
+**Models:** Users, Rules, Projects, Subscriptions, Video Metadata
+
+**SDK:** `@jeffdev/db` exports `getPrismContainer()` singleton
+
+---
+
+## 📁 Storage & Assets
+
+**R2 Cloudflare (Object Storage):**
+1. Client calls `getSignedUploadUrl(filename, filetype)` (server action)
+2. Client uploads directly to R2 (no server overhead)
+3. Served via `/api/file/[...path]` proxy (bypasses Vercel bandwidth limits)
 
 **Common errors:**
-- CORS issues → Use proxy route, NOT direct R2 URLs
-- 404 on images → Check `NEXT_PUBLIC_SITE_URL` in env
-- Upload fails → Verify R2 credentials (`R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_ACCOUNT_ID`)
+- CORS 403 → Use proxy route, NOT direct R2 URLs
+- 404 images → Check `NEXT_PUBLIC_SITE_URL` env var
+- Upload fails → Verify `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`
 
-## Shared Component Library (@jdstudio/ui)
+---
 
+## 🎨 Design System & Components
+
+**See:** [.agent/skills/design-system-implementation.md](./skills/design-system-implementation.md)
+
+### Principles
+- **Dark mode only:** `#050505` void + glassmorphic overlays
+- **Ghost Glow buttons:** Borders that glow on hover (no solid fills)
+- **Precision typography:** Inter (headings), JetBrains Mono (code/data)
+- **Mobile-first:** Sidebar → Bottom navigation on mobile
+
+### Component Library (`packages/ui`)
 ```tsx
 import { Button, Card, Badge } from "@jdstudio/ui";
 
 <Card variant="interactive">
-  <Button variant="cyan">Deploy</Button>
+  <Button variant="cyan">Execute_</Button>
   <Badge variant="success">Active</Badge>
 </Card>
 ```
 
-**Available variants:** Check `packages/ui/src/` for buttonVariants, cardVariants, badgeVariants.
+**Check `packages/ui/src/` for all variants and available components.**
 
-## Common Error Patterns
+---
 
-| Error | Cause | Fix |
-|-------|-------|-----|
-| "Only plain objects can be passed to Client Components" | Firestore Timestamp in props | Serialize to ISO string in server action |
-| 404 on admin route | Route doesn't exist | Create `apps/agency/src/app/admin/[route]/page.tsx` |
-| User shows "Employee" role | Missing user doc in Firestore | Run bootstrap seed script |
-| Invite link 404 | Missing route | Create `apps/agency/src/app/auth/invite/[token]/page.tsx` |
+## 🐛 Debugging Checklist
 
-## Debugging Checklist
+| Symptom | Root Cause | Fix |
+|---------|-----------|-----|
+| "Only plain objects can be passed to Client Components" | Firestore Timestamp in props | Serialize to ISO in server action |
+| 404 on admin route | Route file missing | Create `src/app/admin/[route]/page.tsx` |
+| User defaults to "Employee" role | No user doc in Firestore | Run bootstrap seed script |
+| Hydration mismatch | Nesting violation or dynamic content | Check `<div>` inside `<p>`, add `suppressHydrationWarning` |
+| "ReferenceError: document is not defined" | Client code on server | Add `'use client'` directive or wrap in `useEffect` |
+| Data is stale after mutation | Cache not invalidated | Add `revalidatePath()` to server action |
+| Invalid Hook Call | React version mismatch | Run `npx syncpack fix-mismatches && npm install` |
+| Connection refused to Cosmos | Doppler not injecting secrets | Use `doppler run -- turbo dev` |
 
-1. **Serialization error?** → Check for Firestore Timestamps in server action returns
-2. **404?** → Verify route exists at `src/app/[path]/page.tsx`
-3. **Auth error?** → Check if user document exists in Firestore `users` collection
-4. **Data stale?** → Add `revalidatePath()` to server action
+---
 
-## Key Files
+## 🔑 Key Files & References
 
-- `apps/agency/docs/AGENT_RULES.md` - Detailed agency app patterns
-- `packages/db/src/schema.ts` - Zod schemas (single source of truth)
-- `packages/ui/src/index.ts` - Available UI components
-- `turbo.json` - Turborepo task config
-- `apps/agency/src/components/admin/sidebar.tsx` - Admin navigation structure
+- [.agent/rules/](./rules/) — Tech stack, security, design, debugging, business logic
+- [apps/agency/docs/AGENT_RULES.md](../apps/agency/docs/AGENT_RULES.md) — Detailed agency patterns
+- [packages/db/src/schema.ts](../packages/db/src/schema.ts) — Zod schemas (single source of truth)
+- [packages/ui/src/index.ts](../packages/ui/src/index.ts) — Available components
+- [turbo.json](../turbo.json) — Build & dev tasks config
+- [PRISM_APPS_COMPREHENSIVE_GUIDE.md](../PRISM_APPS_COMPREHENSIVE_GUIDE.md) — Full Prism ecosystem overview
