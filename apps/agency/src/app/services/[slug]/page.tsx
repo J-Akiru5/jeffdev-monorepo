@@ -7,6 +7,7 @@ import { CTA } from '@/components/sections/cta';
 import { ServiceInvestmentCard } from '@/components/services/service-investment-card';
 import { getServiceBySlug, getServices } from '@/lib/data';
 import { getIcon } from '@/lib/icons';
+import { services as staticServices } from '@/data/services';
 import type { Metadata } from 'next';
 
 /**
@@ -23,7 +24,8 @@ interface ServicePageProps {
 
 export async function generateStaticParams() {
   const services = await getServices();
-  return services.map((s) => ({ slug: s.slug }));
+  const source = services.length > 0 ? services : staticServices;
+  return source.map((s) => ({ slug: s.slug }));
 }
 
 export async function generateMetadata({
@@ -45,18 +47,36 @@ export async function generateMetadata({
 export default async function ServicePage({ params }: ServicePageProps) {
   const { slug } = await params;
   const service = await getServiceBySlug(slug);
+  const fallbackService = staticServices.find((item) => item.slug === slug);
 
-  if (!service) {
+  if (!service && !fallbackService) {
     notFound();
   }
 
   // Get other services for cross-linking
   const allServices = await getServices();
-  const otherServices = allServices
-    .filter((s) => s.slug !== service.slug)
+  const serviceList = allServices.length > 0 ? allServices : staticServices;
+  const activeSlug = service?.slug ?? fallbackService?.slug ?? slug;
+  const otherServices = serviceList
+    .filter((s) => s.slug !== activeSlug)
     .slice(0, 2);
 
-  const Icon = getIcon(service.icon);
+  const activeService = service ?? {
+    slug: fallbackService!.slug,
+    icon: fallbackService!.icon.name,
+    title: fallbackService!.title,
+    tagline: fallbackService!.tagline,
+    description: fallbackService!.description,
+    features: fallbackService!.features,
+    deliverables: fallbackService!.deliverables,
+    investment: {
+      starting: `PHP ${fallbackService!.investment.startingPrice.toLocaleString()}`,
+      timeline: fallbackService!.investment.timeline,
+    },
+    order: 0,
+  };
+
+  const Icon = getIcon(activeService.icon);
 
   return (
     <>
@@ -81,13 +101,13 @@ export default async function ServicePage({ params }: ServicePageProps) {
                 </div>
 
                 <h1 className="mt-6 text-4xl font-bold tracking-tight text-white md:text-5xl">
-                  {service.title}
+                  {activeService.title}
                 </h1>
                 <p className="mt-2 font-mono text-sm text-cyan-400">
-                  {service.tagline}
+                  {activeService.tagline}
                 </p>
                 <p className="mt-6 text-lg leading-relaxed text-white/60">
-                  {service.description}
+                  {activeService.description}
                 </p>
 
                 {/* CTAs */}
@@ -114,8 +134,8 @@ export default async function ServicePage({ params }: ServicePageProps) {
 
               {/* Right: Investment Card (Client Component for currency) */}
               <ServiceInvestmentCard
-                investment={service.investment}
-                deliverables={service.deliverables}
+                investment={activeService.investment}
+                deliverables={activeService.deliverables}
               />
             </div>
           </div>
@@ -126,7 +146,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
           <div className="mx-auto max-w-7xl">
             <h2 className="text-2xl font-bold text-white">What&apos;s Included</h2>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {service.features.map((feature) => (
+              {activeService.features.map((feature) => (
                 <div
                   key={feature}
                   className="flex items-center gap-3 rounded-md border border-white/[0.06] bg-white/[0.02] px-4 py-3"
@@ -157,9 +177,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
                     </div>
                     <div className="flex-1">
                       <div className="font-semibold text-white">{s.title}</div>
-                      <div className="mt-0.5 text-sm text-white/50">
-                        {s.tagline}
-                      </div>
+                      <div className="mt-0.5 text-sm text-white/50">{s.tagline}</div>
                     </div>
                     <ArrowUpRight className="h-4 w-4 text-white/30 transition-colors group-hover:text-white" />
                   </Link>

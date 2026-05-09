@@ -5,6 +5,7 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { CTA } from '@/components/sections/cta';
 import { getProjectBySlug, getProjects } from '@/lib/data';
+import { projects as staticProjects } from '@/data/projects';
 import type { Metadata } from 'next';
 
 /**
@@ -21,7 +22,8 @@ interface ProjectPageProps {
 
 export async function generateStaticParams() {
   const projects = await getProjects();
-  return projects.map((p) => ({ slug: p.slug }));
+  const source = projects.length > 0 ? projects : staticProjects;
+  return source.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({
@@ -43,15 +45,19 @@ export async function generateMetadata({
 export default async function ProjectPage({ params }: ProjectPageProps) {
   const { slug } = await params;
   const project = await getProjectBySlug(slug);
+  const fallbackProject = staticProjects.find((item) => item.slug === slug);
 
-  if (!project) {
+  if (!project && !fallbackProject) {
     notFound();
   }
 
   // Get other projects for cross-linking
   const allProjects = await getProjects();
-  const otherProjects = allProjects
-    .filter((p) => p.slug !== project.slug)
+  const projectList = allProjects.length > 0 ? allProjects : staticProjects;
+  const activeSlug = project?.slug ?? fallbackProject?.slug ?? slug;
+  const activeProject = project ?? fallbackProject!;
+  const otherProjects = projectList
+    .filter((p) => p.slug !== activeSlug)
     .slice(0, 2);
 
   return (
@@ -71,20 +77,20 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
             <div className="mt-8 max-w-3xl">
               <span className="font-mono text-xs uppercase tracking-wider text-cyan-400">
-                {project.category}
+                {activeProject.category}
               </span>
               <h1 className="mt-4 text-4xl font-bold tracking-tight text-white md:text-5xl">
-                {project.title}
+                {activeProject.title}
               </h1>
-              <p className="mt-2 text-lg text-white/50">{project.client}</p>
+              <p className="mt-2 text-lg text-white/50">{activeProject.client}</p>
               <p className="mt-6 text-xl leading-relaxed text-white/60">
-                {project.description}
+                {activeProject.description}
               </p>
             </div>
 
             {/* Results Banner */}
             <div className="mt-12 grid gap-4 rounded-md border border-white/[0.08] bg-white/[0.02] p-8 sm:grid-cols-3">
-              {project.results.map((result) => (
+              {activeProject.results.map((result) => (
                 <div key={result.metric} className="text-center">
                   <div className="text-3xl font-bold text-gradient-holographic">
                     {result.value}
@@ -97,11 +103,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             </div>
 
             {/* Cover Image */}
-            {project.image && (
+            {activeProject.image && (
               <div className="mt-12 overflow-hidden rounded-md border border-white/[0.08]">
                 <img
-                  src={project.image}
-                  alt={`${project.title} cover`}
+                  src={activeProject.image}
+                  alt={`${activeProject.title} cover`}
                   className="h-auto w-full object-cover"
                 />
               </div>
@@ -119,7 +125,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   The Challenge
                 </h2>
                 <p className="mt-4 text-lg leading-relaxed text-white/70">
-                  {project.challenge}
+                  {activeProject.challenge}
                 </p>
               </div>
 
@@ -129,7 +135,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                   Our Solution
                 </h2>
                 <p className="mt-4 text-lg leading-relaxed text-white/70">
-                  {project.solution}
+                  {activeProject.solution}
                 </p>
               </div>
             </div>
@@ -143,7 +149,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               Technologies Used
             </h2>
             <div className="mt-6 flex flex-wrap gap-3">
-              {project.technologies.map((tech) => (
+              {activeProject.technologies.map((tech) => (
                 <span
                   key={tech}
                   className="rounded-md border border-white/10 bg-white/5 px-4 py-2 font-mono text-sm text-white/70"
@@ -156,20 +162,20 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </section>
 
         {/* Testimonial */}
-        {project.testimonial && (
+        {activeProject.testimonial && (
           <section className="px-6 py-16 lg:px-8">
             <div className="mx-auto max-w-3xl">
               <div className="rounded-md border border-white/[0.08] bg-white/[0.02] p-8">
                 <Quote className="h-8 w-8 text-cyan-400/50" />
                 <blockquote className="mt-4 text-xl leading-relaxed text-white/80">
-                  &ldquo;{project.testimonial.quote}&rdquo;
+                  &ldquo;{activeProject.testimonial.quote}&rdquo;
                 </blockquote>
                 <div className="mt-6">
                   <div className="font-semibold text-white">
-                    {project.testimonial.author}
+                    {activeProject.testimonial.author}
                   </div>
                   <div className="text-sm text-white/50">
-                    {project.testimonial.role}
+                    {activeProject.testimonial.role}
                   </div>
                 </div>
               </div>
