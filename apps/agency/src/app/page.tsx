@@ -3,6 +3,7 @@ import { Footer } from '@/components/layout/footer';
 import { Hero } from '@/components/sections/hero';
 import { Services } from '@/components/sections/services';
 import { CTA } from '@/components/sections/cta';
+import { AgenticProtocol } from '@/components/sections/agentic-protocol';
 
 /**
  * Homepage
@@ -19,6 +20,7 @@ export default function HomePage() {
       <main>
         <Hero />
         <Services />
+        <AgenticProtocol />
         <CTA />
       </main>
       <Footer />
