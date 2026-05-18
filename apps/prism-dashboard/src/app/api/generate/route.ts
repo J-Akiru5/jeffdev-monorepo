@@ -13,6 +13,44 @@ import { z } from 'zod';
 import crypto from 'crypto';
 import { getCollection } from '@jeffdev/db';
 import { generateComponent, generateRulesFromComponent } from '@/lib/gemini';
+import { TIER_LIMITS, type SubscriptionTier } from '@/lib/subscriptions';
+
+async function getUserTier(userId: string): Promise<SubscriptionTier> {
+  try {
+    const subscriptions = await getCollection('subscriptions');
+    const sub = await subscriptions.findOne({ userId, status: { $in: ['active', 'trialing'] } });
+    return (sub?.tier as SubscriptionTier) || 'free';
+  } catch {
+    return 'free';
+  }
+}
+
+async function getMonthlyUsage(userId: string): Promise<number> {
+  try {
+    const now = new Date();
+    const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const usage = await getCollection('usage');
+    const record = await usage.findOne({ userId, month });
+    return (record?.aiGenerations as number) || 0;
+  } catch {
+    return 0;
+  }
+}
+
+async function trackGeneration(userId: string): Promise<void> {
+  try {
+    const now = new Date();
+    const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    const usage = await getCollection('usage');
+    await usage.updateOne(
+      { userId, month },
+      { $inc: { aiGenerations: 1 }, $setOnInsert: { userId, month, rulesCreated: 0, componentsCreated: 0 } },
+      { upsert: true }
+    );
+  } catch {
+    // non-blocking
+  }
+}
 
 /**
  * 🛡️ Zod Gate - Input Validation Schema
@@ -58,11 +96,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Check subscription limits
-    // const subscription = await getSubscription(userId);
-    // if (!canUseFeature(subscription.tier, 'aiGenerations', usage)) {
-    //   return NextResponse.json({ error: 'AI generation limit reached' }, { status: 403 });
-    // }
+    const tier = await getUserTier(userId);
+    const monthlyUsage = await getMonthlyUsage(userId);
+    const limit = TIER_LIMITS[tier].aiGenerations;
+    if (limit !== -1 && monthlyUsage >= limit) {
+      return NextResponse.json(
+        { error: `Monthly AI generation limit reached (${limit}/month). Upgrade to Pro for more.` },
+        { status: 403 }
+      );
+    }
+
+    await trackGeneration(userId);
     
     // Generate component
     let component;

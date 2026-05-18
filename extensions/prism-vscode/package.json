@@ -1,0 +1,111 @@
+{
+  "name": "prism-context-engine",
+  "displayName": "Prism Context Engine",
+  "description": "Persistent context for AI coding assistants. Enforce architecture rules, eliminate hallucinations.",
+  "version": "1.0.0",
+  "publisher": "prism-engine",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "mcp",
+    "cursor",
+    "windsurf",
+    "ai",
+    "context",
+    "rules",
+    "architecture"
+  ],
+  "icon": "resources/icon.png",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "prism.connect",
+        "title": "Prism: Connect to Context Engine"
+      },
+      {
+        "command": "prism.disconnect",
+        "title": "Prism: Disconnect"
+      },
+      {
+        "command": "prism.showRules",
+        "title": "Prism: Show Rules"
+      },
+      {
+        "command": "prism.refreshRules",
+        "title": "Prism: Refresh Rules"
+      },
+      {
+        "command": "prism.login",
+        "title": "Prism: Login"
+      }
+    ],
+    "configuration": {
+      "title": "Prism Context Engine",
+      "properties": {
+        "prism.token": {
+          "type": "string",
+          "default": "",
+          "description": "Prism API token. Get it from prism.jeffdev.studio/settings"
+        },
+        "prism.apiUrl": {
+          "type": "string",
+          "default": "https://prism.jeffdev.studio",
+          "description": "Prism API URL"
+        },
+        "prism.autoConnect": {
+          "type": "boolean",
+          "default": true,
+          "description": "Auto-connect to Prism on workspace open"
+        },
+        "prism.checkOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Validate code against rules on file save"
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "prism-sidebar",
+          "title": "Prism",
+          "icon": "resources/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "prism-sidebar": [
+        {
+          "type": "tree",
+          "id": "prism-rules",
+          "name": "Rules"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "@types/vscode": "^1.96.0",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  }
+}

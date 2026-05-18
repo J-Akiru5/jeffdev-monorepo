@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Footer, Layout, Navbar } from 'nextra-theme-docs'
 import { Banner, Head } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
+import type { PageMapItem } from 'nextra'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import 'nextra-theme-docs/style.css'
 import '@/app/globals.css'
@@ -95,13 +96,11 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ 
-  children, 
-  params 
+  children 
 }: { 
   children: React.ReactNode; 
-  params: Promise<{ lang: string }> 
 }) {
-  const { lang } = await params
+  const lang = 'nl'
   
   // List of all locale folder names
   const LOCALE_FOLDERS = ['en-US', 'tl', 'ja', 'es', 'id', 'en-GB', 'ru', 'nl']
@@ -114,14 +113,13 @@ export default async function RootLayout({
   let pageMap = rawPageMap
 
   if (Array.isArray(rawPageMap)) {
-    // Find the current locale folder item
-    const currentLocaleItem = rawPageMap.find((item: any) => item.name === lang)
+    const currentLocaleItem = rawPageMap.find((item: any) => item.name === lang) as
+      | { name: string; children: PageMapItem[] }
+      | undefined
 
-    if (currentLocaleItem && currentLocaleItem.children && Array.isArray(currentLocaleItem.children)) {
-      // Use the locale folder's children as the pageMap
+    if (currentLocaleItem?.children) {
       pageMap = currentLocaleItem.children
     } else {
-      // Fallback: filter out all locale folders and internal dirs from top level
       const EXCLUDE = [...LOCALE_FOLDERS, 'api', 'components', 'hooks']
       pageMap = rawPageMap.filter((item: any) =>
         item && item.name && !EXCLUDE.includes(item.name)

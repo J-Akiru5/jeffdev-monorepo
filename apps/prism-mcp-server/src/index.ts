@@ -557,12 +557,23 @@ ${result.extractedRules && result.extractedRules.length > 0 ? `\n**Extracted Rul
 // =============================================================================
 
 async function main() {
+  const isStandalone = process.argv.includes('--standalone');
+
+  if (!isStandalone) {
+    console.error(`[${SERVER_NAME}] ╔══════════════════════════════════════════════════════╗`);
+    console.error(`[${SERVER_NAME}] ║  Direct MCP server startup detected.                ║`);
+    console.error(`[${SERVER_NAME}] ║  Recommended: use "prism connect" for cloud sync.   ║`);
+    console.error(`[${SERVER_NAME}] ║  To run standalone: add --standalone flag.           ║`);
+    console.error(`[${SERVER_NAME}] ╚══════════════════════════════════════════════════════╝`);
+    process.exit(0);
+  }
+
   // Validate API key first
   await validateApiKey();
 
   const transport = new StdioServerTransport();
 
-  console.error(`[${SERVER_NAME}] Starting Prism MCP Server v${SERVER_VERSION}...`);
+  console.error(`[${SERVER_NAME}] Starting Prism MCP Server v${SERVER_VERSION} (standalone)...`);
   
   await server.connect(transport);
   

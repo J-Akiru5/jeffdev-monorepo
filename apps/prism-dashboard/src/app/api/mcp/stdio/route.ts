@@ -110,8 +110,32 @@ async function handleMcpMethod(
       return {
         tools: [
           {
+            name: "get_architectural_rules",
+            description: "Fetch critical coding standards and design rules. Use BEFORE writing any code.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                category: { type: "string", description: "Filter: architecture, styling, security, performance" },
+                tag: { type: "string", description: "Filter by tag (e.g., 'design', 'validation')" }
+              }
+            }
+          },
+          {
+            name: "validate_code_pattern",
+            description: "Check if code follows the project's architectural rules",
+            inputSchema: {
+              type: "object",
+              properties: {
+                code: { type: "string", description: "Code snippet to validate" },
+                context: { type: "string", description: "File or feature context" },
+                category: { type: "string", description: "Filter rules by category" }
+              },
+              required: ["code"]
+            }
+          },
+          {
             name: "search_video_transcript",
-            description: "Search video transcripts within a project",
+            description: "Semantic search across video transcripts",
             inputSchema: {
               type: "object",
               properties: {
@@ -142,6 +166,14 @@ async function handleMcpMethod(
               },
               required: ["projectId"]
             }
+          },
+          {
+            name: "get_project_profile",
+            description: "Auto-detect project metadata from repo structure",
+            inputSchema: {
+              type: "object",
+              properties: {}
+            }
           }
         ]
       };
@@ -170,6 +202,88 @@ async function handleToolCall(
   const { name, arguments: args } = params;
 
   switch (name) {
+    case "get_architectural_rules": {
+      const rules = await getCollection("rules");
+      const category = args?.category as string | undefined;
+      const tag = args?.tag as string | undefined;
+
+      const query: Record<string, unknown> = { userId, isActive: true };
+      if (category) query.category = category;
+      if (tag) query.tags = tag;
+
+      const foundRules = await rules
+        .find(query)
+        .sort({ priority: 1 })
+        .limit(5)
+        .toArray();
+
+      if (foundRules.length === 0) {
+        return {
+          content: [{ type: "text" as const, text: "No matching rules found." }]
+        };
+      }
+
+      const formatted = foundRules
+        .map((r: Record<string, unknown>) => 
+          `## ${r.name}\n\n**Priority:** ${r.priority} | **Category:** ${r.category}\n\n${r.content}`
+        )
+        .join("\n\n---\n\n");
+
+      return {
+        content: [{ type: "text" as const, text: `# Prism Architectural Rules\n\n${formatted}` }]
+      };
+    }
+
+    case "validate_code_pattern": {
+      const code = args?.code as string | undefined;
+      const _context = args?.context as string | undefined;
+      const vCategory = args?.category as string | undefined;
+
+      if (!code) {
+        return { content: [{ type: "text" as const, text: "No code provided." }], ...{ error: true } } as any;
+      }
+
+      const rulesDb = await getCollection("rules");
+      const vQuery: Record<string, unknown> = {
+        userId,
+        isActive: true,
+        pattern: { $exists: true, $ne: null }
+      };
+      if (vCategory) vQuery.category = vCategory;
+
+      const patternRules = await rulesDb.find(vQuery).sort({ priority: 1 }).toArray();
+      const violations: string[] = [];
+
+      for (const rule of patternRules) {
+        const pattern = rule.pattern as string | undefined;
+        if (!pattern) continue;
+        try {
+          const regex = new RegExp(pattern, "gi");
+          if (regex.test(code)) {
+            const severity = rule.severity === "error" ? "❌" : rule.severity === "warning" ? "⚠️" : "ℹ️";
+            violations.push(`${severity} **${rule.name}**: ${rule.content}`);
+          }
+        } catch { /* skip invalid regex */ }
+      }
+
+      if (violations.length === 0) {
+        return { content: [{ type: "text" as const, text: "✅ No violations detected." }] };
+      }
+
+      return {
+        content: [{ type: "text" as const, text: `# Code Validation Report\n\n${violations.join("\n\n")}` }]
+      };
+    }
+
+    case "get_project_profile": {
+      return {
+        content: [{
+          type: "text" as const,
+          text: "Project profile detection is available via the CLI: run `prism init` to scan your repository."
+        }]
+      };
+    }
+
     case "search_video_transcript": {
       const projectId = args.projectId as string;
       const query = args.query as string;

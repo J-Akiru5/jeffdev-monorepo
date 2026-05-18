@@ -3,7 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 import { getAllUsers } from '@/app/actions/users';
 import { getInvites } from '@/app/actions/invites';
 import { UsersClient } from '@/components/admin/users-client';
-import { cookies } from 'next/headers';
+import { requireAdmin } from '@/lib/access';
 
 /**
  * Admin Users Page
@@ -12,18 +12,12 @@ import { cookies } from 'next/headers';
  * Requires Founder or Admin role.
  */
 
-// TODO: Replace with actual auth session
-async function getCurrentUserUid(): Promise<string> {
-  // This would come from session in production
-  return process.env.FOUNDER_UID || 'founder-001';
-}
-
 export default async function AdminUsersPage() {
-  const _ = await cookies(); // Ensure dynamic rendering
-  const [users, invites, currentUserUid] = await Promise.all([
+  const currentUser = await requireAdmin();
+  const currentUserUid = currentUser.uid;
+  const [users, invites] = await Promise.all([
     getAllUsers(),
     getInvites(),
-    getCurrentUserUid(),
   ]);
 
   return (

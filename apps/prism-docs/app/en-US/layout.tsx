@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Footer, Layout, Navbar } from 'nextra-theme-docs'
 import { Banner, Head } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
+import type { PageMapItem } from 'nextra'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import 'nextra-theme-docs/style.css'
 import '@/app/globals.css'
@@ -95,13 +96,11 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ 
-  children, 
-  params 
+  children 
 }: { 
   children: React.ReactNode; 
-  params: Promise<{ lang: string }> 
 }) {
-  const { lang } = await params
+  const lang = 'en-US'
   
   // List of all locale folder names
   const LOCALE_FOLDERS = ['en-US', 'tl', 'ja', 'es', 'id', 'en-GB', 'ru', 'nl']
