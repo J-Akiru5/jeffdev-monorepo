@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Moon, Sun } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -16,7 +16,7 @@ const getPreferredTheme = (): ThemeMode => {
     : 'dark';
 };
 
-const resolveTheme = (): ThemeMode => {
+const resolveStoredTheme = (): ThemeMode => {
   const stored = localStorage.getItem(storageKey);
   if (stored === 'light' || stored === 'dark') return stored;
   return getPreferredTheme();
@@ -33,15 +33,10 @@ interface ThemeToggleProps {
 }
 
 export function ThemeToggle({ className }: ThemeToggleProps) {
-  const [theme, setTheme] = useState<ThemeMode | null>(null);
-  const mounted = useRef(false);
-
-  useEffect(() => {
-    const initialTheme = resolveTheme();
-    setTheme(initialTheme);
-    applyTheme(initialTheme);
-    mounted.current = true;
-  }, []);
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    if (typeof window === 'undefined') return 'dark';
+    return resolveStoredTheme();
+  });
 
   useEffect(() => {
     const mql = window.matchMedia('(prefers-color-scheme: light)');
@@ -58,7 +53,6 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
 
   const toggleTheme = useCallback(() => {
     setTheme((prev) => {
-      if (!prev) return prev;
       const next: ThemeMode = prev === 'light' ? 'dark' : 'light';
       localStorage.setItem(storageKey, next);
       applyTheme(next);
@@ -66,7 +60,6 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
     });
   }, []);
 
-  const isReady = theme !== null;
   const nextThemeLabel = theme === 'light' ? 'Dark' : 'Light';
 
   return (
@@ -77,7 +70,6 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
         'group inline-flex items-center gap-2 rounded-md border px-3 py-2 text-xs uppercase tracking-wider transition-all duration-200',
         'border-white/10 bg-white/5 text-white/70',
         'hover:border-white/20 hover:text-white hover:bg-white/[0.08]',
-        !isReady && 'opacity-0 pointer-events-none',
         className
       )}
       aria-label={`Switch to ${nextThemeLabel} mode`}
