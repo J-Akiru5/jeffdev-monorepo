@@ -16,6 +16,7 @@ import { Menu, X, ArrowUpRight, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useFeatureFlags } from '@/components/providers/feature-flag-provider';
 import { SyntaxureLogo } from '@jdstudio/ui';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 interface NavLink {
   href: string;
@@ -95,7 +96,8 @@ export function Header() {
           </div>
 
           {/* CTA + Mobile Toggle */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
             {/* Ghost Glow CTA Button */}
             <Link
               href="/quote"
@@ -154,6 +156,9 @@ export function Header() {
               )}
             </Link>
           ))}
+          <div className="flex justify-center py-2">
+            <ThemeToggle className="w-full justify-center" />
+          </div>
           <Link
             href="/quote"
             onClick={() => setIsMobileMenuOpen(false)}

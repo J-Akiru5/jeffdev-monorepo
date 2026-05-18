@@ -118,6 +118,23 @@ export default async function RootLayout({
     >
       <head>
         <AnalyticsProvider />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(() => {
+  try {
+    const storageKey = 'syntaxure-theme';
+    const stored = localStorage.getItem(storageKey);
+    const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+    const theme = stored === 'light' || stored === 'dark' ? stored : prefersLight ? 'light' : 'dark';
+    const root = document.documentElement;
+    root.classList.toggle('theme-light', theme === 'light');
+    root.dataset.theme = theme;
+  } catch (error) {
+    console.warn('Theme bootstrap failed', error);
+  }
+})();`,
+          }}
+        />
       </head>
       <body className="bg-void text-white antialiased font-sans selection:bg-cyan-500/30 selection:text-white">
         {/* Global Grid Background */}
@@ -126,19 +143,13 @@ export default async function RootLayout({
           aria-hidden="true"
         >
           {/* Radial spotlight gradient */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(6,182,212,0.15),transparent)]" />
+          <div className="absolute inset-0" style={{ background: 'var(--overlay-spotlight)' }} />
 
           {/* Grid pattern overlay */}
-          <div
-            className="absolute inset-0 opacity-[0.03]"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='1'%3E%3Cpath d='M0 0h60v60H0z'/%3E%3C/g%3E%3C/svg%3E")`,
-              backgroundSize: '60px 60px',
-            }}
-          />
+          <div className="grid-overlay absolute inset-0" />
 
           {/* Noise texture for depth */}
-          <div className="absolute inset-0 bg-noise opacity-[0.02]" />
+          <div className="absolute inset-0 bg-noise" style={{ opacity: 'var(--overlay-noise-opacity)' }} />
         </div>
 
         {/* Application Content */}
