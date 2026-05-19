@@ -3,10 +3,6 @@
   "version": "1.0.3",
   "private": true,
   "type": "module",
-  "main": "dist/index.js",
-  "bin": {
-    "prism-mcp": "dist/index.js"
-  },
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
