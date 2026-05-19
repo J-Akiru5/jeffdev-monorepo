@@ -32,7 +32,14 @@
     "RESEND_*",
     "ADMIN_EMAIL",
     "SENTRY_*",
-    "NEXT_PUBLIC_SENTRY_*"
+    "NEXT_PUBLIC_SENTRY_*",
+    "AGENCY_FIREBASE_KEY",
+    "EXCHANGE_RATE_API_KEY",
+    "GA_PROPERTY_ID",
+    "CONTACT_EMAIL",
+    "HIRE_EMAIL",
+    "NOREPLY_EMAIL",
+    "SESSION_SECRET"
   ],
   "tasks": {
     "build": {

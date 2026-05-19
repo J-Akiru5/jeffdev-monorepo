@@ -80,7 +80,7 @@ export default async function AdminServiceEditPage({ params }: AdminServiceEditP
             <div className="mt-4 space-y-4 text-sm text-white/50">
               <div>
                 <div className="font-mono text-[10px] uppercase tracking-wider text-white/40">Investment</div>
-                <div className="mt-1 text-white">PHP {service.investment.startingPrice.toLocaleString()}</div>
+                <div className="mt-1 text-white">{service.investment.starting}</div>
               </div>
               <div>
                 <div className="font-mono text-[10px] uppercase tracking-wider text-white/40">Timeline</div>
