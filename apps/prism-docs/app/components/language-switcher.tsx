@@ -25,7 +25,7 @@ export function LanguageSwitcher() {
 
   // Determine current language from URL
   // path format: /en-US/foo or /en-US
-  const currentLang = LANGUAGES.find(l => pathname?.startsWith(`/${l.locale}`)) || LANGUAGES[0]
+  const currentLang = LANGUAGES.find(l => pathname?.startsWith(`/${l.locale}`)) ?? LANGUAGES[0]!
 
   const handleSwitch = (locale: string) => {
     if (!pathname) return

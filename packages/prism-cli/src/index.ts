@@ -15,6 +15,7 @@ import { sync } from './commands/sync.js';
 import { serve } from './commands/serve.js';
 import { rules } from './commands/rules.js';
 import { connect } from './commands/connect.js';
+import { init } from './commands/init.js';
 
 const program = new Command();
 
@@ -27,6 +28,11 @@ program
   .command('login')
   .description('Authenticate with Prism Cloud')
   .action(login);
+
+program
+  .command('init')
+  .description('Auto-detect IDEs and configure MCP connection')
+  .action(init);
 
 program
   .command('sync')

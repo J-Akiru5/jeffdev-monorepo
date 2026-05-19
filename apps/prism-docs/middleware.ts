@@ -19,14 +19,14 @@ function getLocale(request: NextRequest): string {
   if (!acceptLanguage) return defaultLocale
 
   // Simple locale matching - match first supported locale found in header
-  const preferredLocales = acceptLanguage.split(',').map(l => l.split(';')[0].trim())
+  const preferredLocales = acceptLanguage.split(',').map(l => l.split(';')[0]?.trim() ?? '')
   
   for (const locale of preferredLocales) {
     if (locales.includes(locale)) {
       return locale
     }
     // Try matching language code only (e.g. 'en' matches 'en-US')
-    const langCode = locale.split('-')[0]
+    const langCode = locale.split('-')[0] ?? ''
     const matchedLocale = locales.find(l => l.startsWith(langCode))
     if (matchedLocale) {
       return matchedLocale

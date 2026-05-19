@@ -1,0 +1,64 @@
+name: jeffdev
+
+services:
+  agency:
+    build:
+      context: .
+      dockerfile: apps/agency/Dockerfile
+    ports:
+      - "3000:3000"
+    env_file: apps/agency/.env
+    depends_on:
+      - cosmos
+    networks:
+      - jeffdev
+
+  prism-dashboard:
+    build:
+      context: .
+      dockerfile: apps/prism-dashboard/Dockerfile
+    ports:
+      - "3001:3001"
+    env_file: apps/prism-dashboard/.env
+    depends_on:
+      - cosmos
+    networks:
+      - jeffdev
+
+  prism-docs:
+    build:
+      context: .
+      dockerfile: apps/prism-docs/Dockerfile
+    ports:
+      - "3002:3002"
+    env_file: apps/prism-docs/.env
+    networks:
+      - jeffdev
+
+  prism-mcp-server:
+    build:
+      context: .
+      dockerfile: apps/prism-mcp-server/Dockerfile
+    ports:
+      - "3003:3003"
+    env_file: apps/prism-mcp-server/.env
+    depends_on:
+      - cosmos
+    networks:
+      - jeffdev
+
+  cosmos:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - cosmos_data:/data/db
+    networks:
+      - jeffdev
+
+volumes:
+  cosmos_data:
+
+networks:
+  jeffdev:
+    driver: bridge

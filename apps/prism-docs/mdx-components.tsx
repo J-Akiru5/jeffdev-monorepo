@@ -79,7 +79,7 @@ function FeatureCard({
 const themeComponents = getThemeComponents()
 
 // Merge with custom components
-export function useMDXComponents(components?: Record<string, React.ComponentType>) {
+export function useMDXComponents(components?: Record<string, React.ComponentType<any>>): Record<string, React.ComponentType<any>> {
   return {
     ...themeComponents,
     Card,

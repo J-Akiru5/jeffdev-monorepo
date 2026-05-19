@@ -38,11 +38,11 @@ export function useTranslation() {
     if (!pathname) return
 
     // Extract locale from pathname (e.g., /ja/introduction -> ja)
-    const pathLocale = pathname.split('/')[1]
+    const pathLocale = pathname.split('/')[1] ?? ''
     
     if (SUPPORTED_LOCALES.includes(pathLocale)) {
       setLocale(pathLocale)
-      setT(translations[pathLocale] || enUS)
+      setT(translations[pathLocale] ?? enUS)
     }
   }, [pathname])
 

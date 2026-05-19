@@ -30,19 +30,25 @@
     "DOPPLER_*",
     "ZOHO_*",
     "RESEND_*",
-    "ADMIN_EMAIL"
+    "ADMIN_EMAIL",
+    "SENTRY_*",
+    "NEXT_PUBLIC_SENTRY_*"
   ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [".next/**", "!.next/cache/**", ".next/standalone/**"]
     },
     "lint": {
       "dependsOn": ["^lint"]
     },
     "check-types": {
       "dependsOn": ["^check-types"]
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "inputs": ["src/**/*.test.ts", "src/**/*.ts"]
     },
     "dev": {
       "cache": false,

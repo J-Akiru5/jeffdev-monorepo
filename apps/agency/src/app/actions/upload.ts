@@ -4,6 +4,7 @@ import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { r2, R2_BUCKET_NAME } from '@/lib/r2';
 import { randomUUID } from 'crypto';
+import { requireAuth } from '@/lib/access';
 
 /**
  * GENERATE PRESIGNED URL
@@ -16,9 +17,8 @@ export async function getSignedUploadUrl(
   fileType: string
 ): Promise<{ url: string; fileUrl: string } | { error: string }> {
   try {
-    // 1. Auth Check (TODO: Add when Auth is ready)
-    // const session = await getSession();
-    // if (!session) return { error: 'Unauthorized' };
+    const user = await requireAuth();
+    if (!user) return { error: 'Unauthorized' };
 
     // 2. Validate File Type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];

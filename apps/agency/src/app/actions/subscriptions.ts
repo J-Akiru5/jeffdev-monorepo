@@ -96,14 +96,25 @@ export async function createSubscription(
       updatedAt: Timestamp.now(),
     });
 
-    // Create notification for new subscription
-    await createNotification({
-      userId: 'admin', // TODO: Get admin user ID
-      type: 'payment',
-      title: 'New Subscription',
-      body: `${input.clientName} subscribed to ${input.serviceName} (${input.tier})`,
-      link: `/admin/subscriptions/${docRef.id}`,
-    });
+    // Notify all admin users
+    try {
+      const adminSnapshot = await db.collection('users')
+        .where('role', 'in', ['founder', 'admin'])
+        .get();
+      const adminIds = adminSnapshot.docs.map(doc => doc.id);
+
+      for (const adminId of adminIds) {
+        await createNotification({
+          userId: adminId,
+          type: 'payment',
+          title: 'New Subscription',
+          body: `${input.clientName} subscribed to ${input.serviceName} (${input.tier})`,
+          link: `/admin/subscriptions/${docRef.id}`,
+        });
+      }
+    } catch (notificationError) {
+      console.error('Failed to notify admins:', notificationError);
+    }
 
     revalidatePath('/admin/subscriptions');
     return { success: true, id: docRef.id };
