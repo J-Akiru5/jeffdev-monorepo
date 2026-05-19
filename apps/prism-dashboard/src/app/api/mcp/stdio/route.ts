@@ -174,6 +174,98 @@ async function handleMcpMethod(
               type: "object",
               properties: {}
             }
+          },
+          {
+            name: "list_projects",
+            description: "List all projects for the authenticated user",
+            inputSchema: {
+              type: "object",
+              properties: {
+                stack: { type: "string", description: "Filter by stack (react, nextjs, react-native)" },
+                designSystem: { type: "string", description: "Filter by design system" }
+              }
+            }
+          },
+          {
+            name: "create_rule",
+            description: "Create a new rule",
+            inputSchema: {
+              type: "object",
+              properties: {
+                name: { type: "string", description: "Rule name" },
+                category: { type: "string", description: "Category: architecture, styling, security, performance, testing, documentation, custom" },
+                content: { type: "string", description: "Rule content/markdown" },
+                priority: { type: "number", description: "Priority 1-100" },
+                projectId: { type: "string", description: "Project ID (optional)" }
+              },
+              required: ["name", "category", "content"]
+            }
+          },
+          {
+            name: "update_rule",
+            description: "Update an existing rule",
+            inputSchema: {
+              type: "object",
+              properties: {
+                ruleId: { type: "string", description: "Rule ID" },
+                content: { type: "string", description: "New content" },
+                name: { type: "string", description: "New name" },
+                category: { type: "string", description: "New category" }
+              },
+              required: ["ruleId"]
+            }
+          },
+          {
+            name: "delete_rule",
+            description: "Delete a rule",
+            inputSchema: {
+              type: "object",
+              properties: {
+                ruleId: { type: "string", description: "Rule ID to delete" }
+              },
+              required: ["ruleId"]
+            }
+          },
+          {
+            name: "get_brand_profile",
+            description: "Get full brand profile including colors, typography, and voice",
+            inputSchema: {
+              type: "object",
+              properties: {
+                brandId: { type: "string", description: "Brand ID or slug (optional, returns first brand if omitted)" }
+              }
+            }
+          },
+          {
+            name: "generate_component",
+            description: "Generate UI component code with AI",
+            inputSchema: {
+              type: "object",
+              properties: {
+                prompt: { type: "string", description: "Component description" },
+                designSystem: { type: "string", description: "Design system: jdstudio, bare-minimum, glassmorphic, 8bit-nostalgia" },
+                stack: { type: "string", description: "Tech stack: react, nextjs, react-native" }
+              },
+              required: ["prompt"]
+            }
+          },
+          {
+            name: "search_marketplace",
+            description: "Search the public rule marketplace",
+            inputSchema: {
+              type: "object",
+              properties: {
+                query: { type: "string", description: "Search query" }
+              }
+            }
+          },
+          {
+            name: "get_usage_stats",
+            description: "Get current usage stats and tier limits",
+            inputSchema: {
+              type: "object",
+              properties: {}
+            }
           }
         ]
       };
@@ -343,6 +435,192 @@ async function handleToolCall(
             : "No rules found. Create rules in the Prism dashboard."
         }]
       };
+    }
+
+    case "list_projects": {
+      const projects = await getCollection("projects");
+      const query: Record<string, unknown> = { userId };
+      if (args?.stack) query.stack = args.stack;
+      if (args?.designSystem) query.designSystem = args.designSystem;
+
+      const items = await projects.find(query).sort({ createdAt: -1 }).limit(20).toArray();
+
+      return {
+        content: [{
+          type: "text",
+          text: items.length > 0
+            ? `# Your Projects\n\n${items.map(p => 
+                `- **${p.name}** (${p.slug}) — Stack: ${p.stack}, Design: ${p.designSystem}`
+              ).join('\n')}`
+            : "No projects found."
+        }]
+      };
+    }
+
+    case "create_rule": {
+      const name = args?.name as string;
+      const category = args?.category as string || 'custom';
+      const content = args?.content as string;
+      const priority = (args?.priority as number) || 50;
+      const projectId = args?.projectId as string | undefined;
+
+      if (!name || !content) {
+        return { content: [{ type: "text", text: "Error: name and content are required" }] };
+      }
+
+      const rules = await getCollection("rules");
+      const now = new Date().toISOString();
+      const doc = {
+        name,
+        category,
+        content,
+        priority,
+        projectId: projectId || null,
+        userId,
+        isActive: true,
+        createdAt: now,
+        updatedAt: now,
+      };
+      const result = await rules.insertOne(doc);
+      return {
+        content: [{ type: "text", text: `Rule "${name}" created successfully (ID: ${result.insertedId})` }]
+      };
+    }
+
+    case "update_rule": {
+      const ruleId = args?.ruleId as string;
+      if (!ruleId) return { content: [{ type: "text", text: "Error: ruleId is required" }] };
+
+      const updates: Record<string, unknown> = { updatedAt: new Date().toISOString() };
+      if (args?.name) updates.name = args.name;
+      if (args?.category) updates.category = args.category;
+      if (args?.content) updates.content = args.content;
+
+      const rules = await getCollection("rules");
+      const { ObjectId } = await import("mongodb");
+      const result = await rules.updateOne(
+        { _id: new ObjectId(ruleId), userId },
+        { $set: updates }
+      );
+
+      if (result.matchedCount === 0) {
+        return { content: [{ type: "text", text: "Rule not found or unauthorized." }] };
+      }
+      return { content: [{ type: "text", text: "Rule updated successfully." }] };
+    }
+
+    case "delete_rule": {
+      const ruleId = args?.ruleId as string;
+      if (!ruleId) return { content: [{ type: "text", text: "Error: ruleId is required" }] };
+
+      const rules = await getCollection("rules");
+      const { ObjectId } = await import("mongodb");
+      const result = await rules.deleteOne({ _id: new ObjectId(ruleId), userId });
+
+      if (result.deletedCount === 0) {
+        return { content: [{ type: "text", text: "Rule not found or unauthorized." }] };
+      }
+      return { content: [{ type: "text", text: "Rule deleted successfully." }] };
+    }
+
+    case "get_brand_profile": {
+      const brands = await getCollection("brands");
+      const brandId = args?.brandId as string | undefined;
+      const query: Record<string, unknown> = { userId };
+      let brand: Record<string, unknown> | null = null;
+      if (brandId) {
+        brand = await brands.findOne({ ...query, slug: brandId }) as Record<string, unknown> | null;
+        if (!brand) {
+          try { const { ObjectId } = await import("mongodb"); if (ObjectId.isValid(brandId)) brand = await brands.findOne({ ...query, _id: new ObjectId(brandId) }) as Record<string, unknown> | null; } catch { /* skip */ }
+        }
+      } else {
+        brand = await brands.findOne(query) as Record<string, unknown> | null;
+      }
+
+      if (!brand) {
+        return { content: [{ type: "text", text: "No brand profile found." }] };
+      }
+
+      return {
+        content: [{
+          type: "text",
+          text: `# ${brand.companyName} Brand Profile\n\n` +
+            `## Identity\n- Industry: ${brand.industry}\n${brand.tagline ? `- Tagline: ${brand.tagline}\n` : ''}` +
+            `## Colors\n${Object.entries(brand.colors || {}).map(([k, v]) => `- ${k}: ${v}`).join('\n')}\n\n` +
+            `## Typography\n- Headings: ${brand.typography?.headingFont}\n- Body: ${brand.typography?.bodyFont}\n- Scale: ${brand.typography?.scale}\n\n` +
+            `## Voice\n- Personality: ${brand.voice?.personality}\n- Formality: ${brand.voice?.formality}\n- Keywords: ${(brand.voice?.keywords || []).join(', ')}`
+        }]
+      };
+    }
+
+    case "generate_component": {
+      const prompt = args?.prompt as string;
+      if (!prompt) return { content: [{ type: "text", text: "Error: prompt is required" }] };
+
+      const { generateComponent } = await import("@/lib/gemini");
+      const component = await generateComponent({
+        prompt,
+        designSystem: (args?.designSystem as string) || "jdstudio",
+        stack: (args?.stack as string) || "nextjs",
+      });
+
+      return {
+        content: [{
+          type: "text",
+          text: `# Generated Component\n\n\`\`\`tsx\n${component.code}\n\`\`\`${component.explanation ? `\n\n## Explanation\n${component.explanation}` : ''}`
+        }]
+      };
+    }
+
+    case "search_marketplace": {
+      const query = args?.query as string;
+      const ruleSets = await getCollection("ruleSets");
+      const mQuery: Record<string, unknown> = { isPublic: true };
+      if (query) mQuery.name = { $regex: query, $options: "i" } as any;
+
+      const items = await ruleSets.find(mQuery).sort({ createdAt: -1 }).limit(10).toArray();
+
+      return {
+        content: [{
+          type: "text",
+          text: items.length > 0
+            ? `# Marketplace Results\n\n${items.map(rs => 
+                `- **${rs.name}** (${rs.rules?.length || 0} rules)\n  ${rs.description || ''}`
+              ).join('\n\n')}`
+            : `No marketplace results for "${query || 'all'}"`
+        }]
+      };
+    }
+
+    case "get_usage_stats": {
+      try {
+        const expiration = await getCollection("generations");
+        const monthStart = new Date();
+        monthStart.setDate(1);
+        monthStart.setHours(0, 0, 0, 0);
+
+        const [projects, rules, components, gens] = await Promise.all([
+          getCollection("projects").then(c => c.countDocuments({ userId })),
+          getCollection("rules").then(c => c.countDocuments({ userId })),
+          getCollection("components").then(c => c.countDocuments({ userId })),
+          expiration.countDocuments({ userId, createdAt: { $gte: monthStart.toISOString() } }),
+        ]);
+
+        const userTier = await getUserTier(userId);
+
+        return {
+          content: [{
+            type: "text",
+            text: `# Prism Usage Stats\n\n` +
+              `- Projects: ${projects}\n` +
+              `- Rules: ${rules}\n` +
+              `- Components: ${components}\n` +
+              `- AI Generations (this month): ${gens}\n` +
+              `- Plan: ${userTier.toUpperCase()}`
+          }]
+        };
+      } catch { void 0; }
+      return { content: [{ type: "text", text: "Unable to fetch usage stats." }] };
     }
 
     default:

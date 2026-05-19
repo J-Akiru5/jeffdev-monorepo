@@ -72,6 +72,41 @@ export class McpClient {
     return result.content[0]?.text || '';
   }
 
+  async listProjects(): Promise<string> {
+    const result = await this.callTool('list_projects', {}) as McpToolResult;
+    return result.content[0]?.text || '';
+  }
+
+  async getBrandProfile(brandId?: string): Promise<string> {
+    const result = await this.callTool('get_brand_profile', { brandId }) as McpToolResult;
+    return result.content[0]?.text || '';
+  }
+
+  async searchMarketplace(query?: string): Promise<string> {
+    const result = await this.callTool('search_marketplace', { query }) as McpToolResult;
+    return result.content[0]?.text || '';
+  }
+
+  async getUsageStats(): Promise<string> {
+    const result = await this.callTool('get_usage_stats', {}) as McpToolResult;
+    return result.content[0]?.text || '';
+  }
+
+  async createRule(name: string, category: string, content: string, projectId?: string): Promise<string> {
+    const result = await this.callTool('create_rule', { name, category, content, projectId }) as McpToolResult;
+    return result.content[0]?.text || '';
+  }
+
+  async updateRule(ruleId: string, updates: Record<string, unknown>): Promise<string> {
+    const result = await this.callTool('update_rule', { ruleId, ...updates }) as McpToolResult;
+    return result.content[0]?.text || '';
+  }
+
+  async deleteRule(ruleId: string): Promise<string> {
+    const result = await this.callTool('delete_rule', { ruleId }) as McpToolResult;
+    return result.content[0]?.text || '';
+  }
+
   private async callTool(name: string, args: Record<string, unknown>): Promise<unknown> {
     return this.sendRequest('tools/call', { name, arguments: args });
   }
@@ -114,7 +149,7 @@ export class McpClient {
           resolve(response.result || response);
         }
       } catch {
-        // non-JSON output (e.g., CLI status messages on stderr)
+        // non-JSON output
       }
     }
   }

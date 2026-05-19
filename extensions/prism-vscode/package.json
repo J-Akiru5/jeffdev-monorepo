@@ -1,8 +1,8 @@
 {
   "name": "prism-context-engine",
   "displayName": "Prism Context Engine",
-  "description": "Persistent context for AI coding assistants. Enforce architecture rules, eliminate hallucinations.",
-  "version": "1.0.0",
+  "description": "Persistent context for AI coding assistants. Enforce architecture rules, manage projects, generate components.",
+  "version": "1.1.0",
   "publisher": "prism-engine",
   "license": "MIT",
   "engines": {
@@ -20,7 +20,8 @@
     "ai",
     "context",
     "rules",
-    "architecture"
+    "architecture",
+    "components"
   ],
   "icon": "resources/icon.png",
   "activationEvents": [
@@ -29,26 +30,25 @@
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
-      {
-        "command": "prism.connect",
-        "title": "Prism: Connect to Context Engine"
-      },
-      {
-        "command": "prism.disconnect",
-        "title": "Prism: Disconnect"
-      },
-      {
-        "command": "prism.showRules",
-        "title": "Prism: Show Rules"
-      },
-      {
-        "command": "prism.refreshRules",
-        "title": "Prism: Refresh Rules"
-      },
-      {
-        "command": "prism.login",
-        "title": "Prism: Login"
-      }
+      { "command": "prism.connect", "title": "Prism: Connect to Context Engine" },
+      { "command": "prism.disconnect", "title": "Prism: Disconnect" },
+      { "command": "prism.showRules", "title": "Prism: Show Rules" },
+      { "command": "prism.refreshRules", "title": "Prism: Refresh Rules" },
+      { "command": "prism.login", "title": "Prism: Login" },
+      { "command": "prism.createRule", "title": "Prism: Create Rule" },
+      { "command": "prism.deleteRule", "title": "Prism: Delete Rule" },
+      { "command": "prism.createProject", "title": "Prism: Create Project" },
+      { "command": "prism.listProjects", "title": "Prism: Show Projects" },
+      { "command": "prism.deleteProject", "title": "Prism: Delete Project" },
+      { "command": "prism.createBrand", "title": "Prism: Brand Wizard" },
+      { "command": "prism.listBrands", "title": "Prism: Show Brands" },
+      { "command": "prism.exportBrand", "title": "Prism: Export Brand" },
+      { "command": "prism.deleteBrand", "title": "Prism: Delete Brand" },
+      { "command": "prism.generate", "title": "Prism: AI Kitchen" },
+      { "command": "prism.marketplace", "title": "Prism: Marketplace" },
+      { "command": "prism.showAnalytics", "title": "Prism: Show Analytics" },
+      { "command": "prism.manageApiKeys", "title": "Prism: API Keys" },
+      { "command": "prism.refreshTree", "title": "Prism: Refresh All" }
     ],
     "configuration": {
       "title": "Prism Context Engine",
@@ -89,7 +89,7 @@
         {
           "type": "tree",
           "id": "prism-rules",
-          "name": "Rules"
+          "name": "Dashboard"
         }
       ]
     }
