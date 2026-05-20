@@ -65,7 +65,7 @@ export function Hero() {
     <div className="relative z-10 drop-shadow-[0_15px_25px_rgba(6,182,212,0.15)] -mb-10">
       <section
         ref={heroRef}
-        className="relative flex min-h-screen items-center bg-void clip-diagonal pb-32"
+        className="relative flex min-h-[90vh] items-center bg-void clip-diagonal pb-32"
       >
       {/* Right Side: Image and Neon Bend (Desktop Only) */}
       <div className="absolute right-0 top-0 bottom-0 w-full lg:w-[50%] hidden lg:block z-0 overflow-hidden">
