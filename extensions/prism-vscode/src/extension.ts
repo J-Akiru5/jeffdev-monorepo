@@ -38,6 +38,8 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand('prism.showAnalytics', showAnalytics),
     vscode.commands.registerCommand('prism.manageApiKeys', manageApiKeys),
     vscode.commands.registerCommand('prism.refreshTree', refreshAll),
+    vscode.commands.registerCommand('prism.applyFix', applyFix),
+    vscode.commands.registerCommand('prism.showRuleDetail', showRuleDetail),
     registerDiagnostics(client),
     vscode.workspace.onDidChangeConfiguration((e) => {
       if (e.affectsConfiguration('prism') && config.get<boolean>('autoConnect', true)) {
@@ -418,6 +420,63 @@ async function manageApiKeys(): Promise<void> {
     if (!pick) return;
     const ok = await apiDelete(`/api/v1/api-keys/${pick.id}`);
     if (ok) vscode.window.showInformationMessage('API key revoked');
+  }
+}
+
+// === Fix & Rule Detail ===
+
+async function applyFix(params: { ruleId: string; ruleName: string; line: number; column: number; endLine: number; endColumn: number; matchedText: string; message: string; severity: string }, docUri: string): Promise<void> {
+  if (!client.isConnected) {
+    vscode.window.showErrorMessage('Prism is not connected.');
+    return;
+  }
+
+  const editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === docUri);
+  if (!editor) {
+    vscode.window.showErrorMessage('Cannot find the document to fix.');
+    return;
+  }
+
+  const code = editor.document.getText();
+  const fixResult = await client.fixCode(params, code);
+  if (!fixResult || !fixResult.correctedCode) {
+    vscode.window.showWarningMessage(`No automatic fix available for "${params.ruleName}". Manual review required.`);
+    return;
+  }
+
+  const fullRange = new vscode.Range(
+    editor.document.positionAt(0),
+    editor.document.positionAt(code.length)
+  );
+
+  await editor.edit(builder => {
+    builder.replace(fullRange, fixResult.correctedCode);
+  });
+
+  const confidence = Math.round(fixResult.confidence * 100);
+  if (fixResult.confidence >= 0.8) {
+    vscode.window.showInformationMessage(`Fixed "${params.ruleName}" (${confidence}% confidence)`);
+  } else if (fixResult.confidence >= 0.5) {
+    vscode.window.showWarningMessage(`Applied partial fix for "${params.ruleName}" (${confidence}% confidence) — please review`);
+  } else {
+    vscode.window.showWarningMessage(`Low-confidence fix applied for "${params.ruleName}" — manual review required`);
+  }
+}
+
+async function showRuleDetail(params: { ruleId: string; ruleName: string }): Promise<void> {
+  const panel = vscode.window.createWebviewPanel('prismRuleDetail', `Rule: ${params.ruleName}`, vscode.ViewColumn.One, {});
+  try {
+    const rules = await client.getArchitecturalRules();
+    const rule = rules.find(r => r.name === params.ruleName);
+    panel.webview.html = `<!DOCTYPE html><html><head><style>
+      body { font-family: system-ui; padding: 1rem; background: var(--vscode-editor-background); color: var(--vscode-editor-foreground); }
+      pre { background: var(--vscode-textCodeBlock-background); padding: 1rem; border-radius: 4px; overflow-x: auto; }
+    </style></head><body>
+      <h1>${rule?.name || params.ruleName}</h1>
+      <pre>${rule?.content || 'Rule content not available'}</pre>
+    </body></html>`;
+  } catch {
+    panel.webview.html = `<h1>${params.ruleName}</h1><p>Error loading rule details.</p>`;
   }
 }
 

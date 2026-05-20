@@ -16,6 +16,7 @@ const CreateRuleSchema = z.object({
   projectId: z.string().optional(),
   pattern: z.string().optional(),
   severity: z.enum(['error', 'warning', 'info']).optional().default('warning'),
+  source: z.enum(['manual', 'playwright', 'repo']).optional().default('manual'),
 });
 
 export async function GET(request: NextRequest) {
@@ -34,12 +35,17 @@ export async function GET(request: NextRequest) {
   const tag = searchParams.get('tag');
   const active = searchParams.get('active') !== 'false';
   const search = searchParams.get('q');
+  const detail = searchParams.get('detail');
+  const modifiedAfter = searchParams.get('modifiedAfter');
 
   const rules = await getCollection('rules');
   const query: Record<string, unknown> = { createdBy: auth.userId, isActive: active };
   if (category && RULE_CATEGORIES.includes(category as any)) query.category = category;
   if (tag) query.tags = tag;
   if (search) query.name = { $regex: search, $options: 'i' } as any;
+  if (modifiedAfter) {
+    query.updatedAt = { $gte: modifiedAfter } as any;
+  }
 
   const total = await rules.countDocuments(query);
   const items = await rules
@@ -49,22 +55,34 @@ export async function GET(request: NextRequest) {
     .limit(limit)
     .toArray();
 
-  const response = successResponse(items.map((r) => ({
-    id: r._id.toString(),
-    name: r.name,
-    description: r.description,
-    category: r.category,
-    content: r.content,
-    priority: r.priority,
-    tags: r.tags || [],
-    pattern: r.pattern,
-    severity: r.severity,
-    isActive: r.isActive,
-    createdAt: r.createdAt,
-    updatedAt: r.updatedAt,
-  })), { page, limit, total, totalPages: Math.ceil(total / limit) });
+  const isFull = detail === 'full';
+  const response = successResponse(items.map((r) => {
+    const base: Record<string, unknown> = {
+      id: r._id.toString(),
+      name: r.name,
+      description: r.description,
+      category: r.category,
+      content: r.content,
+      priority: r.priority,
+      tags: r.tags || [],
+      pattern: r.pattern,
+      severity: r.severity,
+      source: r.source || 'manual',
+      isActive: r.isActive,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+    };
+    if (isFull) {
+      base.skillsContent = r.skillsContent || null;
+      base.projectId = r.projectId || null;
+    }
+    return base;
+  }), { page, limit, total, totalPages: Math.ceil(total / limit) });
 
   Object.entries(getRateLimitHeaders(`rules:list:${auth.userId}`, auth.tier)).forEach(([k, v]) => response.headers.set(k, v));
+  response.headers.set("Cache-Control", "public, max-age=1800");
+  response.headers.set("X-Cache-TTL", "1800");
+  response.headers.set("Vary", "Authorization");
   return response;
 }
 
@@ -85,6 +103,7 @@ export async function POST(request: NextRequest) {
   const now = new Date().toISOString();
   const doc = {
     ...parsed.data,
+    source: parsed.data.source || 'manual',
     createdBy: auth.userId,
     isActive: true,
     createdAt: now,

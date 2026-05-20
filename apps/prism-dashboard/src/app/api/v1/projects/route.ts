@@ -29,11 +29,13 @@ export async function GET(request: NextRequest) {
   const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20')));
   const stack = searchParams.get('stack');
   const designSystem = searchParams.get('designSystem');
+  const modifiedAfter = searchParams.get('modifiedAfter');
 
   const projects = await getCollection('projects');
   const query: Record<string, unknown> = { userId: auth.userId };
   if (stack && STACKS.includes(stack as typeof STACKS[number])) query.stack = stack;
   if (designSystem && DESIGN_SYSTEMS.includes(designSystem as typeof DESIGN_SYSTEMS[number])) query.designSystem = designSystem;
+  if (modifiedAfter) query.updatedAt = { $gte: modifiedAfter } as any;
 
   const total = await projects.countDocuments(query);
   const items = await projects

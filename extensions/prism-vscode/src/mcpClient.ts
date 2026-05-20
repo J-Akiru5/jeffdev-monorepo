@@ -32,7 +32,7 @@ export class McpClient {
       PRISM_API_URL: apiUrl,
     };
 
-    this.process = spawn('npx', ['@prism-engine/cli', 'connect'], {
+    this.process = spawn('npx', ['@prism-engine/cli', 'serve'], {
       env,
       stdio: ['pipe', 'pipe', 'pipe'],
     });
@@ -70,6 +70,43 @@ export class McpClient {
   async validateCode(code: string, context?: string, category?: string): Promise<string> {
     const result = await this.callTool('validate_code_pattern', { code, context, category }) as McpToolResult;
     return result.content[0]?.text || '';
+  }
+
+  async checkCode(code: string, filePath?: string): Promise<{
+    status: string;
+    violations: Array<{
+      ruleId: string;
+      ruleName: string;
+      message: string;
+      severity: string;
+      line: number;
+      column: number;
+      endLine: number;
+      endColumn: number;
+      matchedText: string;
+      suggestion: string;
+    }>;
+    checkedRules: number;
+  }> {
+    const result = await this.callTool('prism_check', { code, filePath }) as McpToolResult;
+    try {
+      return JSON.parse(result.content[0]?.text || '{}');
+    } catch {
+      return { status: 'error', violations: [], checkedRules: 0 };
+    }
+  }
+
+  async fixCode(violation: Record<string, unknown>, code: string): Promise<{
+    correctedCode: string;
+    appliedRule: string;
+    confidence: number;
+  } | null> {
+    const result = await this.callTool('prism_fix', { violation, code }) as McpToolResult;
+    try {
+      return JSON.parse(result.content[0]?.text || '{}');
+    } catch {
+      return null;
+    }
   }
 
   async listProjects(): Promise<string> {

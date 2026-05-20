@@ -27,7 +27,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const rule = await rules.findOne({ _id: new ObjectId(id), createdBy: auth.userId });
   if (!rule) return errorResponse('Rule not found', 404);
 
-  return successResponse({
+  const detail = request.nextUrl.searchParams.get('detail');
+  const isFull = detail === 'full';
+
+  const base = {
     id: rule._id.toString(),
     name: rule.name,
     description: rule.description,
@@ -40,7 +43,27 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     isActive: rule.isActive,
     createdAt: rule.createdAt,
     updatedAt: rule.updatedAt,
+  };
+
+  if (!isFull) {
+    const response = successResponse(base);
+    response.headers.set("Cache-Control", "public, max-age=1800");
+    response.headers.set("X-Cache-TTL", "1800");
+    response.headers.set("Vary", "Authorization");
+    return response;
+  }
+
+  const response = successResponse({
+    ...base,
+    skillsContent: rule.skillsContent || null,
+    projectId: rule.projectId || null,
+    source: rule.source || null,
+    createdBy: rule.createdBy || rule.userId || null,
   });
+  response.headers.set("Cache-Control", "public, max-age=1800");
+  response.headers.set("X-Cache-TTL", "1800");
+  response.headers.set("Vary", "Authorization");
+  return response;
 }
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
