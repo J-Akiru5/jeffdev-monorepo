@@ -73,7 +73,7 @@ export function Hero() {
   return (
     <section
       ref={heroRef}
-      className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 pt-20"
+      className="relative flex min-h-screen items-center justify-center overflow-hidden px-6 pt-20 clip-diagonal bg-void border-b border-white/5 pb-32"
     >
       {/* Background Accents */}
       <div className="pointer-events-none absolute inset-0">
@@ -100,10 +100,8 @@ export function Hero() {
           ref={headlineRef}
           className="text-4xl font-bold leading-[1.1] tracking-tight text-white opacity-0 sm:text-5xl md:text-6xl lg:text-7xl"
         >
-          We Build{' '}
-          <span className="text-gradient-holographic">High-Performance</span>
-          <br />
-          Web Systems That Scale
+          Innovating Digital Solutions <br className="hidden sm:block" />
+          for a <span className="text-gradient-holographic">Smarter Tomorrow</span>
         </h1>
 
         {/* Subtext */}
@@ -111,9 +109,11 @@ export function Hero() {
           ref={subtextRef}
           className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/60 opacity-0 md:text-xl"
         >
-          Enterprise-grade architecture for startups and scaling businesses.
-          Next.js, cloud infrastructure, and AI-powered solutions — engineered
-          for growth.
+          We transform ideas into powerful digital experiences.
+          Building modern solutions that help businesses
+          <span className="text-cyan-400"> grow</span>,
+          <span className="text-purple-400"> scale</span>, and
+          <span className="text-emerald-400"> succeed</span>.
         </p>
 
         {/* CTAs */}
@@ -143,19 +143,22 @@ export function Hero() {
           </Link>
         </div>
 
-        {/* Trust Badges */}
+        {/* Mission Statement Panel - Angled Overlay */}
         <div
           ref={badgesRef}
-          className="mt-16 flex flex-wrap items-center justify-center gap-8 border-t border-white/[0.06] pt-10"
+          className="mt-20 mx-auto max-w-3xl overflow-hidden rounded-xl border border-white/10 bg-gradient-to-r from-blue-950/40 to-purple-950/40 backdrop-blur-xl opacity-0"
         >
-          {trustBadges.map((badge) => (
-            <div key={badge.label} className="text-center opacity-0">
-              <div className="font-mono text-lg font-semibold text-white/90">
-                {badge.label}
-              </div>
-              <div className="mt-0.5 text-xs text-white/40">{badge.sublabel}</div>
+          <div className="p-8 text-left sm:flex gap-6 items-start">
+            <div className="mb-4 text-xs font-mono text-cyan-400 tracking-wider uppercase shrink-0">
+              Our Mission
             </div>
-          ))}
+            <div className="border-l border-white/10 pl-6">
+              <p className="text-white/80 text-lg leading-relaxed italic">
+                "To empower businesses through innovative technology, creative solutions,
+                and a commitment to excellence."
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 

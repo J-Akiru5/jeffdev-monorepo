@@ -11,7 +11,8 @@
     "./badge": "./src/badge.tsx",
     "./progress-bar": "./src/progress-bar.tsx",
     "./data-table": "./src/data-table.tsx",
-    "./chat-assistant": "./src/chat-assistant.tsx"
+    "./chat-assistant": "./src/chat-assistant.tsx",
+    "./styles.css": "./src/styles.css"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",

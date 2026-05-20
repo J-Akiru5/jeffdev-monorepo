@@ -32,10 +32,11 @@ const buttonVariants = cva(
         primary: [
           "border border-white/10 bg-black/20 backdrop-blur-sm",
           "text-white",
-          "hover:border-white/20 hover:bg-black/30",
+          "hover:border-cyan-500/50 hover:bg-black/30",
+          "hover:shadow-[0_0_20px_rgba(6,182,212,0.2)]",
           // Inner glow on hover
           "before:absolute before:inset-0 before:-z-10",
-          "before:bg-gradient-to-r before:from-cyan-500/10 before:to-purple-500/10",
+          "before:bg-gradient-to-r before:from-cyan-500/20 before:to-purple-500/20",
           "before:opacity-0 before:transition-opacity",
           "hover:before:opacity-100",
         ],
