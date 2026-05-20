@@ -9,9 +9,11 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
   const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20')));
+  const modifiedAfter = searchParams.get('modifiedAfter');
 
   const components = await getCollection('components');
-  const query = { userId: auth.userId };
+  const query: Record<string, unknown> = { userId: auth.userId };
+  if (modifiedAfter) query.updatedAt = { $gte: modifiedAfter } as any;
 
   const total = await components.countDocuments(query);
   const items = await components

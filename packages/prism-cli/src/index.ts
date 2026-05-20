@@ -13,6 +13,8 @@
  * - prism generate    : Generate component with AI
  * - prism marketplace : Browse and install rule sets
  * - prism analytics   : View usage stats
+ * - prism telemetry   : View token telemetry and baseline
+ * - prism kitchen     : Context Kitchen — analyze, preview, trim, history, optimize
  * - prism api-keys    : Manage API keys
  */
 
@@ -28,6 +30,8 @@ import { listBrands, viewBrand, createBrand, exportBrand, deleteBrand } from './
 import { generate } from './commands/generate.js';
 import { listMarketplace, installMarketplace } from './commands/marketplace.js';
 import { analytics } from './commands/analytics.js';
+import { telemetry } from './commands/telemetry.js';
+import { kitchenAnalyze, kitchenPreview, kitchenTrim, kitchenHistory, kitchenOptimize } from './commands/kitchen.js';
 import { listApiKeys, createApiKey, revokeApiKey } from './commands/api-keys.js';
 
 const program = new Command();
@@ -50,18 +54,21 @@ program
 program
   .command('sync')
   .description('Sync projects, rules, brands, and components from Prism Cloud')
-  .action(sync);
+  .option('--full', 'Force full re-sync instead of delta')
+  .option('--repo [path]', 'Scan a local repository for naming conventions, import patterns, and config files')
+  .action((opts) => sync(opts));
 
 program
   .command('serve')
-  .description('Start MCP server for IDE integration')
-  .option('-p, --port <port>', 'Port for SSE fallback', '3100')
-  .action(serve);
+  .description('Start Prism MCP server for IDE integration (stdio transport)')
+  .option('--offline', 'Force offline/cache-only mode')
+  .action((opts) => serve(opts));
 
 program
   .command('connect')
-  .description('Launch MCP proxy for IDE integration (stdio mode)')
-  .action(connect);
+  .description('Launch MCP proxy for IDE integration, or scan a URL for rule extraction')
+  .option('-u, --url <url>', 'URL to scan for automatic rule extraction')
+  .action((opts) => connect(opts));
 
 // Rules (enhanced with CRUD)
 const rulesCmd = program
@@ -212,6 +219,52 @@ program
   .description('View usage stats and limits')
   .option('--json', 'Output as JSON')
   .action(analytics);
+
+// Telemetry
+program
+  .command('telemetry')
+  .description('View token telemetry and baseline data')
+  .option('--json', 'Output as JSON')
+  .action(telemetry);
+
+// Kitchen
+const kitchenCmd = program
+  .command('kitchen')
+  .description('Context Kitchen — analyze, preview, trim, and optimize AI context');
+
+kitchenCmd
+  .command('analyze')
+  .description('Analyze how your rules will be used for a given task')
+  .option('-t, --task <task>', 'The task description to analyze against')
+  .option('-b, --budget <number>', 'Token budget', '4000')
+  .option('--json', 'Output as JSON')
+  .action((opts) => kitchenAnalyze({ task: opts.task, budget: parseInt(opts.budget || '4000'), json: opts.json }));
+
+kitchenCmd
+  .command('preview')
+  .description('Preview the exact context string that would be sent to the LLM')
+  .option('-t, --task <task>', 'Filter preview by task relevance')
+  .option('--json', 'Output as JSON')
+  .action(kitchenPreview);
+
+kitchenCmd
+  .command('trim')
+  .description('Trim rules to fit within a token budget')
+  .option('-b, --budget <number>', 'Token budget', '2000')
+  .option('--json', 'Output as JSON')
+  .action((opts) => kitchenTrim({ budget: parseInt(opts.budget || '2000'), json: opts.json }));
+
+kitchenCmd
+  .command('history')
+  .description('Show past kitchen analysis sessions')
+  .option('--json', 'Output as JSON')
+  .action(kitchenHistory);
+
+kitchenCmd
+  .command('optimize')
+  .description('Re-rank rules based on telemetry usage data')
+  .option('--json', 'Output as JSON')
+  .action(kitchenOptimize);
 
 // API Keys
 const apiKeysCmd = program

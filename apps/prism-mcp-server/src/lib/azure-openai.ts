@@ -1,10 +1,23 @@
 /**
  * Azure OpenAI Client for MCP Server
- * 
- * Generates embeddings for semantic search queries
+ *
+ * Generates embeddings for semantic search queries and chat completions.
  */
 
 import { AzureOpenAI } from 'openai';
+
+function getBaseEndpoint(raw: string): string {
+  try {
+    const url = new URL(raw);
+    if (url.pathname.includes('/deployments/')) {
+      url.pathname = '/';
+      url.search = '';
+    }
+    return url.toString().replace(/\/+$/, '');
+  } catch {
+    return raw.replace(/\/+$/, '');
+  }
+}
 
 let _azureClient: AzureOpenAI | null = null;
 
@@ -21,7 +34,7 @@ function getAzureOpenAIClient(): AzureOpenAI {
   }
 
   _azureClient = new AzureOpenAI({
-    endpoint,
+    endpoint: getBaseEndpoint(endpoint),
     apiKey,
     apiVersion: '2024-10-01-preview',
   });
@@ -48,4 +61,44 @@ export async function generateQueryEmbedding(query: string): Promise<number[]> {
       `Failed to generate query embedding: ${error instanceof Error ? error.message : 'Unknown error'}`
     );
   }
+}
+
+/**
+ * Generate embeddings for multiple texts in batch
+ */
+export async function generateBatchEmbeddings(texts: string[]): Promise<number[][]> {
+  const client = getAzureOpenAIClient();
+  const model = process.env.AZURE_OPENAI_EMBEDDING_DEPLOYMENT || 'text-embedding-3-small';
+
+  const results: number[][] = [];
+  for (let i = 0; i < texts.length; i += 10) {
+    const batch = texts.slice(i, i + 10);
+    const response = await client.embeddings.create({ model, input: batch });
+    for (const item of response.data) {
+      results.push(item.embedding);
+    }
+  }
+  return results;
+}
+
+/**
+ * Generate chat completion
+ */
+export async function generateChatCompletion(
+  systemPrompt: string,
+  userMessage: string,
+): Promise<string> {
+  const client = getAzureOpenAIClient();
+  const deployment = process.env.AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt-4o-mini';
+
+  const response = await client.chat.completions.create({
+    model: deployment,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userMessage },
+    ],
+    max_tokens: 2000,
+  });
+
+  return response.choices[0]?.message?.content || '';
 }
