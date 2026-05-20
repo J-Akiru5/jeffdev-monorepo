@@ -102,9 +102,12 @@ export function Hero() {
         </svg>
       </div>
 
-      {/* Background Accents (Mobile/General) */}
-      <div className="pointer-events-none absolute inset-0 lg:hidden">
-        <div className="absolute -left-1/4 -top-1/4 h-[800px] w-[800px] rounded-full bg-cyan-500/10 blur-[120px]" />
+      {/* Background Ambient Glows */}
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        {/* Purple glow bottom-left */}
+        <div className="absolute -bottom-[20%] -left-[10%] h-[800px] w-[800px] rounded-full bg-purple-500/10 blur-[150px]" />
+        {/* Cyan glow top-right (relative to left column) */}
+        <div className="absolute -top-[10%] left-[35%] h-[800px] w-[800px] rounded-full bg-cyan-500/10 blur-[150px]" />
       </div>
 
       {/* Left Content Column */}
