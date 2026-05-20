@@ -102,8 +102,12 @@ export function Hero() {
         </svg>
       </div>
 
-      {/* Background Ambient Glows */}
+      {/* Background Ambient Glows & Mobile Image */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        {/* Mobile Texture */}
+        <div className="absolute inset-0 lg:hidden opacity-20 mix-blend-luminosity bg-[url('/hero-office.png')] bg-cover bg-center" />
+        <div className="absolute inset-0 lg:hidden bg-void/80" />
+        
         {/* Purple glow bottom-left */}
         <div className="absolute -bottom-[20%] -left-[10%] h-[800px] w-[800px] rounded-full bg-purple-500/10 blur-[150px]" />
         {/* Cyan glow top-right (relative to left column) */}
@@ -111,8 +115,8 @@ export function Hero() {
       </div>
 
       {/* Left Content Column */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 flex items-center">
-        <div className="w-full lg:w-[55%] lg:pr-12 py-32">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 flex items-center mt-12 lg:mt-0">
+        <div className="w-full lg:w-[55%] lg:pr-12 py-24 lg:py-32">
           
           {/* Status Badge */}
           <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-sm">
@@ -175,10 +179,10 @@ export function Hero() {
 
           {/* Service Shortcuts */}
           <div className="mt-16 opacity-0" ref={servicesRef}>
-            <p className="mb-4 text-xs font-mono text-cyan-400 tracking-wider uppercase">
+            <p className="mb-4 text-xs font-mono text-cyan-400 tracking-wider uppercase text-center sm:text-left">
               Our Services
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="grid grid-cols-3 gap-4 sm:flex sm:flex-wrap">
               {serviceShortcuts.map((service, idx) => {
                 const Icon = service.icon;
                 return (
@@ -186,7 +190,7 @@ export function Hero() {
                     <div className="flex h-12 w-12 items-center justify-center rounded-md border border-white/10 bg-white/5 transition-all group-hover:border-cyan-500/30 group-hover:bg-white/10 group-hover:shadow-[0_0_15px_rgba(6,182,212,0.2)]">
                       <Icon className="h-5 w-5 text-white/70 group-hover:text-cyan-400 transition-colors" />
                     </div>
-                    <span className="text-[10px] uppercase font-mono text-white/50 group-hover:text-white/80 transition-colors max-w-[80px] text-center leading-tight">
+                    <span className="text-[9px] sm:text-[10px] uppercase font-mono text-white/50 group-hover:text-white/80 transition-colors max-w-[80px] text-center leading-tight">
                       {service.label}
                     </span>
                   </div>
@@ -201,7 +205,7 @@ export function Hero() {
       {/* Scroll Indicator */}
       <button
         onClick={scrollToContent}
-        className="absolute bottom-8 left-12 text-white/30 transition-colors hover:text-white/60 z-20"
+        className="absolute bottom-12 left-1/2 -translate-x-1/2 lg:bottom-8 lg:left-12 lg:-translate-x-0 text-white/30 transition-colors hover:text-white/60 z-20"
         aria-label="Scroll to content"
       >
         <ArrowDown className="h-6 w-6 animate-bounce" />
