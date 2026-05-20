@@ -91,7 +91,7 @@ export function Hero() {
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
           </span>
           <span className="font-mono text-xs text-white/70">
-            Available for Q1 2026 Projects
+            Available for Q3 2026 Projects
           </span>
         </div>
 
@@ -127,7 +127,7 @@ export function Hero() {
             className="group relative overflow-hidden rounded-md border border-cyan-500/50 bg-cyan-500/10 px-8 py-3.5 backdrop-blur-md transition-all hover:border-cyan-400 hover:bg-cyan-500/20 hover:shadow-[0_0_30px_rgba(6,182,212,0.25)]"
           >
             <span className="relative z-10 flex items-center gap-2 font-mono text-sm uppercase tracking-wider text-white">
-              Start_Project
+              START_PROJECT
               <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
             </span>
           </Link>
@@ -138,7 +138,7 @@ export function Hero() {
             className="group flex items-center gap-2 rounded-md border border-white/10 bg-black/50 px-8 py-3.5 backdrop-blur-md transition-all hover:border-white/20"
           >
             <span className="font-mono text-sm uppercase tracking-wider text-white/70 transition-colors group-hover:text-white">
-              View_Work
+              VIEW_WORK
             </span>
           </Link>
         </div>
