@@ -136,9 +136,8 @@ export function Services() {
               key={service.id}
               href={service.href}
               className={cn(
-                'group relative overflow-hidden clip-diagonal border border-white/[0.08] bg-white/[0.02] p-8 transition-all duration-300',
+                'group relative overflow-hidden glass-neon p-8 transition-all duration-300',
                 'hover:border-cyan-500/30 hover:bg-white/[0.04]',
-                'hover:shadow-[0_0_40px_rgba(6,182,212,0.15)]'
               )}
             >
               {/* Icon */}

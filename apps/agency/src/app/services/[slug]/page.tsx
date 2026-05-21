@@ -165,7 +165,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
             <h2 className="text-2xl font-bold text-white">Other Services</h2>
             <div className="mt-8 grid gap-6 md:grid-cols-2">
               {otherServices.map((s) => {
-                const OtherIcon = getIcon(s.icon);
+                const OtherIcon = typeof s.icon === 'string' ? getIcon(s.icon) : s.icon;
                 return (
                   <Link
                     key={s.slug}

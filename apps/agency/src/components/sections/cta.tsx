@@ -50,7 +50,7 @@ export function CTA() {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div
           ref={contentRef}
-          className="relative overflow-hidden rounded-md border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-transparent p-12 md:p-16"
+          className="relative overflow-hidden rounded-md glass-neon p-12 md:p-16"
         >
           {/* Background Accents */}
           <div className="pointer-events-none absolute inset-0">

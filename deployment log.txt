@@ -128,4 +128,4 @@
 12:36:48.024  Failed:    prism-admin#build
 12:36:48.024 
 12:36:48.025  ERROR  run failed: command  exited (1)
-12:36:48.040 Error: Command "turbo run build --filter=prism-admin..." exited with 1
+12:36:48.040 Error: Command "turbo run build --filter=prism-admin..." exited with 1look 
