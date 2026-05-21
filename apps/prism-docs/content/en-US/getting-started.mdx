@@ -1,0 +1,138 @@
+# Getting Started with Prism
+
+Go from zero to a working MCP connection in 60 seconds.
+
+## Prerequisites
+
+- **Node.js 20+** — check with `node --version`
+- **A code editor** — Cursor, VS Code, Windsurf, or Claude Desktop
+- **A project** — any Next.js, React, or web app with a dev server
+
+## Step 1 — Create Your Account
+
+Go to [prism.jeffdev.studio/sign-up](https://prism.jeffdev.studio/sign-up) and sign up with email or Google.
+
+After sign-up you'll land on the dashboard onboarding wizard. You can follow it there, or continue with the CLI path below.
+
+## Step 2 — Install the CLI
+
+```bash
+npm install -g @prism-engine/cli
+```
+
+Verify the installation:
+
+```bash
+prism --version
+# prism-engine/cli v1.1.0
+```
+
+## Step 3 — Extract Your Rules
+
+> [!TIP]
+> **URL scanning is the fastest way to get rules.** Start your project's dev server first, then scan it.
+
+### Option A: Scan your live site (Recommended)
+
+```bash
+# Start your dev server in another terminal
+npm run dev
+
+# Scan it — Prism crawls up to 5 pages with Playwright
+prism connect --url http://localhost:3000
+```
+
+Prism will:
+1. Open a headless browser and crawl your site (depth 2, up to 5 pages)
+2. Extract CSS variables, typography, spacing, color palette, component patterns
+3. Feed the extracted content to Gemini to generate 15–25 rules
+4. Save rules to `~/.prism/rules.json` and sync to your dashboard project
+
+**Expected output:**
+```
+✓ Crawled 3 pages (4,210 tokens)
+✓ Generated 18 rules via Gemini 3.5 Flash
+✓ Saved to ~/.prism/rules.json
+✓ Synced to project: my-app
+```
+
+### Option B: Scan your repository
+
+```bash
+# Scan naming conventions, import patterns, config files
+prism sync --repo ./
+```
+
+Prism reads your `src/`, `components/`, `lib/`, `tsconfig.json`, `tailwind.config.*`, `.eslintrc*` and extracts naming conventions and architecture patterns.
+
+### Option C: Create rules manually
+
+Log in to the dashboard, open your project, and click **"Create Rule"**. Write rules in markdown-style prose — your AI assistant will follow them.
+
+Free plan users can create up to 5 rules manually.
+
+## Step 4 — Sync Your Rules Locally
+
+```bash
+prism sync
+```
+
+This downloads your rules from Prism Cloud to `~/.prism/rules.json` so the local MCP server can serve them.
+
+## Step 5 — Configure Your IDE
+
+```bash
+prism init
+```
+
+This auto-detects which editors you have installed and writes the correct MCP config for each. **Restart your editor after running this.**
+
+For manual configuration, see the [IDE Setup guide](/ide-setup).
+
+## Step 6 — Verify the Connection
+
+Open your editor and ask your AI assistant:
+
+> "What are the architectural rules for this project?"
+
+If Prism is connected correctly, the AI will respond with your project's rules. You'll see something like:
+
+```
+Based on your Prism rules:
+1. Use Tailwind CSS for all styling — avoid inline styles
+2. Components should be in /components with PascalCase naming
+3. API calls use the custom `api.` wrapper with error handling
+...
+```
+
+## What Happens Next
+
+Every time your AI generates code:
+1. It calls `get_architectural_rules({ task: "build a button" })` via MCP
+2. Prism returns only the rules relevant to that task (via Gemini embedding similarity)
+3. VS Code (with the Prism extension) validates generated code on save — violations appear as diagnostics
+4. Quick-fix actions apply `prism_fix` corrections automatically
+
+## Useful Commands After Setup
+
+```bash
+prism telemetry          # View token usage and estimated savings
+prism kitchen analyze --task "build a form"   # Preview what AI will receive
+prism sync               # Re-sync rules after adding new ones
+prism doctor             # Health check — all systems status
+```
+
+## Free Plan vs Pro
+
+| Feature | Free | Pro (₱990/mo) |
+|---------|------|------|
+| Manual rule creation | ✅ Up to 5 rules | ✅ Unlimited |
+| Export as `.cursorrules` / `rules.md` | ✅ | ✅ |
+| URL scanning (Playwright) | ✅ | ✅ |
+| Repo scanning | ✅ | ✅ |
+| API keys (live MCP sync) | ❌ | ✅ 1 key |
+| AI rule enhancement | ❌ | ✅ |
+| Analytics dashboard | ❌ | ✅ |
+
+> [!NOTE]
+> Free plan users can still get value: create rules manually in the dashboard and export them as `.cursorrules` or `rules.md`. Drop the exported file in your project root — Cursor and VS Code will pick it up automatically.

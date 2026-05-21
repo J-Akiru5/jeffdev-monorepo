@@ -17,8 +17,11 @@ import {
   Plus,
   Loader2,
   AlertCircle,
-  Wrench
+  Wrench,
+  Download,
+  FileJson
 } from "lucide-react";
+
 import { GlassPanel, Button, Badge } from "@jdstudio/ui";
 
 // =============================================================================
@@ -144,39 +147,13 @@ export default function SettingsPage() {
       <SubscriptionUsageSection />
 
       {/* Notifications Section */}
-      <GlassPanel className="p-6">
-        <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400">
-            <Bell className="h-6 w-6" />
-          </div>
-          <div className="flex-1">
-            <h2 className="text-lg font-medium text-white">Notifications</h2>
-            <p className="text-sm text-white/50 mt-1">
-              Configure how you receive updates.
-            </p>
-            
-            <div className="mt-4 space-y-3">
-              <NotificationToggle 
-                label="Product Updates" 
-                description="New features and improvements"
-                defaultChecked
-              />
-              <NotificationToggle 
-                label="Usage Alerts" 
-                description="When approaching plan limits"
-                defaultChecked
-              />
-              <NotificationToggle 
-                label="Marketing" 
-                description="Tips, tutorials, and offers"
-              />
-            </div>
-          </div>
-        </div>
-      </GlassPanel>
+      <NotificationsSection />
 
       {/* API Keys Section */}
       <ApiKeysSection />
+
+      {/* Export Rules Section */}
+      <ExportRulesSection />
 
       {/* Dev Tools Section - Only in development */}
       {process.env.NODE_ENV === "development" && <DevToolsSection />}
@@ -603,52 +580,300 @@ function UsageStatItem({
 }
 
 // =============================================================================
-// HELPER COMPONENTS
+// NOTIFICATIONS SECTION (with persistence)
 // =============================================================================
 
-function UsageStat({ 
-  label, 
-  value, 
-  limit 
-}: { 
-  label: string; 
-  value: string; 
-  limit: string;
-}) {
+interface NotificationPrefs {
+  productUpdates: boolean;
+  usageAlerts: boolean;
+  marketing: boolean;
+}
+
+const DEFAULT_PREFS: NotificationPrefs = {
+  productUpdates: true,
+  usageAlerts: true,
+  marketing: false,
+};
+
+function NotificationsSection() {
+  const [prefs, setPrefs] = useState<NotificationPrefs>(DEFAULT_PREFS);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [savedAt, setSavedAt] = useState<number | null>(null);
+  const saveTimerRef = useCallback((fn: () => void, delay: number) => {
+    const t = setTimeout(fn, delay);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Load preferences
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch("/api/notifications");
+        if (res.ok) {
+          const data = await res.json() as { prefs: NotificationPrefs };
+          setPrefs(data.prefs);
+        }
+      } catch { /* use defaults */ }
+      finally { setLoading(false); }
+    };
+    load();
+  }, []);
+
+  // Save preferences (debounced)
+  const save = useCallback(async (newPrefs: NotificationPrefs) => {
+    setSaving(true);
+    try {
+      await fetch("/api/notifications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newPrefs),
+      });
+      setSavedAt(Date.now());
+    } catch { /* silent */ }
+    finally { setSaving(false); }
+  }, []);
+
+  const handleToggle = (key: keyof NotificationPrefs) => {
+    const next = { ...prefs, [key]: !prefs[key] };
+    setPrefs(next);
+    save(next);
+  };
+
   return (
-    <div className="p-3 rounded-md border border-white/5 bg-white/[0.02]">
-      <p className="text-xs text-white/40 uppercase tracking-wider">{label}</p>
-      <p className="text-lg font-semibold text-white mt-1">
-        {value}
-        <span className="text-white/30 text-sm font-normal">/{limit}</span>
-      </p>
-    </div>
+    <GlassPanel className="p-6">
+      <div className="flex items-start gap-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-emerald-500/20 text-emerald-400">
+          <Bell className="h-6 w-6" />
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-medium text-white">Notifications</h2>
+              <p className="text-sm text-white/50 mt-1">Configure how you receive updates.</p>
+            </div>
+            {saving && <Loader2 className="h-4 w-4 animate-spin text-white/30" />}
+            {!saving && savedAt !== null && (
+              <span className="text-xs text-emerald-400/60">Saved</span>
+            )}
+          </div>
+
+          {loading ? (
+            <div className="mt-4 flex items-center gap-2 text-white/30">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">Loading preferences...</span>
+            </div>
+          ) : (
+            <div className="mt-4 space-y-3">
+              <NotificationToggle
+                id="pref-product-updates"
+                label="Product Updates"
+                description="New features and improvements"
+                checked={prefs.productUpdates}
+                onToggle={() => handleToggle("productUpdates")}
+              />
+              <NotificationToggle
+                id="pref-usage-alerts"
+                label="Usage Alerts"
+                description="When approaching plan limits"
+                checked={prefs.usageAlerts}
+                onToggle={() => handleToggle("usageAlerts")}
+              />
+              <NotificationToggle
+                id="pref-marketing"
+                label="Marketing"
+                description="Tips, tutorials, and offers"
+                checked={prefs.marketing}
+                onToggle={() => handleToggle("marketing")}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </GlassPanel>
   );
 }
 
 function NotificationToggle({
+  id,
   label,
   description,
-  defaultChecked = false
+  checked,
+  onToggle,
 }: {
+  id: string;
   label: string;
   description: string;
-  defaultChecked?: boolean;
+  checked: boolean;
+  onToggle: () => void;
 }) {
   return (
-    <label className="flex items-center justify-between py-2 cursor-pointer">
+    <label htmlFor={id} className="flex items-center justify-between py-2 cursor-pointer group">
       <div>
-        <p className="text-sm text-white">{label}</p>
+        <p className="text-sm text-white group-hover:text-white/90 transition-colors">{label}</p>
         <p className="text-xs text-white/40">{description}</p>
       </div>
-      <input
-        type="checkbox"
-        defaultChecked={defaultChecked}
-        className="h-5 w-10 rounded-full appearance-none bg-white/10 checked:bg-cyan-500 relative cursor-pointer transition-colors
-          before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:h-4 before:w-4 before:rounded-full before:bg-white before:transition-transform
-          checked:before:translate-x-5"
-      />
+      <div className="relative flex-shrink-0">
+        <input
+          id={id}
+          type="checkbox"
+          checked={checked}
+          onChange={onToggle}
+          className="sr-only"
+        />
+        <div
+          onClick={onToggle}
+          className={`w-10 h-5 rounded-full transition-colors cursor-pointer ${
+            checked ? "bg-cyan-500" : "bg-white/10"
+          }`}
+        >
+          <div
+            className={`absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform ${
+              checked ? "translate-x-5" : "translate-x-0"
+            }`}
+          />
+        </div>
+      </div>
     </label>
+  );
+}
+
+
+// =============================================================================
+// =============================================================================
+// EXPORT RULES SECTION
+// =============================================================================
+
+interface ProjectItem {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+function ExportRulesSection() {
+  const [projects, setProjects] = useState<ProjectItem[]>([]);
+  const [selectedProject, setSelectedProject] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch("/api/v1/projects");
+        if (res.ok) {
+          const data = await res.json() as { data?: ProjectItem[]; projects?: ProjectItem[] } | ProjectItem[];
+          const list = Array.isArray(data) ? data : (data.data ?? data.projects ?? []);
+          setProjects(list);
+          if (list.length > 0 && list[0]) setSelectedProject(list[0].id);
+        }
+      } catch { /* ignore */ }
+      finally { setLoading(false); }
+    };
+    load();
+  }, []);
+
+  const handleExport = async (format: string) => {
+    if (!selectedProject) return;
+    setExporting(true);
+    try {
+      const url = `/api/brand/export?projectId=${selectedProject}&format=${format}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error("Export failed");
+      const blob = await res.blob();
+      const filename = format === "cursor" ? ".cursorrules"
+        : format === "windsurf" ? ".windsurfrules"
+        : format === "vscode" ? "settings.json"
+        : format === "claude" ? "CLAUDE.md"
+        : `rules-${selectedProject.slice(-6)}.json`;
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch { /* silent */ }
+    finally { setExporting(false); }
+  };
+
+  const formats = [
+    { id: "cursor", label: ".cursorrules", icon: "⚡", desc: "Cursor IDE" },
+    { id: "windsurf", label: ".windsurfrules", icon: "🏄", desc: "Windsurf IDE" },
+    { id: "vscode", label: "settings.json", icon: "🔵", desc: "VS Code MCP" },
+    { id: "claude", label: "CLAUDE.md", icon: "🤖", desc: "Claude Desktop" },
+  ];
+
+  return (
+    <GlassPanel className="p-6">
+      <div className="flex items-start gap-4">
+        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-500/20 text-green-400">
+          <Download className="h-6 w-6" />
+        </div>
+        <div className="flex-1">
+          <h2 className="text-lg font-medium text-white">Export Rules</h2>
+          <p className="text-sm text-white/50 mt-1">
+            Download your rules as IDE configuration files.
+          </p>
+
+          {loading ? (
+            <div className="mt-4 flex items-center gap-2 text-white/30">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm">Loading projects...</span>
+            </div>
+          ) : projects.length === 0 ? (
+            <div className="mt-4 p-4 rounded-md border border-white/5 bg-white/[0.02] text-center">
+              <FileJson className="h-6 w-6 text-white/20 mx-auto mb-2" />
+              <p className="text-sm text-white/40">No projects yet. Create a project first.</p>
+            </div>
+          ) : (
+            <div className="mt-4 space-y-4">
+              {/* Project selector */}
+              <div>
+                <label className="text-xs text-white/50 mb-1.5 block">Project</label>
+                <select
+                  value={selectedProject}
+                  onChange={(e) => setSelectedProject(e.target.value)}
+                  className="w-full h-10 px-3 rounded-md bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-cyan-500/50"
+                >
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id} className="bg-[#0a0a0a]">
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Format buttons */}
+              <div>
+                <label className="text-xs text-white/50 mb-1.5 block">Format</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {formats.map((f) => (
+                    <button
+                      key={f.id}
+                      onClick={() => handleExport(f.id)}
+                      disabled={exporting}
+                      className="flex items-center gap-3 p-3 rounded-md border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-white/10 transition-all text-left disabled:opacity-50 group"
+                    >
+                      <span className="text-base">{f.icon}</span>
+                      <div>
+                        <p className="text-xs font-mono font-medium text-white">{f.label}</p>
+                        <p className="text-[10px] text-white/40">{f.desc}</p>
+                      </div>
+                      <Download className="h-3 w-3 text-white/20 group-hover:text-white/50 ml-auto transition-colors" />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {exporting && (
+                <div className="flex items-center gap-2 text-white/40 text-sm">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Generating export...
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </GlassPanel>
   );
 }
 

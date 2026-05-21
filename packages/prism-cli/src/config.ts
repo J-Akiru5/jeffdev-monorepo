@@ -1,64 +1,33 @@
-/**
- * Prism CLI Configuration
- * 
- * Manages local config stored in ~/.prism/config.json
- */
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
+import { join } from "path";
+import { homedir } from "os";
 
-import { homedir } from 'os';
-import { join } from 'path';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+const CONFIG_DIR = join(homedir(), ".prism");
+const CONFIG_FILE = join(CONFIG_DIR, "config.json");
 
 export interface PrismConfig {
-  apiUrl: string;
-  token: string | null;
-  userId: string | null;
-  tier: 'free' | 'pro' | 'team' | 'enterprise' | null;
-  lastSync: string | null;
-}
-
-const CONFIG_DIR = join(homedir(), '.prism');
-const CONFIG_FILE = join(CONFIG_DIR, 'config.json');
-
-const DEFAULT_CONFIG: PrismConfig = {
-  apiUrl: 'https://api.prism.jeffdev.studio',
-  token: null,
-  userId: null,
-  tier: null,
-  lastSync: null,
-};
-
-export function ensureConfigDir(): void {
-  if (!existsSync(CONFIG_DIR)) {
-    mkdirSync(CONFIG_DIR, { recursive: true });
-  }
+  token?: string;
+  apiUrl?: string;
+  lastSync?: string;
 }
 
 export function loadConfig(): PrismConfig {
-  ensureConfigDir();
-  
-  if (!existsSync(CONFIG_FILE)) {
-    saveConfig(DEFAULT_CONFIG);
-    return DEFAULT_CONFIG;
-  }
-  
   try {
-    const raw = readFileSync(CONFIG_FILE, 'utf-8');
-    return { ...DEFAULT_CONFIG, ...JSON.parse(raw) };
+    if (existsSync(CONFIG_FILE)) {
+      return JSON.parse(readFileSync(CONFIG_FILE, "utf-8")) as PrismConfig;
+    }
   } catch {
-    return DEFAULT_CONFIG;
+    // ignore corrupt config
   }
+  return {};
 }
 
-export function saveConfig(config: Partial<PrismConfig>): void {
-  ensureConfigDir();
-  const current = existsSync(CONFIG_FILE) 
-    ? JSON.parse(readFileSync(CONFIG_FILE, 'utf-8')) 
-    : DEFAULT_CONFIG;
-  const updated = { ...current, ...config };
-  writeFileSync(CONFIG_FILE, JSON.stringify(updated, null, 2));
+export function saveConfig(partial: Partial<PrismConfig>): void {
+  const config = { ...loadConfig(), ...partial };
+  if (!existsSync(CONFIG_DIR)) mkdirSync(CONFIG_DIR, { recursive: true });
+  writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2));
 }
 
 export function isAuthenticated(): boolean {
-  const config = loadConfig();
-  return config.token !== null;
+  return !!(process.env.PRISM_TOKEN || loadConfig().token);
 }

@@ -27,12 +27,12 @@ CI order: `check-types` → `lint` → `test` → `build`. Run in that sequence 
 | `apps/agency` | 3000 | Next.js 16 + Firebase |
 | `apps/prism-dashboard` | 3001 | Next.js 16 + Cosmos DB + Clerk |
 | `apps/prism-docs` | 3002 | Nextra 4 |
-| `apps/prism-mcp-server` | — | Node.js + MCP SDK (stdio transport) |
+| `apps/mht` | 3003 | Next.js 16 + Firebase |
 | `apps/prism-admin` | 3004 | Next.js 16 + Firebase + Clerk |
 | `apps/joularix` | 3005 | Next.js 16 |
-| `apps/mht` | 3003 | Next.js 16 + Firebase |
-| `apps/nexure` | 3004 | Next.js 16 |
-| `apps/tracker` | 3005 | Next.js 16 + Firebase |
+| `apps/nexure` | 3006 | Next.js 16 |
+| `apps/tracker` | 3007 | Next.js 16 + Firebase |
+| `apps/prism-mcp-server` | — | Node.js + MCP SDK (stdio transport) |
 | `apps/prism-exercise` | — | Skeleton (no package.json, only build artifacts) |
 
 ## Architecture Rules
@@ -75,4 +75,4 @@ CI order: `check-types` → `lint` → `test` → `build`. Run in that sequence 
 - Tailwind CSS v4, PostCSS config in each app.
 - Docker Compose at root (`docker-compose.yml`) for local Cosmos DB (Mongo 7) + all apps.
 - `syncpack` manages dependency versions across workspaces: `npx syncpack list-mismatches` / `npx syncpack fix-mismatches`.
-- Two port conflicts exist: `mht` and `prism-exercise` both claim 3003; `joularix` and `tracker` both claim 3005.
+- **Port assignments:** Agency=3000, Dashboard=3001, Docs=3002, MHT=3003, Admin=3004, Joularix=3005, Nexure=3006, Tracker=3007. Each app must set `PORT=<n>` in its Doppler config or `package.json` dev script.

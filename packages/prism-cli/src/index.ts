@@ -6,7 +6,7 @@
  * - prism init        : Auto-detect IDEs and configure MCP connection
  * - prism sync        : Sync data from Prism Cloud to local cache
  * - prism serve       : Start MCP server (for IDE integration)
- * - prism connect     : Launch MCP server for IDE integration (stdio mode)
+ * - prism connect     : URL scanning for rule extraction
  * - prism rules       : List/create/edit/delete rules
  * - prism projects    : Manage projects
  * - prism brands      : Manage brand profiles
@@ -16,7 +16,10 @@
  * - prism telemetry   : View token telemetry and baseline
  * - prism kitchen     : Context Kitchen — analyze, preview, trim, history, optimize
  * - prism api-keys    : Manage API keys
+ * - prism doctor      : Health check — verify all Prism systems
+ * - prism status      : Quick snapshot of current Prism state
  */
+
 
 import { Command } from 'commander';
 import { login } from './commands/login.js';
@@ -33,6 +36,9 @@ import { analytics } from './commands/analytics.js';
 import { telemetry } from './commands/telemetry.js';
 import { kitchenAnalyze, kitchenPreview, kitchenTrim, kitchenHistory, kitchenOptimize } from './commands/kitchen.js';
 import { listApiKeys, createApiKey, revokeApiKey } from './commands/api-keys.js';
+import { doctor } from './commands/doctor.js';
+import { status } from './commands/status.js';
+
 
 const program = new Command();
 
@@ -290,4 +296,19 @@ apiKeysCmd
   .option('--json', 'Output as JSON')
   .action(revokeApiKey);
 
+// Doctor
+program
+  .command('doctor')
+  .description('Run a full health check on all Prism systems')
+  .option('--json', 'Output as JSON')
+  .action((opts) => doctor(opts));
+
+// Status
+program
+  .command('status')
+  .description('Quick snapshot of your current Prism state')
+  .option('--json', 'Output as JSON')
+  .action((opts) => status(opts));
+
 program.parse();
+
