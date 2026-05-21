@@ -268,7 +268,7 @@ export function AgenticProtocol() {
         {/* Terminal Section (Build Sequence) */}
         <div
           ref={sequenceRef}
-          className="mt-24 overflow-hidden rounded-xl border border-white/[0.08] bg-[#050505] shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+          className="mt-24 overflow-hidden rounded-xl border border-white/[0.08] agentic-terminal"
         >
           {/* Terminal Header */}
           <div className="flex items-center justify-between border-b border-white/[0.08] bg-black/60 px-4 py-3 backdrop-blur-md">

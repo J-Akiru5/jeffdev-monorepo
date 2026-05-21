@@ -870,3 +870,130 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* ----------------------------------------
+   AGENTIC TERMINAL — Light Mode (Dark Island)
+   The terminal section stays dark even in
+   light mode so the monospace CLI aesthetic
+   remains readable and intentional.
+   ---------------------------------------- */
+.agentic-terminal {
+  background: #050505;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.theme-light .agentic-terminal {
+  background: #0a0a0a;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Keep terminal text white on dark bg in light mode */
+.theme-light .agentic-terminal .text-white {
+  color: #ededed;
+}
+
+.theme-light .agentic-terminal .text-white\/90 {
+  color: rgba(237, 237, 237, 0.9);
+}
+
+.theme-light .agentic-terminal .text-white\/70 {
+  color: rgba(237, 237, 237, 0.7);
+}
+
+.theme-light .agentic-terminal .text-white\/60 {
+  color: rgba(237, 237, 237, 0.6);
+}
+
+.theme-light .agentic-terminal .text-white\/50 {
+  color: rgba(237, 237, 237, 0.5);
+}
+
+.theme-light .agentic-terminal .text-white\/40 {
+  color: rgba(237, 237, 237, 0.4);
+}
+
+.theme-light .agentic-terminal .text-white\/30 {
+  color: rgba(237, 237, 237, 0.3);
+}
+
+/* Terminal accent colors — keep vivid in light mode */
+.theme-light .agentic-terminal .text-cyan-400 {
+  color: #22d3ee;
+}
+
+.theme-light .agentic-terminal .text-cyan-500 {
+  color: #06b6d4;
+}
+
+.theme-light .agentic-terminal .text-purple-400 {
+  color: #a78bfa;
+}
+
+.theme-light .agentic-terminal .text-purple-400\/70 {
+  color: rgba(167, 139, 250, 0.7);
+}
+
+.theme-light .agentic-terminal .text-purple-500\/50 {
+  color: rgba(139, 92, 246, 0.5);
+}
+
+.theme-light .agentic-terminal .text-emerald-400 {
+  color: #34d399;
+}
+
+.theme-light .agentic-terminal .text-emerald-500 {
+  color: #10b981;
+}
+
+/* Terminal borders and background elements */
+.theme-light .agentic-terminal .border-white\/\[0\.08\] {
+  border-color: rgba(237, 237, 237, 0.08);
+}
+
+.theme-light .agentic-terminal .border-white\/\[0\.04\] {
+  border-color: rgba(237, 237, 237, 0.04);
+}
+
+.theme-light .agentic-terminal .bg-white\/\[0\.01\] {
+  background-color: rgba(237, 237, 237, 0.01);
+}
+
+.theme-light .agentic-terminal .bg-black\/50 {
+  background-color: rgba(10, 10, 10, 0.6);
+}
+
+.theme-light .agentic-terminal .bg-black\/60 {
+  background-color: rgba(10, 10, 10, 0.75);
+}
+
+.theme-light .agentic-terminal .border-white\/10 {
+  border-color: rgba(237, 237, 237, 0.1);
+}
+
+.theme-light .agentic-terminal .hover\:text-white\/60:hover {
+  color: rgba(237, 237, 237, 0.6);
+}
+
+.theme-light .agentic-terminal .hover\:text-white\/70:hover {
+  color: rgba(237, 237, 237, 0.7);
+}
+
+.theme-light .agentic-terminal .group-hover\:text-white:hover {
+  color: #ededed;
+}
+
+.theme-light .agentic-terminal .group-hover\:text-white\/50:hover {
+  color: rgba(237, 237, 237, 0.5);
+}
+
+.theme-light .agentic-terminal .group-hover\:text-white\/70:hover {
+  color: rgba(237, 237, 237, 0.7);
+}
+
+.theme-light .agentic-terminal .hover\:bg-white\/\[0\.03\]:hover {
+  background-color: rgba(237, 237, 237, 0.03);
+}
+
+.theme-light .agentic-terminal .hover\:border-white\/10:hover {
+  border-color: rgba(237, 237, 237, 0.1);
+}
