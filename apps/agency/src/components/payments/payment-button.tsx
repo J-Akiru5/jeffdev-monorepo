@@ -6,9 +6,9 @@
  * PayPal Smart Button + GCash QR option.
  */
 
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js';
-import { CreditCard, QrCode, Loader2 } from 'lucide-react';
+import { CreditCard, QrCode } from 'lucide-react';
 import { createPayPalOrder, capturePayPalOrder } from '@/app/actions/paypal';
 import { GcashProofUpload } from './gcash-proof-upload';
 import type { Invoice } from '@/types/invoice';

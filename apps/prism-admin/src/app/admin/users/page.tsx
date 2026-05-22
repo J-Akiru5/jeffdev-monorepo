@@ -4,8 +4,6 @@ import {
   Search, 
   Filter, 
   MoreVertical, 
-  Shield, 
-  ShieldAlert, 
   ShieldCheck,
   Crown,
   User,

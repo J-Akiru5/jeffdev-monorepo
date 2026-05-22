@@ -30,7 +30,6 @@ export async function POST(request: Request) {
     const eventType = params.get("txn_type") || params.get("event_type");
     const subscriptionId = params.get("subscr_id") || params.get("recurring_payment_id");
     const payerEmail = params.get("payer_email");
-    const payerId = params.get("payer_id");
     const amount = params.get("mc_gross") || params.get("amount");
     const currency = params.get("mc_currency") || "USD";
     const status = params.get("payment_status");

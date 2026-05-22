@@ -1,4 +1,4 @@
-import { getTasks, type Task } from '@/actions/github';
+import { getTasks } from '@/actions/github';
 import { TaskBoard } from '@/components/task-board';
 
 export default async function TasksPage({

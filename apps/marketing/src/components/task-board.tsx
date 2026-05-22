@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
-import { type Task, type TaskStatus, getTasks, getTaskStats } from '@/actions/github';
+import { type Task, type TaskStatus, getTasks } from '@/actions/github';
 import { TaskCard } from '@/components/task-card';
 import { TaskForm } from '@/components/task-form';
 import { team } from '@/data/team';
@@ -31,7 +31,6 @@ type Filter = { phase?: string; owner?: string };
 
 export function TaskBoard({
   tasks: initialTasks,
-  initialFiltered,
   phase: initialPhase,
   owner: initialOwner,
 }: {
