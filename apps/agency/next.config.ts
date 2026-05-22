@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import withBundleAnalyzer from "@next/bundle-analyzer";
 
 const nextConfig: NextConfig = {
   /*
@@ -7,7 +8,7 @@ const nextConfig: NextConfig = {
    */
   experimental: {
     serverActions: {
-      bodySizeLimit: '10mb',
+      bodySizeLimit: "10mb",
     },
   },
 
@@ -24,15 +25,15 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'firebasestorage.googleapis.com',
+        protocol: "https",
+        hostname: "firebasestorage.googleapis.com",
       },
       // If we ever use direct R2 URLs (non-proxied), add them here.
-      // { protocol: 'https', hostname: 'pub-*.r2.dev' }, 
+      // { protocol: 'https', hostname: 'pub-*.r2.dev' },
     ],
     // Dangerously allow SVG if needed for favicons, but usually unnecessary with Next/Image
     dangerouslyAllowSVG: true,
-    contentDispositionType: 'attachment',
+    contentDispositionType: "attachment",
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
@@ -42,27 +43,27 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: '/:path*',
+        source: "/:path*",
         headers: [
           {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on',
+            key: "X-DNS-Prefetch-Control",
+            value: "on",
           },
           {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload',
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
           },
           {
-            key: 'X-Frame-Options',
-            value: 'DENY', // Prevents clickjacking
+            key: "X-Frame-Options",
+            value: "DENY", // Prevents clickjacking
           },
           {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
+            key: "X-Content-Type-Options",
+            value: "nosniff",
           },
           {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
+            key: "Referrer-Policy",
+            value: "origin-when-cross-origin",
           },
           // CSP is best handled via Middleware for nonces, but we can add a basic one here if needed.
           // For now, we rely on the others.
@@ -72,4 +73,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default process.env.ANALYZE === "true"
+  ? withBundleAnalyzer()(nextConfig)
+  : nextConfig;

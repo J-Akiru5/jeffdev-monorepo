@@ -45,7 +45,8 @@
     "AI_PROVIDER",
     "AZURE_OPENAI_EMBEDDING_DEPLOYMENT",
     "GEMINI_MODEL",
-    "GEMINI_EMBEDDING_MODEL"
+    "GEMINI_EMBEDDING_MODEL",
+    "ANALYZE"
   ],
   "tasks": {
     "build": {

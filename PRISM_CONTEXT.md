@@ -1,8 +1,8 @@
 # Prism Context Engine — Full Project Context
 
 > **Read this first.** Canonical handoff document for AI agents. Every Phase, every file, every decision, every test result, every known bug.
-> 
-> Last updated: May 22 2026. Companion to `PRISM_ROADMAP.md` (the checklist).
+>
+> Last updated: May 22 2026 (22:00 PHT). Companion to `PRISM_ROADMAP.md` (the checklist).
 
 ## 1. What Is Prism?
 
@@ -32,6 +32,7 @@ prism serve  (configured by prism init)
 ```
 
 **One-time setup:**
+
 ```bash
 prism login          # Auth with Prism Cloud
 prism sync           # Fetch rules → ~/.prism/rules.json + rules.md + rules/rules.json
@@ -39,6 +40,7 @@ prism init           # Auto-configure Cursor/Windsurf/VS Code/Claude Desktop
 ```
 
 **Daily use:**
+
 - IDE auto-starts `prism serve` when you open it
 - AI assistant calls `get_architectural_rules({ task: "build a button" })` to check constraints
 - AI assistant calls `list_skills` to discover available workflows, then `get_skill({ skillId })` for step-by-step execution guides
@@ -47,17 +49,17 @@ prism init           # Auto-configure Cursor/Windsurf/VS Code/Claude Desktop
 
 ## 3. All 9 Phases — Complete
 
-| Phase | What | Tests | Key Files |
-|-------|------|-------|-----------|
-| 1 | Playwright extraction + AI rule gen | 15 | `extractor.ts`, `rule-generator.ts`, `prism-scan.ts` |
-| 2 | Telemetry & baseline | 11 | `token-counter.ts`, CLI `telemetry.ts` |
-| 3 | Smart context selection | 8 | `smart-select.ts`, `ai-router.ts`, `gemini.ts` |
-| 4 | Progressive disclosure | — | `get-skill.ts` |
-| 5 | Context Kitchen CLI | 9 | CLI `kitchen.ts` |
-| 6 | Caching & tiered delivery | 12 | `cache.ts` |
-| 7 | Active enforcement | 14 | `prism-check.ts`, `prism-fix.ts`, VS Code `diagnostics.ts` |
-| 8 | Repo analysis extraction | 9 | CLI `repo-scanner.ts`, `repo-extract.ts` |
-| 9 | Cross-platform optimization | 22 | `client-detector.ts`, `platform-formatter.ts` |
+| Phase | What                                | Tests | Key Files                                                  |
+| ----- | ----------------------------------- | ----- | ---------------------------------------------------------- |
+| 1     | Playwright extraction + AI rule gen | 15    | `extractor.ts`, `rule-generator.ts`, `prism-scan.ts`       |
+| 2     | Telemetry & baseline                | 11    | `token-counter.ts`, CLI `telemetry.ts`                     |
+| 3     | Smart context selection             | 8     | `smart-select.ts`, `ai-router.ts`, `gemini.ts`             |
+| 4     | Progressive disclosure              | —     | `get-skill.ts`                                             |
+| 5     | Context Kitchen CLI                 | 9     | CLI `kitchen.ts`                                           |
+| 6     | Caching & tiered delivery           | 12    | `cache.ts`                                                 |
+| 7     | Active enforcement                  | 14    | `prism-check.ts`, `prism-fix.ts`, VS Code `diagnostics.ts` |
+| 8     | Repo analysis extraction            | 9     | CLI `repo-scanner.ts`, `repo-extract.ts`                   |
+| 9     | Cross-platform optimization         | 22    | `client-detector.ts`, `platform-formatter.ts`              |
 
 ## 4. Directory Structure
 
@@ -107,12 +109,12 @@ extensions/prism-vscode/src/
 
 ### Required env vars (root `.env`, Doppler-managed)
 
-| Variable | Value |
-|----------|-------|
-| `MONGODB_URI` | Cosmos DB connection string |
-| `COSMOS_DATABASE_NAME` | Default `prism` |
-| `GEMINI_API_KEY` | Google Gemini API key |
-| `GEMINI_MODEL` | Chat model = `gemini-3.5-flash` |
+| Variable                 | Value                                              |
+| ------------------------ | -------------------------------------------------- |
+| `MONGODB_URI`            | Cosmos DB connection string                        |
+| `COSMOS_DATABASE_NAME`   | Default `prism`                                    |
+| `GEMINI_API_KEY`         | Google Gemini API key                              |
+| `GEMINI_MODEL`           | Chat model = `gemini-3.5-flash`                    |
 | `GEMINI_EMBEDDING_MODEL` | Embedding model = `gemini-embedding-2` (3072 dims) |
 
 ### AI Provider
@@ -181,18 +183,18 @@ doppler run -- turbo dev
 
 ## 8. MCP Tools
 
-| Tool | Handler | Notes |
-|------|---------|-------|
-| `get_architectural_rules` | `index.ts` in-house | Smart ranking + cache + platform format |
-| `prism_scan` | `handlePrismScan` | Playwright URL scan → AI rules |
-| `list_skills` | `handleListSkills` | Lightweight discovery of procedural workflows |
-| `get_skill` | `handleGetSkill` | Lazy-loads heavy step-by-step markdown |
-| `prism_check` | `handlePrismCheck` | Regex validation with line/column |
-| `validate_code` | → prism_check | Alias |
-| `prism_fix` | `handlePrismFix` | 3 KNOWN_FIXES + generic FIXME |
-| `repo_extract` | `extractRulesFromRepoScan` | AI gen from scan report |
-| `search_video_transcript` | Legacy in-house | Semantic search |
-| `validate_code_pattern` | Legacy in-house | Built-in checks |
+| Tool                      | Handler                    | Notes                                         |
+| ------------------------- | -------------------------- | --------------------------------------------- |
+| `get_architectural_rules` | `index.ts` in-house        | Smart ranking + cache + platform format       |
+| `prism_scan`              | `handlePrismScan`          | Playwright URL scan → AI rules                |
+| `list_skills`             | `handleListSkills`         | Lightweight discovery of procedural workflows |
+| `get_skill`               | `handleGetSkill`           | Lazy-loads heavy step-by-step markdown        |
+| `prism_check`             | `handlePrismCheck`         | Regex validation with line/column             |
+| `validate_code`           | → prism_check              | Alias                                         |
+| `prism_fix`               | `handlePrismFix`           | 3 KNOWN_FIXES + generic FIXME                 |
+| `repo_extract`            | `extractRulesFromRepoScan` | AI gen from scan report                       |
+| `search_video_transcript` | Legacy in-house            | Semantic search                               |
+| `validate_code_pattern`   | Legacy in-house            | Built-in checks                               |
 
 ## 9. Known Issues
 
@@ -217,118 +219,78 @@ doppler run -- turbo dev
 
 ## 11. Recent Session Changes
 
-| Date | Change |
-|------|--------|
-| May 2026 | Created `scripts/smoke-test.ts` — 18-step E2E test |
-| May 2026 | Migrated AI from Azure to Gemini: `gemini-3.5-flash` + `gemini-embedding-2` |
-| May 2026 | Created `src/lib/gemini.ts`, `src/lib/ai-router.ts` |
-| May 2026 | Fixed `connect.ts` → broken IDE proxy replaced with `prism serve` |
-| May 2026 | Rewrote `serve.ts` — spawns full MCP server with lite fallback |
-| May 2026 | Updated `prism init` → configures IDEs with `prism serve` |
-| May 2026 | Fixed data fragmentation — `sync` generates all 3 formats |
-| May 2026 | Fixed VS Code `mcpClient.ts` → spawns `prism serve` |
-| May 2026 | Fixed cache `cacheHit` metadata bug |
-| May 2026 | Fixed Azure endpoint stripping in `azure-openai.ts` |
-| May 2026 | Removed dead `--port` from serve command |
-| May 2026 | Created `PRISM_CONTEXT.md` and updated `PRISM_ROADMAP.md` |
-| May 2026 | Separated "Rules" and "Skills" into two collections. Created Skill Studio UI. |
-| May 2026 | Added `list_skills` MCP tool for AI agent discovery pattern. |
-| May 2026 | Added Pre-built Rule Templates (Next.js 16, React 19, Tailwind v4, Security). |
-| May 22 2026 | **ESLint/Deploy Cleanup Sprint** — systematically eliminated all `--max-warnings 0` blockers across the monorepo (see §13 below). Pushed to branch `lou`. |
+| Date         | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| May 2026     | Created `scripts/smoke-test.ts` — 18-step E2E test                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| May 2026     | Migrated AI from Azure to Gemini: `gemini-3.5-flash` + `gemini-embedding-2`                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| May 2026     | Created `src/lib/gemini.ts`, `src/lib/ai-router.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| May 2026     | Fixed `connect.ts` → broken IDE proxy replaced with `prism serve`                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| May 2026     | Rewrote `serve.ts` — spawns full MCP server with lite fallback                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| May 2026     | Updated `prism init` → configures IDEs with `prism serve`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| May 2026     | Fixed data fragmentation — `sync` generates all 3 formats                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| May 2026     | Fixed VS Code `mcpClient.ts` → spawns `prism serve`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| May 2026     | Fixed cache `cacheHit` metadata bug                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| May 2026     | Fixed Azure endpoint stripping in `azure-openai.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| May 2026     | Removed dead `--port` from serve command                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| May 2026     | Created `PRISM_CONTEXT.md` and updated `PRISM_ROADMAP.md`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| May 2026     | Separated "Rules" and "Skills" into two collections. Created Skill Studio UI.                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| May 2026     | Added `list_skills` MCP tool for AI agent discovery pattern.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| May 2026     | Added Pre-built Rule Templates (Next.js 16, React 19, Tailwind v4, Security).                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| May 22, 2026 | **100% Warn-Free Monorepo Cleanups**: Cleaned up all remaining ESLint, TypeScript, and React compilation warnings across the monorepo. The verification build/lint checks now pass with zero warnings/errors.                                                                                                                                                                                                                                                                                                                                |
+| May 22, 2026 | **Quality & Safety Automation**: Set up Husky, monorepo-aware `lint-staged.config.js`, Commitlint, `.editorconfig`, `.github/CODEOWNERS`, and Gitleaks CI workflow, committed and pushed to `lou` branch.                                                                                                                                                                                                                                                                                                                                    |
+| May 22, 2026 | **Phase 1 Bulletproof Startup Pack**: Added `LICENSE` (MIT), `SECURITY.md`, `CONTRIBUTING.md`, `.github/PULL_REQUEST_TEMPLATE.md`. Created `/api/health` readiness probe routes across 8 apps (agency, prism-admin, marketing, tracker, nexure, joularix, mht, prism-docs). Installed `@next/bundle-analyzer` in root and wired into all 9 Next.js `next.config.*` files (respecting existing Sentry and Nextra chains). Added `ANALYZE` to `turbo.json` globalEnv. Final verification: `check-types` 7/7 ✅, `lint` 12/12 ✅ zero warnings. |
+| May 22, 2026 | **T3 Env Deferral & Branch Push**: Had a strategic conversation and aligned on **skipping the T3 Env validation rollout** for Phase 1. This prevents making massive, disruptive changes to `process.env` across all 9 apps prematurely; this task is now officially deferred to the planned codebase restructure phase. Pushed all Phase 1 work successfully to remote `origin/lou`.                                                                                                                                                         |
 
 ## 12. Next Steps
+
+### Prism Product
 
 - Deploy to staging, test with real IDE (Cursor/Windsurf/VS Code)
 - Add `prism_scan` to smoke test (needs Playwright browsers)
 - Consider AST-based rule matching for `prism_check`
 - Consider caching config overrides per project
 - Automated dedup/content-merge for repo-extracted rules
-- **Finish remaining ESLint fixes** in `apps/agency`, `apps/prism-admin`, `apps/marketing`, `apps/tracker`, `apps/nexure` (see §13)
-- Run `npx turbo run check-types lint build` to confirm zero warnings end-to-end
 
-## 13. ESLint Cleanup Sprint (May 22 2026)
+### Monorepo — Deferred to Major Refactor
+
+The following are intentionally deferred until the planned codebase restructure:
+
+- **T3 Env Validation** (`@t3-oss/env-nextjs` + `zod`) — type-safe `process.env` across all apps at build/boot time. Deferred because it requires touching every `process.env` usage across all 9 apps — best done as a clean pass during restructure.
+- **Storybook** — component isolation and live docs for `packages/ui`.
+- **Feature Flags** — progressive delivery (PostHog or GrowthBook, both free/self-hostable).
+- **Universal Sentry** — extend error tracking from `prism-dashboard`/`prism-docs` to all remaining apps (`agency`, `prism-admin`, `mht`, `tracker`, `joularix`, `nexure`, `marketing`).
+
+### Bundle Analysis — How to Use
+
+To inspect JS bundle sizes on any app:
+
+```bash
+ANALYZE=true doppler run -- turbo build --filter=<app-name>
+```
+
+This opens an interactive HTML treemap in the browser showing every module by size.
+
+## 13. ESLint Cleanup Sprint (May 22, 2026)
 
 **Goal:** Achieve `--max-warnings 0` across all apps so Vercel/CI never fails on warnings.
+**Status:** **100% Complete & Staged/Committed**
+**Branch:** `lou`
 
-**Branch:** `lou` (commit `ae45f28`)
+All monorepo workspaces (`apps/prism-mcp-server`, `apps/prism-dashboard`, `apps/agency`, `apps/prism-admin`, `apps/marketing`, `apps/tracker`, `apps/nexure`, `packages/*`) have been thoroughly cleaned of unused imports, unused variables, unescaped HTML entities, and inappropriate native `<img>` tag usages.
 
-### What was fixed (committed)
+## 14. Monorepo Quality Controls & Safety Nets (May 22, 2026)
 
-#### `apps/prism-mcp-server`
-- Removed unused imports/vars in `list-models.ts`, `smoke-test.ts`, `index.ts`
-- Fixed type-safety cast warnings in `rule-generator.ts`, `smart-select.ts`, `token-counter.ts`, `prism-check.ts`
-- Removed unused test vars across all test files
-- Added missing env vars to `turbo.json` `globalEnv`: `PRISM_API_KEY`, `PRISM_API_URL`, `AI_PROVIDER`, `AZURE_OPENAI_EMBEDDING_DEPLOYMENT`, `GEMINI_MODEL`, `GEMINI_EMBEDDING_MODEL`
+To prevent code degradation, the following protections are now active on the `lou` branch:
 
-#### `apps/prism-dashboard`
-- `edit-form.tsx` — removed unused `useEffect`
-- `layout.tsx` — removed unused `redirect` import and empty onboarding check block
-- `marketplace/page.tsx` — removed unused `Upload` and `SectionHeader`
-- `rules/templates/actions.ts` — removed unused `err` in catch block
-- `skills/[skillId]/page.tsx` — removed unused `Settings` import
-- `skills/actions.ts` — removed unused `e` in catch block
-- `videos/page.tsx` — suppressed `<img>` warning (Mux dynamic URL) via `eslint-disable-next-line`, prefixed `_projectSlug`
-- `settings/page.tsx` — removed unused `tier` state and unused `saveTimerRef` callback
-- `showcase/keandrew/page.tsx` — removed unused `Type`, `MessageCircle`, `userId`
-- `api/admin/subscription/route.ts` — removed unused `SubscriptionTier` import
-- `api/auth/verify/route.ts` — removed unused `NextRequest` import and `request` parameter
-- `api/notifications/route.ts` — removed unused `e` in catch block
-- `api/subscriptions/route.ts` — removed unused `TIER_PRICES` import
-- `api/v1/components/route.ts` — removed unused `errorResponse` import
-- `api/webhooks/paypal/route.ts` — removed unused `webhookEventUrl` variable
-- `global-error.tsx` — removed unused `NextError` import
-- `scroll-provider.tsx` — removed unused `useEffect` import
-- `pricing-card.tsx` — removed unused `X` icon and `TIER_LIMITS` import
-- `code-block.tsx` — prefixed unused `language` param as `_language`
-- `middleware.ts` — removed unused `isPublicRoute` matcher
-
-### Still remaining (not yet committed)
-
-#### `apps/agency`
-- `src/lib/calendar.ts` — unused `EventType` import
-- `src/lib/paypal.ts` — unused `z` (zod) import
-- `src/lib/project-management.ts` — unused `milestoneSchema`
-- `src/lib/users.ts` — unused `DocumentData`, `QueryDocumentSnapshot`
-- `src/app/admin/calendar/page.tsx` — unused `Plus`
-- `src/app/admin/prism/waitlist/page.tsx` — unused `cn`
-- `src/app/admin/profile/page.tsx` — unused `_` variable
-- `src/app/admin/settings/app/page.tsx` — unused `Upload`
-- `src/app/admin/settings/dev/page.tsx` — unused `RefreshCcw`, `Save`
-- `src/app/admin/subscriptions/page.tsx` — unused `RefreshCcw`
-- `src/app/prism/page.tsx` — unused `Sparkles`, `errorMessage`
-- `src/app/work/[slug]/page.tsx` — `<img>` needs eslint-disable or `<Image />`
-- `src/components/admin/admin-calendar.tsx` — unused `useEffect`
-- `src/components/admin/case-study-image-upload.tsx` — `<img>` needs eslint-disable
-- `src/components/admin/data-table.tsx` — `@typescript-eslint/ban-ts-comment` on `useReactTable`
-- `src/components/admin/namecard-preview.tsx` — unused `location`
-- `src/components/admin/sidebar.tsx` — `<img>` needs eslint-disable
-- `src/components/header.tsx` — unused `prismEngineEnabled`, `prismEngineTeaser`
-- `src/components/payment-button.tsx` — unused `useTransition`, `Loader2`
-- `src/lib/invoice-pdf-buffer.tsx` — unused `Font`
-
-#### `apps/prism-admin`
-- `src/app/inquiries/page.tsx` — unused `MessageSquare`, `ArrowUpRight`, `role`
-- `src/app/layout.tsx` — unused `isAdmin`
-- `src/app/projects/page.tsx` — unused `MoreVertical`, `ArrowRight`
-- `src/app/settings/page.tsx` — unused `Settings`, `Bell`, `Mail`, `CreditCard`
-- `src/app/users/page.tsx` — unused `Shield`, `ShieldAlert`
-- `src/app/api/paypal/route.ts` — unused `payerId`
-- `src/app/unauthorized/page.tsx` — HTML unescaped entities
-
-#### `apps/marketing`
-- `postcss.config.mjs` — `import/no-anonymous-default-export`
-- `src/app/tasks/page.tsx` — unused `Task`
-- `src/components/kpi-cards.tsx` — unused `label`
-- `src/components/task-board.tsx` — unused `getTaskStats`, `initialFiltered`
-
-#### `apps/tracker`
-- `postcss.config.mjs` — `import/no-anonymous-default-export`
-
-#### `apps/nexure`
-- `src/app/page.tsx` — unused `Link`
+1. **Husky & lint-staged**: Intercepts `pre-commit` to format and run `eslint --fix` on modified files. Path differences across packages are dynamically resolved by grouping files by workspace inside `lint-staged.config.js`.
+2. **Commitlint**: Validates commit messages relative to the Conventional Commit conventions on the `commit-msg` hook.
+3. **.editorconfig**: Ensures all editors format whitespace, line-endings, and final newlines identically.
+4. **CODEOWNERS**: Automates reviewer assignments on PRs.
+5. **Gitleaks CI**: Added `.github/workflows/gitleaks.yml` to automatically verify in CI that secrets are never leaked.
 
 ### Pattern notes for AI agents
-- `<img>` for dynamic remote URLs (Mux, R2): use `// eslint-disable-next-line @next/next/no-img-element`
+
+- `<img>` for dynamic remote URLs (Mux, R2): use `// eslint-disable-next-line @next/next/no-img-element` or Next.js `<Image />` component.
 - Unused catch vars: `} catch {` (no binding) or rename to `_e`
 - Unused params in exported functions: prefix with `_` (e.g. `_request`)
 - Secrets: managed via Doppler, never `.env` files

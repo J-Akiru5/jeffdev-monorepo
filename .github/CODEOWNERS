@@ -1,0 +1,14 @@
+# CODEOWNERS file for jeffdev-monorepo
+# Establish automatic review request rules
+
+# Default owner for everything
+*       @J-Akiru5
+
+# CI/CD Workflows
+/.github/workflows/ @J-Akiru5
+
+# Shared Packages
+/packages/db/       @J-Akiru5
+/packages/ui/       @J-Akiru5
+/packages/eslint-config/ @J-Akiru5
+/packages/typescript-config/ @J-Akiru5
