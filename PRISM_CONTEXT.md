@@ -2,7 +2,7 @@
 
 > **Read this first.** Canonical handoff document for AI agents. Every Phase, every file, every decision, every test result, every known bug.
 > 
-> Last updated: May 2026. Companion to `PRISM_ROADMAP.md` (the checklist).
+> Last updated: May 22 2026. Companion to `PRISM_ROADMAP.md` (the checklist).
 
 ## 1. What Is Prism?
 
@@ -234,6 +234,7 @@ doppler run -- turbo dev
 | May 2026 | Separated "Rules" and "Skills" into two collections. Created Skill Studio UI. |
 | May 2026 | Added `list_skills` MCP tool for AI agent discovery pattern. |
 | May 2026 | Added Pre-built Rule Templates (Next.js 16, React 19, Tailwind v4, Security). |
+| May 22 2026 | **ESLint/Deploy Cleanup Sprint** — systematically eliminated all `--max-warnings 0` blockers across the monorepo (see §13 below). Pushed to branch `lou`. |
 
 ## 12. Next Steps
 
@@ -242,3 +243,92 @@ doppler run -- turbo dev
 - Consider AST-based rule matching for `prism_check`
 - Consider caching config overrides per project
 - Automated dedup/content-merge for repo-extracted rules
+- **Finish remaining ESLint fixes** in `apps/agency`, `apps/prism-admin`, `apps/marketing`, `apps/tracker`, `apps/nexure` (see §13)
+- Run `npx turbo run check-types lint build` to confirm zero warnings end-to-end
+
+## 13. ESLint Cleanup Sprint (May 22 2026)
+
+**Goal:** Achieve `--max-warnings 0` across all apps so Vercel/CI never fails on warnings.
+
+**Branch:** `lou` (commit `ae45f28`)
+
+### What was fixed (committed)
+
+#### `apps/prism-mcp-server`
+- Removed unused imports/vars in `list-models.ts`, `smoke-test.ts`, `index.ts`
+- Fixed type-safety cast warnings in `rule-generator.ts`, `smart-select.ts`, `token-counter.ts`, `prism-check.ts`
+- Removed unused test vars across all test files
+- Added missing env vars to `turbo.json` `globalEnv`: `PRISM_API_KEY`, `PRISM_API_URL`, `AI_PROVIDER`, `AZURE_OPENAI_EMBEDDING_DEPLOYMENT`, `GEMINI_MODEL`, `GEMINI_EMBEDDING_MODEL`
+
+#### `apps/prism-dashboard`
+- `edit-form.tsx` — removed unused `useEffect`
+- `layout.tsx` — removed unused `redirect` import and empty onboarding check block
+- `marketplace/page.tsx` — removed unused `Upload` and `SectionHeader`
+- `rules/templates/actions.ts` — removed unused `err` in catch block
+- `skills/[skillId]/page.tsx` — removed unused `Settings` import
+- `skills/actions.ts` — removed unused `e` in catch block
+- `videos/page.tsx` — suppressed `<img>` warning (Mux dynamic URL) via `eslint-disable-next-line`, prefixed `_projectSlug`
+- `settings/page.tsx` — removed unused `tier` state and unused `saveTimerRef` callback
+- `showcase/keandrew/page.tsx` — removed unused `Type`, `MessageCircle`, `userId`
+- `api/admin/subscription/route.ts` — removed unused `SubscriptionTier` import
+- `api/auth/verify/route.ts` — removed unused `NextRequest` import and `request` parameter
+- `api/notifications/route.ts` — removed unused `e` in catch block
+- `api/subscriptions/route.ts` — removed unused `TIER_PRICES` import
+- `api/v1/components/route.ts` — removed unused `errorResponse` import
+- `api/webhooks/paypal/route.ts` — removed unused `webhookEventUrl` variable
+- `global-error.tsx` — removed unused `NextError` import
+- `scroll-provider.tsx` — removed unused `useEffect` import
+- `pricing-card.tsx` — removed unused `X` icon and `TIER_LIMITS` import
+- `code-block.tsx` — prefixed unused `language` param as `_language`
+- `middleware.ts` — removed unused `isPublicRoute` matcher
+
+### Still remaining (not yet committed)
+
+#### `apps/agency`
+- `src/lib/calendar.ts` — unused `EventType` import
+- `src/lib/paypal.ts` — unused `z` (zod) import
+- `src/lib/project-management.ts` — unused `milestoneSchema`
+- `src/lib/users.ts` — unused `DocumentData`, `QueryDocumentSnapshot`
+- `src/app/admin/calendar/page.tsx` — unused `Plus`
+- `src/app/admin/prism/waitlist/page.tsx` — unused `cn`
+- `src/app/admin/profile/page.tsx` — unused `_` variable
+- `src/app/admin/settings/app/page.tsx` — unused `Upload`
+- `src/app/admin/settings/dev/page.tsx` — unused `RefreshCcw`, `Save`
+- `src/app/admin/subscriptions/page.tsx` — unused `RefreshCcw`
+- `src/app/prism/page.tsx` — unused `Sparkles`, `errorMessage`
+- `src/app/work/[slug]/page.tsx` — `<img>` needs eslint-disable or `<Image />`
+- `src/components/admin/admin-calendar.tsx` — unused `useEffect`
+- `src/components/admin/case-study-image-upload.tsx` — `<img>` needs eslint-disable
+- `src/components/admin/data-table.tsx` — `@typescript-eslint/ban-ts-comment` on `useReactTable`
+- `src/components/admin/namecard-preview.tsx` — unused `location`
+- `src/components/admin/sidebar.tsx` — `<img>` needs eslint-disable
+- `src/components/header.tsx` — unused `prismEngineEnabled`, `prismEngineTeaser`
+- `src/components/payment-button.tsx` — unused `useTransition`, `Loader2`
+- `src/lib/invoice-pdf-buffer.tsx` — unused `Font`
+
+#### `apps/prism-admin`
+- `src/app/inquiries/page.tsx` — unused `MessageSquare`, `ArrowUpRight`, `role`
+- `src/app/layout.tsx` — unused `isAdmin`
+- `src/app/projects/page.tsx` — unused `MoreVertical`, `ArrowRight`
+- `src/app/settings/page.tsx` — unused `Settings`, `Bell`, `Mail`, `CreditCard`
+- `src/app/users/page.tsx` — unused `Shield`, `ShieldAlert`
+- `src/app/api/paypal/route.ts` — unused `payerId`
+- `src/app/unauthorized/page.tsx` — HTML unescaped entities
+
+#### `apps/marketing`
+- `postcss.config.mjs` — `import/no-anonymous-default-export`
+- `src/app/tasks/page.tsx` — unused `Task`
+- `src/components/kpi-cards.tsx` — unused `label`
+- `src/components/task-board.tsx` — unused `getTaskStats`, `initialFiltered`
+
+#### `apps/tracker`
+- `postcss.config.mjs` — `import/no-anonymous-default-export`
+
+#### `apps/nexure`
+- `src/app/page.tsx` — unused `Link`
+
+### Pattern notes for AI agents
+- `<img>` for dynamic remote URLs (Mux, R2): use `// eslint-disable-next-line @next/next/no-img-element`
+- Unused catch vars: `} catch {` (no binding) or rename to `_e`
+- Unused params in exported functions: prefix with `_` (e.g. `_request`)
+- Secrets: managed via Doppler, never `.env` files
