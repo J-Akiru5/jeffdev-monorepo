@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
   const brands = await getCollection('brands');
   const query: Record<string, unknown> = { userId: auth.userId };
   if (industry && INDUSTRIES.includes(industry as typeof INDUSTRIES[number])) query.industry = industry;
-  if (modifiedAfter) query.updatedAt = { $gte: modifiedAfter } as any;
+  if (modifiedAfter) query.updatedAt = { $gte: modifiedAfter };
 
   const total = await brands.countDocuments(query);
   const items = await brands

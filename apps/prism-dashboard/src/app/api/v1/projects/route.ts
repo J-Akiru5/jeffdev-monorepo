@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
   const query: Record<string, unknown> = { userId: auth.userId };
   if (stack && STACKS.includes(stack as typeof STACKS[number])) query.stack = stack;
   if (designSystem && DESIGN_SYSTEMS.includes(designSystem as typeof DESIGN_SYSTEMS[number])) query.designSystem = designSystem;
-  if (modifiedAfter) query.updatedAt = { $gte: modifiedAfter } as any;
+  if (modifiedAfter) query.updatedAt = { $gte: modifiedAfter };
 
   const total = await projects.countDocuments(query);
   const items = await projects

@@ -24,16 +24,17 @@ import {
 import { MongoClient, type Collection, type Document, ObjectId } from "mongodb";
 import { generateQueryEmbedding } from "./lib/azure-openai.js";
 import { findTopKSimilar, extractRelevantSnippet } from "./lib/vector-search.js";
-import { handlePrismScan, handleRateRules } from "./tools/prism-scan.js";
+import { handlePrismScan } from "./tools/prism-scan.js";
 import { handleGetSkill } from "./tools/get-skill.js";
+import { handleListSkills } from "./tools/list-skills.js";
 import { handlePrismCheck } from "./tools/prism-check.js";
 import { handlePrismFix } from "./tools/prism-fix.js";
 import { extractRulesFromRepoScan } from "./tools/repo-extract.js";
 import { trackToolResponse, logTelemetryEvent } from "./middleware/token-counter.js";
 import { rankRulesByTask, formatRulesResponse, type RuleDoc } from "./middleware/smart-select.js";
-import { getCached, setCached, getCacheKey, loadDiskCacheIntoMemory, getCacheStats } from "./middleware/cache.js";
+import { getCached, setCached, getCacheKey } from "./middleware/cache.js";
 import { setCurrentClient, getCurrentClient } from "./middleware/client-detector.js";
-import { resolveFormat, resolveMaxTokens, getConfig as getPlatformConfig } from "./middleware/platform-formatter.js";
+import { resolveFormat, resolveMaxTokens } from "./middleware/platform-formatter.js";
 
 // =============================================================================
 // CONFIGURATION
@@ -397,6 +398,22 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
+        name: "list_skills",
+        description:
+          "List all available procedural skills for a project. Returns skill IDs, names, categories, and descriptions. " +
+          "Use this to discover what workflows the AI has been taught, then use get_skill to read the full steps.",
+        inputSchema: {
+          type: "object" as const,
+          properties: {
+            projectId: {
+              type: "string",
+              description: "The project ID to list skills for",
+            },
+          },
+          required: ["projectId"],
+        },
+      },
+      {
         name: "prism_check",
         description:
           "Validate code against pattern-based governance rules. Returns structured violations with line/column positions. " +
@@ -612,7 +629,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       // Smart selection: embed task, rank by similarity, apply truncation
       try {
-        const ranked = await rankRulesByTask(task, foundRules, maxTokens, format);
+        const ranked = await rankRulesByTask(task, foundRules, maxTokens);
         const text = formatRulesResponse(ranked, task, format);
         setCached(responseCacheKey, {
           text,
@@ -864,6 +881,10 @@ ${result.extractedRules && result.extractedRules.length > 0 ? `\n**Extracted Rul
       return await handleGetSkill(args as unknown as Parameters<typeof handleGetSkill>[0]);
     }
 
+    case "list_skills": {
+      return await handleListSkills(args as unknown as Parameters<typeof handleListSkills>[0]);
+    }
+
     case "prism_check":
     case "validate_code": {
       return await handlePrismCheck(args as unknown as Parameters<typeof handlePrismCheck>[0]);
@@ -885,7 +906,7 @@ ${result.extractedRules && result.extractedRules.length > 0 ? `\n**Extracted Rul
   }
   })();
 
-  const trackedResult = trackToolResponse(rawResult, name);
+  const trackedResult = trackToolResponse(rawResult);
   const rMeta = (rawResult as Record<string, unknown>)?._meta as Record<string, unknown> | undefined;
 
   logTelemetryEvent({

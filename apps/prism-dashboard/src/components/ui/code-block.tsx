@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Copy, Check } from "lucide-react";
 
 interface CodeBlockProps {
@@ -11,7 +11,7 @@ interface CodeBlockProps {
 }
 
 // Simple syntax highlighting without Prism (more reliable)
-function highlightSyntax(code: string, language: string): string {
+function highlightSyntax(code: string): string {
   // Basic patterns for TypeScript/TSX highlighting
   const patterns: Array<{ pattern: RegExp; className: string }> = [
     // Comments (must be first)
@@ -64,29 +64,24 @@ function highlightSyntax(code: string, language: string): string {
 
 export function CodeBlock({ 
   code, 
-  language = "tsx", 
+  language: _language = "tsx", 
   filename,
   showCopy = true 
 }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
-  const [highlightedCode, setHighlightedCode] = useState<string>("");
 
-  // Highlight on mount/change
-  useEffect(() => {
+  const highlightedCode = (() => {
     try {
-      const html = highlightSyntax(code, language);
-      setHighlightedCode(html);
+      return highlightSyntax(code);
     } catch (error) {
       console.error("Highlighting failed:", error);
       // Fallback to escaped HTML
-      setHighlightedCode(
-        code
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;")
-      );
+      return code
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
     }
-  }, [code, language]);
+  })();
 
   const handleCopy = useCallback(async () => {
     await navigator.clipboard.writeText(code);

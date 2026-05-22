@@ -12,7 +12,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
 import { getCollection } from "@jeffdev/db/cosmos";
 import { z } from "zod";
-import type { SubscriptionTier } from "@/lib/subscriptions";
 
 async function requireAdmin(adminUserId: string): Promise<void> {
   const clerk = await clerkClient();

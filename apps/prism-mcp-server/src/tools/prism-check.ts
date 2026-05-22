@@ -36,7 +36,7 @@ export async function handlePrismCheck(input: PrismCheckInput): Promise<{
   content: Array<{ type: "text"; text: string }>;
   isError?: boolean;
 }> {
-  const { code, ruleIds, projectId, filePath, category } = input;
+  const { code, ruleIds, projectId, category } = input;
 
   if (!code || typeof code !== "string") {
     return { content: [{ type: "text", text: "Error: code is required." }], isError: true };

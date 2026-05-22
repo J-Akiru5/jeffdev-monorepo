@@ -64,7 +64,6 @@ export async function GET(request: NextRequest) {
     const platform = e.clientPlatform || 'unknown';
     callsByPlatform[platform] = (callsByPlatform[platform] || 0) + 1;
   }
-  }
 
   const costEstimate = (totalTokens / 1000) * (GPT4O_MINI_PER_1K_INPUT + GPT4O_MINI_PER_1K_OUTPUT) / 2;
 

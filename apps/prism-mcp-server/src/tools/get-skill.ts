@@ -23,20 +23,34 @@ export async function handleGetSkill(input: GetSkillInput): Promise<GetSkillOutp
 
   try {
     const { getCollection } = await import("@jeffdev/db/cosmos");
+    const skills = await getCollection("skills");
     const rules = await getCollection("rules");
 
     let doc;
+    let isSkillDoc = true;
 
     if (ObjectId.isValid(skillId)) {
-      doc = await rules.findOne({ _id: new ObjectId(skillId) });
+      doc = await skills.findOne({ _id: new ObjectId(skillId) });
     }
 
     if (!doc) {
-      doc = await rules.findOne({ name: skillId });
+      doc = await skills.findOne({ name: { $regex: skillId, $options: "i" } });
     }
 
     if (!doc) {
-      doc = await rules.findOne({ skillsContent: { $exists: true, $ne: null }, name: { $regex: skillId, $options: "i" } });
+      isSkillDoc = false;
+      // Fallback to rules collection
+      if (ObjectId.isValid(skillId)) {
+        doc = await rules.findOne({ _id: new ObjectId(skillId) });
+      }
+
+      if (!doc) {
+        doc = await rules.findOne({ name: skillId });
+      }
+
+      if (!doc) {
+        doc = await rules.findOne({ skillsContent: { $exists: true, $ne: null }, name: { $regex: skillId, $options: "i" } });
+      }
     }
 
     if (!doc) {
@@ -46,10 +60,21 @@ export async function handleGetSkill(input: GetSkillInput): Promise<GetSkillOutp
       };
     }
 
-    const skillContent = (doc.skillsContent as string) || (doc.content as string);
-    const tokenCount = countTokensInText(skillContent);
+    let formatted = "";
 
-    const formatted = `# ${doc.name}\n\n${skillContent}\n\n---\n**Tokens:** ${tokenCount}`;
+    if (isSkillDoc) {
+      const stepsText = ((doc.steps as Array<{ title: string; content: string }>) || [])
+        .map((step, i) => `### Step ${i + 1}: ${step.title}\n\n${step.content}`)
+        .join("\n\n");
+      const desc = doc.description ? `${doc.description}\n\n` : "";
+      const fullText = `${desc}${stepsText}`;
+      const tokenCount = countTokensInText(fullText);
+      formatted = `# ${doc.name}\n\n${fullText}\n\n---\n**Tokens:** ${tokenCount}`;
+    } else {
+      const skillContent = (doc.skillsContent as string) || (doc.content as string);
+      const tokenCount = countTokensInText(skillContent);
+      formatted = `# ${doc.name}\n\n${skillContent}\n\n---\n**Tokens:** ${tokenCount}`;
+    }
 
     return {
       content: [{ type: "text", text: formatted }],

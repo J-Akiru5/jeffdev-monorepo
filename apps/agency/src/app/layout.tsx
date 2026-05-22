@@ -83,7 +83,6 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
-  themeColor: '#1c2124',
   icons: {
     icon: [
       { url: '/favicon.svg' },
@@ -92,6 +91,10 @@ export const metadata: Metadata = {
     shortcut: '/favicon/favicon.ico',
     apple: '/favicon/apple-icon.png',
   },
+};
+
+export const viewport = {
+  themeColor: '#1c2124',
 };
 
 /**

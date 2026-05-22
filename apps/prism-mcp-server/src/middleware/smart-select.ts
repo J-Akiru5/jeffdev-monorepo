@@ -181,8 +181,7 @@ function truncateByPriority(
 export async function rankRulesByTask(
   task: string,
   rules: RuleDoc[],
-  maxTokens: number = 4000,
-  format: "markdown" | "json" = "markdown"
+  maxTokens: number = 4000
 ): Promise<SmartSelectResult> {
   if (!task || rules.length === 0) {
     return { rules: [], skills: [], skippedRules: 0, dedupedRules: 0, totalRules: rules.length, tokenCount: 0 };

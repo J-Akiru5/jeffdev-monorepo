@@ -44,7 +44,9 @@ export function EventModal({
 
   // Reset form when modal opens
   useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) return;
+
+    const timer = setTimeout(() => {
       if (event) {
         setTitle(event.title);
         setDescription(event.description || '');
@@ -60,7 +62,9 @@ export function EventModal({
         setEnd('');
         setAllDay(true);
       }
-    }
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [isOpen, event, defaultDate]);
 
   const handleSubmit = () => {

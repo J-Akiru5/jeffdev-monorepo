@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  output: "standalone",
+  output: process.platform === "win32" ? undefined : "standalone",
 
   images: {
     remotePatterns: [

@@ -1,15 +1,16 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import { extractRulesFromRepoScan } from "./repo-extract.js";
+import type { RepoScanData } from "./repo-extract.js";
 
 describe("extractRulesFromRepoScan", () => {
   it("returns error when scan is missing", async () => {
-    const result = await extractRulesFromRepoScan({ scan: undefined as any });
+    const result = await extractRulesFromRepoScan({ scan: undefined as unknown as RepoScanData });
     expect(result.isError).toBe(true);
     expect(result.content[0]?.text).toContain("valid scan report");
   });
 
   it("returns error when scan has no structure", async () => {
-    const result = await extractRulesFromRepoScan({ scan: { root: "/test" } as any });
+    const result = await extractRulesFromRepoScan({ scan: { root: "/test" } as unknown as RepoScanData });
     expect(result.isError).toBe(true);
     expect(result.content[0]?.text).toContain("valid scan report");
   });

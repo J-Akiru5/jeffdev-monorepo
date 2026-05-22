@@ -1,0 +1,207 @@
+# Troubleshooting
+
+Solutions to common Prism problems.
+
+## Quick Checklist
+
+Before diving into specific issues, run:
+
+```bash
+prism doctor
+```
+
+This checks all systems and tells you exactly what's wrong with actionable fix commands.
+
+---
+
+## CLI Issues
+
+### `prism: command not found`
+
+**Cause:** The CLI wasn't installed globally, or your terminal doesn't see it.
+
+```bash
+# Re-install
+npm install -g @prism-engine/cli
+
+# If still not found, check npm's global bin is in your PATH
+npm bin -g
+# Add that path to your shell profile (.bashrc, .zshrc, etc.)
+```
+
+**Windows PowerShell:** You may need to add the npm global bin to your system PATH via Environment Variables settings.
+
+### `prism serve` crashes immediately
+
+**Cause:** Node.js version is too old.
+
+```bash
+node --version   # Must be ≥ 20
+```
+
+Install Node 20 from [nodejs.org](https://nodejs.org) or use `nvm`:
+
+```bash
+nvm install 20
+nvm use 20
+```
+
+### `prism sync` fails
+
+**Cause:** Invalid API key, or network issue.
+
+```bash
+# Check your key is set
+echo $PRISM_API_KEY
+
+# Re-login
+prism logout
+prism login
+prism sync
+```
+
+---
+
+## IDE Connection Issues
+
+### "MCP server not running" / IDE shows server error
+
+1. Check `prism` is installed: `prism --version`
+2. Check your MCP config uses `"args": ["serve"]` (not `"connect"`)
+3. Restart the IDE completely
+4. Run `prism doctor` to see all issues
+
+### No rules returned when I ask my AI
+
+**Most common cause:** Rules aren't synced locally.
+
+```bash
+prism sync
+```
+
+Then restart the MCP server in your IDE settings (or restart the IDE).
+
+**Second cause:** No rules exist yet.
+
+Go to the dashboard, open your project, and either:
+- Click "Create Rule" to add rules manually, or
+- Run `prism connect --url http://localhost:3000` to auto-generate them
+
+### AI doesn't seem to use the rules
+
+Rules are delivered via MCP — your AI must explicitly call `get_architectural_rules`. This happens automatically in Cursor and Windsurf because they call MCP tools on every prompt. In VS Code with Copilot, you may need to manually reference Prism in your prompt:
+
+> "Following my Prism architecture rules, build a login form."
+
+---
+
+## API Key Issues
+
+### "API key invalid" or "Unauthorized"
+
+1. Go to Dashboard → Settings → API Keys
+2. Check your key hasn't been revoked (red badge)
+3. Generate a new key and update your MCP config
+
+### Can't generate API keys
+
+API keys require **Pro plan** or above. Free plan users can:
+- Create rules manually in the dashboard (up to 5 rules)
+- Export as `.cursorrules` or `rules.md` and place in their project root
+
+### Key prefix shows but IDE won't connect
+
+Your full key may have expired or been revoked. Generate a new one:
+
+1. Dashboard → Settings → API Keys → Generate Key
+2. Copy the full key immediately (shown only once)
+3. Update your MCP config (`PRISM_API_KEY` env var)
+4. Restart your IDE
+
+---
+
+## Rule Extraction Issues
+
+### `prism connect --url` fails
+
+**Cause:** Playwright browsers aren't installed, or the URL isn't reachable.
+
+```bash
+# Install Playwright browsers
+npx playwright install chromium
+
+# Test if the URL is reachable
+curl http://localhost:3000
+```
+
+Make sure your dev server is running before scanning.
+
+### Extraction generates wrong or low-quality rules
+
+The quality depends on how much content Playwright can extract. Try:
+
+1. Run your dev server with more pages rendered (navigate around first)
+2. Increase depth: `prism connect --url http://localhost:3000 --depth 3`
+3. After extraction, review rules in the dashboard and edit or delete poor ones
+4. Use "Enhance with AI" on the rule edit page to improve rule wording
+
+---
+
+## Dashboard Issues
+
+### Dashboard loads but shows no projects
+
+1. Verify you're logged in with the correct account
+2. Check your projects at `prism.jeffdev.studio/projects`
+3. If you see projects in the CLI but not dashboard, run `prism sync` — data may need to refresh
+
+### "Failed to load API keys"
+
+This is usually a Cosmos DB connection issue on the server side. Try:
+1. Refresh the page
+2. Log out and log back in
+3. If persistent, check [status.jeffdev.studio](https://jeffdev.studio) for outages
+
+---
+
+## Offline Mode
+
+If you're working without internet:
+
+```bash
+prism serve --offline
+```
+
+**Limitations in offline mode:**
+- Rules served from `~/.prism/rules/rules.json` (last sync)
+- Keyword-based ranking instead of Gemini vector similarity
+- 8 of 9 MCP tools available (`prism_scan` requires internet)
+- No telemetry sync
+
+Run `prism sync` when you're back online to update your local cache.
+
+---
+
+## VS Code Extension Issues
+
+### Extension shows "Disconnected" status
+
+1. Check `prism serve` works: run it in a terminal manually
+2. Open the VS Code Output panel → select "Prism" channel for error details
+3. Verify your MCP config in `settings.json` uses `"args": ["serve"]`
+4. Reload the VS Code window: `Ctrl+Shift+P` → "Developer: Reload Window"
+
+### Diagnostics not appearing on save
+
+1. Check the extension is enabled: Extensions panel → search "Prism"
+2. Verify your project has rules (they need patterns/regex for code validation)
+3. Check the Prism output channel for errors
+4. If rules have no `pattern` field, code validation won't trigger — add regex patterns to rules via the dashboard
+
+---
+
+## Getting More Help
+
+- **GitHub Issues:** [github.com/J-Akiru5/jeffdev-monorepo/issues](https://github.com/J-Akiru5/jeffdev-monorepo/issues)
+- **CLI verbose mode:** Add `--verbose` to any command for detailed logs
+- **Prism doctor:** `prism doctor` — checks all systems and prints specific fix commands

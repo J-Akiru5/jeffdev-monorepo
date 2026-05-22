@@ -30,19 +30,56 @@ export default async function DashboardPage() {
     return null;
   }
 
-  // Fetch stats
+  // Date windows for trend calculation
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString();
+
+  // Fetch all collections
   const projectsCollection = await getCollection("projects");
   const rulesCollection = await getCollection("rules");
-  
-  const [projectCount, ruleCount, recentProjects] = await Promise.all([
-    projectsCollection.countDocuments({ userId }),
-    rulesCollection.countDocuments({ createdBy: userId }),
+  const generationsCollection = await getCollection("generations");
+  const videosCollection = await getCollection("video_contexts");
+
+  const [
+    projectCount, projectPrev,
+    ruleCount, rulePrev,
+    genCount, genPrev,
+    videoCount, videoPrev,
+    recentProjects,
+  ] = await Promise.all([
+    // Current window (last 30 days)
+    projectsCollection.countDocuments({ userId, createdAt: { $gte: thirtyDaysAgo } }),
+    // Previous window (30–60 days ago)
+    projectsCollection.countDocuments({ userId, createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo } }),
+    rulesCollection.countDocuments({ createdBy: userId, createdAt: { $gte: thirtyDaysAgo } }),
+    rulesCollection.countDocuments({ createdBy: userId, createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo } }),
+    generationsCollection.countDocuments({ userId, createdAt: { $gte: thirtyDaysAgo } }),
+    generationsCollection.countDocuments({ userId, createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo } }),
+    videosCollection.countDocuments({ userId, createdAt: { $gte: thirtyDaysAgo } }),
+    videosCollection.countDocuments({ userId, createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo } }),
     projectsCollection
       .find({ userId })
       .sort({ updatedAt: -1 })
       .limit(3)
       .toArray(),
   ]);
+
+  // Also fetch totals for card display
+  const [totalProjects, totalRules] = await Promise.all([
+    projectsCollection.countDocuments({ userId }),
+    rulesCollection.countDocuments({ createdBy: userId }),
+  ]);
+
+  // Helper to compute trend
+  const calcTrend = (curr: number, prev: number): { value: number; direction: "up" | "down" | "neutral" } => {
+    if (prev === 0 && curr === 0) return { value: 0, direction: "neutral" };
+    if (prev === 0) return { value: 100, direction: "up" };
+    const pct = Math.round(Math.abs(((curr - prev) / prev) * 100));
+    if (curr > prev) return { value: Math.min(pct, 999), direction: "up" };
+    if (curr < prev) return { value: Math.min(pct, 999), direction: "down" };
+    return { value: 0, direction: "neutral" };
+  };
 
   return (
     <div className="relative space-y-10">
@@ -84,37 +121,37 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Metrics Grid */}
+      {/* Metrics Grid — all real data */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricTile 
           label="Active Projects" 
-          value={projectCount} 
+          value={totalProjects} 
           icon={FolderKanban}
           intent="cyan"
           href="/projects"
-          trend={{ value: 12, direction: "up" }}
+          trend={calcTrend(projectCount, projectPrev)}
         />
         <MetricTile 
           label="Context Rules" 
-          value={ruleCount} 
+          value={totalRules} 
           icon={FileJson}
           intent="purple"
           href="/projects"
-          trend={{ value: 5, direction: "up" }}
+          trend={calcTrend(ruleCount, rulePrev)}
         />
         <MetricTile 
           label="AI Generations" 
-          value="0" 
+          value={genCount} 
           icon={Sparkles}
           href="/generate"
-          trend={{ value: 0, direction: "neutral" }}
+          trend={calcTrend(genCount, genPrev)}
         />
         <MetricTile 
           label="Video Contexts" 
-          value="0" 
+          value={videoCount} 
           icon={Video}
           href="/videos"
-          trend={{ value: 0, direction: "neutral" }}
+          trend={calcTrend(videoCount, videoPrev)}
         />
       </div>
 

@@ -24,9 +24,6 @@ async function verifyPayPalWebhook(
     const transmissionSig = request.headers.get('paypal-transmission-sig') || '';
     const certUrl = request.headers.get('paypal-cert-url') || '';
     const authAlgo = request.headers.get('paypal-auth-algo') || '';
-    const webhookEventUrl = request.headers.get('paypal-transmission-id')
-      ? `${process.env.NEXT_PUBLIC_SITE_URL || ''}/api/webhooks/paypal`
-      : '';
 
     const verificationResponse = await fetch(
       'https://api-m.paypal.com/v1/notifications/verify-webhook-signature',

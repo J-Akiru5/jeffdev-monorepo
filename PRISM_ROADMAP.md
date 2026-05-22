@@ -578,3 +578,14 @@ pnpm --filter @prism-engine/cli run test
 - IDE integration ready for real-world testing (Cursor/Windsurf/VS Code)
 - CLI ready: `prism init` → auto-config → `prism serve` → full MCP server → AI gets rules
 - `PRISM_CONTEXT.md` is the canonical AI handoff document
+
+### Session 2 — Skill Studio, Rule Templates, AI Governance Pattern
+
+**Completed:**
+- Implemented **Skill Studio** UI (`/skills`, `/skills/new`, `/skills/generate`, `/skills/[skillId]`)
+- Implemented **Rule Templates** UI and data (`/projects/[slug]/rules/templates`)
+- Separated "Rules" (constraints) and "Skills" (procedural guides) into two Cosmos DB collections.
+- Updated MCP server for **"Lazy Loading / Discovery"** governance pattern:
+  - Added `list_skills` for metadata discovery (30-50 tokens per skill)
+  - Upgraded `get_skill` for full procedural step-by-step execution guides
+- Optimized AI context usage to achieve the 2026 Enterprise AI Governance standard.

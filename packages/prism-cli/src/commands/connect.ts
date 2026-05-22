@@ -129,10 +129,10 @@ async function scanAndGenerate(url: string): Promise<void> {
   try {
     // Dynamically import MCP server's scan handler
     // In CLI mode, we invoke the extraction directly
-    const { scanUrl } = await import('../../../../apps/prism-mcp-server/src/lib/extractor.js');
-    const { generateRulesFromTokens, saveRulesLocal } = await import(
-      '../../../../apps/prism-mcp-server/src/lib/rule-generator.js'
-    );
+    const extractorPath = '../../../../apps/prism-mcp-server/src/lib/extractor.js';
+    const ruleGenPath = '../../../../apps/prism-mcp-server/src/lib/rule-generator.js';
+    const { scanUrl } = await import(extractorPath);
+    const { generateRulesFromTokens, saveRulesLocal } = await import(ruleGenPath);
 
     console.log('  📄 Launching browser...');
     const { tokens, rawMarkdown } = await scanUrl(url);

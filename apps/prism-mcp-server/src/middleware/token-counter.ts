@@ -24,8 +24,7 @@ export interface TokenMeta {
 }
 
 export function trackToolResponse(
-  result: ToolResponse,
-  toolName?: string
+  result: ToolResponse
 ): ToolResponse & { _meta: { tokenCount: number; byteSize: number } } {
   const text = result.content.map((c) => c.text).join("\n");
   const tokenCount = countTokensInText(text);

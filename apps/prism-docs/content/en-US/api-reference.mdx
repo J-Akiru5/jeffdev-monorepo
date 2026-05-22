@@ -1,0 +1,382 @@
+# API Reference
+
+REST API and MCP tool contracts for Prism Context Engine.
+
+## Authentication
+
+All REST API endpoints require a Clerk session token (browser) or API key (CLI/MCP).
+
+**API Key — Bearer token:**
+```
+Authorization: Bearer pk_live_YOUR_KEY_HERE
+```
+
+Get your API key: Dashboard → Settings → API Keys → Generate Key (Pro plan required)
+
+**Base URL:** `https://prism.jeffdev.studio/api`
+
+---
+
+## REST API
+
+### Projects
+
+#### List Projects
+```
+GET /api/v1/projects
+```
+
+Response:
+```json
+{
+  "projects": [
+    {
+      "id": "64abc...",
+      "name": "My App",
+      "slug": "my-app",
+      "stack": "nextjs",
+      "designSystem": "jdstudio",
+      "createdAt": "2026-05-01T00:00:00.000Z",
+      "updatedAt": "2026-05-15T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+#### Create Project
+```
+POST /api/v1/projects
+```
+
+Body:
+```json
+{
+  "name": "My App",
+  "stack": "nextjs",
+  "designSystem": "jdstudio"
+}
+```
+
+---
+
+### Rules
+
+#### List Rules
+```
+GET /api/v1/rules?projectId=64abc&category=styling&tag=color
+```
+
+Query params:
+| Param | Description |
+|-------|-------------|
+| `projectId` | Filter by project (required) |
+| `category` | Filter by category |
+| `tag` | Filter by tag |
+| `modifiedAfter` | ISO date — only return rules updated after this |
+| `detail=full` | Return full rule content (default: summary only) |
+
+#### Get Rule
+```
+GET /api/v1/rules/:id
+GET /api/v1/rules/:id?detail=full
+```
+
+#### Create Rule
+```
+POST /api/v1/rules
+```
+
+Body:
+```json
+{
+  "projectId": "64abc...",
+  "name": "Use Tailwind for styling",
+  "category": "styling",
+  "content": "Always use Tailwind CSS utility classes...",
+  "priority": 2,
+  "pattern": "style=\\{\\{",
+  "severity": "error",
+  "source": "manual"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `projectId` | string | ✅ | Target project ID |
+| `name` | string | ✅ | Rule display name |
+| `category` | string | ✅ | `architecture`, `styling`, `components`, `data-fetching`, `security`, `performance`, `testing`, `other` |
+| `content` | string | ✅ | Full rule text (markdown supported) |
+| `priority` | number | | 1–100. Default: 50. 1–3 = always included |
+| `pattern` | string | | Regex pattern for code validation |
+| `severity` | string | | `error`, `warning`, `info`. Default: `warning` |
+| `source` | string | | `manual`, `playwright`, `repo`. Default: `manual` |
+
+#### Update Rule
+```
+PATCH /api/v1/rules/:id
+```
+
+Body: any subset of Create Rule fields.
+
+#### Delete Rule
+```
+DELETE /api/v1/rules/:id
+```
+
+#### Extract Rules from Repo Scan
+```
+POST /api/v1/rules/extract
+```
+
+Body:
+```json
+{
+  "projectId": "64abc...",
+  "scanReport": { ... }   // RepoScanReport from prism sync --repo
+}
+```
+
+Response:
+```json
+{
+  "rules": [
+    { "name": "...", "category": "...", "content": "..." }
+  ],
+  "rulesCount": 12,
+  "modelUsed": "gemini-3.5-flash"
+}
+```
+
+---
+
+### Analytics
+
+#### Get Usage Analytics
+```
+GET /api/v1/analytics
+```
+
+Response:
+```json
+{
+  "totalTokens": 1240000,
+  "tokensByTool": {
+    "get_architectural_rules": 1100000,
+    "prism_check": 99000,
+    "get_skill": 41000
+  },
+  "tokensByProject": {
+    "my-app": 800000,
+    "other-project": 440000
+  },
+  "callsByPlatform": {
+    "cursor": 342,
+    "vscode": 189,
+    "windsurf": 78,
+    "claude_desktop": 45
+  },
+  "cacheHitRate": 0.43,
+  "costEstimate": "$24.80"
+}
+```
+
+---
+
+### API Keys
+
+#### List API Keys
+```
+GET /api/api-keys
+```
+
+Response:
+```json
+{
+  "keys": [
+    {
+      "id": "64abc...",
+      "name": "MacBook Pro",
+      "keyPrefix": "pk_live_abc",
+      "createdAt": "2026-05-01T00:00:00.000Z",
+      "lastUsedAt": "2026-05-20T10:30:00.000Z"
+    }
+  ],
+  "tier": "pro",
+  "limit": 1,
+  "canCreate": true
+}
+```
+
+#### Create API Key
+```
+POST /api/api-keys
+```
+
+Body: `{ "name": "My MacBook" }`
+
+Response:
+```json
+{
+  "id": "64abc...",
+  "name": "My MacBook",
+  "key": "pk_live_FULL_KEY_SHOWN_ONCE",
+  "keyPrefix": "pk_live_abc",
+  "createdAt": "2026-05-20T00:00:00.000Z",
+  "message": "Save this key — it won't be shown again."
+}
+```
+
+#### Revoke API Key
+```
+DELETE /api/api-keys/:id
+```
+
+---
+
+## MCP Tool Reference
+
+Prism exposes 9 MCP tools via stdio transport (JSON-RPC 2.0). Your IDE accesses these automatically when `prism serve` is running.
+
+### `get_architectural_rules`
+
+Returns ranked, relevant rules for a developer task.
+
+**Input:**
+```typescript
+{
+  task: string;          // REQUIRED — current coding task
+  projectId: string;     // REQUIRED — project to fetch rules for
+  maxTokens?: number;    // Default: 4000
+  format?: "json" | "markdown";  // Default: "markdown"
+  category?: string;     // Filter by category
+  tag?: string;          // Filter by tag
+}
+```
+
+**Output:**
+```typescript
+{
+  rules: Array<{
+    id: string;
+    title: string;
+    priority: "high" | "medium" | "low";
+    content: string;
+  }>;
+  skills: Array<{
+    id: string;
+    name: string;
+    summary: string;   // 1-line description only
+  }>;
+  tokenCount: number;
+  skippedRules: number;
+}
+```
+
+---
+
+### `get_skill`
+
+Fetch full procedural content for a skill (on demand).
+
+**Input:** `{ skillId: string; projectId?: string }`
+
+**Output:** `{ id: string; name: string; content: string; tokenCount: number }`
+
+---
+
+### `prism_scan`
+
+Scan a URL with Playwright and generate rules.
+
+**Input:** `{ url: string; projectId?: string }`
+
+**Output:** `{ rules: ExtractedRule[]; rulesCount: number; pagesScanned: number }`
+
+---
+
+### `prism_check` / `validate_code`
+
+Validate code against your rules (regex-based).
+
+**Input:**
+```typescript
+{
+  code: string;
+  projectId?: string;
+  ruleIds?: string[];
+  filePath?: string;
+  category?: string;
+}
+```
+
+**Output:**
+```typescript
+{
+  status: "pass" | "fail";
+  violations: Array<{
+    ruleId: string;
+    ruleName: string;
+    pattern: string;
+    message: string;
+    severity: "error" | "warning" | "info";
+    line: number;
+    column: number;
+    endLine: number;
+    endColumn: number;
+    matchedText: string;
+    suggestion: string;
+  }>;
+  checkedRules: number;
+}
+```
+
+---
+
+### `prism_fix`
+
+Auto-correct a violation.
+
+**Input:** `{ violation: Violation; code: string }`
+
+**Output:**
+```typescript
+{
+  correctedCode: string;
+  appliedRule: string;
+  confidence: number;  // 0–1
+  changes: string[];
+  description: string;
+}
+```
+
+Known fix patterns: cross-app imports → `@repo/` alias, inline styles → Tailwind comment, `console.log` → commented out.
+
+---
+
+### `repo_extract`
+
+Generate rules from a repository scan report.
+
+**Input:** `{ scanReport: RepoScanReport; projectId?: string }`
+
+**Output:** `{ rules: ExtractedRule[]; rulesCount: number; modelUsed: string }`
+
+---
+
+### `search_video_transcript` (Beta)
+
+Semantic search over video transcripts.
+
+**Input:** `{ query: string; projectId: string }`
+
+**Output:** `{ results: VideoResult[] }`
+
+---
+
+### `validate_code_pattern` (Legacy)
+
+Pattern matching on code.
+
+**Input:** `{ code: string; pattern: string }`
+
+**Output:** `{ matches: boolean; locations: Location[] }`

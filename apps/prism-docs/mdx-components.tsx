@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMDXComponents as getThemeComponents } from 'nextra-theme-docs'
 import { Callout, Steps, Tabs } from 'nextra/components'
 import Link from 'next/link'
 import type { ReactNode, ReactElement } from 'react'
-import { TranslatedContent, useLocale } from '@/app/components/translated-content'
+import { TranslatedContent } from '@/app/components/translated-content'
 
 // Icon wrapper for Card component
 function CardIcon({ children }: { children: ReactNode }) {
@@ -82,13 +83,13 @@ const themeComponents = getThemeComponents()
 export function useMDXComponents(components?: Record<string, React.ComponentType<any>>): Record<string, React.ComponentType<any>> {
   return {
     ...themeComponents,
-    Card,
-    Cards,
-    FeatureCard,
-    TranslatedContent,
-    Callout,
-    Steps,
-    Tabs,
+    Card: Card as React.ComponentType<any>,
+    Cards: Cards as React.ComponentType<any>,
+    FeatureCard: FeatureCard as React.ComponentType<any>,
+    TranslatedContent: TranslatedContent as React.ComponentType<any>,
+    Callout: Callout as React.ComponentType<any>,
+    Steps: Steps as React.ComponentType<any>,
+    Tabs: Tabs as React.ComponentType<any>,
     ...components
   }
 }

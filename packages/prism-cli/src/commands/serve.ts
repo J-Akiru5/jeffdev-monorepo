@@ -513,10 +513,12 @@ async function runLiteServer(): Promise<void> {
           const targetLine = ((violation.line as number) || 1) - 1;
           if (targetLine >= 0 && targetLine < codeLines.length) {
             const original = codeLines[targetLine];
-            codeLines[targetLine] = `${original} // FIXME: ${ruleName}`;
-            correctedCode = codeLines.join('\n');
-            confidence = 0.3;
-            changes.push({ line: (violation.line as number) || 0, from: original, to: codeLines[targetLine] });
+            if (original !== undefined) {
+              codeLines[targetLine] = `${original} // FIXME: ${ruleName}`;
+              correctedCode = codeLines.join('\n');
+              confidence = 0.3;
+              changes.push({ line: (violation.line as number) || 0, from: original, to: codeLines[targetLine] as string });
+            }
           }
         }
 

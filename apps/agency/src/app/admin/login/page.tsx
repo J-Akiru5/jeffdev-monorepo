@@ -10,6 +10,7 @@ import { Loader2 } from 'lucide-react';
  * Admin Login Page
  * ----------------
  * Google OAuth authentication for admin access.
+ * Glassmorphism + neon accent design for brand consistency.
  */
 
 function AdminLoginForm() {
@@ -19,7 +20,6 @@ function AdminLoginForm() {
   const searchParams = useSearchParams();
   const inviteToken = searchParams.get('invite');
 
-  // UI Text based on context
   const title = inviteToken ? 'Join Team' : 'Admin Login';
   const subtitle = inviteToken
     ? 'Sign in with your invited Google account to complete setup'
@@ -32,17 +32,15 @@ function AdminLoginForm() {
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      
-      // Get ID token
+
       const idToken = await result.user.getIdToken();
 
-      // Create session cookie via API route
       const response = await fetch('/api/auth/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           idToken,
-          inviteToken // Pass invite token if present
+          inviteToken,
         }),
       });
 
@@ -52,12 +50,10 @@ function AdminLoginForm() {
         throw new Error(data.error || 'Failed to create session');
       }
 
-      // Redirect to dashboard or profile setup
       router.push(data.redirectPath || '/admin');
     } catch (err) {
       console.error('[LOGIN ERROR]', err);
       const error = err as { code?: string; message: string };
-      // Handle Firebase Auth errors (like popup closed)
       if (error.code === 'auth/popup-closed-by-user') {
         setIsLoading(false);
         return;
@@ -70,13 +66,22 @@ function AdminLoginForm() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-void px-6">
       <div className="w-full max-w-md">
-        <div className="rounded-md border border-white/[0.08] bg-white/[0.02] p-8">
+        {/* Glass Card */}
+        <div className="relative overflow-hidden glass-heavy glass-shimmer rounded-lg p-10">
+          {/* Neon accent top bar */}
+          <div className="absolute top-0 left-4 right-4 h-px animate-border-beam" />
+
           <div className="mb-8 text-center">
-            {/* Logo or specialized icon could go here */}
-            <h1 className="text-2xl font-bold text-white">{title}</h1>
-            <p className="mt-2 text-white/50 text-sm">
-              {subtitle}
-            </p>
+            {/* Logo icon */}
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-cyan-500/10 border border-cyan-500/30 animate-neon-pulse">
+              <svg className="h-8 w-8 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 6v6l4 2" />
+              </svg>
+            </div>
+
+            <h1 className="text-3xl font-bold text-white">{title}</h1>
+            <p className="mt-2 text-white/50 text-sm">{subtitle}</p>
           </div>
 
           {error && (
@@ -88,11 +93,11 @@ function AdminLoginForm() {
           <button
             onClick={handleGoogleLogin}
             disabled={isLoading}
-            className="flex w-full items-center justify-center gap-3 rounded-md border border-white/10 bg-white/5 px-6 py-3 text-white transition-all hover:border-white/20 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-3 glass rounded-md px-6 py-3.5 text-white/80 transition-all hover:border-cyan-500/30 hover:text-white hover:shadow-[0_0_25px_rgba(6,182,212,0.15)] disabled:cursor-not-allowed disabled:opacity-50 font-mono text-xs uppercase tracking-wider"
           >
             {isLoading ? (
               <>
-                <Loader2 className="h-5 w-5 animate-spin" />
+                <Loader2 className="h-5 w-5 animate-spin text-cyan-400" />
                 {inviteToken ? 'Setting up...' : 'Signing in...'}
               </>
             ) : (
@@ -119,7 +124,15 @@ function AdminLoginForm() {
               </>
             )}
           </button>
+
+          {/* Neon accent bottom bar */}
+          <div className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
         </div>
+
+        {/* Small footer text */}
+        <p className="mt-6 text-center text-[11px] text-white/25 font-mono">
+          Authorized personnel only
+        </p>
       </div>
     </div>
   );
@@ -127,7 +140,11 @@ function AdminLoginForm() {
 
 export default function AdminLoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-void" />}>
+    <Suspense fallback={
+      <div className="min-h-screen bg-void flex items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-cyan-400" />
+      </div>
+    }>
       <AdminLoginForm />
     </Suspense>
   );

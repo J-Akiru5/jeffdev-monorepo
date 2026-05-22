@@ -64,7 +64,7 @@ export default async function WorkPage() {
                 <Link
                   key={project.slug}
                   href={`/work/${project.slug}`}
-                  className="group relative overflow-hidden rounded-md border border-white/[0.08] bg-white/[0.02] transition-all duration-300 hover:border-white/[0.15] hover:bg-white/[0.04]"
+                  className="group relative overflow-hidden glass-neon glass-shimmer transition-all duration-300 hover:border-white/[0.15] hover:bg-white/[0.04]"
                 >
                   <div className="grid gap-6 p-8 lg:grid-cols-2">
                     {/* Left: Content */}
@@ -135,7 +135,7 @@ export default async function WorkPage() {
                   <Link
                     key={project.slug}
                     href={`/work/${project.slug}`}
-                    className="group flex items-start gap-4 rounded-md border border-white/[0.06] bg-white/[0.02] p-6 transition-all hover:border-white/[0.12] hover:bg-white/[0.04]"
+                    className="group flex items-start gap-4 glass-neon glass-shimmer p-6 transition-all hover:border-white/[0.12] hover:bg-white/[0.04]"
                   >
                     <div className="flex-1">
                       <span className="font-mono text-[10px] uppercase tracking-wider text-cyan-400/70">

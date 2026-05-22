@@ -168,7 +168,7 @@ export async function scanUrl(
         }
 
         try {
-          const snapshot = await (page as any).accessibility.snapshot();
+          const snapshot = await (page as unknown as { accessibility: { snapshot(): Promise<unknown> } }).accessibility.snapshot();
           if (snapshot) totalTokens += MAX_TOKENS_ESTIMATE(JSON.stringify(snapshot));
         } catch { /* accessibility snapshot unavailable */ }
 

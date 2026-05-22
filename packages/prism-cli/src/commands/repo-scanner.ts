@@ -105,13 +105,14 @@ export async function scanRepo(repoPath: string): Promise<RepoScanReport> {
 
   // Build summary
   const totalNaming = Object.values(naming.files).reduce((a, b) => a + b, 0);
-  const dominantFileConvention = Object.entries(naming.files).sort((a, b) => b[1] - a[1])[0]?.[0] || "unknown";
+  const fileEntries = Object.entries(naming.files).sort((a, b) => b[1] - a[1]);
+  const dominantFileConvention = fileEntries.length > 0 && fileEntries[0] ? fileEntries[0][0] : "unknown";
   const topExternal = Object.entries(imports.external).sort((a, b) => b[1] - a[1]).slice(0, 10);
 
   const summary = [
     `Scanned ${fileCount} files in ${dirCount} directories`,
     `Languages: ${Object.entries(languages).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([e, c]) => `${e}: ${c}`).join(", ")}`,
-    totalNaming > 0 ? `File naming convention: ${dominantFileConvention} (${Math.round((naming.files[dominantFileConvention] / totalNaming) * 100)}%)` : "No source files found",
+    totalNaming > 0 ? `File naming convention: ${dominantFileConvention} (${Math.round(((naming.files[dominantFileConvention] ?? 0) / totalNaming) * 100)}%)` : "No source files found",
     imports.relative > 0 ? `Imports: ${imports.relative} relative, ${imports.absolute} absolute` : "",
     topExternal.length > 0 ? `Top deps: ${topExternal.map(([d]) => d).join(", ")}` : "",
   ].filter(Boolean).join("\n");
@@ -152,6 +153,7 @@ function analyzeContent(
   const funcRegex = /(?:export\s+)?(?:function|const)\s+(\w+)\s*(?:=\s*(?:\(|async\s*\())?/g;
   let m: RegExpExecArray | null;
   while ((m = funcRegex.exec(content)) !== null) {
+    if (!m[1]) continue;
     const convention = detectVarConvention(m[1]);
     naming.functions[convention] = (naming.functions[convention] || 0) + 1;
   }
@@ -159,6 +161,7 @@ function analyzeContent(
   // Extract component declarations (PascalCase functions returning JSX or with React.FC)
   const compRegex = /(?:export\s+)?(?:function|const)\s+([A-Z]\w*)\s*(?::\s*(?:React\.)?FC|=(?:\s*React\.)?\s*(?:memo\s*)?\s*(?:\(|async\s*\())?/g;
   while ((m = compRegex.exec(content)) !== null) {
+    if (!m[1]) continue;
     const convention = detectVarConvention(m[1]);
     naming.components[convention] = (naming.components[convention] || 0) + 1;
   }
@@ -166,6 +169,7 @@ function analyzeContent(
   // Extract variable declarations (const/let/var)
   const varRegex = /(?:const|let|var)\s+(\w+)\s*[=:]/g;
   while ((m = varRegex.exec(content)) !== null) {
+    if (!m[1]) continue;
     const convention = detectVarConvention(m[1]);
     naming.variables[convention] = (naming.variables[convention] || 0) + 1;
   }
@@ -184,8 +188,10 @@ function analyzeContent(
       imports.internal[pkg] = (imports.internal[pkg] || 0) + 1;
     } else {
       imports.absolute++;
-      const pkg = spec.startsWith("@") ? spec.split("/").slice(0, 2).join("/") : spec.split("/")[0];
-      imports.external[pkg] = (imports.external[pkg] || 0) + 1;
+      const pkg = spec.startsWith("@") ? spec.split("/").slice(0, 2).join("/") : (spec.split("/")[0] || "");
+      if (pkg) {
+        imports.external[pkg] = (imports.external[pkg] || 0) + 1;
+      }
     }
   }
 }

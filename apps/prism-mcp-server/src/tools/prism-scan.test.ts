@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { formatExtractionAsMarkdown, type ExtractedDesignTokens } from "../lib/extractor.js";
 import type { PrismScanInput } from "./prism-scan.js";
 

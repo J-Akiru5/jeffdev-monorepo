@@ -27,7 +27,6 @@ import { resolve } from "node:path";
 import { randomUUID } from "node:crypto";
 import { createInterface } from "node:readline";
 import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 
 // Load root .env so the test works standalone (without Doppler)
 try {
@@ -78,10 +77,7 @@ function skip(msg: string) {
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
-/** Inline timeout helper */
-function delay(ms: number) {
-  return new Promise((r) => setTimeout(r, ms));
-}
+
 
 /** Connect to Cosmos DB and return the rules collection */
 async function connectDB(): Promise<Collection<Document>> {
@@ -373,13 +369,21 @@ async function runTests() {
     } else {
       const result = resp.result as { content?: Array<{ text: string }>; _meta?: Record<string, unknown> };
       const hasContent = result.content?.[0]?.text?.length > 0;
-      hasContent ? ok("get_architectural_rules returned content") : fail("get_architectural_rules returned empty content");
+      if (hasContent) {
+        ok("get_architectural_rules returned content");
+      } else {
+        fail("get_architectural_rules returned empty content");
+      }
 
       // Verify our test rules are findable — they may not appear in top-5 fallback if
       // other low-priority rules exist in the DB, but they ARE in the DB (confirmed below
       // via prism_check). Check the DB directly to be sure.
       const count = await col!.countDocuments({ _id: { $regex: `^${TEST_PREFIX}` } });
-      count === 5 ? ok(`${count} seeded test rules exist in DB`) : fail(`Expected 5 test rules, found ${count}`);
+      if (count === 5) {
+        ok(`${count} seeded test rules exist in DB`);
+      } else {
+        fail(`Expected 5 test rules, found ${count}`);
+      }
 
       // Check if smart selection used embeddings or fell back
       const meta = result._meta || {};
@@ -405,7 +409,11 @@ async function runTests() {
     });
     const result2 = resp2.result as { _meta?: Record<string, unknown> };
     const cacheHit = result2._meta?.cacheHit === true;
-    cacheHit ? ok("Full response cache hit on second identical call") : skip("Response not cached (first call might still be in-flight)");
+    if (cacheHit) {
+      ok("Full response cache hit on second identical call");
+    } else {
+      skip("Response not cached (first call might still be in-flight)");
+    }
   } catch (e) {
     fail("Cached get_architectural_rules threw", e);
   }
@@ -423,7 +431,11 @@ async function runTests() {
       const result = resp.result as { content?: Array<{ text: string }> };
       const text = result.content?.[0]?.text || "";
       const hasContent = text.includes("Functional Components");
-      hasContent ? ok("get_skill returned skill content with code examples") : fail("get_skill returned content without expected patterns");
+      if (hasContent) {
+        ok("get_skill returned skill content with code examples");
+      } else {
+        fail("get_skill returned content without expected patterns");
+      }
     }
   } catch (e) {
     fail("get_skill threw", e);
@@ -449,13 +461,25 @@ export function MyComponent() {
       const result = resp.result as { content?: Array<{ text: string }> };
       const text = result.content?.[0]?.text || "";
       const hasViolations = text.includes("VIOLATION") || text.includes("violation");
-      hasViolations ? ok("prism_check detected violations in bad code") : fail("prism_check did not flag violations");
+      if (hasViolations) {
+        ok("prism_check detected violations in bad code");
+      } else {
+        fail("prism_check did not flag violations");
+      }
 
       const hasCrossApp = text.includes("../../apps/") || text.includes("cross-app") || text.includes("cross_app") || text.includes("Cross-App");
-      hasCrossApp ? ok("prism_check caught cross-app import") : fail("prism_check missed cross-app import");
+      if (hasCrossApp) {
+        ok("prism_check caught cross-app import");
+      } else {
+        fail("prism_check missed cross-app import");
+      }
 
       const hasInlineStyle = text.includes("style={{") || text.includes("inline") || text.includes("Inline");
-      hasInlineStyle ? ok("prism_check caught inline style") : skip("Inline style not flagged (may need DB pattern rules)");
+      if (hasInlineStyle) {
+        ok("prism_check caught inline style");
+      } else {
+        skip("Inline style not flagged (may need DB pattern rules)");
+      }
     }
   } catch (e) {
     fail("prism_check threw", e);
@@ -486,7 +510,11 @@ export function MyComponent() {
       const result = resp.result as { content?: Array<{ text: string }> };
       const text = result.content?.[0]?.text || "";
       const hasFix = text.includes("@repo") || text.includes("correctedCode") || text.includes("FIXME");
-      hasFix ? ok("prism_fix applied a fix") : fail("prism_fix did not return expected content");
+      if (hasFix) {
+        ok("prism_fix applied a fix");
+      } else {
+        fail("prism_fix did not return expected content");
+      }
     }
   } catch (e) {
     fail("prism_fix threw", e);
@@ -526,7 +554,11 @@ export function MyComponent() {
         const result = resp.result as { content?: Array<{ text: string }> };
         const text = result.content?.[0]?.text || "";
         const hasRules = text.includes("rules") || text.includes("Rules") || text.includes("rule");
-        hasRules ? ok("repo_extract generated rules from scan data") : fail("repo_extract returned content without rules");
+        if (hasRules) {
+          ok("repo_extract generated rules from scan data");
+        } else {
+          fail("repo_extract returned content without rules");
+        }
       }
     } catch (e) {
       fail("repo_extract threw", e);
@@ -547,7 +579,11 @@ export function MyComponent() {
     const result = resp.result as { content?: Array<{ text: string }> };
     const text = result.content?.[0]?.text || "";
     const isJson = text.startsWith("{") || text.startsWith("[") || text.includes('"rules"');
-    isJson ? ok("JSON format works (platform formatting)") : skip("JSON format: embeddings unavailable → fallback returns markdown regardless of format param");
+    if (isJson) {
+      ok("JSON format works (platform formatting)");
+    } else {
+      skip("JSON format: embeddings unavailable → fallback returns markdown regardless of format param");
+    }
   } catch (e) {
     fail("Platform-specific formatting threw", e);
   }
@@ -567,9 +603,11 @@ export function MyComponent() {
         fail("validate_code returned error", resp.error);
       }
     } else {
-      text.includes("VIOLATION") || text.includes("violation")
-        ? ok("validate_code alias works (same as prism_check)")
-        : fail("validate_code returned but no violations detected");
+      if (text.includes("VIOLATION") || text.includes("violation")) {
+        ok("validate_code alias works (same as prism_check)");
+      } else {
+        fail("validate_code returned but no violations detected");
+      }
     }
   } catch (e) {
     fail("validate_code threw", e);

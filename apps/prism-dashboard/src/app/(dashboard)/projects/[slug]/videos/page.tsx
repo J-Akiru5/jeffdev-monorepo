@@ -51,8 +51,8 @@ export default async function VideosPage({ params }: Props) {
     .toArray();
 
   // Fetch ALL assets from Mux to show pending ones too
-  let muxAssets: MuxAsset[] = [];
-  let orphanedAssets: MuxAsset[] = []; // Videos without project association
+  const muxAssets: MuxAsset[] = [];
+  const orphanedAssets: MuxAsset[] = []; // Videos without project association
   let muxError: string | null = null;
   
   try {
@@ -190,7 +190,7 @@ export default async function VideosPage({ params }: Props) {
           </p>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {orphanedAssets.map((asset) => (
-              <OrphanedVideoCard key={asset.id} asset={asset} projectSlug={slug} />
+              <OrphanedVideoCard key={asset.id} asset={asset} />
             ))}
           </div>
         </div>
@@ -211,6 +211,7 @@ function VideoCard({ video, slug }: { video: Record<string, unknown>; slug: stri
         {/* Thumbnail */}
         <div className="relative aspect-video bg-[#0a0a0a]">
           {playbackId ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={`https://image.mux.com/${playbackId}/thumbnail.jpg?time=5`}
               alt={video.videoTitle as string}
@@ -276,6 +277,7 @@ function PendingVideoCard({ asset }: { asset: MuxAsset }) {
       {/* Thumbnail */}
       <div className="relative aspect-video bg-[#0a0a0a]">
         {playbackId ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={`https://image.mux.com/${playbackId}/thumbnail.jpg?time=5`}
             alt={title}
@@ -318,7 +320,7 @@ function PendingVideoCard({ asset }: { asset: MuxAsset }) {
   );
 }
 
-function OrphanedVideoCard({ asset, projectSlug }: { asset: MuxAsset; projectSlug: string }) {
+function OrphanedVideoCard({ asset }: { asset: MuxAsset }) {
   const playbackId = asset.playback_ids?.[0]?.id;
   const duration = asset.duration || 0;
   const createdAt = new Date(asset.created_at);
@@ -328,6 +330,7 @@ function OrphanedVideoCard({ asset, projectSlug }: { asset: MuxAsset; projectSlu
       {/* Thumbnail */}
       <div className="relative aspect-video bg-[#0a0a0a]">
         {playbackId ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={`https://image.mux.com/${playbackId}/thumbnail.jpg?time=5`}
             alt={`Video ${asset.id.slice(0, 8)}`}

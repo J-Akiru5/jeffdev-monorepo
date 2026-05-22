@@ -120,6 +120,90 @@ export const projects: Project[] = [
     technologies: ['Next.js', 'Stripe', 'PostgreSQL', 'Vercel', 'Resend'],
     featured: false,
   },
+  {
+    id: 'likaslens',
+    slug: 'likaslens',
+    title: 'LikasLens',
+    client: 'Civic Tech Initiative',
+    category: 'Civic Tech',
+    tagline: 'Smart community watchdog for environmental accountability',
+    description:
+      'A platform that empowers everyday citizens to earn rewards for reporting minor environmental issues, while a public scoreboard holds local governments accountable for resolution speed.',
+    challenge:
+      'Communities lacked an accessible way to report environmental violations and track government response. Existing channels were slow, opaque, and offered no incentive for citizen participation.',
+    solution:
+      'Built a mobile-first reporting platform with geotagged submissions, reward incentives, automated government routing, and a public transparency scoreboard ranking LGU response times.',
+    results: [
+      { metric: 'Response Rate', value: '+200%' },
+      { metric: 'Issue Resolution', value: '3x Faster' },
+      { metric: 'Citizen Reports', value: '500+' },
+    ],
+    technologies: ['JavaScript', 'React', 'Node.js', 'Firebase', 'Mapbox'],
+    featured: true,
+  },
+  {
+    id: 'energy-monitoring',
+    slug: 'energy-monitoring',
+    title: 'Energy Monitoring',
+    client: 'IoT Infrastructure',
+    category: 'IoT & Monitoring',
+    tagline: 'Real-time IoT energy monitoring system',
+    description:
+      'A real-time monitoring dashboard for IoT sensor networks, tracking energy consumption patterns with live visualizations and anomaly detection.',
+    challenge:
+      'Facilities needed granular, real-time visibility into energy usage across multiple zones to identify waste, predict failures, and optimize consumption.',
+    solution:
+      'Developed a TypeScript-based monitoring pipeline ingesting MQTT sensor data, rendering live charts, and triggering alerts on consumption anomalies via threshold rules.',
+    results: [
+      { metric: 'Energy Waste Detected', value: '-40%' },
+      { metric: 'Sensor Uptime', value: '99.8%' },
+      { metric: 'Alert Accuracy', value: '94%' },
+    ],
+    technologies: ['TypeScript', 'Node.js', 'MQTT', 'React', 'Chart.js', 'InfluxDB'],
+    featured: true,
+  },
+  {
+    id: 'dswd-dams',
+    slug: 'dswd-dams',
+    title: 'DAMS',
+    client: 'DSWD Regional Office',
+    category: 'Government System',
+    tagline: 'DSWD Assistance Management System',
+    description:
+      'A centralized case management system for the Department of Social Welfare and Development, streamlining beneficiary intake, assistance tracking, and reporting workflows.',
+    challenge:
+      'Social workers managed thousands of beneficiary cases using paper records and spreadsheets, leading to duplicate entries, lost follow-ups, and delayed assistance distribution.',
+    solution:
+      'Built a PHP-based web application with structured beneficiary profiles, assistance type categorization, case status tracking, and automated report generation for regional compliance.',
+    results: [
+      { metric: 'Processing Time', value: '-60%' },
+      { metric: 'Duplicate Records', value: '-90%' },
+      { metric: 'Cases Managed', value: '1,200+' },
+    ],
+    technologies: ['PHP', 'Laravel', 'MySQL', 'Bootstrap', 'JavaScript'],
+    featured: true,
+  },
+  {
+    id: 'e-bhm-connect',
+    slug: 'e-bhm-connect',
+    title: 'e-BHM Connect',
+    client: 'Barangay Health Unit',
+    category: 'Health Tech',
+    tagline: 'E-Barangay Health Management System',
+    description:
+      'A digital health records and management platform for barangay health centers, enabling patient registration, consultation logging, maternal care tracking, and health program reporting.',
+    challenge:
+      'Barangay health workers relied on manual logbooks and fragmented records, making it difficult to track patient history, schedule follow-ups, and report health trends to municipal offices.',
+    solution:
+      'Designed a role-based web system with patient lifecycle management, automated appointment reminders, maternal and child health modules, and dashboard analytics for health program monitoring.',
+    results: [
+      { metric: 'Record Retrieval', value: '10x Faster' },
+      { metric: 'Patient Follow-ups', value: '+75%' },
+      { metric: 'Reporting Time', value: '-80%' },
+    ],
+    technologies: ['PHP', 'Laravel', 'MySQL', 'Bootstrap', 'JavaScript'],
+    featured: true,
+  },
 ];
 
 export function getProjectBySlug(slug: string): Project | undefined {
