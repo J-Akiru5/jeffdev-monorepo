@@ -6,7 +6,7 @@
  * Main task list view showing all tasks organized by project.
  */
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { TaskList } from '@/components/task-list';
 import { useProjects } from '@/contexts/project-context';
@@ -32,7 +32,7 @@ const initialMockTasks: Task[] = [
   { id: '15', projectId: '5', title: 'Logo making', completed: false, starred: false, order: 3, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
 ];
 
-export default function TasksPage() {
+function TasksContent() {
   const { projects, activeProjectId } = useProjects();
   const [tasks, setTasks] = useState<Task[]>(initialMockTasks);
   const searchParams = useSearchParams();
@@ -139,5 +139,13 @@ export default function TasksPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function TasksPage() {
+  return (
+    <Suspense fallback={<div className="text-center py-12 text-white/40">Loading tasks...</div>}>
+      <TasksContent />
+    </Suspense>
   );
 }

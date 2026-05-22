@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Footer, Layout, Navbar } from 'nextra-theme-docs'
+import { Layout, Navbar } from 'nextra-theme-docs'
 import { Banner, Head } from 'nextra/components'
 import { getPageMap } from 'nextra/page-map'
 import type { PageMapItem } from 'nextra'
@@ -114,19 +114,19 @@ export default async function RootLayout({
 
   if (Array.isArray(rawPageMap) && rawPageMap.length > 0) {
     // Find the current locale folder item
-    const currentLocaleItem = rawPageMap.find((item: any) =>
-      item && typeof item === 'object' && item.name === lang
+    const currentLocaleItem = (rawPageMap as Record<string, unknown>[]).find((item) =>
+      item && item.name === lang
     )
 
-    if (currentLocaleItem && 'children' in currentLocaleItem && Array.isArray(currentLocaleItem.children)) {
+    if (currentLocaleItem && Array.isArray(currentLocaleItem.children)) {
       // Use the locale folder's children as the pageMap
-      pageMap = currentLocaleItem.children
+      pageMap = currentLocaleItem.children as PageMapItem[]
     } else {
       // Fallback: filter out all locale folders and internal dirs from top level
       const EXCLUDE = [...LOCALE_FOLDERS, 'api', 'components', 'hooks']
-      pageMap = rawPageMap.filter((item: any) =>
-        item && typeof item === 'object' && item.name && !EXCLUDE.includes(item.name)
-      )
+      pageMap = (rawPageMap as Record<string, unknown>[]).filter((item) =>
+        item && item.name && !EXCLUDE.includes(item.name as string)
+      ) as unknown as PageMapItem[]
     }
   }
 

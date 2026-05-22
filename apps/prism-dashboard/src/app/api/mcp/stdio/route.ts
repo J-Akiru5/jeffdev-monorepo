@@ -28,6 +28,23 @@ interface McpResponse {
   error?: { code: number; message: string };
 }
 
+interface BrandDocument {
+  companyName?: string;
+  industry?: string;
+  tagline?: string;
+  colors?: Record<string, string>;
+  typography?: {
+    headingFont?: string;
+    bodyFont?: string;
+    scale?: string;
+  };
+  voice?: {
+    personality?: string;
+    formality?: string;
+    keywords?: string[];
+  };
+}
+
 export async function POST(request: NextRequest): Promise<NextResponse<McpResponse>> {
   // 1. Authenticate
   const { userId } = await auth();
@@ -66,11 +83,19 @@ export async function POST(request: NextRequest): Promise<NextResponse<McpRespon
   try {
     const result = await handleMcpMethod(mcpRequest.method, mcpRequest.params, userId);
     
-    return NextResponse.json({
+    const response = NextResponse.json({
       jsonrpc: "2.0",
       id: mcpRequest.id,
       result
     });
+
+    if (typeof result === "object" && result && "content" in result) {
+      const text = (result as { content: Array<{ text: string }> }).content.map((c: { text: string }) => c.text).join("\n");
+      const approxTokens = Math.ceil(text.length / 4);
+      response.headers.set("X-Token-Count", String(approxTokens));
+    }
+
+    return response;
   } catch (error) {
     return NextResponse.json({
       jsonrpc: "2.0",
@@ -111,10 +136,14 @@ async function handleMcpMethod(
         tools: [
           {
             name: "get_architectural_rules",
-            description: "Fetch critical coding standards and design rules. Use BEFORE writing any code.",
+            description: "Fetch critical coding standards and design rules. Provide a 'task' for semantic ranking.",
             inputSchema: {
               type: "object",
               properties: {
+                task: { type: "string", description: "Describe what you're coding (e.g. 'build a button'). Used for semantic rule ranking." },
+                maxTokens: { type: "number", description: "Max tokens for response (default: 4000)" },
+                projectId: { type: "string", description: "Project ID to scope rules" },
+                format: { type: "string", enum: ["markdown", "json"], description: "Response format" },
                 category: { type: "string", description: "Filter: architecture, styling, security, performance" },
                 tag: { type: "string", description: "Filter by tag (e.g., 'design', 'validation')" }
               }
@@ -266,6 +295,59 @@ async function handleMcpMethod(
               type: "object",
               properties: {}
             }
+          },
+          {
+            name: "get_skill",
+            description: "Fetch full skill content by ID (procedural guide with code examples)",
+            inputSchema: {
+              type: "object",
+              properties: {
+                skillId: { type: "string", description: "Skill ID or name" }
+              },
+              required: ["skillId"]
+            }
+          },
+          {
+            name: "prism_check",
+            description: "Validate code against pattern-based governance rules. Returns structured violations with line/column positions.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                code: { type: "string", description: "The source code to validate" },
+                ruleIds: { type: "array", items: { type: "string" }, description: "Optional specific rule IDs" },
+                projectId: { type: "string", description: "Optional project ID" },
+                filePath: { type: "string", description: "Optional file path" },
+                category: { type: "string", description: "Optional category filter" }
+              },
+              required: ["code"]
+            }
+          },
+          {
+            name: "validate_code",
+            description: "Alias for prism_check. Validates code against pattern-based governance rules.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                code: { type: "string", description: "The source code to validate" },
+                ruleIds: { type: "array", items: { type: "string" }, description: "Optional specific rule IDs" },
+                projectId: { type: "string", description: "Optional project ID" },
+                filePath: { type: "string", description: "Optional file path" },
+                category: { type: "string", description: "Optional category filter" }
+              },
+              required: ["code"]
+            }
+          },
+          {
+            name: "prism_fix",
+            description: "Apply an automatic fix for a code violation found by prism_check.",
+            inputSchema: {
+              type: "object",
+              properties: {
+                violation: { type: "object", description: "The violation object from prism_check", properties: { ruleId: { type: "string" }, ruleName: { type: "string" }, line: { type: "number" }, column: { type: "number" }, matchedText: { type: "string" } }, required: ["ruleId", "ruleName", "matchedText"] },
+                code: { type: "string", description: "The original source code" }
+              },
+              required: ["violation", "code"]
+            }
           }
         ]
       };
@@ -290,7 +372,7 @@ async function handleMcpMethod(
 async function handleToolCall(
   params: { name: string; arguments: Record<string, unknown> },
   userId: string
-): Promise<{ content: Array<{ type: string; text: string }> }> {
+): Promise<{ content: Array<{ type: "text"; text: string }>; error?: boolean }> {
   const { name, arguments: args } = params;
 
   switch (name) {
@@ -298,16 +380,20 @@ async function handleToolCall(
       const rules = await getCollection("rules");
       const category = args?.category as string | undefined;
       const tag = args?.tag as string | undefined;
+      const task = args?.task as string | undefined;
+      const projectId = args?.projectId as string | undefined;
+      const maxTokens = (args?.maxTokens as number) || 4000;
+      const format = (args?.format as "markdown" | "json") || "markdown";
 
       const query: Record<string, unknown> = { userId, isActive: true };
       if (category) query.category = category;
       if (tag) query.tags = tag;
+      if (projectId) query.projectId = projectId;
 
       const foundRules = await rules
         .find(query)
         .sort({ priority: 1 })
-        .limit(5)
-        .toArray();
+        .toArray() as Record<string, unknown>[];
 
       if (foundRules.length === 0) {
         return {
@@ -315,24 +401,59 @@ async function handleToolCall(
         };
       }
 
-      const formatted = foundRules
-        .map((r: Record<string, unknown>) => 
-          `## ${r.name}\n\n**Priority:** ${r.priority} | **Category:** ${r.category}\n\n${r.content}`
-        )
+      // If no task, fall back to priority sort
+      if (!task) {
+        const top5 = foundRules.slice(0, 5);
+        const formatted = top5
+          .map((r) => `## ${r.name}\n\n**Priority:** ${r.priority} | **Category:** ${r.category}\n\n${r.content}`)
+          .join("\n\n---\n\n");
+        return {
+          content: [{ type: "text" as const, text: `# Prism Architectural Rules\n\n${formatted}` }]
+        };
+      }
+
+      // Simple priority-aware truncation for task requests
+      const high = foundRules.filter((r) => (r.priority as number) <= 3);
+      const medium = foundRules.filter((r) => {
+        const p = r.priority as number;
+        return p > 3 && p <= 7;
+      });
+      const low = foundRules.filter((r) => (r.priority as number) > 7 || r.priority === undefined);
+      const mid = high.slice();
+      let budget = maxTokens;
+
+      function countTokens(text: string): number {
+        return Math.ceil(text.length / 4);
+      }
+
+      for (const r of [...high, ...medium, ...low]) {
+        const tok = countTokens((r.content as string) || "");
+        if (mid.length < 5 && budget - tok > 0) {
+          budget -= tok;
+          mid.push(r);
+        }
+      }
+
+      const formatted = mid
+        .map((r) => `## ${r.name}\n\n**Priority:** ${r.priority} | **Category:** ${r.category}\n\n${r.content}`)
         .join("\n\n---\n\n");
 
       return {
-        content: [{ type: "text" as const, text: `# Prism Architectural Rules\n\n${formatted}` }]
+        content: [{
+          type: "text" as const,
+          text: format === "json"
+            ? JSON.stringify({ rules: mid.map((r) => ({ id: r._id, name: r.name, priority: r.priority, category: r.category, content: r.content })), meta: { task, tokenCount: mid.reduce((s, r) => s + countTokens((r.content as string) || ""), 0) } })
+            : `# Prism Architectural Rules\n\n**Task:** "${task}"\n\n${formatted}`
+        }]
       };
     }
 
     case "validate_code_pattern": {
       const code = args?.code as string | undefined;
-      const _context = args?.context as string | undefined;
       const vCategory = args?.category as string | undefined;
 
       if (!code) {
-        return { content: [{ type: "text" as const, text: "No code provided." }], ...{ error: true } } as any;
+        return { content: [{ type: "text" as const, text: "No code provided." }], error: true };
       }
 
       const rulesDb = await getCollection("rules");
@@ -364,6 +485,137 @@ async function handleToolCall(
 
       return {
         content: [{ type: "text" as const, text: `# Code Validation Report\n\n${violations.join("\n\n")}` }]
+      };
+    }
+
+    case "prism_check":
+    case "validate_code": {
+      const code = args?.code as string | undefined;
+      if (!code) {
+        return { content: [{ type: "text", text: "Error: code is required." }] };
+      }
+
+      const rulesDb = await getCollection("rules");
+      const vQuery: Record<string, unknown> = {
+        userId,
+        isActive: true,
+        pattern: { $exists: true, $ne: null },
+      };
+      const ruleIds = args?.ruleIds as string[] | undefined;
+      if (ruleIds && ruleIds.length > 0) {
+        const { ObjectId } = await import("mongodb");
+        vQuery._id = { $in: ruleIds.map((id) => (ObjectId.isValid(id) ? new ObjectId(id) : id)) };
+      }
+      if (args?.projectId) vQuery.projectId = args.projectId;
+      if (args?.category) vQuery.category = args.category;
+
+      const patternRules = await rulesDb.find(vQuery).sort({ priority: 1 }).toArray();
+
+      function findLineColumn(text: string, idx: number): { line: number; column: number } {
+        const before = text.slice(0, idx);
+        const lines = before.split("\n");
+        return { line: lines.length, column: lines[lines.length - 1].length + 1 };
+      }
+
+      const violations: Array<Record<string, unknown>> = [];
+
+      for (const rule of patternRules) {
+        const pattern = rule.pattern as string | undefined;
+        if (!pattern) continue;
+        try {
+          const regex = new RegExp(pattern, "g");
+          let match: RegExpExecArray | null;
+          while ((match = regex.exec(code)) !== null) {
+            const matchedText = match[0];
+            const startPos = match.index;
+            const endPos = startPos + matchedText.length;
+            const start = findLineColumn(code, startPos);
+            const end = findLineColumn(code, endPos);
+            violations.push({
+              ruleId: rule._id.toString(),
+              ruleName: rule.name,
+              pattern,
+              message: rule.content,
+              severity: rule.severity || "warning",
+              line: start.line,
+              column: start.column,
+              endLine: end.line,
+              endColumn: end.column,
+              matchedText,
+              suggestion: `Fix for "${rule.name}": ${((rule.content as string) || "").replace(/\*\*/g, "").trim()}`,
+            });
+          }
+        } catch { /* skip invalid regex */ }
+      }
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({
+            status: violations.length === 0 ? "pass" : "fail",
+            violations,
+            checkedRules: patternRules.length,
+          }),
+        }],
+      };
+    }
+
+    case "prism_fix": {
+      const violation = args?.violation as Record<string, unknown> | undefined;
+      const fixCode = args?.code as string | undefined;
+      if (!violation || !fixCode) {
+        return { content: [{ type: "text", text: JSON.stringify({ correctedCode: fixCode || "", appliedRule: "", confidence: 0, changes: [] }) }] };
+      }
+
+      const matchedText = (violation.matchedText as string) || "";
+      const ruleName = (violation.ruleName as string) || "";
+      const pattern = (violation.pattern as string) || "";
+
+      let correctedCode = fixCode;
+      let confidence = 0;
+      const changes: Array<{ line: number; from: string; to: string }> = [];
+
+      if (pattern.includes("../../apps/") || pattern.includes("../apps/")) {
+        const parts = matchedText.split("../../apps/");
+        if (parts.length >= 2) {
+          const appName = parts[1].split("/")[0];
+          const fixed = matchedText.replace(`../../apps/${appName}`, `@repo/${appName}`);
+          correctedCode = fixCode.replace(matchedText, fixed);
+          confidence = 0.95;
+          changes.push({ line: (violation.line as number) || 0, from: matchedText, to: fixed });
+        }
+      } else if (pattern.includes("style={") || ((violation.message as string) || "").toLowerCase().includes("inline style")) {
+        const replacement = ` {/* TODO: Replace with Tailwind classes */}`;
+        const fixed = matchedText.replace(/style=\{[\s\S]*?\}/, replacement);
+        if (fixed !== matchedText) {
+          correctedCode = fixCode.replace(matchedText, fixed);
+          confidence = 0.6;
+          changes.push({ line: (violation.line as number) || 0, from: matchedText, to: fixed });
+        }
+      } else if (pattern.includes("console.log") || ((violation.message as string) || "").toLowerCase().includes("console.log")) {
+        const logRegex = /console\.(log|debug|info)\([^)]*\);?\s*/g;
+        let count = 0;
+        correctedCode = fixCode.replace(logRegex, (m) => { count++; return `// ${m.trim()}`; });
+        confidence = count > 0 ? 0.9 : 0;
+        if (count > 0) changes.push({ line: (violation.line as number) || 0, from: matchedText, to: `// ${matchedText}` });
+      } else {
+        // Generic: comment the line
+        const codeLines = fixCode.split("\n");
+        const targetLine = (violation.line as number) - 1;
+        if (targetLine >= 0 && targetLine < codeLines.length) {
+          const original = codeLines[targetLine];
+          codeLines[targetLine] = `${original} // FIXME: ${ruleName}`;
+          correctedCode = codeLines.join("\n");
+          confidence = 0.3;
+          changes.push({ line: (violation.line as number) || 0, from: original, to: codeLines[targetLine] });
+        }
+      }
+
+      return {
+        content: [{
+          type: "text",
+          text: JSON.stringify({ correctedCode, appliedRule: ruleName, confidence, changes }),
+        }],
       };
     }
 
@@ -399,7 +651,6 @@ async function handleToolCall(
     }
 
     case "get_brand_rules": {
-      const projectId = args.projectId as string;
       
       const brands = await getCollection("brands");
       const brand = await brands.findOne({ userId }) || await brands.findOne({ userId: "demo-user" });
@@ -527,14 +778,14 @@ async function handleToolCall(
       const brands = await getCollection("brands");
       const brandId = args?.brandId as string | undefined;
       const query: Record<string, unknown> = { userId };
-      let brand: Record<string, unknown> | null = null;
+      let brand: BrandDocument | null = null;
       if (brandId) {
-        brand = await brands.findOne({ ...query, slug: brandId }) as Record<string, unknown> | null;
+        brand = await brands.findOne({ ...query, slug: brandId }) as unknown as BrandDocument | null;
         if (!brand) {
-          try { const { ObjectId } = await import("mongodb"); if (ObjectId.isValid(brandId)) brand = await brands.findOne({ ...query, _id: new ObjectId(brandId) }) as Record<string, unknown> | null; } catch { /* skip */ }
+          try { const { ObjectId } = await import("mongodb"); if (ObjectId.isValid(brandId)) brand = await brands.findOne({ ...query, _id: new ObjectId(brandId) }) as unknown as BrandDocument | null; } catch { /* skip */ }
         }
       } else {
-        brand = await brands.findOne(query) as Record<string, unknown> | null;
+        brand = await brands.findOne(query) as unknown as BrandDocument | null;
       }
 
       if (!brand) {
@@ -560,8 +811,8 @@ async function handleToolCall(
       const { generateComponent } = await import("@/lib/gemini");
       const component = await generateComponent({
         prompt,
-        designSystem: (args?.designSystem as string) || "jdstudio",
-        stack: (args?.stack as string) || "nextjs",
+        designSystem: (args?.designSystem as "jdstudio" | "bare-minimum" | "glassmorphic" | "8bit-nostalgia") || "jdstudio",
+        stack: (args?.stack as "react" | "nextjs" | "react-native") || "nextjs",
       });
 
       return {
@@ -576,7 +827,7 @@ async function handleToolCall(
       const query = args?.query as string;
       const ruleSets = await getCollection("ruleSets");
       const mQuery: Record<string, unknown> = { isPublic: true };
-      if (query) mQuery.name = { $regex: query, $options: "i" } as any;
+      if (query) mQuery.name = { $regex: query, $options: "i" };
 
       const items = await ruleSets.find(mQuery).sort({ createdAt: -1 }).limit(10).toArray();
 
@@ -621,6 +872,34 @@ async function handleToolCall(
         };
       } catch { void 0; }
       return { content: [{ type: "text", text: "Unable to fetch usage stats." }] };
+    }
+
+    case "get_skill": {
+      const skillId = args?.skillId as string;
+      if (!skillId) {
+        return { content: [{ type: "text", text: "Error: skillId is required." }], error: true };
+      }
+
+      try {
+        const { ObjectId } = await import("mongodb");
+        const rules = await getCollection("rules");
+        let doc;
+
+        if (ObjectId.isValid(skillId)) {
+          doc = await rules.findOne({ _id: new ObjectId(skillId) });
+        }
+        if (!doc) doc = await rules.findOne({ name: skillId });
+        if (!doc) doc = await rules.findOne({ skillsContent: { $exists: true, $ne: null }, name: { $regex: skillId, $options: "i" } });
+
+        if (!doc) {
+          return { content: [{ type: "text", text: `Skill "${skillId}" not found.` }] };
+        }
+
+        const skillContent = (doc.skillsContent as string) || (doc.content as string);
+        return { content: [{ type: "text" as const, text: `# ${doc.name}\n\n${skillContent}` }] };
+      } catch (e) {
+        return { content: [{ type: "text", text: `Error: ${e instanceof Error ? e.message : "Unknown"}` }] };
+      }
     }
 
     default:

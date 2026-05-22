@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, Plus } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { getCalendarEvents } from '@/app/actions/calendar';
 import { AdminCalendar, CalendarLegend } from '@/components/admin/calendar';
 

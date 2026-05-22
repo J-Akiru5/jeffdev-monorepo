@@ -63,10 +63,12 @@ export async function GET(request: NextRequest) {
   const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
   const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20')));
   const industry = searchParams.get('industry');
+  const modifiedAfter = searchParams.get('modifiedAfter');
 
   const brands = await getCollection('brands');
   const query: Record<string, unknown> = { userId: auth.userId };
   if (industry && INDUSTRIES.includes(industry as typeof INDUSTRIES[number])) query.industry = industry;
+  if (modifiedAfter) query.updatedAt = { $gte: modifiedAfter };
 
   const total = await brands.countDocuments(query);
   const items = await brands

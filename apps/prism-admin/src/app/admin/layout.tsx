@@ -35,7 +35,6 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   }
   
   const isFounder = role === "founder";
-  const isAdmin = role === "admin" || isFounder;
 
   return (
     <div className="min-h-screen bg-[#030303]">

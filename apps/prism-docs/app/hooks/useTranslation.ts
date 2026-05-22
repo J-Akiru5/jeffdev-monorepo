@@ -1,7 +1,6 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
 
 // Import all translation files
 import enUS from '@/locales/en-US.json'
@@ -31,33 +30,24 @@ const SUPPORTED_LOCALES = ['en-US', 'tl', 'ja', 'es', 'id', 'en-GB', 'ru', 'nl']
  */
 export function useTranslation() {
   const pathname = usePathname()
-  const [locale, setLocale] = useState(DEFAULT_LOCALE)
-  const [t, setT] = useState<TranslationData>(enUS)
-
-  useEffect(() => {
-    if (!pathname) return
-
-    // Extract locale from pathname (e.g., /ja/introduction -> ja)
-    const pathLocale = pathname.split('/')[1] ?? ''
-    
-    if (SUPPORTED_LOCALES.includes(pathLocale)) {
-      setLocale(pathLocale)
-      setT(translations[pathLocale] ?? enUS)
-    }
-  }, [pathname])
+  
+  // Extract locale from pathname (e.g., /ja/introduction -> ja)
+  const pathLocale = pathname ? (pathname.split('/')[1] ?? '') : ''
+  const locale = SUPPORTED_LOCALES.includes(pathLocale) ? pathLocale : DEFAULT_LOCALE
+  const t = translations[locale] ?? enUS
 
   /**
-   * Get translated string by key path
-   * @param keyPath - Dot-separated path like "home.title" or "cards.quick_start"
-   * @returns Translated string or the key path if not found
-   */
+    * Get translated string by key path
+    * @param keyPath - Dot-separated path like "home.title" or "cards.quick_start"
+    * @returns Translated string or the key path if not found
+    */
   const translate = (keyPath: string): string => {
     const keys = keyPath.split('.')
-    let value: any = t
+    let value: unknown = t
 
     for (const key of keys) {
-      if (value && typeof value === 'object' && key in value) {
-        value = value[key]
+      if (value && typeof value === 'object' && key in (value as Record<string, unknown>)) {
+        value = (value as Record<string, unknown>)[key]
       } else {
         // Return key path if translation not found
         return keyPath

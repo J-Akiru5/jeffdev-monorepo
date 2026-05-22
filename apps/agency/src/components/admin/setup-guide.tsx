@@ -27,7 +27,8 @@ export function SetupGuide({ profile }: SetupGuideProps) {
       // Check if user has dismissed the guide in this session
       const dismissed = sessionStorage.getItem('setup_guide_dismissed');
       if (!dismissed) {
-        setIsVisible(true);
+        const timer = setTimeout(() => setIsVisible(true), 0);
+        return () => clearTimeout(timer);
       }
     }
   }, [missingFields.length]); // Depend on the count of missing fields

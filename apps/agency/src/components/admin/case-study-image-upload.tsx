@@ -8,6 +8,7 @@
  */
 
 import { useState, useCallback } from 'react';
+import Image from 'next/image';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, ImageIcon, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -90,11 +91,13 @@ export function CaseStudyImageUpload({ currentImage, onImageChange }: Props) {
 
       {preview ? (
         // Preview State
-        <div className="relative overflow-hidden rounded-md border border-white/10">
-          <img
+        <div className="relative overflow-hidden rounded-md border border-white/10 h-48 w-full">
+          <Image
             src={preview}
             alt="Case study cover"
-            className="h-48 w-full object-cover"
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 768px"
           />
           <button
             type="button"

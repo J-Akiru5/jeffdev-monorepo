@@ -1,3 +1,4 @@
+import { createElement } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowUpRight, Check } from 'lucide-react';
@@ -76,8 +77,6 @@ export default async function ServicePage({ params }: ServicePageProps) {
     order: 0,
   };
 
-  const Icon = getIcon(activeService.icon);
-
   return (
     <>
       <Header />
@@ -97,7 +96,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
               {/* Left: Content */}
               <div>
                 <div className="inline-flex rounded-md border border-white/10 bg-white/5 p-3">
-                  <Icon className="h-8 w-8 text-cyan-400" />
+                  {createElement(getIcon(activeService.icon), { className: 'h-8 w-8 text-cyan-400' })}
                 </div>
 
                 <h1 className="mt-6 text-4xl font-bold tracking-tight text-white md:text-5xl">
@@ -165,7 +164,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
             <h2 className="text-2xl font-bold text-white">Other Services</h2>
             <div className="mt-8 grid gap-6 md:grid-cols-2">
               {otherServices.map((s) => {
-                const OtherIcon = typeof s.icon === 'string' ? getIcon(s.icon) : s.icon;
+                const otherIconComponent = typeof s.icon === 'string' ? getIcon(s.icon) : s.icon;
                 return (
                   <Link
                     key={s.slug}
@@ -173,7 +172,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
                     className="group flex items-center gap-4 rounded-md border border-white/[0.06] bg-white/[0.02] p-6 transition-all hover:border-white/[0.12] hover:bg-white/[0.04]"
                   >
                     <div className="rounded-md border border-white/10 bg-white/5 p-2">
-                      <OtherIcon className="h-5 w-5 text-cyan-400" />
+                      {createElement(otherIconComponent, { className: 'h-5 w-5 text-cyan-400' })}
                     </div>
                     <div className="flex-1">
                       <div className="font-semibold text-white">{s.title}</div>

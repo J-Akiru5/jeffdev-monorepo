@@ -304,7 +304,7 @@ function StepColors({
   
   return (
     <div className="space-y-4">
-      <p className="text-sm text-white/50 mb-4">Define your brand's color palette</p>
+      <p className="text-sm text-white/50 mb-4">Define your brand&apos;s color palette</p>
       
       <div className="grid grid-cols-2 gap-4">
         <ColorPicker label="Primary" value={colors.primary} onChange={(v) => updateFormData("colors.primary", v)} />

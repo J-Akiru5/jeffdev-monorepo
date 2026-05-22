@@ -1,4 +1,4 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { 
   Search, 
   Filter,
@@ -6,8 +6,6 @@ import {
   Clock,
   CheckCircle,
   AlertCircle,
-  MessageSquare,
-  ArrowUpRight,
   Star
 } from "lucide-react";
 
@@ -17,8 +15,6 @@ import {
  */
 export default async function InquiriesPage() {
   const { userId } = await auth();
-  const clerk = await currentUser();
-  const role = (clerk?.publicMetadata as { role?: string })?.role || "user";
   
   if (!userId) return null;
 

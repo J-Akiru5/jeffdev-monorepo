@@ -1,4 +1,4 @@
-import { loadConfig } from '../config.js';
+import { loadConfig } from './config.js';
 
 export interface ApiOptions {
   token: string;

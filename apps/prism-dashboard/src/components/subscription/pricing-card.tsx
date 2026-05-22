@@ -7,8 +7,8 @@
  */
 
 import { useState } from 'react';
-import { Check, X, Sparkles } from 'lucide-react';
-import { TIER_LIMITS, TIER_PRICES, type SubscriptionTier } from '@/lib/subscriptions';
+import { Check, Sparkles } from 'lucide-react';
+import { TIER_PRICES, type SubscriptionTier } from '@/lib/subscriptions';
 
 interface PricingCardProps {
   tier: SubscriptionTier;

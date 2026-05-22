@@ -27,10 +27,19 @@ interface AuthResponse {
   upgradeUrl?: string;
 }
 
+interface ConnectOptions {
+  url?: string;
+}
+
 /**
  * Main connect command
  */
-export async function connect(): Promise<void> {
+export async function connect(opts?: ConnectOptions): Promise<void> {
+  if (opts?.url) {
+    await scanAndGenerate(opts.url);
+    return;
+  }
+
   console.log('🔌 Prism Context Engine - Connecting...\n');
 
   // 1. Get auth token
@@ -89,29 +98,77 @@ export async function connect(): Promise<void> {
   // 4. Save token for future use
   saveToken(token);
 
-  // 5. Start MCP proxy mode
-  console.log('🚀 Starting MCP connection...');
-  console.log(`📡 Connected to: ${PRISM_API_URL}`);
-  console.log('\n✅ Ready! Configure your IDE:\n');
-  console.log('Cursor/Windsurf:');
-  console.log('  Add to ~/.cursor/mcp.json or ~/.windsurf/mcp.json:');
-  console.log(`  {
-    "mcpServers": {
-      "prism": {
-        "command": "npx",
-        "args": ["prism-cli", "connect"],
-        "env": {
-          "PRISM_TOKEN": "${token.slice(0, 8)}..."
-        }
-      }
+  // 5. Instead of starting a broken proxy, direct users to prism serve
+  console.log('━'.repeat(50));
+  console.log('⚠  The `prism connect` proxy has been replaced by `prism serve`.');
+  console.log('');
+  console.log('For IDE integration, use:');
+  console.log('  $ prism serve             # Full MCP server with Cosmos DB');
+  console.log('  $ prism serve --offline   # Local-only with cached rules');
+  console.log('');
+  console.log('To scan a URL and generate rules:');
+  console.log('  $ prism connect --url https://example.com');
+  console.log('');
+  console.log('Run `prism init` to auto-configure your IDE with `prism serve`.');
+  console.log('━'.repeat(50));
+  process.exit(0);
+}
+
+/**
+ * Scan a URL and generate rules
+ */
+async function scanAndGenerate(url: string): Promise<void> {
+  console.log('');
+  console.log('━'.repeat(50));
+  console.log('  🔍 Prism URL Scanner');
+  console.log('━'.repeat(50));
+  console.log('');
+  console.log(`  Target: ${url}`);
+  console.log('');
+
+  try {
+    // Dynamically import MCP server's scan handler
+    // In CLI mode, we invoke the extraction directly
+    const extractorPath = '../../../../apps/prism-mcp-server/src/lib/extractor.js';
+    const ruleGenPath = '../../../../apps/prism-mcp-server/src/lib/rule-generator.js';
+    const { scanUrl } = await import(extractorPath);
+    const { generateRulesFromTokens, saveRulesLocal } = await import(ruleGenPath);
+
+    console.log('  📄 Launching browser...');
+    const { tokens, rawMarkdown } = await scanUrl(url);
+    console.log(`  📄 Scanned ${tokens.pagesScanned} page(s), ~${tokens.tokensUsed} tokens\n`);
+
+    console.log('  🤖 Generating rules from design tokens...');
+    const generated = await generateRulesFromTokens(tokens);
+    console.log(`  ✅ Generated ${generated.rulesCount} rules + ${generated.skillsCount} skills`);
+
+    saveRulesLocal(generated.rulesMd, generated.skillsMd);
+    console.log('  💾 Saved to ~/.prism/rules.md + ~/.prism/skills.md\n');
+
+    console.log('  ─'.repeat(25));
+    console.log('  Rules Preview:');
+    console.log('  ─'.repeat(25));
+    console.log('');
+    // Print first few lines of rules
+    const previewLines = generated.rulesMd.split('\n').slice(0, 15);
+    for (const line of previewLines) {
+      console.log(`  ${line}`);
     }
-  }\n`);
-
-  // Keep process alive for MCP stdio communication
-  console.log('⏳ Listening for MCP requests... (Ctrl+C to stop)\n');
-
-  // Simple stdio proxy to deployed server
-  await startMcpProxy(token);
+    console.log('');
+    console.log('  ─'.repeat(25));
+    console.log(`  📊 Full output: ~/.prism/rules.md (${generated.rulesMd.length} chars)`);
+    console.log(`  📊 Skills: ~/.prism/skills.md (${generated.skillsMd.length} chars)`);
+    console.log(`  🤖 Model: ${generated.modelUsed}`);
+    console.log('');
+    console.log('  👍 Rate these rules? Run `prism kitchen analyze --task "..."` to preview.');
+    console.log('  👎 Want regeneration? Re-run with a different model.');
+    console.log('');
+    console.log('━'.repeat(50));
+  } catch (error) {
+    console.error('  ❌ Scan failed:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('     Make sure the MCP server is built and Azure OpenAI is configured.');
+    process.exit(1);
+  }
 }
 
 /**

@@ -13,6 +13,7 @@ import { revalidatePath } from 'next/cache';
 import type { ProjectStatus, MilestoneStatus } from '@/types/firestore';
 
 // Validation schemas
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const milestoneSchema = z.object({
   id: z.string(),
   title: z.string().min(1),

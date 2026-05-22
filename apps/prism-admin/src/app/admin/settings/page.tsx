@@ -1,13 +1,9 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { 
-  Settings,
   Key,
-  Bell,
   Shield,
   Database,
-  Mail,
-  CreditCard,
   ExternalLink,
   AlertCircle,
   CheckCircle

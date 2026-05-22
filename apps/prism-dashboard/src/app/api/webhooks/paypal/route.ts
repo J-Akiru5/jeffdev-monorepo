@@ -24,9 +24,6 @@ async function verifyPayPalWebhook(
     const transmissionSig = request.headers.get('paypal-transmission-sig') || '';
     const certUrl = request.headers.get('paypal-cert-url') || '';
     const authAlgo = request.headers.get('paypal-auth-algo') || '';
-    const webhookEventUrl = request.headers.get('paypal-transmission-id')
-      ? `${process.env.NEXT_PUBLIC_SITE_URL || ''}/api/webhooks/paypal`
-      : '';
 
     const verificationResponse = await fetch(
       'https://api-m.paypal.com/v1/notifications/verify-webhook-signature',
@@ -94,16 +91,16 @@ export async function POST(request: NextRequest) {
         await handleSubscriptionActivated(userId, resource);
         break;
       case 'BILLING.SUBSCRIPTION.CANCELLED':
-        await handleSubscriptionCancelled(userId, resource);
+        await handleSubscriptionCancelled(userId);
         break;
       case 'BILLING.SUBSCRIPTION.SUSPENDED':
-        await handleSubscriptionSuspended(userId, resource);
+        await handleSubscriptionSuspended(userId);
         break;
       case 'PAYMENT.SALE.COMPLETED':
-        await handlePaymentCompleted(userId, resource);
+        await handlePaymentCompleted(userId);
         break;
       case 'BILLING.SUBSCRIPTION.PAYMENT.FAILED':
-        await handlePaymentFailed(userId, resource);
+        await handlePaymentFailed(userId);
         break;
       default:
         console.log(`[paypal-webhook] Unhandled: ${event_type}`);
@@ -151,8 +148,7 @@ async function handleSubscriptionActivated(
 }
 
 async function handleSubscriptionCancelled(
-  userId: string,
-  _resource: PayPalEvent['resource']
+  userId: string
 ) {
   const subscriptions = await getCollection('subscriptions');
   await subscriptions.updateOne(
@@ -163,8 +159,7 @@ async function handleSubscriptionCancelled(
 }
 
 async function handleSubscriptionSuspended(
-  userId: string,
-  _resource: PayPalEvent['resource']
+  userId: string
 ) {
   const subscriptions = await getCollection('subscriptions');
   await subscriptions.updateOne(
@@ -175,8 +170,7 @@ async function handleSubscriptionSuspended(
 }
 
 async function handlePaymentCompleted(
-  userId: string,
-  _resource: PayPalEvent['resource']
+  userId: string
 ) {
   const usage = await getCollection('usage');
   const now = new Date();
@@ -192,8 +186,7 @@ async function handlePaymentCompleted(
 }
 
 async function handlePaymentFailed(
-  userId: string,
-  _resource: PayPalEvent['resource']
+  userId: string
 ) {
   const subscriptions = await getCollection('subscriptions');
   await subscriptions.updateOne(

@@ -49,10 +49,17 @@ function buildMcpConfig(): McpServerConfig {
   const token = process.env.PRISM_TOKEN || loadSavedToken() || '';
   const config: McpServerConfig = {
     command: 'npx',
-    args: ['@prism-engine/cli', 'connect'],
+    args: ['@prism-engine/cli', 'serve'],
   };
   if (token) {
     config.env = { PRISM_TOKEN: token };
+  }
+  // Pass database URI if available (for direct Cosmos DB connection)
+  if (process.env.MONGODB_URI) {
+    config.env = { ...config.env, MONGODB_URI: process.env.MONGODB_URI };
+  }
+  if (process.env.GEMINI_API_KEY) {
+    config.env = { ...config.env, GEMINI_API_KEY: process.env.GEMINI_API_KEY };
   }
   return config;
 }
@@ -192,5 +199,6 @@ export async function init(): Promise<void> {
   }
 
   console.log('\n✓ Setup complete! Restart your IDE(s) to activate Prism.');
-  console.log('  Run `prism connect` to test the connection.\n');
+  console.log('  The full MCP server (prism serve) will start automatically when your IDE connects.');
+  console.log('  Run `prism sync` to pre-cache rules for offline use.\n');
 }

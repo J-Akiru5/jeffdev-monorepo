@@ -9,7 +9,6 @@
 import { db } from '@/lib/firebase/admin';
 import type { UserProfile, PublicNamecard } from '@/types/user';
 import { logAuditEvent } from '@/lib/audit';
-import type { DocumentData, QueryDocumentSnapshot } from 'firebase-admin/firestore';
 import { sanitizeFirestoreData } from '@/lib/utils';
 // ... existing imports ...
 
