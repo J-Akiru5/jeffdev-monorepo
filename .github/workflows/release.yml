@@ -11,7 +11,7 @@ concurrency:
 env:
   TURBO_TELEMETRY_DISABLED: 1
   PNPM_VERSION: 9.1.0
-  NODE_VERSION: "20"
+  NODE_VERSION: "22"
 
 jobs:
   release:
