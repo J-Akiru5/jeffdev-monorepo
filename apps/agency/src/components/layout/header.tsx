@@ -14,7 +14,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Menu, X, ArrowUpRight, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useFeatureFlags } from '@/components/providers/feature-flag-provider';
 import { SyntaxureLogo } from '@jdstudio/ui';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
@@ -27,7 +26,6 @@ interface NavLink {
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { prismEngineEnabled, prismEngineTeaser } = useFeatureFlags();
 
   // Build navigation links based on feature flags
   const navLinks: NavLink[] = [

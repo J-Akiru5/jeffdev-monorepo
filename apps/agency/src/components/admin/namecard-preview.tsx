@@ -26,7 +26,6 @@ export function NamecardPreview({
   bio,
   email,
   phone,
-  location,
   photoURL,
   social,
   namecard,

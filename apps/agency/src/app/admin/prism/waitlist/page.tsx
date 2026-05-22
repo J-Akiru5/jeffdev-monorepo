@@ -9,7 +9,6 @@
 import { useState, useEffect } from 'react';
 import { getWaitlistEntries, type WaitlistEntry } from '@/app/actions/waitlist';
 import { Loader2, Mail, Calendar, User, Search } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 
 export default function WaitlistPage() {

@@ -64,7 +64,6 @@ function highlightSyntax(code: string): string {
 
 export function CodeBlock({ 
   code, 
-  language: _language = "tsx", 
   filename,
   showCopy = true 
 }: CodeBlockProps) {

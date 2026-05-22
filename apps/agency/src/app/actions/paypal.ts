@@ -6,7 +6,6 @@
  * PayPal Checkout integration for invoice payments.
  */
 
-import { z } from 'zod';
 import { db } from '@/lib/firebase/admin';
 import { recordPayment } from './invoice';
 import type { Invoice } from '@/types/invoice';

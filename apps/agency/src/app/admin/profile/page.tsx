@@ -84,7 +84,7 @@ async function getCurrentUser(): Promise<UserProfile> {
 }
 
 export default async function AdminProfilePage() {
-  const _ = await cookies(); // Ensure dynamic rendering
+  await cookies(); // Ensure dynamic rendering
   const profile = await getCurrentUser();
 
   return (

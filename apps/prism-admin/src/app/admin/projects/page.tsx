@@ -4,9 +4,7 @@ import {
   Filter,
   FolderKanban,
   Calendar,
-  Users,
-  MoreVertical,
-  ArrowRight
+  Users
 } from "lucide-react";
 import Link from "next/link";
 

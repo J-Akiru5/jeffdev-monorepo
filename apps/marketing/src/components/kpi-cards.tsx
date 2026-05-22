@@ -5,12 +5,10 @@ import { updateKpi, type Kpi } from '@/actions/kpis';
 import { Pencil, Check, X } from 'lucide-react';
 
 function KpiEditableValue({
-  label,
   value,
   unit,
   onSave,
 }: {
-  label: string;
   value: number;
   unit: string;
   onSave: (v: number) => Promise<void>;
@@ -85,7 +83,6 @@ export function KpiCards({ kpis }: { kpis: Kpi[] }) {
             <p className="text-xs font-mono uppercase tracking-wider text-white/50">{kpi.label}</p>
             <div className="mt-2">
               <KpiEditableValue
-                label={kpi.label}
                 value={kpi.current}
                 unit={kpi.unit}
                 onSave={async (v) => {

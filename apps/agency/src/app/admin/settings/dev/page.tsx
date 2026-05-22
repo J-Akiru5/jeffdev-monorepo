@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Copy, Eye, EyeOff, RefreshCcw, Save } from 'lucide-react';
+import { ArrowLeft, Copy, Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 

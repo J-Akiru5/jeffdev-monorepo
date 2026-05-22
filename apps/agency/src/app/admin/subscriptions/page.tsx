@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, Plus, RefreshCcw, TrendingUp, Users, DollarSign } from 'lucide-react';
+import { ArrowLeft, Plus, TrendingUp, Users, DollarSign } from 'lucide-react';
 import { cookies } from 'next/headers';
 import { getSubscriptions, getSubscriptionStats } from '@/app/actions/subscriptions';
 import { SubscriptionsClient } from '@/components/admin/subscriptions-client';

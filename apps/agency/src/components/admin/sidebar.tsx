@@ -9,6 +9,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -110,10 +111,12 @@ export function AdminSidebar() {
         {!collapsed && (
           <Link href="/admin" className="flex items-center gap-2">
             <div className="relative h-8 w-8 overflow-hidden rounded-md">
-              <img
+              <Image
                 src="/favicon.svg"
                 alt="Syntaxure Labs"
-                className="h-full w-full object-cover"
+                fill
+                sizes="32px"
+                className="object-cover"
               />
             </div>
             <span className="font-semibold text-white">Syntaxure Labs</span>

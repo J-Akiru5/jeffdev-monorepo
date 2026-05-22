@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Wifi, ArrowRight, Signal, Shield, Headphones, Router, Globe, Zap } from 'lucide-react';
 

@@ -1,8 +1,6 @@
 import { ReactNode } from "react";
 import Link from "next/link";
-import { auth } from "@clerk/nextjs/server";
 import { UserButton } from "@clerk/nextjs";
-import { getCollection } from "@jeffdev/db";
 import {
   LayoutDashboard,
   FolderKanban,
