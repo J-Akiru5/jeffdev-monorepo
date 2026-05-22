@@ -167,7 +167,6 @@ export default function SettingsPage() {
 
 function ApiKeysSection() {
   const [keys, setKeys] = useState<ApiKeyData[]>([]);
-  const [tier, setTier] = useState<string>("free");
   const [limit, setLimit] = useState<number>(0);
   const [canCreate, setCanCreate] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
@@ -193,7 +192,6 @@ function ApiKeysSection() {
       }
 
       setKeys(data.keys);
-      setTier(data.tier);
       setLimit(data.limit);
       setCanCreate(data.canCreate);
     } catch (err) {
@@ -600,10 +598,6 @@ function NotificationsSection() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<number | null>(null);
-  const saveTimerRef = useCallback((fn: () => void, delay: number) => {
-    const t = setTimeout(fn, delay);
-    return () => clearTimeout(t);
-  }, []);
 
   // Load preferences
   useEffect(() => {

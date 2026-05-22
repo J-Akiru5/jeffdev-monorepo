@@ -53,7 +53,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     },
   });
 
-  const handleChange = (field: string, value: any) => {
+  const handleChange = (field: string, value: string | boolean) => {
     if (field.includes('.')) {
       const parts = field.split('.');
       if (parts.length === 2) {
@@ -61,7 +61,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
         setFormData((prev) => ({
           ...prev,
           [parent]: {
-            ...(prev[parent as keyof typeof prev] as any),
+            ...(prev[parent as keyof typeof prev] as Record<string, unknown>),
             [child]: value,
           },
         }));
@@ -70,10 +70,10 @@ export function ProfileForm({ profile }: ProfileFormProps) {
         setFormData((prev) => ({
           ...prev,
           [root]: {
-            ...(prev[root as keyof typeof prev] as any),
+            ...(prev[root as keyof typeof prev] as Record<string, unknown>),
             [parent]: {
-              // @ts-ignore - dynamic nesting is hard to type perfectly
-              ...(prev[root as keyof typeof prev]?.[parent] as any),
+              // @ts-expect-error - dynamic nesting is hard to type perfectly
+              ...((prev[root as keyof typeof prev] as Record<string, Record<string, unknown>>)?.[parent] || {}),
               [child]: value,
             }
           },
@@ -475,7 +475,7 @@ function InputField({
   onChange: (value: string) => void;
   placeholder?: string;
   required?: boolean;
-    icon?: any;
+    icon?: React.ComponentType<{ className?: string }>;
   onBlur?: () => void;
     id?: string;
 }) {

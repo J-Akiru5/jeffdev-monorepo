@@ -1,14 +1,14 @@
 import { auth } from "@clerk/nextjs/server";
 import { getCollection } from "@jeffdev/db";
 import Link from "next/link";
-import { ArrowLeft, Code, Palette, Type, MessageCircle } from "lucide-react";
+import { ArrowLeft, Code, Palette } from "lucide-react";
 
 /**
  * Keandrew Demo Showcase
  * Displays the seeded brand profile, rules, and component examples.
  */
 export default async function KeandrewShowcasePage() {
-  const { userId } = await auth();
+  await auth();
   
   // Fetch Keandrew data
   const brandsCollection = await getCollection("brands");

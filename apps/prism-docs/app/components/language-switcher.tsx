@@ -17,6 +17,12 @@ const LANGUAGES = [
 
 const LOCALE_COOKIE = 'PRISM_LOCALE'
 
+function setLocaleCookie(locale: string) {
+  if (typeof document !== 'undefined') {
+    document.cookie = `${LOCALE_COOKIE}=${locale}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`
+  }
+}
+
 export function LanguageSwitcher() {
   const pathname = usePathname()
   const router = useRouter()
@@ -31,7 +37,7 @@ export function LanguageSwitcher() {
     if (!pathname) return
     
     // Save locale preference in cookie (expires in 1 year)
-    document.cookie = `${LOCALE_COOKIE}=${locale}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`
+    setLocaleCookie(locale)
     
     // Replace the first segment (locale) with the new locale
     const segments = pathname.split('/')

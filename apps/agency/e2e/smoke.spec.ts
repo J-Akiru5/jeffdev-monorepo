@@ -9,7 +9,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Smoke Tests', () => {
   test('homepage loads successfully', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle(/JeffDev/i);
+    await expect(page).toHaveTitle(/Syntaxure|JeffDev/i);
   });
 
   test('work page loads successfully', async ({ page }) => {

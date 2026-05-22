@@ -169,7 +169,7 @@ export function NamecardPreview({
   );
 }
 
-function SocialIcon({ href, icon: Icon, color }: { href: string; icon: any; color?: string }) {
+function SocialIcon({ href, icon: Icon, color }: { href: string; icon: React.ComponentType<{ className?: string }>; color?: string }) {
   return (
     <a
       href={href}

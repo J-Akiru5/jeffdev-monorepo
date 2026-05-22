@@ -80,9 +80,9 @@ export function GcashProofUpload({ invoice, amount, onSuccess }: GcashProofUploa
       // 3. Success
       setProofUrl(fileUrl!);
       setUploading(false);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Upload Error:', err);
-      setError(err.message || 'Failed to upload file');
+      setError(err instanceof Error ? err.message : 'Failed to upload file');
       setUploading(false);
     }
   };

@@ -39,7 +39,13 @@
     "CONTACT_EMAIL",
     "HIRE_EMAIL",
     "NOREPLY_EMAIL",
-    "SESSION_SECRET"
+    "SESSION_SECRET",
+    "PRISM_API_KEY",
+    "PRISM_API_URL",
+    "AI_PROVIDER",
+    "AZURE_OPENAI_EMBEDDING_DEPLOYMENT",
+    "GEMINI_MODEL",
+    "GEMINI_EMBEDDING_MODEL"
   ],
   "tasks": {
     "build": {

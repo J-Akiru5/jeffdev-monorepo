@@ -72,7 +72,7 @@ export async function POST(req: Request) {
       { upsert: true }
     );
     return NextResponse.json({ success: true, prefs: parsed.data });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: "Failed to save preferences" }, { status: 500 });
   }
 }

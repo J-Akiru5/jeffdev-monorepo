@@ -40,11 +40,11 @@ export async function GET(request: NextRequest) {
 
   const rules = await getCollection('rules');
   const query: Record<string, unknown> = { createdBy: auth.userId, isActive: active };
-  if (category && RULE_CATEGORIES.includes(category as any)) query.category = category;
+  if (category && (RULE_CATEGORIES as readonly string[]).includes(category)) query.category = category;
   if (tag) query.tags = tag;
-  if (search) query.name = { $regex: search, $options: 'i' } as any;
+  if (search) query.name = { $regex: search, $options: 'i' };
   if (modifiedAfter) {
-    query.updatedAt = { $gte: modifiedAfter } as any;
+    query.updatedAt = { $gte: modifiedAfter };
   }
 
   const total = await rules.countDocuments(query);

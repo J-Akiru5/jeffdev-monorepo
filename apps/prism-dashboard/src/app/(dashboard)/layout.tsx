@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { GridBackground } from "@jdstudio/ui";
 import { BetaBadge } from "@/components/beta-badge";
-import { redirect } from "next/navigation";
 
 /**
  * Dashboard Layout
@@ -24,20 +23,7 @@ import { redirect } from "next/navigation";
  * Auto-redirects new users (0 projects, onboarding not complete) to /onboarding.
  */
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
-  const { userId } = await auth();
 
-  if (userId) {
-    // Check if new user needs onboarding (0 projects AND not on onboarding page)
-    // We detect this by counting their projects
-    try {
-      const projectsCollection = await getCollection("projects");
-      const projectCount = await projectsCollection.countDocuments({ userId });
-      // This will be used client-side for redirect logic — we pass it as a data attribute
-      // Actual redirect handled by middleware or client check to avoid server loop
-    } catch {
-      // DB unavailable — skip onboarding check
-    }
-  }
 
   return (
     <div className="relative flex min-h-screen bg-[#050505]">

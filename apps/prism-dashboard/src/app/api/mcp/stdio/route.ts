@@ -28,6 +28,23 @@ interface McpResponse {
   error?: { code: number; message: string };
 }
 
+interface BrandDocument {
+  companyName?: string;
+  industry?: string;
+  tagline?: string;
+  colors?: Record<string, string>;
+  typography?: {
+    headingFont?: string;
+    bodyFont?: string;
+    scale?: string;
+  };
+  voice?: {
+    personality?: string;
+    formality?: string;
+    keywords?: string[];
+  };
+}
+
 export async function POST(request: NextRequest): Promise<NextResponse<McpResponse>> {
   // 1. Authenticate
   const { userId } = await auth();
@@ -355,7 +372,7 @@ async function handleMcpMethod(
 async function handleToolCall(
   params: { name: string; arguments: Record<string, unknown> },
   userId: string
-): Promise<{ content: Array<{ type: string; text: string }> }> {
+): Promise<{ content: Array<{ type: "text"; text: string }>; error?: boolean }> {
   const { name, arguments: args } = params;
 
   switch (name) {
@@ -433,11 +450,10 @@ async function handleToolCall(
 
     case "validate_code_pattern": {
       const code = args?.code as string | undefined;
-      const _context = args?.context as string | undefined;
       const vCategory = args?.category as string | undefined;
 
       if (!code) {
-        return { content: [{ type: "text" as const, text: "No code provided." }], ...{ error: true } } as any;
+        return { content: [{ type: "text" as const, text: "No code provided." }], error: true };
       }
 
       const rulesDb = await getCollection("rules");
@@ -635,7 +651,6 @@ async function handleToolCall(
     }
 
     case "get_brand_rules": {
-      const projectId = args.projectId as string;
       
       const brands = await getCollection("brands");
       const brand = await brands.findOne({ userId }) || await brands.findOne({ userId: "demo-user" });
@@ -763,14 +778,14 @@ async function handleToolCall(
       const brands = await getCollection("brands");
       const brandId = args?.brandId as string | undefined;
       const query: Record<string, unknown> = { userId };
-      let brand: Record<string, unknown> | null = null;
+      let brand: BrandDocument | null = null;
       if (brandId) {
-        brand = await brands.findOne({ ...query, slug: brandId }) as Record<string, unknown> | null;
+        brand = await brands.findOne({ ...query, slug: brandId }) as unknown as BrandDocument | null;
         if (!brand) {
-          try { const { ObjectId } = await import("mongodb"); if (ObjectId.isValid(brandId)) brand = await brands.findOne({ ...query, _id: new ObjectId(brandId) }) as Record<string, unknown> | null; } catch { /* skip */ }
+          try { const { ObjectId } = await import("mongodb"); if (ObjectId.isValid(brandId)) brand = await brands.findOne({ ...query, _id: new ObjectId(brandId) }) as unknown as BrandDocument | null; } catch { /* skip */ }
         }
       } else {
-        brand = await brands.findOne(query) as Record<string, unknown> | null;
+        brand = await brands.findOne(query) as unknown as BrandDocument | null;
       }
 
       if (!brand) {
@@ -796,8 +811,8 @@ async function handleToolCall(
       const { generateComponent } = await import("@/lib/gemini");
       const component = await generateComponent({
         prompt,
-        designSystem: (args?.designSystem as string) || "jdstudio",
-        stack: (args?.stack as string) || "nextjs",
+        designSystem: (args?.designSystem as "jdstudio" | "bare-minimum" | "glassmorphic" | "8bit-nostalgia") || "jdstudio",
+        stack: (args?.stack as "react" | "nextjs" | "react-native") || "nextjs",
       });
 
       return {
@@ -812,7 +827,7 @@ async function handleToolCall(
       const query = args?.query as string;
       const ruleSets = await getCollection("ruleSets");
       const mQuery: Record<string, unknown> = { isPublic: true };
-      if (query) mQuery.name = { $regex: query, $options: "i" } as any;
+      if (query) mQuery.name = { $regex: query, $options: "i" };
 
       const items = await ruleSets.find(mQuery).sort({ createdAt: -1 }).limit(10).toArray();
 
@@ -862,7 +877,7 @@ async function handleToolCall(
     case "get_skill": {
       const skillId = args?.skillId as string;
       if (!skillId) {
-        return { content: [{ type: "text", text: "Error: skillId is required." }], ...{ error: true } } as any;
+        return { content: [{ type: "text", text: "Error: skillId is required." }], error: true };
       }
 
       try {

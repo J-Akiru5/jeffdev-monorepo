@@ -188,12 +188,20 @@ export function RulesList({
             </span>
           )}
         </h2>
-        <Link
-          href={`/projects/${projectSlug}/rules/new`}
-          className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
-        >
-          + Add Rule
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link
+            href={`/projects/${projectSlug}/rules/templates`}
+            className="text-xs text-white/50 hover:text-white transition-colors"
+          >
+            Browse Templates
+          </Link>
+          <Link
+            href={`/projects/${projectSlug}/rules/new`}
+            className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+          >
+            + Add Rule
+          </Link>
+        </div>
       </div>
 
       {rules.length === 0 ? (
@@ -201,13 +209,21 @@ export function RulesList({
           <p className="text-sm text-white/40">
             No rules yet. Upload a video or create rules manually.
           </p>
-          <Link
-            href={`/projects/${projectSlug}/rules/new`}
-            className="inline-flex items-center gap-1 mt-3 text-xs text-cyan-400 hover:text-cyan-300"
-          >
-            Create your first rule
-            <ExternalLink className="h-3 w-3" />
-          </Link>
+          <div className="flex items-center justify-center gap-4 mt-4">
+            <Link
+              href={`/projects/${projectSlug}/rules/templates`}
+              className="inline-flex items-center gap-1 text-xs text-white/50 hover:text-white transition-colors"
+            >
+              Browse templates
+            </Link>
+            <Link
+              href={`/projects/${projectSlug}/rules/new`}
+              className="inline-flex items-center gap-1 text-xs text-cyan-400 hover:text-cyan-300"
+            >
+              Create your first rule
+              <ExternalLink className="h-3 w-3" />
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="space-y-2">

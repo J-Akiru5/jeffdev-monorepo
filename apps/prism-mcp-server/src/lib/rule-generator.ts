@@ -13,11 +13,6 @@ export interface GeneratedRules {
   skillsCount: number;
   modelUsed: string;
 }
-
-function estimateTokens(text: string): number {
-  return Math.ceil(text.length / 4);
-}
-
 export async function generateRulesFromTokens(
   tokens: ExtractedDesignTokens,
   modelOverride?: string

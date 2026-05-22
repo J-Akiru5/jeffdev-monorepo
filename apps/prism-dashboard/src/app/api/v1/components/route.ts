@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { getCollection } from '@jeffdev/db/cosmos';
-import { authenticate, errorResponse, successResponse } from '@/lib/api-auth';
+import { authenticate, successResponse } from '@/lib/api-auth';
 
 export async function GET(request: NextRequest) {
   const auth = await authenticate(request);
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
   const components = await getCollection('components');
   const query: Record<string, unknown> = { userId: auth.userId };
-  if (modifiedAfter) query.updatedAt = { $gte: modifiedAfter } as any;
+  if (modifiedAfter) query.updatedAt = { $gte: modifiedAfter };
 
   const total = await components.countDocuments(query);
   const items = await components

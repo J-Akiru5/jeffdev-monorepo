@@ -8,9 +8,9 @@
 
 The **Prism Context Engine** is an MCP-based governance layer for AI coding assistants (Cursor, Windsurf, VS Code, Claude Desktop, GitHub Copilot, Cline). It:
 
-1. Extracts coding rules from websites (Playwright) and repos (scanner)
-2. Stores rules in Cosmos DB
-3. Delivers rules via MCP to any IDE — smart-ranked, compressed, cached
+1. Extracts coding rules and step-by-step skills from websites (Playwright) and repos (scanner)
+2. Stores rules and skills in Cosmos DB
+3. Delivers rules/skills via MCP to any IDE — smart-ranked, compressed, cached
 4. Enforces rules by checking + auto-fixing AI-generated code
 
 **Target:** 64% token reduction ($55–150 → $20–55/dev/month).
@@ -40,7 +40,8 @@ prism init           # Auto-configure Cursor/Windsurf/VS Code/Claude Desktop
 
 **Daily use:**
 - IDE auto-starts `prism serve` when you open it
-- AI assistant calls `get_architectural_rules({ task: "build a button" })`
+- AI assistant calls `get_architectural_rules({ task: "build a button" })` to check constraints
+- AI assistant calls `list_skills` to discover available workflows, then `get_skill({ skillId })` for step-by-step execution guides
 - Server returns only relevant rules, ranked by Gemini embedding similarity
 - VS Code underlines violations on save, quick-fix corrects them
 
@@ -71,7 +72,8 @@ apps/prism-mcp-server/src/
     platform-formatter.ts     # Phase 9 — per-platform format/maxTokens
   tools/
     prism-scan.ts             # Phase 1
-    get-skill.ts              # Phase 4
+    get-skill.ts              # Phase 4 (Updated for skills collection)
+    list-skills.ts            # New: Discovery of project workflows
     prism-check.ts            # Phase 7
     prism-fix.ts              # Phase 7
     repo-extract.ts           # Phase 8
@@ -183,7 +185,8 @@ doppler run -- turbo dev
 |------|---------|-------|
 | `get_architectural_rules` | `index.ts` in-house | Smart ranking + cache + platform format |
 | `prism_scan` | `handlePrismScan` | Playwright URL scan → AI rules |
-| `get_skill` | `handleGetSkill` | Progressive disclosure |
+| `list_skills` | `handleListSkills` | Lightweight discovery of procedural workflows |
+| `get_skill` | `handleGetSkill` | Lazy-loads heavy step-by-step markdown |
 | `prism_check` | `handlePrismCheck` | Regex validation with line/column |
 | `validate_code` | → prism_check | Alias |
 | `prism_fix` | `handlePrismFix` | 3 KNOWN_FIXES + generic FIXME |
@@ -228,6 +231,9 @@ doppler run -- turbo dev
 | May 2026 | Fixed Azure endpoint stripping in `azure-openai.ts` |
 | May 2026 | Removed dead `--port` from serve command |
 | May 2026 | Created `PRISM_CONTEXT.md` and updated `PRISM_ROADMAP.md` |
+| May 2026 | Separated "Rules" and "Skills" into two collections. Created Skill Studio UI. |
+| May 2026 | Added `list_skills` MCP tool for AI agent discovery pattern. |
+| May 2026 | Added Pre-built Rule Templates (Next.js 16, React 19, Tailwind v4, Security). |
 
 ## 12. Next Steps
 

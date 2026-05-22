@@ -19,17 +19,6 @@ const isProtectedRoute = createRouteMatcher([
   "/showcase(.*)",
 ]);
 
-/**
- * Define routes that are always public.
- */
-const isPublicRoute = createRouteMatcher([
-  "/",
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-  "/api/webhooks(.*)",
-  "/api/health",
-]);
-
 export default clerkMiddleware(async (auth, req) => {
   // Protect dashboard routes
   if (isProtectedRoute(req)) {

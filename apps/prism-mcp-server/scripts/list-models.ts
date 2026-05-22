@@ -1,4 +1,3 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 
@@ -17,7 +16,6 @@ for (const line of content.split("\n")) {
   env[key] = val;
 }
 
-const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY!);
 
 // List all available models
 console.log("Listing available models from generativelanguage.googleapis.com...\n");

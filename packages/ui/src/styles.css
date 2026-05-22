@@ -1,0 +1,999 @@
+/*
+ * ============================================
+ * JEFFDEV / SYNTAXURE LABS - ENDGAME DESIGN SYSTEM
+ * ============================================
+ * Dark-first design system with light mode support.
+ * The universe is #050505 — until the sun rises.
+ */
+
+/* ----------------------------------------
+   CSS CUSTOM PROPERTIES (Design Tokens)
+   ---------------------------------------- */
+:root {
+  /* Canvas (Backgrounds) */
+  --color-void: #050505;
+  --color-glass: rgba(10, 10, 10, 0.6);
+  --color-glass-heavy: rgba(10, 10, 10, 0.85);
+  --color-surface: #0a0a0a;
+
+  /* Text */
+  --color-ink: #ededed;
+
+  /* Accents (Holographic) */
+  --color-cyan: #06b6d4;
+  --color-purple: #8b5cf6;
+  --color-emerald: #10b981;
+
+  /* Borders */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-active: rgba(255, 255, 255, 0.15);
+  --border-glow: rgba(255, 255, 255, 0.25);
+
+  /* Typography */
+  --tracking-tight: -0.02em;
+  --tracking-mono: -0.01em;
+
+  /* Overlay */
+  --overlay-spotlight: radial-gradient(ellipse 80% 80% at 50% -20%, rgba(6, 182, 212, 0.15), transparent);
+  --overlay-grid-opacity: 0.03;
+  --overlay-grid-glow: rgba(6, 182, 212, 0.03);
+  --overlay-noise-opacity: 0.02;
+
+  /* Glass-Neon Blend */
+  --glass-blend-cyan: rgba(6, 182, 212, 0.06);
+  --glass-blend-purple: rgba(139, 92, 246, 0.04);
+  --glass-edge-glow: rgba(6, 182, 212, 0.08);
+}
+
+.theme-light {
+  color-scheme: light;
+
+  /* Canvas */
+  --color-void: #f6f7fb;
+  --color-glass: rgba(255, 255, 255, 0.75);
+  --color-glass-heavy: rgba(255, 255, 255, 0.92);
+  --color-surface: #f4f6fb;
+
+  /* Text */
+  --color-ink: #0b0f14;
+
+  /* Borders */
+  --border-subtle: rgba(15, 23, 42, 0.1);
+  --border-active: rgba(15, 23, 42, 0.2);
+  --border-glow: rgba(15, 23, 42, 0.3);
+
+  /* Overlay */
+  --overlay-spotlight: radial-gradient(ellipse 80% 80% at 50% -20%, rgba(6, 182, 212, 0.12), transparent);
+  --overlay-grid-opacity: 0.06;
+  --overlay-grid-glow: rgba(6, 182, 212, 0.06);
+  --overlay-noise-opacity: 0.04;
+
+  /* Glass-Neon Blend */
+  --glass-blend-cyan: rgba(6, 182, 212, 0.08);
+  --glass-blend-purple: rgba(139, 92, 246, 0.06);
+  --glass-edge-glow: rgba(6, 182, 212, 0.18);
+}
+
+/* ----------------------------------------
+   TAILWIND v4 THEME CONFIGURATION
+   ---------------------------------------- */
+@theme inline {
+  /* Colors */
+  --color-void: var(--color-void);
+  --color-glass: var(--color-glass);
+  --color-glass-heavy: var(--color-glass-heavy);
+  --color-cyan-accent: var(--color-cyan);
+  --color-purple-accent: var(--color-purple);
+  --color-emerald-accent: var(--color-emerald);
+
+  /* Fonts (mapped from next/font CSS variables) */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono), ui-monospace, monospace;
+}
+
+/* ----------------------------------------
+   GLOBAL BASE STYLES
+   ---------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: auto; /* Lenis handles smooth scroll */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-void);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ----------------------------------------
+   SELECTION & FOCUS STATES
+   ---------------------------------------- */
+::selection {
+  background: rgba(6, 182, 212, 0.3);
+  color: white;
+}
+
+.theme-light ::selection {
+  background: rgba(6, 182, 212, 0.18);
+  color: #0b0f14;
+}
+:focus-visible {
+  outline: 2px solid var(--color-cyan);
+  outline-offset: 2px;
+}
+
+/* ----------------------------------------
+   SCROLLBAR STYLING (Webkit)
+   ---------------------------------------- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-void);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-active);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-glow);
+}
+
+/* ----------------------------------------
+   NOISE TEXTURE (Utility Class)
+   ---------------------------------------- */
+.bg-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* ----------------------------------------
+   GLOBAL BACKGROUND OVERLAYS
+   ---------------------------------------- */
+.grid-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='1'%3E%3Cpath d='M0 0h60v60H0z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 60px 60px;
+  opacity: var(--overlay-grid-opacity);
+}
+
+.theme-light .grid-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cg fill='none' stroke='%230b0f14' stroke-width='1'%3E%3Cpath d='M0 0h60v60H0z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* ----------------------------------------
+   LIGHT MODE UTILITY OVERRIDES
+   ---------------------------------------- */
+.theme-light .bg-\[\#0a0a0a\] {
+  background-color: var(--color-surface);
+}
+
+.theme-light .text-white {
+  color: #0b0f14;
+}
+
+.theme-light .text-white\/90 {
+  color: rgba(11, 15, 20, 0.9);
+}
+
+.theme-light .text-white\/80 {
+  color: rgba(11, 15, 20, 0.8);
+}
+
+.theme-light .text-white\/70 {
+  color: rgba(11, 15, 20, 0.7);
+}
+
+.theme-light .text-white\/60 {
+  color: rgba(11, 15, 20, 0.6);
+}
+
+.theme-light .text-white\/50 {
+  color: rgba(11, 15, 20, 0.5);
+}
+
+.theme-light .text-white\/40 {
+  color: rgba(11, 15, 20, 0.4);
+}
+
+.theme-light .text-white\/30 {
+  color: rgba(11, 15, 20, 0.3);
+}
+
+.theme-light .text-white\/20 {
+  color: rgba(11, 15, 20, 0.2);
+}
+
+.theme-light .text-white\/10 {
+  color: rgba(11, 15, 20, 0.1);
+}
+
+.theme-light .border-white\/40 {
+  border-color: rgba(15, 23, 42, 0.4);
+}
+
+.theme-light .border-white\/30 {
+  border-color: rgba(15, 23, 42, 0.3);
+}
+
+.theme-light .border-white\/20 {
+  border-color: rgba(15, 23, 42, 0.2);
+}
+
+.theme-light .border-white\/15 {
+  border-color: rgba(15, 23, 42, 0.15);
+}
+
+.theme-light .border-white\/12 {
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+.theme-light .border-white\/10 {
+  border-color: rgba(15, 23, 42, 0.18);
+}
+
+.theme-light .border-white\/8 {
+  border-color: rgba(15, 23, 42, 0.15);
+}
+
+.theme-light .border-white\/6 {
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+.theme-light .border-white\/5 {
+  border-color: rgba(15, 23, 42, 0.05);
+}
+
+.theme-light .border-white\/4 {
+  border-color: rgba(15, 23, 42, 0.04);
+}
+
+.theme-light .border-white\/2 {
+  border-color: rgba(15, 23, 42, 0.03);
+}
+
+.theme-light .border-white\/\[0\.08\] {
+  border-color: rgba(15, 23, 42, 0.18);
+}
+
+.theme-light .border-white\/\[0\.06\] {
+  border-color: rgba(15, 23, 42, 0.14);
+}
+
+.theme-light .border-white\/\[0\.12\] {
+  border-color: rgba(15, 23, 42, 0.16);
+}
+
+.theme-light .border-white\/\[0\.15\] {
+  border-color: rgba(15, 23, 42, 0.2);
+}
+
+.theme-light .bg-white\/2 {
+  background-color: rgba(15, 23, 42, 0.02);
+}
+
+.theme-light .bg-white\/3 {
+  background-color: rgba(15, 23, 42, 0.03);
+}
+
+.theme-light .bg-white\/4 {
+  background-color: rgba(15, 23, 42, 0.04);
+}
+
+.theme-light .bg-white\/5 {
+  background-color: rgba(15, 23, 42, 0.05);
+}
+
+.theme-light .bg-white\/8 {
+  background-color: rgba(15, 23, 42, 0.08);
+}
+
+.theme-light .bg-white\/10 {
+  background-color: rgba(15, 23, 42, 0.1);
+}
+
+.theme-light .bg-white\/12 {
+  background-color: rgba(15, 23, 42, 0.12);
+}
+
+.theme-light .bg-white\/15 {
+  background-color: rgba(15, 23, 42, 0.15);
+}
+
+.theme-light .bg-white\/20 {
+  background-color: rgba(15, 23, 42, 0.2);
+}
+
+.theme-light .bg-white\/30 {
+  background-color: rgba(15, 23, 42, 0.3);
+}
+
+.theme-light .bg-white\/40 {
+  background-color: rgba(15, 23, 42, 0.4);
+}
+
+.theme-light .bg-white\/50 {
+  background-color: rgba(15, 23, 42, 0.5);
+}
+
+.theme-light .bg-white\/\[0\.01\] {
+  background-color: rgba(15, 23, 42, 0.015);
+}
+
+.theme-light .bg-white\/\[0\.02\] {
+  background-color: rgba(15, 23, 42, 0.02);
+}
+
+.theme-light .bg-white\/\[0\.03\] {
+  background-color: rgba(15, 23, 42, 0.03);
+}
+
+.theme-light .bg-white\/\[0\.04\] {
+  background-color: rgba(15, 23, 42, 0.04);
+}
+
+.theme-light .bg-white\/\[0\.05\] {
+  background-color: rgba(15, 23, 42, 0.05);
+}
+
+.theme-light .bg-black\/50 {
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+.theme-light .bg-black\/40 {
+  background-color: rgba(255, 255, 255, 0.55);
+}
+
+.theme-light .bg-black\/30 {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.theme-light .bg-black\/20 {
+  background-color: rgba(255, 255, 255, 0.45);
+}
+
+.theme-light .bg-black\/60 {
+  background-color: rgba(255, 255, 255, 0.65);
+}
+
+.theme-light .bg-black\/70 {
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+.theme-light .bg-black\/80 {
+  background-color: rgba(255, 255, 255, 0.75);
+}
+
+.theme-light .bg-black {
+  background-color: rgba(255, 255, 255, 0.95);
+}
+
+.theme-light .hover\:bg-black\/70:hover {
+  background-color: rgba(255, 255, 255, 0.75);
+}
+
+.theme-light .placeholder-white\/20::placeholder {
+  color: rgba(11, 15, 20, 0.2);
+}
+
+.theme-light .placeholder-white\/30::placeholder {
+  color: rgba(11, 15, 20, 0.3);
+}
+
+.theme-light .prose-invert {
+  color: #0b0f14;
+}
+
+.theme-light .prose-invert :where(p, li) {
+  color: rgba(11, 15, 20, 0.65);
+}
+
+.theme-light .prose-invert :where(h1, h2, h3, h4) {
+  color: #0b0f14;
+}
+
+.theme-light ::placeholder {
+  color: rgba(11, 15, 20, 0.4);
+}
+
+.theme-light .btn-ghost {
+  background: rgba(255, 255, 255, 0.5);
+  color: rgba(11, 15, 20, 0.8);
+}
+
+.theme-light .btn-ghost:hover {
+  color: #0b0f14;
+}
+
+/* ----------------------------------------
+   LIGHT MODE: ACCENT COLOUR CONTRAST
+   Shift neon accent colours to darker
+   variants so they meet WCAG AA on white.
+   ---------------------------------------- */
+
+/* Cyan — 400 (#22d3ee) → 700 (#0e7490) */
+.theme-light .text-cyan-400 {
+  color: #0e7490;
+}
+
+.theme-light .text-cyan-400\/80 {
+  color: rgba(14, 116, 144, 0.9);
+}
+
+.theme-light .text-cyan-400\/70 {
+  color: rgba(14, 116, 144, 0.8);
+}
+
+.theme-light .text-cyan-400\/60 {
+  color: rgba(14, 116, 144, 0.7);
+}
+
+/* Purple — 400 (#a78bfa) → 700 (#6d28d9) */
+.theme-light .text-purple-400 {
+  color: #6d28d9;
+}
+
+/* Emerald — 400 (#34d399) → 700 (#047857) */
+.theme-light .text-emerald-400 {
+  color: #047857;
+}
+
+/* Emerald dots/badges stay vivid */
+.theme-light .bg-emerald-400,
+.theme-light .bg-emerald-500 {
+  background-color: #059669;
+}
+
+/* Holographic gradient — darker for light bg */
+.theme-light .text-gradient-holographic {
+  background: linear-gradient(135deg, #0e7490, #6d28d9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Cyan border accents — make visible on light bg */
+.theme-light .border-cyan-500\/50 {
+  border-color: rgba(6, 182, 212, 0.6);
+}
+
+.theme-light .border-cyan-500\/30 {
+  border-color: rgba(6, 182, 212, 0.4);
+}
+
+.theme-light .border-neon-cyan {
+  border-color: rgba(14, 116, 144, 0.5);
+}
+
+/* Semi-transparent cyan backgrounds on light */
+.theme-light .bg-cyan-500\/10 {
+  background-color: rgba(6, 182, 212, 0.12);
+}
+
+.theme-light .bg-cyan-500\/20 {
+  background-color: rgba(6, 182, 212, 0.2);
+}
+
+/* Status badge stronger border in light */
+.theme-light .rounded-full.border.border-white\/10 {
+  border-color: rgba(15, 23, 42, 0.2);
+  background-color: rgba(15, 23, 42, 0.05);
+}
+
+/* Service shortcuts strip border — stronger */
+.theme-light .border-white\/\[0\.05\] {
+  border-color: rgba(15, 23, 42, 0.15);
+}
+
+/* Subtext and secondary text — ensure readable */
+.theme-light .text-white\/60 {
+  color: rgba(11, 15, 20, 0.65);
+}
+
+.theme-light .text-white\/50 {
+  color: rgba(11, 15, 20, 0.55);
+}
+
+/* Neon glow shadows — soften to avoid washed look */
+.theme-light .shadow-glow-cyan-intense {
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.12),
+              0 0 40px rgba(6, 182, 212, 0.04);
+}
+
+/* ----------------------------------------
+   LIGHT MODE: HERO SECTION SPECIFICS
+   ---------------------------------------- */
+
+/* Neon SVG overlay — multiply blend so cyan/purple
+   lines darken the light background instead of washing out */
+.theme-light .hero-neon-overlay {
+  opacity: 0.5;
+  mix-blend-mode: multiply;
+}
+
+/* Hero section — subtle cool gradient background in light mode */
+.theme-light .hero-section-bg {
+  background: linear-gradient(135deg, #f0f9ff 0%, #faf5ff 100%);
+}
+
+/* Floating badge — opaque, readable in light mode */
+.theme-light .hero-floating-badge {
+  background: rgba(240, 249, 255, 0.95) !important;
+  border-color: rgba(14, 116, 144, 0.35) !important;
+  box-shadow: 0 2px 16px rgba(14, 116, 144, 0.12) !important;
+}
+
+/* "Our Services" label and mono labels — darker in light */
+.theme-light .text-cyan-400.text-xs.font-mono {
+  color: #0e7490;
+}
+
+/* ----------------------------------------
+   GLASS MORPHISM UTILITIES
+   ---------------------------------------- */
+.glass {
+  background: var(--color-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+}
+
+.glass-heavy {
+  background: var(--color-glass-heavy);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-active);
+}
+
+/* Glass + Neon Blend: frosted glass with inner neon glow bleed-through */
+.glass-neon {
+  background: var(--color-glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border-subtle);
+  box-shadow:
+    0 0 30px var(--glass-blend-cyan),
+    0 0 60px var(--glass-blend-purple),
+    inset 0 0 30px var(--glass-blend-cyan);
+  transition: box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+.glass-neon:hover {
+  border-color: var(--border-active);
+  box-shadow:
+    0 0 40px var(--glass-edge-glow),
+    0 0 80px var(--glass-blend-purple),
+    inset 0 0 40px var(--glass-blend-cyan);
+}
+
+/* Glass shimmer sweep — animated light streak across glass surface */
+.glass-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(6, 182, 212, 0.04) 45%,
+    rgba(139, 92, 246, 0.04) 50%,
+    rgba(6, 182, 212, 0.04) 55%,
+    transparent 60%
+  );
+  background-size: 200% 100%;
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.glass-shimmer:hover::after {
+  transform: translateX(100%);
+}
+
+/* ----------------------------------------
+   TYPOGRAPHY UTILITIES
+   ---------------------------------------- */
+.text-gradient-cyan {
+  background: linear-gradient(135deg, var(--color-cyan), #67e8f9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-purple {
+  background: linear-gradient(135deg, var(--color-purple), #c4b5fd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-holographic {
+  background: linear-gradient(135deg, var(--color-cyan), var(--color-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ----------------------------------------
+   GEOMETRY / CLIP PATHS
+   ---------------------------------------- */
+.clip-diagonal {
+  clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+}
+
+.clip-diagonal-reverse {
+  clip-path: polygon(0 0, 100% 15%, 100% 100%, 0 100%);
+}
+
+/* ----------------------------------------
+   GHOST GLOW BUTTON BASE
+   ---------------------------------------- */
+.btn-ghost {
+  position: relative;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 0.625rem 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-ghost:hover {
+  color: white;
+  border-color: var(--border-active);
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.15);
+}
+
+/* ----------------------------------------
+   ANIMATIONS
+   ---------------------------------------- */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ----------------------------------------
+   NEON GLOW UTILITIES
+   ---------------------------------------- */
+.shadow-glow-cyan {
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.15),
+              0 0 60px rgba(6, 182, 212, 0.05);
+}
+
+.shadow-glow-purple {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.15),
+              0 0 60px rgba(139, 92, 246, 0.05);
+}
+
+.shadow-glow-cyan-intense {
+  box-shadow: 0 0 25px rgba(6, 182, 212, 0.3),
+              0 0 80px rgba(6, 182, 212, 0.1),
+              inset 0 0 20px rgba(6, 182, 212, 0.05);
+}
+
+.border-neon-cyan {
+  border-color: rgba(6, 182, 212, 0.4);
+}
+
+.border-neon-purple {
+  border-color: rgba(139, 92, 246, 0.4);
+}
+
+/* Light mode: soften neon glows */
+.theme-light .shadow-glow-cyan {
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.08),
+              0 0 40px rgba(6, 182, 212, 0.03);
+}
+
+.theme-light .shadow-glow-purple {
+  box-shadow: 0 0 15px rgba(139, 92, 246, 0.08),
+              0 0 40px rgba(139, 92, 246, 0.03);
+}
+
+.theme-light .shadow-glow-cyan-intense {
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.15),
+              0 0 50px rgba(6, 182, 212, 0.05);
+}
+
+.theme-light .border-neon-cyan {
+  border-color: rgba(6, 182, 212, 0.3);
+}
+
+.theme-light .border-neon-purple {
+  border-color: rgba(139, 92, 246, 0.3);
+}
+
+/* Glass-neon — stronger border for light mode visibility */
+.theme-light .glass-neon {
+  border-color: rgba(15, 23, 42, 0.15);
+  box-shadow:
+    0 0 20px rgba(6, 182, 212, 0.06),
+    0 0 40px rgba(139, 92, 246, 0.04),
+    inset 0 0 20px rgba(6, 182, 212, 0.04);
+}
+
+.theme-light .glass-neon:hover {
+  border-color: rgba(15, 23, 42, 0.25);
+  box-shadow:
+    0 0 30px rgba(6, 182, 212, 0.12),
+    0 0 60px rgba(139, 92, 246, 0.06),
+    inset 0 0 30px rgba(6, 182, 212, 0.06);
+}
+
+/* Glass shimmer — more visible on light bg */
+.theme-light .glass-shimmer::after {
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(6, 182, 212, 0.06) 45%,
+    rgba(109, 40, 217, 0.06) 50%,
+    rgba(6, 182, 212, 0.06) 55%,
+    transparent 60%
+  );
+}
+
+/* ----------------------------------------
+   NEON ANIMATIONS
+   ---------------------------------------- */
+@keyframes neon-pulse {
+  0%, 100% {
+    opacity: 0.6;
+    filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.6));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 30px rgba(6, 182, 212, 1));
+  }
+}
+
+.animate-neon-pulse {
+  animation: neon-pulse 3s ease-in-out infinite;
+}
+
+@keyframes border-beam {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
+}
+
+.animate-border-beam {
+  background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.5), rgba(139, 92, 246, 0.5), transparent);
+  background-size: 200% 100%;
+  animation: border-beam 4s linear infinite;
+}
+
+@keyframes float-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-float-subtle {
+  animation: float-subtle 4s ease-in-out infinite;
+}
+
+/* Neon breathe — slow, ambient cyan glow pulse for glass-neon panels */
+@keyframes neon-breathe {
+  0%, 100% {
+    box-shadow:
+      0 0 20px var(--glass-blend-cyan),
+      0 0 40px var(--glass-blend-purple),
+      inset 0 0 20px var(--glass-blend-cyan);
+  }
+  50% {
+    box-shadow:
+      0 0 40px rgba(6, 182, 212, 0.15),
+      0 0 80px var(--glass-blend-purple),
+      inset 0 0 40px rgba(6, 182, 212, 0.08);
+  }
+}
+
+.animate-neon-breathe {
+  animation: neon-breathe 6s ease-in-out infinite;
+}
+
+.theme-light .animate-neon-breathe {
+  animation-name: neon-breathe-light;
+}
+
+@keyframes neon-breathe-light {
+  0%, 100% {
+    box-shadow:
+      0 0 15px rgba(6, 182, 212, 0.08),
+      0 0 30px rgba(139, 92, 246, 0.04);
+  }
+  50% {
+    box-shadow:
+      0 0 25px rgba(6, 182, 212, 0.12),
+      0 0 50px rgba(139, 92, 246, 0.06);
+  }
+}
+
+@keyframes neon-line-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* ----------------------------------------
+   SCROLLBAR HIDE (Carousels)
+   ---------------------------------------- */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ----------------------------------------
+   AGENTIC TERMINAL — Light Mode (Dark Island)
+   The terminal section stays dark even in
+   light mode so the monospace CLI aesthetic
+   remains readable and intentional.
+   ---------------------------------------- */
+.agentic-terminal {
+  background: #050505;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.theme-light .agentic-terminal {
+  background: #0a0a0a;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Keep terminal text white on dark bg in light mode */
+.theme-light .agentic-terminal .text-white {
+  color: #ededed;
+}
+
+.theme-light .agentic-terminal .text-white\/90 {
+  color: rgba(237, 237, 237, 0.9);
+}
+
+.theme-light .agentic-terminal .text-white\/70 {
+  color: rgba(237, 237, 237, 0.7);
+}
+
+.theme-light .agentic-terminal .text-white\/60 {
+  color: rgba(237, 237, 237, 0.6);
+}
+
+.theme-light .agentic-terminal .text-white\/50 {
+  color: rgba(237, 237, 237, 0.5);
+}
+
+.theme-light .agentic-terminal .text-white\/40 {
+  color: rgba(237, 237, 237, 0.4);
+}
+
+.theme-light .agentic-terminal .text-white\/30 {
+  color: rgba(237, 237, 237, 0.3);
+}
+
+/* Terminal accent colors — keep vivid in light mode */
+.theme-light .agentic-terminal .text-cyan-400 {
+  color: #22d3ee;
+}
+
+.theme-light .agentic-terminal .text-cyan-500 {
+  color: #06b6d4;
+}
+
+.theme-light .agentic-terminal .text-purple-400 {
+  color: #a78bfa;
+}
+
+.theme-light .agentic-terminal .text-purple-400\/70 {
+  color: rgba(167, 139, 250, 0.7);
+}
+
+.theme-light .agentic-terminal .text-purple-500\/50 {
+  color: rgba(139, 92, 246, 0.5);
+}
+
+.theme-light .agentic-terminal .text-emerald-400 {
+  color: #34d399;
+}
+
+.theme-light .agentic-terminal .text-emerald-500 {
+  color: #10b981;
+}
+
+/* Terminal borders and background elements */
+.theme-light .agentic-terminal .border-white\/\[0\.08\] {
+  border-color: rgba(237, 237, 237, 0.08);
+}
+
+.theme-light .agentic-terminal .border-white\/\[0\.04\] {
+  border-color: rgba(237, 237, 237, 0.04);
+}
+
+.theme-light .agentic-terminal .bg-white\/\[0\.01\] {
+  background-color: rgba(237, 237, 237, 0.01);
+}
+
+.theme-light .agentic-terminal .bg-black\/50 {
+  background-color: rgba(10, 10, 10, 0.6);
+}
+
+.theme-light .agentic-terminal .bg-black\/60 {
+  background-color: rgba(10, 10, 10, 0.75);
+}
+
+.theme-light .agentic-terminal .border-white\/10 {
+  border-color: rgba(237, 237, 237, 0.1);
+}
+
+.theme-light .agentic-terminal .hover\:text-white\/60:hover {
+  color: rgba(237, 237, 237, 0.6);
+}
+
+.theme-light .agentic-terminal .hover\:text-white\/70:hover {
+  color: rgba(237, 237, 237, 0.7);
+}
+
+.theme-light .agentic-terminal .group-hover\:text-white:hover {
+  color: #ededed;
+}
+
+.theme-light .agentic-terminal .group-hover\:text-white\/50:hover {
+  color: rgba(237, 237, 237, 0.5);
+}
+
+.theme-light .agentic-terminal .group-hover\:text-white\/70:hover {
+  color: rgba(237, 237, 237, 0.7);
+}
+
+.theme-light .agentic-terminal .hover\:bg-white\/\[0\.03\]:hover {
+  background-color: rgba(237, 237, 237, 0.03);
+}
+
+.theme-light .agentic-terminal .hover\:border-white\/10:hover {
+  border-color: rgba(237, 237, 237, 0.1);
+}

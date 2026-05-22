@@ -8,7 +8,8 @@ import {
   Settings, 
   FileJson,
   Video,
-  Sparkles
+  Sparkles,
+  BookOpen
 } from "lucide-react";
 import { VideoContextUploader } from "@/components/video-context-uploader";
 import { RulesList, type RuleItem } from "./rules-list";
@@ -45,6 +46,12 @@ export default async function ProjectPage({ params }: Props) {
     .sort({ priority: 1 })
     .limit(20)
     .toArray();
+
+  // Fetch skills count
+  const skillsCollection = await getCollection("skills");
+  const skillsCount = await skillsCollection.countDocuments({ 
+    projectId: project._id.toString() 
+  });
 
   return (
     <div className="space-y-8">
@@ -90,11 +97,16 @@ export default async function ProjectPage({ params }: Props) {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         <StatCard 
           label="Rules" 
           value={rules.length.toString()} 
           icon={FileJson}
+        />
+        <StatCard 
+          label="Skills" 
+          value={skillsCount.toString()} 
+          icon={BookOpen}
         />
         <StatCard 
           label="Design System" 
@@ -138,6 +150,40 @@ export default async function ProjectPage({ params }: Props) {
           }))}
           projectSlug={slug}
         />
+      </div>
+
+      {/* Skills Section */}
+      <div className="rounded-md border border-white/5 bg-white/[0.01] p-6 mt-8">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-cyan-400" />
+            <h2 className="text-lg font-medium text-white">Skill Studio</h2>
+          </div>
+          <Link
+            href={`/projects/${slug}/skills`}
+            className="text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
+          >
+            Manage Skills →
+          </Link>
+        </div>
+        <p className="text-sm text-white/50 mb-4 max-w-2xl">
+          Teach your AI how to perform procedural workflows. While Rules provide constraints, Skills provide step-by-step instructions with code examples.
+        </p>
+        <div className="flex gap-3">
+          <Link
+            href={`/projects/${slug}/skills/new`}
+            className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-medium text-white hover:bg-white/[0.05] transition-colors"
+          >
+            Create Manual Skill
+          </Link>
+          <Link
+            href={`/projects/${slug}/skills/generate`}
+            className="inline-flex items-center gap-2 rounded-md border border-purple-500/20 bg-purple-500/10 px-4 py-2 text-sm font-medium text-purple-400 hover:bg-purple-500/20 transition-colors"
+          >
+            <Sparkles className="h-4 w-4" />
+            Generate with AI
+          </Link>
+        </div>
       </div>
     </div>
   );
