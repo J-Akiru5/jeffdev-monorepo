@@ -42,7 +42,7 @@ jobs:
       - run: sfw pnpm install --frozen-lockfile
 
       - name: Build packages
-        run: pnpm --filter @prism-engine/cli... run build
+        run: pnpm --filter prism-context-engine... run build
 
       - name: Create Release Pull Request
         id: changesets

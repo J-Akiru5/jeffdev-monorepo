@@ -418,7 +418,7 @@ function StepConnect({ onNext, onSkip }: { onNext: () => void; onSkip: () => voi
           </p>
           <div className="bg-black/40 border border-white/10 rounded-md p-4 font-mono text-sm">
             <p className="text-white/40 text-xs mb-2"># Install CLI (if not done)</p>
-            <p className="text-emerald-300">npm install -g @prism-engine/cli</p>
+            <p className="text-emerald-300">npm install -g prism-context-engine</p>
             <p className="text-white/40 text-xs mt-3 mb-2"># Sync rules + configure IDE</p>
             <p className="text-cyan-300">prism sync</p>
             <p className="text-cyan-300">prism init</p>

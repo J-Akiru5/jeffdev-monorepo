@@ -32,7 +32,7 @@ function readCached(file: string): unknown | null {
 export async function sync(options?: { full?: boolean; repo?: string | boolean }): Promise<void> {
   // If --repo flag is provided, run repo scanner instead of cloud sync
   if (options?.repo) {
-    const repoPath = options.repo === true ? process.cwd() : options.repo;
+    const repoPath = typeof options.repo === 'boolean' ? process.cwd() : options.repo;
     console.log(chalk.cyan(`🔍 Scanning repository: ${repoPath}`));
     const spinner = ora('Analyzing codebase structure...').start();
 
