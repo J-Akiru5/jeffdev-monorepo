@@ -7,15 +7,13 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "changeset": "changeset"
   },
   "devDependencies": {
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^12.0.8",
-    "@semantic-release/npm": "^13.1.5",
+    "@changesets/changelog-github": "^0.7.0",
+    "@changesets/cli": "^2.31.0",
     "prettier": "^3.7.4",
-    "semantic-release": "^25.0.3",
     "syncpack": "^13.0.4",
     "turbo": "^2.7.2",
     "typescript": "^5.9.2"
