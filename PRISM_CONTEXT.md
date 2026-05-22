@@ -2,7 +2,7 @@
 
 > **Read this first.** Canonical handoff document for AI agents. Every Phase, every file, every decision, every test result, every known bug.
 >
-> Last updated: May 22 2026 (21:45 PHT). Companion to `PRISM_ROADMAP.md` (the checklist).
+> Last updated: May 22 2026 (22:00 PHT). Companion to `PRISM_ROADMAP.md` (the checklist).
 
 ## 1. What Is Prism?
 
@@ -239,6 +239,7 @@ doppler run -- turbo dev
 | May 22, 2026 | **100% Warn-Free Monorepo Cleanups**: Cleaned up all remaining ESLint, TypeScript, and React compilation warnings across the monorepo. The verification build/lint checks now pass with zero warnings/errors.                                                                                                                                                                                                                                                                                                                                |
 | May 22, 2026 | **Quality & Safety Automation**: Set up Husky, monorepo-aware `lint-staged.config.js`, Commitlint, `.editorconfig`, `.github/CODEOWNERS`, and Gitleaks CI workflow, committed and pushed to `lou` branch.                                                                                                                                                                                                                                                                                                                                    |
 | May 22, 2026 | **Phase 1 Bulletproof Startup Pack**: Added `LICENSE` (MIT), `SECURITY.md`, `CONTRIBUTING.md`, `.github/PULL_REQUEST_TEMPLATE.md`. Created `/api/health` readiness probe routes across 8 apps (agency, prism-admin, marketing, tracker, nexure, joularix, mht, prism-docs). Installed `@next/bundle-analyzer` in root and wired into all 9 Next.js `next.config.*` files (respecting existing Sentry and Nextra chains). Added `ANALYZE` to `turbo.json` globalEnv. Final verification: `check-types` 7/7 ✅, `lint` 12/12 ✅ zero warnings. |
+| May 22, 2026 | **T3 Env Deferral & Branch Push**: Had a strategic conversation and aligned on **skipping the T3 Env validation rollout** for Phase 1. This prevents making massive, disruptive changes to `process.env` across all 9 apps prematurely; this task is now officially deferred to the planned codebase restructure phase. Pushed all Phase 1 work successfully to remote `origin/lou`.                                                                                                                                                         |
 
 ## 12. Next Steps
 
