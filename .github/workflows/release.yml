@@ -15,7 +15,7 @@ env:
 
 jobs:
   release:
-    name: Semantic Release
+    name: Changeset Release
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -26,7 +26,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
 
       - uses: pnpm/action-setup@v4
         with:
@@ -37,13 +36,18 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
-      - run: pnpm install --frozen-lockfile
+      - uses: SocketDev/action@v1
+        with:
+          mode: firewall-free
+      - run: sfw pnpm install --frozen-lockfile
 
       - name: Build packages
         run: pnpm --filter @prism-engine/cli... run build
 
-      - name: Semantic Release
+      - name: Create Release Pull Request
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          version: pnpm changeset version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: pnpm dlx semantic-release --root
