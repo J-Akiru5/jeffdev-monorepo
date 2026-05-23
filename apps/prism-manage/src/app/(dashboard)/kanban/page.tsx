@@ -19,22 +19,6 @@ interface KanbanTask extends Task {
   column: KanbanColumn;
 }
 
-interface APITask {
-  id?: string | number;
-  project_id?: string;
-  projectId?: string;
-  title: string;
-  status?: string;
-  priority?: number;
-  order?: number;
-  notes?: string;
-  description?: string;
-  created_at?: string;
-  createdAt?: string;
-  updated_at?: string;
-  updatedAt?: string;
-}
-
 const columns: { id: KanbanColumn; title: string; color: string }[] = [
   { id: 'backlog', title: 'Backlog', color: '#6b7280' },
   { id: 'in_progress', title: 'In Progress', color: '#f59e0b' },
