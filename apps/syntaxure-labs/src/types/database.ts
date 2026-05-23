@@ -834,6 +834,47 @@ export type Database = {
           updated_at?: string;
         };
       };
+      releases: {
+        Row: {
+          id: string;
+          title: string;
+          version: string | null;
+          date: string;
+          type: "tool" | "update" | "patch";
+          description: string;
+          link: string | null;
+          tags: string[] | null;
+          is_featured: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          version?: string | null;
+          date?: string;
+          type?: "tool" | "update" | "patch";
+          description: string;
+          link?: string | null;
+          tags?: string[] | null;
+          is_featured?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          version?: string | null;
+          date?: string;
+          type?: "tool" | "update" | "patch";
+          description?: string;
+          link?: string | null;
+          tags?: string[] | null;
+          is_featured?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -865,3 +906,4 @@ export type Task = Database["public"]["Tables"]["tasks"]["Row"];
 export type UserToken = Database["public"]["Tables"]["user_tokens"]["Row"];
 export type AuditLog = Database["public"]["Tables"]["audit_logs"]["Row"];
 export type SitePage = Database["public"]["Tables"]["site_pages"]["Row"];
+export type Release = Database["public"]["Tables"]["releases"]["Row"];

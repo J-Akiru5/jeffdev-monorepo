@@ -128,6 +128,9 @@ export default async function AdminLayout({
           <NavItem href="/admin/agency/content" icon={FileText}>
             Content
           </NavItem>
+          <NavItem href="/admin/agency/releases" icon={FileText}>
+            Releases
+          </NavItem>
 
           {isFounder && (
             <>
