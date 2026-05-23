@@ -8,7 +8,7 @@
 
 import { useState, useTransition } from 'react';
 import { updateProjectStatus } from '@/app/actions/project-management';
-import type { ProjectStatus } from '@/types/firestore';
+import type { ProjectStatus } from '@/types/supabase';
 
 interface ProjectStatusSelectorProps {
   slug: string;

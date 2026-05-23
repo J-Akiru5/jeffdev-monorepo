@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { toggleFeatured, deleteCaseStudy } from '@/app/actions/case-studies';
-import type { FirestoreProject } from '@/types/firestore';
+import type { FirestoreProject } from '@/types/supabase';
 
 interface Props {
   caseStudies: FirestoreProject[];

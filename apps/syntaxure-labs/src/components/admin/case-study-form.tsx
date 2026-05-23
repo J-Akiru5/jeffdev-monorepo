@@ -14,7 +14,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { createCaseStudy, updateCaseStudy } from '@/app/actions/case-studies';
 import { CaseStudyImageUpload } from './case-study-image-upload';
-import type { FirestoreProject } from '@/types/firestore';
+import type { FirestoreProject } from '@/types/supabase';
 
 // =============================================================================
 // TYPES

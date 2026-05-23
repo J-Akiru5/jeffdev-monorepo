@@ -7,7 +7,7 @@
  */
 
 import { getAdminClient } from '@/lib/supabase/admin';
-import type { FirestoreFeedback, FeedbackStatus } from '@/types/firestore';
+import type { FirestoreFeedback, FeedbackStatus } from '@/types/supabase';
 import { logAuditEvent } from '@/lib/audit';
 
 const COLLECTION = 'feedback';

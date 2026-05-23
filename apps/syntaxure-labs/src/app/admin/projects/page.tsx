@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { getProjects } from '@/lib/data';
-import type { FirestoreProject } from '@/types/firestore';
+import type { FirestoreProject } from '@/types/supabase';
 import { ProjectCard } from '@/components/admin/project-card';
 
 /**

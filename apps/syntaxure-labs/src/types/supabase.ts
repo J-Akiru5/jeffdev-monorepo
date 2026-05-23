@@ -1,8 +1,8 @@
 /**
- * Firestore Data Types
- * ---------------------
- * Type definitions for Firestore collections.
- * Separated from static data types to avoid LucideIcon serialization issues.
+ * Supabase Data Types
+ * -------------------
+ * Type definitions for Supabase collections and admin business-logic models.
+ * These represent the data shapes used by the admin components and server actions.
  */
 
 // =============================================================================

@@ -12,7 +12,7 @@ import { DataTable } from '@/components/admin/data-table';
 import { FeedbackStatusSelector } from '@/components/admin/feedback-status-selector';
 import { deleteFeedback } from '@/app/actions/feedback';
 import { useRouter } from 'next/navigation';
-import type { FeedbackStatus } from '@/types/firestore';
+import type { FeedbackStatus } from '@/types/supabase';
 
 interface Feedback {
   id: string;

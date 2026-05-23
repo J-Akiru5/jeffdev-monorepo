@@ -10,7 +10,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronDown } from 'lucide-react';
 import { updateFeedbackStatus } from '@/app/actions/feedback';
-import type { FeedbackStatus } from '@/types/firestore';
+import type { FeedbackStatus } from '@/types/supabase';
 
 interface FeedbackStatusSelectorProps {
   feedbackId: string;

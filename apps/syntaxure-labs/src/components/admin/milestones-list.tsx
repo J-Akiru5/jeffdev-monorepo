@@ -9,7 +9,7 @@
 import { useState, useTransition } from 'react';
 import { Circle, CheckCircle2, Clock, Trash2, Plus } from 'lucide-react';
 import { updateMilestoneStatus, deleteMilestone, addMilestone } from '@/app/actions/project-management';
-import type { ProjectMilestone, MilestoneStatus } from '@/types/firestore';
+import type { ProjectMilestone, MilestoneStatus } from '@/types/supabase';
 
 interface MilestonesListProps {
   slug: string;
