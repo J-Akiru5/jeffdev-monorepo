@@ -43,6 +43,7 @@ export async function GET() {
         email: user.email,
         role: "founder",
         updated_at: new Date().toISOString(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
       {
         onConflict: "id",

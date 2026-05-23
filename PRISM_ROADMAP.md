@@ -13,6 +13,7 @@ Prism is an **MCP-based governance layer for AI coding assistants** (Cursor, Win
 **The core problem it solves:** AI coding assistants forget project standards, hallucinate design tokens, ignore naming conventions, and waste tokens loading irrelevant context. This costs developers $55–$150/month in API token waste and produces inconsistent, rule-violating code.
 
 **How Prism solves it:**
+
 1. Extracts coding rules from a live website (via Playwright MCP) and/or local repo
 2. Stores rules in Cosmos DB with vector embeddings
 3. Delivers rules via MCP to any IDE — only the relevant ones, compressed, cached
@@ -23,6 +24,7 @@ Prism is an **MCP-based governance layer for AI coding assistants** (Cursor, Win
 ### Why Prism vs Built-in Alternatives
 
 Cursor has `.cursorrules`, Claude has project knowledge, VS Code has Copilot instructions — each is siloed, manual, and IDE-specific. Prism's moat:
+
 - **Cross-IDE**: Write rules once, enforce in Cursor, Windsurf, VS Code, Claude Code, Copilot
 - **Smart retrieval**: Vector embeddings select only task-relevant rules, unlike `.cursorrules` which dumps everything
 - **Auto-extraction**: Playwright scans a live URL to generate rules, no manual authoring needed
@@ -77,6 +79,7 @@ Fallback: Azure OpenAI (set AI_PROVIDER=azure)
 ```
 
 ### Data Flow (every AI prompt — FIXED May 2026)
+
 ```
 Developer types in IDE
     → IDE launches prism serve (configured via prism init)
@@ -96,6 +99,7 @@ Developer types in IDE
 ## ✅ What Is Already Built (DO NOT REBUILD)
 
 ### Core Platform
+
 - [x] MCP Protocol — full JSON-RPC 2.0, stdio transport
 - [x] Auth — Clerk, API key verification, tier-based access (Free/Pro/Team/Enterprise)
 - [x] CRUD APIs — `/api/v1/rules`, `/api/v1/projects`, `/api/v1/brands`, `/api/v1/components`, `/api/v1/api-keys`
@@ -103,6 +107,7 @@ Developer types in IDE
 - [x] Dashboard MCP proxy — `/api/mcp/stdio` (17 tools, proper JSON-RPC)
 
 ### All 9 Phases — Complete
+
 - [x] Phase 1 — Playwright extraction + AI rule generation (15 tests)
 - [x] Phase 2 — Telemetry & baseline (11 tests)
 - [x] Phase 3 — Smart context selection via embeddings (8 tests)
@@ -114,6 +119,7 @@ Developer types in IDE
 - [x] Phase 9 — Cross-platform optimization (22 tests)
 
 ### IDE Integration (Fixed This Session)
+
 - [x] `prism serve` — spawns full MCP server (`prism-mcp-server --standalone`) with transparent stdio relay; local lite fallback with 8 tools
 - [x] `prism init` — auto-detects IDEs, configures MCP with `prism serve` (not broken proxy)
 - [x] VS Code extension — `mcpClient.ts` spawns `prism serve`, diagnostics-on-save via `prism_check`
@@ -121,6 +127,7 @@ Developer types in IDE
 - [x] Cursor/Windsurf/Claude Desktop — MCP config auto-written by `prism init`
 
 ### AI Provider
+
 - [x] Gemini primary — `gemini-3.5-flash` (chat), `gemini-embedding-2` (embeddings, 3072 dims)
 - [x] AI router — `ai-router.ts` switches between Gemini/Azure via `AI_PROVIDER` env var
 - [x] Azure OpenAI fallback — endpoint stripping fix in `azure-openai.ts`
@@ -129,26 +136,27 @@ Developer types in IDE
 
 ## 🚧 Gaps (Token Waste Sources — Fix These)
 
-| Gap | Location | Impact | Status |
-|-----|----------|--------|--------|
-| No context compression | MCP server + Dashboard API | Rules returned as full markdown ~2–5 KB each | ✅ Fixed (Phases 3–4) |
-| No smart context selection | `get_arch_rules` | Always returns top 5 rules, ignores task relevance | ✅ Fixed (Phase 3) |
-| No token budget management | All MCP endpoints | No `maxTokens` param, no size limiting | ✅ Fixed (Phase 3) |
-| No semantic retrieval for rules | MCP rules endpoints | Fetched by category/tag only, not embedding-ranked | ✅ Fixed (Phase 3) |
-| No response caching | All endpoints | Every MCP call re-queries Cosmos DB | ✅ Fixed (Phase 6) |
-| No telemetry | All endpoints | Zero token/payload tracking | ✅ Fixed (Phase 2) |
-| No context prioritization | Rule responses | No hierarchical delivery | ✅ Fixed (Phase 4) |
-| No prompt-aware routing | None | Task context not used to filter rules | ✅ Fixed (Phase 3) |
-| Broken IDE proxy | `connect.ts` | Clerk cookies vs Bearer token auth mismatch | ✅ Fixed (switched to `prism serve`) |
-| Data fragmentation | Kitchen vs Serve vs MCP Server | 3 different data sources/formats | ✅ Fixed (`prism sync` unifies) |
-| Duplicate tool definitions | VS Code extension vs dashboard | Tools called that don't exist on any server | ⏳ Mitigated (serve lite covers 8, full server 9) |
-| No streaming | All endpoints | Full response buffered before delivery | ⏳ Future |
+| Gap                             | Location                       | Impact                                             | Status                                            |
+| ------------------------------- | ------------------------------ | -------------------------------------------------- | ------------------------------------------------- |
+| No context compression          | MCP server + Dashboard API     | Rules returned as full markdown ~2–5 KB each       | ✅ Fixed (Phases 3–4)                             |
+| No smart context selection      | `get_arch_rules`               | Always returns top 5 rules, ignores task relevance | ✅ Fixed (Phase 3)                                |
+| No token budget management      | All MCP endpoints              | No `maxTokens` param, no size limiting             | ✅ Fixed (Phase 3)                                |
+| No semantic retrieval for rules | MCP rules endpoints            | Fetched by category/tag only, not embedding-ranked | ✅ Fixed (Phase 3)                                |
+| No response caching             | All endpoints                  | Every MCP call re-queries Cosmos DB                | ✅ Fixed (Phase 6)                                |
+| No telemetry                    | All endpoints                  | Zero token/payload tracking                        | ✅ Fixed (Phase 2)                                |
+| No context prioritization       | Rule responses                 | No hierarchical delivery                           | ✅ Fixed (Phase 4)                                |
+| No prompt-aware routing         | None                           | Task context not used to filter rules              | ✅ Fixed (Phase 3)                                |
+| Broken IDE proxy                | `connect.ts`                   | Clerk cookies vs Bearer token auth mismatch        | ✅ Fixed (switched to `prism serve`)              |
+| Data fragmentation              | Kitchen vs Serve vs MCP Server | 3 different data sources/formats                   | ✅ Fixed (`prism sync` unifies)                   |
+| Duplicate tool definitions      | VS Code extension vs dashboard | Tools called that don't exist on any server        | ⏳ Mitigated (serve lite covers 8, full server 9) |
+| No streaming                    | All endpoints                  | Full response buffered before delivery             | ⏳ Future                                         |
 
 ---
 
 ## 📋 Phase-by-Phase Checklist
 
 ### Phase 1 — Playwright MCP Rule Extraction (Primary extraction method)
+
 > Goal: Make `/prism-scan [URL]` the canonical onboarding flow. Users should get value in under 60 seconds.
 > Biz milestone: 70% of new users generate their first rule set within 5 min of signup.
 
@@ -177,6 +185,7 @@ Developer types in IDE
 ---
 
 ### Phase 2 — Telemetry & Baseline
+
 > Goal: Know exactly how many tokens are being used before optimizing.
 > Biz milestone: Publish first case study showing X% token waste exists in real projects.
 
@@ -200,6 +209,7 @@ Developer types in IDE
 ---
 
 ### Phase 3 — Smart Context Selection (Biggest Win — 30% reduction)
+
 > Goal: Stop sending irrelevant rules. Only send what the task actually needs.
 > Biz milestone: A/B test shows 30% token reduction vs baseline; publish as benchmark.
 
@@ -223,6 +233,7 @@ Developer types in IDE
 ---
 
 ### Phase 4 — Progressive Disclosure
+
 > Goal: Send skill metadata (30–50 tokens) first. Full content only on demand.
 > Biz milestone: Measure tokens/call hitting ~1,800 target; publish as comparison metric vs baseline.
 
@@ -233,12 +244,21 @@ Developer types in IDE
 - [x] Modify `get_arch_rules` response shape:
   ```json
   {
-    "rules": [{ "id": "...", "title": "...", "priority": "high", "content": "..." }],
-    "skills": [{ "id": "...", "name": "component-creation", "summary": "Build React components" }],
+    "rules": [
+      { "id": "...", "title": "...", "priority": "high", "content": "..." }
+    ],
+    "skills": [
+      {
+        "id": "...",
+        "name": "component-creation",
+        "summary": "Build React components"
+      }
+    ],
     "tokenCount": 1840,
     "skippedRules": 24
   }
   ```
+
   - `rules` array: high-priority rules with full content
   - `skills` array: metadata only (name + 1-line summary), no full content
   - JSON format returns structured `rules` + `skills` + `meta`; markdown shows skills section with `get_skill` usage hint
@@ -253,6 +273,7 @@ Developer types in IDE
 ---
 
 ### Phase 5 — Context Kitchen CLI (`prism kitchen`)
+
 > Goal: Give developers visibility into what AI receives before it gets it.
 > Biz milestone: Make this the default demo flow for sales calls — it's the most visual proof of value.
 
@@ -284,6 +305,7 @@ Developer types in IDE
 ---
 
 ### Phase 6 — Caching & Tiered Delivery (10% reduction)
+
 > Goal: Stop re-fetching rules that haven't changed.
 > Biz milestone: 40% cache hit rate = deploy Vercel edge caching → reduce infra cost by ~30%.
 
@@ -313,6 +335,7 @@ Developer types in IDE
 ---
 
 ### Phase 7 — Active Enforcement (`prism_check` + `prism_fix`)
+
 > Goal: Move from passive context delivery to active, enforceable governance.
 > Biz milestone: Unlocks enterprise sales (compliance requirement). Target 3 enterprise pilots.
 
@@ -340,6 +363,7 @@ Developer types in IDE
 ---
 
 ### Phase 8 — Repo Analysis Extraction
+
 > Goal: Extract naming conventions and architecture patterns from the codebase itself.
 > Biz milestone: Combined with Phase 1, a user can fully onboard in <2 minutes. Track time-to-first-rule.
 
@@ -365,6 +389,7 @@ Developer types in IDE
 ---
 
 ### Phase 9 — Cross-Platform Optimization
+
 > Goal: Different IDEs have different MCP constraints. Handle them.
 > Biz milestone: Track IDE adoption breakdown — aim for balanced distribution across all 5 supported IDEs.
 
@@ -393,10 +418,12 @@ Developer types in IDE
 ## 🔑 Key Rules for AI Agent (Read Before Coding)
 
 ### Rules.md vs Skills.md
+
 - **Rules.md** = always-in-context constraints. Style, architecture, naming. Loaded on every request. For governance and senior devs enforcing standards.
 - **Skills.md** = on-demand procedural guides. Loaded only when relevant task is detected (progressive disclosure). For training junior devs and complex procedures.
 
 ### Token Budget Principles
+
 - Never return full rule content unless `priority: high`
 - Default `maxTokens` for `get_arch_rules` = 4000
 - Skills metadata = 30–50 tokens each (name + one-line summary only)
@@ -404,6 +431,7 @@ Developer types in IDE
 - Cache hits = 0 tokens (serve from `~/.prism/cache/`)
 
 ### Model Routing
+
 - Primary: **Gemini 3.5 Flash** (chat) + **Gemini Embedding 2** (3072 dims) — via `@google/generative-ai` SDK
 - Fallback: Azure OpenAI (set `AI_PROVIDER=azure` in `.env`)
 - Router: `src/lib/ai-router.ts` → delegates to `gemini.ts` or `azure-openai.ts`
@@ -412,6 +440,7 @@ Developer types in IDE
 - Never use a larger/more expensive model if a smaller one can do the job
 
 ### MCP Tool Contracts
+
 ```typescript
 // get_arch_rules
 Input:  { task: string, maxTokens?: number, projectId: string, format?: "json"|"markdown" }
@@ -435,6 +464,7 @@ Output: { results: VideoResult[] }
 ```
 
 ### File Structure
+
 ```
 packages/
   prism-context-engine/         ← CLI commands
@@ -474,6 +504,7 @@ extensions/
 ```
 
 ### What NOT to Build Yet
+
 - ❌ Skill creator / marketplace — post-MVP
 - ❌ More video processing features — de-prioritized (Mux stays as beta only)
 - ❌ Multi-tenant team collaboration features — after core works
@@ -483,14 +514,14 @@ extensions/
 
 ## 📊 Success Metrics
 
-| Metric | Baseline | Target | How to Measure |
-|--------|----------|--------|----------------|
-| Tokens/dev/month | 15–30M | ~7M | `prism telemetry` |
-| Cost/dev/month | $55–$150 | $20–$55 | telemetry × API rates |
-| Token reduction | 0% | 64% | telemetry comparison |
-| Tokens per `get_arch_rules` call | ~60,000 | ~1,800 | token counter middleware |
-| Cache hit rate | 0% | >40% | cache middleware logs |
-| Rule violations caught | 0 | tracked | prism_check logs |
+| Metric                           | Baseline | Target  | How to Measure           |
+| -------------------------------- | -------- | ------- | ------------------------ |
+| Tokens/dev/month                 | 15–30M   | ~7M     | `prism telemetry`        |
+| Cost/dev/month                   | $55–$150 | $20–$55 | telemetry × API rates    |
+| Token reduction                  | 0%       | 64%     | telemetry comparison     |
+| Tokens per `get_arch_rules` call | ~60,000  | ~1,800  | token counter middleware |
+| Cache hit rate                   | 0%       | >40%    | cache middleware logs    |
+| Rule violations caught           | 0        | tracked | prism_check logs         |
 
 ---
 
@@ -521,11 +552,13 @@ Phase 9 (Cross-platform)  ←── Polish. Do last.
 ## 🧪 Testing Requirements
 
 Every phase must ship with:
+
 - Unit tests for all new functions
 - Integration test for the MCP tool call end-to-end
 - Token count assertion (output should be within expected range)
 
 Test command:
+
 ```bash
 pnpm --filter prism-mcp-server run test
 pnpm --filter prism-context-engine run test
@@ -545,11 +578,13 @@ pnpm --filter prism-context-engine run test
 - `prism serve` is the canonical MCP server for IDEs — never use `prism connect` for IDE integration
 
 ---
+
 ## 🗓️ Session Log (May 2026)
 
 ### Session 1 — Phase 1–9 Implementation + E2E Testing + Gemini Migration + Architecture Fix
 
 **Completed:**
+
 - Built all 9 phases (109 MCP tests, 30 CLI tests)
 - Created E2E smoke test (`scripts/smoke-test.ts`) — 18/18 pass, 0 fail, 0 skip
 - Migrated AI from Azure OpenAI to Gemini: `gemini-3.5-flash` (chat), `gemini-embedding-2` (3072d embeds)
@@ -566,6 +601,7 @@ pnpm --filter prism-context-engine run test
 - Created `scripts/debug-gemini.ts` — direct Gemini API test tool
 
 **Key Architecture Decisions:**
+
 - `prism serve` is the canonical MCP server for all IDEs (not `prism connect`)
 - Full MCP server runs as child process with stdio relay — zero code duplication
 - Lite fallback provides 8 tools offline (keyword-based ranking, local JSON cache)
@@ -573,6 +609,7 @@ pnpm --filter prism-context-engine run test
 - Gemini primary, Azure fallback via `AI_PROVIDER` env var
 
 **State at end of session:**
+
 - 109 unit tests pass (11 test files, 0 failures)
 - 18/18 E2E smoke tests pass (DB connect, server startup, handshake, smart select, cache, get_skill, prism_check, prism_fix, repo_extract, JSON format, validate_code alias)
 - IDE integration ready for real-world testing (Cursor/Windsurf/VS Code)
@@ -582,6 +619,7 @@ pnpm --filter prism-context-engine run test
 ### Session 2 — Skill Studio, Rule Templates, AI Governance Pattern
 
 **Completed:**
+
 - Implemented **Skill Studio** UI (`/skills`, `/skills/new`, `/skills/generate`, `/skills/[skillId]`)
 - Implemented **Rule Templates** UI and data (`/projects/[slug]/rules/templates`)
 - Separated "Rules" (constraints) and "Skills" (procedural guides) into two Cosmos DB collections.

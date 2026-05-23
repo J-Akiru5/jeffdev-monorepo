@@ -10,6 +10,7 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@jdstudio/ui": "workspace:*",
     "@google/generative-ai": "^0.24.1",
     "@sentry/nextjs": "^10.53.1",
     "lucide-react": "^0.562.0",

@@ -9,11 +9,6 @@
 import { getAdminClient } from '@/lib/supabase/admin';
 import type { UserProfile, PublicNamecard } from '@/types/user';
 import { logAuditEvent } from '@/lib/audit';
-import { sanitizeFirestoreData } from '@/lib/utils';
-// ... existing imports ...
-
-
-
 const COLLECTION = 'user_profiles';
 
 /**
