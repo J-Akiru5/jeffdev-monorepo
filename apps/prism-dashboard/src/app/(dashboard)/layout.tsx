@@ -1,5 +1,7 @@
 import { ReactNode } from "react";
 import Link from "next/link";
+
+export const dynamic = "force-dynamic";
 import { SupabaseUserButton } from "@/components/auth/supabase-user-button";
 import {
   LayoutDashboard,
