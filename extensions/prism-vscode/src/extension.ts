@@ -485,7 +485,7 @@ async function showRuleDetail(params: { ruleId: string; ruleName: string }): Pro
 async function login(): Promise<void> {
   const terminal = vscode.window.createTerminal('Prism Login');
   terminal.show();
-  terminal.sendText('npx @prism-engine/cli login');
+  terminal.sendText('npx prism-context-engine login');
 }
 
 // === Webview HTML generators ===

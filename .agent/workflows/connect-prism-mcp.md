@@ -21,7 +21,7 @@ description: How to get a Prism API Key and connect the MCP server to your code 
 ## Step 2: Install the Prism CLI
 
 ```bash
-npm install -g @prism-engine/cli
+npm install -g prism-context-engine
 ```
 
 Verify it installed:
@@ -137,7 +137,7 @@ If Prism is connected, the AI will fetch your rules from the Prism Context Engin
 
 | Problem | Fix |
 |---------|-----|
-| `prism: command not found` | Run `npm install -g @prism-engine/cli` again. Restart terminal. |
+| `prism: command not found` | Run `npm install -g prism-context-engine` again. Restart terminal. |
 | API key validation failed | Generate a new key from Settings → API Keys |
 | No rules returned | Run `prism sync` first to download your rules locally |
 | `prism serve` crashes immediately | Check Node.js version: must be ≥20. Run `node --version` |
