@@ -4,16 +4,22 @@ import {
   Filter,
   Building2,
   Mail,
-  Phone,
-  MapPin,
+  FolderKanban,
   MoreVertical,
   Plus,
 } from "lucide-react";
 import Link from "next/link";
 
+interface ClientEntry {
+  client_name: string;
+  client_email: string;
+  project_count: number;
+  projects: Array<{ id: string; title: string }>;
+}
+
 /**
  * Clients Page
- * View Agency clients from Firebase
+ * View agency clients from Supabase projects data
  */
 export default async function ClientsPage() {
   const supabase = await createClient();
@@ -23,17 +29,32 @@ export default async function ClientsPage() {
 
   if (!user) return null;
 
-  // TODO: Fetch from Firebase Admin SDK (Agency data)
-  const clients: Array<{
-    id: string;
-    name: string;
-    email: string;
-    phone?: string;
-    company?: string;
-    location?: string;
-    projectCount: number;
-    status: "active" | "inactive";
-  }> = [];
+  // Fetch all projects with client info
+  const { data: projects } = await supabase
+    .from("projects")
+    .select("id, title, client_name, client_email")
+    .not("client_name", "is", null)
+    .order("client_name", { ascending: true });
+
+  // Group by client name to get unique clients with project counts
+  const clientMap = new Map<string, ClientEntry>();
+  for (const project of projects || []) {
+    const key = project.client_name?.toLowerCase() || "unknown";
+    if (clientMap.has(key)) {
+      const entry = clientMap.get(key)!;
+      entry.project_count++;
+      entry.projects.push({ id: project.id, title: project.title || "" });
+    } else {
+      clientMap.set(key, {
+        client_name: project.client_name || "Unknown",
+        client_email: project.client_email || "",
+        project_count: 1,
+        projects: [{ id: project.id, title: project.title || "" }],
+      });
+    }
+  }
+
+  const clients = Array.from(clientMap.values());
 
   return (
     <div className="space-y-6">
@@ -41,7 +62,9 @@ export default async function ClientsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Clients</h1>
-          <p className="text-sm text-white/50">Agency client directory</p>
+          <p className="text-sm text-white/50">
+            {clients.length} client{clients.length !== 1 ? "s" : ""}
+          </p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black text-sm font-medium rounded-lg transition-colors">
           <Plus className="h-4 w-4" />
@@ -69,7 +92,7 @@ export default async function ClientsPage() {
       {clients.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {clients.map((client) => (
-            <ClientCard key={client.id} client={client} />
+            <ClientCard key={client.client_name} client={client} />
           ))}
         </div>
       ) : (
@@ -81,48 +104,30 @@ export default async function ClientsPage() {
             No clients yet
           </h3>
           <p className="text-xs text-white/40 max-w-sm mx-auto">
-            Connect Firebase to view Agency clients from Syntaxure Labs.
+            Clients will appear here once projects with client information are
+            created.
           </p>
-          <button className="mt-4 px-4 py-2 text-xs font-medium text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 rounded-lg transition-colors">
-            Connect Firebase
-          </button>
         </div>
       )}
     </div>
   );
 }
 
-function ClientCard({
-  client,
-}: {
-  client: {
-    id: string;
-    name: string;
-    email: string;
-    phone?: string;
-    company?: string;
-    location?: string;
-    projectCount: number;
-    status: string;
-  };
-}) {
+function ClientCard({ client }: { client: ClientEntry }) {
   return (
     <Link
-      href={`/admin/clients/${client.id}`}
+      href={`/admin/projects?client=${encodeURIComponent(client.client_name)}`}
       className="group p-4 rounded-lg border border-white/5 bg-white/[0.02] hover:border-amber-500/30 hover:bg-white/[0.04] transition-all"
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center text-sm font-medium text-white">
-            {client.name.charAt(0).toUpperCase()}
+            {client.client_name.charAt(0).toUpperCase()}
           </div>
           <div>
             <h3 className="text-sm font-medium text-white group-hover:text-amber-400 transition-colors">
-              {client.name}
+              {client.client_name}
             </h3>
-            {client.company && (
-              <p className="text-xs text-white/40">{client.company}</p>
-            )}
           </div>
         </div>
         <button
@@ -136,37 +141,36 @@ function ClientCard({
       </div>
 
       <div className="space-y-2 text-xs">
+        {client.client_email && (
+          <div className="flex items-center gap-2 text-white/40">
+            <Mail className="h-3 w-3" />
+            <span className="truncate">{client.client_email}</span>
+          </div>
+        )}
         <div className="flex items-center gap-2 text-white/40">
-          <Mail className="h-3 w-3" />
-          <span className="truncate">{client.email}</span>
+          <FolderKanban className="h-3 w-3" />
+          <span>
+            {client.project_count} project{client.project_count !== 1 ? "s" : ""}
+          </span>
         </div>
-        {client.phone && (
-          <div className="flex items-center gap-2 text-white/40">
-            <Phone className="h-3 w-3" />
-            <span>{client.phone}</span>
-          </div>
-        )}
-        {client.location && (
-          <div className="flex items-center gap-2 text-white/40">
-            <MapPin className="h-3 w-3" />
-            <span>{client.location}</span>
-          </div>
-        )}
       </div>
 
-      <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
-        <span className="text-xs text-white/40">
-          {client.projectCount} projects
-        </span>
-        <span
-          className={`text-[10px] font-mono uppercase px-2 py-1 rounded ${
-            client.status === "active"
-              ? "text-emerald-400 bg-emerald-500/15"
-              : "text-white/40 bg-white/5"
-          }`}
-        >
-          {client.status}
-        </span>
+      <div className="mt-3 pt-3 border-t border-white/5">
+        <div className="flex flex-wrap gap-1.5">
+          {client.projects.slice(0, 3).map((p) => (
+            <span
+              key={p.id}
+              className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-white/50 truncate max-w-[120px]"
+            >
+              {p.title}
+            </span>
+          ))}
+          {client.projects.length > 3 && (
+            <span className="text-[10px] px-2 py-0.5 text-white/30">
+              +{client.projects.length - 3} more
+            </span>
+          )}
+        </div>
       </div>
     </Link>
   );

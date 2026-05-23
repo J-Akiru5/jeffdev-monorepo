@@ -3,15 +3,15 @@
 /**
  * Case Studies Server Actions
  * ----------------------------
- * Complete CRUD operations for managing case studies.
- * Uses the existing `projects` collection in Firestore.
+ * Complete CRUD operations for managing case studies in Supabase.
+ * Uses the `case_studies` table with metadata JSONB for extra fields.
  */
 
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { db } from '@/lib/firebase/admin';
+import { getAdminClient } from '@/lib/supabase/admin';
 import { logAuditEvent } from '@/lib/audit';
-import type { FirestoreProject } from '@/types/firestore';
+import type { CaseStudy } from '@/types/database';
 
 // =============================================================================
 // ZOD SCHEMAS
@@ -61,50 +61,63 @@ function generateSlug(title: string): string {
 }
 
 /**
- * Check if slug already exists
+ * Check if slug already exists in case_studies table
  */
 async function slugExists(slug: string, excludeSlug?: string): Promise<boolean> {
-  const doc = await db.collection('projects').doc(slug).get();
-  if (!doc.exists) return false;
+  const supabase = getAdminClient();
+  const { data } = await supabase
+    .from('case_studies')
+    .select('id')
+    .eq('slug', slug)
+    .maybeSingle();
+  if (!data) return false;
   if (excludeSlug && slug === excludeSlug) return false;
   return true;
 }
 
 /**
- * Serialize Firestore data for client components
+ * Serialize Supabase row to the FirestoreProject shape expected by components
  */
-function serializeCaseStudy(doc: FirebaseFirestore.DocumentSnapshot): FirestoreProject | null {
-  if (!doc.exists) return null;
-  const data = doc.data();
-  if (!data) return null;
-  
+function serializeCaseStudy(row: CaseStudy): Record<string, unknown> {
+  const metadata = (row.metadata || {}) as Record<string, unknown>;
+
   return {
-    ...data,
-    slug: doc.id,
-    // Serialize timestamps
-    createdAt: data.createdAt?.toDate?.() 
-      ? data.createdAt.toDate().toISOString() 
-      : data.createdAt || new Date().toISOString(),
-    updatedAt: data.updatedAt?.toDate?.()
-      ? data.updatedAt.toDate().toISOString()
-      : data.updatedAt || new Date().toISOString(),
-  } as FirestoreProject;
+    slug: row.slug || row.id,
+    title: row.title,
+    client: (metadata.client as string) || '',
+    category: (metadata.category as string) || (row.industry || ''),
+    tagline: (metadata.tagline as string) || '',
+    description: row.description || '',
+    challenge: row.challenge || '',
+    solution: row.solution || '',
+    results: row.metrics as { metric: string; value: string }[] || [],
+    technologies: (metadata.technologies as string[]) || [],
+    testimonial: (metadata.testimonial as { quote: string; author: string; role: string } | null) || null,
+    image: row.images?.[0] || null,
+    featured: metadata.featured === true,
+    order: (metadata.order as number) || 0,
+    status: 'completed',
+    progress: 100,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
 }
 
 // =============================================================================
 // GET CASE STUDIES (LIST)
 // =============================================================================
 
-export async function getCaseStudies(): Promise<FirestoreProject[]> {
+export async function getCaseStudies(): Promise<Record<string, unknown>[]> {
   try {
-    const snapshot = await db
-      .collection('projects')
-      .orderBy('order', 'asc')
-      .get();
+    const supabase = getAdminClient();
+    const { data, error } = await supabase
+      .from('case_studies')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-    return snapshot.docs
-      .map((doc) => serializeCaseStudy(doc))
-      .filter((item): item is FirestoreProject => item !== null);
+    if (error || !data) return [];
+
+    return data.map((row) => serializeCaseStudy(row as CaseStudy));
   } catch (error) {
     console.error('[GET CASE STUDIES ERROR]', error);
     return [];
@@ -117,10 +130,18 @@ export async function getCaseStudies(): Promise<FirestoreProject[]> {
 
 export async function getCaseStudyBySlug(
   slug: string
-): Promise<FirestoreProject | null> {
+): Promise<Record<string, unknown> | null> {
   try {
-    const doc = await db.collection('projects').doc(slug).get();
-    return serializeCaseStudy(doc);
+    const supabase = getAdminClient();
+    const { data, error } = await supabase
+      .from('case_studies')
+      .select('*')
+      .eq('slug', slug)
+      .maybeSingle();
+
+    if (error || !data) return null;
+
+    return serializeCaseStudy(data as CaseStudy);
   } catch (error) {
     console.error('[GET CASE STUDY ERROR]', error);
     return null;
@@ -150,20 +171,39 @@ export async function createCaseStudy(
       return { success: false, error: 'Could not generate unique slug. Try a different title.' };
     }
 
-    // Prepare document
-    const now = new Date().toISOString();
-    const document = {
-      ...validated,
-      slug,
-      // Default project management fields
-      status: 'completed' as const,
-      progress: 100,
-      createdAt: now,
-      updatedAt: now,
-    };
+    // Build result summary text from metrics
+    const resultsText = validated.results
+      .map(r => `${r.metric}: ${r.value}`)
+      .join('; ');
 
-    // Create in Firestore
-    await db.collection('projects').doc(slug).set(document);
+    const supabase = getAdminClient();
+    const { error: insertError } = await supabase
+      .from('case_studies')
+      .insert({
+        title: validated.title,
+        description: validated.tagline,
+        slug,
+        industry: validated.category,
+        challenge: validated.challenge,
+        solution: validated.solution,
+        results: resultsText,
+        metrics: validated.results as unknown as Record<string, unknown>,
+        images: validated.image ? [validated.image] : [],
+        status: 'published',
+        published_at: new Date().toISOString(),
+        metadata: {
+          client: validated.client,
+          tagline: validated.tagline,
+          technologies: validated.technologies,
+          testimonial: validated.testimonial,
+          featured: validated.featured,
+          order: validated.order,
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as any);
+
+    if (insertError) throw insertError;
 
     // Audit log
     await logAuditEvent({
@@ -197,22 +237,56 @@ export async function updateCaseStudy(
   data: Partial<CaseStudyInput>
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const supabase = getAdminClient();
+
     // Check if exists
-    const docRef = db.collection('projects').doc(slug);
-    const doc = await docRef.get();
-    
-    if (!doc.exists) {
+    const { data: existing } = await supabase
+      .from('case_studies')
+      .select('id, metadata')
+      .eq('slug', slug)
+      .maybeSingle();
+
+    if (!existing) {
       return { success: false, error: 'Case study not found' };
     }
 
-    // Partial validation for updates
-    const updateData = {
-      ...data,
-      updatedAt: new Date().toISOString(),
+    const existingMetadata = (existing.metadata || {}) as Record<string, unknown>;
+    const updates: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
     };
 
-    // Update in Firestore
-    await docRef.update(updateData);
+    // Map fields to case_studies columns
+    if (data.title) updates.title = data.title;
+    if (data.tagline) updates.description = data.tagline;
+    if (data.category) updates.industry = data.category;
+    if (data.description) updates.description = data.tagline;
+    if (data.challenge) updates.challenge = data.challenge;
+    if (data.solution) updates.solution = data.solution;
+    if (data.image !== undefined) updates.images = data.image ? [data.image] : [];
+
+    // Build result text from metrics
+    if (data.results) {
+      updates.results = data.results.map(r => `${r.metric}: ${r.value}`).join('; ');
+      updates.metrics = data.results as unknown as Record<string, unknown>;
+    }
+
+    // Store extra fields in metadata
+    updates.metadata = {
+      ...existingMetadata,
+      ...(data.client && { client: data.client }),
+      ...(data.technologies && { technologies: data.technologies }),
+      ...(data.testimonial !== undefined && { testimonial: data.testimonial }),
+      ...(data.featured !== undefined && { featured: data.featured }),
+      ...(data.order !== undefined && { order: data.order }),
+      ...(data.tagline && { tagline: data.tagline }),
+    };
+
+    const { error } = await supabase
+      .from('case_studies')
+      .update(updates as any)
+      .eq('slug', slug);
+
+    if (error) throw error;
 
     // Audit log
     await logAuditEvent({
@@ -243,15 +317,24 @@ export async function deleteCaseStudy(
   slug: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const docRef = db.collection('projects').doc(slug);
-    const doc = await docRef.get();
-    
-    if (!doc.exists) {
+    const supabase = getAdminClient();
+
+    const { data: existing } = await supabase
+      .from('case_studies')
+      .select('id')
+      .eq('slug', slug)
+      .maybeSingle();
+
+    if (!existing) {
       return { success: false, error: 'Case study not found' };
     }
 
-    // Hard delete
-    await docRef.delete();
+    const { error } = await supabase
+      .from('case_studies')
+      .delete()
+      .eq('slug', slug);
+
+    if (error) throw error;
 
     // Audit log
     await logAuditEvent({
@@ -280,20 +363,33 @@ export async function toggleFeatured(
   slug: string
 ): Promise<{ success: boolean; featured?: boolean; error?: string }> {
   try {
-    const docRef = db.collection('projects').doc(slug);
-    const doc = await docRef.get();
-    
-    if (!doc.exists) {
+    const supabase = getAdminClient();
+
+    const { data: existing } = await supabase
+      .from('case_studies')
+      .select('id, metadata')
+      .eq('slug', slug)
+      .maybeSingle();
+
+    if (!existing) {
       return { success: false, error: 'Case study not found' };
     }
 
-    const currentFeatured = doc.data()?.featured || false;
+    const metadata = (existing.metadata || {}) as Record<string, unknown>;
+    const currentFeatured = metadata.featured === true;
     const newFeatured = !currentFeatured;
 
-    await docRef.update({
-      featured: newFeatured,
-      updatedAt: new Date().toISOString(),
-    });
+    metadata.featured = newFeatured;
+
+    const { error } = await supabase
+      .from('case_studies')
+      .update({
+        metadata,
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq('slug', slug);
+
+    if (error) throw error;
 
     // Audit log
     await logAuditEvent({
@@ -323,15 +419,31 @@ export async function reorderCaseStudies(
   orderedSlugs: string[]
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const batch = db.batch();
-    const now = new Date().toISOString();
+    const supabase = getAdminClient();
 
-    orderedSlugs.forEach((slug, index) => {
-      const docRef = db.collection('projects').doc(slug);
-      batch.update(docRef, { order: index, updatedAt: now });
-    });
+    for (let index = 0; index < orderedSlugs.length; index++) {
+      const slug = orderedSlugs[index];
 
-    await batch.commit();
+      const { data: existing } = await supabase
+        .from('case_studies')
+        .select('id, metadata')
+        .eq('slug', slug)
+        .maybeSingle();
+
+      if (!existing) continue;
+
+      const metadata = (existing.metadata || {}) as Record<string, unknown>;
+      metadata.order = index;
+
+      const { error } = await supabase
+        .from('case_studies')      .update({
+        metadata,
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq('slug', slug);
+
+      if (error) throw error;
+    }
 
     // Audit log
     await logAuditEvent({
@@ -360,22 +472,41 @@ export async function getApprovedFeedback(): Promise<
   { id: string; clientName: string; testimonial: string; projectSlug?: string }[]
 > {
   try {
-    const snapshot = await db
-      .collection('feedback')
-      .where('status', 'in', ['approved', 'featured'])
-      .orderBy('createdAt', 'desc')
-      .limit(50)
-      .get();
+    const supabase = getAdminClient();
 
-    return snapshot.docs.map((doc) => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        clientName: data.clientName || 'Unknown',
-        testimonial: data.testimonial || '',
-        projectSlug: data.projectSlug,
-      };
-    });
+    // Supabase feedback table uses different statuses: 'received', 'acknowledged', 'resolved'
+    // We use project_id as the link -> get project slugs from projects table
+    const { data, error } = await supabase
+      .from('feedback')
+      .select('id, project_id, comment, created_at, user_id')
+      .in('status', ['acknowledged', 'resolved'])
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (error || !data) return [];
+
+    // Get user names for each feedback entry
+    const userIds = [...new Set(data.map(f => f.user_id).filter(Boolean))];
+    const { data: userProfiles } = userIds.length > 0
+      ? await supabase.from('user_profiles').select('id, full_name, email').in('id', userIds)
+      : { data: [] };
+
+    const userMap = new Map((userProfiles || []).map(u => [u.id, u.full_name || u.email]));
+
+    // Get project slugs for linked projects
+    const projectIds = [...new Set(data.map(f => f.project_id).filter(Boolean))];
+    const { data: projects } = projectIds.length > 0
+      ? await supabase.from('projects').select('id, slug').in('id', projectIds)
+      : { data: [] };
+
+    const projectMap = new Map((projects || []).map(p => [p.id, p.slug]));
+
+    return data.map((row) => ({
+      id: row.id,
+      clientName: userMap.get(row.user_id) || 'Unknown',
+      testimonial: row.comment || '',
+      projectSlug: row.project_id ? projectMap.get(row.project_id) || undefined : undefined,
+    }));
   } catch (error) {
     console.error('[GET FEEDBACK ERROR]', error);
     return [];
@@ -391,29 +522,61 @@ export async function linkFeedbackToCaseStudy(
   feedbackId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const supabase = getAdminClient();
+
     // Get feedback
-    const feedbackDoc = await db.collection('feedback').doc(feedbackId).get();
-    if (!feedbackDoc.exists) {
+    const { data: feedback, error: feedbackError } = await supabase
+      .from('feedback')
+      .select('*')
+      .eq('id', feedbackId)
+      .maybeSingle();
+
+    if (feedbackError || !feedback) {
       return { success: false, error: 'Feedback not found' };
     }
 
-    const feedbackData = feedbackDoc.data()!;
+    // Get user name for the testimonial author
+    const { data: userProfile } = await supabase
+      .from('user_profiles')
+      .select('full_name, email')
+      .eq('id', feedback.user_id)
+      .maybeSingle();
 
     // Update case study with testimonial
-    const docRef = db.collection('projects').doc(slug);
-    await docRef.update({
-      testimonial: {
-        quote: feedbackData.testimonial,
-        author: feedbackData.clientName,
-        role: feedbackData.company || 'Client',
-      },
-      updatedAt: new Date().toISOString(),
-    });
+    const { data: caseStudy } = await supabase
+      .from('case_studies')
+      .select('id, metadata')
+      .eq('slug', slug)
+      .maybeSingle();
 
-    // Link feedback back to project
-    await db.collection('feedback').doc(feedbackId).update({
-      projectSlug: slug,
-    });
+    if (!caseStudy) {
+      return { success: false, error: 'Case study not found' };
+    }
+
+    const metadata = (caseStudy.metadata || {}) as Record<string, unknown>;
+    metadata.testimonial = {
+      quote: feedback.comment || '',
+      author: userProfile?.full_name || userProfile?.email || 'Client',
+      role: 'Client',
+    };
+
+    const { error: updateError } = await supabase
+      .from('case_studies')
+      .update({
+        metadata,
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq('slug', slug);
+
+    if (updateError) throw updateError;
+
+    // Link feedback back to case study
+    await supabase
+      .from('feedback')
+      .update({
+        case_study_id: caseStudy.id,
+      } as any)
+      .eq('id', feedbackId);
 
     // Audit log
     await logAuditEvent({

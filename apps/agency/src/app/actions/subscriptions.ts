@@ -17,7 +17,7 @@ export interface SubscriptionRow {
   id: string;
   user_id: string;
   plan: 'free' | 'pro' | 'enterprise';
-  status: 'active' | 'cancelled' | 'suspended';
+  status: 'active' | 'cancelled' | 'paused';
   billing_cycle: 'monthly' | 'annual';
   amount: string;
   currency: string;
@@ -216,12 +216,14 @@ export async function cancelSubscription(
 }
 
 /**
- * Suspend a subscription
+ * Pause a subscription
  */
-export async function suspendSubscription(
+export async function pauseSubscription(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
-  return updateSubscription(id, { status: 'suspended' });
+  return updateSubscription(id, {
+    status: 'paused',
+  });
 }
 
 /**

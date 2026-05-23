@@ -7,9 +7,8 @@
  * Called from the session API route during login/registration.
  */
 
-import { auth, db } from '@/lib/firebase/admin';
+import { getAdminClient } from '@/lib/supabase/admin';
 import { getInviteByToken } from './invites';
-import { Timestamp } from 'firebase-admin/firestore';
 
 interface AcceptInviteResult {
   success: boolean;
@@ -19,6 +18,8 @@ interface AcceptInviteResult {
 
 export async function acceptInvite(token: string, uid: string, email: string): Promise<AcceptInviteResult> {
   try {
+    const supabase = getAdminClient();
+
     // 1. Get and validate invite
     const invite = await getInviteByToken(token);
 
@@ -38,55 +39,67 @@ export async function acceptInvite(token: string, uid: string, email: string): P
       };
     }
 
-    // 3. Create user document
-    const userRef = db.collection('users').doc(uid);
-    const userDoc = await userRef.get();
+    // 3. Create or update user profile
+    const { data: existingUser } = await supabase
+      .from('user_profiles')
+      .select('id')
+      .eq('id', uid)
+      .maybeSingle();
 
-    if (userDoc.exists) {
-      // User already exists - just update role if needed? 
-      // ideally we should probably warn them, but for now let's just update
-      // actually, if they already exist, we should probably just error or log them in?
-      // but the prompt implies new registration. 
-      // Let's assume if they exist, we link the invite to them if they match.
-    }
-
-    // Get user display info from Auth
-    const userRecord = await auth.getUser(uid);
-
-    const userData = {
-      email: userRecord.email,
-      displayName: userRecord.displayName || '',
-      photoURL: userRecord.photoURL || '',
-      role: invite.role,
-      status: 'active',
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-      // Add project assignment if present
-      assignedProjects: invite.projectId 
-        ? [invite.projectId] // In the future this might be an array of slugs
-        : [],
-      permissions: [], // Default permissions based on role will be used
-      metadata: {
-        invitedBy: invite.invitedBy,
-        inviteId: invite.id,
-      }
+    const userData: Record<string, unknown> = {
+      id: uid,
+      email,
+      full_name: email.split('@')[0], // Default name from email
+      role: invite.role as 'admin' | 'manager' | 'employee' | 'client',
+      timezone: 'UTC',
+      preferences: {
+        assigned_projects: invite.projectId ? [invite.projectId] : [],
+        invited_by: invite.invitedBy,
+        invite_id: invite.id,
+      },
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
 
-    await userRef.set(userData, { merge: true });
+    if (existingUser) {
+      // Update existing
+      const { error: updateError } = await supabase
+        .from('user_profiles')
+        .update({
+          ...userData,
+          updated_at: new Date().toISOString(),
+        } as any)
+        .eq('id', uid);
 
-    // 4. Set custom claims for RBAC
-    await auth.setCustomUserClaims(uid, { role: invite.role });
+      if (updateError) throw updateError;
+    } else {
+      // Insert new
+      const { error: insertError } = await supabase
+        .from('user_profiles')
+        .insert(userData as any);
+
+      if (insertError) throw insertError;
+    }
+
+    // 4. Set app_metadata for RBAC
+    await supabase.auth.admin.updateUserById(uid, {
+      app_metadata: { role: invite.role },
+    });
 
     if (!invite.id) {
       return { success: false, error: 'Invalid invite ID' };
     }
 
-    // 5. Mark invite as used
-    await db.collection('invites').doc(invite.id).update({
-      status: 'accepted',
-      acceptedBy: uid,
-      acceptedAt: Timestamp.now(),
-    });
+    // 5. Mark invite as accepted
+    const { error: inviteUpdateError } = await supabase
+      .from('invites')
+      .update({
+        status: 'accepted',
+        accepted_at: new Date().toISOString(),
+      } as any)
+      .eq('id', invite.id);
+
+    if (inviteUpdateError) throw inviteUpdateError;
 
     return { success: true, role: invite.role };
   } catch (error) {

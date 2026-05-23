@@ -7,8 +7,7 @@
  * Use with caution - these should only run once.
  */
 
-import { db, adminAuth } from '@/lib/firebase/admin';
-import { Timestamp } from 'firebase-admin/firestore';
+import { getAdminClient } from '@/lib/supabase/admin';
 
 /**
  * Bootstrap the current logged-in user as founder
@@ -20,50 +19,59 @@ export async function bootstrapCurrentUserAsFounder(
   displayName: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const supabase = getAdminClient();
+
     // Check if user document already exists
-    const existingDoc = await db.collection('users').doc(uid).get();
-    
-    if (existingDoc.exists) {
+    const { data: existingUser } = await supabase
+      .from('user_profiles')
+      .select('id')
+      .eq('id', uid)
+      .maybeSingle();
+
+    if (existingUser) {
       // Update existing document to founder role
-      await db.collection('users').doc(uid).update({
-        role: 'founder',
-        updatedAt: Timestamp.now(),
+      const { error: updateError } = await supabase
+        .from('user_profiles')
+        .update({
+          role: 'admin',
+          updated_at: new Date().toISOString(),
+        } as any)
+        .eq('id', uid);
+
+      if (updateError) throw updateError;
+
+      // Set app_metadata for role-based access
+      await supabase.auth.admin.updateUserById(uid, {
+        app_metadata: { role: 'admin' },
       });
-      
-      // Set custom claims
-      await adminAuth.setCustomUserClaims(uid, { role: 'founder' });
-      
+
       return { success: true };
     }
 
     // Create new founder document
-    const founderProfile = {
-      uid,
-      email,
-      displayName,
-      photoURL: '',
-      role: 'founder',
-      title: 'Founder & Lead Developer',
-      bio: 'Building the future, one line at a time',
-      phone: '09519167103',
-      location: 'Iloilo, Philippines',
-      website: 'https://jeffdev.studio',
-      status: 'active',
-      assignedProjects: [],
-      permissions: ['*'],
-      socials: {
-        github: '',
-        linkedin: '',
-        twitter: '',
-      },
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-    };
+    const { error: insertError } = await supabase
+      .from('user_profiles')
+      .insert({
+        id: uid,
+        email,
+        full_name: displayName,
+        role: 'admin',
+        company_name: 'Syntaxure Labs',
+        timezone: 'Asia/Manila',
+        preferences: {
+          namecard: {},
+          socials: {},
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as any);
 
-    await db.collection('users').doc(uid).set(founderProfile);
-    
-    // Set custom claims for role-based access
-    await adminAuth.setCustomUserClaims(uid, { role: 'founder' });
+    if (insertError) throw insertError;
+
+    // Set app_metadata for role-based access
+    await supabase.auth.admin.updateUserById(uid, {
+      app_metadata: { role: 'admin' },
+    });
 
     return { success: true };
   } catch (error) {
@@ -94,27 +102,61 @@ export async function upsertUserProfile(
   }
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const existingDoc = await db.collection('users').doc(uid).get();
-    
-    if (existingDoc.exists) {
-      // Update existing
-      await db.collection('users').doc(uid).update({
-        ...data,
-        updatedAt: Timestamp.now(),
-      });
+    const supabase = getAdminClient();
+
+    // Check if user exists
+    const { data: existingUser } = await supabase
+      .from('user_profiles')
+      .select('id, preferences')
+      .eq('id', uid)
+      .maybeSingle();
+
+    if (existingUser) {
+      // Build update payload
+      const updates: Record<string, unknown> = {
+        updated_at: new Date().toISOString(),
+      };
+      if (data.displayName) updates.full_name = data.displayName;
+      if (data.photoURL) updates.avatar_url = data.photoURL;
+      if (data.bio) updates.bio = data.bio;
+      if (data.phone) updates.phone = data.phone;
+      if (data.location) updates.location = data.location;
+
+      if (data.socials || data.title || data.website) {
+        updates.preferences = {
+          ...(existingUser as Record<string, unknown>).preferences,
+          title: data.title,
+          website: data.website,
+          socials: data.socials,
+        };
+      }
+
+      const { error } = await supabase
+        .from('user_profiles')
+        .update(updates as any)
+        .eq('id', uid);
+
+      if (error) throw error;
     } else {
       // Create new with defaults
-      await db.collection('users').doc(uid).set({
-        uid,
-        email: '', // Will be filled by auth
-        role: 'employee',
-        status: 'active',
-        assignedProjects: [],
-        permissions: [],
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-        ...data,
-      });
+      const { error } = await supabase
+        .from('user_profiles')
+        .insert({
+          id: uid,
+          email: '',
+          full_name: data.displayName || '',
+          role: 'employee',
+          timezone: 'UTC',
+          preferences: {
+            title: data.title || '',
+            website: data.website || '',
+            socials: data.socials || {},
+          },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        } as any);
+
+      if (error) throw error;
     }
 
     return { success: true };

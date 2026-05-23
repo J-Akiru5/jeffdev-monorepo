@@ -7,16 +7,11 @@
  * Flow: Create invite → Send email → User clicks link → Complete signup
  */
 
-import { db, adminAuth } from '@/lib/firebase/admin';
+import { getAdminClient } from '@/lib/supabase/admin';
 import type { UserRole } from '@/types/rbac';
-import type { UserInvite } from '@/types/user';
 import { logAuditEvent } from '@/lib/audit';
 import { randomBytes } from 'crypto';
 import { sendEmail, inviteEmailTemplate, BRANDED_SENDER } from '@/lib/email';
-import { sanitizeFirestoreData } from '@/lib/utils';
-
-const COLLECTION = 'invites';
-const USERS_COLLECTION = 'users';
 
 // Founder UID - locked to single account
 const FOUNDER_UID = process.env.FOUNDER_UID || 'founder-001';
@@ -40,44 +35,54 @@ export async function createInvite(
     email: string;
     role: UserRole;
     invitedBy: string;
-    projectId?: string;  // Optional project assignment
+    projectId?: string;
     projectName?: string;
   }
 ): Promise<{ success: boolean; inviteId?: string; token?: string; error?: string }> {
   try {
+    const supabase = getAdminClient();
+
     // Validate role (prevent creating Founder invites)
     if (data.role === 'founder') {
       return { success: false, error: 'Cannot create founder invites' };
     }
 
-    // Check if user already exists
-    const existingUser = await db
-      .collection(USERS_COLLECTION)
-      .where('email', '==', data.email)
-      .limit(1)
-      .get();
+    // Map UserRole to Supabase role
+    const supabaseRole = mapRoleToSupabase(data.role);
 
-    if (!existingUser.empty) {
+    // Check if user already exists
+    const { data: existingUser } = await supabase
+      .from('user_profiles')
+      .select('id')
+      .eq('email', data.email)
+      .maybeSingle();
+
+    if (existingUser) {
       return { success: false, error: 'User with this email already exists' };
     }
 
     // Check for pending invite
-    const existingInvite = await db
-      .collection(COLLECTION)
-      .where('email', '==', data.email)
-      .where('status', '==', 'pending')
-      .limit(1)
-      .get();
+    const { data: existingInvite } = await supabase
+      .from('invites')
+      .select('id')
+      .eq('email', data.email)
+      .eq('status', 'pending')
+      .maybeSingle();
 
-    if (!existingInvite.empty) {
+    if (existingInvite) {
       return { success: false, error: 'Pending invite already exists for this email' };
     }
 
     // Get inviter's name for the email
     let inviterName: string | undefined;
-    const inviterDoc = await db.collection(USERS_COLLECTION).doc(data.invitedBy).get();
-    if (inviterDoc.exists) {
-      inviterName = inviterDoc.data()?.displayName;
+    const { data: inviterProfile } = await supabase
+      .from('user_profiles')
+      .select('full_name')
+      .eq('id', data.invitedBy)
+      .maybeSingle();
+
+    if (inviterProfile) {
+      inviterName = inviterProfile.full_name || undefined;
     }
 
     // Create invite
@@ -85,19 +90,26 @@ export async function createInvite(
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 days expiry
 
-    const invite: Omit<UserInvite, 'id'> = {
-      email: data.email,
-      role: data.role,
-      invitedBy: data.invitedBy,
-      status: 'pending',
-      token,
-      expiresAt: expiresAt.toISOString(),
-      createdAt: new Date().toISOString(),
-      ...(data.projectId && { projectId: data.projectId }),
-      ...(data.projectName && { projectName: data.projectName }),
-    };
+    const { data: inviteResult, error: inviteError } = await supabase
+      .from('invites')
+      .insert({
+        user_id: data.invitedBy,
+        email: data.email,
+        role: supabaseRole,
+        token,
+        status: 'pending',
+        expires_at: expiresAt.toISOString(),
+        metadata: {
+          ...(data.projectId && { projectId: data.projectId }),
+          ...(data.projectName && { projectName: data.projectName }),
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as any)
+      .select('id')
+      .single();
 
-    const docRef = await db.collection(COLLECTION).add(invite);
+    if (inviteError) throw inviteError;
 
     // Send invite email via Resend
     const inviteLink = `${BASE_URL}/auth/invite/${token}`;
@@ -119,13 +131,12 @@ export async function createInvite(
     } catch (emailError) {
       console.error('[INVITE EMAIL SEND ERROR]', emailError);
       // Don't fail the invite creation, just log the error
-      // The invite is still valid, admin can resend
     }
 
     await logAuditEvent({
       action: 'CREATE',
       resource: 'users',
-      resourceId: docRef.id,
+      resourceId: inviteResult.id,
       details: {
         email: data.email,
         role: data.role,
@@ -135,7 +146,7 @@ export async function createInvite(
       },
     });
 
-    return { success: true, inviteId: docRef.id, token };
+    return { success: true, inviteId: inviteResult.id, token };
   } catch (error) {
     console.error('[CREATE INVITE ERROR]', error);
     return { success: false, error: 'Failed to create invite' };
@@ -145,27 +156,52 @@ export async function createInvite(
 /**
  * Get invite by token
  */
-export async function getInviteByToken(token: string): Promise<UserInvite | null> {
+export async function getInviteByToken(token: string): Promise<{
+  id: string;
+  email: string;
+  role: string;
+  invitedBy: string;
+  status: string;
+  token: string;
+  expiresAt: string;
+  projectId?: string;
+  projectName?: string;
+} | null> {
   try {
-    const snapshot = await db
-      .collection(COLLECTION)
-      .where('token', '==', token)
-      .where('status', '==', 'pending')
-      .limit(1)
-      .get();
+    const supabase = getAdminClient();
 
-    if (snapshot.empty) return null;
+    const { data, error } = await supabase
+      .from('invites')
+      .select('*')
+      .eq('token', token)
+      .eq('status', 'pending')
+      .maybeSingle();
 
-    const doc = snapshot.docs[0];
-    const invite = { id: doc.id, ...doc.data() } as UserInvite;
+    if (error || !data) return null;
+
+    const metadata = (data.metadata || {}) as Record<string, string>;
 
     // Check if expired
-    if (new Date(invite.expiresAt) < new Date()) {
-      await doc.ref.update({ status: 'expired' });
+    if (new Date(data.expires_at) < new Date()) {
+      await supabase
+        .from('invites')
+        .update({ status: 'expired' } as any)
+        .eq('id', data.id);
+
       return null;
     }
 
-    return invite;
+    return {
+      id: data.id,
+      email: data.email,
+      role: data.role,
+      invitedBy: data.user_id,
+      status: data.status,
+      token: data.token,
+      expiresAt: data.expires_at,
+      projectId: metadata.projectId,
+      projectName: metadata.projectName,
+    };
   } catch (error) {
     console.error('[GET INVITE BY TOKEN ERROR]', error);
     return null;
@@ -181,39 +217,53 @@ export async function completeInvite(
   displayName: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const supabase = getAdminClient();
+
     const invite = await getInviteByToken(token);
     if (!invite) {
       return { success: false, error: 'Invalid or expired invite' };
     }
 
-    // Create user profile in Firestore
-    const userProfile = {
-      uid,
-      email: invite.email,
-      displayName,
-      role: invite.role,
-      status: 'active',
-      assignedProjects: [],
-      permissions: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    // Map Supabase role back to UserRole if needed
+    const role = invite.role as UserRole;
 
-    await db.collection(USERS_COLLECTION).doc(uid).set(userProfile);
+    // Create user profile in Supabase
+    const { error: profileError } = await supabase
+      .from('user_profiles')
+      .insert({
+        id: uid,
+        email: invite.email,
+        full_name: displayName,
+        role: invite.role as 'admin' | 'manager' | 'employee' | 'client',
+        timezone: 'UTC',
+        preferences: {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as any);
 
-    // Set custom claims for role
-    await adminAuth.setCustomUserClaims(uid, { role: invite.role });
+    if (profileError) throw profileError;
+
+    // Set app_metadata for role-based access (using service_role key)
+    await supabase.auth.admin.updateUserById(uid, {
+      app_metadata: { role },
+    });
 
     // Mark invite as accepted
-    await db.collection(COLLECTION).doc(invite.id!).update({
-      status: 'accepted',
-    });
+    const { error: updateError } = await supabase
+      .from('invites')
+      .update({
+        status: 'accepted',
+        accepted_at: new Date().toISOString(),
+      } as any)
+      .eq('id', invite.id);
+
+    if (updateError) throw updateError;
 
     await logAuditEvent({
       action: 'CREATE',
       resource: 'users',
       resourceId: uid,
-      details: { email: invite.email, role: invite.role, type: 'signup_complete' },
+      details: { email: invite.email, role, type: 'signup_complete' },
     });
 
     return { success: true };
@@ -226,19 +276,40 @@ export async function completeInvite(
 /**
  * Get all invites
  */
-export async function getInvites(): Promise<UserInvite[]> {
+export async function getInvites(): Promise<{
+  id: string;
+  email: string;
+  role: string;
+  invitedBy: string;
+  status: string;
+  token: string;
+  expiresAt: string;
+  createdAt: string;
+  projectName?: string;
+}[]> {
   try {
-    const snapshot = await db
-      .collection(COLLECTION)
-      .orderBy('createdAt', 'desc')
-      .get();
+    const supabase = getAdminClient();
 
-    return snapshot.docs.map((doc) => {
-      const data = doc.data();
-      return sanitizeFirestoreData<UserInvite>({
-        id: doc.id, 
-        ...data
-      });
+    const { data, error } = await supabase
+      .from('invites')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error || !data) return [];
+
+    return data.map((row) => {
+      const metadata = (row.metadata || {}) as Record<string, string>;
+      return {
+        id: row.id,
+        email: row.email,
+        role: row.role,
+        invitedBy: row.user_id,
+        status: row.status,
+        token: row.token,
+        expiresAt: row.expires_at,
+        createdAt: row.created_at,
+        projectName: metadata.projectName,
+      };
     });
   } catch (error) {
     console.error('[GET INVITES ERROR]', error);
@@ -253,9 +324,14 @@ export async function revokeInvite(
   inviteId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await db.collection(COLLECTION).doc(inviteId).update({
-      status: 'expired',
-    });
+    const supabase = getAdminClient();
+
+    const { error } = await supabase
+      .from('invites')
+      .update({ status: 'expired' } as any)
+      .eq('id', inviteId);
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'DELETE',
@@ -278,14 +354,17 @@ export async function resendInvite(
   inviteId: string
 ): Promise<{ success: boolean; token?: string; error?: string }> {
   try {
-    const inviteRef = db.collection(COLLECTION).doc(inviteId);
-    const inviteDoc = await inviteRef.get();
+    const supabase = getAdminClient();
 
-    if (!inviteDoc.exists) {
+    const { data: invite, error: fetchError } = await supabase
+      .from('invites')
+      .select('*')
+      .eq('id', inviteId)
+      .maybeSingle();
+
+    if (fetchError || !invite) {
       return { success: false, error: 'Invite not found' };
     }
-
-    const invite = inviteDoc.data() as UserInvite;
 
     // Can only resend pending invites
     if (invite.status !== 'pending') {
@@ -297,13 +376,19 @@ export async function resendInvite(
     const newExpiresAt = new Date();
     newExpiresAt.setDate(newExpiresAt.getDate() + 7);
 
-    await inviteRef.update({
-      token: newToken,
-      expiresAt: newExpiresAt.toISOString(),
-    });
+    const { error: updateError } = await supabase
+      .from('invites')
+      .update({
+        token: newToken,
+        expires_at: newExpiresAt.toISOString(),
+      } as any)
+      .eq('id', inviteId);
+
+    if (updateError) throw updateError;
 
     // Send new invite email
     const inviteLink = `${BASE_URL}/auth/invite/${newToken}`;
+    const metadata = (invite.metadata || {}) as Record<string, string>;
 
     try {
       await sendEmail({
@@ -314,7 +399,7 @@ export async function resendInvite(
           email: invite.email,
           role: invite.role,
           inviteLink,
-          projectName: invite.projectName,
+          projectName: metadata.projectName,
           expiresAt: newExpiresAt.toISOString(),
         }),
       });
@@ -345,6 +430,8 @@ export async function updateUserRole(
   updatedBy: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const supabase = getAdminClient();
+
     // Founder protection: Cannot change Founder's role
     if (uid === FOUNDER_UID) {
       return { success: false, error: 'Cannot modify Founder account' };
@@ -355,13 +442,22 @@ export async function updateUserRole(
       return { success: false, error: 'Cannot promote to Founder role' };
     }
 
-    await db.collection(USERS_COLLECTION).doc(uid).update({
-      role: newRole,
-      updatedAt: new Date().toISOString(),
-    });
+    const supabaseRole = mapRoleToSupabase(newRole);
 
-    // Update custom claims
-    await adminAuth.setCustomUserClaims(uid, { role: newRole });
+    const { error } = await supabase
+      .from('user_profiles')
+      .update({
+        role: supabaseRole,
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq('id', uid);
+
+    if (error) throw error;
+
+    // Update app_metadata for role-based access
+    await supabase.auth.admin.updateUserById(uid, {
+      app_metadata: { role: newRole },
+    });
 
     await logAuditEvent({
       action: 'UPDATE',
@@ -385,15 +481,31 @@ export async function assignProjects(
   projectSlugs: string[]
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const supabase = getAdminClient();
+
     // Founder protection
     if (uid === FOUNDER_UID) {
       return { success: false, error: 'Cannot modify Founder account' };
     }
 
-    await db.collection(USERS_COLLECTION).doc(uid).update({
-      assignedProjects: projectSlugs,
-      updatedAt: new Date().toISOString(),
-    });
+    // Get existing preferences to merge
+    const { data: existing } = await supabase
+      .from('user_profiles')
+      .select('preferences')
+      .eq('id', uid)
+      .maybeSingle();
+
+    const existingPrefs = (existing?.preferences || {}) as Record<string, unknown>;
+
+    const { error } = await supabase
+      .from('user_profiles')
+      .update({
+        preferences: { ...existingPrefs, assigned_projects: projectSlugs },
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq('id', uid);
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'UPDATE',
@@ -416,18 +528,34 @@ export async function deactivateUser(
   uid: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const supabase = getAdminClient();
+
     // Founder protection
     if (uid === FOUNDER_UID) {
       return { success: false, error: 'Cannot deactivate Founder account' };
     }
 
-    await db.collection(USERS_COLLECTION).doc(uid).update({
-      status: 'inactive',
-      updatedAt: new Date().toISOString(),
-    });
+    // Get existing preferences to merge (user_profiles has no status column)
+    const { data: existing } = await supabase
+      .from('user_profiles')
+      .select('preferences')
+      .eq('id', uid)
+      .maybeSingle();
 
-    // Disable in Firebase Auth
-    await adminAuth.updateUser(uid, { disabled: true });
+    const existingPrefs = (existing?.preferences || {}) as Record<string, unknown>;
+
+    const { error } = await supabase
+      .from('user_profiles')
+      .update({
+        preferences: { ...existingPrefs, status: 'inactive' },
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq('id', uid);
+
+    if (error) throw error;
+
+    // Disable in Supabase Auth
+    await supabase.auth.admin.updateUserById(uid, { ban_duration: '24h' });
 
     await logAuditEvent({
       action: 'DELETE',
@@ -440,5 +568,22 @@ export async function deactivateUser(
   } catch (error) {
     console.error('[DEACTIVATE USER ERROR]', error);
     return { success: false, error: 'Failed to deactivate user' };
+  }
+}
+
+/**
+ * Map UserRole to Supabase role enum
+ */
+function mapRoleToSupabase(role: UserRole): 'admin' | 'manager' | 'employee' | 'client' {
+  switch (role) {
+    case 'founder':
+    case 'admin':
+      return 'admin';
+    case 'partner':
+      return 'manager';
+    case 'employee':
+      return 'employee';
+    default:
+      return 'employee';
   }
 }

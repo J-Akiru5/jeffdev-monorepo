@@ -4,26 +4,15 @@
  * Project Management Server Actions
  * -----------------------------------
  * CRUD for projects, milestones, and status updates.
+ * Uses Supabase `projects` table + `milestones` table (previously embedded in Firestore).
  */
 
 import { z } from 'zod';
-import { db } from '@/lib/firebase/admin';
+import { getAdminClient } from '@/lib/supabase/admin';
 import { logAuditEvent } from '@/lib/audit';
 import { revalidatePath } from 'next/cache';
-import type { ProjectStatus, MilestoneStatus } from '@/types/firestore';
 
 // Validation schemas
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const milestoneSchema = z.object({
-  id: z.string(),
-  title: z.string().min(1),
-  description: z.string().optional(),
-  status: z.enum(['pending', 'in-progress', 'completed']),
-  dueDate: z.string().optional(),
-  completedAt: z.string().optional(),
-  order: z.number(),
-});
-
 const projectUpdateSchema = z.object({
   status: z.enum(['pending', 'active', 'paused', 'completed']).optional(),
   progress: z.number().min(0).max(100).optional(),
@@ -35,31 +24,64 @@ const projectUpdateSchema = z.object({
   assignedEmployees: z.array(z.string()).optional(),
 });
 
+const milestoneSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().optional(),
+  due_date: z.string().min(1),
+  status: z.enum(['pending', 'in_progress', 'completed', 'blocked']).default('pending'),
+  deliverables: z.array(z.string()).optional(),
+});
+
+/**
+ * Get project by slug and return its ID
+ */
+async function getProjectId(slug: string): Promise<string | null> {
+  const supabase = getAdminClient();
+  const { data } = await supabase
+    .from('projects')
+    .select('id')
+    .eq('slug', slug)
+    .maybeSingle();
+  return data?.id || null;
+}
+
 /**
  * Update project status
  */
 export async function updateProjectStatus(
   slug: string,
-  status: ProjectStatus
+  status: string
 ) {
   try {
-    const snapshot = await db
-      .collection('projects')
-      .where('slug', '==', slug)
-      .limit(1)
-      .get();
+    const supabase = getAdminClient();
 
-    if (snapshot.empty) {
+    const { data: project } = await supabase
+      .from('projects')
+      .select('id, metadata')
+      .eq('slug', slug)
+      .maybeSingle();
+
+    if (!project) {
       return { success: false, error: 'Project not found' };
     }
 
-    const docRef = snapshot.docs[0].ref;
-    const oldStatus = snapshot.docs[0].data().status;
+    const oldStatus = project.metadata && typeof project.metadata === 'object' && 'status' in (project.metadata as Record<string, unknown>)
+      ? (project.metadata as Record<string, unknown>).status as string
+      : undefined;
 
-    await docRef.update({
-      status,
-      updatedAt: new Date().toISOString(),
-    });
+    const metadata = (project.metadata || {}) as Record<string, unknown>;
+    metadata.status = status;
+
+    const { error } = await supabase
+      .from('projects')
+      .update({
+        status: status as 'active' | 'paused' | 'completed' | 'archived',
+        metadata,
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq('slug', slug);
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'STATUS_CHANGE',
@@ -88,22 +110,30 @@ export async function updateProjectProgress(
   try {
     const validProgress = Math.max(0, Math.min(100, progress));
 
-    const snapshot = await db
-      .collection('projects')
-      .where('slug', '==', slug)
-      .limit(1)
-      .get();
+    const supabase = getAdminClient();
 
-    if (snapshot.empty) {
+    const { data: project } = await supabase
+      .from('projects')
+      .select('id, metadata')
+      .eq('slug', slug)
+      .maybeSingle();
+
+    if (!project) {
       return { success: false, error: 'Project not found' };
     }
 
-    const docRef = snapshot.docs[0].ref;
+    const metadata = (project.metadata || {}) as Record<string, unknown>;
+    metadata.progress = validProgress;
 
-    await docRef.update({
-      progress: validProgress,
-      updatedAt: new Date().toISOString(),
-    });
+    const { error } = await supabase
+      .from('projects')
+      .update({
+        metadata,
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq('slug', slug);
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'UPDATE',
@@ -132,22 +162,51 @@ export async function updateProjectDetails(
   try {
     const validated = projectUpdateSchema.parse(data);
 
-    const snapshot = await db
-      .collection('projects')
-      .where('slug', '==', slug)
-      .limit(1)
-      .get();
+    const supabase = getAdminClient();
 
-    if (snapshot.empty) {
+    const { data: project } = await supabase
+      .from('projects')
+      .select('id, metadata')
+      .eq('slug', slug)
+      .maybeSingle();
+
+    if (!project) {
       return { success: false, error: 'Project not found' };
     }
 
-    const docRef = snapshot.docs[0].ref;
+    // Build column updates
+    const updates: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    };
 
-    await docRef.update({
-      ...validated,
-      updatedAt: new Date().toISOString(),
-    });
+    if (validated.status) {
+      updates.status = validated.status as 'active' | 'paused' | 'completed' | 'archived';
+    }
+    if (validated.deadline) {
+      updates.end_date = validated.deadline;
+    }
+    if (validated.startDate) {
+      updates.start_date = validated.startDate;
+    }
+    if (validated.budget !== undefined) {
+      updates.budget = validated.budget.toString();
+    }
+
+    // Store extra fields in metadata
+    const metadata = (project.metadata || {}) as Record<string, unknown>;
+    if (validated.progress !== undefined) metadata.progress = validated.progress;
+    if (validated.paidAmount !== undefined) metadata.paid_amount = validated.paidAmount;
+    if (validated.assignedPartner) metadata.assigned_partner = validated.assignedPartner;
+    if (validated.assignedEmployees) metadata.assigned_employees = validated.assignedEmployees;
+
+    updates.metadata = metadata;
+
+    const { error } = await supabase
+      .from('projects')
+      .update(updates as any)
+      .eq('slug', slug);
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'UPDATE',
@@ -162,41 +221,44 @@ export async function updateProjectDetails(
     return { success: true };
   } catch (error) {
     console.error('[UPDATE PROJECT DETAILS ERROR]', error);
+    if (error instanceof z.ZodError) {
+      return { success: false, error: error.issues[0].message };
+    }
     return { success: false, error: 'Failed to update project' };
   }
 }
 
 /**
- * Add milestone to project
+ * Add milestone to project (now using separate milestones table)
  */
 export async function addMilestone(
   slug: string,
   milestone: Omit<z.infer<typeof milestoneSchema>, 'id'>
 ) {
   try {
-    const snapshot = await db
-      .collection('projects')
-      .where('slug', '==', slug)
-      .limit(1)
-      .get();
+    const supabase = getAdminClient();
 
-    if (snapshot.empty) {
+    const projectId = await getProjectId(slug);
+    if (!projectId) {
       return { success: false, error: 'Project not found' };
     }
 
-    const docRef = snapshot.docs[0].ref;
-    const project = snapshot.docs[0].data();
-    const milestones = project.milestones || [];
+    const { data: newMilestone, error } = await supabase
+      .from('milestones')
+      .insert({
+        project_id: projectId,
+        title: milestone.title,
+        description: milestone.description || null,
+        due_date: milestone.due_date,
+        status: milestone.status || 'pending',
+        deliverables: milestone.deliverables || null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as any)
+      .select('*')
+      .single();
 
-    const newMilestone = {
-      ...milestone,
-      id: `ms-${Date.now()}`,
-    };
-
-    await docRef.update({
-      milestones: [...milestones, newMilestone],
-      updatedAt: new Date().toISOString(),
-    });
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'CREATE',
@@ -220,47 +282,54 @@ export async function addMilestone(
 export async function updateMilestoneStatus(
   slug: string,
   milestoneId: string,
-  status: MilestoneStatus
+  status: string
 ) {
   try {
-    const snapshot = await db
-      .collection('projects')
-      .where('slug', '==', slug)
-      .limit(1)
-      .get();
+    const supabase = getAdminClient();
 
-    if (snapshot.empty) {
+    const projectId = await getProjectId(slug);
+    if (!projectId) {
       return { success: false, error: 'Project not found' };
     }
 
-    const docRef = snapshot.docs[0].ref;
-    const project = snapshot.docs[0].data();
-    const milestones = project.milestones || [];
+    const { error } = await supabase
+      .from('milestones')
+      .update({
+        status: status as 'pending' | 'in_progress' | 'completed' | 'blocked',
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq('id', milestoneId)
+      .eq('project_id', projectId);
 
-    const updatedMilestones = milestones.map((m: { id: string }) => {
-      if (m.id === milestoneId) {
-        return {
-          ...m,
-          status,
-          completedAt: status === 'completed' ? new Date().toISOString() : null,
-        };
-      }
-      return m;
-    });
+    if (error) throw error;
 
     // Calculate progress based on completed milestones
-    const completedCount = updatedMilestones.filter(
-      (m: { status: string }) => m.status === 'completed'
-    ).length;
-    const progress = milestones.length > 0
-      ? Math.round((completedCount / milestones.length) * 100)
-      : 0;
+    const { data: milestones } = await supabase
+      .from('milestones')
+      .select('status')
+      .eq('project_id', projectId);
 
-    await docRef.update({
-      milestones: updatedMilestones,
-      progress,
-      updatedAt: new Date().toISOString(),
-    });
+    const total = milestones?.length || 0;
+    const completed = milestones?.filter(m => m.status === 'completed').length || 0;
+    const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+    // Update project progress in metadata
+    const { data: project } = await supabase
+      .from('projects')
+      .select('metadata')
+      .eq('slug', slug)
+      .maybeSingle();
+
+    const metadata = (project?.metadata || {}) as Record<string, unknown>;
+    metadata.progress = progress;
+
+    await supabase
+      .from('projects')
+      .update({
+        metadata,
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq('slug', slug);
 
     await logAuditEvent({
       action: 'STATUS_CHANGE',
@@ -283,28 +352,20 @@ export async function updateMilestoneStatus(
  */
 export async function deleteMilestone(slug: string, milestoneId: string) {
   try {
-    const snapshot = await db
-      .collection('projects')
-      .where('slug', '==', slug)
-      .limit(1)
-      .get();
+    const supabase = getAdminClient();
 
-    if (snapshot.empty) {
+    const projectId = await getProjectId(slug);
+    if (!projectId) {
       return { success: false, error: 'Project not found' };
     }
 
-    const docRef = snapshot.docs[0].ref;
-    const project = snapshot.docs[0].data();
-    const milestones = project.milestones || [];
+    const { error } = await supabase
+      .from('milestones')
+      .delete()
+      .eq('id', milestoneId)
+      .eq('project_id', projectId);
 
-    const updatedMilestones = milestones.filter(
-      (m: { id: string }) => m.id !== milestoneId
-    );
-
-    await docRef.update({
-      milestones: updatedMilestones,
-      updatedAt: new Date().toISOString(),
-    });
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'DELETE',

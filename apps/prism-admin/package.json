@@ -10,12 +10,11 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.4.1",
-    "@supabase/supabase-js": "^2.47.0",
     "@jdstudio/ui": "workspace:*",
     "@jeffdev/db": "workspace:*",
+    "@supabase/ssr": "^0.4.1",
+    "@supabase/supabase-js": "^2.47.0",
     "clsx": "^2.1.1",
-    "firebase-admin": "^13.6.0",
     "lucide-react": "^0.562.0",
     "next": "16.1.4",
     "react": "^19.2.3",

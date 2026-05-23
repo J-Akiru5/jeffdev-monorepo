@@ -120,10 +120,11 @@ export async function updateCalendarEvent(
     if (validated.color !== undefined) updateData.color = validated.color;
 
     const supabase = getAdminClient();
-    const { error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
       .from('calendar_events')
       .update(updateData)
-      .eq('id', id) as any;
+      .eq('id', id);
 
     if (error) throw error;
 

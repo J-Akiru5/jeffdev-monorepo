@@ -4,11 +4,11 @@
  * PayPal Server Actions
  * ----------------------
  * PayPal Checkout integration for invoice payments.
+ * Uses Supabase `invoices` table — queries by `invoice_number` (refNo).
  */
 
-import { db } from '@/lib/firebase/admin';
+import { getAdminClient } from '@/lib/supabase/admin';
 import { recordPayment } from './invoice';
-import type { Invoice } from '@/types/invoice';
 
 // PayPal API URLs
 const PAYPAL_API_URL = process.env.PAYPAL_MODE === 'live'
@@ -52,19 +52,21 @@ async function getPayPalAccessToken(): Promise<string | null> {
  */
 export async function createPayPalOrder(invoiceRefNo: string, amount?: number) {
   try {
-    // Get invoice
-    const snapshot = await db
-      .collection('invoices')
-      .where('refNo', '==', invoiceRefNo)
-      .limit(1)
-      .get();
+    const supabase = getAdminClient();
 
-    if (snapshot.empty) {
+    // Get invoice by invoice_number (refNo)
+    const { data: invoice, error: fetchError } = await supabase
+      .from('invoices')
+      .select('*')
+      .eq('invoice_number', invoiceRefNo)
+      .maybeSingle();
+
+    if (fetchError || !invoice) {
       return { success: false, error: 'Invoice not found' };
     }
 
-    const invoice = snapshot.docs[0].data() as Invoice;
-    const paymentAmount = amount || invoice.balanceDue;
+    const metadata = (invoice.metadata || {}) as Record<string, unknown>;
+    const paymentAmount = amount || (parseFloat(invoice.total_amount as string) - ((metadata.paidAmount as number) || 0));
 
     if (paymentAmount <= 0) {
       return { success: false, error: 'Invalid payment amount' };
@@ -87,10 +89,10 @@ export async function createPayPalOrder(invoiceRefNo: string, amount?: number) {
         intent: 'CAPTURE',
         purchase_units: [
           {
-            reference_id: invoice.refNo,
-            description: `Invoice ${invoice.refNo} - ${invoice.clientName}`,
+            reference_id: invoice.invoice_number,
+            description: `Invoice ${invoice.invoice_number} - ${metadata.clientName as string || ''}`,
             amount: {
-              currency_code: invoice.currency,
+              currency_code: (metadata.currency as string) || 'USD',
               value: paymentAmount.toFixed(2),
             },
           },
@@ -99,8 +101,8 @@ export async function createPayPalOrder(invoiceRefNo: string, amount?: number) {
           brand_name: 'Syntaxure Labs',
           landing_page: 'BILLING',
           user_action: 'PAY_NOW',
-          return_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pay/${invoice.refNo}/success`,
-          cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pay/${invoice.refNo}`,
+          return_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pay/${invoice.invoice_number}/success`,
+          cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pay/${invoice.invoice_number}`,
         },
       }),
     });
@@ -151,19 +153,20 @@ export async function capturePayPalOrder(orderId: string, invoiceRefNo: string) 
       );
       const transactionId = capture.purchase_units?.[0]?.payments?.captures?.[0]?.id;
 
-      // Get invoice ID
-      const snapshot = await db
-        .collection('invoices')
-        .where('refNo', '==', invoiceRefNo)
-        .limit(1)
-        .get();
+      // Get invoice ID by invoice_number
+      const supabase = getAdminClient();
+      const { data: invoice, error: fetchError } = await supabase
+        .from('invoices')
+        .select('id')
+        .eq('invoice_number', invoiceRefNo)
+        .maybeSingle();
 
-      if (snapshot.empty) {
+      if (fetchError || !invoice) {
         return { success: false, error: 'Invoice not found' };
       }
 
-      // Record the payment
-      const result = await recordPayment(snapshot.docs[0].id, {
+      // Record the payment using the invoice UUID
+      const result = await recordPayment(invoice.id, {
         amount: capturedAmount,
         method: 'paypal',
         transactionId,

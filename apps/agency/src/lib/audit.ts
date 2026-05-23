@@ -1,10 +1,11 @@
 /**
  * Audit Logging System
  * ---------------------
- * Logs all admin actions to Firestore for compliance and debugging.
+ * Logs all admin actions to Supabase for compliance and debugging.
  */
 
-import { db } from '@/lib/firebase/admin';
+import { getAdminClient } from '@/lib/supabase/admin';
+import type { Database } from '@/types/database';
 
 export interface AuditEvent {
   action: 'CREATE' | 'UPDATE' | 'DELETE' | 'STATUS_CHANGE';
@@ -18,23 +19,36 @@ export interface AuditEvent {
 export interface AuditLog extends AuditEvent {
   id: string;
   timestamp: string;
-  userEmail: string;
+  userEmail?: string;
 }
 
+type AuditLogRow = Database['public']['Tables']['audit_logs']['Insert'];
+
 /**
- * Log an audit event to Firestore
+ * Log an audit event to Supabase
  */
 export async function logAuditEvent(event: AuditEvent): Promise<void> {
   try {
-    const auditLog = {
-      ...event,
-      timestamp: new Date().toISOString(),
-      // userEmail would come from session in a real implementation
-      userEmail: event.userEmail || 'admin@jeffdev.studio',
+    const supabase = getAdminClient();
+
+    const payload: Record<string, unknown> = {
+      action: event.action,
+      resource_type: event.resource,
+      resource_id: event.resourceId,
+      changes: {
+        ...(event.details || {}),
+        userEmail: event.userEmail || 'admin@jeffdev.studio',
+      },
+      created_at: new Date().toISOString(),
     };
 
-    await db.collection('audit_logs').add(auditLog);
-    
+    const { error } = await supabase.from('audit_logs').insert([payload] as any);
+
+    if (error) {
+      console.error('[AUDIT DB ERROR]', error);
+      return;
+    }
+
     console.log(`[AUDIT] ${event.action} ${event.resource}/${event.resourceId}`);
   } catch (error) {
     // Don't fail the main operation if audit logging fails
@@ -47,19 +61,27 @@ export async function logAuditEvent(event: AuditEvent): Promise<void> {
  */
 export async function getAuditLogs(limit = 50): Promise<AuditLog[]> {
   try {
-    const snapshot = await db
-      .collection('audit_logs')
-      .orderBy('timestamp', 'desc')
-      .limit(limit)
-      .get();
+    const supabase = getAdminClient();
 
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as AuditLog[];
+    const { data, error } = await supabase
+      .from('audit_logs')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error || !data) return [];
+
+    return (data as Database['public']['Tables']['audit_logs']['Row'][]).map((row) => ({
+      id: row.id,
+      action: row.action as AuditEvent['action'],
+      resource: (row.resource_type || 'users') as AuditEvent['resource'],
+      resourceId: row.resource_id || '',
+      details: (row.changes as Record<string, unknown>) || undefined,
+      userEmail: ((row.changes as Record<string, unknown>)?.userEmail as string) || 'unknown',
+      timestamp: row.created_at || new Date().toISOString(),
+    }));
   } catch (error) {
     console.error('[GET AUDIT LOGS ERROR]', error);
     return [];
   }
 }
-

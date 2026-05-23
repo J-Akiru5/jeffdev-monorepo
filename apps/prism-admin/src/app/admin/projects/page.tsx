@@ -2,9 +2,20 @@ import { createClient } from "@/lib/supabase/server";
 import { Search, Filter, FolderKanban, Calendar, Users } from "lucide-react";
 import Link from "next/link";
 
+interface Project {
+  id: string;
+  title: string;
+  description: string | null;
+  status: "active" | "paused" | "completed" | "archived";
+  client_name: string | null;
+  start_date: string | null;
+  budget: number | null;
+  created_at: string;
+}
+
 /**
  * Projects Page
- * View Agency projects from Firebase
+ * View agency projects from Supabase
  */
 export default async function ProjectsPage() {
   const supabase = await createClient();
@@ -14,21 +25,18 @@ export default async function ProjectsPage() {
 
   if (!user) return null;
 
-  // TODO: Fetch from Firebase Admin SDK (Agency data)
-  // For now, show empty state
-  const projects: Array<{
-    id: string;
-    name: string;
-    client: string;
-    status: "active" | "completed" | "on-hold" | "canceled";
-    startDate: string;
-    teamSize: number;
-  }> = [];
+  const { data: projects } = await supabase
+    .from("projects")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  const projectList: Project[] = (projects as Project[]) || [];
 
   const stats = {
-    active: projects.filter((p) => p.status === "active").length,
-    completed: projects.filter((p) => p.status === "completed").length,
-    onHold: projects.filter((p) => p.status === "on-hold").length,
+    active: projectList.filter((p) => p.status === "active").length,
+    completed: projectList.filter((p) => p.status === "completed").length,
+    paused: projectList.filter((p) => p.status === "paused").length,
+    archived: projectList.filter((p) => p.status === "archived").length,
   };
 
   return (
@@ -38,13 +46,13 @@ export default async function ProjectsPage() {
         <div>
           <h1 className="text-2xl font-bold text-white">Projects</h1>
           <p className="text-sm text-white/50">
-            Agency projects from Syntaxure Labs
+            Agency projects from Supabase
           </p>
         </div>
         <div className="flex items-center gap-2 text-xs">
           <span className="px-2 py-1 rounded bg-white/5 text-white/40 flex items-center gap-1.5">
             <FolderKanban className="h-3 w-3" />
-            Firebase
+            {projectList.length} total
           </span>
         </div>
       </div>
@@ -53,7 +61,8 @@ export default async function ProjectsPage() {
       <div className="flex gap-2 flex-wrap">
         <StatusTab label="Active" count={stats.active} active />
         <StatusTab label="Completed" count={stats.completed} />
-        <StatusTab label="On Hold" count={stats.onHold} />
+        <StatusTab label="Paused" count={stats.paused} />
+        <StatusTab label="Archived" count={stats.archived} />
       </div>
 
       {/* Search/Filter Bar */}
@@ -73,9 +82,9 @@ export default async function ProjectsPage() {
       </div>
 
       {/* Projects Grid */}
-      {projects.length > 0 ? (
+      {projectList.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project) => (
+          {projectList.map((project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
         </div>
@@ -88,11 +97,8 @@ export default async function ProjectsPage() {
             No projects yet
           </h3>
           <p className="text-xs text-white/40 max-w-sm mx-auto">
-            Connect Firebase to view Agency projects from Syntaxure Labs.
+            Projects will appear here once they&apos;re created in the system.
           </p>
-          <button className="mt-4 px-4 py-2 text-xs font-medium text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 rounded-lg transition-colors">
-            Connect Firebase
-          </button>
         </div>
       )}
     </div>
@@ -128,25 +134,13 @@ function StatusTab({
   );
 }
 
-function ProjectCard({
-  project,
-}: {
-  project: {
-    id: string;
-    name: string;
-    client: string;
-    status: string;
-    startDate: string;
-    teamSize: number;
+function ProjectCard({ project }: { project: Project }) {
+  const statusColor: Record<string, string> = {
+    active: "text-emerald-400 bg-emerald-500/15",
+    completed: "text-cyan-400 bg-cyan-500/15",
+    paused: "text-yellow-400 bg-yellow-500/15",
+    archived: "text-white/50 bg-white/5",
   };
-}) {
-  const statusColor =
-    {
-      active: "text-emerald-400 bg-emerald-500/15",
-      completed: "text-cyan-400 bg-cyan-500/15",
-      "on-hold": "text-yellow-400 bg-yellow-500/15",
-      canceled: "text-red-400 bg-red-500/15",
-    }[project.status] || "text-white/50 bg-white/5";
 
   return (
     <Link
@@ -156,25 +150,33 @@ function ProjectCard({
       <div className="flex items-start justify-between mb-3">
         <div>
           <h3 className="text-sm font-medium text-white group-hover:text-amber-400 transition-colors">
-            {project.name}
+            {project.title}
           </h3>
-          <p className="text-xs text-white/40">{project.client}</p>
+          <p className="text-xs text-white/40">
+            {project.client_name || "No client"}
+          </p>
         </div>
         <span
-          className={`text-[10px] font-mono uppercase px-2 py-1 rounded ${statusColor}`}
+          className={`text-[10px] font-mono uppercase px-2 py-1 rounded ${statusColor[project.status] || "text-white/50 bg-white/5"}`}
         >
-          {project.status.replace("-", " ")}
+          {project.status}
         </span>
       </div>
       <div className="flex items-center gap-4 text-xs text-white/40">
         <div className="flex items-center gap-1.5">
           <Calendar className="h-3 w-3" />
-          <span>{new Date(project.startDate).toLocaleDateString()}</span>
+          <span>
+            {project.start_date
+              ? new Date(project.start_date).toLocaleDateString()
+              : "No date"}
+          </span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <Users className="h-3 w-3" />
-          <span>{project.teamSize}</span>
-        </div>
+        {project.budget && (
+          <div className="flex items-center gap-1.5">
+            <Users className="h-3 w-3" />
+            <span>${project.budget.toLocaleString()}</span>
+          </div>
+        )}
       </div>
     </Link>
   );

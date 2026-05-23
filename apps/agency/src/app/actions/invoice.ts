@@ -3,11 +3,13 @@
 /**
  * Invoice Server Actions
  * -----------------------
- * CRUD operations for invoices and payments.
+ * CRUD operations for invoices and payments in Supabase.
+ * Uses the `invoices` table with payments stored in `metadata` JSONB.
  */
 
 import { z } from 'zod';
-import { db } from '@/lib/firebase/admin';
+import { getAdminClient } from '@/lib/supabase/admin';
+import { createClient } from '@/lib/supabase/server';
 import { logAuditEvent } from '@/lib/audit';
 import { revalidatePath } from 'next/cache';
 import { generateInvoiceRef, generatePaymentRef } from '@/lib/ref-generator';
@@ -74,7 +76,12 @@ function determineInvoiceStatus(
     return currentStatus;
   }
   if (paidAmount >= total) return 'paid';
-  if (paidAmount > 0) return 'partial';
+  if (paidAmount > 0) {
+    // Partial payment — 'partial' not in DB CHECK constraint.
+    // The UI detects partial from metadata.paidAmount instead.
+    if (new Date(dueDate) < new Date()) return 'overdue';
+    return 'sent';
+  }
   if (new Date(dueDate) < new Date()) return 'overdue';
   return 'sent';
 }
@@ -84,15 +91,15 @@ function determineInvoiceStatus(
 // =============================================================================
 export async function getInvoices(): Promise<Invoice[]> {
   try {
-    const snapshot = await db
-      .collection('invoices')
-      .orderBy('createdAt', 'desc')
-      .get();
+    const supabase = getAdminClient();
+    const { data, error } = await supabase
+      .from('invoices')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Invoice[];
+    if (error || !data) return [];
+
+    return data.map((row) => normalizeInvoiceRow(row));
   } catch (error) {
     console.error('[GET INVOICES ERROR]', error);
     return [];
@@ -101,22 +108,59 @@ export async function getInvoices(): Promise<Invoice[]> {
 
 export async function getInvoiceByRefNo(refNo: string): Promise<Invoice | null> {
   try {
-    const snapshot = await db
-      .collection('invoices')
-      .where('refNo', '==', refNo)
-      .limit(1)
-      .get();
+    const supabase = getAdminClient();
+    const { data, error } = await supabase
+      .from('invoices')
+      .select('*')
+      .eq('invoice_number', refNo)
+      .maybeSingle();
 
-    if (snapshot.empty) return null;
+    if (error || !data) return null;
 
-    return {
-      id: snapshot.docs[0].id,
-      ...snapshot.docs[0].data(),
-    } as Invoice;
+    return normalizeInvoiceRow(data);
   } catch (error) {
     console.error('[GET INVOICE ERROR]', error);
     return null;
   }
+}
+
+/**
+ * Convert Supabase invoice row to the Invoice type expected by the app
+ */
+function normalizeInvoiceRow(row: Record<string, unknown>): Invoice {
+  const metadata = (row.metadata || {}) as Record<string, unknown>;
+  const payments = (metadata.payments || []) as PaymentRecord[];
+
+  return {
+    id: row.id as string,
+    refNo: row.invoice_number as string,
+    clientName: (metadata.clientName as string) || '',
+    clientEmail: (metadata.clientEmail as string) || '',
+    clientCompany: metadata.clientCompany as string | undefined,
+    clientAddress: metadata.clientAddress as string | undefined,
+    projectSlug: metadata.projectSlug as string | undefined,
+    projectTitle: metadata.projectTitle as string | undefined,
+    items: row.line_items as Invoice['items'] || [],
+    currency: (metadata.currency as Invoice['currency']) || 'USD',
+    subtotal: parseFloat(row.amount as string) || 0,
+    tax: parseFloat(row.tax_amount as string) || 0,
+    taxRate: metadata.taxRate as number | undefined,
+    discount: metadata.discount as number | undefined,
+    total: parseFloat(row.total_amount as string) || 0,
+    paidAmount: (metadata.paidAmount as number) || 0,
+    balanceDue: parseFloat(row.total_amount as string) - ((metadata.paidAmount as number) || 0),
+    status: row.status as InvoiceStatus,
+    issueDate: row.issued_date as string,
+    dueDate: row.due_date as string,
+    sentAt: metadata.sentAt as string | undefined,
+    paidAt: row.paid_date as string | undefined,
+    payments,
+    notes: row.notes as string | undefined,
+    termsAndConditions: row.payment_terms as string | undefined,
+    createdBy: metadata.createdBy as string | undefined,
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+  };
 }
 
 // =============================================================================
@@ -131,50 +175,68 @@ export async function createInvoice(data: z.infer<typeof createInvoiceSchema>) {
       validated.discount
     );
 
-    const invoice: Omit<Invoice, 'id'> = {
-      refNo: generateInvoiceRef(),
-      clientName: validated.clientName,
-      clientEmail: validated.clientEmail,
-      clientCompany: validated.clientCompany,
-      clientAddress: validated.clientAddress,
-      projectSlug: validated.projectSlug,
-      projectTitle: validated.projectTitle,
-      items: validated.items,
-      currency: validated.currency,
-      subtotal,
-      tax,
-      taxRate: validated.taxRate,
-      discount: validated.discount,
-      total,
-      paidAmount: 0,
-      balanceDue: total,
-      status: 'draft',
-      issueDate: new Date().toISOString(),
-      dueDate: validated.dueDate,
-      payments: [],
-      notes: validated.notes,
-      termsAndConditions: validated.termsAndConditions,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    const refNo = generateInvoiceRef();    // Get authenticated user ID
+    const authClient = await createClient();
+    const { data: { user } } = await authClient.auth.getUser();
+    const userId = user?.id;
 
-    const docRef = await db.collection('invoices').add(invoice);
+    if (!userId) {
+      return { success: false, error: 'Authentication required' };
+    }
+
+    const supabase = getAdminClient();
+
+    const { data: result, error } = await supabase
+      .from('invoices')
+      .insert({
+        user_id: userId,
+        amount: subtotal.toString(),
+        tax_amount: tax.toString(),
+        total_amount: total.toString(),
+        status: 'draft',
+        issued_date: new Date().toISOString().split('T')[0],
+        due_date: validated.dueDate,
+        line_items: validated.items as unknown as Record<string, unknown>[],
+        notes: validated.notes || null,
+        payment_terms: validated.termsAndConditions || null,
+        metadata: {
+          clientName: validated.clientName,
+          clientEmail: validated.clientEmail,
+          clientCompany: validated.clientCompany,
+          clientAddress: validated.clientAddress,
+          projectSlug: validated.projectSlug,
+          projectTitle: validated.projectTitle,
+          currency: validated.currency,
+          taxRate: validated.taxRate,
+          discount: validated.discount,
+          paidAmount: 0,
+          payments: [],
+          sentAt: null,
+          createdBy: null,
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as any)
+      .select('id')
+      .single();
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'CREATE',
       resource: 'invoices',
-      resourceId: docRef.id,
-      details: { refNo: invoice.refNo, total, currency: invoice.currency },
+      resourceId: result.id,
+      details: { refNo, total, currency: validated.currency },
     });
 
     // Handle auto-send if requested
     if (validated.sendOnCreate) {
-      await sendInvoice(docRef.id);
+      await sendInvoice(result.id);
     }
 
     revalidatePath('/admin/invoices');
 
-    return { success: true, id: docRef.id, refNo: invoice.refNo };
+    return { success: true, id: result.id, refNo };
   } catch (error) {
     if (error instanceof z.ZodError) {
       console.error('[CREATE INVOICE VALIDATION ERROR]', JSON.stringify(error.issues, null, 2));
@@ -194,39 +256,70 @@ export async function updateInvoice(
   data: Partial<z.infer<typeof createInvoiceSchema>>
 ) {
   try {
-    const docRef = db.collection('invoices').doc(id);
-    const doc = await docRef.get();
+    const supabase = getAdminClient();
 
-    if (!doc.exists) {
+    const { data: existing, error: fetchError } = await supabase
+      .from('invoices')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (fetchError || !existing) {
       return { success: false, error: 'Invoice not found' };
     }
 
-    const invoice = doc.data() as Invoice;
-    if (invoice.status !== 'draft') {
+    if (existing.status !== 'draft') {
       return { success: false, error: 'Can only edit draft invoices' };
     }
 
     const validated = createInvoiceSchema.partial().parse(data);
-    
-    // Recalculate if items changed
-    let updates: Partial<Invoice> = { ...validated, updatedAt: new Date().toISOString() };
-    
+    const existingMetadata = (existing.metadata || {}) as Record<string, unknown>;
+    const updates: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    };
+
+    // Map fields
+    if (validated.notes !== undefined) updates.notes = validated.notes;
+    if (validated.termsAndConditions !== undefined) updates.payment_terms = validated.termsAndConditions;
+    if (validated.dueDate) updates.due_date = validated.dueDate;
     if (validated.items) {
+      updates.line_items = validated.items as unknown as Record<string, unknown>[];
       const { subtotal, tax, total } = calculateInvoiceTotals(
         validated.items,
-        validated.taxRate ?? invoice.taxRate,
-        validated.discount ?? invoice.discount
+        validated.taxRate ?? (existingMetadata.taxRate as number),
+        validated.discount ?? (existingMetadata.discount as number),
       );
-      updates = { ...updates, subtotal, tax, total, balanceDue: total };
+      updates.amount = subtotal.toString();
+      updates.tax_amount = tax.toString();
+      updates.total_amount = total.toString();
     }
 
-    await docRef.update(updates);
+    // Update metadata
+    updates.metadata = {
+      ...existingMetadata,
+      ...(validated.clientName && { clientName: validated.clientName }),
+      ...(validated.clientEmail && { clientEmail: validated.clientEmail }),
+      ...(validated.clientCompany !== undefined && { clientCompany: validated.clientCompany }),
+      ...(validated.clientAddress !== undefined && { clientAddress: validated.clientAddress }),
+      ...(validated.projectSlug !== undefined && { projectSlug: validated.projectSlug }),
+      ...(validated.projectTitle !== undefined && { projectTitle: validated.projectTitle }),
+      ...(validated.currency && { currency: validated.currency }),
+      ...(validated.taxRate !== undefined && { taxRate: validated.taxRate }),
+      ...(validated.discount !== undefined && { discount: validated.discount }),
+    };
+
+    const { error } = await supabase
+      .from('invoices')
+      .update(updates as any)
+      .eq('id', id);
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'UPDATE',
       resource: 'invoices',
       resourceId: id,
-      details: validated,
+      details: validated as Record<string, unknown>,
     });
 
     revalidatePath('/admin/invoices');
@@ -244,19 +337,25 @@ export async function updateInvoice(
 // =============================================================================
 export async function sendInvoice(id: string) {
   try {
-    const docRef = db.collection('invoices').doc(id);
-    const doc = await docRef.get();
+    const supabase = getAdminClient();
 
-    if (!doc.exists) {
+    const { data: existing, error: fetchError } = await supabase
+      .from('invoices')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (fetchError || !existing) {
       return { success: false, error: 'Invoice not found' };
     }
 
-    const invoice = { id: doc.id, ...doc.data() } as Invoice;
-    if (invoice.status !== 'draft') {
+    if (existing.status !== 'draft') {
       return { success: false, error: 'Invoice already sent' };
     }
 
-    // Generate PDF buffer for attachment (dynamic import to avoid module loading issues)
+    const invoice = normalizeInvoiceRow(existing);
+
+    // Generate PDF buffer for attachment
     const { generateInvoicePDFBuffer } = await import('@/lib/invoice-pdf-buffer');
     const pdfBuffer = await generateInvoicePDFBuffer(invoice);
 
@@ -291,11 +390,19 @@ export async function sendInvoice(id: string) {
     });
 
     // Update invoice status
-    await docRef.update({
-      status: 'sent',
-      sentAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
+    const metadata = (existing.metadata || {}) as Record<string, unknown>;
+    metadata.sentAt = new Date().toISOString();
+
+    const { error } = await supabase
+      .from('invoices')
+      .update({
+        status: 'sent',
+        metadata,
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq('id', id);
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'STATUS_CHANGE',
@@ -323,16 +430,23 @@ export async function recordPayment(
 ) {
   try {
     const validated = paymentSchema.parse(data);
+    const supabase = getAdminClient();
 
-    const docRef = db.collection('invoices').doc(invoiceId);
-    const doc = await docRef.get();
+    const { data: existing, error: fetchError } = await supabase
+      .from('invoices')
+      .select('*')
+      .eq('id', invoiceId)
+      .maybeSingle();
 
-    if (!doc.exists) {
+    if (fetchError || !existing) {
       return { success: false, error: 'Invoice not found' };
     }
 
-    const invoice = doc.data() as Invoice;
-    
+    const metadata = (existing.metadata || {}) as Record<string, unknown>;
+    const payments = (metadata.payments || []) as PaymentRecord[];
+    const currentPaidAmount = (metadata.paidAmount as number) || 0;
+    const total = parseFloat(existing.total_amount as string) || 0;
+
     const payment: PaymentRecord = {
       id: generatePaymentRef(),
       amount: validated.amount,
@@ -344,23 +458,33 @@ export async function recordPayment(
       paidAt: new Date().toISOString(),
     };
 
-    const newPaidAmount = invoice.paidAmount + validated.amount;
-    const newBalanceDue = invoice.total - newPaidAmount;
+    const newPaidAmount = currentPaidAmount + validated.amount;
     const newStatus = determineInvoiceStatus(
       newPaidAmount,
-      invoice.total,
-      invoice.dueDate,
-      invoice.status
+      total,
+      existing.due_date as string,
+      existing.status as InvoiceStatus,
     );
 
-    await docRef.update({
-      payments: [...invoice.payments, payment],
-      paidAmount: newPaidAmount,
-      balanceDue: newBalanceDue,
+    metadata.payments = [...payments, payment];
+    metadata.paidAmount = newPaidAmount;
+
+    const updates: Record<string, unknown> = {
+      metadata,
       status: newStatus,
-      paidAt: newStatus === 'paid' ? new Date().toISOString() : invoice.paidAt,
-      updatedAt: new Date().toISOString(),
-    });
+      updated_at: new Date().toISOString(),
+    };
+
+    if (newStatus === 'paid') {
+      updates.paid_date = new Date().toISOString().split('T')[0];
+    }
+
+    const { error } = await supabase
+      .from('invoices')
+      .update(updates as any)
+      .eq('id', invoiceId);
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'UPDATE',
@@ -371,7 +495,7 @@ export async function recordPayment(
 
     revalidatePath('/admin/invoices');
     revalidatePath(`/admin/invoices/${invoiceId}`);
-    revalidatePath(`/pay/${invoice.refNo}`);
+    revalidatePath(`/pay/${existing.invoice_number}`);
 
     return { success: true, paymentId: payment.id };
   } catch (error) {
@@ -389,48 +513,65 @@ export async function verifyGcashPayment(
   verified: boolean
 ) {
   try {
-    const docRef = db.collection('invoices').doc(invoiceId);
-    const doc = await docRef.get();
+    const supabase = getAdminClient();
 
-    if (!doc.exists) {
+    const { data: existing, error: fetchError } = await supabase
+      .from('invoices')
+      .select('*')
+      .eq('id', invoiceId)
+      .maybeSingle();
+
+    if (fetchError || !existing) {
       return { success: false, error: 'Invoice not found' };
     }
 
-    const invoice = doc.data() as Invoice;
-    const paymentIndex = invoice.payments.findIndex((p) => p.id === paymentId);
+    const metadata = (existing.metadata || {}) as Record<string, unknown>;
+    const payments = (metadata.payments || []) as PaymentRecord[];
+    const paymentIndex = payments.findIndex((p) => p.id === paymentId);
 
     if (paymentIndex === -1) {
       return { success: false, error: 'Payment not found' };
     }
 
-    const updatedPayments = [...invoice.payments];
+    const updatedPayments = [...payments];
     updatedPayments[paymentIndex] = {
       ...updatedPayments[paymentIndex],
       status: verified ? 'verified' : 'rejected',
       verifiedAt: new Date().toISOString(),
     };
 
-    // If rejected, reduce paid amount
-    let paidAmount = invoice.paidAmount;
+    const total = parseFloat(existing.total_amount as string) || 0;
+    let paidAmount = (metadata.paidAmount as number) || 0;
     if (!verified) {
-      paidAmount -= invoice.payments[paymentIndex].amount;
+      paidAmount -= payments[paymentIndex].amount;
     }
 
-    const balanceDue = invoice.total - paidAmount;
     const status = determineInvoiceStatus(
       paidAmount,
-      invoice.total,
-      invoice.dueDate,
-      invoice.status
+      total,
+      existing.due_date as string,
+      existing.status as InvoiceStatus,
     );
 
-    await docRef.update({
-      payments: updatedPayments,
-      paidAmount,
-      balanceDue,
+    metadata.payments = updatedPayments;
+    metadata.paidAmount = paidAmount;
+
+    const updates: Record<string, unknown> = {
+      metadata,
       status,
-      updatedAt: new Date().toISOString(),
-    });
+      updated_at: new Date().toISOString(),
+    };
+
+    if (status === 'paid') {
+      updates.paid_date = new Date().toISOString().split('T')[0];
+    }
+
+    const { error } = await supabase
+      .from('invoices')
+      .update(updates as any)
+      .eq('id', invoiceId);
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'UPDATE',
@@ -454,19 +595,28 @@ export async function verifyGcashPayment(
 // =============================================================================
 export async function deleteInvoice(id: string) {
   try {
-    const docRef = db.collection('invoices').doc(id);
-    const doc = await docRef.get();
+    const supabase = getAdminClient();
 
-    if (!doc.exists) {
+    const { data: existing, error: fetchError } = await supabase
+      .from('invoices')
+      .select('id, status')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (fetchError || !existing) {
       return { success: false, error: 'Invoice not found' };
     }
 
-    const invoice = doc.data() as Invoice;
-    if (invoice.status !== 'draft') {
+    if (existing.status !== 'draft') {
       return { success: false, error: 'Can only delete draft invoices' };
     }
 
-    await docRef.delete();
+    const { error } = await supabase
+      .from('invoices')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'DELETE',

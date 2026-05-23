@@ -37,14 +37,10 @@ export default async function SettingsPage() {
 
   // Check integration status
   const integrations = {
-    supabase: { connected: true, name: "Supabase Authentication" },
-    firebase: {
-      connected: !!process.env.FIREBASE_PROJECT_ID,
-      name: "Firebase (Agency)",
-    },
+    supabase: { connected: true, name: "Supabase (Auth + Database)" },
     cosmos: {
       connected: !!process.env.COSMOS_CONNECTION_STRING,
-      name: "Cosmos DB (Prism)",
+      name: "Cosmos DB (Prism Rules)",
     },
     paypal: {
       connected: !!process.env.PAYPAL_CLIENT_ID,
