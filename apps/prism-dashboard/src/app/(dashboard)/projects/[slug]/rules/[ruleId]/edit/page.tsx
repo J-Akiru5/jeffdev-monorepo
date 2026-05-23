@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { getCollection, ObjectId } from "@jeffdev/db";
 import { notFound } from "next/navigation";
 import { RuleEditForm } from "./rule-edit-form";
@@ -13,27 +13,32 @@ interface Props {
  */
 export default async function RuleEditPage({ params }: Props) {
   const { slug, ruleId } = await params;
-  const { userId } = await auth();
-  
-  if (!userId) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
     return null;
   }
+
+  const userId = user.id;
 
   // Fetch project
   const projectsCollection = await getCollection("projects");
   const project = await projectsCollection.findOne({ userId, slug });
-  
+
   if (!project) {
     notFound();
   }
 
   // Fetch rule
   const rulesCollection = await getCollection("rules");
-  const rule = await rulesCollection.findOne({ 
+  const rule = await rulesCollection.findOne({
     _id: new ObjectId(ruleId),
-    projectId: project._id.toString()
+    projectId: project._id.toString(),
   });
-  
+
   if (!rule) {
     notFound();
   }
@@ -42,9 +47,9 @@ export default async function RuleEditPage({ params }: Props) {
   const serializedRule = {
     _id: rule._id.toString(),
     name: rule.name as string,
-    category: rule.category as string || "general",
-    priority: rule.priority as number || 50,
-    content: rule.content as string || "",
+    category: (rule.category as string) || "general",
+    priority: (rule.priority as number) || 50,
+    content: (rule.content as string) || "",
     description: rule.description as string,
   };
 

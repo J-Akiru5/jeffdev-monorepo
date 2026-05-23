@@ -1,15 +1,15 @@
 /**
  * Mux Direct Upload API
- * 
+ *
  * POST /api/upload/mux
  * Creates a signed upload URL for direct browser uploads to Mux.
- * 
+ *
  * @security Clerk Auth required
  * @returns { url: string, id: string } - Signed upload URL and upload ID
  */
 
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import Mux from "@mux/mux-node";
 import { z } from "zod";
 
@@ -22,17 +22,24 @@ const mux = new Mux({
 /**
  * Optional schema for metadata passed with upload
  */
-const UploadRequestSchema = z.object({
-  projectId: z.string().optional(),
-  title: z.string().max(200).optional(),
-}).optional();
+const UploadRequestSchema = z
+  .object({
+    projectId: z.string().optional(),
+    title: z.string().max(200).optional(),
+  })
+  .optional();
 
 export async function POST(request: Request) {
-  const { userId } = await auth();
-  
-  if (!userId) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const userId = user.id;
 
   try {
     // Parse optional body
@@ -81,12 +88,11 @@ export async function POST(request: Request) {
       url: upload.url,
       id: upload.id,
     });
-
   } catch (error) {
     console.error("[Mux] Upload creation failed:", error);
     return NextResponse.json(
       { error: "Failed to initialize video upload" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

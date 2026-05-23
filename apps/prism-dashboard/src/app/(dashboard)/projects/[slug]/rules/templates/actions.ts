@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { getCollection } from "@jeffdev/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -13,13 +13,18 @@ export type InstallTemplateState = {
 
 export async function installTemplate(
   _prevState: InstallTemplateState,
-  formData: FormData
+  formData: FormData,
 ): Promise<InstallTemplateState> {
-  const { userId } = await auth();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!userId) {
+  if (!user) {
     return { error: "Unauthorized" };
   }
+
+  const userId = user.id;
 
   const projectSlug = formData.get("projectSlug") as string;
   const templateId = formData.get("templateId") as string;
@@ -30,14 +35,17 @@ export async function installTemplate(
 
   // Find project
   const projectsCollection = await getCollection("projects");
-  const project = await projectsCollection.findOne({ userId, slug: projectSlug });
+  const project = await projectsCollection.findOne({
+    userId,
+    slug: projectSlug,
+  });
 
   if (!project) {
     return { error: "Project not found" };
   }
 
   // Find template
-  const template = ruleTemplates.find(t => t.id === templateId);
+  const template = ruleTemplates.find((t) => t.id === templateId);
   if (!template) {
     return { error: "Template not found" };
   }
@@ -46,7 +54,7 @@ export async function installTemplate(
   const rulesCollection = await getCollection("rules");
   const now = new Date().toISOString();
 
-  const rulesToInsert = template.rules.map(rule => ({
+  const rulesToInsert = template.rules.map((rule) => ({
     projectId: project._id.toString(),
     createdBy: userId,
     name: rule.name,

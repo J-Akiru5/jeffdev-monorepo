@@ -1,18 +1,23 @@
 import Link from "next/link";
 import { Plus, FolderKanban } from "lucide-react";
 import { getCollection } from "@jeffdev/db";
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * Projects List Page
  * Shows all user projects with option to create new ones.
  */
 export default async function ProjectsPage() {
-  const { userId } = await auth();
-  
-  if (!userId) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
     return null;
   }
+
+  const userId = user.id;
 
   // Fetch user's projects from Cosmos DB
   const projectsCollection = await getCollection("projects");
@@ -81,7 +86,7 @@ function ProjectCard({ project }: { project: Record<string, unknown> }) {
   const name = project.name as string;
   const designSystem = project.designSystem as string;
   const stack = project.stack as string;
-  
+
   return (
     <Link
       href={`/projects/${slug}`}
@@ -95,11 +100,11 @@ function ProjectCard({ project }: { project: Record<string, unknown> }) {
           {stack}
         </span>
       </div>
-      
+
       <h3 className="mt-4 text-base font-medium text-white group-hover:text-cyan-400 transition-colors">
         {name}
       </h3>
-      
+
       <div className="mt-2 flex items-center gap-2">
         <span className="inline-flex items-center rounded-full bg-white/5 px-2 py-0.5 text-xs text-white/50">
           {designSystem}

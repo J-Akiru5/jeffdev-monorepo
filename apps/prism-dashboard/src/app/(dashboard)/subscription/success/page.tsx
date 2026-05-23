@@ -1,9 +1,11 @@
-import Link from 'next/link';
-import { CheckCircle } from 'lucide-react';
+import Link from "next/link";
+import { CheckCircle } from "lucide-react";
 
 export const metadata = {
-  title: 'Subscription Successful | Prism Context Engine',
+  title: "Subscription Successful | Prism Context Engine",
 };
+
+export const dynamic = "force-dynamic";
 
 export default function SubscriptionSuccessPage() {
   return (
@@ -12,9 +14,7 @@ export default function SubscriptionSuccessPage() {
         <CheckCircle className="h-12 w-12 text-emerald-400" />
       </div>
 
-      <h1 className="text-3xl font-bold text-white">
-        Welcome to Prism Pro!
-      </h1>
+      <h1 className="text-3xl font-bold text-white">Welcome to Prism Pro!</h1>
 
       <p className="mt-4 max-w-md text-white/60">
         Your subscription is now active. You have access to unlimited rules,

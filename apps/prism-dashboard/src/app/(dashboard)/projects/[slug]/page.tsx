@@ -1,19 +1,18 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { getCollection } from "@jeffdev/db";
-import { 
-  ArrowLeft, 
+import {
+  ArrowLeft,
   Download,
-  Settings, 
+  Settings,
   FileJson,
   Video,
   Sparkles,
-  BookOpen
+  BookOpen,
 } from "lucide-react";
 import { VideoContextUploader } from "@/components/video-context-uploader";
 import { RulesList, type RuleItem } from "./rules-list";
-
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -25,16 +24,21 @@ interface Props {
  */
 export default async function ProjectPage({ params }: Props) {
   const { slug } = await params;
-  const { userId } = await auth();
-  
-  if (!userId) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
     return null;
   }
+
+  const userId = user.id;
 
   // Fetch project
   const projectsCollection = await getCollection("projects");
   const project = await projectsCollection.findOne({ userId, slug });
-  
+
   if (!project) {
     notFound();
   }
@@ -49,8 +53,8 @@ export default async function ProjectPage({ params }: Props) {
 
   // Fetch skills count
   const skillsCollection = await getCollection("skills");
-  const skillsCount = await skillsCollection.countDocuments({ 
-    projectId: project._id.toString() 
+  const skillsCount = await skillsCollection.countDocuments({
+    projectId: project._id.toString(),
   });
 
   return (
@@ -98,26 +102,22 @@ export default async function ProjectPage({ params }: Props) {
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-4">
-        <StatCard 
-          label="Rules" 
-          value={rules.length.toString()} 
+        <StatCard
+          label="Rules"
+          value={rules.length.toString()}
           icon={FileJson}
         />
-        <StatCard 
-          label="Skills" 
-          value={skillsCount.toString()} 
+        <StatCard
+          label="Skills"
+          value={skillsCount.toString()}
           icon={BookOpen}
         />
-        <StatCard 
-          label="Design System" 
-          value={project.designSystem as string} 
+        <StatCard
+          label="Design System"
+          value={project.designSystem as string}
           icon={Sparkles}
         />
-        <StatCard 
-          label="Stack" 
-          value={project.stack as string} 
-          icon={Video}
-        />
+        <StatCard label="Stack" value={project.stack as string} icon={Video} />
       </div>
 
       {/* Two Column Layout */}
@@ -125,9 +125,7 @@ export default async function ProjectPage({ params }: Props) {
         {/* Video Uploader */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-medium text-white">
-              📹 Video Context
-            </h2>
+            <h2 className="text-sm font-medium text-white">📹 Video Context</h2>
             <Link
               href={`/projects/${slug}/videos`}
               className="text-xs text-cyan-400 hover:text-cyan-300"
@@ -140,14 +138,16 @@ export default async function ProjectPage({ params }: Props) {
 
         {/* Rules List — interactive client component */}
         <RulesList
-          rules={rules.map((r): RuleItem => ({
-            id: (r._id as { toString: () => string }).toString(),
-            name: (r.name as string) || "Untitled",
-            category: (r.category as string) || "general",
-            priority: (r.priority as number) || 50,
-            isActive: r.isActive !== false,
-            content: (r.content as string) || "",
-          }))}
+          rules={rules.map(
+            (r): RuleItem => ({
+              id: (r._id as { toString: () => string }).toString(),
+              name: (r.name as string) || "Untitled",
+              category: (r.category as string) || "general",
+              priority: (r.priority as number) || 50,
+              isActive: r.isActive !== false,
+              content: (r.content as string) || "",
+            }),
+          )}
           projectSlug={slug}
         />
       </div>
@@ -167,7 +167,9 @@ export default async function ProjectPage({ params }: Props) {
           </Link>
         </div>
         <p className="text-sm text-white/50 mb-4 max-w-2xl">
-          Teach your AI how to perform procedural workflows. While Rules provide constraints, Skills provide step-by-step instructions with code examples.
+          Teach your AI how to perform procedural workflows. While Rules provide
+          constraints, Skills provide step-by-step instructions with code
+          examples.
         </p>
         <div className="flex gap-3">
           <Link
@@ -189,25 +191,24 @@ export default async function ProjectPage({ params }: Props) {
   );
 }
 
-
-function StatCard({ 
-  label, 
-  value, 
-  icon: Icon 
-}: { 
-  label: string; 
-  value: string; 
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
   icon: typeof FileJson;
 }) {
   return (
     <div className="rounded-md border border-white/[0.05] bg-white/[0.02] p-4">
       <div className="flex items-center justify-between">
-        <span className="text-xs text-white/40 uppercase tracking-wider">{label}</span>
+        <span className="text-xs text-white/40 uppercase tracking-wider">
+          {label}
+        </span>
         <Icon className="h-4 w-4 text-white/20" />
       </div>
       <p className="text-xl font-semibold text-white mt-2">{value}</p>
     </div>
   );
 }
-
-

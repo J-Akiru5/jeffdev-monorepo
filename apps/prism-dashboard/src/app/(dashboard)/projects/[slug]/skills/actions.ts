@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { getCollection } from "@jeffdev/db";
 import { z } from "zod";
 import { redirect } from "next/navigation";
@@ -19,7 +19,17 @@ const SkillSchema = z.object({
   description: z.string().max(500).optional().default(""),
   category: z.string().min(1, "Category is required"),
   steps: z.array(SkillStepSchema).min(1, "At least one step is required"),
-  tags: z.string().optional().transform(t => t ? t.split(",").map(s => s.trim()).filter(Boolean) : []),
+  tags: z
+    .string()
+    .optional()
+    .transform((t) =>
+      t
+        ? t
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [],
+    ),
 });
 
 export type SkillActionState = {
@@ -38,20 +48,28 @@ export type SkillActionState = {
  */
 export async function createSkill(
   _prevState: SkillActionState,
-  formData: FormData
+  formData: FormData,
 ): Promise<SkillActionState> {
-  const { userId } = await auth();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!userId) {
+  if (!user) {
     return { error: { general: "Unauthorized" } };
   }
+
+  const userId = user.id;
 
   const projectSlug = formData.get("projectSlug") as string;
   const rawSteps = formData.get("steps") as string; // Will be passed as JSON string from a hidden field
 
   // Find project
   const projectsCollection = await getCollection("projects");
-  const project = await projectsCollection.findOne({ userId, slug: projectSlug });
+  const project = await projectsCollection.findOne({
+    userId,
+    slug: projectSlug,
+  });
 
   if (!project) {
     return { error: { general: "Project not found" } };

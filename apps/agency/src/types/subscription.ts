@@ -4,11 +4,9 @@
  * Type definitions for recurring service subscriptions.
  */
 
-import { Timestamp } from 'firebase/firestore';
-
-export type SubscriptionStatus = 'active' | 'paused' | 'cancelled' | 'expired';
-export type BillingCycle = 'monthly' | 'quarterly' | 'yearly';
-export type SubscriptionTier = 'starter' | 'pro' | 'enterprise';
+export type SubscriptionStatus = "active" | "paused" | "cancelled" | "expired";
+export type BillingCycle = "monthly" | "quarterly" | "yearly";
+export type SubscriptionTier = "starter" | "pro" | "enterprise";
 
 export interface Subscription {
   id: string;
@@ -22,13 +20,13 @@ export interface Subscription {
   billingCycle: BillingCycle;
   amount: number;
   currency: string;
-  startDate: Timestamp;
-  nextBillingDate: Timestamp;
-  cancelledAt?: Timestamp;
-  pausedAt?: Timestamp;
+  startDate: string;
+  nextBillingDate: string;
+  cancelledAt?: string;
+  pausedAt?: string;
   notes?: string;
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface SubscriptionCreateInput {
@@ -56,15 +54,15 @@ export interface SubscriptionUpdateInput {
 
 // Status badge styling
 export const statusBadgeStyles: Record<SubscriptionStatus, string> = {
-  active: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-  paused: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-  cancelled: 'bg-red-500/10 text-red-400 border-red-500/20',
-  expired: 'bg-white/5 text-white/40 border-white/10',
+  active: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  paused: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+  cancelled: "bg-red-500/10 text-red-400 border-red-500/20",
+  expired: "bg-white/5 text-white/40 border-white/10",
 };
 
 // Billing cycle labels
 export const billingCycleLabels: Record<BillingCycle, string> = {
-  monthly: 'Monthly',
-  quarterly: 'Quarterly',
-  yearly: 'Yearly',
+  monthly: "Monthly",
+  quarterly: "Quarterly",
+  yearly: "Yearly",
 };

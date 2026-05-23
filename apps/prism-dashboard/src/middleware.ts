@@ -1,30 +1,10 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { type NextRequest } from "next/server";
+import { updateSession } from "@/lib/supabase/middleware";
 
-/**
- * Define routes that require authentication.
- * Everything under /dashboard/* requires sign-in.
- */
-const isProtectedRoute = createRouteMatcher([
-  "/dashboard(.*)",
-  "/projects(.*)",
-  "/settings(.*)",
-  "/rules(.*)",
-  "/brand(.*)",
-  "/generate(.*)",
-  "/analytics(.*)",
-  "/subscription(.*)",
-  "/onboarding(.*)",
-  "/quickstart(.*)",
-  "/marketplace(.*)",
-  "/showcase(.*)",
-]);
-
-export default clerkMiddleware(async (auth, req) => {
-  // Protect dashboard routes
-  if (isProtectedRoute(req)) {
-    await auth.protect();
-  }
-});
+export async function middleware(request: NextRequest) {
+  // Refresh auth session on every request
+  return await updateSession(request);
+}
 
 export const config = {
   matcher: [

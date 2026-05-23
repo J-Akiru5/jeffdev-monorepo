@@ -1,13 +1,13 @@
 /**
  * Usage API
- * 
+ *
  * GET /api/usage - Get user's current usage stats and limits
  */
 
-import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import { getCollection } from '@jeffdev/db';
-import { TIER_LIMITS, type SubscriptionTier } from '@/lib/subscriptions';
+import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { getCollection } from "@jeffdev/db";
+import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
 
 // =============================================================================
 // HELPERS
@@ -15,19 +15,19 @@ import { TIER_LIMITS, type SubscriptionTier } from '@/lib/subscriptions';
 
 async function getUserTier(userId: string): Promise<SubscriptionTier> {
   try {
-    const subscriptionsCollection = await getCollection('subscriptions');
+    const subscriptionsCollection = await getCollection("subscriptions");
     const subscription = await subscriptionsCollection.findOne({
       userId,
-      status: { $in: ['active', 'trialing'] }
+      status: { $in: ["active", "trialing"] },
     });
-    
+
     if (!subscription) {
-      return 'free';
+      return "free";
     }
-    
-    return (subscription.tier as SubscriptionTier) || 'free';
+
+    return (subscription.tier as SubscriptionTier) || "free";
   } catch {
-    return 'free';
+    return "free";
   }
 }
 
@@ -46,17 +46,22 @@ function getNextMonthStart(): Date {
 // =============================================================================
 
 export async function GET() {
-  const { userId } = await auth();
-  
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  
+
+  const userId = user.id;
+
   try {
     // Get user's tier
     const tier = await getUserTier(userId);
     const limits = TIER_LIMITS[tier];
-    
+
     // Get collections
     const [
       projectsCollection,
@@ -64,28 +69,29 @@ export async function GET() {
       componentsCollection,
       generationsCollection,
     ] = await Promise.all([
-      getCollection('projects'),
-      getCollection('rules'),
-      getCollection('components'),
-      getCollection('generations'),
+      getCollection("projects"),
+      getCollection("rules"),
+      getCollection("components"),
+      getCollection("generations"),
     ]);
-    
+
     // Count usage
     const monthStart = getMonthStart();
-    
-    const [projectCount, ruleCount, componentCount, generationCount] = await Promise.all([
-      projectsCollection.countDocuments({ userId }),
-      rulesCollection.countDocuments({ createdBy: userId }),
-      componentsCollection.countDocuments({ userId }),
-      generationsCollection.countDocuments({ 
-        userId, 
-        createdAt: { $gte: monthStart.toISOString() } 
-      }),
-    ]);
-    
+
+    const [projectCount, ruleCount, componentCount, generationCount] =
+      await Promise.all([
+        projectsCollection.countDocuments({ userId }),
+        rulesCollection.countDocuments({ createdBy: userId }),
+        componentsCollection.countDocuments({ userId }),
+        generationsCollection.countDocuments({
+          userId,
+          createdAt: { $gte: monthStart.toISOString() },
+        }),
+      ]);
+
     // Build response
-    const formatLimit = (limit: number) => limit === -1 ? 'unlimited' : limit;
-    
+    const formatLimit = (limit: number) => (limit === -1 ? "unlimited" : limit);
+
     return NextResponse.json({
       tier,
       usage: {
@@ -108,12 +114,11 @@ export async function GET() {
       },
       resetDate: getNextMonthStart().toISOString(),
     });
-    
   } catch (error) {
-    console.error('[Usage] GET error:', error);
+    console.error("[Usage] GET error:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch usage stats' },
-      { status: 500 }
+      { error: "Failed to fetch usage stats" },
+      { status: 500 },
     );
   }
 }

@@ -1,13 +1,13 @@
-import { auth } from "@clerk/nextjs/server";
-import { 
-  Search, 
+import { createClient } from "@/lib/supabase/server";
+import {
+  Search,
   Filter,
   Building2,
   Mail,
   Phone,
   MapPin,
   MoreVertical,
-  Plus
+  Plus,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -16,9 +16,12 @@ import Link from "next/link";
  * View Agency clients from Firebase
  */
 export default async function ClientsPage() {
-  const { userId } = await auth();
-  
-  if (!userId) return null;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return null;
 
   // TODO: Fetch from Firebase Admin SDK (Agency data)
   const clients: Array<{
@@ -74,7 +77,9 @@ export default async function ClientsPage() {
           <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center mx-auto mb-4">
             <Building2 className="h-6 w-6 text-amber-400" />
           </div>
-          <h3 className="text-sm font-medium text-white mb-1">No clients yet</h3>
+          <h3 className="text-sm font-medium text-white mb-1">
+            No clients yet
+          </h3>
           <p className="text-xs text-white/40 max-w-sm mx-auto">
             Connect Firebase to view Agency clients from Syntaxure Labs.
           </p>
@@ -87,16 +92,20 @@ export default async function ClientsPage() {
   );
 }
 
-function ClientCard({ client }: { client: { 
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  company?: string;
-  location?: string;
-  projectCount: number;
-  status: string;
-}}) {
+function ClientCard({
+  client,
+}: {
+  client: {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    company?: string;
+    location?: string;
+    projectCount: number;
+    status: string;
+  };
+}) {
   return (
     <Link
       href={`/admin/clients/${client.id}`}
@@ -116,16 +125,16 @@ function ClientCard({ client }: { client: {
             )}
           </div>
         </div>
-        <button 
+        <button
           onClick={(e) => e.preventDefault()}
-          title="More options" 
+          title="More options"
           aria-label="Client options menu"
           className="p-1.5 rounded-md hover:bg-white/10 text-white/40 hover:text-white transition-colors"
         >
           <MoreVertical className="h-4 w-4" />
         </button>
       </div>
-      
+
       <div className="space-y-2 text-xs">
         <div className="flex items-center gap-2 text-white/40">
           <Mail className="h-3 w-3" />
@@ -146,12 +155,16 @@ function ClientCard({ client }: { client: {
       </div>
 
       <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
-        <span className="text-xs text-white/40">{client.projectCount} projects</span>
-        <span className={`text-[10px] font-mono uppercase px-2 py-1 rounded ${
-          client.status === "active" 
-            ? "text-emerald-400 bg-emerald-500/15" 
-            : "text-white/40 bg-white/5"
-        }`}>
+        <span className="text-xs text-white/40">
+          {client.projectCount} projects
+        </span>
+        <span
+          className={`text-[10px] font-mono uppercase px-2 py-1 rounded ${
+            client.status === "active"
+              ? "text-emerald-400 bg-emerald-500/15"
+              : "text-white/40 bg-white/5"
+          }`}
+        >
           {client.status}
         </span>
       </div>

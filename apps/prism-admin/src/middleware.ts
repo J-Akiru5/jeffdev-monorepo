@@ -1,29 +1,9 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { updateSession } from "@/lib/supabase/middleware";
 
-const isAdminRoute = createRouteMatcher(["/admin(.*)"]);
-const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/unauthorized"]);
-
-export default clerkMiddleware(async (auth, req) => {
-  // Allow public routes
-  if (isPublicRoute(req)) {
-    return NextResponse.next();
-  }
-
-  // Protect admin routes - just require authentication
-  // Role check happens in layout.tsx where we have access to full user metadata
-  if (isAdminRoute(req)) {
-    const { userId } = await auth();
-
-    if (!userId) {
-      return NextResponse.redirect(new URL("/sign-in", req.url));
-    }
-    
-    // Let authenticated users through - role check in layout
-  }
-
-  return NextResponse.next();
-});
+export async function middleware(request: NextRequest) {
+  return await updateSession(request);
+}
 
 export const config = {
   matcher: [

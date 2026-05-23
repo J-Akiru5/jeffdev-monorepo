@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { getCollection } from "@jeffdev/db";
-import { 
+import {
   Store,
   Download,
   Search,
@@ -16,17 +16,22 @@ export default async function MarketplacePage({
 }: {
   searchParams: Promise<{ q?: string; page?: string }>;
 }) {
-  const { userId } = await auth();
-  if (!userId) return null;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const userId = user.id;
 
   const params = await searchParams;
-  const q = params.q || '';
-  const page = Math.max(1, parseInt(params.page || '1'));
+  const q = params.q || "";
+  const page = Math.max(1, parseInt(params.page || "1"));
   const limit = 20;
 
-  const ruleSets = await getCollection('ruleSets');
+  const ruleSets = await getCollection("ruleSets");
   const query: Record<string, unknown> = { isPublic: true };
-  if (q) query.name = { $regex: q, $options: 'i' };
+  if (q) query.name = { $regex: q, $options: "i" };
 
   const total = await ruleSets.countDocuments(query);
   const items = await ruleSets
@@ -37,7 +42,10 @@ export default async function MarketplacePage({
     .toArray();
 
   // Count user's own published sets
-  const mySets = await ruleSets.countDocuments({ createdBy: userId, isPublic: true });
+  const mySets = await ruleSets.countDocuments({
+    createdBy: userId,
+    isPublic: true,
+  });
 
   return (
     <div className="space-y-8">
@@ -63,7 +71,10 @@ export default async function MarketplacePage({
           </p>
         </div>
         {mySets > 0 && (
-          <Badge variant="info" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+          <Badge
+            variant="info"
+            className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+          >
             {mySets} published
           </Badge>
         )}
@@ -100,7 +111,10 @@ export default async function MarketplacePage({
       {items.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {items.map((rs) => (
-            <div key={rs._id.toString()} className="rounded-xl border border-white/10 bg-white/[0.02] p-5 hover:border-white/20 transition-all group">
+            <div
+              key={rs._id.toString()}
+              className="rounded-xl border border-white/10 bg-white/[0.02] p-5 hover:border-white/20 transition-all group"
+            >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
                   <Package className="h-5 w-5" />
@@ -118,9 +132,13 @@ export default async function MarketplacePage({
                 </p>
               )}
               <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
-                <span className="text-xs text-white/30">by {rs.createdBy as string}</span>
+                <span className="text-xs text-white/30">
+                  by {rs.createdBy as string}
+                </span>
                 <Button variant="secondary" size="sm" asChild>
-                  <Link href={`/api/v1/marketplace/install/${rs._id.toString()}`}>
+                  <Link
+                    href={`/api/v1/marketplace/install/${rs._id.toString()}`}
+                  >
                     <Download className="h-3 w-3 mr-1" />
                     Install
                   </Link>
@@ -134,7 +152,8 @@ export default async function MarketplacePage({
           <Store className="h-12 w-12 text-white/20 mb-4" />
           <h3 className="text-white font-medium">No rule sets yet</h3>
           <p className="text-white/40 text-sm mt-1 max-w-md">
-            Be the first to publish! Create rules in your project, then publish them as a set.
+            Be the first to publish! Create rules in your project, then publish
+            them as a set.
           </p>
         </GlassPanel>
       )}
@@ -144,14 +163,14 @@ export default async function MarketplacePage({
         <div className="flex justify-center gap-4">
           {page > 1 && (
             <Button variant="secondary" size="sm" asChild>
-              <Link href={`/marketplace?page=${page - 1}${q ? `&q=${q}` : ''}`}>
+              <Link href={`/marketplace?page=${page - 1}${q ? `&q=${q}` : ""}`}>
                 <ArrowLeft className="h-4 w-4 mr-1" /> Previous
               </Link>
             </Button>
           )}
           {page * limit < total && (
             <Button variant="secondary" size="sm" asChild>
-              <Link href={`/marketplace?page=${page + 1}${q ? `&q=${q}` : ''}`}>
+              <Link href={`/marketplace?page=${page + 1}${q ? `&q=${q}` : ""}`}>
                 Next <ArrowRight className="h-4 w-4 ml-1" />
               </Link>
             </Button>

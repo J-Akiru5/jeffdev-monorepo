@@ -1,21 +1,21 @@
 import Link from "next/link";
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { getCollection } from "@jeffdev/db";
-import { 
-  FolderKanban, 
-  FileJson, 
-  Sparkles, 
+import {
+  FolderKanban,
+  FileJson,
+  Sparkles,
   Video,
   ArrowRight,
   Plus,
-  Palette
+  Palette,
 } from "lucide-react";
-import { 
-  MetricTile, 
-  SectionHeader, 
+import {
+  MetricTile,
+  SectionHeader,
   GlassPanel,
   Button,
-  Badge
+  Badge,
 } from "@jdstudio/ui";
 import { UsageCard } from "@/components/usage-card";
 
@@ -24,16 +24,25 @@ import { UsageCard } from "@/components/usage-card";
  * Shows overview stats and quick actions.
  */
 export default async function DashboardPage() {
-  const { userId } = await auth();
-  
-  if (!userId) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
     return null;
   }
 
+  const userId = user.id;
+
   // Date windows for trend calculation
   const now = new Date();
-  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString();
+  const thirtyDaysAgo = new Date(
+    now.getTime() - 30 * 24 * 60 * 60 * 1000,
+  ).toISOString();
+  const sixtyDaysAgo = new Date(
+    now.getTime() - 60 * 24 * 60 * 60 * 1000,
+  ).toISOString();
 
   // Fetch all collections
   const projectsCollection = await getCollection("projects");
@@ -42,22 +51,50 @@ export default async function DashboardPage() {
   const videosCollection = await getCollection("video_contexts");
 
   const [
-    projectCount, projectPrev,
-    ruleCount, rulePrev,
-    genCount, genPrev,
-    videoCount, videoPrev,
+    projectCount,
+    projectPrev,
+    ruleCount,
+    rulePrev,
+    genCount,
+    genPrev,
+    videoCount,
+    videoPrev,
     recentProjects,
   ] = await Promise.all([
     // Current window (last 30 days)
-    projectsCollection.countDocuments({ userId, createdAt: { $gte: thirtyDaysAgo } }),
+    projectsCollection.countDocuments({
+      userId,
+      createdAt: { $gte: thirtyDaysAgo },
+    }),
     // Previous window (30–60 days ago)
-    projectsCollection.countDocuments({ userId, createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo } }),
-    rulesCollection.countDocuments({ createdBy: userId, createdAt: { $gte: thirtyDaysAgo } }),
-    rulesCollection.countDocuments({ createdBy: userId, createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo } }),
-    generationsCollection.countDocuments({ userId, createdAt: { $gte: thirtyDaysAgo } }),
-    generationsCollection.countDocuments({ userId, createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo } }),
-    videosCollection.countDocuments({ userId, createdAt: { $gte: thirtyDaysAgo } }),
-    videosCollection.countDocuments({ userId, createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo } }),
+    projectsCollection.countDocuments({
+      userId,
+      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo },
+    }),
+    rulesCollection.countDocuments({
+      createdBy: userId,
+      createdAt: { $gte: thirtyDaysAgo },
+    }),
+    rulesCollection.countDocuments({
+      createdBy: userId,
+      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo },
+    }),
+    generationsCollection.countDocuments({
+      userId,
+      createdAt: { $gte: thirtyDaysAgo },
+    }),
+    generationsCollection.countDocuments({
+      userId,
+      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo },
+    }),
+    videosCollection.countDocuments({
+      userId,
+      createdAt: { $gte: thirtyDaysAgo },
+    }),
+    videosCollection.countDocuments({
+      userId,
+      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo },
+    }),
     projectsCollection
       .find({ userId })
       .sort({ updatedAt: -1 })
@@ -72,7 +109,10 @@ export default async function DashboardPage() {
   ]);
 
   // Helper to compute trend
-  const calcTrend = (curr: number, prev: number): { value: number; direction: "up" | "down" | "neutral" } => {
+  const calcTrend = (
+    curr: number,
+    prev: number,
+  ): { value: number; direction: "up" | "down" | "neutral" } => {
     if (prev === 0 && curr === 0) return { value: 0, direction: "neutral" };
     if (prev === 0) return { value: 100, direction: "up" };
     const pct = Math.round(Math.abs(((curr - prev) / prev) * 100));
@@ -94,17 +134,18 @@ export default async function DashboardPage() {
             System Operational
           </span>
         </div>
-        
+
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-2">
               Dashboard
             </h1>
             <p className="text-lg text-white/60 max-w-xl">
-              Welcome to Prism Context Engine. Your architecture is being monitored and optimized.
+              Welcome to Prism Context Engine. Your architecture is being
+              monitored and optimized.
             </p>
           </div>
-          
+
           <div className="flex gap-3">
             <Button variant="secondary" className="hidden md:flex" asChild>
               <Link href="https://docs.prism.jeffdev.studio" target="_blank">
@@ -123,32 +164,32 @@ export default async function DashboardPage() {
 
       {/* Metrics Grid — all real data */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricTile 
-          label="Active Projects" 
-          value={totalProjects} 
+        <MetricTile
+          label="Active Projects"
+          value={totalProjects}
           icon={FolderKanban}
           intent="cyan"
           href="/projects"
           trend={calcTrend(projectCount, projectPrev)}
         />
-        <MetricTile 
-          label="Context Rules" 
-          value={totalRules} 
+        <MetricTile
+          label="Context Rules"
+          value={totalRules}
           icon={FileJson}
           intent="purple"
           href="/projects"
           trend={calcTrend(ruleCount, rulePrev)}
         />
-        <MetricTile 
-          label="AI Generations" 
-          value={genCount} 
+        <MetricTile
+          label="AI Generations"
+          value={genCount}
           icon={Sparkles}
           href="/generate"
           trend={calcTrend(genCount, genPrev)}
         />
-        <MetricTile 
-          label="Video Contexts" 
-          value={videoCount} 
+        <MetricTile
+          label="Video Contexts"
+          value={videoCount}
           icon={Video}
           href="/videos"
           trend={calcTrend(videoCount, videoPrev)}
@@ -160,29 +201,43 @@ export default async function DashboardPage() {
 
       {/* Quick Actions Row */}
       <div className="grid gap-6 md:grid-cols-2">
-        <Link href="/projects/new" className="group relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-cyan-500/10 to-blue-500/5 p-6 transition-all hover:border-cyan-500/30 hover:shadow-glow-cyan/20">
+        <Link
+          href="/projects/new"
+          className="group relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-cyan-500/10 to-blue-500/5 p-6 transition-all hover:border-cyan-500/30 hover:shadow-glow-cyan/20"
+        >
           <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
           <div className="flex items-start justify-between">
             <div>
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/20 text-cyan-400 mb-4">
                 <FolderKanban className="h-5 w-5" />
               </div>
-              <h3 className="text-lg font-semibold text-white">Create Project</h3>
-              <p className="text-sm text-white/50 mt-1">Initialize a new context environment.</p>
+              <h3 className="text-lg font-semibold text-white">
+                Create Project
+              </h3>
+              <p className="text-sm text-white/50 mt-1">
+                Initialize a new context environment.
+              </p>
             </div>
             <ArrowRight className="h-5 w-5 text-white/20 group-hover:text-cyan-400 transition-colors" />
           </div>
         </Link>
 
-        <Link href="/brand/new" className="group relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-purple-500/10 to-pink-500/5 p-6 transition-all hover:border-purple-500/30 hover:shadow-glow-purple/20">
+        <Link
+          href="/brand/new"
+          className="group relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-purple-500/10 to-pink-500/5 p-6 transition-all hover:border-purple-500/30 hover:shadow-glow-purple/20"
+        >
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
           <div className="flex items-start justify-between">
             <div>
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/20 text-purple-400 mb-4">
                 <Palette className="h-5 w-5" />
               </div>
-              <h3 className="text-lg font-semibold text-white">Brand Profile</h3>
-              <p className="text-sm text-white/50 mt-1">Define visual guidelines for AI.</p>
+              <h3 className="text-lg font-semibold text-white">
+                Brand Profile
+              </h3>
+              <p className="text-sm text-white/50 mt-1">
+                Define visual guidelines for AI.
+              </p>
             </div>
             <ArrowRight className="h-5 w-5 text-white/20 group-hover:text-purple-400 transition-colors" />
           </div>
@@ -191,17 +246,23 @@ export default async function DashboardPage() {
 
       {/* Recent Projects */}
       <section>
-        <SectionHeader 
-          title="Recent Activity" 
+        <SectionHeader
+          title="Recent Activity"
           kicker="Projects"
           action={{ label: "View All", href: "/projects" }}
         />
-        
+
         {recentProjects.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-3">
             {recentProjects.map((project) => (
-              <Link key={project._id.toString()} href={`/projects/${project.slug}`}>
-                <GlassPanel hoverEffect className="h-full p-5 flex flex-col justify-between group">
+              <Link
+                key={project._id.toString()}
+                href={`/projects/${project.slug}`}
+              >
+                <GlassPanel
+                  hoverEffect
+                  className="h-full p-5 flex flex-col justify-between group"
+                >
                   <div>
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded bg-white/5 text-white/40 group-hover:text-white transition-colors">
@@ -215,16 +276,20 @@ export default async function DashboardPage() {
                       {project.name as string}
                     </h3>
                     <p className="text-xs text-white/40 mt-1 line-clamp-2">
-                      {project.description as string || "No description provided."}
+                      {(project.description as string) ||
+                        "No description provided."}
                     </p>
                   </div>
-                  
+
                   <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
                     <span className="text-[10px] font-mono text-white/30">
-                      {(project.stack as string)?.split(',')[0] || 'Next.js'}
+                      {(project.stack as string)?.split(",")[0] || "Next.js"}
                     </span>
                     <span className="text-[10px] text-white/30">
-                      {new Date(project.updatedAt as string || new Date().toISOString()).toLocaleDateString()}
+                      {new Date(
+                        (project.updatedAt as string) ||
+                          new Date().toISOString(),
+                      ).toLocaleDateString()}
                     </span>
                   </div>
                 </GlassPanel>
@@ -238,7 +303,8 @@ export default async function DashboardPage() {
             </div>
             <h3 className="text-white font-medium">No projects yet</h3>
             <p className="text-white/40 text-sm mt-1 max-w-xs mx-auto">
-              Create your first project to start tracking context rules and architecture.
+              Create your first project to start tracking context rules and
+              architecture.
             </p>
             <Button variant="primary" size="sm" className="mt-4" asChild>
               <Link href="/projects/new">Create Project</Link>

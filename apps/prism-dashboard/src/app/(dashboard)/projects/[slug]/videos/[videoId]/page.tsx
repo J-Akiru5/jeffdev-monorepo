@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { getCollection, ObjectId } from "@jeffdev/db";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Video, FileJson, Clock, ExternalLink } from "lucide-react";
@@ -15,27 +15,32 @@ interface Props {
  */
 export default async function VideoDetailPage({ params }: Props) {
   const { slug, videoId } = await params;
-  const { userId } = await auth();
-  
-  if (!userId) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
     return null;
   }
+
+  const userId = user.id;
 
   // Fetch project
   const projectsCollection = await getCollection("projects");
   const project = await projectsCollection.findOne({ userId, slug });
-  
+
   if (!project) {
     notFound();
   }
 
   // Fetch video transcript
   const transcriptsCollection = await getCollection("videoTranscripts");
-  const video = await transcriptsCollection.findOne({ 
+  const video = await transcriptsCollection.findOne({
     _id: new ObjectId(videoId),
-    projectId: project._id.toString()
+    projectId: project._id.toString(),
   });
-  
+
   if (!video) {
     notFound();
   }
@@ -68,15 +73,17 @@ export default async function VideoDetailPage({ params }: Props) {
           </div>
           <div>
             <h1 className="text-2xl font-semibold text-white">
-              {video.videoTitle as string || "Untitled Video"}
+              {(video.videoTitle as string) || "Untitled Video"}
             </h1>
             <div className="flex items-center gap-3 mt-1">
               <span className="flex items-center gap-1 text-xs text-white/50">
                 <Clock className="h-3 w-3" />
                 {formatDuration(video.duration as number)}
               </span>
-              <Badge variant={video.confidence === 'high' ? 'success' : 'default'}>
-                {video.confidence as string || 'unknown'} confidence
+              <Badge
+                variant={video.confidence === "high" ? "success" : "default"}
+              >
+                {(video.confidence as string) || "unknown"} confidence
               </Badge>
             </div>
           </div>
@@ -119,7 +126,7 @@ export default async function VideoDetailPage({ params }: Props) {
             <h2 className="text-lg font-medium text-white mb-4">Transcript</h2>
             <div className="max-h-96 overflow-y-auto">
               <p className="text-sm text-white/70 whitespace-pre-wrap leading-relaxed font-mono">
-                {video.transcriptText as string || "No transcript available."}
+                {(video.transcriptText as string) || "No transcript available."}
               </p>
             </div>
           </GlassPanel>
@@ -146,11 +153,7 @@ export default async function VideoDetailPage({ params }: Props) {
           ) : (
             <div className="space-y-3">
               {rules.map((rule) => (
-                <RuleCard 
-                  key={rule._id.toString()} 
-                  rule={rule} 
-                  slug={slug}
-                />
+                <RuleCard key={rule._id.toString()} rule={rule} slug={slug} />
               ))}
             </div>
           )}
@@ -160,9 +163,15 @@ export default async function VideoDetailPage({ params }: Props) {
   );
 }
 
-function RuleCard({ rule, slug }: { rule: Record<string, unknown>; slug: string }) {
+function RuleCard({
+  rule,
+  slug,
+}: {
+  rule: Record<string, unknown>;
+  slug: string;
+}) {
   const ruleId = (rule._id as { toString: () => string }).toString();
-  
+
   return (
     <Link href={`/projects/${slug}/rules/${ruleId}/edit`}>
       <GlassPanel className="p-4 hover:border-white/20 transition-all cursor-pointer">
@@ -172,14 +181,19 @@ function RuleCard({ rule, slug }: { rule: Record<string, unknown>; slug: string 
               {rule.name as string}
             </h3>
             <p className="text-sm text-white/50 mt-1 line-clamp-2">
-              {rule.description as string || (rule.content as string)?.slice(0, 100)}
+              {(rule.description as string) ||
+                (rule.content as string)?.slice(0, 100)}
             </p>
           </div>
-          <Badge variant={
-            rule.category === 'architecture' ? 'architecture' :
-            rule.category === 'security' ? 'security' :
-            'default'
-          }>
+          <Badge
+            variant={
+              rule.category === "architecture"
+                ? "architecture"
+                : rule.category === "security"
+                  ? "security"
+                  : "default"
+            }
+          >
             {rule.category as string}
           </Badge>
         </div>
@@ -192,5 +206,5 @@ function formatDuration(seconds: number): string {
   if (!seconds) return "0:00";
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
 }

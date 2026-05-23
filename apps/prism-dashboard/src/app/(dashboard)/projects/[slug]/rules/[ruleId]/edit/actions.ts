@@ -1,7 +1,7 @@
 "use server";
 
 import { getCollection, ObjectId } from "@jeffdev/db";
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { enhanceRuleWithAI } from "@/lib/gemini";
 
@@ -15,13 +15,18 @@ interface ActionState {
  */
 export async function updateRule(
   prevState: ActionState | null,
-  formData: FormData
+  formData: FormData,
 ): Promise<ActionState> {
-  const { userId } = await auth();
-  
-  if (!userId) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
     return { error: "Unauthorized" };
   }
+
+  const userId = user.id;
 
   const ruleId = formData.get("ruleId") as string;
   const content = formData.get("content") as string;
@@ -33,13 +38,13 @@ export async function updateRule(
 
   try {
     const rulesCollection = await getCollection("rules");
-    
+
     // Verify the rule belongs to the user
-    const rule = await rulesCollection.findOne({ 
+    const rule = await rulesCollection.findOne({
       _id: new ObjectId(ruleId),
-      userId
+      userId,
     });
-    
+
     if (!rule) {
       return { error: "Rule not found" };
     }
@@ -47,17 +52,17 @@ export async function updateRule(
     // Update the rule
     await rulesCollection.updateOne(
       { _id: new ObjectId(ruleId) },
-      { 
-        $set: { 
+      {
+        $set: {
           content,
-          updatedAt: new Date()
-        } 
-      }
+          updatedAt: new Date(),
+        },
+      },
     );
 
     revalidatePath(`/projects/${slug}`);
     revalidatePath(`/projects/${slug}/rules/${ruleId}/edit`);
-    
+
     return { success: true };
   } catch (error) {
     console.error("Failed to update rule:", error);
@@ -72,22 +77,25 @@ export async function enhanceRule(
   ruleId: string,
   ruleName: string,
   ruleContent: string,
-  category: string
+  category: string,
 ): Promise<{
   success: boolean;
   enhancedContent?: string;
   suggestions?: string[];
   error?: string;
 }> {
-  const { userId } = await auth();
-  
-  if (!userId) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
     return { success: false, error: "Unauthorized" };
   }
 
   try {
     const result = await enhanceRuleWithAI(ruleName, ruleContent, category);
-    
+
     return {
       success: true,
       enhancedContent: result.enhancedContent,
@@ -95,9 +103,9 @@ export async function enhanceRule(
     };
   } catch (error) {
     console.error("Failed to enhance rule:", error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : "Enhancement failed" 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Enhancement failed",
     };
   }
 }

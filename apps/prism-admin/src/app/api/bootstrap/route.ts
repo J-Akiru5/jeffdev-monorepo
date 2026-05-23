@@ -1,21 +1,25 @@
 /**
  * Bootstrap API - Set current user as founder
- * 
- * GET /api/bootstrap - Sets the authenticated user as founder in Clerk publicMetadata
- * 
+ *
+ * GET /api/bootstrap - Sets the authenticated user as founder in user_profiles table
+ *
  * ⚠️  DEVELOPMENT ONLY - Remove or protect in production
  */
 
 import { NextResponse } from "next/server";
-import { auth, clerkClient } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
+import { getAdminClient } from "@/lib/supabase/admin";
 
 export async function GET() {
-  const { userId } = await auth();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!userId) {
+  if (!user) {
     return NextResponse.json(
       { error: "Not authenticated. Please sign in first." },
-      { status: 401 }
+      { status: 401 },
     );
   }
 
@@ -25,31 +29,41 @@ export async function GET() {
   if (!isDev) {
     return NextResponse.json(
       { error: "This endpoint is only available in development mode" },
-      { status: 403 }
+      { status: 403 },
     );
   }
 
   try {
-    const clerk = await clerkClient();
-    
-    // Update user's publicMetadata to set role as founder
-    await clerk.users.updateUser(userId, {
-      publicMetadata: {
+    const adminClient = getAdminClient();
+
+    // Update or create user profile with founder role
+    const { error } = await adminClient.from("user_profiles").upsert(
+      {
+        id: user.id,
+        email: user.email,
         role: "founder",
+        updated_at: new Date().toISOString(),
+      } as any,
+      {
+        onConflict: "id",
       },
-    });
+    );
+
+    if (error) {
+      throw error;
+    }
 
     return NextResponse.json({
       success: true,
       message: "You are now a founder! Refresh the admin page to access it.",
-      userId,
+      userId: user.id,
       role: "founder",
     });
   } catch (error) {
     console.error("[bootstrap] Error setting role:", error);
     return NextResponse.json(
-      { error: "Failed to set role. Check Clerk API key configuration." },
-      { status: 500 }
+      { error: "Failed to set role. Check Supabase configuration." },
+      { status: 500 },
     );
   }
 }

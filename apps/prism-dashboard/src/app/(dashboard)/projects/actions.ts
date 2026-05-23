@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { getCollection } from "@jeffdev/db";
 import { z } from "zod";
 import { redirect } from "next/navigation";
@@ -14,7 +14,14 @@ const CreateProjectSchema = z.object({
     .string()
     .min(2, "Project name must be at least 2 characters")
     .max(100, "Project name too long"),
-  designSystem: z.enum(["jdstudio", "bare-minimum", "glassmorphic", "8bit-nostalgia", "keandrew", "custom"]),
+  designSystem: z.enum([
+    "jdstudio",
+    "bare-minimum",
+    "glassmorphic",
+    "8bit-nostalgia",
+    "keandrew",
+    "custom",
+  ]),
   stack: z.enum(["react", "nextjs", "react-native"]),
 });
 
@@ -35,13 +42,18 @@ export type CreateProjectState = {
  */
 export async function createProject(
   _prevState: CreateProjectState,
-  formData: FormData
+  formData: FormData,
 ): Promise<CreateProjectState> {
-  const { userId } = await auth();
-  
-  if (!userId) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
     throw new Error("Unauthorized");
   }
+
+  const userId = user.id;
 
   // Validate input
   const parsed = CreateProjectSchema.safeParse({
@@ -65,7 +77,7 @@ export async function createProject(
   // Check for duplicate slug
   const projectsCollection = await getCollection("projects");
   const existing = await projectsCollection.findOne({ userId, slug });
-  
+
   if (existing) {
     return { error: { name: ["A project with this name already exists"] } };
   }
@@ -107,13 +119,18 @@ export type ProjectActionState = {
  */
 export async function updateProject(
   _prevState: ProjectActionState,
-  formData: FormData
+  formData: FormData,
 ): Promise<ProjectActionState> {
-  const { userId } = await auth();
-  
-  if (!userId) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
     return { error: { general: "Unauthorized" } };
   }
+
+  const userId = user.id;
 
   const slug = formData.get("slug") as string;
   const name = formData.get("name") as string;
@@ -134,10 +151,7 @@ export async function updateProject(
   if (stack) updateData.stack = stack;
   if (designSystem) updateData.designSystem = designSystem;
 
-  await projectsCollection.updateOne(
-    { userId, slug },
-    { $set: updateData }
-  );
+  await projectsCollection.updateOne({ userId, slug }, { $set: updateData });
 
   revalidatePath(`/projects/${slug}`);
   revalidatePath(`/projects/${slug}/settings`);
@@ -150,13 +164,18 @@ export async function updateProject(
  */
 export async function deleteProject(
   _prevState: ProjectActionState,
-  formData: FormData
+  formData: FormData,
 ): Promise<ProjectActionState> {
-  const { userId } = await auth();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!userId) {
+  if (!user) {
     return { error: { general: "Unauthorized" } };
   }
+
+  const userId = user.id;
 
   const slug = formData.get("slug") as string;
 
@@ -209,19 +228,27 @@ export type CreateRuleState = {
 
 export async function createRule(
   _prevState: CreateRuleState,
-  formData: FormData
+  formData: FormData,
 ): Promise<CreateRuleState> {
-  const { userId } = await auth();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!userId) {
+  if (!user) {
     return { error: { general: "Unauthorized" } };
   }
+
+  const userId = user.id;
 
   const projectSlug = formData.get("projectSlug") as string;
 
   // Find project
   const projectsCollection = await getCollection("projects");
-  const project = await projectsCollection.findOne({ userId, slug: projectSlug });
+  const project = await projectsCollection.findOne({
+    userId,
+    slug: projectSlug,
+  });
 
   if (!project) {
     return { error: { general: "Project not found" } };

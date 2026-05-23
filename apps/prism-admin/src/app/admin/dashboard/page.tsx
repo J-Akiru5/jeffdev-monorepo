@@ -1,14 +1,14 @@
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { getCollection } from "@jeffdev/db";
-import { 
-  Users, 
-  CreditCard, 
-  FolderKanban, 
+import {
+  Users,
+  CreditCard,
+  FolderKanban,
   Mail,
   TrendingUp,
   TrendingDown,
   Minus,
-  ArrowRight
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -16,9 +16,12 @@ import Link from "next/link";
  * Admin Dashboard - Overview Stats
  */
 export default async function DashboardPage() {
-  const { userId } = await auth();
-  
-  if (!userId) return null;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return null;
 
   // Fetch stats from Cosmos DB (Prism data)
   const usersCollection = await getCollection("users");
@@ -31,7 +34,7 @@ export default async function DashboardPage() {
     teamUsers,
     activeSubscriptions,
     totalProjects,
-    recentUsers
+    recentUsers,
   ] = await Promise.all([
     usersCollection.countDocuments({}),
     usersCollection.countDocuments({ tier: "pro" }),
@@ -42,47 +45,47 @@ export default async function DashboardPage() {
   ]);
 
   const stats = [
-    { 
-      label: "Total Users", 
-      value: totalUsers, 
-      icon: Users, 
+    {
+      label: "Total Users",
+      value: totalUsers,
+      icon: Users,
       trend: { value: 12, direction: "up" as const },
-      href: "/admin/users"
+      href: "/admin/users",
     },
-    { 
-      label: "Pro Subscribers", 
-      value: proUsers, 
-      icon: CreditCard, 
+    {
+      label: "Pro Subscribers",
+      value: proUsers,
+      icon: CreditCard,
       trend: { value: 8, direction: "up" as const },
-      href: "/admin/subscriptions"
+      href: "/admin/subscriptions",
     },
-    { 
-      label: "Team Plans", 
-      value: teamUsers, 
-      icon: Users, 
+    {
+      label: "Team Plans",
+      value: teamUsers,
+      icon: Users,
       trend: { value: 0, direction: "neutral" as const },
-      href: "/admin/subscriptions"
+      href: "/admin/subscriptions",
     },
-    { 
-      label: "Active Subscriptions", 
-      value: activeSubscriptions, 
-      icon: CreditCard, 
+    {
+      label: "Active Subscriptions",
+      value: activeSubscriptions,
+      icon: CreditCard,
       trend: { value: 5, direction: "up" as const },
-      href: "/admin/subscriptions"
+      href: "/admin/subscriptions",
     },
-    { 
-      label: "Total Projects", 
-      value: totalProjects, 
-      icon: FolderKanban, 
+    {
+      label: "Total Projects",
+      value: totalProjects,
+      icon: FolderKanban,
       trend: { value: 15, direction: "up" as const },
-      href: "/admin/projects"
+      href: "/admin/projects",
     },
-    { 
-      label: "Pending Inquiries", 
-      value: 0, 
-      icon: Mail, 
+    {
+      label: "Pending Inquiries",
+      value: 0,
+      icon: Mail,
       trend: { value: 0, direction: "neutral" as const },
-      href: "/admin/inquiries"
+      href: "/admin/inquiries",
     },
   ];
 
@@ -115,7 +118,9 @@ export default async function DashboardPage() {
               <stat.icon className="h-4 w-4 text-white/20 group-hover:text-amber-400 transition-colors" />
             </div>
             <div className="flex items-end justify-between">
-              <span className="text-2xl font-bold text-white font-mono">{stat.value}</span>
+              <span className="text-2xl font-bold text-white font-mono">
+                {stat.value}
+              </span>
               <TrendIndicator trend={stat.trend} />
             </div>
           </Link>
@@ -142,8 +147,8 @@ export default async function DashboardPage() {
       <div className="rounded-lg border border-white/5 bg-white/[0.02] overflow-hidden">
         <div className="flex items-center justify-between p-4 border-b border-white/5">
           <h2 className="text-sm font-medium text-white">Recent Users</h2>
-          <Link 
-            href="/admin/users" 
+          <Link
+            href="/admin/users"
             className="text-xs text-amber-400 hover:text-amber-300 flex items-center gap-1"
           >
             View all <ArrowRight className="h-3 w-3" />
@@ -152,7 +157,10 @@ export default async function DashboardPage() {
         <div className="divide-y divide-white/5">
           {recentUsers.length > 0 ? (
             recentUsers.map((user) => (
-              <div key={user._id.toString()} className="flex items-center justify-between p-4">
+              <div
+                key={user._id.toString()}
+                className="flex items-center justify-between p-4"
+              >
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-medium text-white">
                     {(user.email as string)?.charAt(0).toUpperCase() || "?"}
@@ -164,12 +172,16 @@ export default async function DashboardPage() {
                     </p>
                   </div>
                 </div>
-                <span className={`text-[10px] font-mono uppercase px-2 py-1 rounded ${
-                  user.tier === "pro" ? "bg-amber-500/20 text-amber-400" :
-                  user.tier === "team" ? "bg-purple-500/20 text-purple-400" :
-                  "bg-white/10 text-white/50"
-                }`}>
-                  {user.tier as string || "free"}
+                <span
+                  className={`text-[10px] font-mono uppercase px-2 py-1 rounded ${
+                    user.tier === "pro"
+                      ? "bg-amber-500/20 text-amber-400"
+                      : user.tier === "team"
+                        ? "bg-purple-500/20 text-purple-400"
+                        : "bg-white/10 text-white/50"
+                  }`}
+                >
+                  {(user.tier as string) || "free"}
                 </span>
               </div>
             ))
@@ -184,12 +196,24 @@ export default async function DashboardPage() {
   );
 }
 
-function TrendIndicator({ trend }: { trend: { value: number; direction: "up" | "down" | "neutral" } }) {
-  const Icon = trend.direction === "up" ? TrendingUp : 
-               trend.direction === "down" ? TrendingDown : Minus;
-  const color = trend.direction === "up" ? "text-emerald-400" :
-                trend.direction === "down" ? "text-red-400" : "text-white/30";
-  
+function TrendIndicator({
+  trend,
+}: {
+  trend: { value: number; direction: "up" | "down" | "neutral" };
+}) {
+  const Icon =
+    trend.direction === "up"
+      ? TrendingUp
+      : trend.direction === "down"
+        ? TrendingDown
+        : Minus;
+  const color =
+    trend.direction === "up"
+      ? "text-emerald-400"
+      : trend.direction === "down"
+        ? "text-red-400"
+        : "text-white/30";
+
   return (
     <div className={`flex items-center gap-1 text-xs font-mono ${color}`}>
       <Icon className="h-3 w-3" />
@@ -198,15 +222,15 @@ function TrendIndicator({ trend }: { trend: { value: number; direction: "up" | "
   );
 }
 
-function QuickAction({ 
-  href, 
-  title, 
-  description, 
-  icon: Icon 
-}: { 
-  href: string; 
-  title: string; 
-  description: string; 
+function QuickAction({
+  href,
+  title,
+  description,
+  icon: Icon,
+}: {
+  href: string;
+  title: string;
+  description: string;
   icon: typeof Users;
 }) {
   return (

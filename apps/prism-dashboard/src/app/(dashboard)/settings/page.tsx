@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "@/components/auth/supabase-provider";
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { 
-  ArrowLeft, 
-  User, 
-  Bell, 
-  Key, 
+import {
+  ArrowLeft,
+  User,
+  Bell,
+  Key,
   CreditCard,
   ExternalLink,
   Copy,
@@ -19,7 +19,7 @@ import {
   AlertCircle,
   Wrench,
   Download,
-  FileJson
+  FileJson,
 } from "lucide-react";
 
 import { GlassPanel, Button, Badge } from "@jdstudio/ui";
@@ -61,9 +61,10 @@ interface NewKeyResponse {
  * User profile, notifications, subscription, and API key management.
  */
 export default function SettingsPage() {
-  const { user, isLoaded } = useUser();
+  const user = useUser();
+  const isLoading = !user;
 
-  if (!isLoaded) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="animate-pulse text-white/40">Loading...</div>
@@ -101,36 +102,35 @@ export default function SettingsPage() {
             <p className="text-sm text-white/50 mt-1">
               Your profile information is managed through Clerk.
             </p>
-            
+
             <div className="mt-4 space-y-3">
               <div className="flex items-center justify-between py-2 border-b border-white/5">
                 <span className="text-sm text-white/60">Email</span>
                 <span className="text-sm text-white font-mono">
-                  {user?.primaryEmailAddress?.emailAddress || "—"}
+                  {user?.email || "—"}
                 </span>
               </div>
               <div className="flex items-center justify-between py-2 border-b border-white/5">
                 <span className="text-sm text-white/60">Name</span>
                 <span className="text-sm text-white">
-                  {user?.fullName || user?.firstName || "—"}
+                  {user?.user_metadata?.full_name || "—"}
                 </span>
               </div>
               <div className="flex items-center justify-between py-2">
                 <span className="text-sm text-white/60">Member Since</span>
                 <span className="text-sm text-white font-mono">
-                  {user?.createdAt 
-                    ? new Date(user.createdAt).toLocaleDateString()
-                    : "—"
-                  }
+                  {user?.created_at
+                    ? new Date(user.created_at).toLocaleDateString()
+                    : "—"}
                 </span>
               </div>
             </div>
 
             <div className="mt-6">
               <Button variant="secondary" size="sm" asChild>
-                <a 
-                  href="https://accounts.prism.jeffdev.studio/user" 
-                  target="_blank" 
+                <a
+                  href="https://accounts.prism.jeffdev.studio/user"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2"
                 >
@@ -188,7 +188,10 @@ function ApiKeysSection() {
       const data: ApiKeysResponse = await response.json();
 
       if (!response.ok) {
-        throw new Error((data as unknown as { error: string }).error || "Failed to fetch keys");
+        throw new Error(
+          (data as unknown as { error: string }).error ||
+            "Failed to fetch keys",
+        );
       }
 
       setKeys(data.keys);
@@ -222,13 +225,18 @@ function ApiKeysSection() {
       const data: NewKeyResponse = await response.json();
 
       if (!response.ok) {
-        throw new Error((data as unknown as { error: string }).error || "Failed to generate key");
+        throw new Error(
+          (data as unknown as { error: string }).error ||
+            "Failed to generate key",
+        );
       }
 
       setGeneratedKey(data.key);
       await fetchKeys(); // Refresh the list
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to generate API key");
+      setError(
+        err instanceof Error ? err.message : "Failed to generate API key",
+      );
     } finally {
       setGenerating(false);
     }
@@ -236,7 +244,11 @@ function ApiKeysSection() {
 
   // Revoke key
   const handleRevokeKey = async (id: string) => {
-    if (!confirm("Are you sure you want to revoke this API key? This action cannot be undone.")) {
+    if (
+      !confirm(
+        "Are you sure you want to revoke this API key? This action cannot be undone.",
+      )
+    ) {
       return;
     }
 
@@ -312,7 +324,7 @@ function ApiKeysSection() {
               <Loader2 className="h-6 w-6 animate-spin text-white/40" />
             </div>
           ) : limit === 0 ? (
-          /* No Access - Free Tier */
+            /* No Access - Free Tier */
             <div className="mt-4 p-4 rounded-md border border-white/5 bg-white/[0.02]">
               <p className="text-sm text-white/40 text-center">
                 API keys are available on Pro plans and above.
@@ -346,7 +358,11 @@ function ApiKeysSection() {
                     <p className="text-xs text-white/30 mt-1">
                       Created {new Date(key.createdAt).toLocaleDateString()}
                       {key.lastUsedAt && (
-                        <> · Last used {new Date(key.lastUsedAt).toLocaleDateString()}</>
+                        <>
+                          {" "}
+                          · Last used{" "}
+                          {new Date(key.lastUsedAt).toLocaleDateString()}
+                        </>
                       )}
                     </p>
                   </div>
@@ -364,8 +380,7 @@ function ApiKeysSection() {
               <p className="text-xs text-white/30 text-center pt-2">
                 {limit === -1
                   ? "Unlimited API keys on your plan"
-                  : `${keys.length} of ${limit} API key${limit !== 1 ? 's' : ''} used`
-                }
+                  : `${keys.length} of ${limit} API key${limit !== 1 ? "s" : ""} used`}
               </p>
             </div>
           )}
@@ -373,56 +388,62 @@ function ApiKeysSection() {
       </div>
 
       {/* New Key Modal - Portal to document body */}
-      {showNewKeyModal && typeof window !== 'undefined' && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-md mx-4 p-6 rounded-lg border border-white/10 bg-[#0a0a0a] shadow-2xl">
-            {!generatedKey ? (
-              /* Step 1: Enter Name */
-              <>
-                <h3 className="text-lg font-semibold text-white">Generate API Key</h3>
-                <p className="text-sm text-white/50 mt-1">
-                  Give your key a name to identify it later.
-                </p>
+      {showNewKeyModal &&
+        typeof window !== "undefined" &&
+        createPortal(
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+            <div className="w-full max-w-md mx-4 p-6 rounded-lg border border-white/10 bg-[#0a0a0a] shadow-2xl">
+              {!generatedKey ? (
+                /* Step 1: Enter Name */
+                <>
+                  <h3 className="text-lg font-semibold text-white">
+                    Generate API Key
+                  </h3>
+                  <p className="text-sm text-white/50 mt-1">
+                    Give your key a name to identify it later.
+                  </p>
 
-                <input
-                  type="text"
-                  value={newKeyName}
-                  onChange={(e) => setNewKeyName(e.target.value)}
-                  placeholder="e.g., MacBook Pro"
-                  maxLength={50}
-                  className="mt-4 w-full px-4 py-3 rounded-md bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-cyan-500/50"
-                  autoFocus
-                />
+                  <input
+                    type="text"
+                    value={newKeyName}
+                    onChange={(e) => setNewKeyName(e.target.value)}
+                    placeholder="e.g., MacBook Pro"
+                    maxLength={50}
+                    className="mt-4 w-full px-4 py-3 rounded-md bg-white/5 border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-cyan-500/50"
+                    autoFocus
+                  />
 
-                <div className="mt-6 flex justify-end gap-3">
-                  <Button variant="secondary" size="sm" onClick={closeModal}>
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={handleGenerateKey}
-                    disabled={!newKeyName.trim() || generating}
-                  >
-                    {generating ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      "Generate"
-                    )}
-                  </Button>
-                </div>
-              </>
-            ) : (
-              /* Step 2: Show Generated Key */
-              <>
-                <h3 className="text-lg font-semibold text-white">Your API Key</h3>
-                <p className="text-sm text-amber-400 mt-1 flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4" />
-                  Copy this key now. It will not be shown again.
-                </p>
+                  <div className="mt-6 flex justify-end gap-3">
+                    <Button variant="secondary" size="sm" onClick={closeModal}>
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={handleGenerateKey}
+                      disabled={!newKeyName.trim() || generating}
+                    >
+                      {generating ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        "Generate"
+                      )}
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                /* Step 2: Show Generated Key */
+                <>
+                  <h3 className="text-lg font-semibold text-white">
+                    Your API Key
+                  </h3>
+                  <p className="text-sm text-amber-400 mt-1 flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4" />
+                    Copy this key now. It will not be shown again.
+                  </p>
 
-                <div className="mt-4 p-4 rounded-md bg-black border border-white/10 font-mono text-sm text-white break-all">
-                  {generatedKey}
+                  <div className="mt-4 p-4 rounded-md bg-black border border-white/10 font-mono text-sm text-white break-all">
+                    {generatedKey}
                   </div>
 
                   <div className="mt-4 flex justify-end gap-3">
@@ -448,12 +469,12 @@ function ApiKeysSection() {
                       Done
                     </Button>
                   </div>
-              </>
-            )}
-          </div>
-        </div>,
-        document.body
-      )}
+                </>
+              )}
+            </div>
+          </div>,
+          document.body,
+        )}
     </GlassPanel>
   );
 }
@@ -466,10 +487,10 @@ function SubscriptionUsageSection() {
   const [usage, setUsage] = useState<{
     tier: string;
     usage: {
-      projects: { used: number; limit: number | 'unlimited' };
-      rules: { used: number; limit: number | 'unlimited' };
-      components: { used: number; limit: number | 'unlimited' };
-      aiGenerations: { used: number; limit: number | 'unlimited' };
+      projects: { used: number; limit: number | "unlimited" };
+      rules: { used: number; limit: number | "unlimited" };
+      components: { used: number; limit: number | "unlimited" };
+      aiGenerations: { used: number; limit: number | "unlimited" };
     };
     resetDate: string;
   } | null>(null);
@@ -478,13 +499,13 @@ function SubscriptionUsageSection() {
   useEffect(() => {
     const fetchUsage = async () => {
       try {
-        const response = await fetch('/api/usage');
+        const response = await fetch("/api/usage");
         if (response.ok) {
           const data = await response.json();
           setUsage(data);
         }
       } catch (error) {
-        console.error('Failed to fetch usage:', error);
+        console.error("Failed to fetch usage:", error);
       } finally {
         setLoading(false);
       }
@@ -492,10 +513,11 @@ function SubscriptionUsageSection() {
     fetchUsage();
   }, []);
 
-  const formatLimit = (limit: number | 'unlimited') =>
-    limit === 'unlimited' ? '∞' : String(limit);
+  const formatLimit = (limit: number | "unlimited") =>
+    limit === "unlimited" ? "∞" : String(limit);
 
-  const tierLabel = usage?.tier?.charAt(0).toUpperCase() + (usage?.tier?.slice(1) || '');
+  const tierLabel =
+    usage?.tier?.charAt(0).toUpperCase() + (usage?.tier?.slice(1) || "");
 
   return (
     <GlassPanel className="p-6">
@@ -506,8 +528,8 @@ function SubscriptionUsageSection() {
         <div className="flex-1">
           <div className="flex items-center gap-3">
             <h2 className="text-lg font-medium text-white">Subscription</h2>
-            <Badge variant={usage?.tier === 'free' ? 'default' : 'success'}>
-              {loading ? '...' : tierLabel}
+            <Badge variant={usage?.tier === "free" ? "default" : "success"}>
+              {loading ? "..." : tierLabel}
             </Badge>
           </div>
           <p className="text-sm text-white/50 mt-1">
@@ -546,9 +568,7 @@ function SubscriptionUsageSection() {
 
           <div className="mt-6">
             <Button variant="primary" size="sm" asChild>
-              <Link href="/subscription">
-                Upgrade Plan
-              </Link>
+              <Link href="/subscription">Upgrade Plan</Link>
             </Button>
           </div>
         </div>
@@ -560,7 +580,7 @@ function SubscriptionUsageSection() {
 function UsageStatItem({
   label,
   value,
-  limit
+  limit,
 }: {
   label: string;
   value: number;
@@ -568,7 +588,9 @@ function UsageStatItem({
 }) {
   return (
     <div className="p-3 rounded-md border border-white/5 bg-white/[0.02]">
-      <p className="text-xs font-medium text-white/40 uppercase tracking-wider">{label}</p>
+      <p className="text-xs font-medium text-white/40 uppercase tracking-wider">
+        {label}
+      </p>
       <p className="text-xl font-mono text-white mt-1">
         {value}
         <span className="text-white/30 text-base">/{limit}</span>
@@ -605,11 +627,14 @@ function NotificationsSection() {
       try {
         const res = await fetch("/api/notifications");
         if (res.ok) {
-          const data = await res.json() as { prefs: NotificationPrefs };
+          const data = (await res.json()) as { prefs: NotificationPrefs };
           setPrefs(data.prefs);
         }
-      } catch { /* use defaults */ }
-      finally { setLoading(false); }
+      } catch {
+        /* use defaults */
+      } finally {
+        setLoading(false);
+      }
     };
     load();
   }, []);
@@ -624,8 +649,11 @@ function NotificationsSection() {
         body: JSON.stringify(newPrefs),
       });
       setSavedAt(Date.now());
-    } catch { /* silent */ }
-    finally { setSaving(false); }
+    } catch {
+      /* silent */
+    } finally {
+      setSaving(false);
+    }
   }, []);
 
   const handleToggle = (key: keyof NotificationPrefs) => {
@@ -644,9 +672,13 @@ function NotificationsSection() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-medium text-white">Notifications</h2>
-              <p className="text-sm text-white/50 mt-1">Configure how you receive updates.</p>
+              <p className="text-sm text-white/50 mt-1">
+                Configure how you receive updates.
+              </p>
             </div>
-            {saving && <Loader2 className="h-4 w-4 animate-spin text-white/30" />}
+            {saving && (
+              <Loader2 className="h-4 w-4 animate-spin text-white/30" />
+            )}
             {!saving && savedAt !== null && (
               <span className="text-xs text-emerald-400/60">Saved</span>
             )}
@@ -702,9 +734,14 @@ function NotificationToggle({
   onToggle: () => void;
 }) {
   return (
-    <label htmlFor={id} className="flex items-center justify-between py-2 cursor-pointer group">
+    <label
+      htmlFor={id}
+      className="flex items-center justify-between py-2 cursor-pointer group"
+    >
       <div>
-        <p className="text-sm text-white group-hover:text-white/90 transition-colors">{label}</p>
+        <p className="text-sm text-white group-hover:text-white/90 transition-colors">
+          {label}
+        </p>
         <p className="text-xs text-white/40">{description}</p>
       </div>
       <div className="relative flex-shrink-0">
@@ -732,7 +769,6 @@ function NotificationToggle({
   );
 }
 
-
 // =============================================================================
 // =============================================================================
 // EXPORT RULES SECTION
@@ -755,13 +791,20 @@ function ExportRulesSection() {
       try {
         const res = await fetch("/api/v1/projects");
         if (res.ok) {
-          const data = await res.json() as { data?: ProjectItem[]; projects?: ProjectItem[] } | ProjectItem[];
-          const list = Array.isArray(data) ? data : (data.data ?? data.projects ?? []);
+          const data = (await res.json()) as
+            | { data?: ProjectItem[]; projects?: ProjectItem[] }
+            | ProjectItem[];
+          const list = Array.isArray(data)
+            ? data
+            : (data.data ?? data.projects ?? []);
           setProjects(list);
           if (list.length > 0 && list[0]) setSelectedProject(list[0].id);
         }
-      } catch { /* ignore */ }
-      finally { setLoading(false); }
+      } catch {
+        /* ignore */
+      } finally {
+        setLoading(false);
+      }
     };
     load();
   }, []);
@@ -774,23 +817,36 @@ function ExportRulesSection() {
       const res = await fetch(url);
       if (!res.ok) throw new Error("Export failed");
       const blob = await res.blob();
-      const filename = format === "cursor" ? ".cursorrules"
-        : format === "windsurf" ? ".windsurfrules"
-        : format === "vscode" ? "settings.json"
-        : format === "claude" ? "CLAUDE.md"
-        : `rules-${selectedProject.slice(-6)}.json`;
+      const filename =
+        format === "cursor"
+          ? ".cursorrules"
+          : format === "windsurf"
+            ? ".windsurfrules"
+            : format === "vscode"
+              ? "settings.json"
+              : format === "claude"
+                ? "CLAUDE.md"
+                : `rules-${selectedProject.slice(-6)}.json`;
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
       a.download = filename;
       a.click();
       URL.revokeObjectURL(a.href);
-    } catch { /* silent */ }
-    finally { setExporting(false); }
+    } catch {
+      /* silent */
+    } finally {
+      setExporting(false);
+    }
   };
 
   const formats = [
     { id: "cursor", label: ".cursorrules", icon: "⚡", desc: "Cursor IDE" },
-    { id: "windsurf", label: ".windsurfrules", icon: "🏄", desc: "Windsurf IDE" },
+    {
+      id: "windsurf",
+      label: ".windsurfrules",
+      icon: "🏄",
+      desc: "Windsurf IDE",
+    },
     { id: "vscode", label: "settings.json", icon: "🔵", desc: "VS Code MCP" },
     { id: "claude", label: "CLAUDE.md", icon: "🤖", desc: "Claude Desktop" },
   ];
@@ -815,13 +871,17 @@ function ExportRulesSection() {
           ) : projects.length === 0 ? (
             <div className="mt-4 p-4 rounded-md border border-white/5 bg-white/[0.02] text-center">
               <FileJson className="h-6 w-6 text-white/20 mx-auto mb-2" />
-              <p className="text-sm text-white/40">No projects yet. Create a project first.</p>
+              <p className="text-sm text-white/40">
+                No projects yet. Create a project first.
+              </p>
             </div>
           ) : (
             <div className="mt-4 space-y-4">
               {/* Project selector */}
               <div>
-                <label className="text-xs text-white/50 mb-1.5 block">Project</label>
+                <label className="text-xs text-white/50 mb-1.5 block">
+                  Project
+                </label>
                 <select
                   value={selectedProject}
                   onChange={(e) => setSelectedProject(e.target.value)}
@@ -837,7 +897,9 @@ function ExportRulesSection() {
 
               {/* Format buttons */}
               <div>
-                <label className="text-xs text-white/50 mb-1.5 block">Format</label>
+                <label className="text-xs text-white/50 mb-1.5 block">
+                  Format
+                </label>
                 <div className="grid grid-cols-2 gap-2">
                   {formats.map((f) => (
                     <button
@@ -848,7 +910,9 @@ function ExportRulesSection() {
                     >
                       <span className="text-base">{f.icon}</span>
                       <div>
-                        <p className="text-xs font-mono font-medium text-white">{f.label}</p>
+                        <p className="text-xs font-mono font-medium text-white">
+                          {f.label}
+                        </p>
                         <p className="text-[10px] text-white/40">{f.desc}</p>
                       </div>
                       <Download className="h-3 w-3 text-white/20 group-hover:text-white/50 ml-auto transition-colors" />
