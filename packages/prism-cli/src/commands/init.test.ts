@@ -32,7 +32,7 @@ describe('prism init command', () => {
       mcpServers: {
         prism: {
           command: 'npx',
-          args: ['@prism-engine/cli', 'connect'],
+          args: ['prism-context-engine', 'connect'],
         },
       },
     };
@@ -58,7 +58,7 @@ describe('prism init command', () => {
     const token = 'test-token-123';
     const config = {
       command: 'npx',
-      args: ['@prism-engine/cli', 'connect'],
+      args: ['prism-context-engine', 'connect'],
       env: { PRISM_TOKEN: token },
     };
     expect(config.env?.PRISM_TOKEN).toBe(token);
@@ -67,7 +67,7 @@ describe('prism init command', () => {
   it('should omit PRISM_TOKEN env var when no token', () => {
     const config = {
       command: 'npx',
-      args: ['@prism-engine/cli', 'connect'],
+      args: ['prism-context-engine', 'connect'],
     };
     expect(config.env).toBeUndefined();
   });

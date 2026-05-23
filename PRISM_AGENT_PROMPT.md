@@ -149,7 +149,7 @@ IDE → HTTPS → prism.jeffdev.studio/api/mcp/stdio → Cosmos DB
 ## User Setup Flow (< 60 seconds)
 
 ```bash
-npm install -g @prism-engine/cli   # 1. install
+npm install -g prism-context-engine   # 1. install
 prism login                         # 2. authenticate
 prism sync                          # 3. download rules to ~/.prism/rules.json
 prism init                          # 4. auto-detect IDE + write mcp.json config

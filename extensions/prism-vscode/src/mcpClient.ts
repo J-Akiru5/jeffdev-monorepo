@@ -32,7 +32,7 @@ export class McpClient {
       PRISM_API_URL: apiUrl,
     };
 
-    this.process = spawn('npx', ['@prism-engine/cli', 'serve'], {
+    this.process = spawn('npx', ['prism-context-engine', 'serve'], {
       env,
       stdio: ['pipe', 'pipe', 'pipe'],
     });

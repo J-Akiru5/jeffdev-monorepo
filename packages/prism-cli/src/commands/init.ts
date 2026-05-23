@@ -49,7 +49,7 @@ function buildMcpConfig(): McpServerConfig {
   const token = process.env.PRISM_TOKEN || loadSavedToken() || '';
   const config: McpServerConfig = {
     command: 'npx',
-    args: ['@prism-engine/cli', 'serve'],
+    args: ['prism-context-engine', 'serve'],
   };
   if (token) {
     config.env = { PRISM_TOKEN: token };

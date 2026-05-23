@@ -56,9 +56,9 @@ jobs:
         with:
           mode: firewall-free
       - run: sfw pnpm install --frozen-lockfile
-      - run: pnpm --filter @prism-engine/cli run build
+      - run: pnpm --filter prism-context-engine run build
         if: ${{ matrix.package == 'prism-cli' }}
-      - run: pnpm --filter ${{ matrix.package == 'prism-cli' && '@prism-engine/cli' || 'prism-mcp-server' }} run test -- --reporter=verbose
+      - run: pnpm --filter ${{ matrix.package == 'prism-cli' && 'prism-context-engine' || 'prism-mcp-server' }} run test -- --reporter=verbose
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI || '' }}
 
