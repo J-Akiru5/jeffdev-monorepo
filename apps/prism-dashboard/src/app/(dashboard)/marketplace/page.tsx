@@ -4,13 +4,12 @@ import { getCollection } from "@jeffdev/db";
 import { 
   Store,
   Download,
-  Upload,
   Search,
   ArrowRight,
   ArrowLeft,
   Package,
 } from "lucide-react";
-import { GlassPanel, Button, Badge, SectionHeader } from "@jdstudio/ui";
+import { GlassPanel, Button, Badge } from "@jdstudio/ui";
 
 export default async function MarketplacePage({
   searchParams,
@@ -27,7 +26,7 @@ export default async function MarketplacePage({
 
   const ruleSets = await getCollection('ruleSets');
   const query: Record<string, unknown> = { isPublic: true };
-  if (q) query.name = { $regex: q, $options: 'i' } as any;
+  if (q) query.name = { $regex: q, $options: 'i' };
 
   const total = await ruleSets.countDocuments(query);
   const items = await ruleSets

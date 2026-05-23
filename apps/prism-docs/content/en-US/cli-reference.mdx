@@ -1,0 +1,287 @@
+# CLI Reference
+
+Complete reference for the `@prism-engine/cli` command line tool.
+
+## Installation
+
+```bash
+npm install -g @prism-engine/cli
+prism --version
+```
+
+---
+
+## Global Flags
+
+| Flag | Description |
+|------|-------------|
+| `--help` | Show help for any command |
+| `--version` | Print CLI version |
+| `--json` | Output as JSON (most commands) |
+| `--verbose` | Debug-level output |
+
+---
+
+## Commands
+
+### `prism login`
+
+Authenticate with Prism Cloud. Opens your browser to the dashboard sign-in page and saves a token to `~/.prism/token`.
+
+```bash
+prism login
+```
+
+### `prism logout`
+
+Remove your saved auth token.
+
+```bash
+prism logout
+```
+
+---
+
+### `prism init`
+
+Auto-detect installed editors and write the correct MCP config for each.
+
+```bash
+prism init
+```
+
+**Detects and configures:**
+- Cursor — writes `.cursor/mcp.json`
+- VS Code — writes `~/.vscode/settings.json` MCP section
+- Windsurf — prints config to paste into Windsurf settings
+- Claude Desktop — writes `claude_desktop_config.json`
+
+**Config written:**
+```json
+{
+  "command": "prism",
+  "args": ["serve"],
+  "env": { "PRISM_API_KEY": "your-key" }
+}
+```
+
+Restart your editor after running `prism init`.
+
+---
+
+### `prism serve`
+
+Start the MCP server for IDE use. **This is what your IDE runs automatically** after `prism init`.
+
+```bash
+prism serve
+prism serve --offline     # Keyword-based ranking, no internet needed
+```
+
+**What it does:**
+1. Validates your API key with Prism Cloud
+2. Spawns `prism-mcp-server --standalone` (full server with Cosmos DB + Gemini)
+3. Sets up transparent stdio relay between IDE and server
+4. Falls back to local lite server if cloud is unavailable
+
+You typically don't run this manually — your IDE runs it automatically.
+
+---
+
+### `prism sync`
+
+Download your rules from Prism Cloud to local cache.
+
+```bash
+prism sync               # Download rules from cloud
+prism sync --repo ./     # + scan local repo for additional rules
+```
+
+**Generates three files:**
+- `~/.prism/rules.md` — Human-readable markdown (used by `prism kitchen`)
+- `~/.prism/rules.json` — API cache
+- `~/.prism/rules/rules.json` — Lite server fallback
+
+**Options:**
+| Flag | Description |
+|------|-------------|
+| `--repo <path>` | Also scan the repo at `<path>` and extract rules |
+| `--json` | Output sync summary as JSON |
+
+---
+
+### `prism connect`
+
+**URL scanning mode only.** Scan a live website and generate rules from it.
+
+```bash
+prism connect --url http://localhost:3000
+prism connect --url https://mysite.com --depth 3 --pages 10
+```
+
+> [!NOTE]
+> `prism connect` is for URL scanning only. Use `prism serve` for IDE/MCP integration.
+
+**Options:**
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--url <url>` | required | URL to scan |
+| `--depth <n>` | `2` | Link crawl depth |
+| `--pages <n>` | `5` | Max pages to scan |
+| `--project <id>` | auto | Project ID to save rules to |
+
+**What it extracts:**
+- CSS variables (colors, spacing, typography tokens)
+- Component patterns from accessibility snapshots
+- Naming conventions from class names and IDs
+- Design system tokens (breakpoints, font scales)
+
+---
+
+### `prism kitchen`
+
+Analyze and optimize the context your AI will receive before sending it.
+
+#### `prism kitchen analyze`
+
+```bash
+prism kitchen analyze --task "build a login form"
+prism kitchen analyze --task "build a nav" --budget 2000 --json
+```
+
+Shows: sections scanned, relevant rules kept, summarized, skipped, token count vs budget.
+
+#### `prism kitchen preview`
+
+```bash
+prism kitchen preview
+prism kitchen preview --task "add a button"   # Highlights relevant sections
+```
+
+Shows the exact context string that would be sent to your AI.
+
+#### `prism kitchen trim`
+
+```bash
+prism kitchen trim --budget 2000
+```
+
+Fits your rules within a token budget, reporting what was removed.
+
+#### `prism kitchen history`
+
+```bash
+prism kitchen history
+```
+
+Shows last 10 kitchen sessions: date, estimated tokens, reduction %.
+
+#### `prism kitchen optimize`
+
+```bash
+prism kitchen optimize --rules
+```
+
+Reads your telemetry and recommends priority changes (promote shorter rules, demote longer ones).
+
+---
+
+### `prism telemetry`
+
+View your token usage statistics.
+
+```bash
+prism telemetry
+prism telemetry --json
+```
+
+**Output:**
+```
+Token Usage (last 30 days)
+  Total tokens:    1,240,000
+  Baseline est.:   3,444,444
+  Reduction:       64% 💰
+  Cache hits:      43%
+  Cost estimate:   ~$24.80/mo saved
+
+Top MCP tool consumers:
+  get_architectural_rules   89%
+  prism_check                8%
+  get_skill                  3%
+```
+
+---
+
+### `prism doctor`
+
+Health check — verifies all Prism systems are operational.
+
+```bash
+prism doctor
+```
+
+**Checks:**
+```
+✅ Node.js 20.11.0 — supported
+✅ Prism CLI v1.1.0
+✅ API Key configured (prism_sk_...7f2a)
+✅ Cosmos DB — healthy (42ms)
+✅ Gemini API — healthy (128ms)
+✅ Local cache — 12 entries, 2.4 MB
+✅ IDE detected: Cursor, VS Code
+✅ MCP config: Cursor ✅, VS Code ✅
+⚠️  VS Code extension: not installed
+❌ Windsurf: MCP config missing
+
+Summary: 8/10 checks passed. Run `prism init` to fix IDE configs.
+```
+
+---
+
+### `prism status`
+
+Quick overview of your current Prism state.
+
+```bash
+prism status
+prism status --json
+```
+
+**Output:**
+```
+Project: my-app (id: 64a...)
+Rules: 23 (12 high, 8 medium, 3 low)
+Last sync: 2 hours ago
+Cache: 15 entries, warm
+Server: prism serve running
+```
+
+---
+
+## Local Files
+
+Prism stores local state in `~/.prism/`:
+
+```
+~/.prism/
+  token                   # Auth token (from prism login)
+  config.json             # lastSync timestamp, project config
+  rules.md                # Human-readable rules (prism kitchen reads this)
+  rules.json              # API cache (prism sync)
+  rules/
+    rules.json            # Lite server fallback
+  skills.md               # Skills from prism connect --url
+  telemetry.json          # JSONL token events
+  cache/                  # LRU disk cache (*.json by hash, 30min TTL)
+  kitchen-history.json    # Past kitchen sessions
+  repo-scan.json          # From prism sync --repo
+```
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `PRISM_API_KEY` | API key for MCP authentication |
+| `PRISM_PROJECT_ID` | Default project ID |
+| `PRISM_OFFLINE` | Set to `1` for offline mode |
+| `AI_PROVIDER` | `gemini` (default) or `azure` |

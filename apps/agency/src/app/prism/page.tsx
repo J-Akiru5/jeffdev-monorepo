@@ -9,7 +9,7 @@
 
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Check, Loader2, Sparkles } from 'lucide-react';
+import { ArrowLeft, Check, Loader2 } from 'lucide-react';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { joinWaitlist } from '@/app/actions/waitlist';
@@ -80,6 +80,11 @@ export default function PrismPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {status === 'error' && (
+                    <p className="text-xs text-rose-400 font-mono text-center">
+                      {errorMessage}
+                    </p>
+                  )}
                   <div className="relative group">
                     <input
                       type="email"

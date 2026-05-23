@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { TIER_PRICES, type SubscriptionTier } from '@/lib/subscriptions';
+import { type SubscriptionTier } from '@/lib/subscriptions';
 
 const PAYPAL_API_URL = process.env.PAYPAL_MODE === 'live'
   ? 'https://api-m.paypal.com'

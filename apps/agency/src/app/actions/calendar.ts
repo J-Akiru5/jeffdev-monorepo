@@ -10,7 +10,7 @@ import { z } from 'zod';
 import { db } from '@/lib/firebase/admin';
 import { logAuditEvent } from '@/lib/audit';
 import { revalidatePath } from 'next/cache';
-import type { CalendarEvent, EventType } from '@/types/firestore';
+import type { CalendarEvent } from '@/types/firestore';
 
 // Validation schema
 const eventSchema = z.object({

@@ -14,7 +14,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Menu, X, ArrowUpRight, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useFeatureFlags } from '@/components/providers/feature-flag-provider';
 import { SyntaxureLogo } from '@jdstudio/ui';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
@@ -27,7 +26,6 @@ interface NavLink {
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { prismEngineEnabled, prismEngineTeaser } = useFeatureFlags();
 
   // Build navigation links based on feature flags
   const navLinks: NavLink[] = [
@@ -87,7 +85,7 @@ export function Header() {
                 {link.highlight && <Sparkles className="h-3.5 w-3.5" />}
                 {link.label}
                 {link.highlight && (
-                  <span className="ml-1 rounded bg-purple-500/20 px-1.5 py-0.5 text-[10px] uppercase">
+                  <span className="ml-1 rounded-full border border-purple-500/30 bg-purple-500/20 px-1.5 py-0.5 text-[10px] uppercase shadow-[0_0_10px_rgba(139,92,246,0.3)]">
                     New
                   </span>
                 )}
@@ -104,7 +102,7 @@ export function Header() {
               className="group relative hidden overflow-hidden rounded-md border border-white/10 bg-black/50 px-5 py-2 backdrop-blur-md transition-all hover:border-white/20 hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] sm:flex"
             >
               <span className="relative z-10 flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-white/80 transition-colors group-hover:text-white">
-                Get_Quote
+                GET_QUOTE
                 <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </span>
               {/* Gradient overlay on hover */}
@@ -162,9 +160,9 @@ export function Header() {
           <Link
             href="/quote"
             onClick={() => setIsMobileMenuOpen(false)}
-            className="mt-2 flex items-center justify-center gap-2 rounded-md border border-white/10 bg-black/50 px-4 py-3 font-mono text-xs uppercase tracking-wider text-white/80 transition-colors hover:border-white/20 hover:text-white"
+            className="mt-2 flex items-center justify-center gap-2 rounded-md border border-white/10 bg-black/50 px-4 py-3 font-mono text-xs uppercase tracking-wider text-white/80 transition-colors hover:border-white/20 hover:text-white shadow-[0_0_15px_rgba(6,182,212,0.1)]"
           >
-            Get_Quote
+            GET_QUOTE
             <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
         </div>

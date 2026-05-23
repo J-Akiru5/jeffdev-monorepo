@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, ArrowUpRight, Quote } from 'lucide-react';
 import { Header } from '@/components/layout/header';
@@ -104,11 +105,14 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
             {/* Cover Image */}
             {activeProject.image && (
-              <div className="mt-12 overflow-hidden rounded-md border border-white/[0.08]">
-                <img
+              <div className="mt-12 overflow-hidden rounded-md border border-white/[0.08] relative aspect-[21/9]">
+                <Image
                   src={activeProject.image}
                   alt={`${activeProject.title} cover`}
-                  className="h-auto w-full object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1200px) 100vw, 1200px"
+                  priority
                 />
               </div>
             )}

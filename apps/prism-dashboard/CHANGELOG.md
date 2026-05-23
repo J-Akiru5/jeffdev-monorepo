@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### ✨ Added
+- **Skill Studio**: Create, manage, and auto-generate procedural step-by-step guides for AI workflows.
+  - Skill Management UI (`/projects/[slug]/skills`) with dynamic toggles and deletion.
+  - AI Skill Generator (`/skills/generate`) using existing rules as context.
+  - Skill Detail View (`/skills/[skillId]`) for step-by-step markdown rendering.
+- **Rule Templates**: One-click starter rule sets to jumpstart projects.
+  - Pre-built templates for Next.js 16, React 19, Tailwind v4, and Node API Security.
+  - Template Gallery UI (`/projects/[slug]/rules/templates`).
+- **MCP Server Updates**: 
+  - Added `list_skills` tool for agents to discover project workflows.
+  - Upgraded `get_skill` tool to query the new `skills` collection and format procedural steps.
+
 ---
 
 ## [1.0.3] - 2026-01-03

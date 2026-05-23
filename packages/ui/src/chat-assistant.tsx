@@ -227,6 +227,7 @@ export function ChatAssistant({
                                 </code>
                               ) : (
                                 <SyntaxHighlighter
+                                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                   style={vscDarkPlus as any}
                                   language={match ? match[1] : 'text'}
                                   PreTag="div"

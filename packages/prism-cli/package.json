@@ -1,7 +1,7 @@
 {
   "name": "@prism-engine/cli",
-  "version": "1.0.3",
-  "description": "Thin local client for Prism Context Engine - Context Governance for LLMs",
+  "version": "1.1.0",
+  "description": "Prism Context Engine — Context Governance for LLMs. MCP server that gives AI coding assistants (Cursor, Claude, Windsurf, VS Code) your project's architectural rules, design system, and security constraints.",
   "type": "module",
   "main": "./dist/index.js",
   "bin": {
@@ -12,24 +12,47 @@
     "dev": "tsc --watch",
     "check-types": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepublishOnly": "pnpm run build"
   },
   "keywords": [
     "mcp",
+    "model-context-protocol",
     "cursor",
     "windsurf",
+    "claude",
+    "vscode",
     "ai",
     "context",
-    "rules"
+    "rules",
+    "llm",
+    "governance",
+    "architecture",
+    "coding-standards",
+    "prism",
+    "mcp-server"
   ],
-  "author": "JeffDev Studio",
+  "author": {
+    "name": "JeffDev Studio",
+    "url": "https://jeffdev.studio"
+  },
   "license": "MIT",
+  "homepage": "https://prism.jeffdev.studio",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/J-Akiru5/jeffdev-monorepo",
+    "directory": "packages/prism-cli"
+  },
+  "bugs": {
+    "url": "https://github.com/J-Akiru5/jeffdev-monorepo/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
     "commander": "^12.0.0",
     "eventsource": "^2.0.2",
-    "inquirer": "^9.2.0",
-    "ora": "^8.0.0",
     "chalk": "^5.3.0"
   },
   "devDependencies": {
@@ -41,9 +64,11 @@
   },
   "files": [
     "dist",
-    "bin"
+    "bin",
+    "README.md",
+    "LICENSE"
   ],
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   }
 }

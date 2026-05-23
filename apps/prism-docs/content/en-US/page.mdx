@@ -1,204 +1,172 @@
 # Prism Context Engine
 
-**The Context Operating System for Vibecoders** — Eliminate "Context Pollution" by orchestrating the flow of rules, design systems, and tech stacks between the Cloud and local AI Agents.
+**The Context Governance Layer for AI Coding Assistants** — Stop your AI from hallucinating your architecture. Extract rules from your live site or repo, deliver them to Cursor / Windsurf / VS Code / Claude via MCP, and enforce them on every file save.
 
 ## What is Prism Context Engine?
 
-Prism Context Engine is a complete **AI-powered context governance platform** that:
+Prism is an **MCP-based governance platform** that:
 
-1. **Extracts Rules from Video** - Upload screen recordings, automatically extract architectural patterns using Azure OpenAI
-2. **Enforces Standards** - Deploy rules to AI coding assistants via MCP (Model Context Protocol)
-3. **Enables Semantic Search** - Find relevant architectural discussions using vector embeddings
+1. **Extracts rules** from your live website (Playwright URL scan) or local repo — automatically, in under 30 seconds
+2. **Stores & ranks rules** in Cosmos DB using Gemini vector embeddings — only relevant rules are sent per task
+3. **Delivers rules via MCP** to any IDE (Cursor, Windsurf, VS Code, Claude Desktop) — cross-IDE, write once
+4. **Enforces rules** by checking and auto-fixing AI-generated code on every file save
+
+**The measurable outcome:** 64% token reduction (~$55–150 → ~$20–55/dev/month) + consistent, rule-compliant AI output.
 
 ### The Core Metaphor
 
 | Concept | Prism Equivalent | Description |
 |---------|------------------|-------------|
-| 🍳 **The Kitchen** | SaaS Dashboard | Where the "Chef" (Developer) mixes ingredients (Next.js, Tailwind, Glassmorphism) |
-| 📜 **The Recipe** | Context Rules | The output file (e.g., `.cursorrules`) containing strict instructions |
-| 🍽️ **The Waiter** | MCP Protocol | Delivers the fresh Recipe directly to the IDE's table |
+| 🍳 **The Kitchen** | SaaS Dashboard | Where the developer creates and manages rules |
+| 📜 **The Recipe** | Context Rules | Your architecture standards, naming conventions, style rules |
+| 🍽️ **The Waiter** | MCP Protocol | Delivers only the relevant rules to your IDE in real time |
 
-### Video-to-Context Extraction
+### Why Prism vs Built-in Alternatives
 
-**Automated Documentation**: Upload a screen recording of your development workflow. Prism analyzes the video transcript using Azure OpenAI to automatically extract architectural rules, coding patterns, and best practices into actionable context that your AI coding assistant can understand.
+Cursor has `.cursorrules`, Claude has project knowledge, VS Code has Copilot instructions — each is siloed, manual, and IDE-specific. Prism's advantage:
 
-Works with:
-- **Cursor** ✅
-- **Windsurf** ✅
-- **Claude (via MCP)** ✅  
-- **VS Code** (via MCP extension)
-- **GitHub Copilot** (coming soon)
+| Feature | Prism | `.cursorrules` / IDE rules |
+|---------|-------|---------------------------|
+| Cross-IDE | ✅ Write once, works in 6 IDEs | ❌ One per IDE |
+| Smart retrieval | ✅ Vector embeddings — only relevant rules per task | ❌ Dumps everything every time |
+| Auto-extraction | ✅ Playwright scans your live URL | ❌ Manual authoring |
+| Active enforcement | ✅ `prism_fix` catches violations on save | ❌ Passive suggestions only |
 
-Instead of hoping your AI follows best practices, **Prism enforces them**.
+## Quick Start (60 Seconds)
 
-## Quick Start
+import { Steps, Step } from 'nextra/components'
 
-### Option A: Web Dashboard (Recommended)
+<Steps>
 
-```bash
-# 1. Sign up at the web dashboard
-https://prism.jeffdev.studio/sign-up
-
-# 2. Create your first project and brand profile
-# 3. Upload a video or manually create rules
-# 4. Export .cursorrules file and paste into your project
-```
-
-### Option B: MCP Server (Advanced)
-
-For real-time sync with your IDE:
-
-> **Note:** The MCP server runs **locally on your machine** — you do NOT need to deploy it to Vercel or any cloud service.
+### Install the CLI
 
 ```bash
-# 1. Install the Prism CLI globally
 npm install -g @prism-engine/cli
-
-# 2. Get your API Key from the Prism Dashboard
-#    Go to: https://prism.jeffdev.studio → Settings → API Keys → Generate Key
-
-# 3. Test the connection
-prism connect
 ```
 
-#### VS Code Setup
+### Sign in & sync your rules
 
-1. Open VS Code
-2. Press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac)
-3. Type **"Preferences: Open User Settings (JSON)"** and select it
-4. Add the following to your `settings.json`:
-
-```json
-{
-  "mcp": {
-    "servers": {
-      "prism": {
-        "type": "stdio",
-        "command": "prism",
-        "args": ["connect"],
-        "env": {
-          "PRISM_API_KEY": "your_api_key_here"
-        }
-      }
-    }
-  }
-}
+```bash
+prism login          # Opens browser → Prism Dashboard → sign in
+prism sync           # Downloads your rules to ~/.prism/rules.json
 ```
 
-5. Restart VS Code — Prism is now connected.
+### Configure your IDE automatically
 
-#### Cursor / Windsurf Setup
-
-Add to your Cursor or Windsurf MCP config (`.cursor/mcp.json` or equivalent):
-
-```json
-{
-  "mcpServers": {
-    "prism": {
-      "command": "prism",
-      "args": ["connect"],
-      "env": {
-        "PRISM_API_KEY": "your_api_key_here"
-      }
-    }
-  }
-}
+```bash
+prism init           # Auto-detects Cursor, VS Code, Windsurf, Claude Desktop
+                     # Writes the correct MCP config for each IDE found
 ```
+
+### Test it
+
+Restart your IDE, then ask your AI assistant:
+
+> "What are the architectural rules for this project?"
+
+Your AI now has your governance rules as context — every time, for every task.
+
+</Steps>
+
+> [!TIP]
+> **New user with no rules yet?** Run `prism connect --url http://localhost:3000` to scan your site and auto-generate rules in under 30 seconds.
+
+> [!NOTE]
+> **Video upload** (screen recordings → rule extraction via Mux) is also supported from the Dashboard. This is a **beta feature** — the primary extraction path is URL scanning and repo analysis.
 
 ## Core Features
 
-import { Rocket, Video, FileCode, Plug, Settings, Code } from 'lucide-react'
+import { Rocket, Globe, GitBranch, Plug, BarChart2, Shield } from 'lucide-react'
 
 <Cards>
-  <Card icon={<Rocket size={20} />} title="Quick Start" href="/quick-start">
-    Deploy your first rule in 5 minutes
+  <Card icon={<Rocket size={20} />} title="Getting Started" href="/getting-started">
+    From zero to working MCP in 60 seconds
   </Card>
-  <Card icon={<Video size={20} />} title="Video Processing" href="/video">
-    Extract rules from screen recordings
+  <Card icon={<Globe size={20} />} title="URL Scanning" href="/getting-started#url-scan">
+    Playwright extracts rules from your live site automatically
   </Card>
-  <Card icon={<FileCode size={20} />} title="Rule Management" href="/rules">
-    Create, organize, and deploy constraints
+  <Card icon={<GitBranch size={20} />} title="Repo Analysis" href="/getting-started#repo-scan">
+    Extract naming conventions and patterns from your codebase
   </Card>
-  <Card icon={<Plug size={20} />} title="IDE Integrations" href="/integrations">
-    Connect to Cursor, Windsurf, and Claude
+  <Card icon={<Plug size={20} />} title="IDE Setup" href="/ide-setup">
+    Connect Cursor, Windsurf, VS Code, Claude Desktop, and more
   </Card>
-  <Card icon={<Settings size={20} />} title="Advanced" href="/advanced">
-    Semantic search and brand profiles
+  <Card icon={<BarChart2 size={20} />} title="CLI Reference" href="/cli-reference">
+    All prism commands with examples and flags
   </Card>
-  <Card icon={<Code size={20} />} title="API Reference" href="/advanced/api-reference">
-    Programmatic access to rules and transcripts
+  <Card icon={<Shield size={20} />} title="API Reference" href="/api-reference">
+    REST API + MCP tool contracts
   </Card>
 </Cards>
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│              Video Upload (Mux)                             │
-│  Screen recordings → Automatic transcription                │
-└────────────────────────────┬────────────────────────────────┘
-                             │ Webhook
-                             ▼
-┌─────────────────────────────────────────────────────────────┐
-│           Azure OpenAI Processing (GPT-4o-mini)             │
-│  Extract rules + Generate embeddings for search             │
-└────────────────────────────┬────────────────────────────────┘
-                             │
-                             ▼
-┌─────────────────────────────────────────────────────────────┐
-│            Azure Cosmos DB (MongoDB API)                    │
-│    Rules Collection + Video Transcripts + Embeddings        │
-└────────────────────────────┬────────────────────────────────┘
-                             │ MCP Protocol
-                             ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   Your IDE (Cursor/Windsurf)                │
-│  AI follows your rules automatically during coding          │
-└─────────────────────────────────────────────────────────────┘
+Developer scans URL or repo
+  ↓
+prism connect --url https://yoursite.com
+  → Playwright crawls site (depth 2, up to 5 pages)
+  → Gemini 3.5 Flash generates 15–25 rules from page content
+  → Rules saved to Cosmos DB + ~/.prism/rules.json
+  ↓
+Developer opens IDE
+  ↓
+prism init (run once)
+  → Auto-detects Cursor / VS Code / Windsurf / Claude Desktop
+  → Writes MCP config pointing to: prism serve
+  ↓
+IDE launches prism serve (automatic on open)
+  → Spawns prism-mcp-server --standalone as child process
+  → MCP server connects to Cosmos DB
+  ↓
+AI gets a task
+  → Calls get_architectural_rules({ task: "build a button" })
+  → Gemini embedding ranks rules by relevance (cosine similarity > 0.72)
+  → Returns only relevant rules (target: ~1,800 tokens vs 60,000 without Prism)
+  ↓
+Developer saves a file
+  → VS Code calls prism_check on the generated code
+  → Violations highlighted with quick-fix code actions
+  → prism_fix auto-corrects the violation
 ```
 
 ## What Makes Prism Different?
 
-### 🎥 Video-First Context Capture
-Record your screen while discussing architecture. Prism automatically extracts rules from your explanations.
+### 🌐 URL-First Rule Extraction
+Point Prism at your live site. It crawls pages with Playwright, extracts CSS variables, component patterns, spacing tokens, and naming conventions — generating 15–25 rules in under 30 seconds. No manual writing.
 
-### 🧠 AI-Powered Rule Extraction
-GPT-4o-mini analyzes transcripts to identify:
-- Architectural patterns
-- Code style conventions
-- Naming rules
-- Testing strategies
-- Security practices
+### 🧠 Smart Context Selection
+Rules are embedded with Gemini (3072-dim vectors). When your AI asks for rules, only the ones relevant to the current task are returned. Sending "build a button" returns button/component rules, not API or testing rules.
 
-### 🔍 Semantic Search
-Vector embeddings enable finding relevant architectural discussions, not just keyword matching.
+### 📦 Context Kitchen
+`prism kitchen analyze --task "build a nav"` shows exactly what your AI will receive before it gets it. Preview, trim, and optimize your rule budget.
 
-### 🚀 Zero-Config MCP Integration
-`npm install -g @prism-engine/cli && prism connect` — your AI assistant now has context.
+### 🔒 Active Enforcement
+`prism_check` validates AI-generated code against your rules on every save. `prism_fix` applies corrections. VS Code shows violations as diagnostics with quick-fix actions.
+
+### 📊 Telemetry
+`prism telemetry` shows your real token usage, cache hit rate, and estimated cost savings per month.
 
 ## Real-World Example
 
 ```typescript
-// Before Prism: Generic code
+// Before Prism: AI guesses your patterns
 const data = await fetch('/api/users');
 
-// After Prism: Enforces your standards
+// After Prism: AI enforces your actual conventions
 const { data, error } = await api.users.list();
 if (error) {
-  toast.error(error.message);
-  return;
+  toast.error(error.message);  // Your toast pattern, enforced
+  return;                       // Your early-return pattern, enforced
 }
 ```
 
-Your AI assistant learns from your videos that you:
-- Use custom API wrapper with error handling
-- Show errors via toast notifications
-- Follow early return patterns
+Your rules teach the AI that you use a custom API wrapper, toast notifications, and early-return error handling — and it follows them on every generation.
 
-## Built by Syntaxure Labs
+## Built by JeffDev Studio
 
-Prism Context Engine is part of the [Syntaxure Labs](https://jeffdev.studio) ecosystem — enterprise-grade tools for developers who want AI that respects their architecture.
+Prism Context Engine is part of the [JeffDev Studio](https://jeffdev.studio) ecosystem — enterprise-grade tools for the Southeast Asian developer market.
 
-**Current Version:** 1.0.3  
-**License:** MIT  
+**Current Version:** 1.1.0
+**License:** MIT
 **Support:** [GitHub Issues](https://github.com/J-Akiru5/jeffdev-monorepo/issues)

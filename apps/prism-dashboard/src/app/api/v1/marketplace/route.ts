@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { getCollection } from '@jeffdev/db/cosmos';
 import { z } from 'zod';
+import { ObjectId } from 'mongodb';
 import { authenticate, errorResponse, successResponse } from '@/lib/api-auth';
 
 const PublishSchema = z.object({
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
 
   const ruleSets = await getCollection('ruleSets');
   const query: Record<string, unknown> = { isPublic: true };
-  if (search) query.name = { $regex: search, $options: 'i' } as any;
+  if (search) query.name = { $regex: search, $options: 'i' };
 
   const total = await ruleSets.countDocuments(query);
   const items = await ruleSets
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) return errorResponse(parsed.error.issues.map(e => e.message).join(', '), 422);
 
   const rules = await getCollection('rules');
-  const existingRules = await rules.find({ _id: { $in: parsed.data.rules.map((id) => ({ $oid: id } as any)) }, createdBy: auth.userId }).toArray();
+  const existingRules = await rules.find({ _id: { $in: parsed.data.rules.map((id) => new ObjectId(id)) }, createdBy: auth.userId }).toArray();
   if (existingRules.length !== parsed.data.rules.length) {
     return errorResponse('One or more rule IDs are invalid or do not belong to you', 422);
   }

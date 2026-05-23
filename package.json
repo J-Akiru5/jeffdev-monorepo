@@ -7,15 +7,20 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "changeset": "changeset",
+    "prepare": "husky"
   },
   "devDependencies": {
-    "@semantic-release/changelog": "^6.0.3",
-    "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^12.0.8",
-    "@semantic-release/npm": "^13.1.5",
+    "@changesets/changelog-github": "^0.7.0",
+    "@changesets/cli": "^2.31.0",
+    "@commitlint/cli": "^21.0.1",
+    "@commitlint/config-conventional": "^21.0.1",
+    "@next/bundle-analyzer": "^15.1.0",
+    "eslint": "^9.39.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.5",
     "prettier": "^3.7.4",
-    "semantic-release": "^25.0.3",
     "syncpack": "^13.0.4",
     "turbo": "^2.7.2",
     "typescript": "^5.9.2"
@@ -34,5 +39,6 @@
     "@upstash/ratelimit": "^2.0.7",
     "ai": "^6.0.5",
     "zustand": "^5.0.9"
-  }
+  },
+  "version": "1.0.0"
 }

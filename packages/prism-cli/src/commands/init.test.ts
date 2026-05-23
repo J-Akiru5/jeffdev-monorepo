@@ -87,7 +87,7 @@ describe('IDE detection helpers', () => {
     process.env.APPDATA = 'C:\\Users\\test\\AppData\\Roaming';
     const vscodePath = join(process.env.APPDATA, 'Code', 'User', 'settings.json');
     expect(vscodePath).toContain('AppData');
-    expect(vscodePath).toContain('Code\\User\\settings.json');
+    expect(vscodePath).toContain(join('Code', 'User', 'settings.json'));
   });
 
   it('should use Library path for VS Code on macOS', () => {

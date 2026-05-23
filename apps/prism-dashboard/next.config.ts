@@ -1,9 +1,10 @@
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
+import withBundleAnalyzer from "@next/bundle-analyzer";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
-  output: "standalone",
+  output: process.platform === "win32" ? undefined : "standalone",
 
   images: {
     remotePatterns: [
@@ -13,11 +14,7 @@ const nextConfig: NextConfig = {
   },
 
   experimental: {
-    optimizePackageImports: [
-      "lucide-react",
-      "@jdstudio/ui",
-      "recharts",
-    ],
+    optimizePackageImports: ["lucide-react", "@jdstudio/ui", "recharts"],
   },
 
   async headers() {
@@ -26,7 +23,10 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: [
           { key: "X-DNS-Prefetch-Control", value: "on" },
-          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "origin-when-cross-origin" },
@@ -35,26 +35,35 @@ const nextConfig: NextConfig = {
       {
         source: "/_next/static/:path*",
         headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
         ],
       },
       {
         source: "/fonts/:path*",
         headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
         ],
       },
       {
         source: "/images/:path*",
         headers: [
-          { key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" },
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=604800",
+          },
         ],
       },
     ];
   },
 };
 
-export default withSentryConfig(nextConfig, {
+const configWithSentry = withSentryConfig(nextConfig, {
   org: process.env.SENTRY_ORG || "jeffdev",
   project: process.env.SENTRY_PROJECT || "prism-dashboard",
   silent: !process.env.CI,
@@ -63,3 +72,7 @@ export default withSentryConfig(nextConfig, {
   tunnelRoute: "/monitoring",
   disableLogger: true,
 });
+
+export default process.env.ANALYZE === "true"
+  ? withBundleAnalyzer()(configWithSentry)
+  : configWithSentry;

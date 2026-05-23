@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { useEffect, useState, ReactNode } from 'react'
+import { ReactNode } from 'react'
 
 interface TranslatedContentProps {
   en: ReactNode
@@ -24,13 +24,8 @@ interface TranslatedContentProps {
  */
 export function TranslatedContent({ en, tl, ja, es, id, ru, nl }: TranslatedContentProps) {
   const pathname = usePathname()
-  const [locale, setLocale] = useState('en-US')
-
-  useEffect(() => {
-    if (!pathname) return
-    const pathLocale = pathname.split('/')[1]
-    setLocale(pathLocale || 'en-US')
-  }, [pathname])
+  const pathLocale = pathname ? pathname.split('/')[1] : 'en-US'
+  const locale = pathLocale || 'en-US'
 
   // Return content based on locale, with fallback to English
   const contentMap: Record<string, ReactNode> = {
@@ -52,13 +47,6 @@ export function TranslatedContent({ en, tl, ja, es, id, ru, nl }: TranslatedCont
  */
 export function useLocale() {
   const pathname = usePathname()
-  const [locale, setLocale] = useState('en-US')
-
-  useEffect(() => {
-    if (!pathname) return
-    const pathLocale = pathname.split('/')[1]
-    setLocale(pathLocale || 'en-US')
-  }, [pathname])
-
-  return locale
+  const pathLocale = pathname ? pathname.split('/')[1] : 'en-US'
+  return pathLocale || 'en-US'
 }

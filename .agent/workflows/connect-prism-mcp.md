@@ -1,42 +1,51 @@
 ---
-description: How to get a Prism API Key and connect the MCP server to your code editor (VS Code, Cursor, Windsurf)
+description: How to get a Prism API Key and connect the MCP server to your code editor (VS Code, Cursor, Windsurf, Claude Desktop)
 ---
 
 # Connect Prism MCP Server to Your Editor
 
+> **Recommended:** Run `prism init` after installing the CLI — it auto-detects your editors and writes the config for you. The manual steps below are for reference or troubleshooting.
+
 ## Step 1: Get Your API Key
 
+> **Free plan:** You can create rules manually in the dashboard and export them as `.cursorrules` or `rules.md`. API keys for live MCP/IDE sync require a **Pro plan**.
+
 1. Go to **https://prism.jeffdev.studio** and sign in (or sign up)
-2. Click **Settings** in the sidebar (bottom-left gear icon)
-3. Go to **API Keys** tab
-4. Click **"Generate New Key"**
-5. Copy the key (starts with `pk_live_...`) — you'll need this in the next step
+2. Click **Settings** in the sidebar
+3. Scroll to **API Keys**
+4. Click **"Generate Key"**
+5. Copy the key (starts with `pk_live_...`) — shown only once
 
 > ⚠️ Save this key somewhere safe. You won't be able to see it again after closing the dialog.
 
 ## Step 2: Install the Prism CLI
 
-Open your terminal (PowerShell, CMD, or any terminal):
-
 ```bash
 npm install -g @prism-engine/cli
 ```
 
-Verify it installed correctly:
+Verify it installed:
 
 ```bash
 prism --version
 ```
 
-## Step 3: Connect to Your Editor
+## Step 3: Auto-Configure (Recommended)
 
-### Option A: VS Code
+```bash
+prism init
+```
+
+This auto-detects which editors you have installed (Cursor, VS Code, Windsurf, Claude Desktop) and writes the correct MCP config for each. Then **restart your editor** — done.
+
+## Step 4: Manual Config (Alternative)
+
+### VS Code
 
 1. Open VS Code
 2. Press `Ctrl+Shift+P` (Windows/Linux) or `Cmd+Shift+P` (Mac)
-3. Type: **Preferences: Open User Settings (JSON)**
-4. Click the result — this opens your `settings.json` file
-5. Add the following block inside the root `{}` object:
+3. Type: **Preferences: Open User Settings (JSON)** and select it
+4. Add inside the root `{}` object:
 
 ```json
 {
@@ -45,7 +54,7 @@ prism --version
       "prism": {
         "type": "stdio",
         "command": "prism",
-        "args": ["connect"],
+        "args": ["serve"],
         "env": {
           "PRISM_API_KEY": "pk_live_YOUR_KEY_HERE"
         }
@@ -55,23 +64,19 @@ prism --version
 }
 ```
 
-6. Replace `pk_live_YOUR_KEY_HERE` with your actual API key from Step 1
-7. Save the file (`Ctrl+S`)
-8. Restart VS Code
-9. Done! Your AI assistant can now access your Prism rules.
+5. Replace `pk_live_YOUR_KEY_HERE` with your actual API key
+6. Save and restart VS Code
 
-### Option B: Cursor
+### Cursor
 
-1. Open your project folder in Cursor
-2. Create a file called `.cursor/mcp.json` in your project root
-3. Paste this:
+Create `.cursor/mcp.json` in your project root:
 
 ```json
 {
   "mcpServers": {
     "prism": {
       "command": "prism",
-      "args": ["connect"],
+      "args": ["serve"],
       "env": {
         "PRISM_API_KEY": "pk_live_YOUR_KEY_HERE"
       }
@@ -80,19 +85,47 @@ prism --version
 }
 ```
 
-4. Replace the API key, save, and restart Cursor
+Replace the API key, save, and restart Cursor.
 
-### Option C: Windsurf
+### Windsurf
 
-1. Open Windsurf Settings → MCP Servers
-2. Add a new server with:
-   - **Name:** `prism`
-   - **Command:** `prism`
-   - **Args:** `connect`
-   - **Env:** `PRISM_API_KEY` = your key
-3. Save and restart
+Open **Windsurf Settings → MCP Servers** and add:
+- **Name:** `prism`
+- **Command:** `prism`
+- **Args:** `serve`
+- **Env Key:** `PRISM_API_KEY` = your key
 
-## Step 4: Test It
+Save and restart.
+
+### Claude Desktop
+
+Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "prism",
+      "args": ["serve"],
+      "env": {
+        "PRISM_API_KEY": "pk_live_YOUR_KEY_HERE"
+      }
+    }
+  }
+}
+```
+
+Restart Claude Desktop.
+
+## Step 5: Sync Your Rules
+
+```bash
+prism sync
+```
+
+This downloads your rules from Prism Cloud to `~/.prism/rules.json` so the server can serve them.
+
+## Step 6: Test It
 
 After restarting your editor, ask your AI assistant:
 
@@ -104,7 +137,20 @@ If Prism is connected, the AI will fetch your rules from the Prism Context Engin
 
 | Problem | Fix |
 |---------|-----|
-| `prism: command not found` | Run `npm install -g @prism-engine/cli` again |
-| API key validation failed | Generate a new key from the dashboard |
-| No rules returned | Make sure you have rules created in your Prism project |
-| Can't find settings.json | In VS Code: `Ctrl+Shift+P` → "Open User Settings (JSON)" |
+| `prism: command not found` | Run `npm install -g @prism-engine/cli` again. Restart terminal. |
+| API key validation failed | Generate a new key from Settings → API Keys |
+| No rules returned | Run `prism sync` first to download your rules locally |
+| `prism serve` crashes immediately | Check Node.js version: must be ≥20. Run `node --version` |
+| Can't find settings.json (VS Code) | `Ctrl+Shift+P` → "Open User Settings (JSON)" |
+| IDE shows "server not running" | Verify `prism --version` works, then restart the IDE |
+| Rules are stale / not updating | Run `prism sync` then restart the MCP server in your IDE |
+
+## Offline Mode
+
+If you're working without internet access:
+
+```bash
+prism serve --offline
+```
+
+This uses your local `~/.prism/rules/rules.json` cache (generated by the last `prism sync`) with keyword-based ranking instead of Gemini embeddings. 8 of the 9 MCP tools are available offline.

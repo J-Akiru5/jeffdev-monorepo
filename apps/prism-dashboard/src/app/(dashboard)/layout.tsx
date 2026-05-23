@@ -1,14 +1,16 @@
 import { ReactNode } from "react";
 import Link from "next/link";
 import { UserButton } from "@clerk/nextjs";
-import { 
-  LayoutDashboard, 
-  FolderKanban, 
-  Palette, 
-  Sparkles, 
+import {
+  LayoutDashboard,
+  FolderKanban,
+  Palette,
+  Sparkles,
   CreditCard,
   Settings,
-  Library
+  Library,
+  Plug,
+  BarChart2,
 } from "lucide-react";
 import { GridBackground } from "@jdstudio/ui";
 import { BetaBadge } from "@/components/beta-badge";
@@ -16,8 +18,11 @@ import { BetaBadge } from "@/components/beta-badge";
 /**
  * Dashboard Layout
  * Provides sidebar navigation for desktop and bottom navigation for mobile.
+ * Auto-redirects new users (0 projects, onboarding not complete) to /onboarding.
  */
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+export default async function DashboardLayout({ children }: { children: ReactNode }) {
+
+
   return (
     <div className="relative flex min-h-screen bg-[#050505]">
       <GridBackground variant="neon" />
@@ -41,9 +46,17 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <NavItem href="/brand" icon={Palette}>Branding</NavItem>
           <NavItem href="/generate" icon={Sparkles}>AI Kitchen</NavItem>
           <NavItem href="/generate/library" icon={Library}>Component Library</NavItem>
-          
+          <NavItem href="/analytics" icon={BarChart2}>Analytics</NavItem>
+
           <div className="my-4 border-t border-white/5" />
-          
+
+          {/* Quick Connect — highlighted in sidebar */}
+          <NavItem href="/quickstart" icon={Plug} highlight>
+            Quick Connect
+          </NavItem>
+
+          <div className="my-4 border-t border-white/5" />
+
           <NavItem href="/subscription" icon={CreditCard}>Subscription</NavItem>
           <NavItem href="/settings" icon={Settings}>Settings</NavItem>
         </nav>
@@ -51,7 +64,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         {/* User */}
         <div className="border-t border-white/5 p-4 bg-black/20">
           <div className="flex items-center gap-3">
-            <UserButton 
+            <UserButton
               appearance={{
                 elements: {
                   avatarBox: "h-9 w-9 ring-2 ring-white/5",
@@ -75,7 +88,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <span className="font-semibold text-white tracking-tight">Prism</span>
           <BetaBadge />
         </Link>
-        <UserButton 
+        <UserButton
           appearance={{
             elements: {
               avatarBox: "h-8 w-8",
@@ -96,29 +109,42 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <MobileNavItem href="/dashboard" icon={LayoutDashboard} label="Home" />
         <MobileNavItem href="/projects" icon={FolderKanban} label="Projects" />
         <div className="relative -top-5">
-          <Link 
+          <Link
             href="/generate"
             className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-violet-500 shadow-lg shadow-cyan-500/20 border border-white/20 text-white"
           >
             <Sparkles className="h-6 w-6" />
           </Link>
         </div>
-        <MobileNavItem href="/brand" icon={Palette} label="Brand" />
+        <MobileNavItem href="/quickstart" icon={Plug} label="Connect" />
         <MobileNavItem href="/settings" icon={Settings} label="Settings" />
       </nav>
     </div>
   );
 }
 
-function NavItem({ 
-  href, 
-  icon: Icon, 
-  children 
-}: { 
-  href: string; 
-  icon: typeof LayoutDashboard; 
+function NavItem({
+  href,
+  icon: Icon,
+  children,
+  highlight,
+}: {
+  href: string;
+  icon: typeof LayoutDashboard;
   children: ReactNode;
+  highlight?: boolean;
 }) {
+  if (highlight) {
+    return (
+      <Link
+        href={href}
+        className="group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-cyan-400/80 transition-all hover:bg-cyan-500/10 hover:text-cyan-300 border border-cyan-500/10 hover:border-cyan-500/20"
+      >
+        <Icon className="h-4 w-4 transition-colors group-hover:text-cyan-300" />
+        {children}
+      </Link>
+    );
+  }
   return (
     <Link
       href={href}

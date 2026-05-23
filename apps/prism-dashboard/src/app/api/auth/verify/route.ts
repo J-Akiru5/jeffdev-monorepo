@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { getCollection } from "@jeffdev/db";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
 
 /**
@@ -13,7 +13,7 @@ import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
  * Authorization: Bearer <clerk-session-token>
  */
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // 1. Get auth from Clerk
     const { userId } = await auth();

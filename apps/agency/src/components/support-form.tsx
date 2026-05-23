@@ -47,7 +47,7 @@ export function SupportForm({ defaultSubject, compact }: SupportFormProps) {
         </div>
         <h3 className="text-lg font-semibold text-white">Message Sent!</h3>
         <p className="mt-2 text-sm text-white/50">
-          We'll get back to you within 24-48 hours.
+          We&apos;ll get back to you within 24-48 hours.
         </p>
       </div>
     );

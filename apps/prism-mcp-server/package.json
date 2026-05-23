@@ -3,10 +3,6 @@
   "version": "1.0.3",
   "private": true,
   "type": "module",
-  "main": "dist/index.js",
-  "bin": {
-    "prism-mcp": "dist/index.js"
-  },
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
@@ -14,13 +10,17 @@
     "lint": "eslint . --max-warnings 0",
     "check-types": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "smoke-test": "tsx scripts/smoke-test.ts"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@jeffdev/db": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.0.0",
+    "gpt-tokenizer": "^3.4.0",
     "mongodb": "^6.15.0",
     "openai": "^6.15.0",
+    "playwright": "^1.52.0",
     "zod": "^4.2.1"
   },
   "devDependencies": {
