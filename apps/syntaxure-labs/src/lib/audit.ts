@@ -22,8 +22,6 @@ export interface AuditLog extends AuditEvent {
   userEmail?: string;
 }
 
-type AuditLogRow = Database['public']['Tables']['audit_logs']['Insert'];
-
 /**
  * Log an audit event to Supabase
  */

@@ -8,7 +8,8 @@ const nextConfig: NextConfig = {
 
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "firebasestorage.googleapis.com" },
+      // TODO: Add Supabase Storage URL pattern when images are hosted there
+      // { protocol: "https", hostname: "*.supabase.co" },
     ],
   },
 

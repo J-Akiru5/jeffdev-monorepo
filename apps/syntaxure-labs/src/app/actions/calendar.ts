@@ -1,7 +1,5 @@
 'use server';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 /**
  * Calendar Event Server Actions
  * ------------------------------

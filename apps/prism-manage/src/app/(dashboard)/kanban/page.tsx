@@ -6,7 +6,7 @@
  * Drag-and-drop kanban board for visual task management with Supabase persistence.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useProjects } from '@/contexts/project-context';
 import { GripVertical, Plus } from 'lucide-react';
 import { updateTaskStatus, createTask } from '@/app/actions/tasks';
@@ -54,9 +54,9 @@ export default function KanbanPage() {
         const res = await fetch('/api/tasks');
         const data = await res.json();
         // Map API tasks to kanban format with column assignment
-        const mapped: KanbanTask[] = (data || []).map((t: APITask) => ({
-          id: t.id?.toString() || String(Math.random()),
-          projectId: t.project_id || t.projectId || '',
+        const mapped: KanbanTask[] = (data || []).map((t: Record<string, unknown>) => ({
+          id: (t.id as string)?.toString() || String(Math.random()),
+          projectId: (t.project_id as string) || (t.projectId as string) || '',
           title: t.title,
           completed: t.status === 'done',
           starred: t.priority ? t.priority > 0 : false,
@@ -66,9 +66,8 @@ export default function KanbanPage() {
           createdAt: t.created_at || t.createdAt || new Date().toISOString(),
           updatedAt: t.updated_at || t.updatedAt || new Date().toISOString(),
         }));
-        setTasks(mapped);
-      } catch (err) {
-        console.error('Failed to load tasks:', err);
+        setTasks(mapped);    } catch {
+      console.error('Failed to load tasks');
       } finally {
         setLoading(false);
       }
@@ -103,7 +102,7 @@ export default function KanbanPage() {
             : t
         )
       );
-    } catch (err) {
+    } catch {
       toast.error('Failed to update task status');
     }
     setDraggedTask(null);
@@ -129,7 +128,7 @@ export default function KanbanPage() {
       };
       setTasks((prev) => [newTask, ...prev]);
       toast.success('Task added');
-    } catch (err) {
+    } catch {
       toast.error('Failed to create task');
     }
   };

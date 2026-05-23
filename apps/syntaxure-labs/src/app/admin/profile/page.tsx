@@ -2,6 +2,9 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { ProfileForm } from '@/components/admin/profile-form';
 import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
+import type { UserProfile } from '@/types/user';
 
 /**
  * Admin Profile Page
@@ -9,78 +12,62 @@ import { cookies } from 'next/headers';
  * Edit user profile, bio, photo, and namecard settings.
  */
 
-import { auth as adminAuth, db } from '@/lib/firebase/admin';
-import { redirect } from 'next/navigation';
-import { UserProfile } from '@/types/user';
-
-async function getCurrentUser(): Promise<UserProfile> {
+async function getCurrentUser(): Promise<UserProfile | null> {
   const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get('session');
+  const supabase = await createClient();
 
-  if (!sessionCookie) {
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) {
     redirect('/admin/login');
   }
 
-  try {
-    const decodedClaims = await adminAuth.verifySessionCookie(
-      sessionCookie.value,
-      true // checkRevoked
-    );
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('*')
+    .eq('id', user.id)
+    .maybeSingle();
 
-    const userDoc = await db.collection('users').doc(decodedClaims.uid).get();
-
-    if (!userDoc.exists) {
-      console.error('User document not found for UID:', decodedClaims.uid);
-      redirect('/admin/login');
-    }
-
-    const data = userDoc.data();
-
-    // Serializing basic timestamps
-    return {
-      uid: userDoc.id,
-      email: data?.email || decodedClaims.email || '',
-      displayName: data?.displayName || '',
-      photoURL: data?.photoURL || undefined,
-      role: data?.role || 'employee',
-      status: data?.status || 'active',
-      bio: data?.bio || '',
-      title: data?.title || '',
-      phone: data?.phone || '',
-      location: data?.location || '',
-      assignedProjects: data?.assignedProjects || [],
-      social: {
-        linkedin: data?.social?.linkedin || '',
-        github: data?.social?.github || '',
-        twitter: data?.social?.twitter || '',
-        website: data?.social?.website || '',
-      },
-      namecard: {
-        username: data?.namecard?.username || '',
-        tagline: data?.namecard?.tagline || '',
-        showEmail: data?.namecard?.showEmail ?? true,
-        showPhone: data?.namecard?.showPhone ?? false,
-        accentColor: data?.namecard?.accentColor || '#06b6d4',
-        background: data?.namecard?.background || 'gradient-dark',
-        socials: {
-          linkedin: data?.namecard?.socials?.linkedin ?? true,
-          github: data?.namecard?.socials?.github ?? true,
-          twitter: data?.namecard?.socials?.twitter ?? true,
-          website: data?.namecard?.socials?.website ?? true,
-        }
-      },
-      // Safely handle Firestore Timestamps
-      createdAt: data?.createdAt?.toDate?.()
-        ? data.createdAt.toDate().toISOString()
-        : new Date().toISOString(),
-      updatedAt: data?.updatedAt?.toDate?.()
-        ? data.updatedAt.toDate().toISOString()
-        : new Date().toISOString(),
-    } as UserProfile;
-  } catch (error) {
-    console.error('Session verification failed:', error);
+  if (!profile) {
     redirect('/admin/login');
   }
+
+  const prefs = (profile.preferences || {}) as Record<string, unknown>;
+
+  return {
+    uid: user.id,
+    email: user.email || '',
+    displayName: profile.full_name || '',
+    photoURL: profile.avatar_url || undefined,
+    role: profile.role || 'employee',
+    status: (prefs.status as string) || 'active',
+    bio: profile.bio || '',
+    title: (prefs.title as string) || '',
+    phone: profile.phone || '',
+    location: profile.location || '',
+    assignedProjects: (prefs.assigned_projects as string[]) || [],
+    social: {
+      linkedin: ((prefs.socials as Record<string, string>)?.linkedin) || '',
+      github: ((prefs.socials as Record<string, string>)?.github) || '',
+      twitter: ((prefs.socials as Record<string, string>)?.twitter) || '',
+      website: (prefs.website as string) || '',
+    },
+    namecard: {
+      username: ((prefs.namecard as Record<string, unknown>)?.username as string) || '',
+      tagline: ((prefs.namecard as Record<string, unknown>)?.tagline as string) || '',
+      showEmail: ((prefs.namecard as Record<string, unknown>)?.showEmail as boolean) ?? true,
+      showPhone: ((prefs.namecard as Record<string, unknown>)?.showPhone as boolean) ?? false,
+      accentColor: ((prefs.namecard as Record<string, unknown>)?.accentColor as string) || '#06b6d4',
+      background: ((prefs.namecard as Record<string, unknown>)?.background as string) || 'gradient-dark',
+      socials: {
+        linkedin: ((prefs.namecard as Record<string, unknown>)?.socials as Record<string, boolean>)?.linkedin ?? true,
+        github: ((prefs.namecard as Record<string, unknown>)?.socials as Record<string, boolean>)?.github ?? true,
+        twitter: ((prefs.namecard as Record<string, unknown>)?.socials as Record<string, boolean>)?.twitter ?? true,
+        website: ((prefs.namecard as Record<string, unknown>)?.socials as Record<string, boolean>)?.website ?? true,
+      },
+    },
+    createdAt: profile.created_at || new Date().toISOString(),
+    updatedAt: profile.updated_at || new Date().toISOString(),
+  };
 }
 
 export default async function AdminProfilePage() {
@@ -105,7 +92,7 @@ export default async function AdminProfilePage() {
       </div>
 
       <div className="mt-8 max-w-3xl">
-        <ProfileForm profile={profile} />
+        {profile ? <ProfileForm profile={profile} /> : <p className="text-white/50">Profile not found.</p>}
       </div>
     </div>
   );

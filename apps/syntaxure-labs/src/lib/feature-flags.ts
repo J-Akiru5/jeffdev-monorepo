@@ -39,6 +39,7 @@ export async function getFeatureFlags(): Promise<FeatureFlags> {
 export async function updateFeatureFlags(
   _flags: Partial<FeatureFlags>
 ): Promise<{ success: boolean; error?: string }> {
+  void _flags; // flags managed via env vars
   return {
     success: false,
     error: 'Feature flags are managed via environment variables. Deploy with updated FEATURE_* vars to change flags.',

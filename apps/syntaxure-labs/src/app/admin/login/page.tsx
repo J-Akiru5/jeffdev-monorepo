@@ -1,15 +1,14 @@
 'use client';
 
 import { useState, Suspense } from 'react';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { auth } from '@/lib/firebase/config';
+import { createClient } from '@/lib/supabase/browser';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 
 /**
  * Admin Login Page
  * ----------------
- * Google OAuth authentication for admin access.
+ * Supabase OAuth authentication for admin access.
  * Glassmorphism + neon accent design for brand consistency.
  */
 
@@ -30,35 +29,22 @@ function AdminLoginForm() {
     setError(null);
 
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
+      const supabase = createClient();
 
-      const idToken = await result.user.getIdToken();
-
-      const response = await fetch('/api/auth/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          idToken,
-          inviteToken,
-        }),
+      const { error: authError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/api/auth/callback${inviteToken ? `?invite=${inviteToken}` : ''}`,
+        },
       });
 
-      const data = await response.json();
+      if (authError) throw authError;
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create session');
-      }
-
-      router.push(data.redirectPath || '/admin');
+      // OAuth redirects away from this page — no further action needed
     } catch (err) {
       console.error('[LOGIN ERROR]', err);
-      const error = err as { code?: string; message: string };
-      if (error.code === 'auth/popup-closed-by-user') {
-        setIsLoading(false);
-        return;
-      }
-      setError(error.message || 'Failed to sign in');
+      const errorObj = err as { message?: string };
+      setError(errorObj.message || 'Failed to sign in');
       setIsLoading(false);
     }
   };

@@ -3,15 +3,11 @@
  * @description The "Data Nexus" - unified database access for the JeffDev ecosystem.
  * 
  * This package provides:
- * - Firebase Admin SDK singleton for Agency (Firestore)
- * - MongoDB client for Prism (Azure Cosmos DB)
+ * - MongoDB / Cosmos DB client for Prism
+ * - Gremlin graph client for Cosmos DB
  * - Shared Zod schemas for type-safe validation
  * 
  * @example
- * // Firebase (Agency)
- * import { firestore } from "@jeffdev/db/firebase";
- * const db = firestore();
- * 
  * // Cosmos DB (Prism)
  * import { getCollection } from "@jeffdev/db/cosmos";
  * const rules = await getCollection("rules");
@@ -20,15 +16,6 @@
  * import { UserSchema, RuleSchema } from "@jeffdev/db/schema";
  */
 
-// Firebase exports
-export {
-  firestore,
-  auth,
-  getFirestoreClient,
-  getAuthClient,
-  type Firestore,
-  type Auth,
-} from "./firebase.js";
 
 // Cosmos/MongoDB exports
 export {
