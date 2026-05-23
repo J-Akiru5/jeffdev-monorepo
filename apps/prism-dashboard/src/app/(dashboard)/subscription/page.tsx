@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { getCollection } from "@jeffdev/db";
-import { 
-  ArrowLeft, 
-  Check, 
+import {
+  ArrowLeft,
+  Check,
   Crown,
   Sparkles,
   Users,
-  Building2
+  Building2,
 } from "lucide-react";
 import { GlassPanel, Button, Badge } from "@jdstudio/ui";
 
@@ -16,11 +16,16 @@ import { GlassPanel, Button, Badge } from "@jdstudio/ui";
  * View current plan and upgrade options.
  */
 export default async function SubscriptionPage() {
-  const { userId } = await auth();
-  
-  if (!userId) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
     return null;
   }
+
+  const userId = user.id;
 
   // Fetch user's current subscription (if any)
   const subscriptionsCollection = await getCollection("subscriptions");
@@ -29,7 +34,7 @@ export default async function SubscriptionPage() {
   // Fetch usage stats
   const projectsCollection = await getCollection("projects");
   const rulesCollection = await getCollection("rules");
-  
+
   const [projectCount, ruleCount] = await Promise.all([
     projectsCollection.countDocuments({ userId }),
     rulesCollection.countDocuments({ createdBy: userId }),
@@ -68,9 +73,7 @@ export default async function SubscriptionPage() {
               {currentTier === "free" && (
                 <Badge variant="default">Active</Badge>
               )}
-              {currentTier !== "free" && (
-                <Badge variant="success">Pro</Badge>
-              )}
+              {currentTier !== "free" && <Badge variant="success">Pro</Badge>}
             </div>
           </div>
           <div className="text-right">
@@ -95,7 +98,7 @@ export default async function SubscriptionPage() {
             "3 components",
             "1 project",
             "10 AI generations/month",
-            "Export as Markdown"
+            "Export as Markdown",
           ]}
           current={currentTier === "free"}
           buttonLabel={currentTier === "free" ? "Current Plan" : "Downgrade"}
@@ -118,7 +121,7 @@ export default async function SubscriptionPage() {
             "IDE auto-sync",
             "All design systems",
             "All stack templates",
-            "Priority support"
+            "Priority support",
           ]}
           current={currentTier === "pro"}
           buttonLabel={currentTier === "pro" ? "Current Plan" : "Upgrade"}
@@ -140,7 +143,7 @@ export default async function SubscriptionPage() {
             "Up to 10 team members",
             "Shared component library",
             "Team rule management",
-            "Admin dashboard"
+            "Admin dashboard",
           ]}
           current={currentTier === "team"}
           buttonLabel={currentTier === "team" ? "Current Plan" : "Upgrade"}
@@ -162,7 +165,7 @@ export default async function SubscriptionPage() {
             "SSO/SAML",
             "Audit logs",
             "Dedicated support",
-            "Custom integrations"
+            "Custom integrations",
           ]}
           current={currentTier === "enterprise"}
           buttonLabel="Contact Sales"
@@ -176,15 +179,15 @@ export default async function SubscriptionPage() {
           Frequently Asked Questions
         </h3>
         <div className="space-y-4">
-          <FAQItem 
+          <FAQItem
             question="Can I cancel anytime?"
             answer="Yes, you can cancel your subscription at any time. Your access continues until the end of your billing period."
           />
-          <FAQItem 
+          <FAQItem
             question="What payment methods do you accept?"
             answer="We accept PayPal for all subscriptions. This includes PayPal balance, linked cards, and bank accounts."
           />
-          <FAQItem 
+          <FAQItem
             question="How do I upgrade or downgrade?"
             answer="You can change your plan at any time. Upgrades are immediate, and downgrades take effect at the next billing cycle."
           />
@@ -205,7 +208,7 @@ function PricingCard({
   current,
   buttonLabel,
   disabled,
-  href
+  href,
 }: {
   name: string;
   description: string;
@@ -220,13 +223,15 @@ function PricingCard({
   href?: string;
 }) {
   return (
-    <div className={`relative rounded-xl border p-6 transition-all ${
-      popular 
-        ? "border-cyan-500/30 bg-cyan-500/5" 
-        : current
-        ? "border-white/20 bg-white/5"
-        : "border-white/10 bg-white/[0.02] hover:border-white/20"
-    }`}>
+    <div
+      className={`relative rounded-xl border p-6 transition-all ${
+        popular
+          ? "border-cyan-500/30 bg-cyan-500/5"
+          : current
+            ? "border-white/20 bg-white/5"
+            : "border-white/10 bg-white/[0.02] hover:border-white/20"
+      }`}
+    >
       {popular && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2">
           <Badge variant="info" className="bg-cyan-500 text-white border-none">
@@ -238,7 +243,9 @@ function PricingCard({
 
       <div className="mb-4">
         {Icon && (
-          <Icon className={`h-6 w-6 mb-3 ${popular ? "text-cyan-400" : "text-white/40"}`} />
+          <Icon
+            className={`h-6 w-6 mb-3 ${popular ? "text-cyan-400" : "text-white/40"}`}
+          />
         )}
         <h3 className="text-lg font-semibold text-white">{name}</h3>
         <p className="text-sm text-white/50">{description}</p>

@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import Link from "next/link";
-import { UserButton } from "@clerk/nextjs";
+import { SupabaseUserButton } from "@/components/auth/supabase-user-button";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -20,9 +20,11 @@ import { BetaBadge } from "@/components/beta-badge";
  * Provides sidebar navigation for desktop and bottom navigation for mobile.
  * Auto-redirects new users (0 projects, onboarding not complete) to /onboarding.
  */
-export default async function DashboardLayout({ children }: { children: ReactNode }) {
-
-
+export default async function DashboardLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
     <div className="relative flex min-h-screen bg-[#050505]">
       <GridBackground variant="neon" />
@@ -34,19 +36,33 @@ export default async function DashboardLayout({ children }: { children: ReactNod
             <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-cyan-500/20 to-violet-500/20 border border-white/10 group-hover:border-cyan-500/30 transition-colors">
               <Sparkles className="h-4 w-4 text-cyan-400" />
             </div>
-            <span className="font-semibold text-white tracking-tight">Prism Engine</span>
+            <span className="font-semibold text-white tracking-tight">
+              Prism Engine
+            </span>
             <BetaBadge />
           </Link>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
-          <NavItem href="/dashboard" icon={LayoutDashboard}>Dashboard</NavItem>
-          <NavItem href="/projects" icon={FolderKanban}>Projects</NavItem>
-          <NavItem href="/brand" icon={Palette}>Branding</NavItem>
-          <NavItem href="/generate" icon={Sparkles}>AI Kitchen</NavItem>
-          <NavItem href="/generate/library" icon={Library}>Component Library</NavItem>
-          <NavItem href="/analytics" icon={BarChart2}>Analytics</NavItem>
+          <NavItem href="/dashboard" icon={LayoutDashboard}>
+            Dashboard
+          </NavItem>
+          <NavItem href="/projects" icon={FolderKanban}>
+            Projects
+          </NavItem>
+          <NavItem href="/brand" icon={Palette}>
+            Branding
+          </NavItem>
+          <NavItem href="/generate" icon={Sparkles}>
+            AI Kitchen
+          </NavItem>
+          <NavItem href="/generate/library" icon={Library}>
+            Component Library
+          </NavItem>
+          <NavItem href="/analytics" icon={BarChart2}>
+            Analytics
+          </NavItem>
 
           <div className="my-4 border-t border-white/5" />
 
@@ -57,20 +73,18 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
           <div className="my-4 border-t border-white/5" />
 
-          <NavItem href="/subscription" icon={CreditCard}>Subscription</NavItem>
-          <NavItem href="/settings" icon={Settings}>Settings</NavItem>
+          <NavItem href="/subscription" icon={CreditCard}>
+            Subscription
+          </NavItem>
+          <NavItem href="/settings" icon={Settings}>
+            Settings
+          </NavItem>
         </nav>
 
         {/* User */}
         <div className="border-t border-white/5 p-4 bg-black/20">
           <div className="flex items-center gap-3">
-            <UserButton
-              appearance={{
-                elements: {
-                  avatarBox: "h-9 w-9 ring-2 ring-white/5",
-                }
-              }}
-            />
+            <SupabaseUserButton />
             <div className="flex-1 truncate">
               <p className="text-sm font-medium text-white truncate">Account</p>
               <p className="text-xs text-white/50">Manage profile</p>
@@ -88,13 +102,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
           <span className="font-semibold text-white tracking-tight">Prism</span>
           <BetaBadge />
         </Link>
-        <UserButton
-          appearance={{
-            elements: {
-              avatarBox: "h-8 w-8",
-            }
-          }}
-        />
+        <SupabaseUserButton />
       </header>
 
       {/* Main Content */}
@@ -159,7 +167,7 @@ function NavItem({
 function MobileNavItem({
   href,
   icon: Icon,
-  label
+  label,
 }: {
   href: string;
   icon: typeof LayoutDashboard;

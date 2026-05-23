@@ -1,14 +1,14 @@
 /**
  * Admin Subscription API (Prism Admin)
- * 
+ *
  * PATCH /api/admin/subscription - Set ANY user's subscription tier
- * 
+ *
  * This is the admin-level endpoint for managing user subscriptions.
  * Allows admins to manually set subscription tiers for any user.
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { getCollection } from "@jeffdev/db/cosmos";
 import { z } from "zod";
 
@@ -22,9 +22,12 @@ const UpdateTierSchema = z.object({
  * GET - List all subscriptions (for admin overview)
  */
 export async function GET() {
-  const { userId } = await auth();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!userId) {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -51,7 +54,7 @@ export async function GET() {
     console.error("[admin/subscription] GET error:", error);
     return NextResponse.json(
       { error: "Failed to fetch subscriptions" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -60,9 +63,12 @@ export async function GET() {
  * PATCH - Update any user's subscription tier (Admin only)
  */
 export async function PATCH(request: NextRequest) {
-  const { userId: adminUserId } = await auth();
+  const supabase = await createClient();
+  const {
+    data: { user: adminUser },
+  } = await supabase.auth.getUser();
 
-  if (!adminUserId) {
+  if (!adminUser) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -75,8 +81,11 @@ export async function PATCH(request: NextRequest) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid request. Required: userId, tier (free|pro|team|enterprise)" },
-        { status: 400 }
+        {
+          error:
+            "Invalid request. Required: userId, tier (free|pro|team|enterprise)",
+        },
+        { status: 400 },
       );
     }
 
@@ -91,7 +100,7 @@ export async function PATCH(request: NextRequest) {
           tier,
           status: "active",
           updatedAt: now,
-          modifiedBy: adminUserId, // Track admin who made the change
+          modifiedBy: adminUser.id, // Track admin who made the change
         },
         $setOnInsert: {
           userId,
@@ -101,10 +110,12 @@ export async function PATCH(request: NextRequest) {
           currentPeriodEnd: new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000), // 1 year for manual
         },
       },
-      { upsert: true }
+      { upsert: true },
     );
 
-    console.log(`[admin/subscription] Admin ${adminUserId} updated ${userId} to tier: ${tier}`);
+    console.log(
+      `[admin/subscription] Admin ${adminUser.id} updated ${userId} to tier: ${tier}`,
+    );
 
     return NextResponse.json({
       success: true,
@@ -117,7 +128,7 @@ export async function PATCH(request: NextRequest) {
     console.error("[admin/subscription] PATCH error:", error);
     return NextResponse.json(
       { error: "Failed to update subscription" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

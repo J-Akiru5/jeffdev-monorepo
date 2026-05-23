@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { getCollection } from "@jeffdev/db";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -6,10 +6,10 @@ import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
 
 /**
  * MCP Search API
- * 
+ *
  * Searches video transcripts within a specific project.
  * Requires Pro+ subscription (ideSync feature).
- * 
+ *
  * GET /api/mcp/search?projectId=xxx&query=xxx
  */
 
@@ -21,14 +21,19 @@ const SearchParamsSchema = z.object({
 
 export async function GET(request: NextRequest) {
   // 1. Authenticate
-  const { userId } = await auth();
-  
-  if (!userId) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
     return NextResponse.json(
       { error: "Unauthorized", code: "AUTH_REQUIRED" },
-      { status: 401 }
+      { status: 401 },
     );
   }
+
+  const userId = user.id;
 
   // 2. Check subscription tier
   const tier = await getUserTier(userId);
@@ -36,14 +41,14 @@ export async function GET(request: NextRequest) {
 
   if (!canUseIdeSync) {
     return NextResponse.json(
-      { 
+      {
         error: "IDE Sync requires Pro subscription or higher",
         code: "UPGRADE_REQUIRED",
         currentTier: tier,
         requiredTier: "pro",
-        upgradeUrl: "/subscription"
+        upgradeUrl: "/subscription",
       },
-      { status: 403 }
+      { status: 403 },
     );
   }
 
@@ -54,7 +59,7 @@ export async function GET(request: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json(
       { error: "Invalid parameters", details: parsed.error.flatten() },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -63,39 +68,41 @@ export async function GET(request: NextRequest) {
   try {
     // 4. Verify project belongs to user
     const projectsCollection = await getCollection("projects");
-    
+
     // Try to find by slug first (most common), then by string ID
-    const project = await projectsCollection.findOne({
-      slug: projectId,
-      userId
-    }) || await projectsCollection.findOne({
-      userId
-    });
+    const project =
+      (await projectsCollection.findOne({
+        slug: projectId,
+        userId,
+      })) ||
+      (await projectsCollection.findOne({
+        userId,
+      }));
 
     if (!project) {
       return NextResponse.json(
         { error: "Project not found or access denied", code: "NOT_FOUND" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     // 5. Search video transcripts
     const transcriptsCollection = await getCollection("videoTranscripts");
-    
+
     // Text search on transcript content
     const transcripts = await transcriptsCollection
       .find({
         projectId: project._id.toString(),
-        transcriptText: { $regex: query, $options: "i" }
+        transcriptText: { $regex: query, $options: "i" },
       })
       .limit(limit)
       .toArray();
 
     // 6. Extract matching segments
-    const results = transcripts.map(transcript => {
-      const text = transcript.transcriptText as string || "";
+    const results = transcripts.map((transcript) => {
+      const text = (transcript.transcriptText as string) || "";
       const matches: { text: string; startIndex: number }[] = [];
-      
+
       // Find all occurrences of the query
       const regex = new RegExp(query, "gi");
       let match;
@@ -104,9 +111,12 @@ export async function GET(request: NextRequest) {
         const start = Math.max(0, match.index - 50);
         const end = Math.min(text.length, match.index + query.length + 50);
         const snippet = text.slice(start, end);
-        
+
         matches.push({
-          text: (start > 0 ? "..." : "") + snippet + (end < text.length ? "..." : ""),
+          text:
+            (start > 0 ? "..." : "") +
+            snippet +
+            (end < text.length ? "..." : ""),
           startIndex: match.index,
         });
       }
@@ -129,12 +139,11 @@ export async function GET(request: NextRequest) {
       totalVideos: results.length,
       tier,
     });
-
   } catch (error) {
     console.error("[MCP Search] Error:", error);
     return NextResponse.json(
       { error: "Search failed", code: "INTERNAL_ERROR" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -145,9 +154,9 @@ export async function GET(request: NextRequest) {
 async function getUserTier(userId: string): Promise<SubscriptionTier> {
   try {
     const subscriptionsCollection = await getCollection("subscriptions");
-    const subscription = await subscriptionsCollection.findOne({ 
+    const subscription = await subscriptionsCollection.findOne({
       userId,
-      status: { $in: ["active", "trialing"] }
+      status: { $in: ["active", "trialing"] },
     });
 
     if (!subscription) {

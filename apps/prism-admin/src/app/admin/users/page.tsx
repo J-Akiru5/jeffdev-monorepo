@@ -1,14 +1,14 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { getCollection } from "@jeffdev/db";
-import { 
-  Search, 
-  Filter, 
-  MoreVertical, 
+import {
+  Search,
+  Filter,
+  MoreVertical,
   ShieldCheck,
   Crown,
   User,
   Mail,
-  Calendar
+  Calendar,
 } from "lucide-react";
 
 /**
@@ -16,22 +16,37 @@ import {
  * List all users with search/filter and tier management
  */
 export default async function UsersPage() {
-  const { userId } = await auth();
-  const clerk = await currentUser();
-  const role = (clerk?.publicMetadata as { role?: string })?.role || "user";
+  const supabase = await createClient();
+  const {
+    data: { user: currentUser },
+  } = await supabase.auth.getUser();
+
+  const { data: currentUserProfile } = await supabase
+    .from("user_profiles")
+    .select("role")
+    .eq("id", currentUser?.id || "")
+    .single();
+
+  const role = currentUserProfile?.role || "employee";
   const isFounder = role === "founder";
-  
-  if (!userId) return null;
+
+  if (!currentUser) return null;
 
   const usersCollection = await getCollection("users");
-  const users = await usersCollection.find({}).sort({ createdAt: -1 }).toArray();
+  const users = await usersCollection
+    .find({})
+    .sort({ createdAt: -1 })
+    .toArray();
 
   // Group by tier for stats
-  const tierCounts = users.reduce((acc, user) => {
-    const tier = (user.tier as string) || "free";
-    acc[tier] = (acc[tier] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const tierCounts = users.reduce(
+    (acc, user) => {
+      const tier = (user.tier as string) || "free";
+      acc[tier] = (acc[tier] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
 
   return (
     <div className="space-y-6">
@@ -73,24 +88,41 @@ export default async function UsersPage() {
           <table className="w-full">
             <thead className="bg-white/[0.02] border-b border-white/5">
               <tr>
-                <th className="px-4 py-3 text-left text-[10px] font-medium text-white/40 uppercase tracking-wider">User</th>
-                <th className="px-4 py-3 text-left text-[10px] font-medium text-white/40 uppercase tracking-wider">Tier</th>
-                <th className="px-4 py-3 text-left text-[10px] font-medium text-white/40 uppercase tracking-wider">Status</th>
-                <th className="px-4 py-3 text-left text-[10px] font-medium text-white/40 uppercase tracking-wider">Joined</th>
-                <th className="px-4 py-3 text-right text-[10px] font-medium text-white/40 uppercase tracking-wider">Actions</th>
+                <th className="px-4 py-3 text-left text-[10px] font-medium text-white/40 uppercase tracking-wider">
+                  User
+                </th>
+                <th className="px-4 py-3 text-left text-[10px] font-medium text-white/40 uppercase tracking-wider">
+                  Tier
+                </th>
+                <th className="px-4 py-3 text-left text-[10px] font-medium text-white/40 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-4 py-3 text-left text-[10px] font-medium text-white/40 uppercase tracking-wider">
+                  Joined
+                </th>
+                <th className="px-4 py-3 text-right text-[10px] font-medium text-white/40 uppercase tracking-wider">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {users.map((user) => (
-                <tr key={user._id.toString()} className="hover:bg-white/[0.02] transition-colors">
+                <tr
+                  key={user._id.toString()}
+                  className="hover:bg-white/[0.02] transition-colors"
+                >
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-medium text-white">
                         {(user.email as string)?.charAt(0).toUpperCase() || "?"}
                       </div>
                       <div>
-                        <p className="text-sm text-white">{user.name as string || "—"}</p>
-                        <p className="text-xs text-white/40">{user.email as string}</p>
+                        <p className="text-sm text-white">
+                          {(user.name as string) || "—"}
+                        </p>
+                        <p className="text-xs text-white/40">
+                          {user.email as string}
+                        </p>
                       </div>
                     </div>
                   </td>
@@ -102,11 +134,19 @@ export default async function UsersPage() {
                   </td>
                   <td className="px-4 py-3">
                     <span className="text-xs text-white/40 font-mono">
-                      {user.createdAt ? new Date(user.createdAt as string).toLocaleDateString() : "—"}
+                      {user.createdAt
+                        ? new Date(
+                            user.createdAt as string,
+                          ).toLocaleDateString()
+                        : "—"}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button title="More options" aria-label="User options menu" className="p-1.5 rounded-md hover:bg-white/10 text-white/40 hover:text-white transition-colors">
+                    <button
+                      title="More options"
+                      aria-label="User options menu"
+                      className="p-1.5 rounded-md hover:bg-white/10 text-white/40 hover:text-white transition-colors"
+                    >
                       <MoreVertical className="h-4 w-4" />
                     </button>
                   </td>
@@ -126,14 +166,22 @@ export default async function UsersPage() {
                     {(user.email as string)?.charAt(0).toUpperCase() || "?"}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-white">{user.name as string || "—"}</p>
+                    <p className="text-sm font-medium text-white">
+                      {(user.name as string) || "—"}
+                    </p>
                     <div className="flex items-center gap-2 mt-0.5">
                       <TierPill tier={(user.tier as string) || "free"} />
-                      <StatusPill status={(user.status as string) || "active"} />
+                      <StatusPill
+                        status={(user.status as string) || "active"}
+                      />
                     </div>
                   </div>
                 </div>
-                <button title="More options" aria-label="User options menu" className="p-2 rounded-md hover:bg-white/10 text-white/40">
+                <button
+                  title="More options"
+                  aria-label="User options menu"
+                  className="p-2 rounded-md hover:bg-white/10 text-white/40"
+                >
                   <MoreVertical className="h-5 w-5" />
                 </button>
               </div>
@@ -144,7 +192,11 @@ export default async function UsersPage() {
                 </div>
                 <div className="flex items-center gap-2 text-white/40">
                   <Calendar className="h-3 w-3" />
-                  <span>{user.createdAt ? new Date(user.createdAt as string).toLocaleDateString() : "—"}</span>
+                  <span>
+                    {user.createdAt
+                      ? new Date(user.createdAt as string).toLocaleDateString()
+                      : "—"}
+                  </span>
                 </div>
               </div>
               {isFounder && (
@@ -175,12 +227,20 @@ export default async function UsersPage() {
 function TierBadge({ tier, count }: { tier: string; count: number }) {
   const config = {
     free: { icon: User, color: "text-white/50 bg-white/5 border-white/10" },
-    pro: { icon: ShieldCheck, color: "text-amber-400 bg-amber-500/10 border-amber-500/20" },
-    team: { icon: Crown, color: "text-purple-400 bg-purple-500/10 border-purple-500/20" },
+    pro: {
+      icon: ShieldCheck,
+      color: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+    },
+    team: {
+      icon: Crown,
+      color: "text-purple-400 bg-purple-500/10 border-purple-500/20",
+    },
   }[tier] || { icon: User, color: "text-white/50 bg-white/5 border-white/10" };
 
   return (
-    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${config.color}`}>
+    <div
+      className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${config.color}`}
+    >
       <config.icon className="h-3 w-3" />
       <span className="text-xs font-medium capitalize">{tier}</span>
       <span className="text-xs font-mono opacity-60">{count}</span>
@@ -189,28 +249,34 @@ function TierBadge({ tier, count }: { tier: string; count: number }) {
 }
 
 function TierPill({ tier }: { tier: string }) {
-  const config = {
-    free: "text-white/50 bg-white/5",
-    pro: "text-amber-400 bg-amber-500/15",
-    team: "text-purple-400 bg-purple-500/15",
-  }[tier] || "text-white/50 bg-white/5";
+  const config =
+    {
+      free: "text-white/50 bg-white/5",
+      pro: "text-amber-400 bg-amber-500/15",
+      team: "text-purple-400 bg-purple-500/15",
+    }[tier] || "text-white/50 bg-white/5";
 
   return (
-    <span className={`text-[10px] font-mono uppercase px-2 py-1 rounded ${config}`}>
+    <span
+      className={`text-[10px] font-mono uppercase px-2 py-1 rounded ${config}`}
+    >
       {tier}
     </span>
   );
 }
 
 function StatusPill({ status }: { status: string }) {
-  const config = {
-    active: "text-emerald-400 bg-emerald-500/15",
-    suspended: "text-red-400 bg-red-500/15",
-    pending: "text-yellow-400 bg-yellow-500/15",
-  }[status] || "text-white/50 bg-white/5";
+  const config =
+    {
+      active: "text-emerald-400 bg-emerald-500/15",
+      suspended: "text-red-400 bg-red-500/15",
+      pending: "text-yellow-400 bg-yellow-500/15",
+    }[status] || "text-white/50 bg-white/5";
 
   return (
-    <span className={`text-[10px] font-mono uppercase px-2 py-1 rounded ${config}`}>
+    <span
+      className={`text-[10px] font-mono uppercase px-2 py-1 rounded ${config}`}
+    >
       {status}
     </span>
   );

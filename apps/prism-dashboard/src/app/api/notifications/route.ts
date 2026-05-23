@@ -6,7 +6,7 @@
  * Preferences stored in Cosmos DB users collection under notificationPrefs field.
  */
 
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { getCollection } from "@jeffdev/db";
 import { z } from "zod";
@@ -26,14 +26,19 @@ const DEFAULT_PREFS: NotificationPrefs = {
 };
 
 export async function GET() {
-  const { userId } = await auth();
-  if (!userId) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const userId = user.id;
+
   try {
     const users = await getCollection("users");
-    const doc = await users.findOne({ clerkUserId: userId });
+    const doc = await users.findOne({ supabaseId: userId });
     const prefs = doc?.notificationPrefs ?? DEFAULT_PREFS;
     return NextResponse.json({ prefs });
   } catch {
@@ -42,10 +47,15 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const { userId } = await auth();
-  if (!userId) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const userId = user.id;
 
   let body: unknown;
   try {
@@ -56,23 +66,29 @@ export async function POST(req: Request) {
 
   const parsed = PrefsSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid preferences", details: parsed.error.flatten() }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid preferences", details: parsed.error.flatten() },
+      { status: 400 },
+    );
   }
 
   try {
     const users = await getCollection("users");
     await users.updateOne(
-      { clerkUserId: userId },
+      { supabaseId: userId },
       {
         $set: {
           notificationPrefs: parsed.data,
           updatedAt: new Date().toISOString(),
         },
       },
-      { upsert: true }
+      { upsert: true },
     );
     return NextResponse.json({ success: true, prefs: parsed.data });
   } catch {
-    return NextResponse.json({ error: "Failed to save preferences" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to save preferences" },
+      { status: 500 },
+    );
   }
 }

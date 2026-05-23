@@ -1,43 +1,59 @@
 'use server';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /**
  * Subscription Server Actions
  * ---------------------------
  * Server-side operations for managing service subscriptions.
+ * Note: Uses actual Supabase database schema with plan, billing_cycle, etc.
  */
-
-import { db } from '@/lib/firebase/admin';
-import { Timestamp } from 'firebase-admin/firestore';
-import type { 
-  Subscription, 
-  SubscriptionCreateInput, 
-  SubscriptionUpdateInput,
-  SubscriptionStatus 
-} from '@/types/subscription';
-import { createNotification } from './notifications';
+import { getAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 
-const SUBSCRIPTIONS_COLLECTION = 'subscriptions';
+const SUBSCRIPTIONS_TABLE = 'subscriptions';
+
+export interface SubscriptionRow {
+  id: string;
+  user_id: string;
+  plan: 'free' | 'pro' | 'enterprise';
+  status: 'active' | 'cancelled' | 'suspended';
+  billing_cycle: 'monthly' | 'annual';
+  amount: string;
+  currency: string;
+  current_period_start: string;
+  current_period_end: string;
+  cancel_at_period_end: boolean;
+  cancelled_at: string | null;
+  payment_method_id: string | null;
+  metadata: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}
 
 /**
  * Get all subscriptions with optional status filter
  */
 export async function getSubscriptions(
-  status?: SubscriptionStatus
-): Promise<Subscription[]> {
+  status?: SubscriptionRow['status']
+): Promise<SubscriptionRow[]> {
   try {
-    let query = db.collection(SUBSCRIPTIONS_COLLECTION).orderBy('createdAt', 'desc');
-    
+    const supabase = getAdminClient();
+
+    let query = supabase
+      .from(SUBSCRIPTIONS_TABLE)
+      .select('*')
+      .order('created_at', { ascending: false });
+
     if (status) {
-      query = query.where('status', '==', status);
+      query = query.eq('status', status);
     }
 
-    const snapshot = await query.get();
+    const { data, error } = await query;
 
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Subscription[];
+    if (error) throw error;
+
+    return (data || []) as SubscriptionRow[];
   } catch (error) {
     console.error('Failed to get subscriptions:', error);
     return [];
@@ -47,16 +63,19 @@ export async function getSubscriptions(
 /**
  * Get a single subscription by ID
  */
-export async function getSubscription(id: string): Promise<Subscription | null> {
+export async function getSubscription(id: string): Promise<SubscriptionRow | null> {
   try {
-    const doc = await db.collection(SUBSCRIPTIONS_COLLECTION).doc(id).get();
-    
-    if (!doc.exists) return null;
+    const supabase = getAdminClient();
 
-    return {
-      id: doc.id,
-      ...doc.data(),
-    } as Subscription;
+    const { data, error } = await supabase
+      .from(SUBSCRIPTIONS_TABLE)
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (error || !data) return null;
+
+    return data as SubscriptionRow;
   } catch (error) {
     console.error('Failed to get subscription:', error);
     return null;
@@ -67,57 +86,53 @@ export async function getSubscription(id: string): Promise<Subscription | null> 
  * Create a new subscription
  */
 export async function createSubscription(
-  input: SubscriptionCreateInput
+  input: {
+    user_id: string;
+    plan: 'free' | 'pro' | 'enterprise';
+    billing_cycle: 'monthly' | 'annual';
+    amount: string;
+    currency?: string;
+    start_date: Date;
+    metadata?: Record<string, any>;
+  }
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
-    // Calculate next billing date based on cycle
-    const startDate = new Date(input.startDate);
-    const nextBillingDate = new Date(startDate);
-    
-    switch (input.billingCycle) {
-      case 'monthly':
-        nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
-        break;
-      case 'quarterly':
-        nextBillingDate.setMonth(nextBillingDate.getMonth() + 3);
-        break;
-      case 'yearly':
-        nextBillingDate.setFullYear(nextBillingDate.getFullYear() + 1);
-        break;
+    // Calculate next billing period based on cycle
+    const startDate = new Date(input.start_date);
+    const endDate = new Date(startDate);
+
+    if (input.billing_cycle === 'monthly') {
+      endDate.setMonth(endDate.getMonth() + 1);
+    } else {
+      endDate.setFullYear(endDate.getFullYear() + 1);
     }
 
-    const docRef = await db.collection(SUBSCRIPTIONS_COLLECTION).add({
-      ...input,
-      status: 'active',
-      currency: input.currency || 'USD',
-      startDate: Timestamp.fromDate(startDate),
-      nextBillingDate: Timestamp.fromDate(nextBillingDate),
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-    });
+    const supabase = getAdminClient();
 
-    // Notify all admin users
-    try {
-      const adminSnapshot = await db.collection('users')
-        .where('role', 'in', ['founder', 'admin'])
-        .get();
-      const adminIds = adminSnapshot.docs.map(doc => doc.id);
+    const { data: result, error } = await supabase
+      .from(SUBSCRIPTIONS_TABLE)
+      .insert([{
+        user_id: input.user_id,
+        plan: input.plan,
+        status: 'active',
+        billing_cycle: input.billing_cycle,
+        amount: input.amount,
+        currency: input.currency || 'USD',
+        current_period_start: startDate.toISOString().split('T')[0],
+        current_period_end: endDate.toISOString().split('T')[0],
+        cancel_at_period_end: false,
+        cancelled_at: null,
+        payment_method_id: null,
+        metadata: input.metadata || {},
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }] as any)
+      .select('id');
 
-      for (const adminId of adminIds) {
-        await createNotification({
-          userId: adminId,
-          type: 'payment',
-          title: 'New Subscription',
-          body: `${input.clientName} subscribed to ${input.serviceName} (${input.tier})`,
-          link: `/admin/subscriptions/${docRef.id}`,
-        });
-      }
-    } catch (notificationError) {
-      console.error('Failed to notify admins:', notificationError);
-    }
+    if (error) throw error;
 
     revalidatePath('/admin/subscriptions');
-    return { success: true, id: docRef.id };
+    return { success: true, id: result?.[0]?.id };
   } catch (error) {
     console.error('Failed to create subscription:', error);
     return { success: false, error: 'Failed to create subscription' };
@@ -129,27 +144,56 @@ export async function createSubscription(
  */
 export async function updateSubscription(
   id: string,
-  input: SubscriptionUpdateInput
+  input: Partial<Omit<SubscriptionRow, 'id' | 'created_at'>>
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const updateData: Record<string, unknown> = {
-      ...input,
-      updatedAt: Timestamp.now(),
-    };
+    const supabase = getAdminClient();
+    const updateData: Record<string, unknown> = {};
 
-    // Convert nextBillingDate if provided
-    if (input.nextBillingDate) {
-      updateData.nextBillingDate = Timestamp.fromDate(new Date(input.nextBillingDate));
+    // Only add fields that are actually being updated
+    if (input.status !== undefined) {
+      updateData.status = input.status;
+    }
+    if (input.plan !== undefined) {
+      updateData.plan = input.plan;
+    }
+    if (input.billing_cycle !== undefined) {
+      updateData.billing_cycle = input.billing_cycle;
+    }
+    if (input.amount !== undefined) {
+      updateData.amount = input.amount;
+    }
+    if (input.currency !== undefined) {
+      updateData.currency = input.currency;
+    }
+    if (input.current_period_end !== undefined) {
+      updateData.current_period_end = input.current_period_end;
+    }
+    if (input.current_period_start !== undefined) {
+      updateData.current_period_start = input.current_period_start;
+    }
+    if (input.cancel_at_period_end !== undefined) {
+      updateData.cancel_at_period_end = input.cancel_at_period_end;
+    }
+    if (input.metadata !== undefined) {
+      updateData.metadata = input.metadata;
     }
 
     // Handle status changes
-    if (input.status === 'cancelled') {
-      updateData.cancelledAt = Timestamp.now();
-    } else if (input.status === 'paused') {
-      updateData.pausedAt = Timestamp.now();
+    if (input.status === 'cancelled' && !input.cancelled_at) {
+      updateData.cancelled_at = new Date().toISOString();
+    } else if (input.cancelled_at !== undefined) {
+      updateData.cancelled_at = input.cancelled_at;
     }
 
-    await db.collection(SUBSCRIPTIONS_COLLECTION).doc(id).update(updateData);
+    updateData.updated_at = new Date().toISOString();
+
+    const { error } = await supabase
+      .from(SUBSCRIPTIONS_TABLE)
+      .update(updateData as any)
+      .eq('id', id);
+
+    if (error) throw error;
 
     revalidatePath('/admin/subscriptions');
     return { success: true };
@@ -165,20 +209,23 @@ export async function updateSubscription(
 export async function cancelSubscription(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
-  return updateSubscription(id, { status: 'cancelled' });
+  return updateSubscription(id, {
+    status: 'cancelled',
+    cancelled_at: new Date().toISOString(),
+  });
 }
 
 /**
- * Pause a subscription
+ * Suspend a subscription
  */
-export async function pauseSubscription(
+export async function suspendSubscription(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
-  return updateSubscription(id, { status: 'paused' });
+  return updateSubscription(id, { status: 'suspended' });
 }
 
 /**
- * Resume a paused subscription
+ * Resume a suspended subscription
  */
 export async function resumeSubscription(
   id: string
@@ -188,6 +235,7 @@ export async function resumeSubscription(
 
 /**
  * Get subscription stats
+ * Calculates MRR (Monthly Recurring Revenue) based on active subscriptions
  */
 export async function getSubscriptionStats(): Promise<{
   total: number;
@@ -195,30 +243,30 @@ export async function getSubscriptionStats(): Promise<{
   mrr: number;
 }> {
   try {
-    const snapshot = await db.collection(SUBSCRIPTIONS_COLLECTION).get();
-    
+    const supabase = getAdminClient();
+
+    const { data, error } = await supabase
+      .from(SUBSCRIPTIONS_TABLE)
+      .select('*');
+
+    if (error) throw error;
+
     let total = 0;
     let active = 0;
     let mrr = 0;
 
-    snapshot.docs.forEach((doc) => {
-      const data = doc.data();
+    (data || []).forEach((subscription: any) => {
       total++;
-      
-      if (data.status === 'active') {
+
+      if (subscription.status === 'active') {
         active++;
-        
+
         // Calculate MRR based on billing cycle
-        switch (data.billingCycle) {
-          case 'monthly':
-            mrr += data.amount;
-            break;
-          case 'quarterly':
-            mrr += data.amount / 3;
-            break;
-          case 'yearly':
-            mrr += data.amount / 12;
-            break;
+        const amount = parseFloat(subscription.amount);
+        if (subscription.billing_cycle === 'monthly') {
+          mrr += amount;
+        } else if (subscription.billing_cycle === 'annual') {
+          mrr += amount / 12;
         }
       }
     });

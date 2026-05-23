@@ -1,26 +1,33 @@
-'use client';
+"use client";
 
 /**
  * User Context
- * -------------
- * Provides current user info and role throughout admin panel.
+ * Rewritten to use Supabase Auth
+ * Public API remains identical to consumer components
  */
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '@/lib/firebase/config';
-import type { AppUser } from '@/types/rbac';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { createClient } from "@/lib/supabase/browser";
+import type { AppUser } from "@/types/rbac";
 
 interface UserContextValue {
   user: AppUser | null;
   loading: boolean;
   error: string | null;
+  logout: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextValue>({
   user: null,
   loading: true,
   error: null,
+  logout: async () => {},
 });
 
 export function useUser() {
@@ -35,26 +42,29 @@ export function UserProvider({ children }: UserProviderProps) {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const supabase = createClient();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
         try {
-          // Fetch user profile from Firestore
-          const response = await fetch(`/api/users/${firebaseUser.uid}`);
-          
+          // Fetch user profile from Supabase
+          const response = await fetch(`/api/users/${session.user.id}`);
+
           if (response.ok) {
             const userData = await response.json();
             setUser(userData);
           } else {
-            // User exists in Firebase but not in our users collection
+            // User exists in Supabase Auth but not in user_profiles
             // Default to employee role for now
             setUser({
-              uid: firebaseUser.uid,
-              email: firebaseUser.email || '',
-              displayName: firebaseUser.displayName || 'User',
-              photoURL: firebaseUser.photoURL || undefined,
-              role: 'employee',
+              uid: session.user.id,
+              email: session.user.email || "",
+              displayName: session.user.user_metadata?.name || "User",
+              photoURL: session.user.user_metadata?.avatar_url || undefined,
+              role: "employee",
               assignedProjects: [],
               permissions: [],
               createdAt: new Date().toISOString(),
@@ -62,8 +72,8 @@ export function UserProvider({ children }: UserProviderProps) {
             });
           }
         } catch (err) {
-          console.error('[USER FETCH ERROR]', err);
-          setError('Failed to load user profile');
+          console.error("[USER FETCH ERROR]", err);
+          setError("Failed to load user profile");
         }
       } else {
         setUser(null);
@@ -71,11 +81,23 @@ export function UserProvider({ children }: UserProviderProps) {
       setLoading(false);
     });
 
-    return () => unsubscribe();
-  }, []);
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, [supabase]);
+
+  async function logout() {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+    } catch (err) {
+      console.error("[LOGOUT ERROR]", err);
+      setError("Failed to sign out");
+    }
+  }
 
   return (
-    <UserContext.Provider value={{ user, loading, error }}>
+    <UserContext.Provider value={{ user, loading, error, logout }}>
       {children}
     </UserContext.Provider>
   );

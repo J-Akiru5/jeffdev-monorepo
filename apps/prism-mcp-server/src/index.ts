@@ -21,7 +21,7 @@ import {
   ReadResourceRequestSchema,
   InitializeRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { MongoClient, type Collection, type Document, ObjectId, MongoNotConnectedError } from "mongodb";
+import { MongoClient, type Collection, type Document, ObjectId } from "mongodb";
 import { generateQueryEmbedding } from "./lib/azure-openai.js";
 import { findTopKSimilar, extractRelevantSnippet } from "./lib/vector-search.js";
 import { handlePrismScan } from "./tools/prism-scan.js";
@@ -141,7 +141,7 @@ async function getDB(): Promise<Collection<Document>> {
 
   try {
     await client.connect();
-  } catch (connectError) {
+  } catch {
     client = null;
     rulesCollection = null;
 

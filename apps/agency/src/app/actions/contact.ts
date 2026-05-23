@@ -3,14 +3,14 @@
  * ---------------------------
  * Handles contact form submissions:
  * 1. Validates input with Zod
- * 2. Saves to Firestore
+ * 2. Saves to Supabase
  * 3. Sends email notification to contact@jeffdev.studio
  */
 
 'use server';
 
 import { z } from 'zod';
-import { db } from '@/lib/firebase/admin';
+import { getAdminClient } from '@/lib/supabase/admin';
 import {
   sendEmail,
   contactEmailTemplate,
@@ -31,13 +31,20 @@ export async function submitContactForm(data: ContactFormData) {
     // Validate input
     const validated = contactSchema.parse(data);
 
-    // Save to Firestore
-    const docRef = await db.collection('messages').add({
-      ...validated,
-      status: 'new',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
+    // Save to Supabase
+    const supabase = getAdminClient();
+    const { data: result, error } = await supabase
+      .from('messages')
+      .insert({
+        ...validated,
+        status: 'new',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
 
     // Send email notification
     await sendEmail({
@@ -50,7 +57,7 @@ export async function submitContactForm(data: ContactFormData) {
     return {
       success: true,
       message: 'Message sent successfully! We\'ll get back to you within 24 hours.',
-      id: docRef.id,
+      id: result?.id,
     };
   } catch (error) {
     console.error('[CONTACT FORM ERROR]', error);
@@ -80,19 +87,30 @@ export async function updateMessageStatus(
   try {
     const { logAuditEvent } = await import('@/lib/audit');
 
-    const docRef = db.collection('messages').doc(messageId);
-    const doc = await docRef.get();
+    const supabase = getAdminClient();
+    
+    // Get current message for audit
+    const { data: current, error: fetchError } = await supabase
+      .from('messages')
+      .select('status')
+      .eq('id', messageId)
+      .single();
 
-    if (!doc.exists) {
+    if (fetchError || !current) {
       return { success: false, error: 'Message not found' };
     }
 
-    const oldStatus = doc.data()?.status;
+    const oldStatus = current.status;
 
-    await docRef.update({
-      status,
-      updatedAt: new Date().toISOString(),
-    });
+    const { error } = await supabase
+      .from('messages')
+      .update({
+        status,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', messageId);
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'STATUS_CHANGE',
@@ -110,4 +128,3 @@ export async function updateMessageStatus(
     return { success: false, error: 'Failed to update status' };
   }
 }
-

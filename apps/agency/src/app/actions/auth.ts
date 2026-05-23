@@ -1,16 +1,16 @@
-'use server';
+"use server";
 
 /**
  * Logout Action
- * --------------
- * Clears session cookie and signs out user.
+ * Rewritten to use Supabase Auth
+ * Clears session and signs out user.
  */
 
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
 
 export async function logout() {
-  const cookieStore = await cookies();
-  cookieStore.delete('session');
-  redirect('/admin/login');
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect("/");
 }

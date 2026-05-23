@@ -1,35 +1,40 @@
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { getCollection } from "@jeffdev/db";
 import { NextResponse } from "next/server";
 import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
 
 /**
  * Auth Verify API
- * 
+ *
  * Verifies a session token and returns user info + subscription tier.
  * Used by prism-cli to authenticate and check IDE sync access.
- * 
+ *
  * GET /api/auth/verify
- * Authorization: Bearer <clerk-session-token>
+ * Authorization: Bearer <supabase-session-token>
  */
 
 export async function GET() {
   try {
-    // 1. Get auth from Clerk
-    const { userId } = await auth();
+    // 1. Get auth from Supabase
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: "Invalid or expired token",
           tier: "free",
           ideSync: false,
-          userId: ""
+          userId: "",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
+
+    const userId = user.id;
 
     // 2. Get subscription tier
     const tier = await getUserTier(userId);
@@ -43,18 +48,17 @@ export async function GET() {
       limits: TIER_LIMITS[tier],
       upgradeUrl: ideSync ? undefined : "/subscription",
     });
-
   } catch (error) {
     console.error("[Auth Verify] Error:", error);
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: "Verification failed",
         tier: "free",
         ideSync: false,
-        userId: ""
+        userId: "",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -65,9 +69,9 @@ export async function GET() {
 async function getUserTier(userId: string): Promise<SubscriptionTier> {
   try {
     const subscriptionsCollection = await getCollection("subscriptions");
-    const subscription = await subscriptionsCollection.findOne({ 
+    const subscription = await subscriptionsCollection.findOne({
       userId,
-      status: { $in: ["active", "trialing"] }
+      status: { $in: ["active", "trialing"] },
     });
 
     if (!subscription) {

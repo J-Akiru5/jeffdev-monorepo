@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { getCollection } from "@jeffdev/db";
 
 /**
  * Brand Export API
  * Generates Prism Rules in various formats for different IDEs.
- * 
+ *
  * GET /api/brand/export?slug=brand-slug&format=cursor
- * 
+ *
  * Formats:
  * - cursor: .cursorrules file
  * - windsurf: .windsurfrules file
@@ -17,9 +17,12 @@ import { getCollection } from "@jeffdev/db";
  * - tailwind: Tailwind config theme
  */
 export async function GET(request: NextRequest) {
-  const { userId } = await auth();
-  
-  if (!userId) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -28,12 +31,15 @@ export async function GET(request: NextRequest) {
   const format = searchParams.get("format") || "cursor";
 
   if (!slug) {
-    return NextResponse.json({ error: "Missing slug parameter" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Missing slug parameter" },
+      { status: 400 },
+    );
   }
 
   // Fetch brand
   const brandsCollection = await getCollection("brands");
-  const brand = await brandsCollection.findOne({ userId, slug });
+  const brand = await brandsCollection.findOne({ userId: user.id, slug });
 
   if (!brand) {
     return NextResponse.json({ error: "Brand not found" }, { status: 404 });
@@ -175,18 +181,22 @@ function generateWindsurfRules(brand: BrandDoc): string {
  * Generate VS Code settings snippet
  */
 function generateVSCodeSettings(brand: BrandDoc): string {
-  return JSON.stringify({
-    "prism.brand": {
-      name: brand.companyName,
-      colors: brand.colors,
-      typography: brand.typography,
-      voice: brand.voice,
+  return JSON.stringify(
+    {
+      "prism.brand": {
+        name: brand.companyName,
+        colors: brand.colors,
+        typography: brand.typography,
+        voice: brand.voice,
+      },
+      "editor.tokenColorCustomizations": {
+        comments: brand.colors.textMuted,
+        strings: brand.colors.accent,
+      },
     },
-    "editor.tokenColorCustomizations": {
-      comments: brand.colors.textMuted,
-      strings: brand.colors.accent,
-    },
-  }, null, 2);
+    null,
+    2,
+  );
 }
 
 /**

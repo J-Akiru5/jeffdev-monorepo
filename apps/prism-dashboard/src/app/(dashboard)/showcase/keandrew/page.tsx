@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { getCollection } from "@jeffdev/db";
 import Link from "next/link";
 import { ArrowLeft, Code, Palette } from "lucide-react";
@@ -8,28 +8,37 @@ import { ArrowLeft, Code, Palette } from "lucide-react";
  * Displays the seeded brand profile, rules, and component examples.
  */
 export default async function KeandrewShowcasePage() {
-  await auth();
-  
+  const supabase = await createClient();
+  await supabase.auth.getUser();
+
   // Fetch Keandrew data
   const brandsCollection = await getCollection("brands");
   const rulesCollection = await getCollection("rules");
   const componentsCollection = await getCollection("components");
 
-  const brand = await brandsCollection.findOne({ slug: "keandrew-photography" });
-  const rules = await rulesCollection.find({ tags: { $in: ["keandrew"] } }).toArray();
-  const components = await componentsCollection.find({ name: { $regex: /^Keandrew/ } }).toArray();
+  const brand = await brandsCollection.findOne({
+    slug: "keandrew-photography",
+  });
+  const rules = await rulesCollection
+    .find({ tags: { $in: ["keandrew"] } })
+    .toArray();
+  const components = await componentsCollection
+    .find({ name: { $regex: /^Keandrew/ } })
+    .toArray();
 
   if (!brand) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <h1 className="text-2xl font-semibold text-white mb-4">Keandrew Demo Not Found</h1>
+        <h1 className="text-2xl font-semibold text-white mb-4">
+          Keandrew Demo Not Found
+        </h1>
         <p className="text-white/50 mb-6">
           Run the seed script to populate demo data:
         </p>
         <code className="bg-white/5 border border-white/10 px-4 py-2 rounded text-sm font-mono text-cyan-400">
           npm run seed:keandrew
         </code>
-        <Link 
+        <Link
           href="/brand"
           className="mt-8 text-sm text-white/50 hover:text-white transition-colors"
         >
@@ -46,14 +55,16 @@ export default async function KeandrewShowcasePage() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <Link 
+          <Link
             href="/brand"
             className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors mb-4"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Brands
           </Link>
-          <h1 className="text-2xl font-semibold text-white">Keandrew Photography Demo</h1>
+          <h1 className="text-2xl font-semibold text-white">
+            Keandrew Photography Demo
+          </h1>
           <p className="text-sm text-white/50 mt-1">
             Showcase of brand rules and UI component examples
           </p>
@@ -67,22 +78,25 @@ export default async function KeandrewShowcasePage() {
       </div>
 
       {/* Brand Overview */}
-      <section 
+      <section
         className="rounded-md border p-6"
-        style={{ 
+        style={{
           backgroundColor: colors.background,
-          borderColor: `${colors.accent}30`
+          borderColor: `${colors.accent}30`,
         }}
       >
         <div className="flex items-center gap-4 mb-6">
-          <div 
+          <div
             className="h-16 w-16 rounded-lg flex items-center justify-center text-2xl font-bold"
             style={{ backgroundColor: colors.accent, color: colors.background }}
           >
             K
           </div>
           <div>
-            <h2 style={{ color: colors.text }} className="text-xl font-semibold">
+            <h2
+              style={{ color: colors.text }}
+              className="text-xl font-semibold"
+            >
               {brand.companyName as string}
             </h2>
             <p style={{ color: colors.textMuted }} className="text-sm">
@@ -93,17 +107,22 @@ export default async function KeandrewShowcasePage() {
 
         {/* Color Swatches */}
         <div className="flex gap-3">
-          {Object.entries(colors).slice(0, 5).map(([name, value]) => (
-            <div key={name} className="text-center">
-              <div 
-                className="h-8 w-8 rounded-full border"
-                style={{ backgroundColor: value, borderColor: `${colors.text}20` }}
-              />
-              <p className="text-xs mt-1" style={{ color: colors.textMuted }}>
-                {name}
-              </p>
-            </div>
-          ))}
+          {Object.entries(colors)
+            .slice(0, 5)
+            .map(([name, value]) => (
+              <div key={name} className="text-center">
+                <div
+                  className="h-8 w-8 rounded-full border"
+                  style={{
+                    backgroundColor: value,
+                    borderColor: `${colors.text}20`,
+                  }}
+                />
+                <p className="text-xs mt-1" style={{ color: colors.textMuted }}>
+                  {name}
+                </p>
+              </div>
+            ))}
         </div>
       </section>
 
@@ -115,18 +134,20 @@ export default async function KeandrewShowcasePage() {
         </h2>
         <div className="grid md:grid-cols-2 gap-4">
           {rules.map((rule, i) => (
-            <div 
+            <div
               key={i}
               className="rounded-md border border-white/5 bg-white/2 p-4 hover:border-white/10 transition-colors"
             >
               <div className="flex items-start justify-between">
-                <h3 className="text-sm font-medium text-white">{rule.name as string}</h3>
+                <h3 className="text-sm font-medium text-white">
+                  {rule.name as string}
+                </h3>
                 <span className="text-xs bg-cyan-500/10 text-cyan-400 px-2 py-0.5 rounded">
                   {rule.category as string}
                 </span>
               </div>
               <div className="mt-2 text-xs text-white/40 font-mono flex gap-2">
-                {(rule.tags as string[] || []).slice(0, 3).map((tag, j) => (
+                {((rule.tags as string[]) || []).slice(0, 3).map((tag, j) => (
                   <span key={j}>#{tag}</span>
                 ))}
               </div>
@@ -146,14 +167,18 @@ export default async function KeandrewShowcasePage() {
         </h2>
         <div className="space-y-4">
           {components.map((comp, i) => (
-            <details 
+            <details
               key={i}
               className="group rounded-md border border-white/5 bg-white/2 overflow-hidden"
             >
               <summary className="flex items-center justify-between p-4 cursor-pointer hover:bg-white/5 transition-colors">
                 <div>
-                  <h3 className="text-sm font-medium text-white">{comp.name as string}</h3>
-                  <p className="text-xs text-white/40 mt-1">{comp.category as string}</p>
+                  <h3 className="text-sm font-medium text-white">
+                    {comp.name as string}
+                  </h3>
+                  <p className="text-xs text-white/40 mt-1">
+                    {comp.category as string}
+                  </p>
                 </div>
                 <span className="text-xs text-white/30 group-open:rotate-180 transition-transform">
                   ▼
@@ -173,7 +198,8 @@ export default async function KeandrewShowcasePage() {
       <section className="rounded-md border border-cyan-500/20 bg-cyan-500/5 p-6 text-center">
         <h2 className="text-lg font-medium text-white mb-2">Ready to Use</h2>
         <p className="text-sm text-white/50 mb-4">
-          Export these rules to your IDE and start building with Keandrew&apos;s brand system.
+          Export these rules to your IDE and start building with Keandrew&apos;s
+          brand system.
         </p>
         <Link
           href={`/brand/keandrew-photography`}

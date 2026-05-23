@@ -47,8 +47,8 @@ export interface Service {
   status: 'draft' | 'published' | 'archived';
   
   // Timestamps
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 // Tier metadata for display

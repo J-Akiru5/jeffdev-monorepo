@@ -3,14 +3,15 @@
  * -------------------------
  * Handles multi-step quote form submissions:
  * 1. Validates all steps with Zod
- * 2. Saves to Firestore
+ * 2. Saves to Supabase
  * 3. Sends email notification to hire@jeffdev.studio
  */
-
 'use server';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { z } from 'zod';
-import { db } from '@/lib/firebase/admin';
+import { getAdminClient } from '@/lib/supabase/admin';
 import {
   sendEmail,
   quoteEmailTemplate,
@@ -23,7 +24,7 @@ const quoteSchema = z.object({
   projectType: z.enum(['web', 'saas', 'mobile', 'ai', 'other'], {
     message: 'Please select a project type',
   }),
-  
+
   // Step 2: Budget & Timeline
   budget: z.enum(['50k-100k', '100k-250k', '250k-500k', '500k+'], {
     message: 'Please select a budget range',
@@ -31,7 +32,7 @@ const quoteSchema = z.object({
   timeline: z.enum(['1-2-weeks', '1-month', '2-3-months', 'flexible'], {
     message: 'Please select a timeline',
   }),
-  
+
   // Step 3: Contact Info
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
@@ -49,15 +50,33 @@ export async function submitQuoteForm(data: QuoteFormData) {
     // Generate unique reference number
     const refNo = generateQuoteRef();
 
-    // Save to Firestore
-    const docRef = await db.collection('quotes').add({
-      ...validated,
-      refNo,
-      status: 'new',
-      closedReason: null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
+    const supabase = getAdminClient();
+
+    // Save to Supabase
+    const { data: result, error } = await supabase
+      .from('quotes')
+      .insert([{
+        user_id: '',
+        project_id: null,
+        title: validated.name,
+        description: validated.details,
+        amount: '0',
+        status: 'draft' as const,
+        valid_until: null,
+        line_items: [],
+        metadata: {
+          projectType: validated.projectType,
+          budget: validated.budget,
+          timeline: validated.timeline,
+          company: validated.company,
+          refNo,
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }] as any)
+      .select('id');
+
+    if (error) throw error;
 
     // Send email notification
     await sendEmail({
@@ -70,7 +89,7 @@ export async function submitQuoteForm(data: QuoteFormData) {
     return {
       success: true,
       message: 'Quote request submitted! We\'ll respond within 24 hours with a custom quote.',
-      id: docRef.id,
+      id: result?.[0]?.id,
     };
   } catch (error) {
     console.error('[QUOTE FORM ERROR]', error);
@@ -95,24 +114,35 @@ export async function submitQuoteForm(data: QuoteFormData) {
  */
 export async function updateQuoteStatus(
   quoteId: string,
-  status: 'new' | 'contacted' | 'in-progress' | 'closed'
+  status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired'
 ) {
   try {
     const { logAuditEvent } = await import('@/lib/audit');
+    const supabase = getAdminClient();
 
-    const docRef = db.collection('quotes').doc(quoteId);
-    const doc = await docRef.get();
+    // Fetch current quote
+    const { data: quotes, error: fetchError } = await supabase
+      .from('quotes')
+      .select('status')
+      .eq('id', quoteId);
 
-    if (!doc.exists) {
+    if (fetchError || !quotes || quotes.length === 0) {
       return { success: false, error: 'Quote not found' };
     }
 
-    const oldStatus = doc.data()?.status;
+    const quote = quotes[0] as any;
+    const oldStatus = quote.status;
 
-    await docRef.update({
-      status,
-      updatedAt: new Date().toISOString(),
-    });
+    // Update quote status
+    const { error: updateError } = await supabase
+      .from('quotes')
+      .update({
+        status,
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq('id', quoteId);
+
+    if (updateError) throw updateError;
 
     await logAuditEvent({
       action: 'STATUS_CHANGE',
@@ -130,4 +160,3 @@ export async function updateQuoteStatus(
     return { success: false, error: 'Failed to update status' };
   }
 }
-

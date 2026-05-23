@@ -1,8 +1,16 @@
 import Link from "next/link";
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { getCollection } from "@jeffdev/db";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Video, Clock, FileJson, Play, AlertCircle, RefreshCw } from "lucide-react";
+import {
+  ArrowLeft,
+  Video,
+  Clock,
+  FileJson,
+  Play,
+  AlertCircle,
+  RefreshCw,
+} from "lucide-react";
 import { GlassPanel } from "@jdstudio/ui";
 import Mux from "@mux/mux-node";
 
@@ -26,16 +34,21 @@ interface MuxAsset {
  */
 export default async function VideosPage({ params }: Props) {
   const { slug } = await params;
-  const { userId } = await auth();
-  
-  if (!userId) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
     return null;
   }
+
+  const userId = user.id;
 
   // Fetch project
   const projectsCollection = await getCollection("projects");
   const project = await projectsCollection.findOne({ userId, slug });
-  
+
   if (!project) {
     notFound();
   }
@@ -54,15 +67,15 @@ export default async function VideosPage({ params }: Props) {
   const muxAssets: MuxAsset[] = [];
   const orphanedAssets: MuxAsset[] = []; // Videos without project association
   let muxError: string | null = null;
-  
+
   try {
     const tokenId = process.env.MUX_TOKEN_ID;
     const tokenSecret = process.env.MUX_TOKEN_SECRET;
-    
+
     if (tokenId && tokenSecret) {
       const mux = new Mux({ tokenId, tokenSecret });
       const { data } = await mux.video.assets.list({ limit: 50 });
-      
+
       // Separate: assets for this project vs orphaned assets
       for (const asset of data as MuxAsset[]) {
         if (asset.passthrough) {
@@ -88,9 +101,9 @@ export default async function VideosPage({ params }: Props) {
   }
 
   // Merge: Show processed videos first, then pending Mux assets
-  const processedAssetIds = new Set(processedVideos.map(v => v.muxAssetId));
-  const pendingAssets = muxAssets.filter(a => !processedAssetIds.has(a.id));
-  
+  const processedAssetIds = new Set(processedVideos.map((v) => v.muxAssetId));
+  const pendingAssets = muxAssets.filter((a) => !processedAssetIds.has(a.id));
+
   const totalVideos = processedVideos.length + pendingAssets.length;
 
   return (
@@ -112,7 +125,9 @@ export default async function VideosPage({ params }: Props) {
           </div>
           <div>
             <h1 className="text-2xl font-semibold text-white">Video Library</h1>
-            <p className="text-sm text-white/50">{totalVideos} video{totalVideos !== 1 ? 's' : ''} uploaded</p>
+            <p className="text-sm text-white/50">
+              {totalVideos} video{totalVideos !== 1 ? "s" : ""} uploaded
+            </p>
           </div>
         </div>
       </div>
@@ -146,9 +161,9 @@ export default async function VideosPage({ params }: Props) {
           {processedVideos.length > 0 && (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {processedVideos.map((video) => (
-                <VideoCard 
-                  key={video._id.toString()} 
-                  video={video} 
+                <VideoCard
+                  key={video._id.toString()}
+                  video={video}
                   slug={slug}
                 />
               ))}
@@ -185,8 +200,9 @@ export default async function VideosPage({ params }: Props) {
             </span>
           </div>
           <p className="text-xs text-white/40">
-            These videos were uploaded directly to Mux and aren&apos;t linked to any project. 
-            Re-upload them through the project page to enable AI rule extraction.
+            These videos were uploaded directly to Mux and aren&apos;t linked to
+            any project. Re-upload them through the project page to enable AI
+            rule extraction.
           </p>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {orphanedAssets.map((asset) => (
@@ -199,12 +215,18 @@ export default async function VideosPage({ params }: Props) {
   );
 }
 
-function VideoCard({ video, slug }: { video: Record<string, unknown>; slug: string }) {
+function VideoCard({
+  video,
+  slug,
+}: {
+  video: Record<string, unknown>;
+  slug: string;
+}) {
   const rulesCount = (video.extractedRules as string[])?.length || 0;
-  const duration = video.duration as number || 0;
+  const duration = (video.duration as number) || 0;
   const videoId = (video._id as { toString: () => string }).toString();
   const playbackId = video.muxPlaybackId as string;
-  
+
   return (
     <Link href={`/projects/${slug}/videos/${videoId}`}>
       <GlassPanel className="p-0 overflow-hidden hover:border-white/20 transition-all group cursor-pointer">
@@ -228,11 +250,11 @@ function VideoCard({ video, slug }: { video: Record<string, unknown>; slug: stri
             </div>
           </div>
         </div>
-        
+
         {/* Info */}
         <div className="p-4">
           <h3 className="font-medium text-white truncate">
-            {video.videoTitle as string || "Untitled Video"}
+            {(video.videoTitle as string) || "Untitled Video"}
           </h3>
           <div className="flex items-center gap-4 mt-2 text-xs text-white/50">
             <span className="flex items-center gap-1">
@@ -241,7 +263,7 @@ function VideoCard({ video, slug }: { video: Record<string, unknown>; slug: stri
             </span>
             <span className="flex items-center gap-1">
               <FileJson className="h-3 w-3" />
-              {rulesCount} rule{rulesCount !== 1 ? 's' : ''}
+              {rulesCount} rule{rulesCount !== 1 ? "s" : ""}
             </span>
           </div>
         </div>
@@ -254,22 +276,26 @@ function formatDuration(seconds: number): string {
   if (!seconds) return "0:00";
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
 function PendingVideoCard({ asset }: { asset: MuxAsset }) {
   const playbackId = asset.playback_ids?.[0]?.id;
   const duration = asset.duration || 0;
   const createdAt = new Date(asset.created_at);
-  const hasTranscript = asset.tracks?.some(t => t.type === "text" && t.text_type === "subtitles");
-  
+  const hasTranscript = asset.tracks?.some(
+    (t) => t.type === "text" && t.text_type === "subtitles",
+  );
+
   // Parse title from passthrough
   let title = `Video ${asset.id.slice(0, 8)}`;
   if (asset.passthrough) {
     try {
       const meta = JSON.parse(asset.passthrough);
       if (meta.videoTitle) title = meta.videoTitle;
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
 
   return (
@@ -293,16 +319,16 @@ function PendingVideoCard({ asset }: { asset: MuxAsset }) {
           <div className="text-center">
             <RefreshCw className="h-8 w-8 text-amber-400 animate-spin mx-auto mb-2" />
             <span className="text-xs font-mono text-amber-400">
-              {asset.status === "ready" && !hasTranscript 
-                ? "Generating captions..." 
-                : asset.status === "preparing" 
-                  ? "Processing video..." 
+              {asset.status === "ready" && !hasTranscript
+                ? "Generating captions..."
+                : asset.status === "preparing"
+                  ? "Processing video..."
                   : "Extracting rules..."}
             </span>
           </div>
         </div>
       </div>
-      
+
       {/* Info */}
       <div className="p-4">
         <h3 className="font-medium text-white/70 truncate">{title}</h3>
@@ -357,18 +383,20 @@ function OrphanedVideoCard({ asset }: { asset: MuxAsset }) {
           </a>
         )}
       </div>
-      
+
       {/* Info */}
       <div className="p-4">
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-mono text-xs text-white/50 truncate">
             {asset.id.slice(0, 16)}...
           </h3>
-          <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
-            asset.status === "ready" 
-              ? "text-emerald-400 bg-emerald-500/15" 
-              : "text-amber-400 bg-amber-500/15"
-          }`}>
+          <span
+            className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
+              asset.status === "ready"
+                ? "text-emerald-400 bg-emerald-500/15"
+                : "text-amber-400 bg-amber-500/15"
+            }`}
+          >
             {asset.status}
           </span>
         </div>
@@ -377,9 +405,7 @@ function OrphanedVideoCard({ asset }: { asset: MuxAsset }) {
             <Clock className="h-3 w-3" />
             {formatDuration(duration)}
           </span>
-          <span>
-            {createdAt.toLocaleDateString()}
-          </span>
+          <span>{createdAt.toLocaleDateString()}</span>
         </div>
       </div>
     </GlassPanel>

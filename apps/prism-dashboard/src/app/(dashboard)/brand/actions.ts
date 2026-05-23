@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
+import { createClient } from "@/lib/supabase/server";
 import { getCollection } from "@jeffdev/db";
 import { z } from "zod";
 import { redirect } from "next/navigation";
@@ -21,8 +21,15 @@ const IdentitySchema = z.object({
   companyName: z.string().min(2, "Company name required").max(100),
   tagline: z.string().max(200).optional(),
   industry: z.enum([
-    "photography", "tech", "agency", "ecommerce", 
-    "saas", "healthcare", "finance", "education", "other"
+    "photography",
+    "tech",
+    "agency",
+    "ecommerce",
+    "saas",
+    "healthcare",
+    "finance",
+    "education",
+    "other",
   ]),
 });
 
@@ -55,7 +62,12 @@ const TypographySchema = z.object({
 const VoiceSchema = z.object({
   personality: z.enum(["minimal", "warm", "bold", "playful", "corporate"]),
   formality: z.enum(["casual", "balanced", "formal"]),
-  keywords: z.string().transform(s => s.split(",").map(k => k.trim()).filter(Boolean)),
+  keywords: z.string().transform((s) =>
+    s
+      .split(",")
+      .map((k) => k.trim())
+      .filter(Boolean),
+  ),
 });
 
 /**
@@ -81,13 +93,18 @@ const CompleteBrandSchema = z.object({
  */
 export async function createBrand(
   _prevState: BrandFormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<BrandFormState> {
-  const { userId } = await auth();
-  
-  if (!userId) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
     throw new Error("Unauthorized");
   }
+
+  const userId = user.id;
 
   // Parse all form data
   const rawData = {
@@ -126,9 +143,11 @@ export async function createBrand(
 
   // Validate
   const parsed = CompleteBrandSchema.safeParse(rawData);
-  
+
   if (!parsed.success) {
-    return { error: parsed.error.flatten().fieldErrors as Record<string, string[]> };
+    return {
+      error: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+    };
   }
 
   const data = parsed.data;
@@ -170,14 +189,19 @@ export async function createBrand(
  * Get user's brands
  */
 export async function getUserBrands() {
-  const { userId } = await auth();
-  
-  if (!userId) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
     return [];
   }
 
+  const userId = user.id;
+
   const brandsCollection = await getCollection("brands");
-  
+
   // Only show user's own brands
   return brandsCollection
     .find({ userId })
@@ -190,11 +214,16 @@ export async function getUserBrands() {
  * Get a single brand by slug
  */
 export async function getBrand(slug: string) {
-  const { userId } = await auth();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!userId) {
+  if (!user) {
     return null;
   }
+
+  const userId = user.id;
 
   const brandsCollection = await getCollection("brands");
   return brandsCollection.findOne({ userId, slug });
@@ -205,13 +234,18 @@ export async function getBrand(slug: string) {
  */
 export async function updateBrand(
   _prevState: BrandFormState,
-  formData: FormData
+  formData: FormData,
 ): Promise<BrandFormState> {
-  const { userId } = await auth();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!userId) {
+  if (!user) {
     throw new Error("Unauthorized");
   }
+
+  const userId = user.id;
 
   const slug = formData.get("slug") as string;
 
@@ -254,7 +288,9 @@ export async function updateBrand(
   const parsed = CompleteBrandSchema.safeParse(rawData);
 
   if (!parsed.success) {
-    return { error: parsed.error.flatten().fieldErrors as Record<string, string[]> };
+    return {
+      error: parsed.error.flatten().fieldErrors as Record<string, string[]>,
+    };
   }
 
   const data = parsed.data;
@@ -280,7 +316,7 @@ export async function updateBrand(
         spacing: data.spacing,
         updatedAt: new Date().toISOString(),
       },
-    }
+    },
   );
 
   // Revalidate and redirect
@@ -293,11 +329,16 @@ export async function updateBrand(
  * Delete a brand
  */
 export async function deleteBrand(slug: string) {
-  const { userId } = await auth();
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!userId) {
+  if (!user) {
     throw new Error("Unauthorized");
   }
+
+  const userId = user.id;
 
   const brandsCollection = await getCollection("brands");
   await brandsCollection.deleteOne({ userId, slug });
@@ -305,4 +346,3 @@ export async function deleteBrand(slug: string) {
   revalidatePath("/brand");
   redirect("/brand");
 }
-

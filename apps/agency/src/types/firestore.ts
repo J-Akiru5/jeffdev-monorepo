@@ -72,8 +72,8 @@ export interface FirestoreProject {
   assignedPartner?: string; // User UID
   assignedEmployees?: string[]; // User UIDs
   milestones?: ProjectMilestone[];
-  createdAt?: string;
-  updatedAt?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // =============================================================================
@@ -89,8 +89,8 @@ export interface FirestoreQuote {
   company?: string;
   details: string;
   status: 'new' | 'contacted' | 'in-progress' | 'closed';
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 // =============================================================================
@@ -103,8 +103,8 @@ export interface FirestoreMessage {
   subject: string;
   message: string;
   status: 'new' | 'read' | 'responded';
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }
 
 // =============================================================================
@@ -123,8 +123,8 @@ export interface CalendarEvent {
   projectSlug?: string; // Link to project
   color?: string; // Custom color override
   createdBy?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // =============================================================================
@@ -142,6 +142,6 @@ export interface FirestoreFeedback {
   testimonial: string;
   status: FeedbackStatus;
   featured: boolean; // Show on public site
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }

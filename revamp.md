@@ -76,15 +76,15 @@ REMOVED: mht, joularix, nexure, marketing, prism-exercise, tracker (repurposed �
 
 **Key decisions:**
 
-| Decision | Rationale |
-|----------|-----------|
-| Single Supabase project for all apps | Shared auth, simpler cookie domain setup (single `__Host-` prefix), one RLS policy surface |
-| Gremlin only for Prism rules/skills graph | App data (projects, brands) stays on MongoDB document model. Graph model is experimental — isolate blast radius |
-| Hard cutover for Clerk migration | Staged auth (two providers simultaneously) doubles middleware complexity. Password reset is acceptable UX tradeoff for simpler code |
-| `@jdstudio/ui` → `@syntaxure/ui` | Aligns with syntaxure-labs brand. Single source of truth for all designs |
-| prism-admin as universal admin | Consolidates agency admin + Prism admin + team management into one app. Reduces maintenance surface from 2 admin panels to 1 |
-| Python app inside monorepo | Minimizes deployment orchestration. Docker-based, REST API boundary to other apps |
-| prism-manage = Calendar + Tasks MVP | Full Notion clone is 6+ months. Calendar sync + task management delivers immediate business value |
+| Decision                                  | Rationale                                                                                                                           |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Single Supabase project for all apps      | Shared auth, simpler cookie domain setup (single `__Host-` prefix), one RLS policy surface                                          |
+| Gremlin only for Prism rules/skills graph | App data (projects, brands) stays on MongoDB document model. Graph model is experimental — isolate blast radius                     |
+| Hard cutover for Clerk migration          | Staged auth (two providers simultaneously) doubles middleware complexity. Password reset is acceptable UX tradeoff for simpler code |
+| `@jdstudio/ui` → `@syntaxure/ui`          | Aligns with syntaxure-labs brand. Single source of truth for all designs                                                            |
+| prism-admin as universal admin            | Consolidates agency admin + Prism admin + team management into one app. Reduces maintenance surface from 2 admin panels to 1        |
+| Python app inside monorepo                | Minimizes deployment orchestration. Docker-based, REST API boundary to other apps                                                   |
+| prism-manage = Calendar + Tasks MVP       | Full Notion clone is 6+ months. Calendar sync + task management delivers immediate business value                                   |
 
 ---
 
@@ -95,6 +95,7 @@ REMOVED: mht, joularix, nexure, marketing, prism-exercise, tracker (repurposed �
 **Goal:** Clean slate. Monorepo only has the apps we're keeping. Infrastructure ready.
 
 #### Task 1.1 — Remove Unnecessary Apps
+
 - Remove directories: `apps/mht/`, `apps/joularix/`, `apps/nexure/`, `apps/marketing/`, `apps/prism-exercise/`
 - Remove from `pnpm-workspace.yaml` (if listed individually; currently `apps/*` covers all)
 - Remove from `docker-compose.yml` (mht, marketing not in compose, but nexure/joularix/prism-exercise aren't either — just remove references if any)
@@ -103,6 +104,7 @@ REMOVED: mht, joularix, nexure, marketing, prism-exercise, tracker (repurposed �
 - **Result:** 7 apps remain (agency, prism-dashboard, prism-docs, prism-admin, prism-mcp-server, tracker, + empty prism-analytics)
 
 #### Task 1.2 — Publish @prism-engine/cli to npm
+
 - Verify `packages/prism-cli/package.json` build pipeline (`prepublishOnly: pnpm run build`)
 - Run `pnpm --filter @prism-engine/cli run build` → verify dist/ output
 - Run `pnpm --filter @prism-engine/cli publish` (or `npm publish` from package dir with `--access public`)
@@ -110,6 +112,7 @@ REMOVED: mht, joularix, nexure, marketing, prism-exercise, tracker (repurposed �
 - **Result:** `@prism-engine/cli` available on npm
 
 #### Task 1.3 — Supabase Project Setup
+
 - Create Supabase organization + project on supabase.com
 - Generate: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
 - Install Supabase CLI: `pnpm add -D supabase` (root)
@@ -119,12 +122,14 @@ REMOVED: mht, joularix, nexure, marketing, prism-exercise, tracker (repurposed �
 - **Result:** Supabase running locally and in cloud
 
 #### Task 1.4 — Redis Setup
+
 - Option A: Upstash (serverless, already in deps)
 - Option B: Self-hosted Redis (add to docker-compose.yml)
 - Add `REDIS_URL` (or `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`) to Doppler
 - **Result:** Redis available for rate limiting
 
 #### Task 1.5 — Python Toolchain Setup
+
 - Add `uv` (or `poetry`) for Python package management
 - Create `apps/prism-analytics/pyproject.toml` (template)
 - Create `apps/prism-analytics/Dockerfile` (template)
@@ -137,6 +142,7 @@ REMOVED: mht, joularix, nexure, marketing, prism-exercise, tracker (repurposed �
 **Goal:** Supabase Auth replaces Clerk + Firebase Auth. Supabase replaces Firestore. Cloudflare R2 replaced.
 
 #### Task 2.1 — Cloudflare R2 → Supabase Storage
+
 **Files to change (6 files):**
 | File | Change |
 |------|--------|
@@ -154,13 +160,16 @@ REMOVED: mht, joularix, nexure, marketing, prism-exercise, tracker (repurposed �
 **Verification:** Upload a test image through the profile form. Verify it appears via Supabase public URL.
 
 #### Task 2.2 — Clerk → Supabase Auth (prism-engine)
+
 **⚠️ Critical: Preserve API key dual-auth.** prism-engine has TWO auth mechanisms:
+
 1. Clerk (session-based, for dashboard UI) → **REPLACED** with Supabase Auth
 2. API keys (SHA-256 hashed, for MCP/API access) → **PRESERVED AS-IS**
 
 **Files to change (40+ files):**
 
 **Supabase client setup (NEW):**
+
 ```
 apps/prism-engine/src/lib/supabase/
 ├── server.ts          # Server client (reads cookies, uses service role)
@@ -179,6 +188,7 @@ apps/prism-engine/src/lib/supabase/
 | `src/app/(dashboard)/layout.tsx` | Replace `UserButton` → Custom `SupabaseUserButton` |
 
 **Server actions/pages using Clerk `auth()` (30+ files):**
+
 ```typescript
 // BEFORE (Clerk)
 import { auth } from "@clerk/nextjs/server";
@@ -187,11 +197,14 @@ const { userId } = await auth();
 // AFTER (Supabase)
 import { createClient } from "~/lib/supabase/server";
 const supabase = await createClient();
-const { data: { user } } = await supabase.auth.getUser();
+const {
+  data: { user },
+} = await supabase.auth.getUser();
 const userId = user?.id;
 ```
 
 **Affected files (all in prism-engine):**
+
 ```
 src/lib/api-auth.ts                        # DUAL AUTH: Clerk check → Supabase check, API key check preserved
 src/app/api/mcp/stdio/route.ts             # auth() → supabase.auth.getUser()
@@ -214,6 +227,7 @@ src/lib/subscription-actions.ts
 ```
 
 **Metadata migration:**
+
 ```typescript
 // BEFORE: Clerk publicMetadata/privateMetadata
 const { publicMetadata } = await currentUser();
@@ -234,12 +248,14 @@ const { data: profile } = await supabase
 ```
 
 **Auth UI components to build:**
+
 - `SignInForm` — email + password, magic link option, "Forgot password" link
 - `SignUpForm` — email + password + name
 - `SupabaseUserButton` — avatar, name, dropdown (Settings, Sign Out)
 - `AuthCallback` — OAuth callback handler (if adding social providers later)
 
 **Verification:**
+
 1. Sign up new user via Supabase UI → user appears in Supabase dashboard
 2. Sign in → redirected to dashboard
 3. API key authentication still works (dual auth preserved)
@@ -247,25 +263,27 @@ const { data: profile } = await supabase
 5. Tier/role checks in server actions return correct user metadata
 
 #### Task 2.3 — Clerk → Supabase Auth (prism-admin)
+
 **Similar changes to prism-engine but smaller scope (12 files):**
 
-| File | Change |
-|------|--------|
-| `src/middleware.ts` | Clerk → Supabase SSR middleware |
-| `src/app/layout.tsx` | ClerkProvider → SupabaseProvider |
-| `src/app/admin/layout.tsx` | UserButton → SupabaseUserButton; currentUser → supabase.auth.getUser() |
-| `src/app/sign-in/[[...sign-in]]/page.tsx` | Custom sign-in page |
-| `src/app/admin/users/page.tsx` | auth() + currentUser → supabase |
-| `src/app/admin/settings/page.tsx` | auth() + currentUser → supabase |
-| `src/app/admin/projects/page.tsx` | auth() → supabase |
-| `src/app/admin/inquiries/page.tsx` | auth() → supabase |
-| `src/app/admin/subscriptions/page.tsx` | auth() → supabase |
-| `src/app/admin/dashboard/page.tsx` | auth() → supabase |
-| `src/app/admin/clients/page.tsx` | auth() → supabase |
-| `src/app/api/bootstrap/route.ts` | clerkClient.users.updateUser() → supabase.auth.admin.updateUserById() |
-| `src/app/api/admin/subscription/route.ts` | auth() → supabase |
+| File                                      | Change                                                                 |
+| ----------------------------------------- | ---------------------------------------------------------------------- |
+| `src/middleware.ts`                       | Clerk → Supabase SSR middleware                                        |
+| `src/app/layout.tsx`                      | ClerkProvider → SupabaseProvider                                       |
+| `src/app/admin/layout.tsx`                | UserButton → SupabaseUserButton; currentUser → supabase.auth.getUser() |
+| `src/app/sign-in/[[...sign-in]]/page.tsx` | Custom sign-in page                                                    |
+| `src/app/admin/users/page.tsx`            | auth() + currentUser → supabase                                        |
+| `src/app/admin/settings/page.tsx`         | auth() + currentUser → supabase                                        |
+| `src/app/admin/projects/page.tsx`         | auth() → supabase                                                      |
+| `src/app/admin/inquiries/page.tsx`        | auth() → supabase                                                      |
+| `src/app/admin/subscriptions/page.tsx`    | auth() → supabase                                                      |
+| `src/app/admin/dashboard/page.tsx`        | auth() → supabase                                                      |
+| `src/app/admin/clients/page.tsx`          | auth() → supabase                                                      |
+| `src/app/api/bootstrap/route.ts`          | clerkClient.users.updateUser() → supabase.auth.admin.updateUserById()  |
+| `src/app/api/admin/subscription/route.ts` | auth() → supabase                                                      |
 
 **Role migration (critical path):**
+
 ```
 Clerk: publicMetadata.role = "admin" | "employee" | "client"
   ↓
@@ -273,6 +291,7 @@ Supabase: user_profiles.role field + RLS policies
 ```
 
 #### Task 2.4 — Clerk → Supabase Auth (syntaxure-labs)
+
 **Simplest auth migration — only 3 files:**
 | File | Change |
 |------|--------|
@@ -281,7 +300,9 @@ Supabase: user_profiles.role field + RLS policies
 | `src/components/admin/bootstrap-button.tsx` | Update `useUser()` usage |
 
 #### Task 2.5 — Clerk User Export + Supabase Import
+
 **Hard cutover procedure (manual):**
+
 1. Export all Clerk users via Clerk Dashboard → CSV/JSON export
 2. Write import script: `scripts/import-clerk-users.ts` — creates users in Supabase via Admin API with `email_confirm: true`, sets `user_metadata` from Clerk `publicMetadata`
 3. Run import → all users have accounts but no password set
@@ -290,11 +311,13 @@ Supabase: user_profiles.role field + RLS policies
 6. Keep Clerk project active for 30 days as emergency fallback
 
 #### Task 2.6 — Firestore → Supabase (syntaxure-labs)
+
 **⚠️ Largest single migration. ~50+ files changed.**
 
 **Step 1: Design Supabase schema → apply migration (see §3 below)**
 
 **Step 2: Create Supabase client helpers:**
+
 ```
 apps/agency/src/lib/supabase/
 ├── server.ts          # Server client (cookies + service role)
@@ -310,6 +333,7 @@ apps/agency/src/lib/supabase/
 | `src/types/notification.ts` | Remove `Timestamp` import |
 
 **Step 4: Rewrite server actions (8 files):**
+
 ```typescript
 // BEFORE (Firestore)
 import { db } from "@/lib/firebase/admin";
@@ -319,11 +343,12 @@ const docRef = await db.collection("projects").add({
   title,
   createdAt: Timestamp.now(),
 });
-const snapshot = await db.collection("projects")
+const snapshot = await db
+  .collection("projects")
   .where("userId", "==", userId)
   .orderBy("createdAt", "desc")
   .get();
-const projects = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+const projects = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
 // AFTER (Supabase)
 import { createClient } from "@/lib/supabase/admin";
@@ -340,23 +365,24 @@ const { data: projects } = await supabase
   .order("created_at", { ascending: false });
 ```
 
-| File | Action |
-|------|--------|
-| `src/app/actions/subscriptions.ts` | Firestore → Supabase (subscriptions table) |
-| `src/app/actions/notifications.ts` | Firestore → Supabase (notifications table) |
-| `src/app/actions/projects.ts` | Firestore → Supabase (projects table) |
-| `src/app/actions/calendar.ts` | Firestore → Supabase (calendar_events table) |
-| `src/app/actions/feedback.ts` | Firestore → Supabase (feedback table) |
-| `src/app/actions/case-studies.ts` | Firestore → Supabase (case_studies table) |
-| `src/app/actions/seed.ts` | Firestore → Supabase seed |
-| `src/app/actions/accept-invite.ts` | Firestore → Supabase (invites table) |
-| `src/app/actions/users.ts` | Firestore → Supabase (user_profiles table) |
-| `src/app/actions/project-management.ts` | Firestore → Supabase |
+| File                                    | Action                                       |
+| --------------------------------------- | -------------------------------------------- |
+| `src/app/actions/subscriptions.ts`      | Firestore → Supabase (subscriptions table)   |
+| `src/app/actions/notifications.ts`      | Firestore → Supabase (notifications table)   |
+| `src/app/actions/projects.ts`           | Firestore → Supabase (projects table)        |
+| `src/app/actions/calendar.ts`           | Firestore → Supabase (calendar_events table) |
+| `src/app/actions/feedback.ts`           | Firestore → Supabase (feedback table)        |
+| `src/app/actions/case-studies.ts`       | Firestore → Supabase (case_studies table)    |
+| `src/app/actions/seed.ts`               | Firestore → Supabase seed                    |
+| `src/app/actions/accept-invite.ts`      | Firestore → Supabase (invites table)         |
+| `src/app/actions/users.ts`              | Firestore → Supabase (user_profiles table)   |
+| `src/app/actions/project-management.ts` | Firestore → Supabase                         |
 
 **Step 5: Rewrite components (15+ files):**
 All components importing from `@/types/firestore` need imports updated to `@/types/database`.
 
 **Step 6: Remove Firebase entirely from syntaxure-labs:**
+
 - Delete `src/lib/firebase/` directory
 - Delete `src/contexts/user-context.tsx` (replaced by Supabase Auth context)
 - Remove `firebase`, `firebase-admin` from `package.json`
@@ -364,9 +390,11 @@ All components importing from `@/types/firestore` need imports updated to `@/typ
 - Remove `Timestamp` utility from `src/lib/utils.ts`
 
 **Step 7: Write Firestore → Supabase data migration script:**
+
 ```
 scripts/migrate-firestore-to-supabase.ts
 ```
+
 - Iterates all Firestore collections
 - Maps Timestamps → ISO strings
 - Inserts into Supabase tables
@@ -374,20 +402,23 @@ scripts/migrate-firestore-to-supabase.ts
 - Handles errors with retry
 
 **Verification:**
+
 1. All server actions work with new Supabase backend
 2. Admin dashboard fetches data from Supabase
 3. Client-facing pages (projects, case studies) display data
 4. Firestore seed script equivalent works on Supabase
 
 #### Task 2.7 — prism-admin Firestore References Update
+
 `apps/prism-admin/src/lib/firebase.ts` is used to READ agency Firestore data. After Task 2.6, agency data lives in Supabase.
 
-| File | Change |
-|------|--------|
+| File                  | Change                                                                                                                 |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `src/lib/firebase.ts` | Replace Firestore reads with Supabase reads. Query same `projects`, `users`, `clients`, `invoices` tables in Supabase. |
-| `package.json` | Remove `firebase-admin`. Add `@supabase/supabase-js` if not already added by Task 2.3 |
+| `package.json`        | Remove `firebase-admin`. Add `@supabase/supabase-js` if not already added by Task 2.3                                  |
 
 #### Task 2.8 — Firebase Auth Removal (tracker/mht)
+
 **Both apps being removed in Phase 3 (rename).** No migration needed. Just part of app removal verification in Phase 1.
 
 ---
@@ -397,49 +428,54 @@ scripts/migrate-firestore-to-supabase.ts
 **Goal:** Apps renamed. Admin consolidated. Deployments stable.
 
 #### Task 3.1 — Rename Agency → syntaxure-labs
+
 **⚠️ Triggers new Vercel deployment + domain change.**
 
-| Step | Action |
-|------|--------|
-| 1 | Rename `apps/agency/` → `apps/syntaxure-labs/` |
-| 2 | Update `apps/syntaxure-labs/package.json`: `"name": "syntaxure-labs"` |
-| 3 | Update all internal imports that reference `apps/agency/` |
-| 4 | Update `docker-compose.yml`: `agency` → `syntaxure-labs` service name |
-| 5 | Update `docker-compose.yml`: Dockerfile path `apps/agency/Dockerfile` → `apps/syntaxure-labs/Dockerfile` |
-| 6 | Update `.github/workflows/ci.yml`: build matrix names |
-| 7 | Create new Vercel project linked to `apps/syntaxure-labs/` |
-| 8 | Set env vars in Vercel from Doppler |
-| 9 | Configure custom domain (TBD — see manual guide) |
-| 10 | Update Doppler configs: app-specific vars for agency → syntaxure-labs |
+| Step | Action                                                                                                   |
+| ---- | -------------------------------------------------------------------------------------------------------- |
+| 1    | Rename `apps/agency/` → `apps/syntaxure-labs/`                                                           |
+| 2    | Update `apps/syntaxure-labs/package.json`: `"name": "syntaxure-labs"`                                    |
+| 3    | Update all internal imports that reference `apps/agency/`                                                |
+| 4    | Update `docker-compose.yml`: `agency` → `syntaxure-labs` service name                                    |
+| 5    | Update `docker-compose.yml`: Dockerfile path `apps/agency/Dockerfile` → `apps/syntaxure-labs/Dockerfile` |
+| 6    | Update `.github/workflows/ci.yml`: build matrix names                                                    |
+| 7    | Create new Vercel project linked to `apps/syntaxure-labs/`                                               |
+| 8    | Set env vars in Vercel from Doppler                                                                      |
+| 9    | Configure custom domain (TBD — see manual guide)                                                         |
+| 10   | Update Doppler configs: app-specific vars for agency → syntaxure-labs                                    |
 
 #### Task 3.2 — Rename prism-dashboard → prism-engine
-| Step | Action |
-|------|--------|
-| 1 | Rename `apps/prism-dashboard/` → `apps/prism-engine/` |
-| 2 | Update `apps/prism-engine/package.json`: `"name": "prism-engine"` |
-| 3 | Update all internal imports |
-| 4 | Update `docker-compose.yml` service name + Dockerfile path |
-| 5 | Update CI workflow build matrix |
-| 6 | Create new Vercel project |
-| 7 | Move env vars |
-| 8 | Configure custom domain |
+
+| Step | Action                                                            |
+| ---- | ----------------------------------------------------------------- |
+| 1    | Rename `apps/prism-dashboard/` → `apps/prism-engine/`             |
+| 2    | Update `apps/prism-engine/package.json`: `"name": "prism-engine"` |
+| 3    | Update all internal imports                                       |
+| 4    | Update `docker-compose.yml` service name + Dockerfile path        |
+| 5    | Update CI workflow build matrix                                   |
+| 6    | Create new Vercel project                                         |
+| 7    | Move env vars                                                     |
+| 8    | Configure custom domain                                           |
 
 #### Task 3.3 — Repurpose tracker → prism-manage
-| Step | Action |
-|------|--------|
-| 1 | Rename `apps/tracker/` → `apps/prism-manage/` |
-| 2 | Update `package.json`: `"name": "prism-manage"`, port 3007 |
-| 3 | Strip all Firebase code (client SDK, admin SDK) |
-| 4 | Add Supabase client helpers |
-| 5 | Keep FullCalendar setup, CalendarEventSchema, TaskSchema |
-| 6 | Keep glass UI/dark theme (inherits from agency design) |
-| 7 | Add Google Calendar OAuth2 integration (detailed in §8) |
-| 8 | New Vercel deployment |
+
+| Step | Action                                                     |
+| ---- | ---------------------------------------------------------- |
+| 1    | Rename `apps/tracker/` → `apps/prism-manage/`              |
+| 2    | Update `package.json`: `"name": "prism-manage"`, port 3007 |
+| 3    | Strip all Firebase code (client SDK, admin SDK)            |
+| 4    | Add Supabase client helpers                                |
+| 5    | Keep FullCalendar setup, CalendarEventSchema, TaskSchema   |
+| 6    | Keep glass UI/dark theme (inherits from agency design)     |
+| 7    | Add Google Calendar OAuth2 integration (detailed in §8)    |
+| 8    | New Vercel deployment                                      |
 
 #### Task 3.4 — Integrate Agency Admin into prism-admin
+
 **This is the key structural change.** Agency admin pages (~35 components) move from `apps/agency/src/components/admin/` to `apps/prism-admin/src/components/agency/`.
 
 **What moves:**
+
 ```
 FROM: apps/syntaxure-labs/src/
 ├── components/admin/
@@ -469,6 +505,7 @@ FROM: apps/syntaxure-labs/src/
 ```
 
 **TO: apps/prism-admin/src/**
+
 ```
 prism-admin/src/
 ├── components/
@@ -499,6 +536,7 @@ prism-admin/src/
 ```
 
 **Navigation restructure:**
+
 ```
 prism-admin sidebar:
 ├── Overview
@@ -529,6 +567,7 @@ prism-admin sidebar:
 ```
 
 **User roles for prism-admin:**
+
 ```
 admin:     Full access (Jeff)
 manager:   Can manage one or both app sections
@@ -538,6 +577,7 @@ client:    View own projects, invoices, quotes (client portal)
 
 **syntaxure-labs after admin extraction:**
 Keep ONLY client-facing pages:
+
 ```
 syntaxure-labs/src/app/
 ├── page.tsx              # Landing page (hero, services, features, etc.)
@@ -553,7 +593,9 @@ syntaxure-labs/src/app/
 ```
 
 #### Task 3.5 — CI/CD & Docker Updates
+
 Update all references to renamed/removed apps:
+
 - **`.github/workflows/ci.yml`**: Update build/test matrix app names
 - **`docker-compose.yml`**: Update service names and Dockerfile paths
 - **`turbo.json`**: Verify no app-specific pipeline entries reference removed apps
@@ -563,17 +605,20 @@ Update all references to renamed/removed apps:
 ### Phase 4: Design System Consolidation (Week 8)
 
 #### Task 4.1 — Rename @jdstudio/ui → @syntaxure/ui
-| Step | Action |
-|------|--------|
-| 1 | Update `packages/ui/package.json`: `"name": "@syntaxure/ui"` |
-| 2 | Update all apps' `package.json`: `"@jdstudio/ui": "workspace:*"` → `"@syntaxure/ui": "workspace:*"` |
-| 3 | Update all import statements across 4 apps (prism-engine, syntaxure-labs, prism-admin, prism-manage) — ~50+ files |
-| 4 | Update `next.config.ts` in apps that `transpilePackages: ["@jdstudio/ui"]` → `["@syntaxure/ui"]` |
+
+| Step | Action                                                                                                            |
+| ---- | ----------------------------------------------------------------------------------------------------------------- |
+| 1    | Update `packages/ui/package.json`: `"name": "@syntaxure/ui"`                                                      |
+| 2    | Update all apps' `package.json`: `"@jdstudio/ui": "workspace:*"` → `"@syntaxure/ui": "workspace:*"`               |
+| 3    | Update all import statements across 4 apps (prism-engine, syntaxure-labs, prism-admin, prism-manage) — ~50+ files |
+| 4    | Update `next.config.ts` in apps that `transpilePackages: ["@jdstudio/ui"]` → `["@syntaxure/ui"]`                  |
 
 #### Task 4.2 — Consolidate Design Tokens
+
 **Current problem:** prism-engine, tracker/prism-manage duplicate agency's CSS custom properties instead of importing `@jdstudio/ui/styles.css`.
 
 **Fix:**
+
 ```
 packages/ui/src/
 ├── styles.css                     # Base "Endgame" tokens (from agency)
@@ -595,9 +640,10 @@ packages/ui/src/
 ```
 
 **Each app's globals.css becomes:**
+
 ```css
 @import "tailwindcss";
-@import "@syntaxure/ui/styles.css";   /* Single source of truth */
+@import "@syntaxure/ui/styles.css"; /* Single source of truth */
 ```
 
 **Prism-admin's amber theme is preserved:** It becomes a theme extension in the shared package, not a duplicate.
@@ -611,6 +657,7 @@ packages/ui/src/
 #### Task 5.1 — prism-manage Implementation (Calendar + Tasks MVP)
 
 **Core features:**
+
 1. Google Calendar OAuth2 integration
 2. Calendar view (day, week, month) using FullCalendar (already installed)
 3. Task management with drag-and-drop
@@ -618,6 +665,7 @@ packages/ui/src/
 5. Basic markdown notes for tasks (NOT full Notion blocks)
 
 **Google Calendar integration:**
+
 ```typescript
 // npm: googleapis, @supabase/supabase-js
 
@@ -634,6 +682,7 @@ POST /api/calendar/webhook       → Receive push notifications from Google for 
 ```
 
 **Database tables (Supabase):**
+
 ```sql
 -- Extended from tracker's existing schemas
 calendar_events (
@@ -669,6 +718,7 @@ tasks (
 #### Task 5.2 — prism-analytics Implementation (Python Flask API)
 
 **Structure:**
+
 ```
 apps/prism-analytics/
 ├── pyproject.toml
@@ -692,6 +742,7 @@ apps/prism-analytics/
 **Dependencies:** fastapi, uvicorn, supabase-py, pandas, matplotlib, seaborn, pydantic
 
 **API endpoints:**
+
 ```
 GET  /api/v1/health
 GET  /api/v1/leads/conversion-rate?start=2026-01-01&end=2026-05-31
@@ -708,11 +759,13 @@ GET  /api/v1/reports/export?format=csv
 ### Phase 6: Advanced — Gremlin Graph (Weeks 12-14)
 
 #### Task 6.1 — Cosmos DB Gremlin API Setup
+
 - Create separate Cosmos DB account or database with Gremlin API
 - Add `COSMOS_GREMLIN_ENDPOINT`, `COSMOS_GREMLIN_KEY` to Doppler
 - Install Apache TinkerPop Gremlin JS client: `gremlin` npm package
 
 #### Task 6.2 — Graph Data Model
+
 ```
 Vertex types:
   Rule { id, title, content, category, priority, source }
@@ -730,9 +783,11 @@ Edge types:
 ```
 
 #### Task 6.3 — Migration Script
+
 ```
 scripts/migrate-rules-to-gremlin.ts
 ```
+
 1. Read all rules from MongoDB `rules` collection
 2. For each rule, create Gremlin vertex
 3. Use Gemini to analyze rule content → suggest relationships (relates_to, conflicts_with)
@@ -740,28 +795,34 @@ scripts/migrate-rules-to-gremlin.ts
 5. Verify: count vertices matches MongoDB document count
 
 #### Task 6.4 — Replace Smart Select with Graph Ranking
+
 ```typescript
 // BEFORE: MongoDB query + Gemini embedding cosine similarity
 const rules = await getCollection("rules").find({ projectId }).toArray();
-const ranked = await smartSelect(task, rules);  // embedding-based
+const ranked = await smartSelect(task, rules); // embedding-based
 
 // AFTER: Gremlin traversal with graph centrality
-const result = await g.V()
+const result = await g
+  .V()
   .has("projectId", projectId)
   .has("category", within(relevantCategories))
-  .order().by("priority", decr)        // Priority first pass
-  .order().by("centrality", decr)      // Graph centrality second pass
+  .order()
+  .by("priority", decr) // Priority first pass
+  .order()
+  .by("centrality", decr) // Graph centrality second pass
   .limit(10)
   .valueMap()
   .toList();
 ```
 
 **Graph centrality options:**
+
 - PageRank — rules referenced by many other rules score higher
 - Betweenness — rules that bridge different categories score higher
 - Degree centrality — rules with many relationships score higher
 
 #### Task 6.5 — Dual Read (Safety Net)
+
 During transition, BOTH MongoDB and Gremlin queries run. Results compared for correctness. After 30 days with no discrepancies, MongoDB queries removed.
 
 ---
@@ -1023,6 +1084,7 @@ CREATE POLICY "Users can manage own tokens"
 ### Cutover Procedure
 
 **Pre-cutover (Week 4):**
+
 1. Build Supabase auth UI components (SignInForm, SignUpForm, SupabaseUserButton)
 2. Build Supabase SSR middleware (session management, cookie rotation)
 3. Deploy to staging — verify all protected routes work
@@ -1047,19 +1109,21 @@ CREATE POLICY "Users can manage own tokens"
    ```typescript
    for (const user of importedUsers) {
      await supabaseAdmin.auth.admin.generateLink({
-       type: 'recovery',
-       email: user.email
+       type: "recovery",
+       email: user.email,
      });
    }
    ```
 
 **Cutover day:**
+
 1. Deploy prism-engine + prism-admin with Supabase Auth (not Clerk)
 2. Deploy syntaxure-labs with Supabase Auth (not Firebase Auth)
 3. Monitor error rates for 24 hours
 4. Keep Clerk + Firebase Auth projects active for 30 days (emergency rollback)
 
 **Post-cutover (Week 5):**
+
 1. Remove `@clerk/nextjs`, `@clerk/themes` from all apps
 2. Remove Firebase Auth from syntaxure-labs
 3. Remove Clerk env vars from Doppler
@@ -1088,7 +1152,9 @@ import { createClient } from "@/lib/supabase/server";
 
 export default async function AdminPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   const { data: profile } = await supabase
     .from("user_profiles")
     .select("role")
@@ -1103,6 +1169,7 @@ export default async function AdminPage() {
 ```
 
 **Middleware protection:**
+
 ```typescript
 // apps/prism-admin/src/middleware.ts
 import { updateSession } from "@/lib/supabase/middleware";
@@ -1112,7 +1179,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"]
+  matcher: ["/admin/:path*"],
 };
 ```
 
@@ -1131,7 +1198,10 @@ import { createClient } from "@supabase/supabase-js";
 const COLLECTION_MAP = {
   users: { table: "user_profiles", transform: transformUser },
   projects: { table: "projects", transform: transformProject },
-  calendar_events: { table: "calendar_events", transform: transformCalendarEvent },
+  calendar_events: {
+    table: "calendar_events",
+    transform: transformCalendarEvent,
+  },
   quotes: { table: "quotes", transform: transformQuote },
   invoices: { table: "invoices", transform: transformInvoice },
   case_studies: { table: "case_studies", transform: transformCaseStudy },
@@ -1143,14 +1213,18 @@ const COLLECTION_MAP = {
 };
 
 async function migrate() {
-  for (const [collection, { table, transform }] of Object.entries(COLLECTION_MAP)) {
+  for (const [collection, { table, transform }] of Object.entries(
+    COLLECTION_MAP,
+  )) {
     const snapshot = await firestore.collection(collection).get();
-    const rows = snapshot.docs.map(doc => transform(doc.id, doc.data()));
+    const rows = snapshot.docs.map((doc) => transform(doc.id, doc.data()));
 
     // Batch insert in chunks of 100
     for (let i = 0; i < rows.length; i += 100) {
       const chunk = rows.slice(i, i + 100);
-      const { error } = await supabase.from(table).upsert(chunk, { onConflict: "id" });
+      const { error } = await supabase
+        .from(table)
+        .upsert(chunk, { onConflict: "id" });
       if (error) {
         console.error(`Failed to migrate ${collection} chunk ${i}:`, error);
         // Write failed records to migration_errors.json for manual review
@@ -1158,8 +1232,12 @@ async function migrate() {
     }
 
     // Verify
-    const { count } = await supabase.from(table).select("*", { count: "exact", head: true });
-    console.log(`${collection}: Firestore ${snapshot.size} → Supabase ${count} ✓`);
+    const { count } = await supabase
+      .from(table)
+      .select("*", { count: "exact", head: true });
+    console.log(
+      `${collection}: Firestore ${snapshot.size} → Supabase ${count} ✓`,
+    );
   }
 }
 
@@ -1197,6 +1275,7 @@ function transformProject(firestoreId: string, data: any) {
 | `packages/ui/package.json` | `"name": "@syntaxure/ui"` |
 
 **Apps importing @jdstudio/ui:**
+
 ```
 apps/syntaxure-labs/     # ~8 files (header, footer, landing sections)
 apps/prism-engine/       # ~15 files (GlassPanel, Button, Badge, Card, MetricTile, etc.)
@@ -1204,12 +1283,12 @@ apps/prism-admin/        # ~3 files
 apps/prism-manage/       # ~3 files (from tracker)
 ```
 
-| App Package | Change |
-|-------------|--------|
+| App Package                   | Change                                                             |
+| ----------------------------- | ------------------------------------------------------------------ |
 | `syntaxure-labs/package.json` | `"@jdstudio/ui": "workspace:*"` → `"@syntaxure/ui": "workspace:*"` |
-| `prism-engine/package.json` | Same |
-| `prism-admin/package.json` | Same |
-| `prism-manage/package.json` | Same |
+| `prism-engine/package.json`   | Same                                                               |
+| `prism-admin/package.json`    | Same                                                               |
+| `prism-manage/package.json`   | Same                                                               |
 
 **Next.js transpilePackages:**
 | App | Change |
@@ -1219,6 +1298,7 @@ apps/prism-manage/       # ~3 files (from tracker)
 | `prism-manage/next.config.ts` | Same |
 
 **CSS imports:**
+
 ```css
 /* BEFORE */
 @import "@jdstudio/ui/styles.css";
@@ -1264,6 +1344,7 @@ apps/prism-manage/       # ~3 files (from tracker)
 ```
 
 **Route structure:**
+
 ```
 prism-admin/src/app/
 ├── (auth)/
@@ -1302,18 +1383,19 @@ prism-admin/src/app/
 
 **RBAC for three zones:**
 
-| Role | App Management | Client Portal | Team Hub |
-|------|---------------|---------------|----------|
-| admin | Full access | — | Full access |
-| manager | Full access | — | Full access |
-| employee | Prism view only | — | Full access (own tasks) |
-| client | — | Own data only | — |
+| Role     | App Management  | Client Portal | Team Hub                |
+| -------- | --------------- | ------------- | ----------------------- |
+| admin    | Full access     | —             | Full access             |
+| manager  | Full access     | —             | Full access             |
+| employee | Prism view only | —             | Full access (own tasks) |
+| client   | —               | Own data only | —                       |
 
 ---
 
 ## 8. prism-manage — Calendar + Tasks MVP
 
 ### Tech Stack
+
 - **Frontend:** Next.js 16, `@fullcalendar/react` (already in tracker), `@syntaxure/ui`
 - **Backend:** Server actions with Supabase
 - **Google Calendar:** `googleapis` npm, OAuth2 web flow
@@ -1322,6 +1404,7 @@ prism-admin/src/app/
 ### Feature Roadmap
 
 **MVP (Week 9-10):**
+
 - [ ] User authentication via Supabase (shared session)
 - [ ] Calendar view (day/week/month) using FullCalendar
 - [ ] Create/edit/delete events
@@ -1331,6 +1414,7 @@ prism-admin/src/app/
 - [ ] Task → Calendar event linking
 
 **Phase 2 (Post-MVP, Week 11+):**
+
 - [ ] Two-way sync: Supabase ↔ Google Calendar
 - [ ] Google Calendar push webhook for real-time updates
 - [ ] Task drag-and-drop reordering
@@ -1347,16 +1431,16 @@ prism-admin/src/app/
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  `${process.env.NEXT_PUBLIC_SITE_URL}/api/calendar/callback`
+  `${process.env.NEXT_PUBLIC_SITE_URL}/api/calendar/callback`,
 );
 
 const authUrl = oauth2Client.generateAuthUrl({
-  access_type: "offline",  // Get refresh token
+  access_type: "offline", // Get refresh token
   scope: [
     "https://www.googleapis.com/auth/calendar.events",
     "https://www.googleapis.com/auth/calendar.readonly",
   ],
-  prompt: "consent",       // Always get refresh token
+  prompt: "consent", // Always get refresh token
 });
 
 // 2. Google redirects back with code
@@ -1385,20 +1469,24 @@ const { data } = await calendar.events.list({
 
 // Upsert into calendar_events table
 for (const event of data.items) {
-  await supabase.from("calendar_events").upsert({
-    user_id: user.id,
-    title: event.summary,
-    description: event.description,
-    start_time: event.start.dateTime || event.start.date,
-    end_time: event.end.dateTime || event.end.date,
-    all_day: !!event.start.date,
-    google_event_id: event.id,
-    synced_at: new Date().toISOString(),
-  }, { onConflict: "google_event_id" });
+  await supabase.from("calendar_events").upsert(
+    {
+      user_id: user.id,
+      title: event.summary,
+      description: event.description,
+      start_time: event.start.dateTime || event.start.date,
+      end_time: event.end.dateTime || event.end.date,
+      all_day: !!event.start.date,
+      google_event_id: event.id,
+      synced_at: new Date().toISOString(),
+    },
+    { onConflict: "google_event_id" },
+  );
 }
 ```
 
 **Doppler vars to add:**
+
 ```
 GOOGLE_CLIENT_ID
 GOOGLE_CLIENT_SECRET
@@ -1410,11 +1498,13 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3007   # prism-manage URL
 ## 9. prism-analytics — Python Flask API
 
 ### Tech Decisions
+
 - **Framework:** FastAPI (async, auto-docs, Pydantic integration)
 - **Package manager:** uv (fast, Rust-based, pip compatible)
 - **Deployment:** Docker container, potentially Vercel Python or Fly.io
 
 ### pyproject.toml
+
 ```toml
 [project]
 name = "prism-analytics"
@@ -1439,6 +1529,7 @@ dev = ["pytest>=8", "ruff>=0.11", "jupyter>=1.1"]
 ```
 
 ### Dockerfile
+
 ```dockerfile
 FROM python:3.12-slim
 WORKDIR /app
@@ -1464,13 +1555,13 @@ async def get_conversion_rate(
         .gte("created_at", start.isoformat()) \
         .lte("created_at", end.isoformat()) \
         .execute()
-    
+
     df = pd.DataFrame(quotes.data)
     # pandas analytics pipeline
     total_leads = len(df)
     accepted = len(df[df["status"] == "accepted"])
     paid = len(df[df["status"] == "paid"])
-    
+
     return LeadConversionResponse(
         total_leads=total_leads,
         accepted=accepted,
@@ -1486,11 +1577,13 @@ async def get_conversion_rate(
 ### Why Gremlin for Prism Rules?
 
 Current embedding-based rule selection works but has blind spots:
+
 - Doesn't understand rule relationships (rule A contradicts rule B)
 - Can't traverse dependency chains (rule C requires rules A and D)
 - No graph-aware ranking (a rule that bridges CSS and accessibility is more valuable than isolated rules)
 
 Gremlin graph enables:
+
 - **Relationship-aware retrieval** — traverse `requires` → `conflicts_with` → `relates_to`
 - **Graph centrality ranking** — PageRank identifies foundational rules
 - **Conflict detection** — warn AI before it generates rule-violating code
@@ -1499,9 +1592,11 @@ Gremlin graph enables:
 ### Database Design
 
 **Separate Cosmos DB account/database: `prism-graph` (Gremlin API)**
+
 - Cosmos DB supports multiple APIs per account, but Gremlin and MongoDB can't share the same database within an account. Use separate database or separate account.
 
 **Connection:**
+
 ```
 COSMOS_GREMLIN_ENDPOINT=wss://prism-graph.gremlin.cosmos.azure.com:443/
 COSMOS_GREMLIN_KEY=...
@@ -1522,15 +1617,13 @@ export async function getGremlinClient() {
   if (!g) {
     const authenticator = new gremlin.driver.auth.PlainTextSaslAuthenticator(
       `/dbs/prism-graph/colls/rules`,
-      process.env.COSMOS_GREMLIN_KEY!
+      process.env.COSMOS_GREMLIN_KEY!,
     );
     const client = gremlin.driver.Client.create(
       process.env.COSMOS_GREMLIN_ENDPOINT!,
-      { authenticator }
+      { authenticator },
     );
-    g = traversal().withRemote(
-      new DriverRemoteConnection(client)
-    );
+    g = traversal().withRemote(new DriverRemoteConnection(client));
   }
   return g;
 }
@@ -1540,25 +1633,30 @@ export async function getGremlinClient() {
 
 ```typescript
 // Basic: Get rules by project with priority ordering
-const rules = await g.V()
+const rules = await g
+  .V()
   .hasLabel("rule")
   .has("projectId", projectId)
-  .order().by("priority", gremlin.process.order.decr)
+  .order()
+  .by("priority", gremlin.process.order.decr)
   .limit(10)
   .valueMap()
   .toList();
 
 // Advanced: Get foundational rules (high PageRank)
-const foundationalRules = await g.V()
+const foundationalRules = await g
+  .V()
   .hasLabel("rule")
   .has("projectId", projectId)
-  .order().by("pagerank", gremlin.process.order.decr)
+  .order()
+  .by("pagerank", gremlin.process.order.decr)
   .limit(5)
   .valueMap()
   .toList();
 
 // Advanced: Get rules related to task keywords (tag traversal)
-const relevantRules = await g.V()
+const relevantRules = await g
+  .V()
   .hasLabel("tag")
   .has("name", gremlin.process.P.within(taskTags))
   .inE("tagged_with")
@@ -1569,7 +1667,8 @@ const relevantRules = await g.V()
   .toList();
 
 // Advanced: Find conflicting rules (for AI warning)
-const conflicts = await g.V(ruleId)
+const conflicts = await g
+  .V(ruleId)
   .outE("conflicts_with")
   .inV()
   .valueMap()
@@ -1586,7 +1685,8 @@ const rules = await getCollection("rules").find({}).toArray();
 
 // 2. Create vertices for each rule
 for (const rule of rules) {
-  await g.addV("rule")
+  await g
+    .addV("rule")
     .property("id", rule._id.toString())
     .property("title", rule.title)
     .property("content", rule.content)
@@ -1601,17 +1701,19 @@ for (const rule of rules) {
 for (const rule of rules) {
   for (const tag of rule.tags || []) {
     // Find or create tag vertex
-    const tagVertex = await g.V()
+    const tagVertex = await g
+      .V()
       .has("tag", "name", tag)
       .fold()
       .coalesce(
         gremlin.process.__.unfold(),
-        gremlin.process.__.addV("tag").property("name", tag)
+        gremlin.process.__.addV("tag").property("name", tag),
       )
       .next();
-    
+
     // Create edge
-    await g.V(rule._id.toString())
+    await g
+      .V(rule._id.toString())
       .addE("tagged_with")
       .to(g.V(tagVertex.value.id))
       .iterate();
@@ -1623,19 +1725,22 @@ for (let i = 0; i < rules.length; i++) {
   for (let j = i + 1; j < rules.length; j++) {
     const relationship = await gemini.detectRelationship(rules[i], rules[j]);
     if (relationship.type === "relates_to") {
-      await g.V(rules[i]._id.toString())
+      await g
+        .V(rules[i]._id.toString())
         .addE("relates_to")
         .property("weight", relationship.weight)
         .to(g.V(rules[j]._id.toString()))
         .iterate();
     } else if (relationship.type === "conflicts_with") {
-      await g.V(rules[i]._id.toString())
+      await g
+        .V(rules[i]._id.toString())
         .addE("conflicts_with")
         .property("weight", relationship.weight)
         .to(g.V(rules[j]._id.toString()))
         .iterate();
     } else if (relationship.type === "requires") {
-      await g.V(rules[i]._id.toString())
+      await g
+        .V(rules[i]._id.toString())
         .addE("requires")
         .to(g.V(rules[j]._id.toString()))
         .iterate();
@@ -1686,32 +1791,37 @@ The agency app's "Endgame" design system is the source of truth. All other app d
 ### App Consumption
 
 **syntaxure-labs (globals.css):**
+
 ```css
 @import "tailwindcss";
-@import "@syntaxure/ui/styles.css";   /* Full Endgame system (dark + light) */
+@import "@syntaxure/ui/styles.css"; /* Full Endgame system (dark + light) */
 ```
 
 **prism-engine (globals.css):**
+
 ```css
 @import "tailwindcss";
-@import "@syntaxure/ui/styles.css";   /* Endgame tokens */
+@import "@syntaxure/ui/styles.css"; /* Endgame tokens */
 /* prism-engine only uses dark mode — no .theme-light toggle */
 ```
 
 **prism-admin (globals.css):**
+
 ```css
 @import "tailwindcss";
-@import "@syntaxure/ui/styles.css";   /* Endgame base tokens */
+@import "@syntaxure/ui/styles.css"; /* Endgame base tokens */
 /* Applies theme: mission-control via admin/globals.css or theme class on body */
 ```
 
 **prism-manage (globals.css):**
+
 ```css
 @import "tailwindcss";
-@import "@syntaxure/ui/styles.css";   /* Endgame tokens */
+@import "@syntaxure/ui/styles.css"; /* Endgame tokens */
 ```
 
 ### What MUST NOT Change
+
 - Agency landing page components (`hero.tsx`, `services.tsx`, `features.tsx`, `works-showcase.tsx`, `agentic-protocol.tsx`, `cta.tsx`)
 - Agency layout (`header.tsx`, `footer.tsx`)
 - Theme toggle mechanism (`.theme-light` class, localStorage, inline bootstrap script)
@@ -1725,35 +1835,35 @@ These are the constitution. The shared package MUST support them verbatim.
 
 ### Current Global Env (turbo.json globalEnv — 50 vars)
 
-| Category | Vars to KEEP | Vars to REMOVE | Vars to ADD |
-|----------|-------------|----------------|-------------|
-| **Clerk** | — | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` | — |
-| **Supabase** | — | — | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET` |
-| **Firebase** | `FIREBASE_*` (if prism-admin reads legacy agency data during migration) | `AGENCY_FIREBASE_KEY`, `NEXT_PUBLIC_FIREBASE_*` | — |
-| **Cosmos DB** | `MONGODB_URI`, `COSMOS_DATABASE_NAME` | — | `COSMOS_GREMLIN_ENDPOINT`, `COSMOS_GREMLIN_KEY` |
-| **R2** | — | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_PUBLIC_URL` | — |
-| **Redis** | — | — | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` (or `REDIS_URL`) |
-| **Google** | — | — | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
-| **AI** | `GEMINI_API_KEY`, `AZURE_OPENAI_*`, `AI_PROVIDER`, `GEMINI_MODEL`, `GEMINI_EMBEDDING_MODEL` | — | — |
-| **Mux** | `MUX_TOKEN_ID`, `MUX_TOKEN_SECRET`, `MUX_WEBHOOK_SECRET` | — | — |
-| **PayPal** | All `PAYPAL_*` vars | — | — |
-| **Sentry** | All `SENTRY_*` vars | — | — |
-| **Email** | All `ZOHO_*`, `RESEND_*`, `ADMIN_EMAIL`, etc. | — | — |
-| **Prism** | `PRISM_API_KEY`, `PRISM_API_URL` | — | — |
-| **Misc** | `EXCHANGE_RATE_API_KEY`, `GA_PROPERTY_ID`, `SESSION_SECRET` | — | `NEXT_PUBLIC_SITE_URL` (per-app) |
+| Category      | Vars to KEEP                                                                                | Vars to REMOVE                                                                                 | Vars to ADD                                                                                                         |
+| ------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Clerk**     | —                                                                                           | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`                                        | —                                                                                                                   |
+| **Supabase**  | —                                                                                           | —                                                                                              | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET` |
+| **Firebase**  | `FIREBASE_*` (if prism-admin reads legacy agency data during migration)                     | `AGENCY_FIREBASE_KEY`, `NEXT_PUBLIC_FIREBASE_*`                                                | —                                                                                                                   |
+| **Cosmos DB** | `MONGODB_URI`, `COSMOS_DATABASE_NAME`                                                       | —                                                                                              | `COSMOS_GREMLIN_ENDPOINT`, `COSMOS_GREMLIN_KEY`                                                                     |
+| **R2**        | —                                                                                           | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_PUBLIC_URL` | —                                                                                                                   |
+| **Redis**     | —                                                                                           | —                                                                                              | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` (or `REDIS_URL`)                                               |
+| **Google**    | —                                                                                           | —                                                                                              | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`                                                                          |
+| **AI**        | `GEMINI_API_KEY`, `AZURE_OPENAI_*`, `AI_PROVIDER`, `GEMINI_MODEL`, `GEMINI_EMBEDDING_MODEL` | —                                                                                              | —                                                                                                                   |
+| **Mux**       | `MUX_TOKEN_ID`, `MUX_TOKEN_SECRET`, `MUX_WEBHOOK_SECRET`                                    | —                                                                                              | —                                                                                                                   |
+| **PayPal**    | All `PAYPAL_*` vars                                                                         | —                                                                                              | —                                                                                                                   |
+| **Sentry**    | All `SENTRY_*` vars                                                                         | —                                                                                              | —                                                                                                                   |
+| **Email**     | All `ZOHO_*`, `RESEND_*`, `ADMIN_EMAIL`, etc.                                               | —                                                                                              | —                                                                                                                   |
+| **Prism**     | `PRISM_API_KEY`, `PRISM_API_URL`                                                            | —                                                                                              | —                                                                                                                   |
+| **Misc**      | `EXCHANGE_RATE_API_KEY`, `GA_PROPERTY_ID`, `SESSION_SECRET`                                 | —                                                                                              | `NEXT_PUBLIC_SITE_URL` (per-app)                                                                                    |
 
 ### Per-App Env Vars (Vercel projects)
 
 These should be set in each Vercel project's environment, NOT in global Doppler:
 
-| App | Vars |
-|-----|------|
-| syntaxure-labs | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` |
-| prism-engine | Same |
-| prism-admin | Same |
-| prism-manage | Same + `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` |
-| prism-docs | Keep existing |
-| prism-analytics | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (Python doesn't use `NEXT_PUBLIC_` prefix) |
+| App             | Vars                                                                                     |
+| --------------- | ---------------------------------------------------------------------------------------- |
+| syntaxure-labs  | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` |
+| prism-engine    | Same                                                                                     |
+| prism-admin     | Same                                                                                     |
+| prism-manage    | Same + `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`                                        |
+| prism-docs      | Keep existing                                                                            |
+| prism-analytics | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (Python doesn't use `NEXT_PUBLIC_` prefix)   |
 
 ---
 
@@ -1838,45 +1948,59 @@ If converting to changeset-based releases (already partially configured), update
 ## 14. Rollback Strategy (per Phase)
 
 ### Phase 1 (Foundation)
+
 **Risk: LOW.** Rollback is trivial:
+
 - Restore deleted app directories from git
 - `pnpm install` to restore lockfile
 
 ### Phase 2 (Auth + DB)
+
 **Risk: HIGH.** Multi-layered rollback:
 
 **Auth rollback (if Supabase Auth fails):**
+
 1. Revert middleware in prism-engine + prism-admin to Clerk
 2. Deploy Clerk-only version
 3. Clerk account still active (keep for 30 days)
 
 **DB rollback (if Supabase fails):**
+
 1. Revert server actions to Firestore
 2. Firestore still has data (never deleted — migrated, not truncated)
 3. Deploy Firestore-only version
 
 **Storage rollback:**
+
 1. Revert upload actions to R2
 2. R2 bucket not deleted during migration
 
 ### Phase 3 (Restructure)
+
 **Risk: MEDIUM.** Namespace conflicts:
+
 - Vercel: keep old project alive, deploy new project with alias
 - DNS: keep old domain as redirect to new domain
 - Git: directory renames can be reverted via `git revert`
 
 ### Phase 4 (Design)
+
 **Risk: LOW.** CSS-only changes:
+
 - Revert CSS imports if visual regressions occur
 - Agency landing page components NEVER touched — design regressions impossible
 
 ### Phase 5 (New Builds)
+
 **Risk: LOW.** New apps are additive:
+
 - prism-manage: if not ready, deploy tracker temporarily (keep old code)
 - prism-analytics: separate service, no impact on Next.js apps
 
 ### Phase 6 (Gremlin)
+
 **Risk: MEDIUM-HIGH.** Dual-read safety net:
+
 - Keep MongoDB queries active alongside Gremlin
 - Feature flag: `USE_GREMLIN_OF_RULES=false` for instant rollback
 - 30-day dual-read period for validation
@@ -1886,6 +2010,7 @@ If converting to changeset-based releases (already partially configured), update
 ## 15. Testing Gates (per Phase)
 
 ### Phase 2 — Auth Migration Gate
+
 - [ ] Sign up new user via Supabase → appears in Supabase dashboard
 - [ ] Sign in → redirects to dashboard
 - [ ] Protected routes redirect to sign-in when unauthenticated
@@ -1900,6 +2025,7 @@ If converting to changeset-based releases (already partially configured), update
 - [ ] `pnpm --filter @prism-engine/cli run test` — all 30 tests pass
 
 ### Phase 2 — DB Migration Gate
+
 - [ ] All server actions (subscriptions, notifications, projects, calendar, feedback, case studies, seeding) work
 - [ ] Admin panel loads data from Supabase
 - [ ] Firestore → Supabase migration script: row counts match
@@ -1909,6 +2035,7 @@ If converting to changeset-based releases (already partially configured), update
 - [ ] `pnpm --filter syntaxure-labs run build` succeeds
 
 ### Phase 3 — Restructure Gate
+
 - [ ] `syntaxure-labs` builds and deploys on Vercel
 - [ ] `prism-engine` builds and deploys on Vercel
 - [ ] `prism-manage` builds and deploys on Vercel
@@ -1917,6 +2044,7 @@ If converting to changeset-based releases (already partially configured), update
 - [ ] `turbo run build` succeeds for all apps
 
 ### Phase 4 — Design Gate
+
 - [ ] Agency landing page visually identical to pre-refactor
 - [ ] All apps import `@syntaxure/ui/styles.css` without duplicate tokens
 - [ ] prism-admin amber theme renders correctly
@@ -1927,45 +2055,46 @@ If converting to changeset-based releases (already partially configured), update
 
 ## 16. Timeline & Developer Allocation
 
-| Week | Phase | Jeff | Lou |
-|------|-------|------|-----|
-| **1** | Foundation | Task 1.1 (remove apps), 1.2 (npm publish) | Task 1.3 (Supabase setup), 1.4 (Redis), 1.5 (Python scaffolding) |
-| **2** | Storage + Auth Start | Task 2.1 (R2 → Storage) | Task 2.2 (prism-engine auth) |
-| **3** | Auth Continue | Task 2.3 (prism-admin auth) | Task 2.4 (syntaxure-labs auth) |
-| **4** | Auth Cutover | Task 2.5 (Clerk user export/import + reset emails) | Task 2.6 (Firestore → Supabase DB — schema + types) |
-| **5** | DB Migration | Task 2.6 (server actions rewrite) | Task 2.6 (component rewrites + migration script) |
-| **6** | DB Finish + Admin | Task 2.7 (prism-admin Firestore ref update) | Task 2.6 continued + verification |
-| **7** | Restructure | Task 3.1 (rename agency), 3.2 (rename dashboard), 3.3 (tracker → manage) | Task 3.4 (integrate agency admin into prism-admin) |
-| **8** | Design + CI | Task 3.5 (CI/CD updates) + Task 4.1 (package rename) | Task 4.2 (consolidate design tokens, protect landing page) |
-| **9** | New Builds | Task 5.1 (prism-manage — calendar + sync) | Task 5.2 (prism-analytics — FastAPI setup) |
-| **10** | New Builds | Task 5.1 (prism-manage — tasks) | Task 5.2 (prism-analytics — analytics pipelines) |
-| **11** | New Builds + Polish | Task 5.1 (prism-manage — polish + deploy) | Task 5.2 (prism-analytics — charts + deploy) |
-| **12** | Gremlin | Task 6.1 (Gremlin API setup), 6.2 (graph model), 6.3 (migration) | Task 6.1-6.3 (pair programming on graph migration) |
-| **13** | Gremlin | Task 6.4 (smart select replacement) | Task 6.5 (dual read validation + testing) |
-| **14** | Gremlin + Buffer | Task 6.4-6.5 continued | Buffer week for slip + final verification |
+| Week   | Phase                | Jeff                                                                     | Lou                                                              |
+| ------ | -------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| **1**  | Foundation           | Task 1.1 (remove apps), 1.2 (npm publish)                                | Task 1.3 (Supabase setup), 1.4 (Redis), 1.5 (Python scaffolding) |
+| **2**  | Storage + Auth Start | Task 2.1 (R2 → Storage)                                                  | Task 2.2 (prism-engine auth)                                     |
+| **3**  | Auth Continue        | Task 2.3 (prism-admin auth)                                              | Task 2.4 (syntaxure-labs auth)                                   |
+| **4**  | Auth Cutover         | Task 2.5 (Clerk user export/import + reset emails)                       | Task 2.6 (Firestore → Supabase DB — schema + types)              |
+| **5**  | DB Migration         | Task 2.6 (server actions rewrite)                                        | Task 2.6 (component rewrites + migration script)                 |
+| **6**  | DB Finish + Admin    | Task 2.7 (prism-admin Firestore ref update)                              | Task 2.6 continued + verification                                |
+| **7**  | Restructure          | Task 3.1 (rename agency), 3.2 (rename dashboard), 3.3 (tracker → manage) | Task 3.4 (integrate agency admin into prism-admin)               |
+| **8**  | Design + CI          | Task 3.5 (CI/CD updates) + Task 4.1 (package rename)                     | Task 4.2 (consolidate design tokens, protect landing page)       |
+| **9**  | New Builds           | Task 5.1 (prism-manage — calendar + sync)                                | Task 5.2 (prism-analytics — FastAPI setup)                       |
+| **10** | New Builds           | Task 5.1 (prism-manage — tasks)                                          | Task 5.2 (prism-analytics — analytics pipelines)                 |
+| **11** | New Builds + Polish  | Task 5.1 (prism-manage — polish + deploy)                                | Task 5.2 (prism-analytics — charts + deploy)                     |
+| **12** | Gremlin              | Task 6.1 (Gremlin API setup), 6.2 (graph model), 6.3 (migration)         | Task 6.1-6.3 (pair programming on graph migration)               |
+| **13** | Gremlin              | Task 6.4 (smart select replacement)                                      | Task 6.5 (dual read validation + testing)                        |
+| **14** | Gremlin + Buffer     | Task 6.4-6.5 continued                                                   | Buffer week for slip + final verification                        |
 
 ---
 
 ## 17. Risk Register
 
-| ID | Risk | Probability | Impact | Mitigation | Owner |
-|----|------|------------|--------|------------|-------|
-| R1 | **Firestore data loss during migration** | Low | Critical | Dry-run first, verify row counts, keep Firestore as backup for 30 days, feature flag for rollback | Jeff |
-| R2 | **Clerk user password migration UX friction** | High | Medium | Clear reset email template, 7-day grace period notice, support channel ready | Lou |
-| R3 | **Vercel deployment break on rename** | Medium | High | One app at a time, alias old project → new project, DNS with low TTL during transition | Both |
-| R4 | **Supabase RLS policy prevents legitimate access** | Medium | High | Write integration tests for RLS policies, use service role for server actions until RLS verified | Jeff |
-| R5 | **prism-manage Google Calendar OAuth rejected** | Medium | Medium | Submit for verification early, limited scope (read-only sync first) | Lou |
-| R6 | **Gremlin graph performance worse than MongoDB** | Medium | Medium | Dual-read comparison for 30 days, feature flag, a/b metrics | Jeff |
-| R7 | **Agency landing page visual regression** | Low | Critical | CSS-only refactor, NEVER touch agency component markup, screenshot comparison tests | Lou |
-| R8 | **Python/Node CI tooling conflict** | Low | Low | Independent Dockerfile + CI job, no cross-language build deps | Lou |
-| R9 | **Doppler env var mismatch between environments** | Medium | Medium | Doppler branch strategy, per-environment config review, pre-deploy env check script | Both |
-| R10 | **pnpm lockfile corruption during mass package updates** | Low | Medium | Commit lockfile after every phase, use `pnpm install --frozen-lockfile` in CI | Jeff |
+| ID  | Risk                                                     | Probability | Impact   | Mitigation                                                                                        | Owner |
+| --- | -------------------------------------------------------- | ----------- | -------- | ------------------------------------------------------------------------------------------------- | ----- |
+| R1  | **Firestore data loss during migration**                 | Low         | Critical | Dry-run first, verify row counts, keep Firestore as backup for 30 days, feature flag for rollback | Jeff  |
+| R2  | **Clerk user password migration UX friction**            | High        | Medium   | Clear reset email template, 7-day grace period notice, support channel ready                      | Lou   |
+| R3  | **Vercel deployment break on rename**                    | Medium      | High     | One app at a time, alias old project → new project, DNS with low TTL during transition            | Both  |
+| R4  | **Supabase RLS policy prevents legitimate access**       | Medium      | High     | Write integration tests for RLS policies, use service role for server actions until RLS verified  | Jeff  |
+| R5  | **prism-manage Google Calendar OAuth rejected**          | Medium      | Medium   | Submit for verification early, limited scope (read-only sync first)                               | Lou   |
+| R6  | **Gremlin graph performance worse than MongoDB**         | Medium      | Medium   | Dual-read comparison for 30 days, feature flag, a/b metrics                                       | Jeff  |
+| R7  | **Agency landing page visual regression**                | Low         | Critical | CSS-only refactor, NEVER touch agency component markup, screenshot comparison tests               | Lou   |
+| R8  | **Python/Node CI tooling conflict**                      | Low         | Low      | Independent Dockerfile + CI job, no cross-language build deps                                     | Lou   |
+| R9  | **Doppler env var mismatch between environments**        | Medium      | Medium   | Doppler branch strategy, per-environment config review, pre-deploy env check script               | Both  |
+| R10 | **pnpm lockfile corruption during mass package updates** | Low         | Medium   | Commit lockfile after every phase, use `pnpm install --frozen-lockfile` in CI                     | Jeff  |
 
 ---
 
 ## Appendix A: Complete File Manifest
 
 ### Files to DELETE
+
 ```
 # Removed apps
 apps/mht/
@@ -1997,6 +2126,7 @@ firebase, firebase-admin (from syntaxure-labs, prism-manage)
 ```
 
 ### Files to CREATE
+
 ```
 # Supabase
 supabase/
@@ -2027,6 +2157,7 @@ scripts/migrate-rules-to-gremlin.ts
 ```
 
 ### Files to RENAME
+
 ```
 apps/agency/                              → apps/syntaxure-labs/
 apps/prism-dashboard/                     → apps/prism-engine/
@@ -2043,14 +2174,14 @@ packages/ui/package.json: name            → @syntaxure/ui
 
 These were installed by Lou and are beneficial — they survive the revamp:
 
-| System | File | Purpose | Action |
-|--------|------|---------|--------|
-| **Renovate** | `renovate.json` | Automated dependency updates (PRs on Monday) | Keep, update config if needed for new apps |
-| **PR Agent** | `.github/workflows/pr-agent.yml` | AI code review on PRs | Keep |
-| **Gitleaks** | `.pre-commit-config.yaml` | Secrets detection pre-commit | Keep |
-| **Changesets** | `.changeset/config.json` | Semantic versioning + changelog | Keep, ensure auto-publish step for @prism-engine/cli |
-| **syncpack** | `.syncpackrc` | Consistent dependency versions | Keep |
+| System         | File                             | Purpose                                      | Action                                               |
+| -------------- | -------------------------------- | -------------------------------------------- | ---------------------------------------------------- |
+| **Renovate**   | `renovate.json`                  | Automated dependency updates (PRs on Monday) | Keep, update config if needed for new apps           |
+| **PR Agent**   | `.github/workflows/pr-agent.yml` | AI code review on PRs                        | Keep                                                 |
+| **Gitleaks**   | `.pre-commit-config.yaml`        | Secrets detection pre-commit                 | Keep                                                 |
+| **Changesets** | `.changeset/config.json`         | Semantic versioning + changelog              | Keep, ensure auto-publish step for @prism-engine/cli |
+| **syncpack**   | `.syncpackrc`                    | Consistent dependency versions               | Keep                                                 |
 
 ---
 
-*End of revamp.md — Next: revamp-guide.md (manual-only actions)*
+_End of revamp.md — Next: revamp-guide.md (manual-only actions)_

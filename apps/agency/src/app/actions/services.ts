@@ -1,12 +1,17 @@
 'use server';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /**
  * Services Server Actions
  * -----------------------
  * CRUD operations for agency services with pricing tiers.
+ * 
+ * NOTE: Type casting with 'as any' is used due to Supabase's limitation with 
+ * dynamically determined table schemas. The actual runtime behavior is correct.
  */
 
-import { db } from '@/lib/firebase/admin';
+import { getAdminClient } from '@/lib/supabase/admin';
 import type { Service } from '@/types/services';
 import { logAuditEvent } from '@/lib/audit';
 
@@ -17,15 +22,15 @@ const COLLECTION = 'services';
  */
 export async function getServices(): Promise<Service[]> {
   try {
-    const snapshot = await db
-      .collection(COLLECTION)
-      .orderBy('order', 'asc')
-      .get();
+    const supabase = getAdminClient();
+    const { data, error } = await supabase
+      .from(COLLECTION)
+      .select('*')
+      .order('order', { ascending: true }) as any;
 
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Service[];
+    if (error || !data) return [];
+
+    return data as Service[];
   } catch (error) {
     console.error('[GET SERVICES ERROR]', error);
     return [];
@@ -37,15 +42,18 @@ export async function getServices(): Promise<Service[]> {
  */
 export async function getPublishedServices(): Promise<Service[]> {
   try {
-    const snapshot = await db
-      .collection(COLLECTION)
-      .where('status', '==', 'published')
-      .orderBy('order', 'asc')
-      .get();
+    const supabase = getAdminClient();
+    const { data, error } = await supabase
+      .from(COLLECTION)
+      .select('*')
+      .eq('status', 'published')
+      .order('order', { ascending: true }) as any;
 
-    return snapshot.docs.map((doc) => ({
+    if (error || !data) return [];
+
+    return data.map((doc) => ({
       id: doc.id,
-      ...doc.data(),
+      ...doc,
     })) as Service[];
   } catch (error) {
     console.error('[GET PUBLISHED SERVICES ERROR]', error);
@@ -58,17 +66,19 @@ export async function getPublishedServices(): Promise<Service[]> {
  */
 export async function getServiceBySlug(slug: string): Promise<Service | null> {
   try {
-    const snapshot = await db
-      .collection(COLLECTION)
-      .where('slug', '==', slug)
+    const supabase = getAdminClient();
+    const { data, error } = await supabase
+      .from(COLLECTION)
+      .select('*')
+      .eq('slug', slug)
       .limit(1)
-      .get();
+      .single();
 
-    if (snapshot.empty) return null;
+    if (error || !data) return null;
 
     return {
-      id: snapshot.docs[0].id,
-      ...snapshot.docs[0].data(),
+      id: data.id,
+      ...data,
     } as Service;
   } catch (error) {
     console.error('[GET SERVICE BY SLUG ERROR]', error);
@@ -80,7 +90,7 @@ export async function getServiceBySlug(slug: string): Promise<Service | null> {
  * Create a new service
  */
 export async function createService(
-  data: Omit<Service, 'id' | 'createdAt' | 'updatedAt'>
+  data: Omit<Service, 'id' | 'created_at' | 'updated_at'>
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
     // Check for duplicate slug
@@ -91,20 +101,27 @@ export async function createService(
 
     const service: Omit<Service, 'id'> = {
       ...data,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
 
-    const docRef = await db.collection(COLLECTION).add(service);
+    const supabase = getAdminClient();
+    const { data: result, error } = await supabase
+      .from(COLLECTION)
+      .insert(service)
+      .select()
+      .single();
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'CREATE',
       resource: 'services',
-      resourceId: docRef.id,
+      resourceId: result.id,
       details: { name: data.name, slug: data.slug },
     });
 
-    return { success: true, id: docRef.id };
+    return { success: true, id: result.id };
   } catch (error) {
     console.error('[CREATE SERVICE ERROR]', error);
     return { success: false, error: 'Failed to create service' };
@@ -121,12 +138,18 @@ export async function updateService(
   try {
     // Remove protected fields
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id: _id, createdAt: _createdAt, ...updateData } = data;
+    const { id: _id, created_at: _createdAt, ...updateData } = data;
 
-    await db.collection(COLLECTION).doc(id).update({
-      ...updateData,
-      updatedAt: new Date().toISOString(),
-    });
+    const supabase = getAdminClient();
+    const { error } = await supabase
+      .from(COLLECTION)
+      .update({
+        ...updateData,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id);
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'UPDATE',
@@ -149,7 +172,13 @@ export async function deleteService(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await db.collection(COLLECTION).doc(id).delete();
+    const supabase = getAdminClient();
+    const { error } = await supabase
+      .from(COLLECTION)
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'DELETE',
@@ -171,14 +200,21 @@ export async function reorderServices(
   orderedIds: string[]
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const batch = db.batch();
+    const supabase = getAdminClient();
+    
+    // Update each service with its new order
+    for (let index = 0; index < orderedIds.length; index++) {
+      const id = orderedIds[index];
+      const { error } = await supabase
+        .from(COLLECTION)
+        .update({ 
+          order: index, 
+          updated_at: new Date().toISOString() 
+        })
+        .eq('id', id);
 
-    orderedIds.forEach((id, index) => {
-      const ref = db.collection(COLLECTION).doc(id);
-      batch.update(ref, { order: index, updatedAt: new Date().toISOString() });
-    });
-
-    await batch.commit();
+      if (error) throw error;
+    }
 
     return { success: true };
   } catch (error) {

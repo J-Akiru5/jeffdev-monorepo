@@ -1,0 +1,67 @@
+# Gitleaks Configuration for JeffDev Monorepo
+# Prevents false positives from documentation examples and build artifacts
+# while keeping secret detection active for real secrets.
+
+[allowlist]
+  description = "Allowlisted paths and patterns for the JeffDev monorepo"
+
+  # ─── Documentation files (MDX/MD) ───
+  # These contain Prism API key examples with `pk_live_` and `sk_live_` prefixes
+  # which are documentation patterns, not real secrets.
+  paths = [
+    # All locale troubleshooting pages
+    "apps/prism-docs/app/.*/api-keys\\.mdx$",
+    "apps/prism-docs/app/.*/common-issues\\.mdx$",
+    "apps/prism-docs/app/.*/mcp-setup\\.mdx$",
+    "apps/prism-docs/app/.*/installation/page\\.mdx$",
+    "apps/prism-docs/content/.*\\.mdx$",
+    "apps/prism-docs/content/.*\\.md$",
+
+    # Architecture/design docs that reference env vars
+    "apps/prism-dashboard/public/prism_admin_architecture\\.md\\.resolved$",
+    "apps/prism-dashboard/PHASE1_ENV_SETUP\\.md$",
+    "apps/prism-admin/.*\\.md$",
+
+    # Build artifacts and logs
+    "deployment log\\.txt$",
+    "prism-test-error\\.txt$",
+    "prism-test-output\\.txt$",
+    "prism_system_report\\.md$",
+
+    # Phase/revamp documentation
+    "PHASE.*\\.md$",
+    "PRISM.*\\.md$",
+    "revamp.*\\.md$",
+  ]
+
+  # ─── Placeholder patterns ───
+  # These match known example/placeholder values in documentation
+  regexes = [
+    # Prism API key examples in docs (always contain placeholder text)
+    "(?i)pk_live_YOUR_KEY",
+    "(?i)pk_live_your_api_key_here",
+    "(?i)sk_live_abc123\\.\\.\\.",
+    "(?i)your[_-]?api[_-]?key[_-]?here",
+    "(?i)YOUR_API_KEY",
+    "(?i)YOUR_SECRET_KEY",
+    "(?i)YOUR_KEY_HERE",
+    "(?i)your-cosmos-connection-string",
+    "(?i)your-azure-openai-api-key",
+
+    # Env placeholder values like =xxx, =sk_xxx, =pk_xxx
+    "=[a-z]+_xxx$",
+    "=<your-.*?>",
+
+    # Build-time placeholders used in Firebase config
+    "build-placeholder",
+    "project-placeholder",
+
+    # API key prefix validation in code (not actual secrets)
+    "pk_live_\\\\$\\{randomBytes\\}",
+    "startsWith\\('pk_live_'\\)",
+    "keyPrefix:.*pk_live_",
+
+    # Sample/masked values in UI components
+    "sk_live_\\.\\.\\.sample",
+    "pk_live_\\.\\.\\.",
+  ]

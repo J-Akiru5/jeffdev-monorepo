@@ -6,24 +6,25 @@
  * CRUD operations for user profiles.
  */
 
-import { db } from '@/lib/firebase/admin';
+import { getAdminClient } from '@/lib/supabase/admin';
 import type { UserProfile, PublicNamecard } from '@/types/user';
 import { logAuditEvent } from '@/lib/audit';
-import { sanitizeFirestoreData } from '@/lib/utils';
-// ... existing imports ...
-
-
-
-const COLLECTION = 'users';
+const COLLECTION = 'user_profiles';
 
 /**
- * Get user profile by UID
+ * Get user profile by ID
  */
 export async function getUserProfile(uid: string): Promise<UserProfile | null> {
   try {
-    const doc = await db.collection(COLLECTION).doc(uid).get();
-    if (!doc.exists) return null;
-    return { uid: doc.id, ...doc.data() } as UserProfile;
+    const supabase = getAdminClient();
+    const { data, error } = await supabase
+      .from(COLLECTION)
+      .select('*')
+      .eq('id', uid)
+      .single();
+
+    if (error || !data) return null;
+    return { uid: data.id, ...data } as UserProfile;
   } catch (error) {
     console.error('[GET USER PROFILE ERROR]', error);
     return null;
@@ -35,16 +36,18 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
  */
 export async function getPublicNamecard(username: string): Promise<PublicNamecard | null> {
   try {
-    const snapshot = await db
-      .collection(COLLECTION)
-      .where('namecard.username', '==', username)
-      .where('status', '==', 'active')
+    const supabase = getAdminClient();
+    const { data, error } = await supabase
+      .from(COLLECTION)
+      .select('*')
+      .eq('namecard.username', username)
+      .eq('status', 'active')
       .limit(1)
-      .get();
+      .single();
 
-    if (snapshot.empty) return null;
+    if (error || !data) return null;
 
-    const user = snapshot.docs[0].data() as UserProfile;
+    const user = data as UserProfile;
     
     // Build public namecard (only expose allowed fields)
     const namecard: PublicNamecard = {
@@ -84,12 +87,18 @@ export async function updateUserProfile(
   try {
     // Remove protected fields (prefixed with _ to indicate intentional exclusion)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { role: _role, status: _status, createdAt: _createdAt, ...safeData } = data;
+    const { role: _role, status: _status, created_at: _createdAt, ...safeData } = data;
 
-    await db.collection(COLLECTION).doc(uid).update({
-      ...safeData,
-      updatedAt: new Date().toISOString(),
-    });
+    const supabase = getAdminClient();
+    const { error } = await supabase
+      .from(COLLECTION)
+      .update({
+        ...safeData,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', uid);
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'UPDATE',
@@ -113,14 +122,15 @@ export async function checkUsernameAvailable(
   excludeUid?: string
 ): Promise<boolean> {
   try {
-    const snapshot = await db
-      .collection(COLLECTION)
-      .where('namecard.username', '==', username)
-      .limit(1)
-      .get();
+    const supabase = getAdminClient();
+    const { data, error } = await supabase
+      .from(COLLECTION)
+      .select('id')
+      .eq('namecard.username', username)
+      .limit(1);
 
-    if (snapshot.empty) return true;
-    if (excludeUid && snapshot.docs[0].id === excludeUid) return true;
+    if (error || !data || data.length === 0) return true;
+    if (excludeUid && data[0].id === excludeUid) return true;
     return false;
   } catch (error) {
     console.error('[CHECK USERNAME ERROR]', error);
@@ -130,25 +140,24 @@ export async function checkUsernameAvailable(
 
 /**
  * Get all users (for admin user management)
- * Serializes Firestore Timestamps to ISO strings for client components
+ * Supabase already returns ISO strings, no serialization needed
  */
 export async function getAllUsers(): Promise<UserProfile[]> {
   try {
-    const snapshot = await db
-      .collection(COLLECTION)
-      .orderBy('createdAt', 'desc')
-      .get();
+    const supabase = getAdminClient();
+    const { data, error } = await supabase
+      .from(COLLECTION)
+      .select('*')
+      .order('created_at', { ascending: false });
 
-    return snapshot.docs.map((doc) => {
-      const data = doc.data();
-      return sanitizeFirestoreData<UserProfile>({
-        uid: doc.id, 
-        ...data
-      });
-    });
+    if (error || !data) return [];
+
+    return data.map((doc) => ({
+      uid: doc.id, 
+      ...doc
+    })) as UserProfile[];
   } catch (error) {
     console.error('[GET ALL USERS ERROR]', error);
     return [];
   }
 }
-

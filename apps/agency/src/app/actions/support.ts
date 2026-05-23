@@ -1,12 +1,14 @@
 'use server';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /**
  * Support Server Actions
  * ----------------------
  * Handles support requests and sends them to support email via Resend.
  */
-
 import { z } from 'zod';
+import { getAdminClient } from '@/lib/supabase/admin';
 import { sendEmail, BRANDED_SENDER } from '@/lib/email';
 
 const supportSchema = z.object({
@@ -38,6 +40,32 @@ export async function sendSupportRequest(formData: FormData): Promise<ActionResu
 
     // Support email address
     const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'support@jeffdev.studio';
+
+    const supabase = getAdminClient();
+
+    // Create support ticket in database
+    const { error: ticketError } = await supabase
+      .from('support_tickets')
+      .insert([{
+        user_id: null,
+        title: validated.subject,
+        description: validated.message,
+        priority: 'medium' as const,
+        status: 'open' as const,
+        assigned_to: null,
+        tags: ['web_form'],
+        metadata: {
+          email: validated.email,
+          name: validated.name,
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }] as any);
+
+    if (ticketError) {
+      console.error('[SUPPORT TICKET CREATE ERROR]', ticketError);
+      // Don't fail - still send email even if ticket creation fails
+    }
 
     // Send email to support
     await sendEmail({
@@ -75,6 +103,11 @@ function supportEmailTemplate(data: {
   subject: string;
   message: string;
 }) {
+  const dataName = data.name;
+  const dataEmail = data.email;
+  const dataSubject = data.subject;
+  const dataMessage = data.message;
+
   return `
 <!DOCTYPE html>
 <html>
@@ -87,26 +120,26 @@ function supportEmailTemplate(data: {
   <div style="background: linear-gradient(135deg, #06b6d420 0%, #1a1a1a 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
     <h1 style="margin: 0; color: white; font-size: 24px; font-weight: 700;">New Support Request</h1>
   </div>
-  
+
   <div style="background: #111111; padding: 30px; border-radius: 0 0 12px 12px; border: 1px solid rgba(255,255,255,0.1); border-top: none;">
     <div style="background: rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 8px; margin-bottom: 20px;">
       <p style="margin: 0 0 5px 0; font-size: 12px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px;">From</p>
-      <p style="margin: 0; font-size: 16px; color: white;">${data.name}</p>
-      <p style="margin: 5px 0 0 0; font-size: 14px; color: #06b6d4;">${data.email}</p>
+      <p style="margin: 0; font-size: 16px; color: white;">${dataName}</p>
+      <p style="margin: 5px 0 0 0; font-size: 14px; color: #06b6d4;">${dataEmail}</p>
     </div>
-    
+
     <div style="background: rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 8px; margin-bottom: 20px;">
       <p style="margin: 0 0 5px 0; font-size: 12px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px;">Subject</p>
-      <p style="margin: 0; font-size: 16px; color: white;">${data.subject}</p>
+      <p style="margin: 0; font-size: 16px; color: white;">${dataSubject}</p>
     </div>
-    
+
     <div style="background: rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 8px;">
       <p style="margin: 0 0 10px 0; font-size: 12px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.5px;">Message</p>
-      <p style="margin: 0; font-size: 14px; color: rgba(255,255,255,0.8); white-space: pre-wrap;">${data.message}</p>
+      <p style="margin: 0; font-size: 14px; color: rgba(255,255,255,0.8); white-space: pre-wrap;">${dataMessage}</p>
     </div>
-    
+
     <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 25px 0;">
-    
+
     <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.3); text-align: center;">
       Reply directly to this email to respond to the user.
     </p>
@@ -123,6 +156,9 @@ function supportConfirmationTemplate(data: {
   name: string;
   subject: string;
 }) {
+  const dataName = data.name;
+  const dataSubject = data.subject;
+
   return `
 <!DOCTYPE html>
 <html>
@@ -134,26 +170,26 @@ function supportConfirmationTemplate(data: {
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #0a0a0a; color: #e5e5e5;">
   <div style="background: linear-gradient(135deg, #10b98120 0%, #1a1a1a 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
     <h1 style="margin: 0; color: white; font-size: 24px; font-weight: 700;">Request Received</h1>
-    <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.7);">We'll get back to you soon</p>
+    <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.7);">We will get back to you soon</p>
   </div>
-  
+
   <div style="background: #111111; padding: 30px; border-radius: 0 0 12px 12px; border: 1px solid rgba(255,255,255,0.1); border-top: none;">
-    <p style="margin: 0 0 20px 0; font-size: 16px;">Hi ${data.name},</p>
-    
+    <p style="margin: 0 0 20px 0; font-size: 16px;">Hi ${dataName},</p>
+
     <p style="margin: 0 0 20px 0; font-size: 14px; color: rgba(255,255,255,0.7);">
-      Thank you for reaching out. We've received your support request regarding:
+      Thank you for reaching out. We have received your support request regarding:
     </p>
-    
+
     <div style="background: rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #10b981;">
-      <p style="margin: 0; font-size: 16px; color: white; font-weight: 500;">${data.subject}</p>
+      <p style="margin: 0; font-size: 16px; color: white; font-weight: 500;">${dataSubject}</p>
     </div>
-    
+
     <p style="margin: 0 0 10px 0; font-size: 14px; color: rgba(255,255,255,0.7);">
       Our team typically responds within 24-48 hours. If this is urgent, please reply directly to this email.
     </p>
-    
+
     <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 25px 0;">
-    
+
     <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.3); text-align: center;">
       <strong>Syntaxure Labs</strong> • Enterprise Web Solutions<br>
       <a href="https://jeffdev.studio" style="color: #10b981; text-decoration: none;">jeffdev.studio</a>
