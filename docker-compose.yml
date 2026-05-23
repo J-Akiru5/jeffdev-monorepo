@@ -80,6 +80,24 @@ services:
     networks:
       - jeffdev
 
+  prism-manage:
+    build:
+      context: .
+      dockerfile: apps/prism-manage/Dockerfile
+    ports:
+      - "3007:3007"
+    networks:
+      - jeffdev
+
+  prism-analytics:
+    build:
+      context: apps/prism-analytics
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - jeffdev
+
   cosmos:
     image: mongo:7
     ports:

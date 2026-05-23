@@ -76,15 +76,15 @@ REMOVED: mht, joularix, nexure, marketing (pipeline integrated into prism-manage
 
 **Key decisions:**
 
-| Decision                                  | Rationale                                                                                                                           |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Single Supabase project for all apps      | Shared auth, simpler cookie domain setup (single `__Host-` prefix), one RLS policy surface                                          |
-| Gremlin only for Prism rules/skills graph | App data (projects, brands) stays on MongoDB document model. Graph model is experimental — isolate blast radius                     |
-| Hard cutover for Clerk migration          | Staged auth (two providers simultaneously) doubles middleware complexity. Password reset is acceptable UX tradeoff for simpler code |
-| `@jdstudio/ui` → `@syntaxure/ui`          | Aligns with syntaxure-labs brand. Single source of truth for all designs                                                            |
-| prism-admin as universal admin            | Consolidates agency admin + Prism admin + team management into one app. Reduces maintenance surface from 2 admin panels to 1        |
-| Python app inside monorepo                | Minimizes deployment orchestration. Docker-based, REST API boundary to other apps                                                   |
-| prism-manage = Calendar + Tasks + Marketing | Calendar sync, task management, and GitHub-based marketing pipeline deliver immediate business value                              |
+| Decision                                    | Rationale                                                                                                                           |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Single Supabase project for all apps        | Shared auth, simpler cookie domain setup (single `__Host-` prefix), one RLS policy surface                                          |
+| Gremlin only for Prism rules/skills graph   | App data (projects, brands) stays on MongoDB document model. Graph model is experimental — isolate blast radius                     |
+| Hard cutover for Clerk migration            | Staged auth (two providers simultaneously) doubles middleware complexity. Password reset is acceptable UX tradeoff for simpler code |
+| `@jdstudio/ui` → `@syntaxure/ui`            | Aligns with syntaxure-labs brand. Single source of truth for all designs                                                            |
+| prism-admin as universal admin              | Consolidates agency admin + Prism admin + team management into one app. Reduces maintenance surface from 2 admin panels to 1        |
+| Python app inside monorepo                  | Minimizes deployment orchestration. Docker-based, REST API boundary to other apps                                                   |
+| prism-manage = Calendar + Tasks + Marketing | Calendar sync, task management, and GitHub-based marketing pipeline deliver immediate business value                                |
 
 ---
 
@@ -459,17 +459,17 @@ scripts/migrate-firestore-to-supabase.ts
 
 #### Task 3.3 — Repurpose tracker → prism-manage
 
-| Step | Action                                                     |
-| ---- | ---------------------------------------------------------- |
-| 1    | Rename `apps/tracker/` → `apps/prism-manage/`              |
-| 2    | Update `package.json`: `"name": "prism-manage"`, port 3007 |
-| 3    | Strip all Firebase code (client SDK, admin SDK)            |
-| 4    | Add Supabase client helpers                                |
-| 5    | Keep FullCalendar setup, CalendarEventSchema, TaskSchema   |
-| 6    | Keep glass UI/dark theme (inherits from agency design)     |
-| 7    | Add Google Calendar OAuth2 integration (detailed in §8)    |
+| Step | Action                                                             |
+| ---- | ------------------------------------------------------------------ |
+| 1    | Rename `apps/tracker/` → `apps/prism-manage/`                      |
+| 2    | Update `package.json`: `"name": "prism-manage"`, port 3007         |
+| 3    | Strip all Firebase code (client SDK, admin SDK)                    |
+| 4    | Add Supabase client helpers                                        |
+| 5    | Keep FullCalendar setup, CalendarEventSchema, TaskSchema           |
+| 6    | Keep glass UI/dark theme (inherits from agency design)             |
+| 7    | Add Google Calendar OAuth2 integration (detailed in §8)            |
 | 8    | Add GitHub API integration for Marketing Pipeline (detailed in §8) |
-| 9    | New Vercel deployment                                      |
+| 9    | New Vercel deployment                                              |
 
 #### Task 3.4 — Integrate Agency Admin into prism-admin
 
@@ -1854,22 +1854,22 @@ These are the constitution. The shared package MUST support them verbatim.
 
 ### Current Global Env (turbo.json globalEnv — 50 vars)
 
-| Category      | Vars to KEEP                                                                                | Vars to REMOVE                                                                                 | Vars to ADD                                                                                                         |
-| ------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| **Clerk**     | —                                                                                           | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`                                        | —                                                                                                                   |
-| **Supabase**  | —                                                                                           | —                                                                                              | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET` |
-| **Firebase**  | `FIREBASE_*` (if prism-admin reads legacy agency data during migration)                     | `AGENCY_FIREBASE_KEY`, `NEXT_PUBLIC_FIREBASE_*`                                                | —                                                                                                                   |
-| **Cosmos DB** | `MONGODB_URI`, `COSMOS_DATABASE_NAME`                                                       | —                                                                                              | `COSMOS_GREMLIN_ENDPOINT`, `COSMOS_GREMLIN_KEY`                                                                     |
-| **R2**        | —                                                                                           | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_PUBLIC_URL` | —                                                                                                                   |
-| **Redis**     | —                                                                                           | —                                                                                              | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` (or `REDIS_URL`)                                               |
-| **Google/GitHub** | —                                                                                       | —                                                                                              | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`                             |
-| **AI**        | `GEMINI_API_KEY`, `AZURE_OPENAI_*`, `AI_PROVIDER`, `GEMINI_MODEL`, `GEMINI_EMBEDDING_MODEL` | —                                                                                              | —                                                                                                                   |
-| **Mux**       | `MUX_TOKEN_ID`, `MUX_TOKEN_SECRET`, `MUX_WEBHOOK_SECRET`                                    | —                                                                                              | —                                                                                                                   |
-| **PayPal**    | All `PAYPAL_*` vars                                                                         | —                                                                                              | —                                                                                                                   |
-| **Sentry**    | All `SENTRY_*` vars                                                                         | —                                                                                              | —                                                                                                                   |
-| **Email**     | All `ZOHO_*`, `RESEND_*`, `ADMIN_EMAIL`, etc.                                               | —                                                                                              | —                                                                                                                   |
-| **Prism**     | `PRISM_API_KEY`, `PRISM_API_URL`                                                            | —                                                                                              | —                                                                                                                   |
-| **Misc**      | `EXCHANGE_RATE_API_KEY`, `GA_PROPERTY_ID`, `SESSION_SECRET`                                 | —                                                                                              | `NEXT_PUBLIC_SITE_URL` (per-app)                                                                                    |
+| Category          | Vars to KEEP                                                                                | Vars to REMOVE                                                                                 | Vars to ADD                                                                                                         |
+| ----------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Clerk**         | —                                                                                           | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`                                        | —                                                                                                                   |
+| **Supabase**      | —                                                                                           | —                                                                                              | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET` |
+| **Firebase**      | `FIREBASE_*` (if prism-admin reads legacy agency data during migration)                     | `AGENCY_FIREBASE_KEY`, `NEXT_PUBLIC_FIREBASE_*`                                                | —                                                                                                                   |
+| **Cosmos DB**     | `MONGODB_URI`, `COSMOS_DATABASE_NAME`                                                       | —                                                                                              | `COSMOS_GREMLIN_ENDPOINT`, `COSMOS_GREMLIN_KEY`                                                                     |
+| **R2**            | —                                                                                           | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_PUBLIC_URL` | —                                                                                                                   |
+| **Redis**         | —                                                                                           | —                                                                                              | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` (or `REDIS_URL`)                                               |
+| **Google/GitHub** | —                                                                                           | —                                                                                              | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`                              |
+| **AI**            | `GEMINI_API_KEY`, `AZURE_OPENAI_*`, `AI_PROVIDER`, `GEMINI_MODEL`, `GEMINI_EMBEDDING_MODEL` | —                                                                                              | —                                                                                                                   |
+| **Mux**           | `MUX_TOKEN_ID`, `MUX_TOKEN_SECRET`, `MUX_WEBHOOK_SECRET`                                    | —                                                                                              | —                                                                                                                   |
+| **PayPal**        | All `PAYPAL_*` vars                                                                         | —                                                                                              | —                                                                                                                   |
+| **Sentry**        | All `SENTRY_*` vars                                                                         | —                                                                                              | —                                                                                                                   |
+| **Email**         | All `ZOHO_*`, `RESEND_*`, `ADMIN_EMAIL`, etc.                                               | —                                                                                              | —                                                                                                                   |
+| **Prism**         | `PRISM_API_KEY`, `PRISM_API_URL`                                                            | —                                                                                              | —                                                                                                                   |
+| **Misc**          | `EXCHANGE_RATE_API_KEY`, `GA_PROPERTY_ID`, `SESSION_SECRET`                                 | —                                                                                              | `NEXT_PUBLIC_SITE_URL` (per-app)                                                                                    |
 
 ### Per-App Env Vars (Vercel projects)
 
@@ -2101,7 +2101,7 @@ If converting to changeset-based releases (already partially configured), update
 | R2  | **Clerk user password migration UX friction**            | High        | Medium   | Clear reset email template, 7-day grace period notice, support channel ready                      | Lou   |
 | R3  | **Vercel deployment break on rename**                    | Medium      | High     | One app at a time, alias old project → new project, DNS with low TTL during transition            | Both  |
 | R4  | **Supabase RLS policy prevents legitimate access**       | Medium      | High     | Write integration tests for RLS policies, use service role for server actions until RLS verified  | Jeff  |
-| R5  | **prism-manage Google Calendar/GitHub OAuth rejected**    | Medium      | Medium   | Submit for verification early, limit permissions scope during development                          | Lou   |
+| R5  | **prism-manage Google Calendar/GitHub OAuth rejected**   | Medium      | Medium   | Submit for verification early, limit permissions scope during development                         | Lou   |
 | R6  | **Gremlin graph performance worse than MongoDB**         | Medium      | Medium   | Dual-read comparison for 30 days, feature flag, a/b metrics                                       | Jeff  |
 | R7  | **Agency landing page visual regression**                | Low         | Critical | CSS-only refactor, NEVER touch agency component markup, screenshot comparison tests               | Lou   |
 | R8  | **Python/Node CI tooling conflict**                      | Low         | Low      | Independent Dockerfile + CI job, no cross-language build deps                                     | Lou   |
