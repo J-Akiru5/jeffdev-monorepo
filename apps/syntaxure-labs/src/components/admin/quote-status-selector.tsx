@@ -15,10 +15,11 @@ interface QuoteStatusSelectorProps {
 }
 
 const statuses = [
-  { value: 'new', label: 'New', color: 'bg-blue-500/20 text-blue-400' },
-  { value: 'contacted', label: 'Contacted', color: 'bg-yellow-500/20 text-yellow-400' },
-  { value: 'in-progress', label: 'In Progress', color: 'bg-purple-500/20 text-purple-400' },
-  { value: 'closed', label: 'Closed', color: 'bg-emerald-500/20 text-emerald-400' },
+  { value: 'draft', label: 'Draft', color: 'bg-white/10 text-white/60' },
+  { value: 'sent', label: 'Sent', color: 'bg-blue-500/20 text-blue-400' },
+  { value: 'accepted', label: 'Accepted', color: 'bg-emerald-500/20 text-emerald-400' },
+  { value: 'rejected', label: 'Rejected', color: 'bg-red-500/20 text-red-400' },
+  { value: 'expired', label: 'Expired', color: 'bg-yellow-500/20 text-yellow-400' },
 ];
 
 export function QuoteStatusSelector({ quoteId, currentStatus }: QuoteStatusSelectorProps) {
@@ -34,7 +35,7 @@ export function QuoteStatusSelector({ quoteId, currentStatus }: QuoteStatusSelec
     startTransition(async () => {
       const result = await updateQuoteStatus(
         quoteId,
-        newStatus as 'new' | 'contacted' | 'in-progress' | 'closed'
+        newStatus as 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired'
       );
 
       if (!result.success) {

@@ -8,7 +8,7 @@
  */
 'use server';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 
 import { z } from 'zod';
 import { getAdminClient } from '@/lib/supabase/admin';
@@ -50,7 +50,7 @@ export async function submitQuoteForm(data: QuoteFormData) {
     // Generate unique reference number
     const refNo = generateQuoteRef();
 
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     // Save to Supabase
     const { data: result, error } = await supabase
@@ -118,7 +118,7 @@ export async function updateQuoteStatus(
 ) {
   try {
     const { logAuditEvent } = await import('@/lib/audit');
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     // Fetch current quote
     const { data: quotes, error: fetchError } = await supabase

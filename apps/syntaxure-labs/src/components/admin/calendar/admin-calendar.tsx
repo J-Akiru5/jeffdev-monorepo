@@ -38,7 +38,7 @@ export function AdminCalendar({ initialEvents = [] }: AdminCalendarProps) {
   // Refresh events
   const refreshEvents = useCallback(async () => {
     const newEvents = await getCalendarEvents();
-    setEvents(newEvents);
+    setEvents(newEvents as any);
   }, []);
 
   // Handle date click/select

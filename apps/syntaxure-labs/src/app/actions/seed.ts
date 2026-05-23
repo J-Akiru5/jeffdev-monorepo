@@ -19,7 +19,7 @@ export async function bootstrapCurrentUserAsFounder(
   displayName: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     // Check if user document already exists
     const { data: existingUser } = await supabase
@@ -102,7 +102,7 @@ export async function upsertUserProfile(
   }
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     // Check if user exists
     const { data: existingUser } = await supabase
@@ -124,7 +124,7 @@ export async function upsertUserProfile(
 
       if (data.socials || data.title || data.website) {
         updates.preferences = {
-          ...(existingUser as Record<string, unknown>).preferences,
+          ...((existingUser as Record<string, unknown>).preferences as Record<string, unknown>),
           title: data.title,
           website: data.website,
           socials: data.socials,

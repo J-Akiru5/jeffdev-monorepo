@@ -62,7 +62,7 @@ export function NotificationPopover({ userId }: NotificationPopoverProps) {
     if (!isOpen) {
       setIsLoading(true);
       const data = await getNotifications(userId);
-      setNotifications(data);
+      setNotifications(data as any);
       setIsLoading(false);
     }
   };

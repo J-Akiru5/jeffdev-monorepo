@@ -1,6 +1,6 @@
 'use server';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 
 /**
  * Support Server Actions
@@ -41,7 +41,7 @@ export async function sendSupportRequest(formData: FormData): Promise<ActionResu
     // Support email address
     const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'support@jeffdev.studio';
 
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     // Create support ticket in database
     const { error: ticketError } = await supabase

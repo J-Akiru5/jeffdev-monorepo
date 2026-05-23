@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Receipt,
   Calendar,
+  FileText,
 } from "lucide-react";
 
 /**
@@ -123,6 +124,9 @@ export default async function AdminLayout({
           </NavItem>
           <NavItem href="/admin/agency/users" icon={Users}>
             Users
+          </NavItem>
+          <NavItem href="/admin/agency/content" icon={FileText}>
+            Content
           </NavItem>
 
           {isFounder && (

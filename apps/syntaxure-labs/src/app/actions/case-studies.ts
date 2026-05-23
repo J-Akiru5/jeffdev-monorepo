@@ -64,7 +64,7 @@ function generateSlug(title: string): string {
  * Check if slug already exists in case_studies table
  */
 async function slugExists(slug: string, excludeSlug?: string): Promise<boolean> {
-  const supabase = getAdminClient();
+  const supabase = getAdminClient() as any;
   const { data } = await supabase
     .from('case_studies')
     .select('id')
@@ -93,7 +93,7 @@ function serializeCaseStudy(row: CaseStudy): Record<string, unknown> {
     results: row.metrics as { metric: string; value: string }[] || [],
     technologies: (metadata.technologies as string[]) || [],
     testimonial: (metadata.testimonial as { quote: string; author: string; role: string } | null) || null,
-    image: row.images?.[0] || null,
+    image: (row.images as any)?.[0] || null,
     featured: metadata.featured === true,
     order: (metadata.order as number) || 0,
     status: 'completed',
@@ -109,7 +109,7 @@ function serializeCaseStudy(row: CaseStudy): Record<string, unknown> {
 
 export async function getCaseStudies(): Promise<Record<string, unknown>[]> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from('case_studies')
       .select('*')
@@ -117,7 +117,7 @@ export async function getCaseStudies(): Promise<Record<string, unknown>[]> {
 
     if (error || !data) return [];
 
-    return data.map((row) => serializeCaseStudy(row as CaseStudy));
+    return data.map((row: any) => serializeCaseStudy(row as CaseStudy));
   } catch (error) {
     console.error('[GET CASE STUDIES ERROR]', error);
     return [];
@@ -132,7 +132,7 @@ export async function getCaseStudyBySlug(
   slug: string
 ): Promise<Record<string, unknown> | null> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from('case_studies')
       .select('*')
@@ -176,7 +176,7 @@ export async function createCaseStudy(
       .map(r => `${r.metric}: ${r.value}`)
       .join('; ');
 
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { error: insertError } = await supabase
       .from('case_studies')
       .insert({
@@ -237,10 +237,10 @@ export async function updateCaseStudy(
   data: Partial<CaseStudyInput>
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     // Check if exists
-    const { data: existing } = await supabase
+    const { data: existing } = await (supabase as any)
       .from('case_studies')
       .select('id, metadata')
       .eq('slug', slug)
@@ -317,7 +317,7 @@ export async function deleteCaseStudy(
   slug: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const { data: existing } = await supabase
       .from('case_studies')
@@ -363,9 +363,9 @@ export async function toggleFeatured(
   slug: string
 ): Promise<{ success: boolean; featured?: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
-    const { data: existing } = await supabase
+    const { data: existing } = await (supabase as any)
       .from('case_studies')
       .select('id, metadata')
       .eq('slug', slug)
@@ -419,12 +419,12 @@ export async function reorderCaseStudies(
   orderedSlugs: string[]
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     for (let index = 0; index < orderedSlugs.length; index++) {
       const slug = orderedSlugs[index];
 
-      const { data: existing } = await supabase
+      const { data: existing } = await (supabase as any)
         .from('case_studies')
         .select('id, metadata')
         .eq('slug', slug)
@@ -472,11 +472,11 @@ export async function getApprovedFeedback(): Promise<
   { id: string; clientName: string; testimonial: string; projectSlug?: string }[]
 > {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     // Supabase feedback table uses different statuses: 'received', 'acknowledged', 'resolved'
     // We use project_id as the link -> get project slugs from projects table
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('feedback')
       .select('id, project_id, comment, created_at, user_id')
       .in('status', ['acknowledged', 'resolved'])
@@ -486,22 +486,22 @@ export async function getApprovedFeedback(): Promise<
     if (error || !data) return [];
 
     // Get user names for each feedback entry
-    const userIds = [...new Set(data.map(f => f.user_id).filter(Boolean))];
+    const userIds = [...new Set(data.map((f: any) => f.user_id).filter(Boolean))];
     const { data: userProfiles } = userIds.length > 0
       ? await supabase.from('user_profiles').select('id, full_name, email').in('id', userIds)
       : { data: [] };
 
-    const userMap = new Map((userProfiles || []).map(u => [u.id, u.full_name || u.email]));
+    const userMap = new Map((userProfiles || []).map((u: any) => [u.id, u.full_name || u.email]));
 
     // Get project slugs for linked projects
-    const projectIds = [...new Set(data.map(f => f.project_id).filter(Boolean))];
+    const projectIds = [...new Set(data.map((f: any) => f.project_id).filter(Boolean))];
     const { data: projects } = projectIds.length > 0
       ? await supabase.from('projects').select('id, slug').in('id', projectIds)
       : { data: [] };
 
-    const projectMap = new Map((projects || []).map(p => [p.id, p.slug]));
+    const projectMap = new Map((projects || []).map((p: any) => [p.id, p.slug]));
 
-    return data.map((row) => ({
+    return data.map((row: any) => ({
       id: row.id,
       clientName: userMap.get(row.user_id) || 'Unknown',
       testimonial: row.comment || '',
@@ -522,7 +522,7 @@ export async function linkFeedbackToCaseStudy(
   feedbackId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     // Get feedback
     const { data: feedback, error: feedbackError } = await supabase
@@ -536,14 +536,14 @@ export async function linkFeedbackToCaseStudy(
     }
 
     // Get user name for the testimonial author
-    const { data: userProfile } = await supabase
+    const { data: userProfile } = await (supabase as any)
       .from('user_profiles')
       .select('full_name, email')
       .eq('id', feedback.user_id)
       .maybeSingle();
 
     // Update case study with testimonial
-    const { data: caseStudy } = await supabase
+    const { data: caseStudy } = await (supabase as any)
       .from('case_studies')
       .select('id, metadata')
       .eq('slug', slug)

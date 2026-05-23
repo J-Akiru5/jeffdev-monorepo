@@ -18,7 +18,7 @@ interface AcceptInviteResult {
 
 export async function acceptInvite(token: string, uid: string, email: string): Promise<AcceptInviteResult> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     // 1. Get and validate invite
     const invite = await getInviteByToken(token);
@@ -63,20 +63,20 @@ export async function acceptInvite(token: string, uid: string, email: string): P
 
     if (existingUser) {
       // Update existing
-      const { error: updateError } = await supabase
+      const { error: updateError } = await (supabase as any)
         .from('user_profiles')
         .update({
           ...userData,
           updated_at: new Date().toISOString(),
-        } as any)
+        })
         .eq('id', uid);
 
       if (updateError) throw updateError;
     } else {
       // Insert new
-      const { error: insertError } = await supabase
+      const { error: insertError } = await (supabase as any)
         .from('user_profiles')
-        .insert(userData as any);
+        .insert(userData);
 
       if (insertError) throw insertError;
     }
@@ -91,12 +91,12 @@ export async function acceptInvite(token: string, uid: string, email: string): P
     }
 
     // 5. Mark invite as accepted
-    const { error: inviteUpdateError } = await supabase
+    const { error: inviteUpdateError } = await (supabase as any)
       .from('invites')
       .update({
         status: 'accepted',
         accepted_at: new Date().toISOString(),
-      } as any)
+      })
       .eq('id', invite.id);
 
     if (inviteUpdateError) throw inviteUpdateError;

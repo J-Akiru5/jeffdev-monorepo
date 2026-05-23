@@ -9,74 +9,74 @@ import { cookies } from 'next/headers';
  * Edit user profile, bio, photo, and namecard settings.
  */
 
-import { auth as adminAuth, db } from '@/lib/firebase/admin';
+import { createClient } from '@/lib/supabase/server';
+import { getAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import { UserProfile } from '@/types/user';
 
 async function getCurrentUser(): Promise<UserProfile> {
-  const cookieStore = await cookies();
-  const sessionCookie = cookieStore.get('session');
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-  if (!sessionCookie) {
+  if (authError || !user) {
     redirect('/admin/login');
   }
 
   try {
-    const decodedClaims = await adminAuth.verifySessionCookie(
-      sessionCookie.value,
-      true // checkRevoked
-    );
+    const adminSupabase = getAdminClient() as any;
+    const { data: profile, error: dbError } = await adminSupabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle();
 
-    const userDoc = await db.collection('users').doc(decodedClaims.uid).get();
-
-    if (!userDoc.exists) {
-      console.error('User document not found for UID:', decodedClaims.uid);
+    if (dbError || !profile) {
+      console.error('User document not found for UID:', user.id);
       redirect('/admin/login');
     }
 
-    const data = userDoc.data();
+    const preferences = (profile.preferences || {}) as Record<string, any>;
+    const namecard = (preferences.namecard || {}) as Record<string, any>;
+    const socials = (preferences.socials || {}) as Record<string, any>;
 
     // Serializing basic timestamps
     return {
-      uid: userDoc.id,
-      email: data?.email || decodedClaims.email || '',
-      displayName: data?.displayName || '',
-      photoURL: data?.photoURL || undefined,
-      role: data?.role || 'employee',
-      status: data?.status || 'active',
-      bio: data?.bio || '',
-      title: data?.title || '',
-      phone: data?.phone || '',
-      location: data?.location || '',
-      assignedProjects: data?.assignedProjects || [],
+      uid: profile.id,
+      email: profile.email || '',
+      displayName: profile.full_name || '',
+      photoURL: profile.avatar_url || undefined,
+      role: profile.role || 'employee',
+      status: (profile.status as any) || 'active',
+      bio: profile.bio || '',
+      title: profile.title || '',
+      phone: profile.phone || '',
+      location: (profile as any).location || '',
+      assignedProjects: (profile as any).assignedProjects || [],
       social: {
-        linkedin: data?.social?.linkedin || '',
-        github: data?.social?.github || '',
-        twitter: data?.social?.twitter || '',
-        website: data?.social?.website || '',
+        linkedin: socials.linkedin || '',
+        github: socials.github || '',
+        twitter: socials.twitter || '',
+        website: socials.website || '',
       },
       namecard: {
-        username: data?.namecard?.username || '',
-        tagline: data?.namecard?.tagline || '',
-        showEmail: data?.namecard?.showEmail ?? true,
-        showPhone: data?.namecard?.showPhone ?? false,
-        accentColor: data?.namecard?.accentColor || '#06b6d4',
-        background: data?.namecard?.background || 'gradient-dark',
+        username: namecard.username || '',
+        tagline: namecard.tagline || '',
+        showEmail: namecard.showEmail ?? true,
+        showPhone: namecard.showPhone ?? false,
+        accentColor: namecard.accentColor || '#06b6d4',
+        background: namecard.background || 'gradient-dark',
         socials: {
-          linkedin: data?.namecard?.socials?.linkedin ?? true,
-          github: data?.namecard?.socials?.github ?? true,
-          twitter: data?.namecard?.socials?.twitter ?? true,
-          website: data?.namecard?.socials?.website ?? true,
+          linkedin: namecard.socials?.linkedin ?? true,
+          github: namecard.socials?.github ?? true,
+          twitter: namecard.socials?.twitter ?? true,
+          website: namecard.socials?.website ?? true,
         }
       },
-      // Safely handle Firestore Timestamps
-      createdAt: data?.createdAt?.toDate?.()
-        ? data.createdAt.toDate().toISOString()
-        : new Date().toISOString(),
-      updatedAt: data?.updatedAt?.toDate?.()
-        ? data.updatedAt.toDate().toISOString()
-        : new Date().toISOString(),
-    } as UserProfile;
+      created_at: profile.created_at || new Date().toISOString(),
+      updated_at: profile.updated_at || new Date().toISOString(),
+      createdAt: profile.created_at || new Date().toISOString(),
+      updatedAt: profile.updated_at || new Date().toISOString(),
+    } as unknown as UserProfile;
   } catch (error) {
     console.error('Session verification failed:', error);
     redirect('/admin/login');

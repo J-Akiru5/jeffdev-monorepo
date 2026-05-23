@@ -37,8 +37,9 @@ export async function getFeatureFlags(): Promise<FeatureFlags> {
  * Flags must be updated via Vercel/Doppler environment variables.
  */
 export async function updateFeatureFlags(
-  _flags: Partial<FeatureFlags>
+  flags: Partial<FeatureFlags>
 ): Promise<{ success: boolean; error?: string }> {
+  console.log('[FEATURE FLAGS] Update attempted (no-op in env mode):', flags);
   return {
     success: false,
     error: 'Feature flags are managed via environment variables. Deploy with updated FEATURE_* vars to change flags.',

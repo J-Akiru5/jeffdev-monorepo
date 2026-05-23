@@ -63,7 +63,7 @@ export function MilestonesList({ slug, milestones, onProgressUpdate }: Milestone
         title: newTitle.trim(),
         status: 'pending',
         order: milestones.length,
-      });
+      } as any);
       setNewTitle('');
       setShowAddForm(false);
     });

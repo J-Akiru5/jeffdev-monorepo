@@ -1,6 +1,6 @@
 'use server';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 
 /**
  * Notification Server Actions
@@ -33,7 +33,7 @@ export async function getNotifications(
   limit = 20
 ): Promise<Notification[]> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(NOTIFICATIONS_COLLECTION)
       .select('*')
@@ -55,7 +55,7 @@ export async function getNotifications(
  */
 export async function getUnreadCount(userId: string): Promise<number> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { count, error } = await supabase
       .from(NOTIFICATIONS_COLLECTION)
       .select('*', { count: 'exact', head: true })
@@ -77,7 +77,7 @@ export async function markAsRead(
   notificationId: string
 ): Promise<{ success: boolean }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { error } = await supabase
       .from(NOTIFICATIONS_COLLECTION)
       .update({ read: true } as any)
@@ -98,7 +98,7 @@ export async function markAllAsRead(
   userId: string
 ): Promise<{ success: boolean }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { error } = await supabase
       .from(NOTIFICATIONS_COLLECTION)
       .update({ read: true } as any)
@@ -120,7 +120,7 @@ export async function dismissNotification(
   notificationId: string
 ): Promise<{ success: boolean }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { error } = await supabase
       .from(NOTIFICATIONS_COLLECTION)
       .delete()
@@ -142,7 +142,7 @@ export async function createNotification(
   input: NotificationCreateInput
 ): Promise<{ success: boolean; id?: string }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(NOTIFICATIONS_COLLECTION)
       .insert({

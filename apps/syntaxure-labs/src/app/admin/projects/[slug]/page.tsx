@@ -1,10 +1,11 @@
 import Link from 'next/link';
-import { ArrowLeft, Calendar, DollarSign, User, Users } from 'lucide-react';
+import { ArrowLeft, Calendar, DollarSign, User, Users, Edit } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { getProjects } from '@/lib/data';
 import { ProgressBar } from '@/components/admin/progress-bar';
 import { ProjectStatusSelector } from '@/components/admin/project-status-selector';
 import { MilestonesList } from '@/components/admin/milestones-list';
+import { DeleteProjectButton } from '@/components/admin/delete-project-button';
 import type { FirestoreProject, ProjectMilestone } from '@/types/firestore';
 
 export const dynamic = 'force-dynamic';
@@ -60,24 +61,39 @@ export default async function ProjectDetailPage({ params }: Props) {
           )}
         </div>
 
-        {/* Quick Stats */}
-        <div className="flex gap-4">
-          {deadline && (
-            <div className="flex items-center gap-2 rounded-md border border-white/[0.08] bg-white/[0.02] px-4 py-2">
-              <Calendar className="h-4 w-4 text-white/40" />
-              <span className="text-sm text-white/70">
-                Due: {new Date(deadline).toLocaleDateString()}
-              </span>
-            </div>
-          )}
-          {budget !== undefined && (
-            <div className="flex items-center gap-2 rounded-md border border-white/[0.08] bg-white/[0.02] px-4 py-2">
-              <DollarSign className="h-4 w-4 text-emerald-400/70" />
-              <span className="text-sm text-white/70">
-                ${paidAmount.toLocaleString()} / ${budget.toLocaleString()}
-              </span>
-            </div>
-          )}
+        {/* Actions & Quick Stats */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center lg:flex-col lg:items-end">
+          {/* Action Buttons */}
+          <div className="flex gap-2">
+            <Link
+              href={`/admin/projects/${slug}/edit`}
+              className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-white/10"
+            >
+              <Edit className="h-4 w-4 text-white/70" />
+              Edit Project
+            </Link>
+            <DeleteProjectButton slug={slug} />
+          </div>
+
+          {/* Quick Stats */}
+          <div className="flex gap-4">
+            {deadline && (
+              <div className="flex items-center gap-2 rounded-md border border-white/[0.08] bg-white/[0.02] px-4 py-2">
+                <Calendar className="h-4 w-4 text-white/40" />
+                <span className="text-sm text-white/70">
+                  Due: {new Date(deadline).toLocaleDateString()}
+                </span>
+              </div>
+            )}
+            {budget !== undefined && (
+              <div className="flex items-center gap-2 rounded-md border border-white/[0.08] bg-white/[0.02] px-4 py-2">
+                <DollarSign className="h-4 w-4 text-emerald-400/70" />
+                <span className="text-sm text-white/70">
+                  ${paidAmount.toLocaleString()} / ${budget.toLocaleString()}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 'use server';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 
 /**
  * Subscription Server Actions
@@ -38,7 +38,7 @@ export async function getSubscriptions(
   status?: SubscriptionRow['status']
 ): Promise<SubscriptionRow[]> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     let query = supabase
       .from(SUBSCRIPTIONS_TABLE)
@@ -65,7 +65,7 @@ export async function getSubscriptions(
  */
 export async function getSubscription(id: string): Promise<SubscriptionRow | null> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const { data, error } = await supabase
       .from(SUBSCRIPTIONS_TABLE)
@@ -107,7 +107,7 @@ export async function createSubscription(
       endDate.setFullYear(endDate.getFullYear() + 1);
     }
 
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const { data: result, error } = await supabase
       .from(SUBSCRIPTIONS_TABLE)
@@ -147,7 +147,7 @@ export async function updateSubscription(
   input: Partial<Omit<SubscriptionRow, 'id' | 'created_at'>>
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const updateData: Record<string, unknown> = {};
 
     // Only add fields that are actually being updated
@@ -245,7 +245,7 @@ export async function getSubscriptionStats(): Promise<{
   mrr: number;
 }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const { data, error } = await supabase
       .from(SUBSCRIPTIONS_TABLE)

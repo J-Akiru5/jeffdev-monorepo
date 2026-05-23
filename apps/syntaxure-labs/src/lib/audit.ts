@@ -22,14 +22,13 @@ export interface AuditLog extends AuditEvent {
   userEmail?: string;
 }
 
-type AuditLogRow = Database['public']['Tables']['audit_logs']['Insert'];
 
 /**
  * Log an audit event to Supabase
  */
 export async function logAuditEvent(event: AuditEvent): Promise<void> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const payload: Record<string, unknown> = {
       action: event.action,
@@ -61,7 +60,7 @@ export async function logAuditEvent(event: AuditEvent): Promise<void> {
  */
 export async function getAuditLogs(limit = 50): Promise<AuditLog[]> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const { data, error } = await supabase
       .from('audit_logs')
