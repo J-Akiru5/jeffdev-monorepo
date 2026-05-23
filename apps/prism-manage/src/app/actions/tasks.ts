@@ -2,7 +2,6 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import type { Task } from "@/lib/schemas";
 
 /**
  * Task Server Actions

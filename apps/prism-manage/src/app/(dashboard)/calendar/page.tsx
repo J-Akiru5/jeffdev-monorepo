@@ -11,14 +11,12 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { useProjects } from '@/contexts/project-context';
-import { createEvent, updateEvent, deleteEvent, syncCalendar } from '@/app/actions/calendar';
+import { createEvent, updateEvent, syncCalendar } from '@/app/actions/calendar';
 import { fetchEvents } from '@/app/actions/calendar';
 import type { CalendarEvent } from '@/lib/schemas';
 import { toast } from 'sonner';
 
 export default function CalendarPage() {
-  const { projects } = useProjects();
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -73,7 +71,7 @@ export default function CalendarPage() {
       const created = await createEvent(newEvent);
       setEvents((prev) => [...prev, created]);
       toast.success('Event created');
-    } catch (err) {
+    } catch {
       toast.error('Failed to create event');
     }
   }, []);
@@ -86,7 +84,7 @@ export default function CalendarPage() {
       const updated = await updateEvent(info.event.id, { title: newTitle });
       setEvents((prev) => prev.map((e) => (e.id === info.event.id ? updated : e)));
       toast.success('Event updated');
-    } catch (err) {
+    } catch {
       toast.error('Failed to update event');
     }
   }, []);

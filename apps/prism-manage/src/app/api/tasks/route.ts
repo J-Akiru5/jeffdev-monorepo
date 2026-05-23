@@ -9,7 +9,7 @@ export async function GET() {
   try {
     const tasks = await getTasks();
     return NextResponse.json(tasks);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch tasks" },
       { status: 500 }

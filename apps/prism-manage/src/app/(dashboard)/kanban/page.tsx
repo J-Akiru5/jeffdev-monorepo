@@ -6,7 +6,7 @@
  * Drag-and-drop kanban board for visual task management with Supabase persistence.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useProjects } from '@/contexts/project-context';
 import { GripVertical, Plus } from 'lucide-react';
 import { updateTaskStatus, createTask } from '@/app/actions/tasks';
@@ -103,7 +103,7 @@ export default function KanbanPage() {
             : t
         )
       );
-    } catch (err) {
+    } catch {
       toast.error('Failed to update task status');
     }
     setDraggedTask(null);
@@ -129,7 +129,7 @@ export default function KanbanPage() {
       };
       setTasks((prev) => [newTask, ...prev]);
       toast.success('Task added');
-    } catch (err) {
+    } catch {
       toast.error('Failed to create task');
     }
   };

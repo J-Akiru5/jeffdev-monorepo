@@ -17,7 +17,7 @@
 
 import type { RankedRule } from "./smart-select.js";
 
-// @ts-ignore - gremlin package has no TypeScript declarations
+// @ts-expect-error - gremlin package has no TypeScript declarations
 import gremlin from "gremlin";
 
 const { process: gremlinProcess } = gremlin;
