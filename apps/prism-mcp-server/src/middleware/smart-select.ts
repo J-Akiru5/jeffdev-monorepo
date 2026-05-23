@@ -1,6 +1,12 @@
 import { countTokens as gptCountTokens } from "gpt-tokenizer";
 import { cosineSimilarity } from "../lib/vector-search.js";
 import { getEmbedding, getBatchEmbeddings } from "../lib/ai-router.js";
+import {
+  computeGremlinBoosts,
+  applyGremlinBoosts,
+  logDualReadComparison,
+  isGremlinRankingEnabled,
+} from "./gremlin-ranking.js";
 
 const SIMILARITY_THRESHOLD = 0.72;
 const MAX_RULES_RETURNED = 20;
@@ -260,6 +266,27 @@ export async function rankRulesByTask(
     similarity: s.similarity,
     truncated: false,
   }));
+
+  // --- Gremlin graph ranking (Phase 6.4) ---
+  // If USE_GREMLIN_RANKING=true, query the Gremlin graph for relationship
+  // signals (tag overlap, related rules, conflicts) and boost/penalize scores.
+  let gremlinChangedIds: string[] = [];
+  if (isGremlinRankingEnabled()) {
+    const baseForComparison = ranked.map((r) => ({ ...r }));
+    const boosts = await computeGremlinBoosts(ranked);
+    const result = applyGremlinBoosts(ranked, boosts);
+    gremlinChangedIds = result.changedIds;
+
+    // Dual-read safety net: log comparison when significant shifts occur
+    logDualReadComparison(baseForComparison, ranked);
+
+    if (gremlinChangedIds.length > 0) {
+      console.error(
+        `[smart-select] Gremlin ranking applied to ${gremlinChangedIds.length} rules`,
+      );
+    }
+  }
+  // --- End Gremlin graph ranking ---
 
   // 7. Deduplicate
   const { rules: dedupedRules, dedupedCount } = deduplicateRules(ranked);

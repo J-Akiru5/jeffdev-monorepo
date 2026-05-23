@@ -61,7 +61,7 @@ APPS (7):
   prism-docs         Nextra 4    port 3002  Static (no DB)
   prism-admin        Next.js 16  port 3004  Supabase + Cosmos DB
   prism-mcp-server   Node.js     stdio     Cosmos DB
-  prism-manage       Next.js 16  port 3007  Supabase + Google Calendar API
+  prism-manage       Next.js 16  port 3007  Supabase + Google Calendar API + GitHub API
   prism-analytics    Python      port 8000  Supabase (read) + pandas/matplotlib
 
 PACKAGES (5):
@@ -71,7 +71,7 @@ PACKAGES (5):
   @repo/eslint-config
   @repo/typescript-config
 
-REMOVED: mht, joularix, nexure, marketing, prism-exercise, tracker (repurposed → prism-manage)
+REMOVED: mht, joularix, nexure, marketing (pipeline integrated into prism-manage), prism-exercise, tracker (repurposed → prism-manage)
 ```
 
 **Key decisions:**
@@ -84,7 +84,7 @@ REMOVED: mht, joularix, nexure, marketing, prism-exercise, tracker (repurposed �
 | `@jdstudio/ui` → `@syntaxure/ui`          | Aligns with syntaxure-labs brand. Single source of truth for all designs                                                            |
 | prism-admin as universal admin            | Consolidates agency admin + Prism admin + team management into one app. Reduces maintenance surface from 2 admin panels to 1        |
 | Python app inside monorepo                | Minimizes deployment orchestration. Docker-based, REST API boundary to other apps                                                   |
-| prism-manage = Calendar + Tasks MVP       | Full Notion clone is 6+ months. Calendar sync + task management delivers immediate business value                                   |
+| prism-manage = Calendar + Tasks + Marketing | Calendar sync, task management, and GitHub-based marketing pipeline deliver immediate business value                              |
 
 ---
 
@@ -468,7 +468,8 @@ scripts/migrate-firestore-to-supabase.ts
 | 5    | Keep FullCalendar setup, CalendarEventSchema, TaskSchema   |
 | 6    | Keep glass UI/dark theme (inherits from agency design)     |
 | 7    | Add Google Calendar OAuth2 integration (detailed in §8)    |
-| 8    | New Vercel deployment                                      |
+| 8    | Add GitHub API integration for Marketing Pipeline (detailed in §8) |
+| 9    | New Vercel deployment                                      |
 
 #### Task 3.4 — Integrate Agency Admin into prism-admin
 
@@ -606,8 +607,8 @@ Update all references to renamed/removed apps:
 
 #### Task 4.1 — Rename @jdstudio/ui → @syntaxure/ui
 
-| Step | Action                                                                                                            |
-| ---- | ----------------------------------------------------------------------------------------------------------------- |
+| Step | Action                                                                                                 |
+| ---- | -------------------------------------------------------------------------------------------------------- |
 | 1    | Update `packages/ui/package.json`: `"name": "@syntaxure/ui"`                                                      |
 | 2    | Update all apps' `package.json`: `"@jdstudio/ui": "workspace:*"` → `"@syntaxure/ui": "workspace:*"`               |
 | 3    | Update all import statements across 4 apps (prism-engine, syntaxure-labs, prism-admin, prism-manage) — ~50+ files |
@@ -654,7 +655,7 @@ packages/ui/src/
 
 ### Phase 5: New Builds (Weeks 9-11)
 
-#### Task 5.1 — prism-manage Implementation (Calendar + Tasks MVP)
+#### Task 5.1 — prism-manage Implementation (Calendar + Tasks MVP & Marketing Pipeline)
 
 **Core features:**
 
@@ -662,7 +663,8 @@ packages/ui/src/
 2. Calendar view (day, week, month) using FullCalendar (already installed)
 3. Task management with drag-and-drop
 4. Two-way sync: Supabase ↔ Google Calendar
-5. Basic markdown notes for tasks (NOT full Notion blocks)
+5. GitHub API integration for the Marketing Pipeline (mapping GitHub issues to status columns)
+6. Basic markdown notes for tasks (NOT full Notion blocks)
 
 **Google Calendar integration:**
 
@@ -709,10 +711,21 @@ tasks (
   priority int DEFAULT 0,
   due_date timestamptz,
   google_event_id text,
+  github_issue_number int,        -- GitHub issue mapping for Marketing Pipeline
   notes text,                     -- Markdown notes (MVP: plain text area)
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
 )
+```
+
+**Doppler vars to add:**
+
+```
+GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET
+GITHUB_CLIENT_ID
+GITHUB_CLIENT_SECRET
+NEXT_PUBLIC_SITE_URL=http://localhost:3007   # prism-manage URL
 ```
 
 #### Task 5.2 — prism-analytics Implementation (Python Flask API)
@@ -1005,17 +1018,18 @@ CREATE TABLE tasks (
   priority INT DEFAULT 0,
   due_date TIMESTAMPTZ,
   google_event_id TEXT,
+  github_issue_number INT,        -- GitHub issue mapping for Marketing Pipeline
   notes TEXT,
   parent_task_id UUID REFERENCES tasks(id),
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- prism-manage: Google Calendar Tokens
+-- prism-manage: Google Calendar & GitHub Tokens
 CREATE TABLE user_tokens (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL UNIQUE REFERENCES user_profiles(id),
-  provider TEXT NOT NULL CHECK (provider IN ('google')),
+  provider TEXT NOT NULL CHECK (provider IN ('google', 'github')),
   access_token TEXT NOT NULL,
   refresh_token TEXT,
   expires_at TIMESTAMPTZ,
@@ -1388,17 +1402,17 @@ prism-admin/src/app/
 | admin    | Full access     | —             | Full access             |
 | manager  | Full access     | —             | Full access             |
 | employee | Prism view only | —             | Full access (own tasks) |
-| client   | —               | Own data only | —                       |
+| client   | —               | Own data only | —             |
 
 ---
 
-## 8. prism-manage — Calendar + Tasks MVP
+## 8. prism-manage — Calendar + Tasks + Marketing Pipeline
 
 ### Tech Stack
 
 - **Frontend:** Next.js 16, `@fullcalendar/react` (already in tracker), `@syntaxure/ui`
 - **Backend:** Server actions with Supabase
-- **Google Calendar:** `googleapis` npm, OAuth2 web flow
+- **Integrations:** `googleapis` npm (Google Calendar OAuth2), `@octokit/rest` or direct GitHub REST API (GitHub Issues)
 - **Auth:** Supabase Auth (shared session)
 
 ### Feature Roadmap
@@ -1412,11 +1426,14 @@ prism-admin/src/app/
 - [ ] One-way sync: Google → Supabase (pull events)
 - [ ] Task management (list view with status columns)
 - [ ] Task → Calendar event linking
+- [ ] GitHub OAuth2 integration (connect GitHub accounts)
+- [ ] Marketing Pipeline Board: Fetch GitHub issues from a specified repository and display them in columns mapped by labels/status
 
 **Phase 2 (Post-MVP, Week 11+):**
 
 - [ ] Two-way sync: Supabase ↔ Google Calendar
 - [ ] Google Calendar push webhook for real-time updates
+- [ ] Two-way sync: GitHub issues ↔ prism-manage (modifying status in prism-manage updates labels/status on GitHub issue)
 - [ ] Task drag-and-drop reordering
 - [ ] Markdown notes on tasks
 - [ ] Task assignment to team members
@@ -1490,6 +1507,8 @@ for (const event of data.items) {
 ```
 GOOGLE_CLIENT_ID
 GOOGLE_CLIENT_SECRET
+GITHUB_CLIENT_ID
+GITHUB_CLIENT_SECRET
 NEXT_PUBLIC_SITE_URL=http://localhost:3007   # prism-manage URL
 ```
 
@@ -1843,7 +1862,7 @@ These are the constitution. The shared package MUST support them verbatim.
 | **Cosmos DB** | `MONGODB_URI`, `COSMOS_DATABASE_NAME`                                                       | —                                                                                              | `COSMOS_GREMLIN_ENDPOINT`, `COSMOS_GREMLIN_KEY`                                                                     |
 | **R2**        | —                                                                                           | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`, `R2_PUBLIC_URL` | —                                                                                                                   |
 | **Redis**     | —                                                                                           | —                                                                                              | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` (or `REDIS_URL`)                                               |
-| **Google**    | —                                                                                           | —                                                                                              | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`                                                                          |
+| **Google/GitHub** | —                                                                                       | —                                                                                              | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`                             |
 | **AI**        | `GEMINI_API_KEY`, `AZURE_OPENAI_*`, `AI_PROVIDER`, `GEMINI_MODEL`, `GEMINI_EMBEDDING_MODEL` | —                                                                                              | —                                                                                                                   |
 | **Mux**       | `MUX_TOKEN_ID`, `MUX_TOKEN_SECRET`, `MUX_WEBHOOK_SECRET`                                    | —                                                                                              | —                                                                                                                   |
 | **PayPal**    | All `PAYPAL_*` vars                                                                         | —                                                                                              | —                                                                                                                   |
@@ -2082,7 +2101,7 @@ If converting to changeset-based releases (already partially configured), update
 | R2  | **Clerk user password migration UX friction**            | High        | Medium   | Clear reset email template, 7-day grace period notice, support channel ready                      | Lou   |
 | R3  | **Vercel deployment break on rename**                    | Medium      | High     | One app at a time, alias old project → new project, DNS with low TTL during transition            | Both  |
 | R4  | **Supabase RLS policy prevents legitimate access**       | Medium      | High     | Write integration tests for RLS policies, use service role for server actions until RLS verified  | Jeff  |
-| R5  | **prism-manage Google Calendar OAuth rejected**          | Medium      | Medium   | Submit for verification early, limited scope (read-only sync first)                               | Lou   |
+| R5  | **prism-manage Google Calendar/GitHub OAuth rejected**    | Medium      | Medium   | Submit for verification early, limit permissions scope during development                          | Lou   |
 | R6  | **Gremlin graph performance worse than MongoDB**         | Medium      | Medium   | Dual-read comparison for 30 days, feature flag, a/b metrics                                       | Jeff  |
 | R7  | **Agency landing page visual regression**                | Low         | Critical | CSS-only refactor, NEVER touch agency component markup, screenshot comparison tests               | Lou   |
 | R8  | **Python/Node CI tooling conflict**                      | Low         | Low      | Independent Dockerfile + CI job, no cross-language build deps                                     | Lou   |
