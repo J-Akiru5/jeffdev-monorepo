@@ -57,10 +57,14 @@ export async function createEvent(event: {
 
 export async function updateEvent(eventId: string, data: Record<string, any>) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
   const { data: updated, error } = await supabase
     .from("calendar_events")
     .update(data)
     .eq("id", eventId)
+    .eq("user_id", user.id)
     .select()
     .single();
 
@@ -71,10 +75,14 @@ export async function updateEvent(eventId: string, data: Record<string, any>) {
 
 export async function deleteEvent(eventId: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
   const { error } = await supabase
     .from("calendar_events")
     .delete()
-    .eq("id", eventId);
+    .eq("id", eventId)
+    .eq("user_id", user.id);
 
   if (error) throw error;
   revalidatePath("/calendar");

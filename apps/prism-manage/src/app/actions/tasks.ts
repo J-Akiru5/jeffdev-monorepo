@@ -43,10 +43,14 @@ export async function createTask(task: { title: string; projectId: string | numb
 
 export async function toggleTaskComplete(taskId: string, completed: boolean) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
   const { error } = await supabase
     .from("tasks")
     .update({ status: completed ? "done" : "todo" })
-    .eq("id", taskId);
+    .eq("id", taskId)
+    .eq("user_id", user.id);
 
   if (error) throw error;
   revalidatePath("/tasks");
@@ -54,10 +58,14 @@ export async function toggleTaskComplete(taskId: string, completed: boolean) {
 
 export async function toggleTaskStar(taskId: string, starred: boolean) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
   const { error } = await supabase
     .from("tasks")
     .update({ priority: starred ? 1 : 0 })
-    .eq("id", taskId);
+    .eq("id", taskId)
+    .eq("user_id", user.id);
 
   if (error) throw error;
   revalidatePath("/tasks");
@@ -65,10 +73,14 @@ export async function toggleTaskStar(taskId: string, starred: boolean) {
 
 export async function updateTaskStatus(taskId: string, status: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
   const { error } = await supabase
     .from("tasks")
     .update({ status })
-    .eq("id", taskId);
+    .eq("id", taskId)
+    .eq("user_id", user.id);
 
   if (error) throw error;
   revalidatePath("/tasks");
@@ -76,10 +88,14 @@ export async function updateTaskStatus(taskId: string, status: string) {
 
 export async function updateTask(taskId: string, data: Record<string, any>) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
   const { error } = await supabase
     .from("tasks")
     .update(data)
-    .eq("id", taskId);
+    .eq("id", taskId)
+    .eq("user_id", user.id);
 
   if (error) throw error;
   revalidatePath("/tasks");
@@ -87,10 +103,14 @@ export async function updateTask(taskId: string, data: Record<string, any>) {
 
 export async function deleteTask(taskId: string) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
   const { error } = await supabase
     .from("tasks")
     .delete()
-    .eq("id", taskId);
+    .eq("id", taskId)
+    .eq("user_id", user.id);
 
   if (error) throw error;
   revalidatePath("/tasks");
