@@ -28,7 +28,7 @@ export {
   getAuthClient,
   type Firestore,
   type Auth,
-} from "./firebase";
+} from "./firebase.js";
 
 // Cosmos/MongoDB exports
 export {
@@ -41,7 +41,7 @@ export {
   type Collection,
   type Document,
   type MongoClient,
-} from "./cosmos";
+} from "./cosmos.js";
 
 // Cosmos/Gremlin exports
 export {
@@ -51,7 +51,7 @@ export {
   getRelatedRules,
   getConflictingRules,
   getRulesByTags,
-} from "./cosmos-gremlin";
+} from "./cosmos-gremlin.js";
 
 // Schema exports
 export {
@@ -98,4 +98,4 @@ export {
   type SubscriptionStatus,
   type Usage,
   type VideoTranscript,
-} from "./schema";
+} from "./schema.js";

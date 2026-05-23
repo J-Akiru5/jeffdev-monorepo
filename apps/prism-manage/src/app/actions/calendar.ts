@@ -55,7 +55,24 @@ export async function createEvent(event: {
   return normalizeEvent(data);
 }
 
-export async function updateEvent(eventId: string, data: Record<string, any>) {
+interface DatabaseEvent {
+  id: string | number;
+  title?: string;
+  start_time?: string;
+  start?: string;
+  end_time?: string;
+  end?: string;
+  all_day?: boolean;
+  allDay?: boolean;
+  google_calendar_id?: string;
+  googleCalendarId?: string;
+  linked_task_id?: string;
+  linkedTaskId?: string;
+  synced_at?: string;
+  syncedAt?: string;
+}
+
+export async function updateEvent(eventId: string, data: Record<string, unknown>) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
@@ -105,9 +122,9 @@ export async function syncCalendar(): Promise<CalendarEvent[]> {
   return (events || []).map(normalizeEvent);
 }
 
-function normalizeEvent(raw: any): CalendarEvent {
+function normalizeEvent(raw: DatabaseEvent): CalendarEvent {
   return {
-    id: raw.id || raw.id?.toString(),
+    id: raw.id || raw.id?.toString() || "",
     title: raw.title || "",
     start: raw.start_time || raw.start || "",
     end: raw.end_time || raw.end || "",

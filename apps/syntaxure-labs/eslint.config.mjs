@@ -10,6 +10,7 @@ const eslintConfig = defineConfig([
   {
     rules: {
       "@stylistic/suggestCanonicalClasses": "off",
+      "@typescript-eslint/no-explicit-any": "off",
     },
   },
   // Override default ignores of eslint-config-next.

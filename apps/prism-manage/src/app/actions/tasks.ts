@@ -86,7 +86,7 @@ export async function updateTaskStatus(taskId: string, status: string) {
   revalidatePath("/tasks");
 }
 
-export async function updateTask(taskId: string, data: Record<string, any>) {
+export async function updateTask(taskId: string, data: Record<string, unknown>) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");

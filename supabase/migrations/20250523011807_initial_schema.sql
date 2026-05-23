@@ -7,8 +7,8 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT NOT NULL UNIQUE,
   full_name TEXT,
-  role TEXT DEFAULT 'employee' CHECK (role IN ('admin', 'manager', 'employee', 'client')),
-  tier TEXT DEFAULT 'free' CHECK (tier IN ('free', 'pro', 'enterprise')),
+  role TEXT DEFAULT 'client' CHECK (role IN ('admin', 'manager', 'employee', 'client')),
+  tier TEXT DEFAULT 'free' CHECK (tier IN ('free', 'pro', 'team', 'enterprise')),
   avatar_url TEXT,
   bio TEXT,
   company_name TEXT,
@@ -258,6 +258,10 @@ CREATE TABLE IF NOT EXISTS tasks (
   estimated_hours DECIMAL(10, 2),
   actual_hours DECIMAL(10, 2),
   tags TEXT[],
+  google_event_id TEXT,
+  github_issue_number INT,        -- GitHub issue mapping for Marketing Pipeline
+  notes TEXT,
+  parent_task_id UUID REFERENCES tasks(id) ON DELETE SET NULL,
   metadata JSONB DEFAULT '{}'::jsonb,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -308,6 +312,7 @@ CREATE INDEX idx_subscriptions_status ON subscriptions(status);
 CREATE INDEX idx_notifications_user_id ON notifications(user_id);
 CREATE INDEX idx_notifications_read ON notifications(read);
 CREATE INDEX idx_tasks_user_id ON tasks(user_id);
+CREATE INDEX idx_tasks_assigned_to ON tasks(assigned_to);
 CREATE INDEX idx_tasks_status ON tasks(status);
 CREATE INDEX idx_tasks_project_id ON tasks(project_id);
 CREATE INDEX idx_user_tokens_user_id ON user_tokens(user_id);
