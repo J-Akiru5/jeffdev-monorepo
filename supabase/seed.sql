@@ -13,3 +13,10 @@
 --   ('Web Design', 'Custom website design', 'design', 2000, 5000, 'active'),
 --   ('Web Development', 'Full-stack web applications', 'development', 5000, 15000, 'active'),
 --   ('SEO Optimization', 'Search engine optimization', 'marketing', 1000, 3000, 'active');
+
+-- Example seed data for testing (uncomment when needed):
+/*
+INSERT INTO projects (user_id, title, description, status, category, technologies)
+VALUES 
+  ('00000000-0000-0000-0000-000000000000', 'Sample Project', 'A sample project for testing', 'draft', 'web', ARRAY['Next.js', 'TypeScript', 'Tailwind CSS']);
+*/

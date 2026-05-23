@@ -1,25 +1,25 @@
 name: jeffdev
 
 services:
-  agency:
+  syntaxure-labs:
     build:
       context: .
-      dockerfile: apps/agency/Dockerfile
+      dockerfile: apps/syntaxure-labs/Dockerfile
     ports:
       - "3000:3000"
-    env_file: apps/agency/.env
+    env_file: apps/syntaxure-labs/.env
     depends_on:
       - cosmos
     networks:
       - jeffdev
 
-  prism-dashboard:
+  prism-engine:
     build:
       context: .
-      dockerfile: apps/prism-dashboard/Dockerfile
+      dockerfile: apps/prism-engine/Dockerfile
     ports:
       - "3001:3001"
-    env_file: apps/prism-dashboard/.env
+    env_file: apps/prism-engine/.env
     depends_on:
       - cosmos
     networks:
@@ -56,6 +56,24 @@ services:
     env_file: apps/prism-mcp-server/.env
     depends_on:
       - cosmos
+    networks:
+      - jeffdev
+
+  prism-manage:
+    build:
+      context: .
+      dockerfile: apps/prism-manage/Dockerfile
+    ports:
+      - "3007:3007"
+    networks:
+      - jeffdev
+
+  prism-analytics:
+    build:
+      context: apps/prism-analytics
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
     networks:
       - jeffdev
 
