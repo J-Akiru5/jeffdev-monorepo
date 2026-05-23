@@ -4,13 +4,19 @@
  * Calendar Event Server Actions
  * ------------------------------
  * CRUD operations for calendar events.
+ * 
+ * NOTE: Type casting with 'as any' is used due to Supabase's limitation with 
+ * dynamically determined table schemas. The actual runtime behavior is correct;
+ * TypeScript just cannot infer the response types from `.from('table_name')`.
  */
 
 import { z } from 'zod';
-import { db } from '@/lib/firebase/admin';
+import { getAdminClient } from '@/lib/supabase/admin';
 import { logAuditEvent } from '@/lib/audit';
 import { revalidatePath } from 'next/cache';
-import type { CalendarEvent } from '@/types/firestore';
+import type { Database } from '@/types/database';
+
+type CalendarEvent = Database['public']['Tables']['calendar_events']['Row'];
 
 // Validation schema
 const eventSchema = z.object({
@@ -29,15 +35,15 @@ const eventSchema = z.object({
  */
 export async function getCalendarEvents(): Promise<CalendarEvent[]> {
   try {
-    const snapshot = await db
-      .collection('calendar_events')
-      .orderBy('start', 'asc')
-      .get();
+    const supabase = getAdminClient();
+    const { data, error } = await supabase
+      .from('calendar_events')
+      .select('*')
+      .order('start_time', { ascending: true }) as any;
 
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as CalendarEvent[];
+    if (error || !data) return [];
+
+    return data as CalendarEvent[];
   } catch (error) {
     console.error('[GET CALENDAR EVENTS ERROR]', error);
     return [];
@@ -53,24 +59,37 @@ export async function createCalendarEvent(
   try {
     const validated = eventSchema.parse(data);
 
-    const event: Omit<CalendarEvent, 'id'> = {
-      ...validated,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+    const event = {
+      title: validated.title,
+      description: validated.description,
+      event_type: validated.type,
+      start_time: validated.start,
+      end_time: validated.end || validated.start,
+      color: validated.color,
+      user_id: '', // TODO: Get from session
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
 
-    const docRef = await db.collection('calendar_events').add(event);
+    const supabase = getAdminClient();
+    const { data: result, error } = await supabase
+      .from('calendar_events')
+      .insert(event as any)
+      .select()
+      .single() as any;
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'CREATE',
       resource: 'calendar_events',
-      resourceId: docRef.id,
+      resourceId: result?.id || '',
       details: { title: validated.title, type: validated.type },
     });
 
     revalidatePath('/admin/calendar');
 
-    return { success: true, id: docRef.id };
+    return { success: true, id: result?.id };
   } catch (error) {
     console.error('[CREATE CALENDAR EVENT ERROR]', error);
     return { success: false, error: 'Failed to create event' };
@@ -87,10 +106,24 @@ export async function updateCalendarEvent(
   try {
     const validated = eventSchema.partial().parse(data);
 
-    await db.collection('calendar_events').doc(id).update({
-      ...validated,
-      updatedAt: new Date().toISOString(),
-    });
+    const updateData: any = {
+      updated_at: new Date().toISOString(),
+    };
+
+    if (validated.title) updateData.title = validated.title;
+    if (validated.description) updateData.description = validated.description;
+    if (validated.type) updateData.event_type = validated.type;
+    if (validated.start) updateData.start_time = validated.start;
+    if (validated.end) updateData.end_time = validated.end;
+    if (validated.color !== undefined) updateData.color = validated.color;
+
+    const supabase = getAdminClient();
+    const { error } = await supabase
+      .from('calendar_events')
+      .update(updateData)
+      .eq('id', id) as any;
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'UPDATE',
@@ -113,7 +146,13 @@ export async function updateCalendarEvent(
  */
 export async function deleteCalendarEvent(id: string) {
   try {
-    await db.collection('calendar_events').doc(id).delete();
+    const supabase = getAdminClient();
+    const { error } = await supabase
+      .from('calendar_events')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'DELETE',

@@ -7,7 +7,7 @@
  */
 
 import { z } from 'zod';
-import { db } from '@/lib/firebase/admin';
+import { getAdminClient } from '@/lib/supabase/admin';
 import { sendEmail } from '@/lib/email';
 import { prismWaitlistConfirmation, prismWaitlistNotification } from '@/lib/emails/prism-emails';
 
@@ -23,7 +23,7 @@ export interface WaitlistEntry {
   id: string;
   email: string;
   role: string;
-  createdAt: string;
+  created_at: string;
   source: string;
 }
 
@@ -37,25 +37,33 @@ export async function joinWaitlist(data: {
   try {
     const validated = waitlistSchema.parse(data);
 
-    // Check if email already exists
-    const existing = await db
-      .collection('prism_waitlist')
-      .where('email', '==', validated.email)
-      .get();
+    const supabase = getAdminClient();
 
-    if (!existing.empty) {
+    // Check if email already exists
+    const { data: existing, error: checkError } = await supabase
+      .from('prism_waitlist')
+      .select('id')
+      .eq('email', validated.email)
+      .limit(1);
+
+    if (checkError) throw checkError;
+    if (existing && existing.length > 0) {
       return { success: false, error: 'You\'re already on the waitlist!' };
     }
 
     // Add to waitlist
-    await db.collection('prism_waitlist').add({
-      email: validated.email,
-      role: validated.role,
-      createdAt: new Date().toISOString(),
-      source: 'website',
-      status: 'approved', // Auto-approve
-      emailSent: true,
-    });
+    const { error: insertError } = await supabase
+      .from('prism_waitlist')
+      .insert({
+        email: validated.email,
+        role: validated.role,
+        created_at: new Date().toISOString(),
+        source: 'website',
+        status: 'approved', // Auto-approve
+        email_sent: true,
+      });
+
+    if (insertError) throw insertError;
 
     // Send confirmation to user
     await sendEmail({
@@ -92,14 +100,17 @@ export async function joinWaitlist(data: {
  */
 export async function getWaitlistEntries(): Promise<WaitlistEntry[]> {
   try {
-    const snapshot = await db
-      .collection('prism_waitlist')
-      .orderBy('createdAt', 'desc')
-      .get();
+    const supabase = getAdminClient();
+    const { data, error } = await supabase
+      .from('prism_waitlist')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-    return snapshot.docs.map((doc) => ({
+    if (error || !data) return [];
+
+    return data.map((doc) => ({
       id: doc.id,
-      ...doc.data(),
+      ...doc,
     })) as WaitlistEntry[];
   } catch (error) {
     console.error('[GET WAITLIST ERROR]', error);

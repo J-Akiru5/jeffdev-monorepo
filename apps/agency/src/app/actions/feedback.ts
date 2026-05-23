@@ -6,7 +6,7 @@
  * CRUD operations for client testimonials/reviews.
  */
 
-import { db } from '@/lib/firebase/admin';
+import { getAdminClient } from '@/lib/supabase/admin';
 import type { FirestoreFeedback, FeedbackStatus } from '@/types/firestore';
 import { logAuditEvent } from '@/lib/audit';
 
@@ -17,14 +17,17 @@ const COLLECTION = 'feedback';
  */
 export async function getFeedback(): Promise<FirestoreFeedback[]> {
   try {
-    const snapshot = await db
-      .collection(COLLECTION)
-      .orderBy('createdAt', 'desc')
-      .get();
+    const supabase = getAdminClient();
+    const { data, error } = await supabase
+      .from(COLLECTION)
+      .select('*')
+      .order('created_at', { ascending: false });
 
-    return snapshot.docs.map((doc) => ({
+    if (error || !data) return [];
+
+    return data.map((doc) => ({
       id: doc.id,
-      ...doc.data(),
+      ...doc,
     })) as FirestoreFeedback[];
   } catch (error) {
     console.error('[GET FEEDBACK ERROR]', error);
@@ -37,15 +40,18 @@ export async function getFeedback(): Promise<FirestoreFeedback[]> {
  */
 export async function getPublicFeedback(): Promise<FirestoreFeedback[]> {
   try {
-    const snapshot = await db
-      .collection(COLLECTION)
-      .where('status', 'in', ['approved', 'featured'])
-      .orderBy('createdAt', 'desc')
-      .get();
+    const supabase = getAdminClient();
+    const { data, error } = await supabase
+      .from(COLLECTION)
+      .select('*')
+      .in('status', ['approved', 'featured'])
+      .order('created_at', { ascending: false });
 
-    return snapshot.docs.map((doc) => ({
+    if (error || !data) return [];
+
+    return data.map((doc) => ({
       id: doc.id,
-      ...doc.data(),
+      ...doc,
     })) as FirestoreFeedback[];
   } catch (error) {
     console.error('[GET PUBLIC FEEDBACK ERROR]', error);
@@ -57,27 +63,34 @@ export async function getPublicFeedback(): Promise<FirestoreFeedback[]> {
  * Create a new feedback entry
  */
 export async function createFeedback(
-  data: Omit<FirestoreFeedback, 'id' | 'createdAt' | 'updatedAt' | 'status' | 'featured'>
+  data: Omit<FirestoreFeedback, 'id' | 'created_at' | 'updated_at' | 'status' | 'featured'>
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
     const feedback: Omit<FirestoreFeedback, 'id'> = {
       ...data,
       status: 'pending',
       featured: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     };
 
-    const docRef = await db.collection(COLLECTION).add(feedback);
+    const supabase = getAdminClient();
+    const { data: result, error } = await supabase
+      .from(COLLECTION)
+      .insert(feedback)
+      .select()
+      .single();
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'CREATE',
       resource: 'feedback',
-      resourceId: docRef.id,
+      resourceId: result.id,
       details: { clientName: data.clientName },
     });
 
-    return { success: true, id: docRef.id };
+    return { success: true, id: result.id };
   } catch (error) {
     console.error('[CREATE FEEDBACK ERROR]', error);
     return { success: false, error: 'Failed to create feedback' };
@@ -92,11 +105,17 @@ export async function updateFeedbackStatus(
   status: FeedbackStatus
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await db.collection(COLLECTION).doc(id).update({
-      status,
-      featured: status === 'featured',
-      updatedAt: new Date().toISOString(),
-    });
+    const supabase = getAdminClient();
+    const { error } = await supabase
+      .from(COLLECTION)
+      .update({
+        status,
+        featured: status === 'featured',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id);
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'STATUS_CHANGE',
@@ -119,7 +138,13 @@ export async function deleteFeedback(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await db.collection(COLLECTION).doc(id).delete();
+    const supabase = getAdminClient();
+    const { error } = await supabase
+      .from(COLLECTION)
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
 
     await logAuditEvent({
       action: 'DELETE',

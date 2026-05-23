@@ -3,13 +3,11 @@
 /**
  * Projects CRUD Actions
  * ---------------------
- * Server actions for managing projects in Firestore.
+ * Server actions for managing projects in Supabase.
  */
-
-import { db } from '@/lib/firebase/admin';
+import { getAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import type { FirestoreProject } from '@/types/firestore';
 import { logAuditEvent } from '@/lib/audit';
 
 // Validation schema
@@ -50,10 +48,16 @@ interface ActionResult {
  */
 export async function getProjectsList(): Promise<{ slug: string; title: string }[]> {
   try {
-    const snapshot = await db.collection('projects').orderBy('title').get();
-    return snapshot.docs.map((doc) => ({
-      slug: doc.id,
-      title: (doc.data() as FirestoreProject).title,
+    const supabase = getAdminClient();
+    const { data, error } = await supabase
+      .from('projects')
+      .select('slug, title');
+
+    if (error) throw error;
+
+    return (data || []).map((project: any) => ({
+      slug: project.slug || '',
+      title: project.title,
     }));
   } catch (error) {
     console.error('[GET PROJECTS LIST ERROR]', error);
@@ -67,24 +71,57 @@ export async function getProjectsList(): Promise<{ slug: string; title: string }
 export async function createProject(data: ProjectFormData): Promise<ActionResult> {
   try {
     const validated = projectSchema.parse(data);
-    
-    const existing = await db.collection('projects').doc(validated.slug).get();
-    if (existing.exists) {
+    const supabase = getAdminClient();
+
+    // Check if slug already exists
+    const { data: existing } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('slug', validated.slug)
+      .maybeSingle();
+
+    if (existing) {
       return { success: false, error: 'A project with this slug already exists' };
     }
-    
-    await db.collection('projects').doc(validated.slug).set(validated);
-    
+
+    // Insert new project
+    const { error } = await supabase
+      .from('projects')
+      .insert([{
+        user_id: '', // Will be set by RLS policy or auth context
+        title: validated.title,
+        description: validated.description,
+        slug: validated.slug,
+        status: 'active' as const,
+        client_name: validated.client,
+        metadata: {
+          category: validated.category,
+          tagline: validated.tagline,
+          challenge: validated.challenge,
+          solution: validated.solution,
+          results: validated.results,
+          technologies: validated.technologies,
+          testimonial: validated.testimonial,
+          image: validated.image,
+          featured: validated.featured,
+          order: validated.order,
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }] as any);
+
+    if (error) throw error;
+
     await logAuditEvent({
       action: 'CREATE',
       resource: 'projects',
       resourceId: validated.slug,
       details: { title: validated.title },
     });
-    
+
     revalidatePath('/work');
     revalidatePath('/admin/projects');
-    
+
     return { success: true };
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -104,37 +141,106 @@ export async function updateProject(
 ): Promise<ActionResult> {
   try {
     const validated = projectSchema.parse(data);
-    
-    const existing = await db.collection('projects').doc(slug).get();
-    if (!existing.exists) {
+    const supabase = getAdminClient();
+
+    // Check if current slug exists
+    const { data: existing } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('slug', slug)
+      .maybeSingle();
+
+    if (!existing) {
       return { success: false, error: 'Project not found' };
     }
-    
+
+    // If slug is changing, check if new slug exists
     if (slug !== validated.slug) {
-      const newExists = await db.collection('projects').doc(validated.slug).get();
-      if (newExists.exists) {
+      const { data: newSlugExists } = await supabase
+        .from('projects')
+        .select('id')
+        .eq('slug', validated.slug)
+        .maybeSingle();
+
+      if (newSlugExists) {
         return { success: false, error: 'A project with the new slug already exists' };
       }
-      await db.collection('projects').doc(slug).delete();
-      await db.collection('projects').doc(validated.slug).set(validated);
+
+      // Delete old record and insert new one (since slug is primary identifier)
+      const { error: deleteError } = await supabase
+        .from('projects')
+        .delete()
+        .eq('slug', slug);
+
+      if (deleteError) throw deleteError;
+
+      const { error: insertError } = await supabase
+        .from('projects')
+        .insert([{
+          user_id: '',
+          title: validated.title,
+          description: validated.description,
+          slug: validated.slug,
+          status: 'active' as const,
+          client_name: validated.client,
+          metadata: {
+            category: validated.category,
+            tagline: validated.tagline,
+            challenge: validated.challenge,
+            solution: validated.solution,
+            results: validated.results,
+            technologies: validated.technologies,
+            testimonial: validated.testimonial,
+            image: validated.image,
+            featured: validated.featured,
+            order: validated.order,
+          },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }] as any);
+
+      if (insertError) throw insertError;
     } else {
-      await db.collection('projects').doc(slug).set(validated, { merge: true });
+      // Update existing record
+      const { error: updateError } = await supabase
+        .from('projects')
+        .update({
+          title: validated.title,
+          description: validated.description,
+          client_name: validated.client,
+          metadata: {
+            category: validated.category,
+            tagline: validated.tagline,
+            challenge: validated.challenge,
+            solution: validated.solution,
+            results: validated.results,
+            technologies: validated.technologies,
+            testimonial: validated.testimonial,
+            image: validated.image,
+            featured: validated.featured,
+            order: validated.order,
+          },
+          updated_at: new Date().toISOString(),
+        } as any)
+        .eq('slug', slug);
+
+      if (updateError) throw updateError;
     }
-    
+
     await logAuditEvent({
       action: 'UPDATE',
       resource: 'projects',
       resourceId: validated.slug,
       details: { title: validated.title, oldSlug: slug !== validated.slug ? slug : undefined },
     });
-    
+
     revalidatePath('/work');
     revalidatePath('/admin/projects');
     revalidatePath(`/work/${slug}`);
     if (slug !== validated.slug) {
       revalidatePath(`/work/${validated.slug}`);
     }
-    
+
     return { success: true };
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -150,24 +256,35 @@ export async function updateProject(
  */
 export async function deleteProject(slug: string): Promise<ActionResult> {
   try {
-    const existing = await db.collection('projects').doc(slug).get();
-    if (!existing.exists) {
+    const supabase = getAdminClient();
+
+    const { data: existing, error: fetchError } = await supabase
+      .from('projects')
+      .select('title')
+      .eq('slug', slug)
+      .maybeSingle();
+
+    if (fetchError || !existing) {
       return { success: false, error: 'Project not found' };
     }
-    
-    const data = existing.data() as FirestoreProject;
-    await db.collection('projects').doc(slug).delete();
-    
+
+    const { error: deleteError } = await supabase
+      .from('projects')
+      .delete()
+      .eq('slug', slug);
+
+    if (deleteError) throw deleteError;
+
     await logAuditEvent({
       action: 'DELETE',
       resource: 'projects',
       resourceId: slug,
-      details: { title: data.title },
+      details: { title: existing.title },
     });
-    
+
     revalidatePath('/work');
     revalidatePath('/admin/projects');
-    
+
     return { success: true };
   } catch (error) {
     console.error('[DELETE PROJECT ERROR]', error);

@@ -13,17 +13,17 @@ export type NotificationType =
 
 export interface Notification {
   id: string;
-  userId: string;
+  user_id: string;
   type: NotificationType;
   title: string;
   body: string;
   link?: string;
   read: boolean;
-  createdAt: string;
+  created_at: string;
 }
 
 export interface NotificationCreateInput {
-  userId: string;
+  user_id: string;
   type: NotificationType;
   title: string;
   body: string;

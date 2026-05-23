@@ -29,8 +29,8 @@ export interface UserProfile {
   status: 'active' | 'inactive' | 'pending';
   assignedProjects?: string[]; // Project slugs for partners
   permissions?: string[];      // Granular permission overrides
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
   lastLoginAt?: string;
   // Namecard settings
   namecard?: {

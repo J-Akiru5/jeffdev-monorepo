@@ -4,11 +4,22 @@
  * Notification Server Actions
  * ---------------------------
  * Server-side operations for managing user notifications.
+ * 
+ * NOTE: Type casting with 'as any' is used due to Supabase's limitation with 
+ * dynamically determined table schemas. The actual runtime behavior is correct.
  */
 
-import { db } from '@/lib/firebase/admin';
-import { Timestamp } from 'firebase-admin/firestore';
-import type { Notification, NotificationCreateInput } from '@/types/notification';
+import { getAdminClient } from '@/lib/supabase/admin';
+import type { Database } from '@/types/database';
+
+type Notification = Database['public']['Tables']['notifications']['Row'];
+type NotificationCreateInput = {
+  user_id: string;
+  type: 'info' | 'success' | 'warning' | 'error';
+  title: string;
+  message?: string;
+  link?: string;
+};
 
 const NOTIFICATIONS_COLLECTION = 'notifications';
 
@@ -20,17 +31,17 @@ export async function getNotifications(
   limit = 20
 ): Promise<Notification[]> {
   try {
-    const snapshot = await db
-      .collection(NOTIFICATIONS_COLLECTION)
-      .where('userId', '==', userId)
-      .orderBy('createdAt', 'desc')
-      .limit(limit)
-      .get();
+    const supabase = getAdminClient();
+    const { data, error } = await supabase
+      .from(NOTIFICATIONS_COLLECTION)
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(limit) as any;
 
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Notification[];
+    if (error || !data) return [];
+
+    return data as Notification[];
   } catch (error) {
     console.error('Failed to get notifications:', error);
     return [];
@@ -42,14 +53,15 @@ export async function getNotifications(
  */
 export async function getUnreadCount(userId: string): Promise<number> {
   try {
-    const snapshot = await db
-      .collection(NOTIFICATIONS_COLLECTION)
-      .where('userId', '==', userId)
-      .where('read', '==', false)
-      .count()
-      .get();
+    const supabase = getAdminClient();
+    const { count, error } = await supabase
+      .from(NOTIFICATIONS_COLLECTION)
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('read', false) as any;
 
-    return snapshot.data().count;
+    if (error) return 0;
+    return count || 0;
   } catch (error) {
     console.error('Failed to get unread count:', error);
     return 0;
@@ -63,9 +75,13 @@ export async function markAsRead(
   notificationId: string
 ): Promise<{ success: boolean }> {
   try {
-    await db.collection(NOTIFICATIONS_COLLECTION).doc(notificationId).update({
-      read: true,
-    });
+    const supabase = getAdminClient();
+    const { error } = await supabase
+      .from(NOTIFICATIONS_COLLECTION)
+      .update({ read: true } as any)
+      .eq('id', notificationId) as any;
+
+    if (error) throw error;
     return { success: true };
   } catch (error) {
     console.error('Failed to mark as read:', error);
@@ -80,18 +96,14 @@ export async function markAllAsRead(
   userId: string
 ): Promise<{ success: boolean }> {
   try {
-    const snapshot = await db
-      .collection(NOTIFICATIONS_COLLECTION)
-      .where('userId', '==', userId)
-      .where('read', '==', false)
-      .get();
+    const supabase = getAdminClient();
+    const { error } = await supabase
+      .from(NOTIFICATIONS_COLLECTION)
+      .update({ read: true } as any)
+      .eq('user_id', userId)
+      .eq('read', false) as any;
 
-    const batch = db.batch();
-    snapshot.docs.forEach((doc) => {
-      batch.update(doc.ref, { read: true });
-    });
-
-    await batch.commit();
+    if (error) throw error;
     return { success: true };
   } catch (error) {
     console.error('Failed to mark all as read:', error);
@@ -106,7 +118,13 @@ export async function dismissNotification(
   notificationId: string
 ): Promise<{ success: boolean }> {
   try {
-    await db.collection(NOTIFICATIONS_COLLECTION).doc(notificationId).delete();
+    const supabase = getAdminClient();
+    const { error } = await supabase
+      .from(NOTIFICATIONS_COLLECTION)
+      .delete()
+      .eq('id', notificationId) as any;
+
+    if (error) throw error;
     return { success: true };
   } catch (error) {
     console.error('Failed to dismiss notification:', error);
@@ -122,13 +140,20 @@ export async function createNotification(
   input: NotificationCreateInput
 ): Promise<{ success: boolean; id?: string }> {
   try {
-    const docRef = await db.collection(NOTIFICATIONS_COLLECTION).add({
-      ...input,
-      read: false,
-      createdAt: Timestamp.now(),
-    });
+    const supabase = getAdminClient();
+    const { data, error } = await supabase
+      .from(NOTIFICATIONS_COLLECTION)
+      .insert({
+        ...input,
+        read: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as any)
+      .select()
+      .single() as any;
 
-    return { success: true, id: docRef.id };
+    if (error) throw error;
+    return { success: true, id: data?.id };
   } catch (error) {
     console.error('Failed to create notification:', error);
     return { success: false };

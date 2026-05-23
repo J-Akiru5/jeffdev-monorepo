@@ -178,8 +178,8 @@ export function NotificationPopover({ userId }: NotificationPopoverProps) {
                               {notification.body}
                             </p>
                             <p className="mt-1 text-[10px] text-white/30">
-                              {notification.createdAt?.toDate
-                                ? formatDistanceToNow(notification.createdAt.toDate(), { addSuffix: true })
+                              {notification.created_at
+                                ? formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })
                                 : 'Just now'}
                             </p>
                           </div>
