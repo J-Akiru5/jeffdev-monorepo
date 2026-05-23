@@ -13,6 +13,8 @@ import {
   Settings,
   Shield,
   ChevronRight,
+  Receipt,
+  Calendar,
 } from "lucide-react";
 
 /**
@@ -104,14 +106,23 @@ export default async function AdminLayout({
               Agency
             </span>
           </div>
-          <NavItem href="/admin/inquiries" icon={Mail}>
-            Inquiries
+          <NavItem href="/admin/agency/dashboard" icon={LayoutDashboard}>
+            Dashboard
           </NavItem>
-          <NavItem href="/admin/projects" icon={FolderKanban}>
+          <NavItem href="/admin/agency/projects" icon={FolderKanban}>
             Projects
           </NavItem>
-          <NavItem href="/admin/clients" icon={Building2}>
-            Clients
+          <NavItem href="/admin/agency/quotes" icon={Mail}>
+            Quotes
+          </NavItem>
+          <NavItem href="/admin/agency/invoices" icon={Receipt}>
+            Invoices
+          </NavItem>
+          <NavItem href="/admin/agency/calendar" icon={Calendar}>
+            Calendar
+          </NavItem>
+          <NavItem href="/admin/agency/users" icon={Users}>
+            Users
           </NavItem>
 
           {isFounder && (
@@ -162,24 +173,28 @@ export default async function AdminLayout({
           icon={LayoutDashboard}
           label="Home"
         />
-        <MobileNavItem href="/admin/users" icon={Users} label="Users" />
+        <MobileNavItem
+          href="/admin/agency/dashboard"
+          icon={FolderKanban}
+          label="Agency"
+        />
         <div className="relative -top-4">
           <Link
-            href="/admin/inquiries"
+            href="/admin/agency/inquiries"
             className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-500/20 border border-white/20 text-white"
           >
             <Mail className="h-5 w-5" />
           </Link>
         </div>
         <MobileNavItem
-          href="/admin/subscriptions"
-          icon={CreditCard}
-          label="Subs"
+          href="/admin/users"
+          icon={Users}
+          label="Users"
         />
         <MobileNavItem
-          href="/admin/projects"
-          icon={FolderKanban}
-          label="Projects"
+          href="/admin/agency/calendar"
+          icon={Calendar}
+          label="Calendar"
         />
       </nav>
     </div>

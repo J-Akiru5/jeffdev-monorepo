@@ -22,5 +22,5 @@ COPY src/ /app/src/
 # Expose the API port
 EXPOSE 8000
 
-# Start FastAPI application
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Start FastAPI application with app-dir for proper module resolution
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--app-dir", "src"]

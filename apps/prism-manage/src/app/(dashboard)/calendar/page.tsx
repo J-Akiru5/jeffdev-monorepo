@@ -6,50 +6,114 @@
  * FullCalendar view showing tasks with due dates and synced events.
  */
 
-import { useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { useProjects } from '@/contexts/project-context';
-import type { Task } from '@/lib/schemas';
-
-// Mock tasks with due dates
-const mockTasks: Task[] = [
-  { id: '1', projectId: '1', title: 'Review quarterly reports', completed: false, starred: true, dueDate: '2026-01-20', order: 0, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: '2', projectId: '1', title: 'Schedule team meeting', completed: false, starred: false, dueDate: '2026-01-22', order: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: '4', projectId: '2', title: 'Ppt Ma\'am Osano', completed: false, starred: false, dueDate: '2026-01-21', order: 0, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: '8', projectId: '3', title: 'Token Ma\'am Ding', completed: false, starred: false, dueDate: '2026-01-23', order: 0, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: '13', projectId: '5', title: 'Monthly Regular Meeting', completed: false, starred: false, dueDate: '2026-01-25', dueTime: '14:00', order: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-];
+import { createEvent, updateEvent, deleteEvent, syncCalendar } from '@/app/actions/calendar';
+import { fetchEvents } from '@/app/actions/calendar';
+import type { CalendarEvent } from '@/lib/schemas';
+import { toast } from 'sonner';
 
 export default function CalendarPage() {
   const { projects } = useProjects();
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
 
-  // Convert tasks to FullCalendar events
-  const events = useMemo(() => {
-    return mockTasks
-      .filter((task) => task.dueDate)
-      .map((task) => {
-        const project = projects.find((p) => p.id === task.projectId);
-        return {
-          id: task.id,
-          title: task.title,
-          start: task.dueTime
-            ? `${task.dueDate}T${task.dueTime}`
-            : task.dueDate,
-          allDay: !task.dueTime,
-          backgroundColor: project?.color || '#06b6d4',
-          borderColor: project?.color || '#06b6d4',
-          extendedProps: {
-            projectId: task.projectId,
-            projectName: project?.name,
-            completed: task.completed,
-            starred: task.starred,
-          },
-        };
-      });
-  }, [projects]);
+  // Fetch events from Supabase on mount
+  useEffect(() => {
+    async function loadEvents() {
+      try {
+        const data = await fetchEvents();
+        setEvents(data);
+      } catch (err) {
+        console.error('Failed to load events:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadEvents();
+  }, []);
+
+  // Convert events to FullCalendar format
+  const calendarEvents = useMemo(() => {
+    return events.map((event) => ({
+      id: event.id,
+      title: event.title,
+      start: event.start,
+      end: event.end,
+      allDay: event.allDay,
+      backgroundColor: event.linkedTaskId ? '#06b6d4' : '#8b5cf6',
+      borderColor: event.linkedTaskId ? '#06b6d4' : '#8b5cf6',
+      extendedProps: {
+        linkedTaskId: event.linkedTaskId,
+        googleCalendarId: event.googleCalendarId,
+      },
+    }));
+  }, [events]);
+
+  const handleDateSelect = useCallback(async (selectInfo: { startStr: string; endStr: string; allDay: boolean }) => {
+    const title = prompt('Event title:');
+    if (!title) return;
+
+    const newEvent: CalendarEvent = {
+      id: Date.now().toString(),
+      title,
+      start: selectInfo.startStr,
+      end: selectInfo.endStr,
+      allDay: selectInfo.allDay,
+      googleCalendarId: '',
+      syncedAt: new Date().toISOString(),
+    };
+
+    try {
+      const created = await createEvent(newEvent);
+      setEvents((prev) => [...prev, created]);
+      toast.success('Event created');
+    } catch (err) {
+      toast.error('Failed to create event');
+    }
+  }, []);
+
+  const handleEventClick = useCallback(async (info: { event: { id: string; title: string; start: Date | null; end: Date | null } }) => {
+    const newTitle = prompt('Edit title:', info.event.title);
+    if (!newTitle || newTitle === info.event.title) return;
+
+    try {
+      const updated = await updateEvent(info.event.id, { title: newTitle });
+      setEvents((prev) => prev.map((e) => (e.id === info.event.id ? updated : e)));
+      toast.success('Event updated');
+    } catch (err) {
+      toast.error('Failed to update event');
+    }
+  }, []);
+
+  const handleSync = useCallback(async () => {
+    setSyncing(true);
+    try {
+      const syncedEvents = await syncCalendar();
+      setEvents(syncedEvents);
+      toast.success('Calendar synced');
+    } catch (err) {
+      console.error('Sync error:', err);
+      toast.error('Sync failed. Connect Google Calendar first.');
+    } finally {
+      setSyncing(false);
+    }
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-6xl">
+        <div className="flex items-center justify-center py-20">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500/30 border-t-cyan-400" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -71,31 +135,41 @@ export default function CalendarPage() {
             center: 'title',
             right: 'dayGridMonth,timeGridWeek,timeGridDay',
           }}
-          events={events}
+          events={calendarEvents}
           editable={true}
           selectable={true}
           selectMirror={true}
           dayMaxEvents={3}
           weekends={true}
           height="auto"
-          eventClick={(info) => {
-            console.log('Event clicked:', info.event);
-          }}
-          dateClick={(info) => {
-            console.log('Date clicked:', info.dateStr);
-          }}
+          select={handleDateSelect}
+          eventClick={handleEventClick}
         />
       </div>
 
-      {/* Sync Status (Placeholder) */}
+      {/* Sync Status */}
       <div className="mt-6 flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.02] p-4">
         <div>
           <h3 className="text-sm font-medium text-white">Google Calendar Sync</h3>
-          <p className="text-xs text-white/40">Connect to sync your events</p>
+          <p className="text-xs text-white/40">
+            {syncing ? 'Syncing...' : 'Connect to sync your events'}
+          </p>
         </div>
-        <button className="rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-400 transition-colors hover:bg-cyan-500/20">
-          Connect Calendar
-        </button>
+        <div className="flex gap-3">
+          <a
+            href="/api/calendar/auth"
+            className="rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-sm font-medium text-cyan-400 transition-colors hover:bg-cyan-500/20"
+          >
+            Connect Calendar
+          </a>
+          <button
+            onClick={handleSync}
+            disabled={syncing}
+            className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/60 transition-colors hover:bg-white/[0.08] disabled:opacity-50"
+          >
+            {syncing ? 'Syncing...' : 'Sync Now'}
+          </button>
+        </div>
       </div>
     </div>
   );

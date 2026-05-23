@@ -4,47 +4,73 @@
  * Tasks Page
  * ----------
  * Main task list view showing all tasks organized by project.
+ * Uses Supabase server actions for data persistence.
  */
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { TaskList } from '@/components/task-list';
 import { useProjects } from '@/contexts/project-context';
 import { Star } from 'lucide-react';
+import { createTask, deleteTask, toggleTaskComplete, toggleTaskStar } from '@/app/actions/tasks';
 import type { Task } from '@/lib/schemas';
+import { toast } from 'sonner';
 
-// Mock tasks for now (will be fetched from Firestore)
-const initialMockTasks: Task[] = [
-  { id: '1', projectId: '1', title: 'Review quarterly reports', completed: false, starred: true, order: 0, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: '2', projectId: '1', title: 'Schedule team meeting', completed: false, starred: false, dueDate: '2026-01-22', order: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: '3', projectId: '1', title: 'Update project documentation', completed: true, starred: false, order: 2, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: '4', projectId: '2', title: 'Ppt Ma\'am Osano', completed: false, starred: true, order: 0, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: '5', projectId: '2', title: 'Activity 2 and 3 Sir benj', completed: false, starred: false, order: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: '6', projectId: '2', title: 'Filmmaking 1st phase', completed: false, starred: false, order: 2, notes: 'Polish shoot list', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: '7', projectId: '2', title: 'SineAI-Hub', completed: false, starred: true, order: 3, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: '8', projectId: '3', title: 'Token Ma\'am Ding', completed: false, starred: false, order: 0, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: '9', projectId: '3', title: 'Promotional Video', completed: false, starred: false, order: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: '10', projectId: '3', title: 'IT Day Preparations', completed: false, starred: false, order: 2, notes: 'Committee', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: '11', projectId: '4', title: 'Logo KampSama', completed: false, starred: false, order: 0, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: '12', projectId: '5', title: 'Mantra', completed: false, starred: false, order: 0, notes: 'Short message that makes everybody aware about our...', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: '13', projectId: '5', title: 'Monthly Regular Meeting', completed: false, starred: false, order: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: '14', projectId: '5', title: 'CBL', completed: false, starred: false, order: 2, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id: '15', projectId: '5', title: 'Logo making', completed: false, starred: false, order: 3, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-];
+async function fetchTasks(): Promise<Task[]> {
+  const res = await fetch('/api/tasks');
+  if (!res.ok) return [];
+  const data = await res.json();
+  // Map snake_case from Supabase to camelCase Task type
+  return (data || []).map(mapTask);
+}
+
+/** Map a raw Supabase row (snake_case) to the Task type (camelCase). */
+function mapTask(raw: Record<string, unknown>): Task {
+  return {
+    id: String(raw.id || ''),
+    projectId: String(raw.project_id || raw.projectId || ''),
+    title: String(raw.title || ''),
+    notes: String(raw.notes || raw.description || ''),
+    completed: raw.status === 'done',
+    starred: raw.priority ? Number(raw.priority) > 0 : false,
+    dueDate: raw.due_date ? String(raw.due_date) : undefined,
+    dueTime: raw.due_time ? String(raw.due_time) : undefined,
+    order: Number(raw.order || 0),
+    createdAt: String(raw.created_at || raw.createdAt || new Date().toISOString()),
+    updatedAt: String(raw.updated_at || raw.updatedAt || new Date().toISOString()),
+  };
+}
 
 function TasksContent() {
   const { projects, activeProjectId } = useProjects();
-  const [tasks, setTasks] = useState<Task[]>(initialMockTasks);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const filter = searchParams.get('filter');
   const isStarredFilter = filter === 'starred';
+
+  // Load tasks from Supabase
+  useEffect(() => {
+    let cancelled = false;
+    async function loadTasks() {
+      try {
+        const data = await fetchTasks();
+        if (!cancelled) setTasks(data);
+      } catch (err) {
+        console.error('Failed to load tasks:', err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    loadTasks();
+    return () => { cancelled = true; };
+  }, []);
 
   // Filter tasks by active project and/or starred filter
   let filteredTasks = activeProjectId
     ? tasks.filter((t) => t.projectId === activeProjectId)
     : tasks;
 
-  // Apply starred filter if active
   if (isStarredFilter) {
     filteredTasks = filteredTasks.filter((t) => t.starred);
   }
@@ -58,39 +84,71 @@ function TasksContent() {
     return acc;
   }, {} as Record<string, Task[]>);
 
-  const handleToggleComplete = (taskId: string) => {
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.id === taskId ? { ...t, completed: !t.completed, updatedAt: new Date().toISOString() } : t
-      )
+  const handleToggleComplete = useCallback(async (taskId: string) => {
+    try {
+      const task = tasks.find((t) => t.id === taskId);
+      if (!task) return;
+      await toggleTaskComplete(taskId, !task.completed);
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === taskId
+            ? { ...t, completed: !t.completed, updatedAt: new Date().toISOString() }
+            : t
+        )
+      );
+    } catch {
+      toast.error('Failed to update task');
+    }
+  }, [tasks]);
+
+  const handleToggleStar = useCallback(async (taskId: string) => {
+    try {
+      const task = tasks.find((t) => t.id === taskId);
+      if (!task) return;
+      await toggleTaskStar(taskId, !task.starred);
+      setTasks((prev) =>
+        prev.map((t) =>
+          t.id === taskId
+            ? { ...t, starred: !t.starred, updatedAt: new Date().toISOString() }
+            : t
+        )
+      );
+    } catch {
+      toast.error('Failed to update task');
+    }
+  }, [tasks]);
+
+  const handleDelete = useCallback(async (taskId: string) => {
+    try {
+      await deleteTask(taskId);
+      setTasks((prev) => prev.filter((t) => t.id !== taskId));
+      toast.success('Task deleted');
+    } catch {
+      toast.error('Failed to delete task');
+    }
+  }, []);
+
+  const handleAdd = useCallback(async (title: string, projectId: string) => {
+    try {
+      await createTask({ title, projectId: projectId.toString() });
+      // Refetch to get server-assigned ID
+      const data = await fetchTasks();
+      setTasks(data);
+      toast.success('Task created');
+    } catch {
+      toast.error('Failed to create task');
+    }
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-4xl">
+        <div className="flex items-center justify-center py-20">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-500/30 border-t-cyan-400" />
+        </div>
+      </div>
     );
-  };
-
-  const handleToggleStar = (taskId: string) => {
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.id === taskId ? { ...t, starred: !t.starred, updatedAt: new Date().toISOString() } : t
-      )
-    );
-  };
-
-  const handleDelete = (taskId: string) => {
-    setTasks((prev) => prev.filter((t) => t.id !== taskId));
-  };
-
-  const handleAdd = (title: string, projectId: string) => {
-    const newTask: Task = {
-      id: Date.now().toString(),
-      projectId,
-      title,
-      completed: false,
-      starred: false,
-      order: tasks.filter((t) => t.projectId === projectId).length,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    setTasks((prev) => [newTask, ...prev]);
-  };
+  }
 
   return (
     <div className="mx-auto max-w-4xl">

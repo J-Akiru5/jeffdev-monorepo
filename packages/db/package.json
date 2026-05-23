@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "firebase-admin": "^13.6.0",
+    "gremlin": "^3.8.1",
     "mongodb": "^6.15.0",
     "zod": "^4.2.1"
   },

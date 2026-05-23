@@ -43,6 +43,16 @@ export {
   type MongoClient,
 } from "./cosmos";
 
+// Cosmos/Gremlin exports
+export {
+  getGremlinClient,
+  closeGremlinClient,
+  getRulesByProject,
+  getRelatedRules,
+  getConflictingRules,
+  getRulesByTags,
+} from "./cosmos-gremlin";
+
 // Schema exports
 export {
   // User
