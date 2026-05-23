@@ -24,7 +24,7 @@ IDE (Cursor/Windsurf/VS Code/Claude)
   ▼
 prism serve  (configured by prism init)
   │
-  ├─ spawns prism-mcp-server --standalone  (full server, Cosmos DB)
+  ├─ spawns prism-mcp-server  (full server, Cosmos DB)
   │   → 9 tools, Gemini embeddings, LRU cache, telemetry
   │
   └─ fallback: local lite server  (8 tools, keyword ranking, offline)
@@ -156,8 +156,8 @@ pnpm --filter prism-mcp-server run smoke-test
 # Debug Gemini directly
 pnpm --filter prism-mcp-server exec tsx scripts/debug-gemini.ts
 
-# Start full MCP server (standalone)
-pnpm --filter prism-mcp-server exec tsx src/index.ts --standalone
+# Start full MCP server
+pnpm --filter prism-mcp-server exec tsx src/index.ts
 
 # Start for IDE use
 pnpm --filter prism-cli exec tsx src/index.ts serve
@@ -219,27 +219,32 @@ doppler run -- turbo dev
 
 ## 11. Recent Session Changes
 
-| Date         | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| May 2026     | Created `scripts/smoke-test.ts` — 18-step E2E test                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| May 2026     | Migrated AI from Azure to Gemini: `gemini-3.5-flash` + `gemini-embedding-2`                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| May 2026     | Created `src/lib/gemini.ts`, `src/lib/ai-router.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| May 2026     | Fixed `connect.ts` → broken IDE proxy replaced with `prism serve`                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| May 2026     | Rewrote `serve.ts` — spawns full MCP server with lite fallback                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| May 2026     | Updated `prism init` → configures IDEs with `prism serve`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| May 2026     | Fixed data fragmentation — `sync` generates all 3 formats                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| May 2026     | Fixed VS Code `mcpClient.ts` → spawns `prism serve`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| May 2026     | Fixed cache `cacheHit` metadata bug                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| May 2026     | Fixed Azure endpoint stripping in `azure-openai.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| May 2026     | Removed dead `--port` from serve command                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| May 2026     | Created `PRISM_CONTEXT.md` and updated `PRISM_ROADMAP.md`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| May 2026     | Separated "Rules" and "Skills" into two collections. Created Skill Studio UI.                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| May 2026     | Added `list_skills` MCP tool for AI agent discovery pattern.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| May 2026     | Added Pre-built Rule Templates (Next.js 16, React 19, Tailwind v4, Security).                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| May 22, 2026 | **100% Warn-Free Monorepo Cleanups**: Cleaned up all remaining ESLint, TypeScript, and React compilation warnings across the monorepo. The verification build/lint checks now pass with zero warnings/errors.                                                                                                                                                                                                                                                                                                                                |
-| May 22, 2026 | **Quality & Safety Automation**: Set up Husky, monorepo-aware `lint-staged.config.js`, Commitlint, `.editorconfig`, `.github/CODEOWNERS`, and Gitleaks CI workflow, committed and pushed to `lou` branch.                                                                                                                                                                                                                                                                                                                                    |
-| May 22, 2026 | **Phase 1 Bulletproof Startup Pack**: Added `LICENSE` (MIT), `SECURITY.md`, `CONTRIBUTING.md`, `.github/PULL_REQUEST_TEMPLATE.md`. Created `/api/health` readiness probe routes across 8 apps (agency, prism-admin, marketing, tracker, nexure, joularix, mht, prism-docs). Installed `@next/bundle-analyzer` in root and wired into all 9 Next.js `next.config.*` files (respecting existing Sentry and Nextra chains). Added `ANALYZE` to `turbo.json` globalEnv. Final verification: `check-types` 7/7 ✅, `lint` 12/12 ✅ zero warnings. |
-| May 22, 2026 | **T3 Env Deferral & Branch Push**: Had a strategic conversation and aligned on **skipping the T3 Env validation rollout** for Phase 1. This prevents making massive, disruptive changes to `process.env` across all 9 apps prematurely; this task is now officially deferred to the planned codebase restructure phase. Pushed all Phase 1 work successfully to remote `origin/lou`.                                                                                                                                                         |
+| Date | Change |
+|------|--------|
+| May 22, 2026 | **Phase 1 Bulletproof Startup Pack**: Added LICENSE, SECURITY.md, CONTRIBUTING.md, PR template. Created /api/health routes across 8 apps. Added bundle analyzer. |
+| May 22, 2026 | **Quality & Safety Automation**: Husky, lint-staged, Commitlint, editorconfig, CODEOWNERS, Gitleaks CI workflow. |
+| May 22, 2026 | **100% Warn-Free Monorepo Cleanups**: Cleaned up all remaining ESLint, TypeScript, and React compilation warnings. |
+| May 22, 2026 | Added Pre-built Rule Templates (Next.js 16, React 19, Tailwind v4, Security). |
+| May 22, 2026 | Added `list_skills` MCP tool for AI agent discovery pattern. |
+| May 22, 2026 | Separated "Rules" and "Skills" into two collections. Created Skill Studio UI. |
+| May 22, 2026 | Created `PRISM_CONTEXT.md` and updated `PRISM_ROADMAP.md` |
+| May 22, 2026 | Fixed `gpt-tokenizer` missing dependency — reinstalled pnpm deps |
+| May 22, 2026 | Removed `--standalone` guard — server starts unconditionally on stdio connect |
+| May 22, 2026 | Added DB reconnection logic — health check + retry on connection loss |
+| May 22, 2026 | Updated `PHASE2_COMPLETE.md` — stale `prism connect` → `prism serve` |
+| May 22, 2026 | Renamed npm package from `@prism-engine/cli` → `prism-context-engine` |
+| May 22, 2026 | Published `prism-context-engine@1.1.1` to npm public registry |
+| May 2026 | Fixed `connect.ts` → broken IDE proxy replaced with `prism serve` |
+| May 2026 | Rewrote `serve.ts` — spawns full MCP server with lite fallback |
+| May 2026 | Updated `prism init` → configures IDEs with `prism serve` |
+| May 2026 | Fixed data fragmentation — `sync` generates all 3 formats |
+| May 2026 | Fixed VS Code `mcpClient.ts` → spawns `prism serve` |
+| May 2026 | Fixed cache `cacheHit` metadata bug |
+| May 2026 | Fixed Azure endpoint stripping in `azure-openai.ts` |
+| May 2026 | Removed dead `--port` from serve command |
+| May 2026 | Migrated AI from Azure to Gemini: `gemini-3.5-flash` + `gemini-embedding-2` |
+| May 2026 | Created `src/lib/gemini.ts`, `src/lib/ai-router.ts` |
+| May 2026 | Created `scripts/smoke-test.ts` — 18-step E2E test |
 
 ## 12. Next Steps
 

@@ -125,9 +125,9 @@ export default function QuickConnectPage() {
           <h2 className="text-base font-semibold text-white">Install the CLI</h2>
         </div>
         <div className="bg-black/40 border border-white/10 rounded-md p-4 flex items-center justify-between gap-4">
-          <code className="text-sm font-mono text-emerald-300">npm install -g @prism-engine/cli</code>
+          <code className="text-sm font-mono text-emerald-300">npm install -g prism-context-engine</code>
           <button
-            onClick={() => handleCopy("npm install -g @prism-engine/cli", "install")}
+            onClick={() => handleCopy("npm install -g prism-context-engine", "install")}
             className="text-white/30 hover:text-white transition-colors flex-shrink-0"
           >
             {copied === "install" ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}

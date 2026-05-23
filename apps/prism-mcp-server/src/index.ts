@@ -21,7 +21,7 @@ import {
   ReadResourceRequestSchema,
   InitializeRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { MongoClient, type Collection, type Document, ObjectId } from "mongodb";
+import { MongoClient, type Collection, type Document, ObjectId, MongoNotConnectedError } from "mongodb";
 import { generateQueryEmbedding } from "./lib/azure-openai.js";
 import { findTopKSimilar, extractRelevantSnippet } from "./lib/vector-search.js";
 import { handlePrismScan } from "./tools/prism-scan.js";
@@ -116,7 +116,14 @@ let rulesCollection: Collection<Document> | null = null;
 
 async function getDB(): Promise<Collection<Document>> {
   if (rulesCollection) {
-    return rulesCollection;
+    try {
+      await client?.db(DATABASE_NAME).command({ ping: 1 });
+      return rulesCollection;
+    } catch {
+      console.error(`[${SERVER_NAME}] DB connection lost, reconnecting...`);
+      client = null;
+      rulesCollection = null;
+    }
   }
 
   if (!MONGODB_URI) {
@@ -125,17 +132,32 @@ async function getDB(): Promise<Collection<Document>> {
     );
   }
 
-  client = new MongoClient(MONGODB_URI, {
-    retryWrites: false, // Cosmos DB doesn't support retryable writes
-    maxPoolSize: 5,
-  });
+  if (!client) {
+    client = new MongoClient(MONGODB_URI, {
+      retryWrites: false,
+      maxPoolSize: 5,
+    });
+  }
 
-  await client.connect();
+  try {
+    await client.connect();
+  } catch (connectError) {
+    client = null;
+    rulesCollection = null;
+
+    console.error(`[${SERVER_NAME}] First connection attempt failed, retrying...`);
+    client = new MongoClient(MONGODB_URI, {
+      retryWrites: false,
+      maxPoolSize: 5,
+    });
+    await client.connect();
+  }
+
   console.error(`[${SERVER_NAME}] Connected to Azure Cosmos DB`);
 
   const db = client.db(DATABASE_NAME);
   rulesCollection = db.collection("rules");
-  
+
   return rulesCollection;
 }
 
@@ -929,26 +951,13 @@ ${result.extractedRules && result.extractedRules.length > 0 ? `\n**Extracted Rul
 // =============================================================================
 
 async function main() {
-  const isStandalone = process.argv.includes('--standalone');
+  console.error(`[${SERVER_NAME}] Starting Prism MCP Server v${SERVER_VERSION}...`);
 
-  if (!isStandalone) {
-    console.error(`[${SERVER_NAME}] ╔══════════════════════════════════════════════════════╗`);
-    console.error(`[${SERVER_NAME}] ║  Direct MCP server startup detected.                ║`);
-    console.error(`[${SERVER_NAME}] ║  Recommended: use "prism connect" for cloud sync.   ║`);
-    console.error(`[${SERVER_NAME}] ║  To run standalone: add --standalone flag.           ║`);
-    console.error(`[${SERVER_NAME}] ╚══════════════════════════════════════════════════════╝`);
-    process.exit(0);
-  }
-
-  // Validate API key first
   await validateApiKey();
 
   const transport = new StdioServerTransport();
-
-  console.error(`[${SERVER_NAME}] Starting Prism MCP Server v${SERVER_VERSION} (standalone)...`);
-  
   await server.connect(transport);
-  
+
   console.error(`[${SERVER_NAME}] Server connected and ready.`);
 }
 

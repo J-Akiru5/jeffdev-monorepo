@@ -37,7 +37,7 @@ CI order: `check-types` → `lint` → `test` → `build`. Run in that sequence 
 
 ## Architecture Rules
 
-- **No cross-app imports.** Shared code goes in `packages/` (`@jdstudio/ui`, `@jeffdev/db`, `@repo/eslint-config`, `@repo/typescript-config`, `@prism-engine/cli`).
+- **No cross-app imports.** Shared code goes in `packages/` (`@jdstudio/ui`, `@jeffdev/db`, `@repo/eslint-config`, `@repo/typescript-config`, `prism-context-engine`).
 - DB clients are singletons via `@jeffdev/db` — use `getPrismContainer()` (Cosmos) or Firestore exports.
 - UI components live in `packages/ui/src/` — check there before creating new ones in apps.
 - `@repo/typescript-config` and `@repo/eslint-config` are shared; apps extend them.
@@ -53,7 +53,7 @@ CI order: `check-types` → `lint` → `test` → `build`. Run in that sequence 
 ## Testing
 
 - **Unit tests:** Vitest. **E2E:** Playwright (agency only).
-- MCP server must be built before CLI tests: `pnpm --filter @prism-engine/cli run build`.
+- MCP server must be built before CLI tests: `pnpm --filter prism-context-engine run build`.
 - DB integration tests skip if `MONGODB_URI` not set (`.skipIf` pattern).
 - Focused test: `pnpm --filter <package> run test` (e.g., `pnpm --filter prism-mcp-server run test`).
 

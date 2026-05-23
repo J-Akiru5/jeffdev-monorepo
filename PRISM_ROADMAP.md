@@ -38,7 +38,7 @@ Developer
     ▼
 [Prism Dashboard] ──── Clerk auth, brand/project config, API keys, MCP proxy
     │
-    ├── [CLI: @prism-engine/cli]
+    ├── [CLI: prism-context-engine]
     │       Commands: init, serve, sync, rules, projects,
     │                 brands, generate, api-keys, telemetry,
     │                 kitchen, connect (--url only)
@@ -256,7 +256,7 @@ Developer types in IDE
 > Goal: Give developers visibility into what AI receives before it gets it.
 > Biz milestone: Make this the default demo flow for sales calls — it's the most visual proof of value.
 
-- [x] Add `kitchen` command group to `@prism-engine/cli` (5 subcommands)
+- [x] Add `kitchen` command group to `prism-context-engine` (5 subcommands)
 - [x] `prism kitchen analyze --task "..."` subcommand
   - Reads local `~/.prism/rules.md` + `skills.md`, does keyword-based relevance matching
   - Outputs: sections total, relevant, kept, summarized, skipped, token usage vs budget
@@ -437,7 +437,7 @@ Output: { results: VideoResult[] }
 ### File Structure
 ```
 packages/
-  @prism-engine/cli/         ← CLI commands
+  prism-context-engine/         ← CLI commands
     commands/
       init.ts
       connect.ts
@@ -528,7 +528,7 @@ Every phase must ship with:
 Test command:
 ```bash
 pnpm --filter prism-mcp-server run test
-pnpm --filter @prism-engine/cli run test
+pnpm --filter prism-context-engine run test
 ```
 
 ---

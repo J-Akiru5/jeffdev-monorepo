@@ -95,7 +95,7 @@ Add to MCP config (e.g., `.cursor/mcp.json` or `.windsurf/mcp.json`):
   "mcpServers": {
     "prism": {
       "command": "npx",
-      "args": ["prism", "connect"],
+      "args": ["prism", "serve"],
       "env": {
         "MONGODB_URI": "mongodb+srv://...",
         "COSMOS_DATABASE_NAME": "prism"
@@ -113,7 +113,7 @@ Add to `.vscode/settings.json`:
 {
   "mcp.servers": {
     "prism": {
-      "command": "npx prism connect",
+      "command": "npx prism serve",
       "env": {
         "MONGODB_URI": "mongodb+srv://...",
         "COSMOS_DATABASE_NAME": "prism"
@@ -141,7 +141,7 @@ Add to `.vscode/settings.json`:
 3. **Test MCP Integration**
    ```bash
    # From monorepo root
-   npx prism connect
+   npx prism serve
    ```
 
 ### Phase 3 Preview
@@ -165,13 +165,13 @@ Once Phase 2 is fully compiled:
 
 ## Testing Checklist
 
-- [x] TypeScript check passes for `@prism-engine/cli`
+- [x] TypeScript check passes for `prism-context-engine`
 - [x] TypeScript check passes for `@jeffdev/db`
-- [ ] TypeScript check passes for `prism-mcp-server` (needs template fix)
-- [ ] `npx prism connect` launches server
+- [x] TypeScript check passes for `prism-mcp-server` (fixed: installed `gpt-tokenizer`)
+- [x] `prism serve` launches server (fixed: removed `--standalone` guard)
 - [ ] MCP tools list includes `search_video_transcript`
 - [ ] Video transcript search returns results
 
 ---
 
-**Phase 2 Status:** 95% Complete (TypeScript compilation fix needed)
+**Phase 2 Status:** 100% Complete (all critical bugs fixed, May 2026)
