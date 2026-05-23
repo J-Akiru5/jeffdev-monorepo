@@ -303,17 +303,17 @@ npx create-next-app@latest . --typescript --tailwind --app --src-dir
 
 ```bash
 # Clerk
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_xxx
-CLERK_SECRET_KEY=sk_xxx
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<your-clerk-publishable-key>
+CLERK_SECRET_KEY=<your-clerk-secret-key>
 
 # Database (from Doppler)
-COSMOS_ENDPOINT=xxx
-COSMOS_KEY=xxx
+COSMOS_ENDPOINT=<your-cosmos-endpoint>
+COSMOS_KEY=<your-cosmos-key>
 
 # PayPal
-PAYPAL_CLIENT_ID=xxx
-PAYPAL_CLIENT_SECRET=xxx
-PAYPAL_WEBHOOK_ID=xxx
+PAYPAL_CLIENT_ID=<your-paypal-client-id>
+PAYPAL_CLIENT_SECRET=<your-paypal-client-secret>
+PAYPAL_WEBHOOK_ID=<your-paypal-webhook-id>
 
 # URLs
 NEXT_PUBLIC_ADMIN_URL=https://admin.jeffdev.studio

@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 
 export default function DevSettingsPage() {
   const [showKey, setShowKey] = useState(false);
-  const apiKey = 'sk_live_51M...xY2z';
+  const apiKey = 'sk_live_...sample';
   
   const copyToClipboard = () => {
     navigator.clipboard.writeText(apiKey);

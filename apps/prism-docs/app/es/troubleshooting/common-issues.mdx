@@ -96,11 +96,11 @@ node --version  # Should be 18.x or higher
 3. **Check header format:**
    ```bash
    # Correct
-   -H "Authorization: Bearer sk_live_abc123..."
+   -H "Authorization: Bearer YOUR_SECRET_KEY"
    
    # Wrong
-   -H "Authorization: sk_live_abc123..."
-   -H "Bearer sk_live_abc123..."
+   -H "Authorization: YOUR_SECRET_KEY"
+   -H "Bearer YOUR_SECRET_KEY"
    ```
 
 ### "403 Forbidden"

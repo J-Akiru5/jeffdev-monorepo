@@ -37,8 +37,8 @@ MONGODB_URI=your-cosmos-connection-string
 COSMOS_DATABASE_NAME=prism
 
 # Clerk Authentication
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-CLERK_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<your-clerk-publishable-key>
+CLERK_SECRET_KEY=<your-clerk-secret-key>
 
 # App URLs
 NEXT_PUBLIC_APP_URL=http://localhost:3001
