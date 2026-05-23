@@ -1,11 +1,11 @@
 /**
- * @jdstudio/ui
+ * @syntaxure/ui
  * Syntaxure Labs Component Library
  *
  * Ghost Glow aesthetic • Headless logic • Tailwind styling
  *
  * @example
- * import { Button, Card, Input, Badge } from "@jdstudio/ui";
+ * import { Button, Card, Input, Badge } from "@syntaxure/ui";
  */
 
 // Utilities

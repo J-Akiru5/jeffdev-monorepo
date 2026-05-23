@@ -1,6 +1,0 @@
-{
-  "buildCommand": "pnpm turbo build --filter=prism-dashboard",
-  "installCommand": "pnpm install --frozen-lockfile",
-  "outputDirectory": ".next",
-  "framework": "nextjs"
-}

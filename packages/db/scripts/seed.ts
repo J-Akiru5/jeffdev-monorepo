@@ -126,8 +126,8 @@ const INITIAL_RULES: Omit<SeedRule, "createdAt" | "updatedAt">[] = [
 ## Apps Directory
 | App | Stack | Purpose |
 |-----|-------|---------|
-| agency | Next.js 16 + Firebase | Marketing Site & Admin |
-| prism-dashboard | Next.js 16 + Cosmos | SaaS Platform |
+| syntaxure-labs | Next.js 16 + Supabase | Marketing Site & Admin |
+| prism-engine | Next.js 16 + Cosmos | SaaS Platform |
 | prism-mcp-server | Node.js + MCP SDK | AI Context Server |
 
 ## Packages Directory
@@ -186,7 +186,7 @@ const INITIAL_RULES: Omit<SeedRule, "createdAt" | "updatedAt">[] = [
 \`\`\`typescript
 // ❌ NEVER DO THIS
 import { Button } from "../../apps/agency/src/components/Button";
-import { auth } from "../../../apps/prism-dashboard/src/lib/auth";
+import { auth } from "../../../apps/prism-engine/src/lib/auth";
 \`\`\`
 
 ## What's Allowed

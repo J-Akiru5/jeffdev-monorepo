@@ -1,6 +1,6 @@
 'use client';
 
-import { ChatAssistant } from '@jdstudio/ui/chat-assistant';
+import { ChatAssistant } from '@syntaxure/ui/chat-assistant';
 
 interface DocsAssistantProps {
   className?: string;

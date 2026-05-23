@@ -2,12 +2,8 @@ import type { NextConfig } from "next";
 import withBundleAnalyzer from "@next/bundle-analyzer";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@syntaxure/ui", "@jeffdev/db"],
-  experimental: {
-    serverActions: {
-      bodySizeLimit: "2mb",
-    },
-  },
+  reactStrictMode: true,
+  transpilePackages: ["@syntaxure/ui"],
 };
 
 export default process.env.ANALYZE === "true"
