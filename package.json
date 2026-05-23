@@ -21,6 +21,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^17.0.5",
     "prettier": "^3.7.4",
+    "supabase": "^2.101.0",
     "syncpack": "^13.0.4",
     "turbo": "^2.7.2",
     "typescript": "^5.9.2"
