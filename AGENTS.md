@@ -8,32 +8,28 @@
 
 ## Key Commands
 
-| Command | Description |
-|---------|-------------|
-| `pnpm install` | Install all workspace deps |
-| `doppler run -- turbo dev` | Start all apps (secrets via Doppler) |
-| `turbo run build` | Build all apps/packages |
-| `turbo run lint` | ESLint all workspaces |
-| `turbo run check-types` | TypeScript check all workspaces |
-| `turbo run test` | Run all tests |
-| `prettier --write \"**/*.{ts,tsx,md}\"` | Format code |
+| Command                                 | Description                          |
+| --------------------------------------- | ------------------------------------ |
+| `pnpm install`                          | Install all workspace deps           |
+| `doppler run -- turbo dev`              | Start all apps (secrets via Doppler) |
+| `turbo run build`                       | Build all apps/packages              |
+| `turbo run lint`                        | ESLint all workspaces                |
+| `turbo run check-types`                 | TypeScript check all workspaces      |
+| `turbo run test`                        | Run all tests                        |
+| `prettier --write \"**/*.{ts,tsx,md}\"` | Format code                          |
 
 CI order: `check-types` → `lint` → `test` → `build`. Run in that sequence before pushing.
 
 ## Apps & Ports
 
-| App | Port | Stack |
-|-----|------|-------|
-| `apps/agency` | 3000 | Next.js 16 + Firebase |
-| `apps/prism-dashboard` | 3001 | Next.js 16 + Cosmos DB + Clerk |
-| `apps/prism-docs` | 3002 | Nextra 4 |
-| `apps/mht` | 3003 | Next.js 16 + Firebase |
-| `apps/prism-admin` | 3004 | Next.js 16 + Firebase + Clerk |
-| `apps/joularix` | 3005 | Next.js 16 |
-| `apps/nexure` | 3006 | Next.js 16 |
-| `apps/tracker` | 3007 | Next.js 16 + Firebase |
-| `apps/prism-mcp-server` | — | Node.js + MCP SDK (stdio transport) |
-| `apps/prism-exercise` | — | Skeleton (no package.json, only build artifacts) |
+| App                     | Port | Stack                               |
+| ----------------------- | ---- | ----------------------------------- |
+| `apps/prism-docs`       | 3002 | Nextra 4                            |
+| `apps/prism-admin`      | 3004 | Next.js 16 + Supabase + Clerk       |
+| `apps/prism-engine`     | —    | Node.js + Supabase                  |
+| `apps/prism-manage`     | —    | Next.js 16 + Supabase               |
+| `apps/prism-mcp-server` | —    | Node.js + MCP SDK (stdio transport) |
+| `apps/syntaxure-labs`   | —    | Next.js 16 + Supabase               |
 
 ## Architecture Rules
 
@@ -52,7 +48,7 @@ CI order: `check-types` → `lint` → `test` → `build`. Run in that sequence 
 
 ## Testing
 
-- **Unit tests:** Vitest. **E2E:** Playwright (agency only).
+- **Unit tests:** Vitest. **E2E:** Playwright.
 - MCP server must be built before CLI tests: `pnpm --filter prism-context-engine run build`.
 - DB integration tests skip if `MONGODB_URI` not set (`.skipIf` pattern).
 - Focused test: `pnpm --filter <package> run test` (e.g., `pnpm --filter prism-mcp-server run test`).
@@ -75,4 +71,4 @@ CI order: `check-types` → `lint` → `test` → `build`. Run in that sequence 
 - Tailwind CSS v4, PostCSS config in each app.
 - Docker Compose at root (`docker-compose.yml`) for local Cosmos DB (Mongo 7) + all apps.
 - `syncpack` manages dependency versions across workspaces: `npx syncpack list-mismatches` / `npx syncpack fix-mismatches`.
-- **Port assignments:** Agency=3000, Dashboard=3001, Docs=3002, MHT=3003, Admin=3004, Joularix=3005, Nexure=3006, Tracker=3007. Each app must set `PORT=<n>` in its Doppler config or `package.json` dev script.
+- **Port assignments:** Docs=3002, Admin=3004, Manage=3007, MCP=3003. Each app must set `PORT=<n>` in its Doppler config or `package.json` dev script.
