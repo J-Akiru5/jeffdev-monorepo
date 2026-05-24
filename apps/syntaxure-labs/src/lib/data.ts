@@ -87,7 +87,7 @@ export interface DataMessage {
 // =============================================================================
 export async function getServices(): Promise<DataService[]> {
   try {
-    const supabase = await getAdminClient();
+    const supabase = (await getAdminClient()) as any;
     const { data, error } = await supabase
       .from('services')
       .select('*')
@@ -97,7 +97,7 @@ export async function getServices(): Promise<DataService[]> {
     if (!data) return [];
 
     // Map Supabase columns to DataService shape
-    return data.map((svc, idx) => ({
+    return data.map((svc: any, idx: number) => ({
       slug: svc.name?.toLowerCase().replace(/\s+/g, '-') || `service-${idx}`,
       icon: mapCategoryToIcon(svc.category),
       title: svc.name || '',
@@ -142,7 +142,7 @@ function mapCategoryToIcon(category: string): string {
 // =============================================================================
 export async function getProjects(): Promise<DataProject[]> {
   try {
-    const supabase = await getAdminClient();
+    const supabase = (await getAdminClient()) as any;
     const { data, error } = await supabase
       .from('projects')
       .select('*')
@@ -151,7 +151,7 @@ export async function getProjects(): Promise<DataProject[]> {
     if (error) throw error;
     if (!data) return [];
 
-    return data.map((p) => ({
+    return data.map((p: any) => ({
       slug: p.slug || p.id,
       refNo: undefined,
       title: p.title || '',
@@ -159,23 +159,27 @@ export async function getProjects(): Promise<DataProject[]> {
       category: p.metadata?.category || '',
       tagline: p.description?.slice(0, 120) || '',
       description: p.description || '',
-      challenge: '',
-      solution: '',
-      results: [],
-      technologies: [],
-      testimonial: null,
-      image: null,
-      featured: false,
-      order: 0,
+      challenge: p.metadata?.challenge || '',
+      solution: p.metadata?.solution || '',
+      results: p.metadata?.results || [],
+      technologies: p.metadata?.technologies || [],
+      testimonial: p.metadata?.testimonial || null,
+      image: p.metadata?.image || null,
+      featured: p.metadata?.featured === true,
+      order: p.metadata?.order || 0,
       status: p.status || 'active',
       progress: p.metadata?.progress ?? 0,
       deadline: p.end_date || undefined,
       startDate: p.start_date || undefined,
       budget: p.budget ? Number(p.budget) : undefined,
       paidAmount: p.budget_spent ? Number(p.budget_spent) : undefined,
+      assignedPartner: p.metadata?.assignedPartner || undefined,
+      assignedEmployees: p.metadata?.assignedEmployees || [],
+      user_id: p.user_id,
+      client_email: p.client_email,
       created_at: p.created_at,
       updated_at: p.updated_at,
-    }));
+    } as any));
   } catch (error) {
     console.error('[GET PROJECTS ERROR]', error);
     return [];
@@ -191,10 +195,10 @@ export async function getProjectBySlug(
   slug: string
 ): Promise<DataProject | null> {
   try {
-    const supabase = await getAdminClient();
+    const supabase = (await getAdminClient()) as any;
     const { data, error } = await supabase
       .from('projects')
-      .select('*')
+      .select('*, milestones(*)')
       .eq('slug', slug)
       .maybeSingle();
 
@@ -209,23 +213,36 @@ export async function getProjectBySlug(
       category: data.metadata?.category || '',
       tagline: data.description?.slice(0, 120) || '',
       description: data.description || '',
-      challenge: '',
-      solution: '',
-      results: [],
-      technologies: [],
-      testimonial: null,
-      image: null,
-      featured: false,
-      order: 0,
+      challenge: data.metadata?.challenge || '',
+      solution: data.metadata?.solution || '',
+      results: data.metadata?.results || [],
+      technologies: data.metadata?.technologies || [],
+      testimonial: data.metadata?.testimonial || null,
+      image: data.metadata?.image || null,
+      featured: data.metadata?.featured === true,
+      order: data.metadata?.order || 0,
       status: data.status || 'active',
       progress: data.metadata?.progress ?? 0,
       deadline: data.end_date || undefined,
       startDate: data.start_date || undefined,
       budget: data.budget ? Number(data.budget) : undefined,
       paidAmount: data.budget_spent ? Number(data.budget_spent) : undefined,
+      assignedPartner: data.metadata?.assignedPartner || undefined,
+      assignedEmployees: data.metadata?.assignedEmployees || [],
+      milestones: (data.milestones || []).map((m: any) => ({
+        id: m.id,
+        title: m.title,
+        description: m.description || '',
+        status: m.status === 'in_progress' ? 'in-progress' : m.status,
+        dueDate: m.due_date || undefined,
+        completedAt: m.metadata?.completedAt || undefined,
+        order: m.metadata?.order || 0,
+      })),
+      user_id: data.user_id,
+      client_email: data.client_email,
       created_at: data.created_at,
       updated_at: data.updated_at,
-    };
+    } as any;
   } catch (error) {
     console.error('[GET PROJECT ERROR]', error);
     return null;
@@ -237,7 +254,7 @@ export async function getProjectBySlug(
 // =============================================================================
 export async function getQuotes(limit = 50): Promise<DataQuote[]> {
   try {
-    const supabase = await getAdminClient();
+    const supabase = (await getAdminClient()) as any;
     const { data, error } = await supabase
       .from('quotes')
       .select('*')
@@ -270,7 +287,7 @@ export async function getQuotes(limit = 50): Promise<DataQuote[]> {
 // =============================================================================
 export async function getMessages(limit = 50): Promise<DataMessage[]> {
   try {
-    const supabase = await getAdminClient();
+    const supabase = (await getAdminClient()) as any;
     const { data, error } = await supabase
       .from('messages')
       .select('*')

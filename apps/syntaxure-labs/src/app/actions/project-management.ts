@@ -36,7 +36,7 @@ const milestoneSchema = z.object({
  * Get project by slug and return its ID
  */
 async function getProjectId(slug: string): Promise<string | null> {
-  const supabase = getAdminClient();
+  const supabase = getAdminClient() as any;
   const { data } = await supabase
     .from('projects')
     .select('id')
@@ -53,7 +53,7 @@ export async function updateProjectStatus(
   status: string
 ) {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const { data: project } = await supabase
       .from('projects')
@@ -110,7 +110,7 @@ export async function updateProjectProgress(
   try {
     const validProgress = Math.max(0, Math.min(100, progress));
 
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const { data: project } = await supabase
       .from('projects')
@@ -162,7 +162,7 @@ export async function updateProjectDetails(
   try {
     const validated = projectUpdateSchema.parse(data);
 
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const { data: project } = await supabase
       .from('projects')
@@ -236,7 +236,8 @@ export async function addMilestone(
   milestone: Omit<z.infer<typeof milestoneSchema>, 'id'>
 ) {
   try {
-    const supabase = getAdminClient();
+    const validated = milestoneSchema.parse(milestone);
+    const supabase = getAdminClient() as any;
 
     const projectId = await getProjectId(slug);
     if (!projectId) {
@@ -247,11 +248,11 @@ export async function addMilestone(
       .from('milestones')
       .insert({
         project_id: projectId,
-        title: milestone.title,
-        description: milestone.description || null,
-        due_date: milestone.due_date,
-        status: milestone.status || 'pending',
-        deliverables: milestone.deliverables || null,
+        title: validated.title,
+        description: validated.description || null,
+        due_date: validated.due_date,
+        status: validated.status || 'pending',
+        deliverables: validated.deliverables || null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       } as any)
@@ -285,7 +286,7 @@ export async function updateMilestoneStatus(
   status: string
 ) {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const projectId = await getProjectId(slug);
     if (!projectId) {
@@ -310,7 +311,7 @@ export async function updateMilestoneStatus(
       .eq('project_id', projectId);
 
     const total = milestones?.length || 0;
-    const completed = milestones?.filter(m => m.status === 'completed').length || 0;
+    const completed = milestones?.filter((m: any) => m.status === 'completed').length || 0;
     const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
 
     // Update project progress in metadata
@@ -352,7 +353,7 @@ export async function updateMilestoneStatus(
  */
 export async function deleteMilestone(slug: string, milestoneId: string) {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const projectId = await getProjectId(slug);
     if (!projectId) {

@@ -25,7 +25,7 @@ interface Quote {
   timeline: string;
   details: string;
   status: 'new' | 'contacted' | 'in-progress' | 'closed';
-  createdAt: string;
+  created_at: string;
 }
 
 interface QuoteModalProps {
@@ -126,7 +126,7 @@ export function QuoteModal({ quote, onClose }: QuoteModalProps) {
           <InfoRow
             icon={User}
             label="Submitted"
-            value={new Date(quote.createdAt).toLocaleDateString('en-US', {
+            value={new Date(quote.created_at).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',
               day: 'numeric',

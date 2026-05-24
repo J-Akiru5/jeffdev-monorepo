@@ -1,6 +1,6 @@
 'use server';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 
 /**
  * Services Server Actions
@@ -22,11 +22,11 @@ const COLLECTION = 'services';
  */
 export async function getServices(): Promise<Service[]> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(COLLECTION)
       .select('*')
-      .order('order', { ascending: true }) as any;
+      .order('order', { ascending: true });
 
     if (error || !data) return [];
 
@@ -42,16 +42,16 @@ export async function getServices(): Promise<Service[]> {
  */
 export async function getPublishedServices(): Promise<Service[]> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(COLLECTION)
       .select('*')
       .eq('status', 'published')
-      .order('order', { ascending: true }) as any;
+      .order('order', { ascending: true });
 
     if (error || !data) return [];
 
-    return data.map((doc) => ({
+    return data.map((doc: any) => ({
       id: doc.id,
       ...doc,
     })) as Service[];
@@ -66,7 +66,7 @@ export async function getPublishedServices(): Promise<Service[]> {
  */
 export async function getServiceBySlug(slug: string): Promise<Service | null> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(COLLECTION)
       .select('*')
@@ -105,7 +105,7 @@ export async function createService(
       updated_at: new Date().toISOString(),
     };
 
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data: result, error } = await supabase
       .from(COLLECTION)
       .insert(service)
@@ -140,7 +140,7 @@ export async function updateService(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id: _id, created_at: _createdAt, ...updateData } = data;
 
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { error } = await supabase
       .from(COLLECTION)
       .update({
@@ -172,7 +172,7 @@ export async function deleteService(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { error } = await supabase
       .from(COLLECTION)
       .delete()
@@ -200,7 +200,7 @@ export async function reorderServices(
   orderedIds: string[]
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     
     // Update each service with its new order
     for (let index = 0; index < orderedIds.length; index++) {

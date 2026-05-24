@@ -33,6 +33,7 @@ export function Header() {
     { href: 'https://prism.jeffdev.studio', label: 'Prism Context Engine', highlight: true },
     { href: '/services', label: 'Services' },
     { href: '/work', label: 'Work' },
+    { href: '/community', label: 'Community' },
     { href: '/about', label: 'About' },
     { href: '/contact', label: 'Contact' },
   ];

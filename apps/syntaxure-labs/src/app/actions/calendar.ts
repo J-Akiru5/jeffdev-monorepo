@@ -1,6 +1,6 @@
 'use server';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 
 /**
  * Calendar Event Server Actions
@@ -37,7 +37,7 @@ const eventSchema = z.object({
  */
 export async function getCalendarEvents(): Promise<CalendarEvent[]> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from('calendar_events')
       .select('*')
@@ -73,7 +73,7 @@ export async function createCalendarEvent(
       updated_at: new Date().toISOString(),
     };
 
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data: result, error } = await supabase
       .from('calendar_events')
       .insert(event as any)
@@ -119,8 +119,8 @@ export async function updateCalendarEvent(
     if (validated.end) updateData.end_time = validated.end;
     if (validated.color !== undefined) updateData.color = validated.color;
 
-    const supabase = getAdminClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
+     
     const { error } = await (supabase as any)
       .from('calendar_events')
       .update(updateData)
@@ -149,7 +149,7 @@ export async function updateCalendarEvent(
  */
 export async function deleteCalendarEvent(id: string) {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { error } = await supabase
       .from('calendar_events')
       .delete()

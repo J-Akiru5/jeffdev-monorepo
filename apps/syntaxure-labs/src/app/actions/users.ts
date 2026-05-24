@@ -16,7 +16,7 @@ const COLLECTION = 'user_profiles';
  */
 export async function getUserProfile(uid: string): Promise<UserProfile | null> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(COLLECTION)
       .select('*')
@@ -36,7 +36,7 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
  */
 export async function getPublicNamecard(username: string): Promise<PublicNamecard | null> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(COLLECTION)
       .select('*')
@@ -89,7 +89,7 @@ export async function updateUserProfile(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { role: _role, status: _status, created_at: _createdAt, ...safeData } = data;
 
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { error } = await supabase
       .from(COLLECTION)
       .update({
@@ -122,7 +122,7 @@ export async function checkUsernameAvailable(
   excludeUid?: string
 ): Promise<boolean> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(COLLECTION)
       .select('id')
@@ -144,7 +144,7 @@ export async function checkUsernameAvailable(
  */
 export async function getAllUsers(): Promise<UserProfile[]> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(COLLECTION)
       .select('*')
@@ -152,7 +152,7 @@ export async function getAllUsers(): Promise<UserProfile[]> {
 
     if (error || !data) return [];
 
-    return data.map((doc) => ({
+    return data.map((doc: any) => ({
       uid: doc.id, 
       ...doc
     })) as UserProfile[];

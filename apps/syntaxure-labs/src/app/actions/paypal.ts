@@ -52,7 +52,7 @@ async function getPayPalAccessToken(): Promise<string | null> {
  */
 export async function createPayPalOrder(invoiceRefNo: string, amount?: number) {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     // Get invoice by invoice_number (refNo)
     const { data: invoice, error: fetchError } = await supabase
@@ -154,7 +154,7 @@ export async function capturePayPalOrder(orderId: string, invoiceRefNo: string) 
       const transactionId = capture.purchase_units?.[0]?.payments?.captures?.[0]?.id;
 
       // Get invoice ID by invoice_number
-      const supabase = getAdminClient();
+      const supabase = getAdminClient() as any;
       const { data: invoice, error: fetchError } = await supabase
         .from('invoices')
         .select('id')

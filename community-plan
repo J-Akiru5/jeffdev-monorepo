@@ -1,0 +1,60 @@
+# Community Page & CMS Implementation
+
+This plan outlines the creation of a "Community" page for the Syntaxure Labs website (`/community`) and the corresponding CMS interface within `prism-admin` to manage releases using Supabase.
+
+## Proposed Changes
+
+### 1. Database Schema (Supabase)
+---
+#### [NEW] `supabase/migrations/[timestamp]_add_releases_table.sql`
+- Create a new `releases` table in Supabase.
+- Fields:
+  - `id` (UUID, Primary Key)
+  - `title` (Text)
+  - `version` (Text, nullable)
+  - `date` (Timestamp)
+  - `type` (Enum: 'tool', 'update', 'patch')
+  - `description` (Text)
+  - `link` (Text, nullable)
+  - `tags` (Text array, nullable)
+  - `is_featured` (Boolean, default false) - used for the hybrid layout's top section.
+  - `created_at` (Timestamp)
+  - `updated_at` (Timestamp)
+
+#### [MODIFY] `apps/syntaxure-labs/src/types/database.ts`
+- Update the generated types to include the new `releases` table.
+
+### 2. Prism Admin (The CMS)
+---
+#### [MODIFY] `apps/prism-admin/src/app/admin/layout.tsx`
+- Add a "Releases" (or "Community Updates") link to the sidebar navigation under a new or existing category (e.g., "Content").
+
+#### [NEW] `apps/prism-admin/src/app/admin/releases/page.tsx`
+- Build the CMS data table to list all releases fetched from Supabase.
+- Add "Create Release", "Edit", and "Delete" actions.
+
+#### [NEW] `apps/prism-admin/src/components/releases/release-form.tsx`
+- A form to create/edit release notes, interacting with the Supabase client.
+
+### 3. Syntaxure Labs (The Front-end)
+---
+#### [MODIFY] `apps/syntaxure-labs/src/components/layout/header.tsx`
+- Add `/community` to the `navLinks` array.
+
+#### [NEW] `apps/syntaxure-labs/src/app/community/page.tsx`
+- The main entry page with a dark, stealth-luxury aesthetic (`bg-void`).
+- Fetches live data from Supabase `releases` table.
+- **Hybrid Layout:** 
+  - **Featured Section:** Maps over releases where `is_featured == true` (displayed as large cards/grids).
+  - **Timeline Section:** Maps over the rest of the releases ordered by date descending (displayed as a technical changelog).
+
+#### [NEW] `apps/syntaxure-labs/src/components/sections/release-timeline.tsx`
+- The core UI component for rendering the release history, using `lucide-react` icons (Terminal for tools, Box for updates).
+
+## Verification Plan
+
+### Manual Verification
+1. Run `supabase db push` or equivalent to apply the migration.
+2. Open the `prism-admin` app, navigate to the new Releases section, and create a test release (e.g., "Prism Organizer TUI v1.0").
+3. Open the `syntaxure-labs` app and verify the `/community` page displays the new release with the correct styling and layout.
+4. Verify mobile responsiveness of both the CMS and the public-facing community page.

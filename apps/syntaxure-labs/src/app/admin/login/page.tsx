@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, Suspense } from 'react';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { auth } from '@/lib/firebase/config';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { createClient } from '@/lib/supabase/browser';
+import { useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 
 /**
@@ -16,9 +15,16 @@ import { Loader2 } from 'lucide-react';
 function AdminLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
   const searchParams = useSearchParams();
   const inviteToken = searchParams.get('invite');
+  const queryError = searchParams.get('error');
+
+  // Set initial error if callback redirected back with error
+  useState(() => {
+    if (queryError === 'auth_failed') {
+      setError('Google authentication failed. Please try again.');
+    }
+  });
 
   const title = inviteToken ? 'Join Team' : 'Admin Login';
   const subtitle = inviteToken
@@ -30,35 +36,20 @@ function AdminLoginForm() {
     setError(null);
 
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-
-      const idToken = await result.user.getIdToken();
-
-      const response = await fetch('/api/auth/session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          idToken,
-          inviteToken,
-        }),
+      const supabase = createClient();
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback?invite=${inviteToken || ''}`,
+        },
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create session');
+      if (oauthError) {
+        throw oauthError;
       }
-
-      router.push(data.redirectPath || '/admin');
-    } catch (err) {
+    } catch (err: any) {
       console.error('[LOGIN ERROR]', err);
-      const error = err as { code?: string; message: string };
-      if (error.code === 'auth/popup-closed-by-user') {
-        setIsLoading(false);
-        return;
-      }
-      setError(error.message || 'Failed to sign in');
+      setError(err.message || 'Failed to initialize Google login');
       setIsLoading(false);
     }
   };

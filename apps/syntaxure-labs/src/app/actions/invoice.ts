@@ -91,7 +91,7 @@ function determineInvoiceStatus(
 // =============================================================================
 export async function getInvoices(): Promise<Invoice[]> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from('invoices')
       .select('*')
@@ -99,7 +99,7 @@ export async function getInvoices(): Promise<Invoice[]> {
 
     if (error || !data) return [];
 
-    return data.map((row) => normalizeInvoiceRow(row));
+    return data.map((row: any) => normalizeInvoiceRow(row));
   } catch (error) {
     console.error('[GET INVOICES ERROR]', error);
     return [];
@@ -108,7 +108,7 @@ export async function getInvoices(): Promise<Invoice[]> {
 
 export async function getInvoiceByRefNo(refNo: string): Promise<Invoice | null> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from('invoices')
       .select('*')
@@ -184,7 +184,7 @@ export async function createInvoice(data: z.infer<typeof createInvoiceSchema>) {
       return { success: false, error: 'Authentication required' };
     }
 
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const { data: result, error } = await supabase
       .from('invoices')
@@ -256,7 +256,7 @@ export async function updateInvoice(
   data: Partial<z.infer<typeof createInvoiceSchema>>
 ) {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const { data: existing, error: fetchError } = await supabase
       .from('invoices')
@@ -337,7 +337,7 @@ export async function updateInvoice(
 // =============================================================================
 export async function sendInvoice(id: string) {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const { data: existing, error: fetchError } = await supabase
       .from('invoices')
@@ -430,7 +430,7 @@ export async function recordPayment(
 ) {
   try {
     const validated = paymentSchema.parse(data);
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const { data: existing, error: fetchError } = await supabase
       .from('invoices')
@@ -513,7 +513,7 @@ export async function verifyGcashPayment(
   verified: boolean
 ) {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const { data: existing, error: fetchError } = await supabase
       .from('invoices')
@@ -595,7 +595,7 @@ export async function verifyGcashPayment(
 // =============================================================================
 export async function deleteInvoice(id: string) {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const { data: existing, error: fetchError } = await supabase
       .from('invoices')

@@ -40,7 +40,7 @@ export async function createInvite(
   }
 ): Promise<{ success: boolean; inviteId?: string; token?: string; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     // Validate role (prevent creating Founder invites)
     if (data.role === 'founder') {
@@ -168,7 +168,7 @@ export async function getInviteByToken(token: string): Promise<{
   projectName?: string;
 } | null> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const { data, error } = await supabase
       .from('invites')
@@ -217,7 +217,7 @@ export async function completeInvite(
   displayName: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const invite = await getInviteByToken(token);
     if (!invite) {
@@ -288,7 +288,7 @@ export async function getInvites(): Promise<{
   projectName?: string;
 }[]> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const { data, error } = await supabase
       .from('invites')
@@ -297,7 +297,7 @@ export async function getInvites(): Promise<{
 
     if (error || !data) return [];
 
-    return data.map((row) => {
+    return data.map((row: any) => {
       const metadata = (row.metadata || {}) as Record<string, string>;
       return {
         id: row.id,
@@ -324,7 +324,7 @@ export async function revokeInvite(
   inviteId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const { error } = await supabase
       .from('invites')
@@ -354,7 +354,7 @@ export async function resendInvite(
   inviteId: string
 ): Promise<{ success: boolean; token?: string; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const { data: invite, error: fetchError } = await supabase
       .from('invites')
@@ -430,7 +430,7 @@ export async function updateUserRole(
   updatedBy: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     // Founder protection: Cannot change Founder's role
     if (uid === FOUNDER_UID) {
@@ -481,7 +481,7 @@ export async function assignProjects(
   projectSlugs: string[]
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     // Founder protection
     if (uid === FOUNDER_UID) {
@@ -528,7 +528,7 @@ export async function deactivateUser(
   uid: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     // Founder protection
     if (uid === FOUNDER_UID) {

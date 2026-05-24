@@ -74,13 +74,6 @@ export function ProjectCard({ project }: ProjectCardProps) {
           </div>
         </div>
       )}
-      
-      {/* Full card link overlay */}
-      <Link
-        href={`/admin/projects/${project.slug}`}
-        className="absolute inset-0"
-        aria-label={`View ${project.title}`}
-      />
     </div>
   );
 }

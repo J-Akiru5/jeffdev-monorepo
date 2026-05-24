@@ -17,7 +17,7 @@ const COLLECTION = 'feedback';
  */
 export async function getFeedback(): Promise<FirestoreFeedback[]> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(COLLECTION)
       .select('*')
@@ -25,7 +25,7 @@ export async function getFeedback(): Promise<FirestoreFeedback[]> {
 
     if (error || !data) return [];
 
-    return data.map((doc) => ({
+    return data.map((doc: any) => ({
       id: doc.id,
       ...doc,
     })) as FirestoreFeedback[];
@@ -40,7 +40,7 @@ export async function getFeedback(): Promise<FirestoreFeedback[]> {
  */
 export async function getPublicFeedback(): Promise<FirestoreFeedback[]> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(COLLECTION)
       .select('*')
@@ -49,7 +49,7 @@ export async function getPublicFeedback(): Promise<FirestoreFeedback[]> {
 
     if (error || !data) return [];
 
-    return data.map((doc) => ({
+    return data.map((doc: any) => ({
       id: doc.id,
       ...doc,
     })) as FirestoreFeedback[];
@@ -74,7 +74,7 @@ export async function createFeedback(
       updated_at: new Date().toISOString(),
     };
 
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data: result, error } = await supabase
       .from(COLLECTION)
       .insert(feedback)
@@ -105,7 +105,7 @@ export async function updateFeedbackStatus(
   status: FeedbackStatus
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { error } = await supabase
       .from(COLLECTION)
       .update({
@@ -138,7 +138,7 @@ export async function deleteFeedback(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { error } = await supabase
       .from(COLLECTION)
       .delete()

@@ -32,7 +32,7 @@ export async function submitContactForm(data: ContactFormData) {
     const validated = contactSchema.parse(data);
 
     // Save to Supabase
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data: result, error } = await supabase
       .from('messages')
       .insert({
@@ -87,7 +87,7 @@ export async function updateMessageStatus(
   try {
     const { logAuditEvent } = await import('@/lib/audit');
 
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     
     // Get current message for audit
     const { data: current, error: fetchError } = await supabase

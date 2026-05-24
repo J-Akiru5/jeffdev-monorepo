@@ -1,8 +1,10 @@
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Plus } from 'lucide-react';
 import { getProjects } from '@/lib/data';
 import type { FirestoreProject } from '@/types/firestore';
 import { ProjectCard } from '@/components/admin/project-card';
+
+export const dynamic = 'force-dynamic';
 
 /**
  * Admin Projects Page
@@ -38,6 +40,13 @@ export default async function AdminProjectsPage() {
           <h1 className="text-3xl font-bold text-white">Projects</h1>
           <p className="mt-2 text-white/50">{projects.length} total projects</p>
         </div>
+        <Link
+          href="/admin/projects/new"
+          className="inline-flex items-center gap-1.5 rounded-md bg-cyan-500 px-4 py-2 text-sm font-medium text-black transition-colors hover:bg-cyan-400"
+        >
+          <Plus className="h-4 w-4" />
+          New Project
+        </Link>
       </div>
 
       {/* Projects Grid */}

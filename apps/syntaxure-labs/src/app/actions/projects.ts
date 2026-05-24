@@ -1,6 +1,6 @@
 'use server';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
 
 /**
  * Projects CRUD Actions
@@ -16,25 +16,35 @@ import { logAuditEvent } from '@/lib/audit';
 const projectSchema = z.object({
   slug: z.string().min(1).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase with hyphens'),
   title: z.string().min(1).max(100),
+  userId: z.string().uuid('Please select a valid client'),
   client: z.string().min(1).max(100),
+  clientEmail: z.string().email('Please enter a valid client email').optional().or(z.literal('')),
   category: z.string().min(1).max(50),
   tagline: z.string().min(1).max(200),
   description: z.string().min(1).max(1000),
-  challenge: z.string().min(1).max(1000),
-  solution: z.string().min(1).max(1000),
+  challenge: z.string().optional().default(''),
+  solution: z.string().optional().default(''),
   results: z.array(z.object({
-    metric: z.string().min(1),
-    value: z.string().min(1),
-  })).min(1).max(5),
-  technologies: z.array(z.string()).min(1).max(10),
+    metric: z.string(),
+    value: z.string(),
+  })).optional().default([]),
+  technologies: z.array(z.string()).optional().default([]),
   testimonial: z.object({
-    quote: z.string().min(1),
-    author: z.string().min(1),
-    role: z.string().min(1),
-  }).nullable(),
-  image: z.string().nullable(),
-  featured: z.boolean(),
-  order: z.number().int().min(1),
+    quote: z.string(),
+    author: z.string(),
+    role: z.string(),
+  }).nullable().optional(),
+  image: z.string().nullable().optional(),
+  featured: z.boolean().default(false),
+  order: z.number().int().min(0).default(0),
+  status: z.enum(['pending', 'active', 'paused', 'completed']).default('active'),
+  progress: z.number().int().min(0).max(100).default(0),
+  startDate: z.string().optional().or(z.literal('')),
+  deadline: z.string().optional().or(z.literal('')),
+  budget: z.number().min(0).optional(),
+  paidAmount: z.number().min(0).optional(),
+  assignedPartner: z.string().optional(),
+  assignedEmployees: z.array(z.string()).optional().default([]),
 });
 
 export type ProjectFormData = z.infer<typeof projectSchema>;
@@ -50,7 +60,7 @@ interface ActionResult {
  */
 export async function getProjectsList(): Promise<{ slug: string; title: string }[]> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from('projects')
       .select('slug, title');
@@ -73,7 +83,7 @@ export async function getProjectsList(): Promise<{ slug: string; title: string }
 export async function createProject(data: ProjectFormData): Promise<ActionResult> {
   try {
     const validated = projectSchema.parse(data);
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     // Check if slug already exists
     const { data: existing } = await supabase
@@ -90,12 +100,17 @@ export async function createProject(data: ProjectFormData): Promise<ActionResult
     const { error } = await supabase
       .from('projects')
       .insert([{
-        user_id: '', // Will be set by RLS policy or auth context
+        user_id: validated.userId,
         title: validated.title,
         description: validated.description,
         slug: validated.slug,
-        status: 'active' as const,
+        status: validated.status,
+        start_date: validated.startDate || null,
+        end_date: validated.deadline || null,
+        budget: validated.budget !== undefined ? validated.budget.toString() : null,
+        budget_spent: validated.paidAmount !== undefined ? validated.paidAmount.toString() : '0',
         client_name: validated.client,
+        client_email: validated.clientEmail || null,
         metadata: {
           category: validated.category,
           tagline: validated.tagline,
@@ -107,6 +122,9 @@ export async function createProject(data: ProjectFormData): Promise<ActionResult
           image: validated.image,
           featured: validated.featured,
           order: validated.order,
+          progress: validated.progress,
+          assignedPartner: validated.assignedPartner || null,
+          assignedEmployees: validated.assignedEmployees || [],
         },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -143,7 +161,7 @@ export async function updateProject(
 ): Promise<ActionResult> {
   try {
     const validated = projectSchema.parse(data);
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     // Check if current slug exists
     const { data: existing } = await supabase
@@ -167,67 +185,43 @@ export async function updateProject(
       if (newSlugExists) {
         return { success: false, error: 'A project with the new slug already exists' };
       }
-
-      // Delete old record and insert new one (since slug is primary identifier)
-      const { error: deleteError } = await supabase
-        .from('projects')
-        .delete()
-        .eq('slug', slug);
-
-      if (deleteError) throw deleteError;
-
-      const { error: insertError } = await supabase
-        .from('projects')
-        .insert([{
-          user_id: '',
-          title: validated.title,
-          description: validated.description,
-          slug: validated.slug,
-          status: 'active' as const,
-          client_name: validated.client,
-          metadata: {
-            category: validated.category,
-            tagline: validated.tagline,
-            challenge: validated.challenge,
-            solution: validated.solution,
-            results: validated.results,
-            technologies: validated.technologies,
-            testimonial: validated.testimonial,
-            image: validated.image,
-            featured: validated.featured,
-            order: validated.order,
-          },
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }] as any);
-
-      if (insertError) throw insertError;
-    } else {
-      // Update existing record
-      const { error: updateError } = await supabase
-        .from('projects')
-        .update({
-          title: validated.title,
-          description: validated.description,
-          client_name: validated.client,
-          metadata: {
-            category: validated.category,
-            tagline: validated.tagline,
-            challenge: validated.challenge,
-            solution: validated.solution,
-            results: validated.results,
-            technologies: validated.technologies,
-            testimonial: validated.testimonial,
-            image: validated.image,
-            featured: validated.featured,
-            order: validated.order,
-          },
-          updated_at: new Date().toISOString(),
-        } as any)
-        .eq('slug', slug);
-
-      if (updateError) throw updateError;
     }
+
+    // Update existing record directly (no delete/re-insert to preserve foreign key constraints)
+    const { error: updateError } = await supabase
+      .from('projects')
+      .update({
+        user_id: validated.userId,
+        slug: validated.slug,
+        title: validated.title,
+        description: validated.description,
+        status: validated.status,
+        start_date: validated.startDate || null,
+        end_date: validated.deadline || null,
+        budget: validated.budget !== undefined ? validated.budget.toString() : null,
+        budget_spent: validated.paidAmount !== undefined ? validated.paidAmount.toString() : '0',
+        client_name: validated.client,
+        client_email: validated.clientEmail || null,
+        metadata: {
+          category: validated.category,
+          tagline: validated.tagline,
+          challenge: validated.challenge,
+          solution: validated.solution,
+          results: validated.results,
+          technologies: validated.technologies,
+          testimonial: validated.testimonial,
+          image: validated.image,
+          featured: validated.featured,
+          order: validated.order,
+          progress: validated.progress,
+          assignedPartner: validated.assignedPartner || null,
+          assignedEmployees: validated.assignedEmployees || [],
+        },
+        updated_at: new Date().toISOString(),
+      } as any)
+      .eq('slug', slug);
+
+    if (updateError) throw updateError;
 
     await logAuditEvent({
       action: 'UPDATE',
@@ -258,7 +252,7 @@ export async function updateProject(
  */
 export async function deleteProject(slug: string): Promise<ActionResult> {
   try {
-    const supabase = getAdminClient();
+    const supabase = getAdminClient() as any;
 
     const { data: existing, error: fetchError } = await supabase
       .from('projects')

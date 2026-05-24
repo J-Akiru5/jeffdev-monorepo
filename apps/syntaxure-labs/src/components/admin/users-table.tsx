@@ -101,11 +101,11 @@ export function UsersTable({ users, currentUserUid }: UsersTableProps) {
       ),
     },
     {
-      accessorKey: 'createdAt',
+      accessorKey: 'created_at',
       header: 'Joined',
       cell: ({ row }) => (
         <span className="font-mono text-xs text-white/40">
-          {new Date(row.original.createdAt).toLocaleDateString()}
+          {new Date(row.original.created_at).toLocaleDateString()}
         </span>
       ),
     },

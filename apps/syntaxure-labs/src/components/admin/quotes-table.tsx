@@ -25,7 +25,7 @@ interface Quote {
   timeline: string;
   details: string;
   status: 'new' | 'contacted' | 'in-progress' | 'closed';
-  createdAt: string;
+  created_at: string;
 }
 
 const projectTypeLabels: Record<string, string> = {
@@ -90,11 +90,11 @@ export function QuotesTable({ quotes }: QuotesTableProps) {
       ),
     },
     {
-      accessorKey: 'createdAt',
+      accessorKey: 'created_at',
       header: 'Date',
       cell: ({ row }) => (
         <span className="font-mono text-xs text-white/40">
-          {new Date(row.original.createdAt).toLocaleDateString()}
+          {new Date(row.original.created_at).toLocaleDateString()}
         </span>
       ),
     },
