@@ -6,6 +6,7 @@ import { useActionState } from "react";
 import { ArrowLeft, FileJson } from "lucide-react";
 import { GlassPanel, Button } from "@syntaxure/ui";
 import { createRule, type CreateRuleState } from "../../../actions";
+import { useActionFeedback } from "@/lib/hooks/use-action-feedback";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -27,6 +28,7 @@ function NewRuleForm({ slug }: { slug: string }) {
     CreateRuleState,
     FormData
   >(createRule, null);
+  useActionFeedback(state, { successMessage: "Rule created!" });
 
   return (
     <div className="space-y-8 max-w-2xl">

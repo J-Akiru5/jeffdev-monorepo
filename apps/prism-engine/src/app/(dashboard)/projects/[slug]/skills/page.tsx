@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@jeffdev/db";
+import { getCollection } from "@syntaxure-labs/db";
 import { ArrowLeft, BookOpen, Sparkles, ListOrdered } from "lucide-react";
 import { SkillsList, type SkillItem } from "./skills-list";
+import type { SkillDoc } from "@/lib/types";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -89,15 +90,18 @@ export default async function ProjectSkillsPage({ params }: Props) {
         <div className="lg:col-span-2">
           <SkillsList
             skills={skills.map(
-              (s): SkillItem => ({
-                id: (s._id as { toString: () => string }).toString(),
-                name: (s.name as string) || "Untitled Skill",
-                category: (s.category as string) || "other",
-                description: (s.description as string) || "",
-                stepCount: (s.steps as unknown[])?.length || 0,
-                isActive: s.isActive !== false,
-                source: (s.source as string) || "manual",
-              }),
+              (doc): SkillItem => {
+                const s = doc as unknown as SkillDoc;
+                return {
+                  id: s._id.toString(),
+                  name: s.name || "Untitled Skill",
+                  category: s.category || "other",
+                  description: s.description || "",
+                  stepCount: s.steps?.length || 0,
+                  isActive: s.isActive !== false,
+                  source: s.source || "manual",
+                };
+              },
             )}
             projectSlug={slug}
           />

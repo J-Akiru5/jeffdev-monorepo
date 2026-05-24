@@ -1,5 +1,5 @@
 /**
- * @module @jeffdev/db/webhook-publisher
+ * @module @syntaxure-labs/db/webhook-publisher
  * @description Webhook event publisher for n8n automation integration.
  *
  * Provides a lightweight helper to fire events from any app to n8n's webhook receiver.
@@ -7,7 +7,7 @@
  * an automated workflow (Discord notifications, emails, social media posts, etc.).
  *
  * @example
- * import { publishEvent } from "@jeffdev/db/webhook-publisher";
+ * import { publishEvent } from "@syntaxure-labs/db/webhook-publisher";
  *
  * // After a release
  * await publishEvent("release.created", {

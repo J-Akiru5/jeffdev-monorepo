@@ -10,6 +10,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { GlassPanel, Button } from "@syntaxure/ui";
+import { useActionFeedback } from "@/lib/hooks/use-action-feedback";
 import {
   updateProject,
   deleteProject,
@@ -32,6 +33,14 @@ export default function ProjectSettingsPage() {
     ProjectActionState,
     FormData
   >(deleteProject, null);
+
+  useActionFeedback(updateState, {
+    successMessage: "Project updated successfully!",
+    fallbackErrorMessage: "Failed to update project.",
+  });
+  useActionFeedback(deleteState, {
+    fallbackErrorMessage: "Failed to delete project.",
+  });
 
   return (
     <div className="space-y-8 max-w-2xl">

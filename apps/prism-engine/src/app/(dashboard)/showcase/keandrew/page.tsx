@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@jeffdev/db";
+import { getCollection } from "@syntaxure-labs/db";
 import Link from "next/link";
 import { ArrowLeft, Code, Palette } from "lucide-react";
+import type { BrandDoc } from "@/lib/types";
 
 /**
  * Keandrew Demo Showcase
@@ -16,9 +17,9 @@ export default async function KeandrewShowcasePage() {
   const rulesCollection = await getCollection("rules");
   const componentsCollection = await getCollection("components");
 
-  const brand = await brandsCollection.findOne({
+  const brand = (await brandsCollection.findOne({
     slug: "keandrew-photography",
-  });
+  })) as BrandDoc | null;
   const rules = await rulesCollection
     .find({ tags: { $in: ["keandrew"] } })
     .toArray();
@@ -48,7 +49,7 @@ export default async function KeandrewShowcasePage() {
     );
   }
 
-  const colors = brand.colors as Record<string, string>;
+  const colors = brand.colors;
 
   return (
     <div className="space-y-8">
@@ -97,10 +98,10 @@ export default async function KeandrewShowcasePage() {
               style={{ color: colors.text }}
               className="text-xl font-semibold"
             >
-              {brand.companyName as string}
+              {brand.companyName}
             </h2>
             <p style={{ color: colors.textMuted }} className="text-sm">
-              {brand.tagline as string}
+              {brand.tagline}
             </p>
           </div>
         </div>

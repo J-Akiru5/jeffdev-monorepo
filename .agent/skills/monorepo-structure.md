@@ -17,7 +17,7 @@ jeffdev-monorepo/
 │
 ├── packages/                      # Shared code (published as npm packages)
 │   ├── ui/                        # Ghost Glow component library (@jdstudio/ui)
-│   ├── db/                        # Database clients (@jeffdev/db)
+│   ├── db/                        # Database clients (@syntaxure-labs/db)
 │   ├── eslint-config/             # ESLint rules (@repo/eslint-config)
 │   ├── typescript-config/         # TypeScript config (@repo/typescript-config)
 │   └── prism-cli/                 # CLI tools (prism-cli)
@@ -79,7 +79,7 @@ import { Button, Card } from "@jdstudio/ui";
 // apps/agency/src/components/Button.tsx → packages/ui/src/Button.tsx
 
 // ✅ CORRECT: Shared database logic in packages/db
-import { firestore, getPrismContainer } from "@jeffdev/db";
+import { firestore, getPrismContainer } from "@syntaxure-labs/db";
 ```
 
 ### Workspace Dependency Management
@@ -91,7 +91,7 @@ Declare dependencies in each package's `package.json`:
 {
   "dependencies": {
     "@jdstudio/ui": "workspace:*",
-    "@jeffdev/db": "workspace:*",
+    "@syntaxure-labs/db": "workspace:*",
     "react": "^19.0.0"
   }
 }
@@ -100,7 +100,7 @@ Declare dependencies in each package's `package.json`:
 {
   "dependencies": {
     "@jdstudio/ui": "workspace:*",
-    "@jeffdev/db": "workspace:*",
+    "@syntaxure-labs/db": "workspace:*",
     "@clerk/nextjs": "^5.0.0"
   }
 }

@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCollection } from "@jeffdev/db/cosmos";
+import { getCollection } from "@syntaxure-labs/db/cosmos";
 import { ObjectId } from "mongodb";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
 
@@ -22,7 +22,7 @@ export async function POST(
 
   const rules = await getCollection("rules");
   const installed: string[] = [];
-  const ruleIds = (ruleSet.rules || []) as string[];
+  const ruleIds = (ruleSet.rules || []) as unknown as string[];
 
   for (const ruleId of ruleIds) {
     if (!ObjectId.isValid(ruleId)) continue;

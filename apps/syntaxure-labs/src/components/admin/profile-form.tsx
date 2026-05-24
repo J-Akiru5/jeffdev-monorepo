@@ -82,9 +82,8 @@ export function ProfileForm({ profile }: ProfileFormProps) {
           [root]: {
             ...(prev[root as keyof typeof prev] as Record<string, unknown>),
             [parent]: {
-              // @ts-expect-error - dynamic nesting is hard to type perfectly
               ...((
-                prev[root as keyof typeof prev] as Record<
+                prev[root as keyof typeof prev] as unknown as Record<
                   string,
                   Record<string, unknown>
                 >

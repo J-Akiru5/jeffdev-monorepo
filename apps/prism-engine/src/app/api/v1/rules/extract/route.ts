@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCollection } from "@jeffdev/db/cosmos";
+import { getCollection } from "@syntaxure-labs/db/cosmos";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
 import { AzureOpenAI } from "openai";
 
@@ -57,15 +57,17 @@ export async function POST(request: NextRequest) {
     const structure = scan.structure || {};
     const dirsSample = (structure.directories || []).slice(0, 30).join("\n");
     const topExt = Object.entries(
-      (imports.external as Record<string, number>) || {},
+      (imports.external || {}) as Record<string, number>,
     )
       .sort((a, b) => b[1] - a[1])
       .slice(0, 15);
     const configSummary = Object.entries(scan.configs || {})
       .map(([k, v]) => {
         if (k === "package.json" && typeof v === "object" && v !== null) {
-          const pkg = v as Record<string, unknown>;
-          return `${k}: name=${pkg.name || "?"}, deps=${Object.keys((pkg.dependencies as Record<string, string>) || {}).length + Object.keys((pkg.devDependencies as Record<string, string>) || {}).length}`;
+          const pkg = (v || {}) as Record<string, unknown>;
+          const deps = (pkg.dependencies || {}) as Record<string, string>;
+          const devDeps = (pkg.devDependencies || {}) as Record<string, string>;
+          return `${k}: name=${pkg.name || "?"}, deps=${Object.keys(deps).length + Object.keys(devDeps).length}`;
         }
         return k;
       })
@@ -84,17 +86,17 @@ export async function POST(request: NextRequest) {
     const prompt = `You are a senior front-end architect. Analyze this repository scan report and generate 5-15 architectural governance rules as a JSON array.
 
 ## Naming Conventions
-- Files: ${formatMap(naming.files as Record<string, number>)}
-- Functions: ${formatMap(naming.functions as Record<string, number>)}
-- Components: ${formatMap(naming.components as Record<string, number>)}
-- Variables: ${formatMap(naming.variables as Record<string, number>)}
+- Files: ${formatMap(naming.files as unknown as Record<string, number>)}
+- Functions: ${formatMap(naming.functions as unknown as Record<string, number>)}
+- Components: ${formatMap(naming.components as unknown as Record<string, number>)}
+- Variables: ${formatMap(naming.variables as unknown as Record<string, number>)}
 
 ## Import Patterns
 - Relative imports: ${(imports.relative as number) || 0}
 - Absolute imports: ${(imports.absolute as number) || 0}
 - Top external: ${topExt.map(([p, c]) => `${p} (${c})`).join(", ")}
 - Internal packages: ${Object.entries(
-      (imports.internal as Record<string, number>) || {},
+      (imports.internal || {}) as Record<string, number>,
     )
       .sort((a, b) => b[1] - a[1])
       .slice(0, 10)

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@jeffdev/db";
+import { getCollection } from "@syntaxure-labs/db";
 import {
   Store,
   Download,
@@ -31,6 +31,7 @@ export default async function MarketplacePage({
 
   const ruleSets = await getCollection("ruleSets");
   const query: Record<string, unknown> = { isPublic: true };
+   
   if (q) query.name = { $regex: q, $options: "i" };
 
   const total = await ruleSets.countDocuments(query);
@@ -124,16 +125,16 @@ export default async function MarketplacePage({
                 </Badge>
               </div>
               <h3 className="font-medium text-white group-hover:text-emerald-400 transition-colors">
-                {rs.name as string}
+                {rs.name}
               </h3>
               {rs.description && (
                 <p className="text-sm text-white/50 mt-1 line-clamp-2">
-                  {rs.description as string}
+                  {rs.description}
                 </p>
               )}
               <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
                 <span className="text-xs text-white/30">
-                  by {rs.createdBy as string}
+                  by {rs.createdBy}
                 </span>
                 <Button variant="secondary" size="sm" asChild>
                   <Link

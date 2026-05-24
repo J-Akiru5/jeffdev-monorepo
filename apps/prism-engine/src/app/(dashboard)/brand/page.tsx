@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { Plus, Palette } from "lucide-react";
 import { getUserBrands } from "./actions";
+import type { BrandDoc } from "@/lib/types";
 
 /**
  * Brands List Page
  * Shows all user brand profiles with option to create new ones.
  */
 export default async function BrandsPage() {
-  const brands = await getUserBrands();
+  const rawBrands = await getUserBrands();
+  const brands = rawBrands as unknown as BrandDoc[];
 
   return (
     <div className="space-y-8">
@@ -63,11 +65,11 @@ function EmptyState() {
   );
 }
 
-function BrandCard({ brand }: { brand: Record<string, unknown> }) {
-  const slug = brand.slug as string;
-  const name = brand.companyName as string;
-  const industry = brand.industry as string;
-  const colors = brand.colors as { primary: string; accent: string };
+function BrandCard({ brand }: { brand: BrandDoc }) {
+  const slug = brand.slug;
+  const name = brand.companyName;
+  const industry = brand.industry;
+  const colors = brand.colors;
 
   return (
     <Link

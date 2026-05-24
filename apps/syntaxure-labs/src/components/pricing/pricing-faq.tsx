@@ -8,7 +8,7 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@syntaxure/ui";
 import type { FAQItem } from "@/data/pricing";
 
 interface PricingFAQProps {

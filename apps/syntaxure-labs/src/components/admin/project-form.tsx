@@ -14,7 +14,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { createProject, updateProject } from "@/app/actions/projects";
 import { CaseStudyImageUpload } from "./case-study-image-upload";
-import type { FirestoreProject } from "@/types/firestore";
+import type { FirestoreProject } from "@/types/supabase";
 import type { UserProfile } from "@/types/user";
 
 interface Metric {

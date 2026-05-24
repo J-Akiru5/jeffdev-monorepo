@@ -572,7 +572,7 @@ You can consider these options:
 
 After 30 days:
 
-- Remove `firebase-admin` dependency from `@jeffdev/db` package
+- Remove `firebase-admin` dependency from `@syntaxure-labs/db` package
 - Remove Firebase env vars from Doppler
 - Delete `packages/db/src/firebase.ts`
 - Delete all Firebase client SDK configs

@@ -4,7 +4,9 @@ import { useState, useActionState } from "react";
 import { ArrowLeft, Save, Trash2, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { updateBrand, deleteBrand, type BrandFormState } from "../../actions";
+import { useActionFeedback } from "@/lib/hooks/use-action-feedback";
 
 // Font options
 const FONT_OPTIONS = [
@@ -63,6 +65,7 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
     updateBrand,
     null,
   );
+  useActionFeedback(state, { successMessage: "Brand updated!" });
   const [deleting, setDeleting] = useState(false);
 
   // Form data
@@ -110,9 +113,10 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
     setDeleting(true);
     try {
       await deleteBrand(brand.slug);
+      toast.success("Brand deleted!");
     } catch {
       setDeleting(false);
-      router.push("/brand");
+      toast.error("Failed to delete brand. Please try again.");
     }
   };
 

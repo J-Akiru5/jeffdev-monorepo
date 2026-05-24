@@ -32,6 +32,7 @@ export function MobileNav() {
     { label: "Tasks", href: "/tasks", icon: CheckSquare },
     { label: "Calendar", href: "/calendar", icon: Calendar },
     { label: "Kanban", href: "/kanban", icon: LayoutGrid },
+    { label: "Mktg", href: "/marketing", icon: CheckSquare },
   ];
 
   const handleProjectClick = (projectId: string) => {

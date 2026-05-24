@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@jeffdev/db";
+import { getCollection } from "@syntaxure-labs/db";
 
 // =============================================================================
 // GET - Get Single Component

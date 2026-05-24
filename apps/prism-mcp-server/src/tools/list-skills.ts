@@ -20,7 +20,7 @@ export async function handleListSkills(
   }
 
   try {
-    const { getCollection } = await import("@jeffdev/db/cosmos");
+    const { getCollection } = await import("@syntaxure-labs/db/cosmos");
     const skills = await getCollection("skills");
     const rules = await getCollection("rules");
 

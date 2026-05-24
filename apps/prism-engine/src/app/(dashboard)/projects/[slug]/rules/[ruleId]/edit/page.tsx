@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCollection, ObjectId } from "@jeffdev/db";
+import { getCollection, ObjectId } from "@syntaxure-labs/db";
 import { notFound } from "next/navigation";
 import { RuleEditForm } from "./rule-edit-form";
+import type { RuleDoc } from "@/lib/types";
 
 interface Props {
   params: Promise<{ slug: string; ruleId: string }>;
@@ -34,10 +35,10 @@ export default async function RuleEditPage({ params }: Props) {
 
   // Fetch rule
   const rulesCollection = await getCollection("rules");
-  const rule = await rulesCollection.findOne({
+  const rule = (await rulesCollection.findOne({
     _id: new ObjectId(ruleId),
     projectId: project._id.toString(),
-  });
+  })) as RuleDoc | null;
 
   if (!rule) {
     notFound();
@@ -46,11 +47,11 @@ export default async function RuleEditPage({ params }: Props) {
   // Serialize rule for client component
   const serializedRule = {
     _id: rule._id.toString(),
-    name: rule.name as string,
-    category: (rule.category as string) || "general",
-    priority: (rule.priority as number) || 50,
-    content: (rule.content as string) || "",
-    description: rule.description as string,
+    name: rule.name,
+    category: rule.category || "general",
+    priority: rule.priority || 50,
+    content: rule.content || "",
+    description: rule.description,
   };
 
   return <RuleEditForm rule={serializedRule} />;

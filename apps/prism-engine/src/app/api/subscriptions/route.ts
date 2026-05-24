@@ -49,7 +49,7 @@ export async function GET() {
 
   try {
     // Fetch subscription from database
-    const { getCollection } = await import("@jeffdev/db/cosmos");
+    const { getCollection } = await import("@syntaxure-labs/db/cosmos");
     const subscriptions = await getCollection("subscriptions");
     const subscription = await subscriptions.findOne({ userId });
 

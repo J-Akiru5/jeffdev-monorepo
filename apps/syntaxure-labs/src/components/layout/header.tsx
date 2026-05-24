@@ -13,7 +13,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X, ArrowUpRight, Sparkles } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@syntaxure/ui";
 import { SyntaxureLogo } from "@syntaxure/ui";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 

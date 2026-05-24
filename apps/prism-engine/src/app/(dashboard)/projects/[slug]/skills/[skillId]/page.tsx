@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@jeffdev/db";
+import { getCollection } from "@syntaxure-labs/db";
 import { ObjectId } from "mongodb";
 import { ArrowLeft, BookOpen } from "lucide-react";
+import type { SkillDoc } from "@/lib/types";
 
 interface Props {
   params: Promise<{ slug: string; skillId: string }>;
@@ -25,16 +26,16 @@ export default async function SkillDetailPage({ params }: Props) {
   }
 
   const skillsCollection = await getCollection("skills");
-  const skill = await skillsCollection.findOne({
+  const skill = (await skillsCollection.findOne({
     _id: new ObjectId(skillId),
     createdBy: userId,
-  });
+  })) as SkillDoc | null;
 
   if (!skill) {
     notFound();
   }
 
-  const steps = (skill.steps as { title: string; content: string }[]) || [];
+  const steps = skill.steps || [];
 
   return (
     <div className="space-y-8 max-w-4xl">
@@ -53,14 +54,14 @@ export default async function SkillDetailPage({ params }: Props) {
           </div>
           <div>
             <h1 className="text-2xl font-semibold text-white">
-              {skill.name as string}
+              {skill.name}
             </h1>
             <div className="flex items-center gap-3 mt-1">
               <span className="text-sm text-white/50">
-                {skill.category as string}
+                {skill.category}
               </span>
               <span className="inline-flex items-center rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-mono text-white/40">
-                SOURCE: {skill.source as string}
+                SOURCE: {skill.source}
               </span>
               {skill.isActive === false && (
                 <span className="inline-flex items-center rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-mono text-red-400 border border-red-500/20">
@@ -75,7 +76,7 @@ export default async function SkillDetailPage({ params }: Props) {
       {skill.description && (
         <div className="rounded-md border border-white/5 bg-white/[0.02] p-5">
           <p className="text-sm text-white/70 leading-relaxed">
-            {skill.description as string}
+            {skill.description}
           </p>
         </div>
       )}

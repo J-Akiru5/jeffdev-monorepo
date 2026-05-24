@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { PriceRangeDisplay } from "@/components/ui/price-display";
-import { cn } from "@/lib/utils";
+import { cn } from "@syntaxure/ui";
 
 /**
  * Multi-Step Quote Form

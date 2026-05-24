@@ -92,7 +92,7 @@ export async function computeGremlinBoosts(
 
   try {
     // Dynamically import Gremlin client (safe — only called when feature is on)
-    const { getGremlinClient } = await import("@jeffdev/db");
+    const { getGremlinClient } = await import("@syntaxure-labs/db");
 
     const g = getGremlinClient();
 

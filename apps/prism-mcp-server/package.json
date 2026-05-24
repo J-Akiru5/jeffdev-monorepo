@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
-    "@jeffdev/db": "workspace:*",
+    "@syntaxure-labs/db": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.0.0",
     "gpt-tokenizer": "^3.4.0",
     "mongodb": "^6.15.0",

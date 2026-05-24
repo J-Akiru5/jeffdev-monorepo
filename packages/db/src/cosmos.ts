@@ -1,10 +1,10 @@
 /**
- * @module @jeffdev/db/cosmos
+ * @module @syntaxure-labs/db/cosmos
  * @description MongoDB client for Azure Cosmos DB (MongoDB API).
  * Uses MONGODB_URI from Doppler environment.
  *
  * @example
- * import { getDatabase, getCollection } from "@jeffdev/db/cosmos";
+ * import { getDatabase, getCollection } from "@syntaxure-labs/db/cosmos";
  * const rules = await getCollection("rules").find({}).toArray();
  */
 

@@ -129,6 +129,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Tailwind CSS v4 styling
 - ESLint configuration
 - Shared UI components from `@jdstudio/ui`
-- Database integration via `@jeffdev/db`
+- Database integration via `@syntaxure-labs/db`
 
 ---

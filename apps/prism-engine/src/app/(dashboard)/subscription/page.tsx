@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@jeffdev/db";
+import { getCollection } from "@syntaxure-labs/db";
 import {
   ArrowLeft,
   Check,
@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { GlassPanel, Button, Badge } from "@syntaxure/ui";
 import { getPricingPlans, getPricingFAQs } from "@/lib/pricing-db";
+import type { SubscriptionDoc } from "@/lib/types";
 
 /**
  * Subscription Page
@@ -30,7 +31,7 @@ export default async function SubscriptionPage() {
 
   // Fetch user's current subscription (if any)
   const subscriptionsCollection = await getCollection("subscriptions");
-  const subscription = await subscriptionsCollection.findOne({ userId });
+  const subscription = (await subscriptionsCollection.findOne({ userId })) as SubscriptionDoc | null;
 
   // Fetch usage stats
   const projectsCollection = await getCollection("projects");

@@ -7,7 +7,7 @@
  * Uses CSS transforms and animations to create a futuristic, abstract artifact.
  */
 
-import { cn } from "@/lib/utils";
+import { cn } from "@syntaxure/ui";
 
 interface Prism3DProps {
   className?: string;

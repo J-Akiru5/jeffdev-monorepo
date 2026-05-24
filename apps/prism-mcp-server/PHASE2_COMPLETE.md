@@ -175,7 +175,7 @@ Once Phase 2 is fully compiled:
 ## Testing Checklist
 
 - [x] TypeScript check passes for `prism-context-engine`
-- [x] TypeScript check passes for `@jeffdev/db`
+- [x] TypeScript check passes for `@syntaxure-labs/db`
 - [x] TypeScript check passes for `prism-mcp-server` (fixed: installed `gpt-tokenizer`)
 - [x] `prism serve` launches server (fixed: removed `--standalone` guard)
 - [ ] MCP tools list includes `search_video_transcript`

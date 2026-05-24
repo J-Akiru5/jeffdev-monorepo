@@ -10,7 +10,7 @@
 import { useState } from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Eye } from "lucide-react";
-import { DataTable } from "@/components/admin/data-table";
+import { DataTable } from "@syntaxure/ui";
 import { QuoteStatusSelector } from "@/components/admin/quote-status-selector";
 import { QuoteModal } from "@/components/admin/quote-modal";
 

@@ -6,7 +6,7 @@
 
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@jeffdev/db";
+import { getCollection } from "@syntaxure-labs/db";
 import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
 
 // =============================================================================

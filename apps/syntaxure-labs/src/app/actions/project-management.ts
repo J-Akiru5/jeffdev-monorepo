@@ -24,7 +24,6 @@ const projectUpdateSchema = z.object({
   assignedEmployees: z.array(z.string()).optional(),
 });
 
-// @ts-expect-error -- unused, kept for reference
 const milestoneSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),

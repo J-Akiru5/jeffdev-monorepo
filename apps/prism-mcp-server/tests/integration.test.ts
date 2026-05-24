@@ -5,7 +5,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { MongoClient, type Db, type Collection } from "mongodb";
-import { VideoTranscriptSchema } from "@jeffdev/db/schema";
+import { VideoTranscriptSchema } from "@syntaxure-labs/db/schema";
 
 // Sample video: https://youtu.be/1NTKwpAVcHg
 const SAMPLE_VIDEO_TRANSCRIPT = {

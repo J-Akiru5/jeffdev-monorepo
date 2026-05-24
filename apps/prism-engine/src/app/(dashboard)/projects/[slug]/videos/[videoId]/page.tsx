@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection, ObjectId } from "@jeffdev/db";
+import { getCollection, ObjectId } from "@syntaxure-labs/db";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Video, FileJson, Clock, ExternalLink } from "lucide-react";
 import { GlassPanel, Badge } from "@syntaxure/ui";
+import type { RuleDoc } from "@/lib/types";
 
 interface Props {
   params: Promise<{ slug: string; videoId: string }>;
@@ -34,25 +35,35 @@ export default async function VideoDetailPage({ params }: Props) {
     notFound();
   }
 
+  const projectId = project._id.toString();
+
   // Fetch video transcript
   const transcriptsCollection = await getCollection("videoTranscripts");
-  const video = await transcriptsCollection.findOne({
+   
+  const video = (await transcriptsCollection.findOne({
     _id: new ObjectId(videoId),
-    projectId: project._id.toString(),
-  });
+    projectId,
+  })) as Record<string, unknown> | null;
 
   if (!video) {
     notFound();
   }
 
+  const videoTitle = String(video.videoTitle || "Untitled Video");
+  const playbackId = String(video.muxPlaybackId || "");
+  const transcriptText = String(video.transcriptText || "No transcript available.");
+  const confidence = String(video.confidence || "unknown");
+  const duration = Number(video.duration) || 0;
+
   // Fetch extracted rules
   const rulesCollection = await getCollection("rules");
-  const rules = await rulesCollection
+   
+  const rawRules = (await rulesCollection
     .find({ videoTranscriptId: videoId })
     .sort({ priority: 1 })
-    .toArray();
+    .toArray()) as RuleDoc[];
 
-  const playbackId = video.muxPlaybackId as string;
+  const rules = rawRules;
 
   return (
     <div className="space-y-8">
@@ -73,17 +84,17 @@ export default async function VideoDetailPage({ params }: Props) {
           </div>
           <div>
             <h1 className="text-2xl font-semibold text-white">
-              {(video.videoTitle as string) || "Untitled Video"}
+              {videoTitle}
             </h1>
             <div className="flex items-center gap-3 mt-1">
               <span className="flex items-center gap-1 text-xs text-white/50">
                 <Clock className="h-3 w-3" />
-                {formatDuration(video.duration as number)}
+                {formatDuration(duration)}
               </span>
               <Badge
-                variant={video.confidence === "high" ? "success" : "default"}
+                variant={confidence === "high" ? "success" : "default"}
               >
-                {(video.confidence as string) || "unknown"} confidence
+                {confidence} confidence
               </Badge>
             </div>
           </div>
@@ -126,7 +137,7 @@ export default async function VideoDetailPage({ params }: Props) {
             <h2 className="text-lg font-medium text-white mb-4">Transcript</h2>
             <div className="max-h-96 overflow-y-auto">
               <p className="text-sm text-white/70 whitespace-pre-wrap leading-relaxed font-mono">
-                {(video.transcriptText as string) || "No transcript available."}
+                {transcriptText}
               </p>
             </div>
           </GlassPanel>
@@ -167,10 +178,10 @@ function RuleCard({
   rule,
   slug,
 }: {
-  rule: Record<string, unknown>;
+  rule: RuleDoc;
   slug: string;
 }) {
-  const ruleId = (rule._id as { toString: () => string }).toString();
+  const ruleId = rule._id.toString();
 
   return (
     <Link href={`/projects/${slug}/rules/${ruleId}/edit`}>
@@ -178,11 +189,11 @@ function RuleCard({
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <h3 className="font-medium text-white truncate">
-              {rule.name as string}
+              {rule.name}
             </h3>
             <p className="text-sm text-white/50 mt-1 line-clamp-2">
-              {(rule.description as string) ||
-                (rule.content as string)?.slice(0, 100)}
+              {rule.description ||
+                rule.content?.slice(0, 100)}
             </p>
           </div>
           <Badge
@@ -194,7 +205,7 @@ function RuleCard({
                   : "default"
             }
           >
-            {rule.category as string}
+            {rule.category}
           </Badge>
         </div>
       </GlassPanel>

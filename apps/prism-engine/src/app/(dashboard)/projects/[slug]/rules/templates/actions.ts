@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@jeffdev/db";
+import { getCollection } from "@syntaxure-labs/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ruleTemplates } from "@/data/rule-templates";

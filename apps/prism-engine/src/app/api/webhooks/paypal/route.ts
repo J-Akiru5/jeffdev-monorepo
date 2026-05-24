@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { getCollection } from "@jeffdev/db";
+import { getCollection } from "@syntaxure-labs/db";
 import { Resend } from "resend";
 
 const PAYPAL_WEBHOOK_ID = process.env.PAYPAL_WEBHOOK_ID;

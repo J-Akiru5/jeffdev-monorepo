@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@jeffdev/db";
+import { getCollection } from "@syntaxure-labs/db";
 import {
   ArrowLeft,
   Download,
@@ -11,7 +11,6 @@ import {
   Sparkles,
   BookOpen,
 } from "lucide-react";
-import { VideoContextUploader } from "@/components/video-context-uploader";
 import { RulesList, type RuleItem } from "./rules-list";
 
 interface Props {
@@ -114,10 +113,10 @@ export default async function ProjectPage({ params }: Props) {
         />
         <StatCard
           label="Design System"
-          value={project.designSystem as string}
+          value={project.designSystem}
           icon={Sparkles}
         />
-        <StatCard label="Stack" value={project.stack as string} icon={Video} />
+        <StatCard label="Stack"          value={project.stack} icon={Video} />
       </div>
 
       {/* Two Column Layout */}
@@ -133,14 +132,14 @@ export default async function ProjectPage({ params }: Props) {
               View All Videos →
             </Link>
           </div>
-          <VideoContextUploader projectId={project._id.toString()} />
+          <p className="text-sm text-white/50">Video context upload coming soon.</p>
         </div>
 
         {/* Rules List — interactive client component */}
         <RulesList
           rules={rules.map(
             (r): RuleItem => ({
-              id: (r._id as { toString: () => string }).toString(),
+              id:            r._id.toString(),
               name: (r.name as string) || "Untitled",
               category: (r.category as string) || "general",
               priority: (r.priority as number) || 50,

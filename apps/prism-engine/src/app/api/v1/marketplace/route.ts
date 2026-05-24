@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCollection } from "@jeffdev/db/cosmos";
+import { getCollection } from "@syntaxure-labs/db/cosmos";
 import { z } from "zod";
 import { ObjectId } from "mongodb";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";

@@ -41,7 +41,7 @@ See [.agent/skills/](./skills/) for detailed guides on:
 | Package                       | Purpose                                                  |
 | ----------------------------- | -------------------------------------------------------- |
 | **`@jdstudio/ui`**            | Ghost Glow components (Button, Card, Badge, Input, etc.) |
-| **`@jeffdev/db`**             | Firebase/Cosmos DB clients with Zod schemas              |
+| **`@syntaxure-labs/db`**      | Firebase/Cosmos DB clients with Zod schemas              |
 | **`@repo/eslint-config`**     | Shared ESLint rules                                      |
 | **`@repo/typescript-config`** | Shared TypeScript configs                                |
 | **`prism-cli`**               | CLI for Prism context operations                         |
@@ -151,7 +151,7 @@ npx tsx apps/agency/scripts/seed-founder.ts
 
 **Models:** Users, Rules, Projects, Subscriptions, Video Metadata
 
-**SDK:** `@jeffdev/db` exports `getPrismContainer()` singleton
+**SDK:** `@syntaxure-labs/db` exports `getPrismContainer()` singleton
 
 ---
 

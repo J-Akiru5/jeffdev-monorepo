@@ -9,7 +9,7 @@
 import { useState } from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Shield, MoreHorizontal, UserX, FolderKanban } from "lucide-react";
-import { DataTable } from "@/components/admin/data-table";
+import { DataTable } from "@syntaxure/ui";
 import { updateUserRole, deactivateUser } from "@/app/actions/invites";
 import { useRouter } from "next/navigation";
 import type { UserRole } from "@/types/rbac";

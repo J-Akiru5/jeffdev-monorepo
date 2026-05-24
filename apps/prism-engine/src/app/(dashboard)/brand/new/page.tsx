@@ -4,6 +4,7 @@ import { useState, useActionState } from "react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 import { createBrand, type BrandFormState } from "../actions";
+import { useActionFeedback } from "@/lib/hooks/use-action-feedback";
 
 // Wizard steps
 const STEPS = [
@@ -39,6 +40,7 @@ export default function NewBrandPage() {
     createBrand,
     null,
   );
+  useActionFeedback(state, { successMessage: "Brand created!" });
 
   // Form data stored in state for multi-step
   const [formData, setFormData] = useState({

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Globe, Cloud, Cpu, Sparkles, ArrowUpRight } from "lucide-react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { cn } from "@/lib/utils";
+import { cn } from "@syntaxure/ui";
 
 // Register GSAP plugin
 if (typeof window !== "undefined") {

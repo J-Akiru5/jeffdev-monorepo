@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCollection } from "@jeffdev/db/cosmos";
+import { getCollection } from "@syntaxure-labs/db/cosmos";
 import { authenticate, successResponse } from "@/lib/api-auth";
 
 export async function GET(request: NextRequest) {

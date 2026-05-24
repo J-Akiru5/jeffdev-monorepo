@@ -7,7 +7,7 @@
  */
 
 import Link from "next/link";
-import { ProgressBar } from "@/components/admin/progress-bar";
+import { ProgressBar } from "@syntaxure/ui";
 import { ProjectStatusSelector } from "@/components/admin/project-status-selector";
 import type { FirestoreProject, ProjectMilestone } from "@/types/supabase";
 

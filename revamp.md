@@ -66,7 +66,7 @@ APPS (7):
 
 PACKAGES (5):
   @syntaxure/ui      (renamed from @jdstudio/ui) — shared components + design tokens
-  @jeffdev/db        Cosmos DB client (MongoDB API + Gremlin client)
+  @syntaxure-labs/db        Cosmos DB client (MongoDB API + Gremlin client)
   @prism-engine/cli  Published to npm — MCP server for IDE integration
   @repo/eslint-config
   @repo/typescript-config

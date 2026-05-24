@@ -3,6 +3,7 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useActionState } from "react";
+import { useActionFeedback } from "@/lib/hooks/use-action-feedback";
 import { createProject, type CreateProjectState } from "../actions";
 
 /**
@@ -14,6 +15,10 @@ export default function NewProjectPage() {
     CreateProjectState,
     FormData
   >(createProject, null);
+
+  useActionFeedback(state, {
+    fallbackErrorMessage: "Please fix the form errors.",
+  });
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">

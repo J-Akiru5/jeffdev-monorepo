@@ -20,6 +20,7 @@ import {
   ChevronLeft,
   ChevronRight,
   FolderKanban,
+  TrendingUp,
 } from "lucide-react";
 import { useProjects } from "@/contexts/project-context";
 
@@ -38,6 +39,7 @@ const views: NavItem[] = [
   { label: "Tasks", href: "/tasks", icon: CheckSquare },
   { label: "Calendar", href: "/calendar", icon: Calendar },
   { label: "Kanban", href: "/kanban", icon: LayoutGrid },
+  { label: "Marketing", href: "/marketing", icon: TrendingUp },
 ];
 
 export function Sidebar() {

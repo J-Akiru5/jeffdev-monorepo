@@ -13,6 +13,7 @@ import {
 import { GlassPanel, Button } from "@syntaxure/ui";
 import { ruleTemplates } from "@/data/rule-templates";
 import { installTemplate, type InstallTemplateState } from "./actions";
+import { useActionFeedback } from "@/lib/hooks/use-action-feedback";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -68,6 +69,7 @@ function TemplateCard({
     InstallTemplateState,
     FormData
   >(installTemplate, null);
+  useActionFeedback(state, { successMessage: "Template installed!" });
 
   return (
     <GlassPanel className="p-6 flex flex-col h-full">

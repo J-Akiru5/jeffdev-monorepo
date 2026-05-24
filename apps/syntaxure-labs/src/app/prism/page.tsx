@@ -13,7 +13,7 @@ import { ArrowLeft, Check, Loader2 } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { joinWaitlist } from "@/app/actions/waitlist";
-import { cn } from "@/lib/utils";
+import { cn } from "@syntaxure/ui";
 import { Prism3D } from "@/components/prism/prism-3d";
 
 export default function PrismPage() {

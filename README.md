@@ -113,7 +113,7 @@ import { Button, Card, Badge } from "@jdstudio/ui";
 
 **Components**: Button, Card, Input, Badge, ProgressBar, DataTable
 
-### @jeffdev/db
+### @syntaxure-labs/db
 
 Unified database clients for Firebase and Azure Cosmos DB with Zod schemas.
 

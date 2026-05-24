@@ -5,6 +5,7 @@ import { use, useState } from "react";
 import { useActionState } from "react";
 import { ArrowLeft, BookOpen, Plus, Trash2, GripVertical } from "lucide-react";
 import { GlassPanel, Button } from "@syntaxure/ui";
+import { useActionFeedback } from "@/lib/hooks/use-action-feedback";
 import { createSkill, type SkillActionState } from "../actions";
 
 interface Props {
@@ -21,6 +22,10 @@ function NewSkillForm({ slug }: { slug: string }) {
     SkillActionState,
     FormData
   >(createSkill, null);
+
+  useActionFeedback(state, {
+    fallbackErrorMessage: "Please fix the form errors.",
+  });
 
   const [steps, setSteps] = useState([
     { id: crypto.randomUUID(), title: "", content: "" },

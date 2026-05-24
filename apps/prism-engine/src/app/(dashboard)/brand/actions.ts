@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@jeffdev/db";
+import { getCollection } from "@syntaxure-labs/db";
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -247,7 +247,7 @@ export async function updateBrand(
 
   const userId = user.id;
 
-  const slug = formData.get("slug") as string;
+  const slug = String(formData.get("slug") || "");
 
   // Parse all form data
   const rawData = {

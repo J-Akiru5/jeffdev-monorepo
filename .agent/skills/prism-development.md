@@ -397,7 +397,7 @@ export const RuleSchema = z.object({
 
 // apps/prism-dashboard/app/actions/create-rule.ts
 ("use server");
-import { RuleSchema } from "@jeffdev/db";
+import { RuleSchema } from "@syntaxure-labs/db";
 
 export async function createRule(data: unknown) {
   const rule = RuleSchema.parse(data);

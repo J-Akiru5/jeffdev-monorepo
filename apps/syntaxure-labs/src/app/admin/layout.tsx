@@ -1,13 +1,13 @@
 import { AdminSidebar } from "@/components/admin/sidebar";
 import { AdminHeader } from "@/components/admin/header";
 import { UserProvider } from "@/contexts/user-context";
-import { Toaster } from "sonner";
 
 /**
  * Admin Layout
  * -------------
  * Layout wrapper for all /admin pages.
  * Includes sidebar navigation and header.
+ * Toaster is provided by root layout.
  */
 
 import { MobileNav } from "@/components/admin/mobile-nav";
@@ -20,8 +20,6 @@ export default function AdminLayout({
   return (
     <UserProvider>
       <div className="min-h-screen bg-void">
-        <Toaster position="bottom-right" theme="dark" />
-
         {/* Desktop Sidebar */}
         <AdminSidebar />
 

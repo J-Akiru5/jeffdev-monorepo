@@ -6,7 +6,7 @@
  * Toggle between PHP and USD currency display.
  */
 
-import { cn } from "@/lib/utils";
+import { cn } from "@syntaxure/ui";
 
 interface CurrencyToggleProps {
   currency: "php" | "usd";

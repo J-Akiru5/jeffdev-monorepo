@@ -11,7 +11,7 @@
  * The npm script uses dotenv-cli to load .env.local before running tsx.
  */
 
-import { getCollection, closeConnection } from "@jeffdev/db";
+import { getCollection, closeConnection } from "@syntaxure-labs/db";
 
 // Keandrew Brand Definition
 const KEANDREW_BRAND = {

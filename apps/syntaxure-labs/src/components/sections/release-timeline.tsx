@@ -11,7 +11,7 @@
  */
 
 import { Terminal, Box, Bug, ExternalLink, Calendar, Tag } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@syntaxure/ui";
 import { format } from "date-fns";
 
 export interface Release {

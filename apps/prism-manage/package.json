@@ -17,6 +17,7 @@
     "@supabase/ssr": "^0.4.0",
     "@supabase/supabase-js": "^2.47.0",
     "@syntaxure/ui": "workspace:*",
+    "@octokit/rest": "^21.0.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.26",
     "googleapis": "^172.0.0",

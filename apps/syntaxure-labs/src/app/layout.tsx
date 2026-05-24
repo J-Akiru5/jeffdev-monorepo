@@ -8,6 +8,7 @@ import { getFeatureFlags } from "@/lib/feature-flags";
 import { CookieConsent } from "@/components/cookie-consent";
 import { AnalyticsProvider } from "@/components/analytics-provider";
 import { ChatAssistant } from "@syntaxure/ui/chat-assistant";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 /**
@@ -206,6 +207,17 @@ export default async function RootLayout({
         {/* Vercel Analytics - Web Vitals Tracking */}
         <Analytics />
         <CookieConsent />
+        <Toaster
+          theme="dark"
+          position="bottom-right"
+          toastOptions={{
+            style: {
+              background: "#0a0a0a",
+              border: "1px solid rgba(255,255,255,0.1)",
+              color: "#fff",
+            },
+          }}
+        />
         <ChatAssistant
           apiEndpoint="/api/assistant"
           title="JeffDev System Assistant"

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@jeffdev/db";
+import { getCollection } from "@syntaxure-labs/db";
 import {
   FolderKanban,
   FileJson,
@@ -273,21 +273,21 @@ export default async function DashboardPage() {
                       </Badge>
                     </div>
                     <h3 className="font-medium text-white group-hover:text-cyan-400 transition-colors">
-                      {project.name as string}
+                      {project.name}
                     </h3>
                     <p className="text-xs text-white/40 mt-1 line-clamp-2">
-                      {(project.description as string) ||
+                      {(project.description) ||
                         "No description provided."}
                     </p>
                   </div>
 
                   <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
                     <span className="text-[10px] font-mono text-white/30">
-                      {(project.stack as string)?.split(",")[0] || "Next.js"}
+                      {(project.stack?.split(",")[0]) || "Next.js"}
                     </span>
                     <span className="text-[10px] text-white/30">
                       {new Date(
-                        (project.updatedAt as string) ||
+                        (project.updatedAt) ||
                           new Date().toISOString(),
                       ).toLocaleDateString()}
                     </span>

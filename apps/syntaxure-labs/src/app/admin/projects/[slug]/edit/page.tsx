@@ -2,7 +2,7 @@ import { getProjectBySlug } from "@/lib/data";
 import { getAllUsers } from "@/app/actions/users";
 import { ProjectForm } from "@/components/admin/project-form";
 import { notFound } from "next/navigation";
-import type { FirestoreProject } from "@/types/firestore";
+import type { FirestoreProject } from "@/types/supabase";
 
 export const dynamic = "force-dynamic";
 

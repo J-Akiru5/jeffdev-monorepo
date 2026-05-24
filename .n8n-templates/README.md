@@ -29,7 +29,7 @@ into your n8n instance to automate the JeffDev monorepo ecosystem.
 ## Architecture Notes
 
 - **Webhook workflows** are triggered by the `N8N_WEBHOOK_URL` endpoint.
-  Apps call `publishEvent()` from `@jeffdev/db/webhook-publisher` to fire events.
+  Apps call `publishEvent()` from `@syntaxure-labs/db/webhook-publisher` to fire events.
 - **Cron workflows** run on schedules and poll databases directly.
 - **Discord workflows** use n8n's native Discord node (requires bot token).
 - **Supabase access** uses n8n's PostgreSQL node or HTTP Request node.

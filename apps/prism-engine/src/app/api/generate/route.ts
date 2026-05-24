@@ -11,7 +11,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { z } from "zod";
 import crypto from "crypto";
-import { getCollection } from "@jeffdev/db";
+import { getCollection } from "@syntaxure-labs/db";
 import { generateComponent, generateRulesFromComponent } from "@/lib/gemini";
 import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
 

@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@jeffdev/db";
+import { getCollection } from "@syntaxure-labs/db";
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -150,6 +150,7 @@ export async function updateProject(
   if (name) updateData.name = name;
   if (stack) updateData.stack = stack;
   if (designSystem) updateData.designSystem = designSystem;
+   
 
   await projectsCollection.updateOne({ userId, slug }, { $set: updateData });
 

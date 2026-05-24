@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Plus, FolderKanban } from "lucide-react";
-import { getCollection } from "@jeffdev/db";
+import { getCollection } from "@syntaxure-labs/db";
 import { createClient } from "@/lib/supabase/server";
+import type { ProjectDoc } from "@/lib/types";
 
 /**
  * Projects List Page
@@ -21,11 +22,11 @@ export default async function ProjectsPage() {
 
   // Fetch user's projects from Cosmos DB
   const projectsCollection = await getCollection("projects");
-  const projects = await projectsCollection
+  const projects = (await projectsCollection
     .find({ userId })
     .sort({ createdAt: -1 })
     .limit(20)
-    .toArray();
+    .toArray()) as unknown as ProjectDoc[];
 
   return (
     <div className="space-y-8">
@@ -81,11 +82,8 @@ function EmptyState() {
   );
 }
 
-function ProjectCard({ project }: { project: Record<string, unknown> }) {
-  const slug = project.slug as string;
-  const name = project.name as string;
-  const designSystem = project.designSystem as string;
-  const stack = project.stack as string;
+function ProjectCard({ project }: { project: ProjectDoc }) {
+  const { slug, name, designSystem, stack } = project;
 
   return (
     <Link

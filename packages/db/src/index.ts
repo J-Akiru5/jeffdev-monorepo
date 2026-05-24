@@ -1,5 +1,5 @@
 /**
- * @module @jeffdev/db
+ * @module @syntaxure-labs/db
  * @description The "Data Nexus" - unified database access for the JeffDev ecosystem.
  *
  * This package provides:
@@ -9,11 +9,11 @@
  *
  * @example
  * // Cosmos DB (Prism)
- * import { getCollection } from "@jeffdev/db/cosmos";
+ * import { getCollection } from "@syntaxure-labs/db/cosmos";
  * const rules = await getCollection("rules");
  *
  * // Schemas
- * import { UserSchema, RuleSchema } from "@jeffdev/db/schema";
+ * import { UserSchema, RuleSchema } from "@syntaxure-labs/db/schema";
  */
 
 // Cosmos/MongoDB exports

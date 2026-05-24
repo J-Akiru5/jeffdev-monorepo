@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@jeffdev/db";
+import { getCollection } from "@syntaxure-labs/db";
 import { NextRequest, NextResponse } from "next/server";
 import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
+import type { RuleDoc, BrandDoc } from "@/lib/types";
 
 /**
  * MCP Stdio Proxy API
@@ -26,23 +27,6 @@ interface McpResponse {
   id: string | number | null;
   result?: unknown;
   error?: { code: number; message: string };
-}
-
-interface BrandDocument {
-  companyName?: string;
-  industry?: string;
-  tagline?: string;
-  colors?: Record<string, string>;
-  typography?: {
-    headingFont?: string;
-    bodyFont?: string;
-    scale?: string;
-  };
-  voice?: {
-    personality?: string;
-    formality?: string;
-    keywords?: string[];
-  };
 }
 
 export async function POST(
@@ -525,12 +509,12 @@ async function handleToolCall(
   switch (name) {
     case "get_architectural_rules": {
       const rules = await getCollection("rules");
-      const category = args?.category as string | undefined;
-      const tag = args?.tag as string | undefined;
-      const task = args?.task as string | undefined;
-      const projectId = args?.projectId as string | undefined;
-      const maxTokens = (args?.maxTokens as number) || 4000;
-      const format = (args?.format as "markdown" | "json") || "markdown";
+      const category = typeof args?.category === 'string' ? args.category : undefined;
+      const tag = typeof args?.tag === 'string' ? args.tag : undefined;
+      const task = typeof args?.task === 'string' ? args.task : undefined;
+      const projectId = typeof args?.projectId === 'string' ? args.projectId : undefined;
+      const maxTokens = Number(args?.maxTokens) || 4000;
+      const format = args?.format === "markdown" || args?.format === "json" ? args.format : "markdown";
 
       const query: Record<string, unknown> = { userId, isActive: true };
       if (category) query.category = category;
@@ -540,7 +524,7 @@ async function handleToolCall(
       const foundRules = (await rules
         .find(query)
         .sort({ priority: 1 })
-        .toArray()) as Record<string, unknown>[];
+        .toArray()) as unknown as RuleDoc[];
 
       if (foundRules.length === 0) {
         return {
@@ -553,6 +537,7 @@ async function handleToolCall(
       // If no task, fall back to priority sort
       if (!task) {
         const top5 = foundRules.slice(0, 5);
+        const name_ = String(top5[0]?.name || "");
         const formatted = top5
           .map(
             (r) =>
@@ -570,13 +555,13 @@ async function handleToolCall(
       }
 
       // Simple priority-aware truncation for task requests
-      const high = foundRules.filter((r) => (r.priority as number) <= 3);
+      const high = foundRules.filter((r) => r.priority <= 3);
       const medium = foundRules.filter((r) => {
-        const p = r.priority as number;
+        const p = r.priority;
         return p > 3 && p <= 7;
       });
       const low = foundRules.filter(
-        (r) => (r.priority as number) > 7 || r.priority === undefined,
+        (r) => r.priority > 7 || r.priority === undefined,
       );
       const mid = high.slice();
       let budget = maxTokens;
@@ -586,7 +571,7 @@ async function handleToolCall(
       }
 
       for (const r of [...high, ...medium, ...low]) {
-        const tok = countTokens((r.content as string) || "");
+        const tok = countTokens(r.content || "");
         if (mid.length < 5 && budget - tok > 0) {
           budget -= tok;
           mid.push(r);
@@ -617,7 +602,7 @@ async function handleToolCall(
                     meta: {
                       task,
                       tokenCount: mid.reduce(
-                        (s, r) => s + countTokens((r.content as string) || ""),
+                        (s, r) => s + countTokens(r.content || ""),
                         0,
                       ),
                     },
@@ -629,8 +614,8 @@ async function handleToolCall(
     }
 
     case "validate_code_pattern": {
-      const code = args?.code as string | undefined;
-      const vCategory = args?.category as string | undefined;
+      const code = typeof args?.code === 'string' ? args.code : undefined;
+      const vCategory = typeof args?.category === 'string' ? args.category : undefined;
 
       if (!code) {
         return {
@@ -647,14 +632,15 @@ async function handleToolCall(
       };
       if (vCategory) vQuery.category = vCategory;
 
-      const patternRules = await rulesDb
+      const patternRules = (await rulesDb
         .find(vQuery)
         .sort({ priority: 1 })
-        .toArray();
+        .toArray()) as unknown as RuleDoc[];
+
       const violations: string[] = [];
 
       for (const rule of patternRules) {
-        const pattern = rule.pattern as string | undefined;
+        const pattern = rule.pattern;
         if (!pattern) continue;
         try {
           const regex = new RegExp(pattern, "gi");
@@ -692,8 +678,8 @@ async function handleToolCall(
 
     case "prism_check":
     case "validate_code": {
-      const code = args?.code as string | undefined;
-      if (!code) {
+      const checkCode = typeof args?.code === 'string' ? args.code : undefined;
+      if (!checkCode) {
         return {
           content: [{ type: "text", text: "Error: code is required." }],
         };
@@ -705,7 +691,7 @@ async function handleToolCall(
         isActive: true,
         pattern: { $exists: true, $ne: null },
       };
-      const ruleIds = args?.ruleIds as string[] | undefined;
+      const ruleIds = Array.isArray(args?.ruleIds) ? args.ruleIds as unknown as string[] : undefined;
       if (ruleIds && ruleIds.length > 0) {
         const { ObjectId } = await import("mongodb");
         vQuery._id = {
@@ -717,10 +703,10 @@ async function handleToolCall(
       if (args?.projectId) vQuery.projectId = args.projectId;
       if (args?.category) vQuery.category = args.category;
 
-      const patternRules = await rulesDb
+      const patternRules = (await rulesDb
         .find(vQuery)
         .sort({ priority: 1 })
-        .toArray();
+        .toArray()) as unknown as RuleDoc[];
 
       function findLineColumn(
         text: string,
@@ -734,20 +720,32 @@ async function handleToolCall(
         };
       }
 
-      const violations: Array<Record<string, unknown>> = [];
+      const violations: Array<{
+        ruleId: string;
+        ruleName: string;
+        pattern: string;
+        message: string;
+        severity: string;
+        line: number;
+        column: number;
+        endLine: number;
+        endColumn: number;
+        matchedText: string;
+        suggestion: string;
+      }> = [];
 
       for (const rule of patternRules) {
-        const pattern = rule.pattern as string | undefined;
+        const pattern = rule.pattern;
         if (!pattern) continue;
         try {
           const regex = new RegExp(pattern, "g");
           let match: RegExpExecArray | null;
-          while ((match = regex.exec(code)) !== null) {
+          while ((match = regex.exec(checkCode)) !== null) {
             const matchedText = match[0];
             const startPos = match.index;
             const endPos = startPos + matchedText.length;
-            const start = findLineColumn(code, startPos);
-            const end = findLineColumn(code, endPos);
+            const start = findLineColumn(checkCode, startPos);
+            const end = findLineColumn(checkCode, endPos);
             violations.push({
               ruleId: rule._id.toString(),
               ruleName: rule.name,
@@ -759,7 +757,7 @@ async function handleToolCall(
               endLine: end.line,
               endColumn: end.column,
               matchedText,
-              suggestion: `Fix for "${rule.name}": ${((rule.content as string) || "").replace(/\*\*/g, "").trim()}`,
+              suggestion: `Fix for "${rule.name}": ${(rule.content || "").replace(/\*\*/g, "").trim()}`,
             });
           }
         } catch {
@@ -782,8 +780,11 @@ async function handleToolCall(
     }
 
     case "prism_fix": {
-      const violation = args?.violation as Record<string, unknown> | undefined;
-      const fixCode = args?.code as string | undefined;
+      const violation =
+        typeof args?.violation === "object" && args?.violation !== null
+          ? (args.violation as Record<string, unknown>)
+          : undefined;
+      const fixCode = typeof args?.code === "string" ? args.code : undefined;
       if (!violation || !fixCode) {
         return {
           content: [
@@ -800,9 +801,11 @@ async function handleToolCall(
         };
       }
 
-      const matchedText = (violation.matchedText as string) || "";
-      const ruleName = (violation.ruleName as string) || "";
-      const pattern = (violation.pattern as string) || "";
+      const matchedText = typeof violation.matchedText === "string" ? violation.matchedText : "";
+      const ruleName = typeof violation.ruleName === "string" ? violation.ruleName : "";
+      const pattern = typeof violation.pattern === "string" ? violation.pattern : "";
+      const violationLine = typeof violation.line === "number" ? violation.line : 0;
+      const violationMessage = typeof violation.message === "string" ? violation.message : "";
 
       let correctedCode = fixCode;
       let confidence = 0;
@@ -819,16 +822,14 @@ async function handleToolCall(
           correctedCode = fixCode.replace(matchedText, fixed);
           confidence = 0.95;
           changes.push({
-            line: (violation.line as number) || 0,
+            line: violationLine,
             from: matchedText,
             to: fixed,
           });
         }
       } else if (
         pattern.includes("style={") ||
-        ((violation.message as string) || "")
-          .toLowerCase()
-          .includes("inline style")
+        violationMessage.toLowerCase().includes("inline style")
       ) {
         const replacement = ` {/* TODO: Replace with Tailwind classes */}`;
         const fixed = matchedText.replace(/style=\{[\s\S]*?\}/, replacement);
@@ -836,16 +837,14 @@ async function handleToolCall(
           correctedCode = fixCode.replace(matchedText, fixed);
           confidence = 0.6;
           changes.push({
-            line: (violation.line as number) || 0,
+            line: violationLine,
             from: matchedText,
             to: fixed,
           });
         }
       } else if (
         pattern.includes("console.log") ||
-        ((violation.message as string) || "")
-          .toLowerCase()
-          .includes("console.log")
+        violationMessage.toLowerCase().includes("console.log")
       ) {
         const logRegex = /console\.(log|debug|info)\([^)]*\);?\s*/g;
         let count = 0;
@@ -856,21 +855,21 @@ async function handleToolCall(
         confidence = count > 0 ? 0.9 : 0;
         if (count > 0)
           changes.push({
-            line: (violation.line as number) || 0,
+            line: violationLine,
             from: matchedText,
             to: `// ${matchedText}`,
           });
       } else {
         // Generic: comment the line
         const codeLines = fixCode.split("\n");
-        const targetLine = (violation.line as number) - 1;
+        const targetLine = violationLine - 1;
         if (targetLine >= 0 && targetLine < codeLines.length) {
           const original = codeLines[targetLine];
           codeLines[targetLine] = `${original} // FIXME: ${ruleName}`;
           correctedCode = codeLines.join("\n");
           confidence = 0.3;
           changes.push({
-            line: (violation.line as number) || 0,
+            line: violationLine,
             from: original,
             to: codeLines[targetLine],
           });
@@ -904,17 +903,17 @@ async function handleToolCall(
     }
 
     case "search_video_transcript": {
-      const projectId = args.projectId as string;
-      const query = args.query as string;
+      const projectId = typeof args?.projectId === "string" ? args.projectId : "";
+      const searchQuery = typeof args?.query === "string" ? args.query : "";
 
       const transcripts = await getCollection("videoTranscripts");
-      const results = await transcripts
+      const results = (await transcripts
         .find({
           projectId,
-          transcriptText: { $regex: query, $options: "i" },
+          transcriptText: { $regex: searchQuery, $options: "i" },
         })
         .limit(5)
-        .toArray();
+        .toArray()) as Array<Record<string, unknown>>;
 
       return {
         content: [
@@ -925,10 +924,10 @@ async function handleToolCall(
                 ? `Found ${results.length} matches:\n\n${results
                     .map(
                       (r) =>
-                        `- ${r.videoTitle || "Video"}: ...${extractSnippet(r.transcriptText as string, query)}...`,
+                        `- ${r.videoTitle || "Video"}: ...${extractSnippet(String(r.transcriptText || ""), searchQuery)}...`,
                     )
                     .join("\n")}`
-                : `No matches found for "${query}"`,
+                : `No matches found for "${searchQuery}"`,
           },
         ],
       };
@@ -936,11 +935,10 @@ async function handleToolCall(
 
     case "get_brand_rules": {
       const brands = await getCollection("brands");
-      const brand =
-        (await brands.findOne({ userId })) ||
-        (await brands.findOne({ userId: "demo-user" }));
+      const brand = (await brands.findOne({ userId })) as unknown as BrandDoc | null;
+      const brand_ = brand || ((await brands.findOne({ userId: "demo-user" })) as unknown as BrandDoc | null);
 
-      if (!brand) {
+      if (!brand_) {
         return { content: [{ type: "text", text: "No brand configured" }] };
       }
 
@@ -949,10 +947,10 @@ async function handleToolCall(
           {
             type: "text",
             text:
-              `# ${brand.companyName} Brand Rules\n\n` +
-              `## Colors\n- Primary: ${brand.colors?.primary}\n- Accent: ${brand.colors?.accent}\n\n` +
-              `## Typography\n- Headings: ${brand.typography?.headingFont}\n- Body: ${brand.typography?.bodyFont}\n\n` +
-              `## Voice\n- Personality: ${brand.voice?.personality}\n- Formality: ${brand.voice?.formality}`,
+              `# ${brand_.companyName} Brand Rules\n\n` +
+              `## Colors\n- Primary: ${brand_.colors.primary}\n- Accent: ${brand_.colors.accent}\n\n` +
+              `## Typography\n- Headings: ${brand_.typography.headingFont}\n- Body: ${brand_.typography.bodyFont}\n\n` +
+              `## Voice\n- Personality: ${brand_.voice.personality}\n- Formality: ${brand_.voice.formality}`,
           },
         ],
       };
@@ -1013,11 +1011,11 @@ async function handleToolCall(
     }
 
     case "create_rule": {
-      const name = args?.name as string;
-      const category = (args?.category as string) || "custom";
-      const content = args?.content as string;
-      const priority = (args?.priority as number) || 50;
-      const projectId = args?.projectId as string | undefined;
+      const name = typeof args?.name === 'string' ? args.name : '';
+      const category = typeof args?.category === 'string' ? args.category : 'custom';
+      const content = typeof args?.content === 'string' ? args.content : '';
+      const priority = typeof args?.priority === 'number' ? args.priority : 50;
+      const projectId = typeof args?.projectId === 'string' ? args.projectId : undefined;
 
       if (!name || !content) {
         return {
@@ -1052,7 +1050,7 @@ async function handleToolCall(
     }
 
     case "update_rule": {
-      const ruleId = args?.ruleId as string;
+      const ruleId = typeof args?.ruleId === 'string' ? args.ruleId : '';
       if (!ruleId)
         return {
           content: [{ type: "text", text: "Error: ruleId is required" }],
@@ -1061,9 +1059,9 @@ async function handleToolCall(
       const updates: Record<string, unknown> = {
         updatedAt: new Date().toISOString(),
       };
-      if (args?.name) updates.name = args.name;
-      if (args?.category) updates.category = args.category;
-      if (args?.content) updates.content = args.content;
+      if (typeof args?.name === 'string') updates.name = args.name;
+      if (typeof args?.category === 'string') updates.category = args.category;
+      if (typeof args?.content === 'string') updates.content = args.content;
 
       const rules = await getCollection("rules");
       const { ObjectId } = await import("mongodb");
@@ -1083,7 +1081,7 @@ async function handleToolCall(
     }
 
     case "delete_rule": {
-      const ruleId = args?.ruleId as string;
+      const ruleId = typeof args?.ruleId === 'string' ? args.ruleId : '';
       if (!ruleId)
         return {
           content: [{ type: "text", text: "Error: ruleId is required" }],
@@ -1108,14 +1106,14 @@ async function handleToolCall(
 
     case "get_brand_profile": {
       const brands = await getCollection("brands");
-      const brandId = args?.brandId as string | undefined;
+      const brandId = typeof args?.brandId === 'string' ? args.brandId : undefined;
       const query: Record<string, unknown> = { userId };
-      let brand: BrandDocument | null = null;
+      let brand: BrandDoc | null = null;
       if (brandId) {
         brand = (await brands.findOne({
           ...query,
           slug: brandId,
-        })) as unknown as BrandDocument | null;
+        })) as unknown as BrandDoc | null;
         if (!brand) {
           try {
             const { ObjectId } = await import("mongodb");
@@ -1123,7 +1121,7 @@ async function handleToolCall(
               brand = (await brands.findOne({
                 ...query,
                 _id: new ObjectId(brandId),
-              })) as unknown as BrandDocument | null;
+              })) as unknown as BrandDoc | null;
           } catch {
             /* skip */
           }
@@ -1131,7 +1129,7 @@ async function handleToolCall(
       } else {
         brand = (await brands.findOne(
           query,
-        )) as unknown as BrandDocument | null;
+        )) as unknown as BrandDoc | null;
       }
 
       if (!brand) {
@@ -1156,7 +1154,7 @@ async function handleToolCall(
     }
 
     case "generate_component": {
-      const prompt = args?.prompt as string;
+      const prompt = typeof args?.prompt === 'string' ? args.prompt : '';
       if (!prompt)
         return {
           content: [{ type: "text", text: "Error: prompt is required" }],
@@ -1185,7 +1183,7 @@ async function handleToolCall(
     }
 
     case "search_marketplace": {
-      const query = args?.query as string;
+      const query = typeof args?.query === 'string' ? args.query : '';
       const ruleSets = await getCollection("ruleSets");
       const mQuery: Record<string, unknown> = { isPublic: true };
       if (query) mQuery.name = { $regex: query, $options: "i" };
@@ -1256,7 +1254,7 @@ async function handleToolCall(
     }
 
     case "get_skill": {
-      const skillId = args?.skillId as string;
+      const skillId = typeof args?.skillId === 'string' ? args.skillId : '';
       if (!skillId) {
         return {
           content: [{ type: "text", text: "Error: skillId is required." }],
@@ -1286,7 +1284,7 @@ async function handleToolCall(
         }
 
         const skillContent =
-          (doc.skillsContent as string) || (doc.content as string);
+          typeof doc.skillsContent === 'string' ? doc.skillsContent : (typeof doc.content === 'string' ? doc.content : '');
         return {
           content: [
             { type: "text" as const, text: `# ${doc.name}\n\n${skillContent}` },

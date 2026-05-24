@@ -13,7 +13,7 @@
 
 import Link from "next/link";
 import { Check, X, ArrowUpRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@syntaxure/ui";
 import type { PricingTier } from "@/data/pricing";
 
 interface PricingCardProps {

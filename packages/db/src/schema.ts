@@ -1,11 +1,11 @@
 /**
- * @module @jeffdev/db/schema
+ * @module @syntaxure-labs/db/schema
  * @description Shared Zod schemas for type-safe data validation.
  * These schemas are the "single source of truth" for data structures
  * used across Agency and Prism apps.
  *
  * @example
- * import { UserSchema, RuleSchema } from "@jeffdev/db/schema";
+ * import { UserSchema, RuleSchema } from "@syntaxure-labs/db/schema";
  * const user = UserSchema.parse(rawData);
  */
 

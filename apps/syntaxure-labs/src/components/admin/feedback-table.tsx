@@ -8,7 +8,7 @@
 
 import { type ColumnDef } from "@tanstack/react-table";
 import { Star, Trash2 } from "lucide-react";
-import { DataTable } from "@/components/admin/data-table";
+import { DataTable } from "@syntaxure/ui";
 import { FeedbackStatusSelector } from "@/components/admin/feedback-status-selector";
 import { deleteFeedback } from "@/app/actions/feedback";
 import { useRouter } from "next/navigation";

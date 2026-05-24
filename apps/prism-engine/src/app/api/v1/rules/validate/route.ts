@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCollection } from "@jeffdev/db/cosmos";
+import { getCollection } from "@syntaxure-labs/db/cosmos";
 import { z } from "zod";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
 import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
@@ -53,16 +53,16 @@ export async function POST(request: NextRequest) {
   for (const rule of patternRules) {
     if (!rule.pattern) continue;
     try {
-      const regex = new RegExp(rule.pattern as string, "gi");
+      const regex = new RegExp(String(rule.pattern ?? ""), "gi");
       let match: RegExpExecArray | null;
       while ((match = regex.exec(code)) !== null) {
         const lineNumber = code.substring(0, match.index).split("\n").length;
         const snippet =
           match[0].length > 80 ? match[0].substring(0, 80) + "..." : match[0];
         violations.push({
-          rule: rule.name as string,
-          severity: (rule.severity as string) || "warning",
-          message: `${rule.content as string} (matched: "${snippet}")`,
+          rule: String(rule.name ?? ""),
+          severity: String(rule.severity || "warning"),
+          message: `${String(rule.content ?? "")} (matched: "${snippet}")`,
           line: lineNumber,
         });
       }

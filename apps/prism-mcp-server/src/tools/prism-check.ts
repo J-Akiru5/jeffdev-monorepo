@@ -53,7 +53,7 @@ export async function handlePrismCheck(input: PrismCheckInput): Promise<{
   }
 
   try {
-    const { getCollection } = await import("@jeffdev/db/cosmos");
+    const { getCollection } = await import("@syntaxure-labs/db/cosmos");
     const rules = await getCollection("rules");
 
     const query: Record<string, unknown> = {

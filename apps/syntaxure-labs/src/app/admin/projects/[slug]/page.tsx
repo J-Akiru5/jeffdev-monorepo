@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getProjects } from "@/lib/data";
-import { ProgressBar } from "@/components/admin/progress-bar";
+import { ProgressBar } from "@syntaxure/ui";
 import { ProjectStatusSelector } from "@/components/admin/project-status-selector";
 import { MilestonesList } from "@/components/admin/milestones-list";
 import { DeleteProjectButton } from "@/components/admin/delete-project-button";

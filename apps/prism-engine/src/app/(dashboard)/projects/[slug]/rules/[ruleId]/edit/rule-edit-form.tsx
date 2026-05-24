@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button, GlassPanel, Badge } from "@syntaxure/ui";
 import { updateRule, enhanceRule } from "./actions";
+import { useActionFeedback } from "@/lib/hooks/use-action-feedback";
 
 interface RuleEditFormProps {
   rule: {
@@ -44,6 +45,7 @@ export function RuleEditForm({ rule }: RuleEditFormProps) {
     { success?: boolean; error?: string } | null,
     FormData
   >(updateRule, null);
+  useActionFeedback(state, { successMessage: "Rule updated!" });
 
   const handleEnhance = async () => {
     setIsEnhancing(true);
@@ -189,9 +191,6 @@ export function RuleEditForm({ rule }: RuleEditFormProps) {
 
         {/* Status Messages */}
         {state?.error && <p className="text-sm text-red-400">{state.error}</p>}
-        {state?.success && (
-          <p className="text-sm text-emerald-400">Rule updated successfully!</p>
-        )}
 
         {/* Actions */}
         <div className="flex items-center justify-end gap-3">

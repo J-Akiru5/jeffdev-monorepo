@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@jeffdev/db";
+import { getCollection } from "@syntaxure-labs/db";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
 
     // 6. Extract matching segments
     const results = transcripts.map((transcript) => {
-      const text = (transcript.transcriptText as string) || "";
+      const text = String(transcript.transcriptText || "");
       const matches: { text: string; startIndex: number }[] = [];
 
       // Find all occurrences of the query
@@ -163,7 +163,7 @@ async function getUserTier(userId: string): Promise<SubscriptionTier> {
       return "free";
     }
 
-    return (subscription.tier as SubscriptionTier) || "free";
+    return (subscription.tier || "free") as SubscriptionTier;
   } catch {
     return "free";
   }

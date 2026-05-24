@@ -131,7 +131,7 @@ export async function saveRulesToCosmos(
   projectId: string,
   userId: string,
 ): Promise<void> {
-  const { getCollection } = await import("@jeffdev/db/cosmos");
+  const { getCollection } = await import("@syntaxure-labs/db/cosmos");
   const collection = await getCollection("rules");
   await collection.insertOne({
     id: `scan-${Date.now()}`,

@@ -1,6 +1,6 @@
 "use server";
 
-import { getCollection, ObjectId } from "@jeffdev/db";
+import { getCollection, ObjectId } from "@syntaxure-labs/db";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { enhanceRuleWithAI } from "@/lib/gemini";

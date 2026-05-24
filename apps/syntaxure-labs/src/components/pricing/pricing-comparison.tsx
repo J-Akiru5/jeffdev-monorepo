@@ -7,7 +7,7 @@
  */
 
 import { Check, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@syntaxure/ui";
 import type { ComparisonRow } from "@/data/pricing";
 
 interface PricingComparisonProps {

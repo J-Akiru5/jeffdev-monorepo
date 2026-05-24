@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@jeffdev/db";
+import { getCollection } from "@syntaxure-labs/db";
 import { ArrowLeft, Download, Settings } from "lucide-react";
+import type { BrandDoc, BrandColorsSchema, BrandTypographySchema, BrandVoiceSchema } from "@/lib/types";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -27,19 +28,15 @@ export default async function BrandPage({ params }: Props) {
 
   // Fetch brand
   const brandsCollection = await getCollection("brands");
-  const brand = await brandsCollection.findOne({ userId, slug });
+  const brand = (await brandsCollection.findOne({ userId, slug })) as BrandDoc | null;
 
   if (!brand) {
     notFound();
   }
 
-  const colors = brand.colors as Record<string, string>;
-  const typography = brand.typography as Record<string, string>;
-  const voice = brand.voice as {
-    personality: string;
-    formality: string;
-    keywords: string[];
-  };
+  const colors = brand.colors;
+  const typography = brand.typography;
+  const voice = brand.voice;
 
   return (
     <div className="space-y-8">
@@ -56,16 +53,16 @@ export default async function BrandPage({ params }: Props) {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-white">
-            {brand.companyName as string}
+            {brand.companyName}
           </h1>
           {brand.tagline && (
             <p className="text-sm text-white/50 mt-1">
-              {brand.tagline as string}
+              {brand.tagline}
             </p>
           )}
           <div className="flex items-center gap-2 mt-3">
             <span className="inline-flex items-center rounded-full bg-cyan-500/10 border border-cyan-500/30 px-2.5 py-0.5 text-xs font-medium text-cyan-400 capitalize">
-              {brand.industry as string}
+              {brand.industry}
             </span>
           </div>
         </div>
@@ -182,14 +179,14 @@ export default async function BrandPage({ params }: Props) {
             className="text-xl font-semibold"
             style={{ color: colors.text, fontFamily: typography.headingFont }}
           >
-            {brand.companyName as string}
+            {brand.companyName}
           </h3>
           <p
             className="text-sm mt-2"
             style={{ color: colors.textMuted, fontFamily: typography.bodyFont }}
           >
             {(brand.tagline as string) ||
-              `Welcome to ${brand.companyName as string}. This is a preview of your brand colors and typography.`}
+              `Welcome to ${brand.companyName}. This is a preview of your brand colors and typography.`}
           </p>
           <div className="flex gap-3 mt-4">
             <button

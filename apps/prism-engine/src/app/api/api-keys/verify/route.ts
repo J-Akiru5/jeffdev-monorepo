@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { getCollection } from "@jeffdev/db";
+import { getCollection } from "@syntaxure-labs/db";
 import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
 import crypto from "crypto";
 
