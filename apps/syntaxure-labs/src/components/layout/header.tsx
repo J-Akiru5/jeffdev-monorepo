@@ -31,7 +31,7 @@ export function Header() {
   const navLinks: NavLink[] = [
     // Prism Context Engine - always show as main product
     {
-      href: "https://prism.jeffdev.studio",
+      href: "https://www.syntaxure.dev/prism",
       label: "Prism Context Engine",
       highlight: true,
     },

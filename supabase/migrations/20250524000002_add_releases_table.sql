@@ -2,7 +2,7 @@
 CREATE TYPE release_type AS ENUM ('tool', 'update', 'patch');
 
 CREATE TABLE IF NOT EXISTS releases (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   version TEXT,
   date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,

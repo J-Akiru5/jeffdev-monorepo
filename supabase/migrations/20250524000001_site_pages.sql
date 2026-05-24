@@ -1,6 +1,6 @@
 -- Site pages table (CMS content management for static/marketing pages)
 CREATE TABLE IF NOT EXISTS site_pages (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   slug TEXT UNIQUE NOT NULL,
   content JSONB DEFAULT '{}'::jsonb,
   updated_by UUID REFERENCES user_profiles(id) ON DELETE SET NULL,

@@ -146,8 +146,7 @@ export async function updateGitHubIssueStatus(
 ): Promise<void> {
   const octokit = getOctokit();
   const { owner, repo } = getRepoConfig();
-  const { githubUtils } = await import("@/lib/github-utils");
-  const { extractLabels } = githubUtils;
+  const { extractLabels } = await import("@/lib/github-utils");
 
   const { data: issue } = await octokit.issues.get({
     owner,

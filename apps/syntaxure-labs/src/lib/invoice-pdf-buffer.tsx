@@ -506,7 +506,7 @@ function InvoicePDFDocument({ invoice }: { invoice: Invoice }) {
               This document serves as an internal Statement of Account. Official
               Receipt (OR) unavailable pending BIR registration.
             </Text>
-            <Text style={styles.footerLink}>www.jeffdev.studio</Text>
+            <Text style={styles.footerLink}>www.syntaxure.dev</Text>
           </View>
         </View>
       </Page>

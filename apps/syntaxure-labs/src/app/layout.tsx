@@ -59,11 +59,11 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Syntaxure Labs" }],
   creator: "Syntaxure Labs",
-  metadataBase: new URL("https://jeffdev.studio"),
+  metadataBase: new URL("https://www.syntaxure.dev"),
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://jeffdev.studio",
+    url: "https://www.syntaxure.dev",
     siteName: "Syntaxure Labs",
     title: "Syntaxure Labs — Enterprise Web Development & SaaS Solutions",
     description:
@@ -71,6 +71,12 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/api/og",
+        width: 1200,
+        height: 630,
+        alt: "Syntaxure Labs",
+      },
+      {
+        url: "/favicon/og-image.png",
         width: 1200,
         height: 630,
         alt: "Syntaxure Labs",
@@ -94,10 +100,10 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.svg" },
-      { url: "/favicon/icon-48x48.png", sizes: "48x48", type: "image/png" },
+      { url: "/favicon/favicon-96x96.png", sizes: "96x96", type: "image/png" },
     ],
     shortcut: "/favicon/favicon.ico",
-    apple: "/favicon/apple-icon.png",
+    apple: "/favicon/apple-touch-icon.png",
   },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
@@ -185,8 +191,8 @@ export default async function RootLayout({
                       "@type": "ProfessionalService",
                       name: "Syntaxure Labs",
                       alternateName: ["JeffDev Studio"],
-                      url: "https://jeffdev.studio",
-                      logo: "https://jeffdev.studio/favicon.svg",
+                      url: "https://www.syntaxure.dev",
+                      logo: "https://www.syntaxure.dev/favicon.svg",
                       contactPoint: {
                         "@type": "ContactPoint",
                         telephone: "+63-951-916-7103",

@@ -381,7 +381,7 @@ async function handlePaymentFailed(
                   <p style="color:#ffffff60;font-size:12px;margin:0 0 4px;">Subscription ID</p>
                   <p style="color:#fff;font-size:13px;font-family:monospace;margin:0;">${resource.id}</p>
                 </div>
-                <a href="https://prism.jeffdev.studio/subscription" style="display:block;text-align:center;background:linear-gradient(135deg,#f59e0b,#fb923c);color:#000;text-decoration:none;font-size:14px;font-weight:600;padding:12px 24px;border-radius:8px;">
+                <a href="${process.env.NEXT_PUBLIC_PRISM_URL ?? "https://prism.jeffdev.studio"}/subscription" style="display:block;text-align:center;background:linear-gradient(135deg,#f59e0b,#fb923c);color:#000;text-decoration:none;font-size:14px;font-weight:600;padding:12px 24px;border-radius:8px;">
                   Update Payment Method
                 </a>
               </div>

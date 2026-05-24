@@ -178,7 +178,7 @@ export async function GET(req: NextRequest) {
                   Email_
                 </span>
                 <span style={{ color: "#ffffff", opacity: 0.8 }}>
-                  contact@jeffdev.studio
+                  contact@syntaxure.dev
                 </span>
               </div>
               <div style={{ display: "flex", alignItems: "center" }}>

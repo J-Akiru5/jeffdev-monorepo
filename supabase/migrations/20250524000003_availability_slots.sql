@@ -1,6 +1,6 @@
 -- Availability slots table (quarter-based slot tracking for agency availability)
 CREATE TABLE IF NOT EXISTS availability_slots (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   quarter_label TEXT UNIQUE NOT NULL,
   total_slots INTEGER NOT NULL DEFAULT 0,
   filled_slots INTEGER NOT NULL DEFAULT 0,
