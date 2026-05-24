@@ -10,7 +10,8 @@
     "check-types": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "seed:keandrew": "dotenv -e .env.local -- tsx scripts/seed-keandrew.ts"
+    "seed:keandrew": "dotenv -e .env.local -- tsx scripts/seed-keandrew.ts",
+    "seed:founder": "dotenv -e .env.local -- tsx scripts/seed-founder.ts"
   },
   "dependencies": {
     "@codesandbox/sandpack-react": "^2.20.0",
