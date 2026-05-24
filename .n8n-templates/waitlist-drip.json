@@ -1,0 +1,159 @@
+{
+  "name": "Waitlist Drip Sequence (Cron)",
+  "nodes": [
+    {
+      "id": "cron-trigger",
+      "name": "Daily Cron (9 AM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "fetch-waitlist",
+      "name": "Fetch New Waitlist Entries",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [450, 300],
+      "parameters": {
+        "operation": "select",
+        "schema": "public",
+        "table": "prism_waitlist",
+        "where": {
+          "conditions": [
+            {
+              "leftValue": "email_sent",
+              "operation": "equal",
+              "rightValue": false
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "={{ $env.SUPABASE_DB_URL }}"
+        }
+      }
+    },
+    {
+      "id": "send-day0",
+      "name": "Send Day 0: Welcome + Confirmation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [650, 200],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.RESEND_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "from",
+              "value": "Syntaxure Labs <noreply@jeffdev.studio>"
+            },
+            {
+              "name": "to",
+              "value": "={{ $json.email }}"
+            },
+            {
+              "name": "subject",
+              "value": "Transmission Received: Prism Context Engine"
+            },
+            {
+              "name": "html",
+              "value": "<h1>You're on the list!</h1><p>Thanks for joining the Prism Context Engine waitlist.</p><p>We're building something special — stay tuned.</p>"
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "resend-api"
+        }
+      }
+    },
+    {
+      "id": "mark-sent",
+      "name": "Mark as Sent in Supabase",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [850, 200],
+      "parameters": {
+        "operation": "update",
+        "schema": "public",
+        "table": "prism_waitlist",
+        "updateKey": "id",
+        "updateValues": {
+          "values": {
+            "email_sent": true
+          }
+        }
+      },
+      "credentials": {
+        "postgres": {
+          "id": "={{ $env.SUPABASE_DB_URL }}"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Daily Cron (9 AM)": {
+      "main": [
+        [
+          {
+            "node": "Fetch New Waitlist Entries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch New Waitlist Entries": {
+      "main": [
+        [
+          {
+            "node": "Send Day 0: Welcome + Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Day 0: Welcome + Confirmation": {
+      "main": [
+        [
+          {
+            "node": "Mark as Sent in Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "versionId": "1.0.0",
+  "active": false,
+  "settings": {},
+  "tags": ["waitlist", "email", "cron", "supabase"]
+}

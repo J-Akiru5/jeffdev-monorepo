@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Users,
   CreditCard,
+  DollarSign,
   Mail,
   FolderKanban,
   Building2,
@@ -101,6 +102,9 @@ export default async function AdminLayout({
           </NavItem>
           <NavItem href="/admin/subscriptions" icon={CreditCard}>
             Subscriptions
+          </NavItem>
+          <NavItem href="/admin/pricing" icon={DollarSign}>
+            Pricing
           </NavItem>
 
           <div className="px-3 mt-4 mb-2">

@@ -5,8 +5,6 @@ import { Resend } from "resend";
  * Used for sending transactional emails (inquiry responses, notifications)
  */
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 interface EmailOptions {
   to: string | string[];
   subject: string;
@@ -16,11 +14,15 @@ interface EmailOptions {
   tags?: Array<{ name: string; value: string }>;
 }
 
-/**
- * Send an email via Resend
- */
 export async function sendEmail(options: EmailOptions) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn("[Resend] RESEND_API_KEY is not set. Skipping email send.");
+    return { success: false, error: "RESEND_API_KEY is not set" };
+  }
+
   try {
+    const resend = new Resend(apiKey);
     const { data, error } = await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL || "noreply@prism.jeffdev.io",
       ...options,

@@ -1,12 +1,30 @@
 {
-  "name": "Syntaxure Labs",
-  "short_name": "Syntaxure",
+  "name": "Syntaxure Labs — Enterprise Web Development & SaaS Solutions",
+  "short_name": "Syntaxure Labs",
+  "description": "We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/favicon/icon1.png",
+      "src": "/favicon/icon-48x48.png",
       "sizes": "48x48",
       "type": "image/png",
       "purpose": "maskable"
+    },
+    {
+      "src": "/favicon/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/favicon/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
       "src": "/favicon/apple-icon.png",
@@ -15,7 +33,29 @@
       "purpose": "any"
     }
   ],
-  "theme_color": "#050505",
-  "background_color": "#050505",
-  "display": "standalone"
+  "categories": ["business", "development", "productivity"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Services",
+      "short_name": "Services",
+      "description": "View our web development services",
+      "url": "/services",
+      "icons": [{ "src": "/favicon/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Contact",
+      "short_name": "Contact",
+      "description": "Get in touch with us",
+      "url": "/contact",
+      "icons": [{ "src": "/favicon/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Quote",
+      "short_name": "Quote",
+      "description": "Request a project quote",
+      "url": "/quote",
+      "icons": [{ "src": "/favicon/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ]
 }

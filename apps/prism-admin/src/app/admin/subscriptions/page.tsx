@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@jeffdev/db";
 import {
   Search,
   Filter,
@@ -14,6 +13,7 @@ import Link from "next/link";
 
 /**
  * Subscription Management Page
+ * Reads subscription data from Supabase.
  */
 export default async function SubscriptionsPage() {
   const supabase = await createClient();
@@ -23,20 +23,26 @@ export default async function SubscriptionsPage() {
 
   if (!user) return null;
 
-  const subscriptionsCollection = await getCollection("subscriptions");
-  const subscriptions = await subscriptionsCollection
-    .find({})
-    .sort({ createdAt: -1 })
-    .toArray();
+  // Fetch subscriptions from Supabase
+  const { data: subscriptions, error } = await supabase
+    .from("subscriptions")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("[subscriptions] Error fetching:", error);
+  }
+
+  const subs = subscriptions || [];
 
   // Calculate stats
   const stats = {
-    active: subscriptions.filter((s) => s.status === "active").length,
-    canceled: subscriptions.filter((s) => s.status === "canceled").length,
-    pastDue: subscriptions.filter((s) => s.status === "past_due").length,
-    mrr: subscriptions
-      .filter((s) => s.status === "active")
-      .reduce((sum, s) => sum + ((s.amount as number) || 0), 0),
+    active: subs.filter((s) => s.status === "active").length,
+    canceled: subs.filter((s) => s.status === "cancelled").length,
+    pastDue: subs.filter((s) => s.status === "past_due").length,
+    mrr: subs
+      .filter((s) => s.status === "active" || s.status === "past_due")
+      .reduce((sum, s) => sum + Number(s.amount || 0), 0),
   };
 
   return (
@@ -46,7 +52,7 @@ export default async function SubscriptionsPage() {
         <div>
           <h1 className="text-2xl font-bold text-white">Subscriptions</h1>
           <p className="text-sm text-white/50">
-            {subscriptions.length} total subscriptions
+            {subs.length} total subscriptions
           </p>
         </div>
       </div>
@@ -120,37 +126,37 @@ export default async function SubscriptionsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-              {subscriptions.map((sub) => (
+              {subs.map((sub) => (
                 <tr
-                  key={sub._id.toString()}
+                  key={sub.id}
                   className="hover:bg-white/[0.02] transition-colors"
                 >
                   <td className="px-4 py-3">
                     <Link
-                      href={`/admin/users/${sub.userId}`}
+                      href={`/admin/users/${sub.user_id}`}
                       className="text-sm text-white hover:text-amber-400 transition-colors"
                     >
-                      {(sub.userEmail as string) || (sub.userId as string)}
+                      {sub.user_email || sub.user_id}
                     </Link>
                   </td>
                   <td className="px-4 py-3">
                     <span className="text-xs font-mono text-white/60 uppercase">
-                      {(sub.plan as string) || "—"}
+                      {sub.plan || "—"}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <StatusPill status={(sub.status as string) || "unknown"} />
+                    <StatusPill status={sub.status || "unknown"} />
                   </td>
                   <td className="px-4 py-3">
                     <span className="text-sm font-mono text-white">
-                      ${(sub.amount as number)?.toFixed(2) || "0.00"}
+                      ${Number(sub.amount || 0).toFixed(2)}
                     </span>
                   </td>
                   <td className="px-4 py-3">
                     <span className="text-xs text-white/40 font-mono">
-                      {sub.nextBillingDate
+                      {sub.current_period_end
                         ? new Date(
-                            sub.nextBillingDate as string,
+                            sub.current_period_end,
                           ).toLocaleDateString()
                         : "—"}
                     </span>
@@ -163,23 +169,23 @@ export default async function SubscriptionsPage() {
 
         {/* Mobile Cards */}
         <div className="md:hidden divide-y divide-white/5">
-          {subscriptions.map((sub) => (
-            <div key={sub._id.toString()} className="p-4 space-y-3">
+          {subs.map((sub) => (
+            <div key={sub.id} className="p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-white">
-                    {(sub.userEmail as string) || "Unknown"}
+                    {sub.user_email || "Unknown"}
                   </p>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-xs font-mono text-white/40 uppercase">
-                      {(sub.plan as string) || "—"}
+                      {sub.plan || "—"}
                     </span>
-                    <StatusPill status={(sub.status as string) || "unknown"} />
+                    <StatusPill status={sub.status || "unknown"} />
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="text-lg font-mono text-white">
-                    ${(sub.amount as number)?.toFixed(2) || "0.00"}
+                    ${Number(sub.amount || 0).toFixed(2)}
                   </p>
                   <p className="text-[10px] text-white/40">per month</p>
                 </div>
@@ -192,9 +198,9 @@ export default async function SubscriptionsPage() {
                 <div className="flex items-center gap-2">
                   <Calendar className="h-3 w-3" />
                   <span>
-                    {sub.nextBillingDate
+                    {sub.current_period_end
                       ? new Date(
-                          sub.nextBillingDate as string,
+                          sub.current_period_end,
                         ).toLocaleDateString()
                       : "—"}
                   </span>
@@ -204,7 +210,7 @@ export default async function SubscriptionsPage() {
           ))}
         </div>
 
-        {subscriptions.length === 0 && (
+        {subs.length === 0 && (
           <div className="p-12 text-center">
             <CreditCard className="h-8 w-8 text-white/20 mx-auto mb-3" />
             <p className="text-sm text-white/40">No subscriptions yet</p>
@@ -254,7 +260,7 @@ function StatusPill({ status }: { status: string }) {
   const config =
     {
       active: "text-emerald-400 bg-emerald-500/15",
-      canceled: "text-red-400 bg-red-500/15",
+      cancelled: "text-red-400 bg-red-500/15",
       past_due: "text-yellow-400 bg-yellow-500/15",
       trialing: "text-cyan-400 bg-cyan-500/15",
     }[status] || "text-white/50 bg-white/5";

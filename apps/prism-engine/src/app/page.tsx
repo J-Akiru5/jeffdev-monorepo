@@ -3,9 +3,105 @@ import Image from "next/image";
 import { PublicNav } from "@/components/layout/public-nav";
 import { AnimatedHero } from "@/components/hero";
 
+export const metadata: Metadata = {
+  title: 'Prism Context Engine - The Context Operating System for Vibecoders',
+  description:
+    'Record your architecture. AI learns your rules. Deploy context directly to Cursor, Windsurf, and Claude via MCP. Eliminate context pollution forever.',
+  keywords: [
+    'MCP server',
+    'Model Context Protocol',
+    'Cursor AI',
+    'Windsurf AI',
+    'Claude Code',
+    'AI coding assistant',
+    'context governance',
+    'video to context',
+    'architectural rules',
+    'design system documentation',
+    'AI hallucination prevention',
+    'code standards enforcement',
+  ],
+  openGraph: {
+    title: 'Prism Context Engine - The Context Operating System for Vibecoders',
+    description:
+      'Record your architecture. AI learns your rules. Deploy to your IDE via MCP. Eliminate context pollution.',
+    url: '/',
+    siteName: 'Prism Context Engine',
+    images: [
+      {
+        url: '/prism-icon.png',
+        width: 1200,
+        height: 630,
+        alt: 'Prism Context Engine',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Prism Context Engine - The Context Operating System',
+    description: 'Record your architecture. AI learns your rules. Deploy to your IDE via MCP.',
+    images: ['/prism-icon.png'],
+    creator: '@jeffdevstudio',
+  },
+  alternates: {
+    canonical: '/',
+  },
+};
+
 export default function HomePage() {
   return (
     <main className="min-h-screen flex flex-col">
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": "Prism Context Engine",
+            "applicationCategory": "DeveloperApplication",
+            "operatingSystem": "Web, macOS, Windows, Linux",
+            "description":
+              "Record your architecture. AI learns your rules. Deploy context directly to Cursor, Windsurf, and Claude via MCP. Eliminate context pollution.",
+            "url": "https://prism.jeffdev.studio",
+            "author": {
+              "@type": "Organization",
+              "name": "Syntaxure Labs",
+              "url": "https://jeffdev.studio",
+            },
+            "offers": [
+              {
+                "@type": "Offer",
+                "name": "Free Tier",
+                "price": "0",
+                "priceCurrency": "USD",
+              },
+              {
+                "@type": "Offer",
+                "name": "Pro Tier",
+                "price": "18",
+                "priceCurrency": "USD",
+                "priceSpecification": {
+                  "@type": "UnitPriceSpecification",
+                  "unitText": "month"
+                },
+              },
+              {
+                "@type": "Offer",
+                "name": "Team Tier",
+                "price": "54",
+                "priceCurrency": "USD",
+                "priceSpecification": {
+                  "@type": "UnitPriceSpecification",
+                  "unitText": "month"
+                },
+              },
+            ],
+          }),
+        }}
+      />
       {/* Navigation */}
       <PublicNav />
 

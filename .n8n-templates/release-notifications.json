@@ -1,0 +1,165 @@
+{
+  "name": "Release → Discord + Email + Twitter",
+  "nodes": [
+    {
+      "id": "webhook-trigger",
+      "name": "GitHub Release Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "parameters": {
+        "path": "release",
+        "responseMode": "lastNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "ifttt",
+      "name": "Is This a Release?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.event }}",
+              "operation": "equal",
+              "value2": "release.published"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "discord",
+      "name": "Post to Discord #changelog",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 1,
+      "position": [650, 200],
+      "parameters": {
+        "resource": "message",
+        "channelId": "={{ $env.DISCORD_CHANGELOG_CHANNEL_ID }}",
+        "jsonParameters": false,
+        "content": "=📢 **New Release: {{ $json.payload.version }}**\n\n{{ $json.payload.changelog }}\n\n🔗 {{ $json.payload.url }}\n\n---\n_Powered by n8n automation_"
+      },
+      "credentials": {
+        "discordApi": {
+          "id": "={{ $env.DISCORD_BOT_TOKEN }}"
+        }
+      }
+    },
+    {
+      "id": "admin-notify",
+      "name": "Notify Team in Discord",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 1,
+      "position": [650, 400],
+      "parameters": {
+        "resource": "message",
+        "channelId": "={{ $env.DISCORD_ADMIN_CHANNEL_ID }}",
+        "jsonParameters": false,
+        "content": "=👋 Release **{{ $json.payload.version }}** by {{ $json.payload.author }} — review & share!\n📅 {{ $json.timestamp }}"
+      },
+      "credentials": {
+        "discordApi": {
+          "id": "={{ $env.DISCORD_BOT_TOKEN }}"
+        }
+      }
+    },
+    {
+      "id": "email",
+      "name": "Send Newsletter via Resend",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [850, 200],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.resend.com/emails",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.RESEND_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "from",
+              "value": "Syntaxure Labs <noreply@jeffdev.studio>"
+            },
+            {
+              "name": "to",
+              "value": "={{ $env.NEWSLETTER_LIST_EMAIL || 'waitlist@jeffdev.studio' }}"
+            },
+            {
+              "name": "subject",
+              "value": "=🚀 What's New in Prism — {{ $json.payload.version }}"
+            },
+            {
+              "name": "html",
+              "value": "=<h1>New Release: {{ $json.payload.version }}</h1><p>{{ $json.payload.changelog }}</p><p><a href=\"{{ $json.payload.url }}\">View full release notes</a></p>"
+            }
+          ]
+        }
+      },
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "resend-api"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "GitHub Release Webhook": {
+      "main": [
+        [
+          {
+            "node": "Is This a Release?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is This a Release?": {
+      "main": [
+        [
+          {
+            "node": "Post to Discord #changelog",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notify Team in Discord",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Post to Discord #changelog": {
+      "main": [
+        [
+          {
+            "node": "Send Newsletter via Resend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "versionId": "1.0.0",
+  "active": false,
+  "settings": {},
+  "tags": ["release", "discord", "email", "notification"]
+}

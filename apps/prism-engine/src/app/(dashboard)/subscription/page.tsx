@@ -10,6 +10,7 @@ import {
   Building2,
 } from "lucide-react";
 import { GlassPanel, Button, Badge } from "@syntaxure/ui";
+import { getPricingPlans, getPricingFAQs } from "@/lib/pricing-db";
 
 /**
  * Subscription Page
@@ -35,12 +36,21 @@ export default async function SubscriptionPage() {
   const projectsCollection = await getCollection("projects");
   const rulesCollection = await getCollection("rules");
 
-  const [projectCount, ruleCount] = await Promise.all([
+  const [projectCount, ruleCount, pricingPlans, faqs] = await Promise.all([
     projectsCollection.countDocuments({ userId }),
     rulesCollection.countDocuments({ createdBy: userId }),
+    getPricingPlans(),
+    getPricingFAQs(),
   ]);
 
   const currentTier = subscription?.tier || "free";
+
+  // Build pricing cards from dynamic data
+  const tierIcons: Record<string, typeof Crown | undefined> = {
+    pro: Crown,
+    team: Users,
+    enterprise: Building2,
+  };
 
   return (
     <div className="space-y-8 max-w-5xl">
@@ -87,90 +97,56 @@ export default async function SubscriptionPage() {
 
       {/* Pricing Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {/* Free Tier */}
-        <PricingCard
-          name="Free"
-          description="Get started with the basics"
-          price="₱0"
-          period=""
-          features={[
-            "5 rules",
-            "3 components",
-            "1 project",
-            "10 AI generations/month",
-            "Export as Markdown",
-          ]}
-          current={currentTier === "free"}
-          buttonLabel={currentTier === "free" ? "Current Plan" : "Downgrade"}
-          disabled={currentTier === "free"}
-        />
+        {pricingPlans.map((plan) => {
+          const Icon = tierIcons[plan.tier_slug];
+          const isCurrent = currentTier === plan.tier_slug;
 
-        {/* Pro Tier */}
-        <PricingCard
-          name="Pro"
-          description="For serious developers"
-          price="₱990"
-          period="/month"
-          icon={Crown}
-          popular
-          features={[
-            "Unlimited rules",
-            "Unlimited components",
-            "10 projects",
-            "500 AI generations/month",
-            "IDE auto-sync",
-            "All design systems",
-            "All stack templates",
-            "Priority support",
-          ]}
-          current={currentTier === "pro"}
-          buttonLabel={currentTier === "pro" ? "Current Plan" : "Upgrade"}
-          disabled={currentTier === "pro"}
-          href="/api/subscriptions/checkout?tier=pro"
-        />
+          // Format price display
+          let priceDisplay: string;
+          let periodDisplay: string;
+          if (plan.pricePhp.monthly === null) {
+            priceDisplay = "Custom";
+            periodDisplay = "";
+          } else if (plan.pricePhp.monthly === 0) {
+            priceDisplay = "₱0";
+            periodDisplay = "";
+          } else {
+            priceDisplay = `₱${plan.pricePhp.monthly.toLocaleString()}`;
+            periodDisplay = "/month";
+          }
 
-        {/* Team Tier */}
-        <PricingCard
-          name="Team"
-          description="Collaborate with your team"
-          price="₱2,990"
-          period="/month"
-          icon={Users}
-          features={[
-            "Everything in Pro",
-            "Unlimited projects",
-            "2,000 AI generations/month",
-            "Up to 10 team members",
-            "Shared component library",
-            "Team rule management",
-            "Admin dashboard",
-          ]}
-          current={currentTier === "team"}
-          buttonLabel={currentTier === "team" ? "Current Plan" : "Upgrade"}
-          disabled={currentTier === "team"}
-          href="/api/subscriptions/checkout?tier=team"
-        />
+          // Determine button label and href
+          let buttonLabel: string;
+          let href: string | undefined;
+          if (isCurrent) {
+            buttonLabel = "Current Plan";
+          } else if (plan.tier_slug === "free") {
+            buttonLabel = "Downgrade";
+          } else if (plan.tier_slug === "enterprise") {
+            buttonLabel = "Contact Sales";
+            href = "mailto:enterprise@jeffdev.studio";
+          } else {
+            buttonLabel = "Upgrade";
+            href = `/api/subscriptions/checkout?tier=${plan.tier_slug}`;
+          }
 
-        {/* Enterprise Tier */}
-        <PricingCard
-          name="Enterprise"
-          description="Custom solutions for scale"
-          price="Custom"
-          period=""
-          icon={Building2}
-          features={[
-            "Everything in Team",
-            "Unlimited team members",
-            "Unlimited AI generations",
-            "SSO/SAML",
-            "Audit logs",
-            "Dedicated support",
-            "Custom integrations",
-          ]}
-          current={currentTier === "enterprise"}
-          buttonLabel="Contact Sales"
-          href="mailto:enterprise@jeffdev.studio"
-        />
+          return (
+            <PricingCard
+              key={plan.tier_slug}
+              name={plan.name}
+              description={plan.tagline}
+              price={priceDisplay}
+              period={periodDisplay}
+              icon={Icon}
+              features={plan.features}
+              popular={plan.popular}
+              current={isCurrent}
+              buttonLabel={buttonLabel}
+              disabled={isCurrent}
+              href={href}
+            />
+          );
+        })}
       </div>
 
       {/* FAQ or Notes */}
@@ -179,18 +155,13 @@ export default async function SubscriptionPage() {
           Frequently Asked Questions
         </h3>
         <div className="space-y-4">
-          <FAQItem
-            question="Can I cancel anytime?"
-            answer="Yes, you can cancel your subscription at any time. Your access continues until the end of your billing period."
-          />
-          <FAQItem
-            question="What payment methods do you accept?"
-            answer="We accept PayPal for all subscriptions. This includes PayPal balance, linked cards, and bank accounts."
-          />
-          <FAQItem
-            question="How do I upgrade or downgrade?"
-            answer="You can change your plan at any time. Upgrades are immediate, and downgrades take effect at the next billing cycle."
-          />
+          {faqs.map((faq) => (
+            <FAQItem
+              key={faq.question}
+              question={faq.question}
+              answer={faq.answer}
+            />
+          ))}
         </div>
       </GlassPanel>
     </div>

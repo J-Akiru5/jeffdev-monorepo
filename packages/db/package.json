@@ -4,11 +4,25 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./cosmos": "./src/cosmos.ts",
-    "./schema": "./src/schema.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./firebase": {
+      "types": "./dist/firebase.d.ts",
+      "default": "./dist/firebase.js"
+    },
+    "./cosmos": {
+      "types": "./dist/cosmos.d.ts",
+      "default": "./dist/cosmos.js"
+    },
+    "./schema": {
+      "types": "./dist/schema.d.ts",
+      "default": "./dist/schema.js"
+    }
   },
   "scripts": {
+    "build": "tsc",
     "lint": "eslint . --max-warnings 0",
     "check-types": "tsc --noEmit",
     "db:seed": "tsx scripts/seed.ts"
