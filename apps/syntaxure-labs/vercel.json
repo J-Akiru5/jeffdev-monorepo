@@ -1,0 +1,6 @@
+{
+  "buildCommand": "pnpm turbo build --filter=syntaxure-labs",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "outputDirectory": ".next",
+  "framework": "nextjs"
+}

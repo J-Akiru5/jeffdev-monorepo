@@ -65,7 +65,7 @@ const nextConfig: NextConfig = {
 
 const configWithSentry = withSentryConfig(nextConfig, {
   org: process.env.SENTRY_ORG || "jeffdev",
-  project: process.env.SENTRY_PROJECT || "prism-dashboard",
+  project: process.env.SENTRY_PROJECT || "prism-engine",
   silent: !process.env.CI,
   widenClientFileUpload: true,
   reactComponentAnnotation: { enabled: true },
