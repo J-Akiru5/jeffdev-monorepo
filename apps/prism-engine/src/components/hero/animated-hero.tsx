@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Animated Hero Section - Scrub-Based Scroll Reveal
@@ -8,14 +8,14 @@
  * All animations are scrub-based (sync with scroll position)
  */
 
-import { useEffect, useRef } from 'react';
-import Link from 'next/link';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { PrismLogo3D } from '@/components/prism';
+import { useEffect, useRef } from "react";
+import Link from "next/link";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { PrismLogo3D } from "@/components/prism";
 
 // Register GSAP plugin
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
@@ -35,17 +35,25 @@ export function AnimatedHero() {
   useEffect(() => {
     const ctx = gsap.context(() => {
       // Initial state - hidden elements start with 0 height to not affect centering
-      gsap.set([headlineRef.current, subheadlineRef.current, taglineRef.current, ctaRef.current], {
-        opacity: 0,
-        y: 40,
-        height: 0,
-        marginBottom: 0,
-        overflow: 'hidden',
-      });
+      gsap.set(
+        [
+          headlineRef.current,
+          subheadlineRef.current,
+          taglineRef.current,
+          ctaRef.current,
+        ],
+        {
+          opacity: 0,
+          y: 40,
+          height: 0,
+          marginBottom: 0,
+          overflow: "hidden",
+        },
+      );
       gsap.set(pillsRef.current, {
         opacity: 0,
         height: 0,
-        overflow: 'hidden',
+        overflow: "hidden",
       });
       gsap.set(pillsRef.current?.children || [], {
         opacity: 0,
@@ -62,8 +70,8 @@ export function AnimatedHero() {
       const scrollTl = gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
-          start: 'top top',
-          end: '+=150%',
+          start: "top top",
+          end: "+=150%",
           scrub: 1,
           pin: heroRef.current,
         },
@@ -71,69 +79,101 @@ export function AnimatedHero() {
 
       // Phase 1: Prism shrinks and moves up (0% - 15%)
       scrollTl
-        .to(prismContainerRef.current, {
-          scale: 0.5,
-          marginBottom: 16,
-          duration: 0.15,
-        }, 0)
-        .to(badgeRef.current, {
-          scale: 0.8,
-          marginTop: 16,
-          marginBottom: 32,
-          duration: 0.15,
-        }, 0);
+        .to(
+          prismContainerRef.current,
+          {
+            scale: 0.5,
+            marginBottom: 16,
+            duration: 0.15,
+          },
+          0,
+        )
+        .to(
+          badgeRef.current,
+          {
+            scale: 0.8,
+            marginTop: 16,
+            marginBottom: 32,
+            duration: 0.15,
+          },
+          0,
+        );
 
       // Phase 2: Headline reveals with height animation (15% - 30%)
-      scrollTl.to(headlineRef.current, {
-        opacity: 1,
-        y: 0,
-        height: 'auto',
-        marginBottom: 24,
-        duration: 0.15,
-      }, 0.15);
+      scrollTl.to(
+        headlineRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          height: "auto",
+          marginBottom: 24,
+          duration: 0.15,
+        },
+        0.15,
+      );
 
       // Phase 3: Subheadline reveals (30% - 40%)
-      scrollTl.to(subheadlineRef.current, {
-        opacity: 1,
-        y: 0,
-        height: 'auto',
-        marginBottom: 16,
-        duration: 0.1,
-      }, 0.30);
+      scrollTl.to(
+        subheadlineRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          height: "auto",
+          marginBottom: 16,
+          duration: 0.1,
+        },
+        0.3,
+      );
 
       // Phase 4: Tagline reveals (40% - 50%)
-      scrollTl.to(taglineRef.current, {
-        opacity: 1,
-        y: 0,
-        height: 'auto',
-        marginBottom: 40,
-        duration: 0.1,
-      }, 0.40);
+      scrollTl.to(
+        taglineRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          height: "auto",
+          marginBottom: 40,
+          duration: 0.1,
+        },
+        0.4,
+      );
 
       // Phase 5: CTA buttons reveal (50% - 65%)
-      scrollTl.to(ctaRef.current, {
-        opacity: 1,
-        y: 0,
-        height: 'auto',
-        marginBottom: 48,
-        duration: 0.15,
-      }, 0.50);
+      scrollTl.to(
+        ctaRef.current,
+        {
+          opacity: 1,
+          y: 0,
+          height: "auto",
+          marginBottom: 48,
+          duration: 0.15,
+        },
+        0.5,
+      );
 
       // Phase 6: Pills container reveals (65% - 75%)
-      scrollTl.to(pillsRef.current, {
-        opacity: 1,
-        height: 'auto',
-        duration: 0.1,
-      }, 0.65);
+      scrollTl.to(
+        pillsRef.current,
+        {
+          opacity: 1,
+          height: "auto",
+          duration: 0.1,
+        },
+        0.65,
+      );
 
       // Phase 7: Feature pills stagger reveal (75% - 100%)
-      scrollTl.to(pillsRef.current?.children || [], {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        stagger: 0.02,
-        duration: 0.25,
-      }, 0.75);
+      scrollTl.to(
+        pillsRef.current?.children || [],
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          stagger: 0.02,
+          duration: 0.25,
+        },
+        0.75,
+      );
 
       // Parallax effect on orb
       gsap.to(orbRef.current, {
@@ -141,12 +181,11 @@ export function AnimatedHero() {
         scale: 1.2,
         scrollTrigger: {
           trigger: containerRef.current,
-          start: 'top top',
-          end: '+=150%',
+          start: "top top",
+          end: "+=150%",
           scrub: 2,
         },
       });
-
     }, containerRef);
 
     return () => ctx.revert();
@@ -156,27 +195,30 @@ export function AnimatedHero() {
     <div ref={containerRef} className="relative">
       {/* Scroll container - height for animation */}
       <div className="h-[250vh]">
-        <div 
-          ref={heroRef} 
+        <div
+          ref={heroRef}
           className="h-screen flex items-center justify-center px-4"
-          style={{ paddingTop: '64px' }} // Nav height offset
+          style={{ paddingTop: "64px" }} // Nav height offset
         >
           {/* Background Grid */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-size-[64px_64px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
           {/* Gradient Orb - Parallax, centered */}
-          <div 
+          <div
             ref={orbRef}
-            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-cyan-500/20 to-violet-500/20 rounded-full blur-3xl -z-10 pointer-events-none" 
+            className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-cyan-500/20 to-violet-500/20 rounded-full blur-3xl -z-10 pointer-events-none"
           />
 
-          <div ref={contentRef} className="text-center max-w-4xl relative z-10 flex flex-col items-center">
+          <div
+            ref={contentRef}
+            className="text-center max-w-4xl relative z-10 flex flex-col items-center"
+          >
             {/* Animated Prism Logo - Starts Large & Centered */}
             <div ref={prismContainerRef}>
               <PrismLogo3D size="lg" className="mx-auto scale-150" />
             </div>
 
             {/* Version Badge */}
-            <div 
+            <div
               ref={badgeRef}
               className="inline-flex items-center gap-3 px-6 py-3 rounded-full border border-cyan-500/30 bg-cyan-500/5 backdrop-blur-sm"
             >
@@ -187,7 +229,7 @@ export function AnimatedHero() {
             </div>
 
             {/* Headline - Hidden Initially (height: 0) */}
-            <h1 
+            <h1
               ref={headlineRef}
               className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight"
             >
@@ -201,15 +243,16 @@ export function AnimatedHero() {
             </h1>
 
             {/* Subheadline - Hidden Initially */}
-            <p 
+            <p
               ref={subheadlineRef}
               className="text-white/60 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
             >
-              Record your architecture. AI learns your rules. Deploy context directly to Cursor, Windsurf, and Claude via MCP.
+              Record your architecture. AI learns your rules. Deploy context
+              directly to Cursor, Windsurf, and Claude via MCP.
             </p>
-            
+
             {/* Tagline - Hidden Initially */}
-            <p 
+            <p
               ref={taglineRef}
               className="text-cyan-400/80 text-base md:text-lg font-mono"
             >
@@ -217,7 +260,10 @@ export function AnimatedHero() {
             </p>
 
             {/* CTA Buttons - Hidden Initially */}
-            <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div
+              ref={ctaRef}
+              className="flex flex-col sm:flex-row gap-4 justify-center"
+            >
               <Link
                 href="/sign-up"
                 className="group relative overflow-hidden rounded-md border border-cyan-500/30 bg-cyan-500/10 px-8 py-4 transition-all hover:border-cyan-500/50 hover:bg-cyan-500/20 active:scale-95"
@@ -248,16 +294,24 @@ export function AnimatedHero() {
             {/* Feature Pills - Hidden Initially */}
             <div ref={pillsRef} className="flex flex-wrap gap-3 justify-center">
               <div className="glass px-4 py-2 rounded-full">
-                <span className="text-xs text-white/60 font-mono">📹 Video → Context</span>
+                <span className="text-xs text-white/60 font-mono">
+                  📹 Video → Context
+                </span>
               </div>
               <div className="glass px-4 py-2 rounded-full">
-                <span className="text-xs text-white/60 font-mono">🤖 AI Rule Extraction</span>
+                <span className="text-xs text-white/60 font-mono">
+                  🤖 AI Rule Extraction
+                </span>
               </div>
               <div className="glass px-4 py-2 rounded-full">
-                <span className="text-xs text-white/60 font-mono">🔌 MCP Protocol</span>
+                <span className="text-xs text-white/60 font-mono">
+                  🔌 MCP Protocol
+                </span>
               </div>
               <div className="glass px-4 py-2 rounded-full">
-                <span className="text-xs text-white/60 font-mono">⚡ Real-time Sync</span>
+                <span className="text-xs text-white/60 font-mono">
+                  ⚡ Real-time Sync
+                </span>
               </div>
             </div>
           </div>

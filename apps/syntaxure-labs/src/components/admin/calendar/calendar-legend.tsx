@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Calendar Legend Component
@@ -6,14 +6,14 @@
  * Shows event type color legend.
  */
 
-import type { EventType } from '@/types/supabase';
+import type { EventType } from "@/types/supabase";
 
 const eventTypes: { type: EventType; label: string; color: string }[] = [
-  { type: 'deadline', label: 'Deadline', color: '#ef4444' },
-  { type: 'meeting', label: 'Meeting', color: '#06b6d4' },
-  { type: 'milestone', label: 'Milestone', color: '#8b5cf6' },
-  { type: 'reminder', label: 'Reminder', color: '#f59e0b' },
-  { type: 'holiday', label: 'Holiday', color: '#10b981' },
+  { type: "deadline", label: "Deadline", color: "#ef4444" },
+  { type: "meeting", label: "Meeting", color: "#06b6d4" },
+  { type: "milestone", label: "Milestone", color: "#8b5cf6" },
+  { type: "reminder", label: "Reminder", color: "#f59e0b" },
+  { type: "holiday", label: "Holiday", color: "#10b981" },
 ];
 
 export function CalendarLegend() {

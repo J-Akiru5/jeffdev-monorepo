@@ -52,9 +52,7 @@ describe("applyGremlinBoosts", () => {
   });
 
   it("should clamp similarity between 0 and 1", () => {
-    const rules: RankedRule[] = [
-      makeRankedRule({ id: "a", similarity: 0.95 }),
-    ];
+    const rules: RankedRule[] = [makeRankedRule({ id: "a", similarity: 0.95 })];
 
     const boosts: BoostMap = { a: 1.2 }; // would push to 1.14
 
@@ -64,9 +62,7 @@ describe("applyGremlinBoosts", () => {
   });
 
   it("should return empty changedIds when no boosts match", () => {
-    const rules: RankedRule[] = [
-      makeRankedRule({ id: "a", similarity: 0.9 }),
-    ];
+    const rules: RankedRule[] = [makeRankedRule({ id: "a", similarity: 0.9 })];
 
     const boosts: BoostMap = { b: 1.2 };
 
@@ -76,9 +72,7 @@ describe("applyGremlinBoosts", () => {
   });
 
   it("should return empty changedIds for empty boost map", () => {
-    const rules: RankedRule[] = [
-      makeRankedRule({ id: "a", similarity: 0.9 }),
-    ];
+    const rules: RankedRule[] = [makeRankedRule({ id: "a", similarity: 0.9 })];
 
     const { changedIds } = applyGremlinBoosts(rules, {});
 

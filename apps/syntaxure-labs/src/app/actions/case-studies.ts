@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 /**
  * Case Studies Server Actions
@@ -7,37 +7,41 @@
  * Uses the `case_studies` table with metadata JSONB for extra fields.
  */
 
-import { z } from 'zod';
-import { revalidatePath } from 'next/cache';
-import { getAdminClient } from '@/lib/supabase/admin';
-import { logAuditEvent } from '@/lib/audit';
-import type { CaseStudy } from '@/types/database';
+import { z } from "zod";
+import { revalidatePath } from "next/cache";
+import { getAdminClient } from "@/lib/supabase/admin";
+import { logAuditEvent } from "@/lib/audit";
+import type { CaseStudy } from "@/types/database";
 
 // =============================================================================
 // ZOD SCHEMAS
 // =============================================================================
 
 const metricSchema = z.object({
-  metric: z.string().min(1, 'Metric label is required'),
-  value: z.string().min(1, 'Metric value is required'),
+  metric: z.string().min(1, "Metric label is required"),
+  value: z.string().min(1, "Metric value is required"),
 });
 
-const testimonialSchema = z.object({
-  quote: z.string().min(1),
-  author: z.string().min(1),
-  role: z.string().min(1),
-}).nullable();
+const testimonialSchema = z
+  .object({
+    quote: z.string().min(1),
+    author: z.string().min(1),
+    role: z.string().min(1),
+  })
+  .nullable();
 
 const caseStudySchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  client: z.string().min(1, 'Client name is required'),
-  category: z.string().min(1, 'Category is required'),
-  tagline: z.string().min(1, 'Tagline is required'),
-  description: z.string().min(10, 'Description must be at least 10 characters'),
-  challenge: z.string().min(10, 'Challenge description is required'),
-  solution: z.string().min(10, 'Solution description is required'),
-  results: z.array(metricSchema).min(1, 'At least one metric is required'),
-  technologies: z.array(z.string()).min(1, 'At least one technology is required'),
+  title: z.string().min(1, "Title is required"),
+  client: z.string().min(1, "Client name is required"),
+  category: z.string().min(1, "Category is required"),
+  tagline: z.string().min(1, "Tagline is required"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  challenge: z.string().min(10, "Challenge description is required"),
+  solution: z.string().min(10, "Solution description is required"),
+  results: z.array(metricSchema).min(1, "At least one metric is required"),
+  technologies: z
+    .array(z.string())
+    .min(1, "At least one technology is required"),
   testimonial: testimonialSchema.optional(),
   image: z.string().nullable().optional(),
   featured: z.boolean().default(false),
@@ -56,19 +60,22 @@ type CaseStudyInput = z.infer<typeof caseStudySchema>;
 function generateSlug(title: string): string {
   return title
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 }
 
 /**
  * Check if slug already exists in case_studies table
  */
-async function slugExists(slug: string, excludeSlug?: string): Promise<boolean> {
+async function slugExists(
+  slug: string,
+  excludeSlug?: string,
+): Promise<boolean> {
   const supabase = getAdminClient() as any;
   const { data } = await supabase
-    .from('case_studies')
-    .select('id')
-    .eq('slug', slug)
+    .from("case_studies")
+    .select("id")
+    .eq("slug", slug)
     .maybeSingle();
   if (!data) return false;
   if (excludeSlug && slug === excludeSlug) return false;
@@ -84,19 +91,24 @@ function serializeCaseStudy(row: CaseStudy): Record<string, unknown> {
   return {
     slug: row.slug || row.id,
     title: row.title,
-    client: (metadata.client as string) || '',
-    category: (metadata.category as string) || (row.industry || ''),
-    tagline: (metadata.tagline as string) || '',
-    description: row.description || '',
-    challenge: row.challenge || '',
-    solution: row.solution || '',
-    results: row.metrics as { metric: string; value: string }[] || [],
+    client: (metadata.client as string) || "",
+    category: (metadata.category as string) || row.industry || "",
+    tagline: (metadata.tagline as string) || "",
+    description: row.description || "",
+    challenge: row.challenge || "",
+    solution: row.solution || "",
+    results: (row.metrics as { metric: string; value: string }[]) || [],
     technologies: (metadata.technologies as string[]) || [],
-    testimonial: (metadata.testimonial as { quote: string; author: string; role: string } | null) || null,
+    testimonial:
+      (metadata.testimonial as {
+        quote: string;
+        author: string;
+        role: string;
+      } | null) || null,
     image: (row.images as any)?.[0] || null,
     featured: metadata.featured === true,
     order: (metadata.order as number) || 0,
-    status: 'completed',
+    status: "completed",
     progress: 100,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -111,15 +123,15 @@ export async function getCaseStudies(): Promise<Record<string, unknown>[]> {
   try {
     const supabase = getAdminClient() as any;
     const { data, error } = await supabase
-      .from('case_studies')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .from("case_studies")
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error || !data) return [];
 
     return data.map((row: any) => serializeCaseStudy(row as CaseStudy));
   } catch (error) {
-    console.error('[GET CASE STUDIES ERROR]', error);
+    console.error("[GET CASE STUDIES ERROR]", error);
     return [];
   }
 }
@@ -129,21 +141,21 @@ export async function getCaseStudies(): Promise<Record<string, unknown>[]> {
 // =============================================================================
 
 export async function getCaseStudyBySlug(
-  slug: string
+  slug: string,
 ): Promise<Record<string, unknown> | null> {
   try {
     const supabase = getAdminClient() as any;
     const { data, error } = await supabase
-      .from('case_studies')
-      .select('*')
-      .eq('slug', slug)
+      .from("case_studies")
+      .select("*")
+      .eq("slug", slug)
       .maybeSingle();
 
     if (error || !data) return null;
 
     return serializeCaseStudy(data as CaseStudy);
   } catch (error) {
-    console.error('[GET CASE STUDY ERROR]', error);
+    console.error("[GET CASE STUDY ERROR]", error);
     return null;
   }
 }
@@ -153,7 +165,7 @@ export async function getCaseStudyBySlug(
 // =============================================================================
 
 export async function createCaseStudy(
-  data: CaseStudyInput
+  data: CaseStudyInput,
 ): Promise<{ success: boolean; slug?: string; error?: string }> {
   try {
     // Validate input
@@ -162,69 +174,73 @@ export async function createCaseStudy(
     // Generate slug
     let slug = generateSlug(validated.title);
     let attempts = 0;
-    while (await slugExists(slug) && attempts < 10) {
+    while ((await slugExists(slug)) && attempts < 10) {
       attempts++;
       slug = `${generateSlug(validated.title)}-${attempts}`;
     }
 
     if (attempts >= 10) {
-      return { success: false, error: 'Could not generate unique slug. Try a different title.' };
+      return {
+        success: false,
+        error: "Could not generate unique slug. Try a different title.",
+      };
     }
 
     // Build result summary text from metrics
     const resultsText = validated.results
-      .map(r => `${r.metric}: ${r.value}`)
-      .join('; ');
+      .map((r) => `${r.metric}: ${r.value}`)
+      .join("; ");
 
     const supabase = getAdminClient() as any;
-    const { error: insertError } = await supabase
-      .from('case_studies')
-      .insert({
-        title: validated.title,
-        description: validated.tagline,
-        slug,
-        industry: validated.category,
-        challenge: validated.challenge,
-        solution: validated.solution,
-        results: resultsText,
-        metrics: validated.results as unknown as Record<string, unknown>,
-        images: validated.image ? [validated.image] : [],
-        status: 'published',
-        published_at: new Date().toISOString(),
-        metadata: {
-          client: validated.client,
-          tagline: validated.tagline,
-          technologies: validated.technologies,
-          testimonial: validated.testimonial,
-          featured: validated.featured,
-          order: validated.order,
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      } as any);
+    const { error: insertError } = await supabase.from("case_studies").insert({
+      title: validated.title,
+      description: validated.tagline,
+      slug,
+      industry: validated.category,
+      challenge: validated.challenge,
+      solution: validated.solution,
+      results: resultsText,
+      metrics: validated.results as unknown as Record<string, unknown>,
+      images: validated.image ? [validated.image] : [],
+      status: "published",
+      published_at: new Date().toISOString(),
+      metadata: {
+        client: validated.client,
+        tagline: validated.tagline,
+        technologies: validated.technologies,
+        testimonial: validated.testimonial,
+        featured: validated.featured,
+        order: validated.order,
+      },
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    } as any);
 
     if (insertError) throw insertError;
 
     // Audit log
     await logAuditEvent({
-      action: 'CREATE',
-      resource: 'case_study',
+      action: "CREATE",
+      resource: "case_study",
       resourceId: slug,
       details: { title: validated.title },
     });
 
     // Revalidate paths
-    revalidatePath('/admin/case-studies');
-    revalidatePath('/work');
+    revalidatePath("/admin/case-studies");
+    revalidatePath("/work");
     revalidatePath(`/work/${slug}`);
 
     return { success: true, slug };
   } catch (error) {
-    console.error('[CREATE CASE STUDY ERROR]', error);
+    console.error("[CREATE CASE STUDY ERROR]", error);
     if (error instanceof z.ZodError) {
-      return { success: false, error: error.issues[0]?.message || 'Validation failed' };
+      return {
+        success: false,
+        error: error.issues[0]?.message || "Validation failed",
+      };
     }
-    return { success: false, error: 'Failed to create case study' };
+    return { success: false, error: "Failed to create case study" };
   }
 }
 
@@ -234,23 +250,26 @@ export async function createCaseStudy(
 
 export async function updateCaseStudy(
   slug: string,
-  data: Partial<CaseStudyInput>
+  data: Partial<CaseStudyInput>,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = getAdminClient() as any;
 
     // Check if exists
     const { data: existing } = await (supabase as any)
-      .from('case_studies')
-      .select('id, metadata')
-      .eq('slug', slug)
+      .from("case_studies")
+      .select("id, metadata")
+      .eq("slug", slug)
       .maybeSingle();
 
     if (!existing) {
-      return { success: false, error: 'Case study not found' };
+      return { success: false, error: "Case study not found" };
     }
 
-    const existingMetadata = (existing.metadata || {}) as Record<string, unknown>;
+    const existingMetadata = (existing.metadata || {}) as Record<
+      string,
+      unknown
+    >;
     const updates: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
     };
@@ -262,11 +281,14 @@ export async function updateCaseStudy(
     if (data.description) updates.description = data.tagline;
     if (data.challenge) updates.challenge = data.challenge;
     if (data.solution) updates.solution = data.solution;
-    if (data.image !== undefined) updates.images = data.image ? [data.image] : [];
+    if (data.image !== undefined)
+      updates.images = data.image ? [data.image] : [];
 
     // Build result text from metrics
     if (data.results) {
-      updates.results = data.results.map(r => `${r.metric}: ${r.value}`).join('; ');
+      updates.results = data.results
+        .map((r) => `${r.metric}: ${r.value}`)
+        .join("; ");
       updates.metrics = data.results as unknown as Record<string, unknown>;
     }
 
@@ -282,30 +304,30 @@ export async function updateCaseStudy(
     };
 
     const { error } = await supabase
-      .from('case_studies')
+      .from("case_studies")
       .update(updates as any)
-      .eq('slug', slug);
+      .eq("slug", slug);
 
     if (error) throw error;
 
     // Audit log
     await logAuditEvent({
-      action: 'UPDATE',
-      resource: 'case_study',
+      action: "UPDATE",
+      resource: "case_study",
       resourceId: slug,
       details: { fields: Object.keys(data) },
     });
 
     // Revalidate paths
-    revalidatePath('/admin/case-studies');
+    revalidatePath("/admin/case-studies");
     revalidatePath(`/admin/case-studies/${slug}`);
-    revalidatePath('/work');
+    revalidatePath("/work");
     revalidatePath(`/work/${slug}`);
 
     return { success: true };
   } catch (error) {
-    console.error('[UPDATE CASE STUDY ERROR]', error);
-    return { success: false, error: 'Failed to update case study' };
+    console.error("[UPDATE CASE STUDY ERROR]", error);
+    return { success: false, error: "Failed to update case study" };
   }
 }
 
@@ -314,44 +336,44 @@ export async function updateCaseStudy(
 // =============================================================================
 
 export async function deleteCaseStudy(
-  slug: string
+  slug: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = getAdminClient() as any;
 
     const { data: existing } = await supabase
-      .from('case_studies')
-      .select('id')
-      .eq('slug', slug)
+      .from("case_studies")
+      .select("id")
+      .eq("slug", slug)
       .maybeSingle();
 
     if (!existing) {
-      return { success: false, error: 'Case study not found' };
+      return { success: false, error: "Case study not found" };
     }
 
     const { error } = await supabase
-      .from('case_studies')
+      .from("case_studies")
       .delete()
-      .eq('slug', slug);
+      .eq("slug", slug);
 
     if (error) throw error;
 
     // Audit log
     await logAuditEvent({
-      action: 'DELETE',
-      resource: 'case_study',
+      action: "DELETE",
+      resource: "case_study",
       resourceId: slug,
       details: {},
     });
 
     // Revalidate paths
-    revalidatePath('/admin/case-studies');
-    revalidatePath('/work');
+    revalidatePath("/admin/case-studies");
+    revalidatePath("/work");
 
     return { success: true };
   } catch (error) {
-    console.error('[DELETE CASE STUDY ERROR]', error);
-    return { success: false, error: 'Failed to delete case study' };
+    console.error("[DELETE CASE STUDY ERROR]", error);
+    return { success: false, error: "Failed to delete case study" };
   }
 }
 
@@ -360,19 +382,19 @@ export async function deleteCaseStudy(
 // =============================================================================
 
 export async function toggleFeatured(
-  slug: string
+  slug: string,
 ): Promise<{ success: boolean; featured?: boolean; error?: string }> {
   try {
     const supabase = getAdminClient() as any;
 
     const { data: existing } = await (supabase as any)
-      .from('case_studies')
-      .select('id, metadata')
-      .eq('slug', slug)
+      .from("case_studies")
+      .select("id, metadata")
+      .eq("slug", slug)
       .maybeSingle();
 
     if (!existing) {
-      return { success: false, error: 'Case study not found' };
+      return { success: false, error: "Case study not found" };
     }
 
     const metadata = (existing.metadata || {}) as Record<string, unknown>;
@@ -382,32 +404,32 @@ export async function toggleFeatured(
     metadata.featured = newFeatured;
 
     const { error } = await supabase
-      .from('case_studies')
+      .from("case_studies")
       .update({
         metadata,
         updated_at: new Date().toISOString(),
       } as any)
-      .eq('slug', slug);
+      .eq("slug", slug);
 
     if (error) throw error;
 
     // Audit log
     await logAuditEvent({
-      action: 'UPDATE',
-      resource: 'case_study',
+      action: "UPDATE",
+      resource: "case_study",
       resourceId: slug,
       details: { featured: newFeatured },
     });
 
     // Revalidate paths
-    revalidatePath('/admin/case-studies');
-    revalidatePath('/work');
+    revalidatePath("/admin/case-studies");
+    revalidatePath("/work");
     revalidatePath(`/work/${slug}`);
 
     return { success: true, featured: newFeatured };
   } catch (error) {
-    console.error('[TOGGLE FEATURED ERROR]', error);
-    return { success: false, error: 'Failed to toggle featured status' };
+    console.error("[TOGGLE FEATURED ERROR]", error);
+    return { success: false, error: "Failed to toggle featured status" };
   }
 }
 
@@ -416,7 +438,7 @@ export async function toggleFeatured(
 // =============================================================================
 
 export async function reorderCaseStudies(
-  orderedSlugs: string[]
+  orderedSlugs: string[],
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = getAdminClient() as any;
@@ -425,9 +447,9 @@ export async function reorderCaseStudies(
       const slug = orderedSlugs[index];
 
       const { data: existing } = await (supabase as any)
-        .from('case_studies')
-        .select('id, metadata')
-        .eq('slug', slug)
+        .from("case_studies")
+        .select("id, metadata")
+        .eq("slug", slug)
         .maybeSingle();
 
       if (!existing) continue;
@@ -436,31 +458,32 @@ export async function reorderCaseStudies(
       metadata.order = index;
 
       const { error } = await supabase
-        .from('case_studies')      .update({
-        metadata,
-        updated_at: new Date().toISOString(),
-      } as any)
-      .eq('slug', slug);
+        .from("case_studies")
+        .update({
+          metadata,
+          updated_at: new Date().toISOString(),
+        } as any)
+        .eq("slug", slug);
 
       if (error) throw error;
     }
 
     // Audit log
     await logAuditEvent({
-      action: 'UPDATE',
-      resource: 'case_study',
-      resourceId: 'batch',
-      details: { action: 'reorder', count: orderedSlugs.length },
+      action: "UPDATE",
+      resource: "case_study",
+      resourceId: "batch",
+      details: { action: "reorder", count: orderedSlugs.length },
     });
 
     // Revalidate paths
-    revalidatePath('/admin/case-studies');
-    revalidatePath('/work');
+    revalidatePath("/admin/case-studies");
+    revalidatePath("/work");
 
     return { success: true };
   } catch (error) {
-    console.error('[REORDER CASE STUDIES ERROR]', error);
-    return { success: false, error: 'Failed to reorder case studies' };
+    console.error("[REORDER CASE STUDIES ERROR]", error);
+    return { success: false, error: "Failed to reorder case studies" };
   }
 }
 
@@ -469,7 +492,12 @@ export async function reorderCaseStudies(
 // =============================================================================
 
 export async function getApprovedFeedback(): Promise<
-  { id: string; clientName: string; testimonial: string; projectSlug?: string }[]
+  {
+    id: string;
+    clientName: string;
+    testimonial: string;
+    projectSlug?: string;
+  }[]
 > {
   try {
     const supabase = getAdminClient() as any;
@@ -477,38 +505,56 @@ export async function getApprovedFeedback(): Promise<
     // Supabase feedback table uses different statuses: 'received', 'acknowledged', 'resolved'
     // We use project_id as the link -> get project slugs from projects table
     const { data, error } = await (supabase as any)
-      .from('feedback')
-      .select('id, project_id, comment, created_at, user_id')
-      .in('status', ['acknowledged', 'resolved'])
-      .order('created_at', { ascending: false })
+      .from("feedback")
+      .select("id, project_id, comment, created_at, user_id")
+      .in("status", ["acknowledged", "resolved"])
+      .order("created_at", { ascending: false })
       .limit(50);
 
     if (error || !data) return [];
 
     // Get user names for each feedback entry
-    const userIds = [...new Set(data.map((f: any) => f.user_id).filter(Boolean))];
-    const { data: userProfiles } = userIds.length > 0
-      ? await supabase.from('user_profiles').select('id, full_name, email').in('id', userIds)
-      : { data: [] };
+    const userIds = [
+      ...new Set(data.map((f: any) => f.user_id).filter(Boolean)),
+    ];
+    const { data: userProfiles } =
+      userIds.length > 0
+        ? await supabase
+            .from("user_profiles")
+            .select("id, full_name, email")
+            .in("id", userIds)
+        : { data: [] };
 
-    const userMap = new Map((userProfiles || []).map((u: any) => [u.id, u.full_name || u.email]));
+    const userMap = new Map(
+      (userProfiles || []).map((u: any) => [u.id, u.full_name || u.email]),
+    );
 
     // Get project slugs for linked projects
-    const projectIds = [...new Set(data.map((f: any) => f.project_id).filter(Boolean))];
-    const { data: projects } = projectIds.length > 0
-      ? await supabase.from('projects').select('id, slug').in('id', projectIds)
-      : { data: [] };
+    const projectIds = [
+      ...new Set(data.map((f: any) => f.project_id).filter(Boolean)),
+    ];
+    const { data: projects } =
+      projectIds.length > 0
+        ? await supabase
+            .from("projects")
+            .select("id, slug")
+            .in("id", projectIds)
+        : { data: [] };
 
-    const projectMap = new Map((projects || []).map((p: any) => [p.id, p.slug]));
+    const projectMap = new Map(
+      (projects || []).map((p: any) => [p.id, p.slug]),
+    );
 
     return data.map((row: any) => ({
       id: row.id,
-      clientName: userMap.get(row.user_id) || 'Unknown',
-      testimonial: row.comment || '',
-      projectSlug: row.project_id ? projectMap.get(row.project_id) || undefined : undefined,
+      clientName: userMap.get(row.user_id) || "Unknown",
+      testimonial: row.comment || "",
+      projectSlug: row.project_id
+        ? projectMap.get(row.project_id) || undefined
+        : undefined,
     }));
   } catch (error) {
-    console.error('[GET FEEDBACK ERROR]', error);
+    console.error("[GET FEEDBACK ERROR]", error);
     return [];
   }
 }
@@ -519,79 +565,79 @@ export async function getApprovedFeedback(): Promise<
 
 export async function linkFeedbackToCaseStudy(
   slug: string,
-  feedbackId: string
+  feedbackId: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = getAdminClient() as any;
 
     // Get feedback
     const { data: feedback, error: feedbackError } = await supabase
-      .from('feedback')
-      .select('*')
-      .eq('id', feedbackId)
+      .from("feedback")
+      .select("*")
+      .eq("id", feedbackId)
       .maybeSingle();
 
     if (feedbackError || !feedback) {
-      return { success: false, error: 'Feedback not found' };
+      return { success: false, error: "Feedback not found" };
     }
 
     // Get user name for the testimonial author
     const { data: userProfile } = await (supabase as any)
-      .from('user_profiles')
-      .select('full_name, email')
-      .eq('id', feedback.user_id)
+      .from("user_profiles")
+      .select("full_name, email")
+      .eq("id", feedback.user_id)
       .maybeSingle();
 
     // Update case study with testimonial
     const { data: caseStudy } = await (supabase as any)
-      .from('case_studies')
-      .select('id, metadata')
-      .eq('slug', slug)
+      .from("case_studies")
+      .select("id, metadata")
+      .eq("slug", slug)
       .maybeSingle();
 
     if (!caseStudy) {
-      return { success: false, error: 'Case study not found' };
+      return { success: false, error: "Case study not found" };
     }
 
     const metadata = (caseStudy.metadata || {}) as Record<string, unknown>;
     metadata.testimonial = {
-      quote: feedback.comment || '',
-      author: userProfile?.full_name || userProfile?.email || 'Client',
-      role: 'Client',
+      quote: feedback.comment || "",
+      author: userProfile?.full_name || userProfile?.email || "Client",
+      role: "Client",
     };
 
     const { error: updateError } = await supabase
-      .from('case_studies')
+      .from("case_studies")
       .update({
         metadata,
         updated_at: new Date().toISOString(),
       } as any)
-      .eq('slug', slug);
+      .eq("slug", slug);
 
     if (updateError) throw updateError;
 
     // Link feedback back to case study
     await supabase
-      .from('feedback')
+      .from("feedback")
       .update({
         case_study_id: caseStudy.id,
       } as any)
-      .eq('id', feedbackId);
+      .eq("id", feedbackId);
 
     // Audit log
     await logAuditEvent({
-      action: 'UPDATE',
-      resource: 'case_study',
+      action: "UPDATE",
+      resource: "case_study",
       resourceId: slug,
       details: { linkedFeedback: feedbackId },
     });
 
-    revalidatePath('/admin/case-studies');
+    revalidatePath("/admin/case-studies");
     revalidatePath(`/work/${slug}`);
 
     return { success: true };
   } catch (error) {
-    console.error('[LINK FEEDBACK ERROR]', error);
-    return { success: false, error: 'Failed to link feedback' };
+    console.error("[LINK FEEDBACK ERROR]", error);
+    return { success: false, error: "Failed to link feedback" };
   }
 }

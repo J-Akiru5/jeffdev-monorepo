@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Users Page Client Component
@@ -6,14 +6,23 @@
  * Wraps the users table, invite modal, and pending invites section.
  */
 
-import { useState, useTransition } from 'react';
-import { Plus, Mail, RefreshCw, X, Clock, Copy, Check, Loader2 } from 'lucide-react';
-import { UsersTable } from '@/components/admin/users-table';
-import { InviteModal } from '@/components/admin/invite-modal';
-import { resendInvite, revokeInvite } from '@/app/actions/invites';
-import type { UserProfile, UserInvite } from '@/types/user';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import { useState, useTransition } from "react";
+import {
+  Plus,
+  Mail,
+  RefreshCw,
+  X,
+  Clock,
+  Copy,
+  Check,
+  Loader2,
+} from "lucide-react";
+import { UsersTable } from "@/components/admin/users-table";
+import { InviteModal } from "@/components/admin/invite-modal";
+import { resendInvite, revokeInvite } from "@/app/actions/invites";
+import type { UserProfile, UserInvite } from "@/types/user";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface UsersClientProps {
   users: UserProfile[];
@@ -21,23 +30,27 @@ interface UsersClientProps {
   currentUserUid: string;
 }
 
-export function UsersClient({ users, invites, currentUserUid }: UsersClientProps) {
+export function UsersClient({
+  users,
+  invites,
+  currentUserUid,
+}: UsersClientProps) {
   const router = useRouter();
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Filter pending invites
-  const pendingInvites = invites.filter((inv) => inv.status === 'pending');
+  const pendingInvites = invites.filter((inv) => inv.status === "pending");
 
   const handleResend = async (inviteId: string) => {
     startTransition(async () => {
       const result = await resendInvite(inviteId);
       if (result.success) {
-        toast.success('Invite resent successfully');
+        toast.success("Invite resent successfully");
         router.refresh();
       } else {
-        toast.error(result.error || 'Failed to resend invite');
+        toast.error(result.error || "Failed to resend invite");
       }
     });
   };
@@ -46,10 +59,10 @@ export function UsersClient({ users, invites, currentUserUid }: UsersClientProps
     startTransition(async () => {
       const result = await revokeInvite(inviteId);
       if (result.success) {
-        toast.success('Invite revoked');
+        toast.success("Invite revoked");
         router.refresh();
       } else {
-        toast.error(result.error || 'Failed to revoke invite');
+        toast.error(result.error || "Failed to revoke invite");
       }
     });
   };
@@ -58,31 +71,33 @@ export function UsersClient({ users, invites, currentUserUid }: UsersClientProps
     const link = `${window.location.origin}/auth/invite/${invite.token}`;
     await navigator.clipboard.writeText(link);
     setCopiedId(invite.id || null);
-    toast.success('Link copied to clipboard');
+    toast.success("Link copied to clipboard");
     setTimeout(() => setCopiedId(null), 2000);
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending':
-        return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
-      case 'accepted':
-        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
-      case 'expired':
-        return 'bg-red-500/10 text-red-400 border-red-500/20';
+      case "pending":
+        return "bg-yellow-500/10 text-yellow-400 border-yellow-500/20";
+      case "accepted":
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+      case "expired":
+        return "bg-red-500/10 text-red-400 border-red-500/20";
       default:
-        return 'bg-white/10 text-white/50 border-white/20';
+        return "bg-white/10 text-white/50 border-white/20";
     }
   };
 
   const formatExpiry = (expiresAt: string) => {
     const expiry = new Date(expiresAt);
     const now = new Date();
-    const diffDays = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    const diffDays = Math.ceil(
+      (expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+    );
 
-    if (diffDays < 0) return 'Expired';
-    if (diffDays === 0) return 'Expires today';
-    if (diffDays === 1) return 'Expires tomorrow';
+    if (diffDays < 0) return "Expired";
+    if (diffDays === 0) return "Expires today";
+    if (diffDays === 1) return "Expires tomorrow";
     return `Expires in ${diffDays} days`;
   };
 
@@ -123,7 +138,9 @@ export function UsersClient({ users, invites, currentUserUid }: UsersClientProps
                       <Mail className="h-4 w-4 text-white/40" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-white">{invite.email}</p>
+                      <p className="text-sm font-medium text-white">
+                        {invite.email}
+                      </p>
                       <div className="flex items-center gap-2 mt-1">
                         <span
                           className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium capitalize ${getStatusColor(invite.status)}`}

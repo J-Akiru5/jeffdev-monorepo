@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * PricingComparison Component
@@ -6,25 +6,25 @@
  * Feature comparison table across all pricing tiers.
  */
 
-import { Check, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import type { ComparisonRow } from '@/data/pricing';
+import { Check, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { ComparisonRow } from "@/data/pricing";
 
 interface PricingComparisonProps {
   rows: ComparisonRow[];
 }
 
 export function PricingComparison({ rows }: PricingComparisonProps) {
-  const tiers = ['starter', 'business', 'custom', 'enterprise'] as const;
+  const tiers = ["starter", "business", "custom", "enterprise"] as const;
   const tierLabels = {
-    starter: 'Starter',
-    business: 'Business',
-    custom: 'Custom',
-    enterprise: 'Enterprise',
+    starter: "Starter",
+    business: "Business",
+    custom: "Custom",
+    enterprise: "Enterprise",
   };
 
   const renderCell = (value: boolean | string) => {
-    if (typeof value === 'boolean') {
+    if (typeof value === "boolean") {
       return value ? (
         <Check className="mx-auto h-5 w-5 text-emerald-400" />
       ) : (
@@ -46,8 +46,8 @@ export function PricingComparison({ rows }: PricingComparisonProps) {
               <th
                 key={tier}
                 className={cn(
-                  'py-4 text-center text-sm font-semibold',
-                  tier === 'business' ? 'text-cyan-400' : 'text-white'
+                  "py-4 text-center text-sm font-semibold",
+                  tier === "business" ? "text-cyan-400" : "text-white",
                 )}
               >
                 {tierLabels[tier]}
@@ -60,8 +60,8 @@ export function PricingComparison({ rows }: PricingComparisonProps) {
             <tr
               key={idx}
               className={cn(
-                'border-b border-white/5 transition-colors hover:bg-white/[0.02]',
-                idx % 2 === 0 && 'bg-white/[0.01]'
+                "border-b border-white/5 transition-colors hover:bg-white/[0.02]",
+                idx % 2 === 0 && "bg-white/[0.01]",
               )}
             >
               <td className="py-4 text-sm text-white/70">{row.feature}</td>

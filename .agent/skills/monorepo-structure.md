@@ -40,14 +40,14 @@ jeffdev-monorepo/
 
 ## 🔑 Key Files
 
-| File | Purpose | Who |
-|------|---------|-----|
-| `turbo.json` | Task definitions, caching, pipelines | All developers |
-| `pnpm-workspace.yaml` | Workspace member definitions | All developers |
-| `.syncpackrc` | Dependency version alignment | DevOps/Setup |
+| File                        | Purpose                              | Who             |
+| --------------------------- | ------------------------------------ | --------------- |
+| `turbo.json`                | Task definitions, caching, pipelines | All developers  |
+| `pnpm-workspace.yaml`       | Workspace member definitions         | All developers  |
+| `.syncpackrc`               | Dependency version alignment         | DevOps/Setup    |
 | `packages/db/src/schema.ts` | Zod schemas (single source of truth) | Full-stack devs |
-| `packages/ui/src/index.ts` | Component exports | Frontend devs |
-| `.agent/rules/*` | Technical constitution | AI agents |
+| `packages/ui/src/index.ts`  | Component exports                    | Frontend devs   |
+| `.agent/rules/*`            | Technical constitution               | AI agents       |
 
 ---
 
@@ -183,22 +183,22 @@ The `turbo.json` file defines all tasks:
 {
   "version": "1",
   "extends": ["//"],
-  
+
   // Task definitions
   "tasks": {
     // Build task
     "build": {
-      "dependsOn": ["^build"],          // Depends on deps' builds first
+      "dependsOn": ["^build"], // Depends on deps' builds first
       "outputs": [".next/**", "dist/**"],
       "cache": true
     },
-    
+
     // Dev task (no caching, runs forever)
     "dev": {
       "cache": false,
       "persistent": true
     },
-    
+
     // Test task
     "test": {
       "outputs": ["coverage/**"],
@@ -206,12 +206,9 @@ The `turbo.json` file defines all tasks:
       "inputs": ["src/**", "tests/**", "package.json"]
     }
   },
-  
+
   // Global environment variables
-  "globalEnv": [
-    "NODE_ENV",
-    "NEXT_PUBLIC_*"
-  ]
+  "globalEnv": ["NODE_ENV", "NEXT_PUBLIC_*"]
 }
 ```
 
@@ -239,14 +236,15 @@ import { Button } from "@jdstudio/ui";
 ### Task 2: Create a New API Route
 
 **In apps/agency:**
+
 ```typescript
 // apps/agency/src/app/api/users/[id]/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { requireAuth } from '@/lib/auth';
+import { NextRequest, NextResponse } from "next/server";
+import { requireAuth } from "@/lib/auth";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const user = await requireAuth();
   const data = await getUserData(params.id);
@@ -255,14 +253,15 @@ export async function GET(
 ```
 
 **In apps/prism-dashboard:**
+
 ```typescript
 // apps/prism-dashboard/src/app/api/rules/[id]/route.ts
-import { Clerk } from '@clerk/clerk-sdk-node';
-import { getPrismContainer } from '@/lib/cosmos';
+import { Clerk } from "@clerk/clerk-sdk-node";
+import { getPrismContainer } from "@/lib/cosmos";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const container = await getPrismContainer();
   const result = await container.items.create({ id: params.id });
@@ -306,7 +305,7 @@ pnpm install
 
 ```bash
 # Cause: Workspace hoisting issue
-# Fix: 
+# Fix:
 pnpm install
 turbo run build --filter=packages/ui
 turbo run build --filter=apps/agency
@@ -354,6 +353,7 @@ import { helper } from "@jeffdev/shared-helpers";
 ## 📋 Testing Strategy
 
 ### Unit Tests (Vitest)
+
 ```bash
 turbo run test:unit              # Run all unit tests
 turbo run test:unit:watch        # Watch mode
@@ -361,12 +361,14 @@ turbo run test:unit --filter=apps/agency
 ```
 
 ### E2E Tests (Playwright)
+
 ```bash
 turbo run test:e2e                    # Run all E2E tests
 turbo run test:e2e:ui --filter=apps/agency  # UI mode for one app
 ```
 
 ### Coverage Reports
+
 ```bash
 turbo run test:coverage
 # Reports in apps/*/coverage/
@@ -377,12 +379,15 @@ turbo run test:coverage
 ## 🚢 Deployment Workflow
 
 ### Vercel (Automatic)
+
 Each app has its own Vercel project:
+
 - Push to `main` → Auto-deploy
 - Pull request → Preview deployment
 - Secrets via Doppler integration
 
 ### Custom Deployments
+
 ```bash
 # Build for production
 turbo run build

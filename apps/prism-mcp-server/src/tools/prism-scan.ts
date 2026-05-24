@@ -5,7 +5,8 @@ import {
   type GeneratedRules,
 } from "../lib/rule-generator.js";
 
-const RATING_PROMPT = "\n\n---\n**Rate these rules** — reply with 👍 if good, 👎 if you want regenerated with a different model.";
+const RATING_PROMPT =
+  "\n\n---\n**Rate these rules** — reply with 👍 if good, 👎 if you want regenerated with a different model.";
 
 export interface PrismScanInput {
   url: string;
@@ -21,7 +22,9 @@ export interface PrismScanOutput {
   isError?: boolean;
 }
 
-export async function handlePrismScan(args: PrismScanInput): Promise<PrismScanOutput> {
+export async function handlePrismScan(
+  args: PrismScanInput,
+): Promise<PrismScanOutput> {
   const { url, maxPages = 5, depth = 2, projectId, userId, model } = args;
 
   if (!url || typeof url !== "string") {
@@ -64,13 +67,18 @@ export async function handlePrismScan(args: PrismScanInput): Promise<PrismScanOu
   if (tokens.pagesScanned === 0) {
     return {
       content: [
-        { type: "text", text: `❌ Could not reach ${url}. Make sure the URL is accessible.` },
+        {
+          type: "text",
+          text: `❌ Could not reach ${url}. Make sure the URL is accessible.`,
+        },
       ],
       isError: true,
     };
   }
 
-  steps.push(`📄 Scanned ${tokens.pagesScanned} page(s), ~${tokens.tokensUsed} tokens used`);
+  steps.push(
+    `📄 Scanned ${tokens.pagesScanned} page(s), ~${tokens.tokensUsed} tokens used`,
+  );
 
   // Generate rules via AI
   steps.push(`🤖 Generating rules from extracted design tokens...`);
@@ -90,24 +98,35 @@ export async function handlePrismScan(args: PrismScanInput): Promise<PrismScanOu
     };
   }
 
-  steps.push(`✅ Generated ${generated.rulesCount} rules + ${generated.skillsCount} skills (${generated.modelUsed})`);
+  steps.push(
+    `✅ Generated ${generated.rulesCount} rules + ${generated.skillsCount} skills (${generated.modelUsed})`,
+  );
 
   // Save locally
   try {
     saveRulesLocal(generated.rulesMd, generated.skillsMd);
     steps.push(`💾 Saved to ~/.prism/rules.md + ~/.prism/skills.md`);
   } catch (error) {
-    steps.push(`⚠️  Local save failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+    steps.push(
+      `⚠️  Local save failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
   }
 
   // Sync to Cosmos if projectId provided
   if (projectId && userId) {
     try {
       const { saveRulesToCosmos } = await import("../lib/rule-generator.js");
-      await saveRulesToCosmos(generated.rulesMd, generated.skillsMd, projectId, userId);
+      await saveRulesToCosmos(
+        generated.rulesMd,
+        generated.skillsMd,
+        projectId,
+        userId,
+      );
       steps.push(`☁️  Synced to Cosmos DB (project: ${projectId})`);
     } catch (error) {
-      steps.push(`⚠️  Cloud sync failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+      steps.push(
+        `⚠️  Cloud sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   }
 
@@ -148,13 +167,19 @@ export async function handlePrismScan(args: PrismScanInput): Promise<PrismScanOu
   };
 }
 
-export async function handleRateRules(rating: "good" | "bad", url: string): Promise<PrismScanOutput> {
+export async function handleRateRules(
+  rating: "good" | "bad",
+  url: string,
+): Promise<PrismScanOutput> {
   if (rating === "bad") {
     // Re-generate with a different model
     const differentModel = "gemini-flash-lite";
     try {
       const scanResult = await scanUrl(url, 5, 2);
-      const generated = await generateRulesFromTokens(scanResult.tokens, differentModel);
+      const generated = await generateRulesFromTokens(
+        scanResult.tokens,
+        differentModel,
+      );
       saveRulesLocal(generated.rulesMd, generated.skillsMd);
 
       return {
@@ -193,7 +218,7 @@ export async function handleRateRules(rating: "good" | "bad", url: string): Prom
     content: [
       {
         type: "text",
-        text: "👍 Great! Rules are saved. You can run `prism kitchen analyze --task \"...\"` to see how they'll be used.",
+        text: '👍 Great! Rules are saved. You can run `prism kitchen analyze --task "..."` to see how they\'ll be used.',
       },
     ],
   };

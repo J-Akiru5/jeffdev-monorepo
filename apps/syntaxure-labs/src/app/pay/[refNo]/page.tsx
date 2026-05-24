@@ -1,10 +1,10 @@
-import { notFound } from 'next/navigation';
-import { getInvoiceByRefNo } from '@/app/actions/invoice';
-import { PaymentButton } from '@/components/payments';
-import type { InvoiceStatus } from '@/types/invoice';
-import { PriceDisplay } from '@/components/ui/price-display';
+import { notFound } from "next/navigation";
+import { getInvoiceByRefNo } from "@/app/actions/invoice";
+import { PaymentButton } from "@/components/payments";
+import type { InvoiceStatus } from "@/types/invoice";
+import { PriceDisplay } from "@/components/ui/price-display";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 /**
  * Public Payment Page
@@ -17,16 +17,37 @@ interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-const statusMessages: Record<InvoiceStatus, { title: string; description: string }> = {
-  draft: { title: 'Invoice Not Ready', description: 'This invoice is still being prepared.' },
-  sent: { title: 'Payment Due', description: 'Please complete your payment below.' },
-  partial: { title: 'Partial Payment Received', description: 'Complete your remaining balance below.' },
-  paid: { title: 'Fully Paid', description: 'Thank you for your payment!' },
-  overdue: { title: 'Payment Overdue', description: 'Please complete your payment as soon as possible.' },
-  cancelled: { title: 'Invoice Cancelled', description: 'This invoice has been cancelled.' },
+const statusMessages: Record<
+  InvoiceStatus,
+  { title: string; description: string }
+> = {
+  draft: {
+    title: "Invoice Not Ready",
+    description: "This invoice is still being prepared.",
+  },
+  sent: {
+    title: "Payment Due",
+    description: "Please complete your payment below.",
+  },
+  partial: {
+    title: "Partial Payment Received",
+    description: "Complete your remaining balance below.",
+  },
+  paid: { title: "Fully Paid", description: "Thank you for your payment!" },
+  overdue: {
+    title: "Payment Overdue",
+    description: "Please complete your payment as soon as possible.",
+  },
+  cancelled: {
+    title: "Invoice Cancelled",
+    description: "This invoice has been cancelled.",
+  },
 };
 
-export default async function PublicPaymentPage({ params, searchParams }: PageProps) {
+export default async function PublicPaymentPage({
+  params,
+  searchParams,
+}: PageProps) {
   const { refNo } = await params;
   const { preview } = await searchParams;
   const invoice = await getInvoiceByRefNo(refNo);
@@ -34,12 +55,14 @@ export default async function PublicPaymentPage({ params, searchParams }: PagePr
   if (!invoice) notFound();
 
   // Show "Not Ready" screen if draft AND not in admin preview mode
-  if (invoice.status === 'draft' && preview !== 'admin') {
+  if (invoice.status === "draft" && preview !== "admin") {
     return (
       <div className="flex min-h-screen items-center justify-center bg-void p-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white">Invoice Not Ready</h1>
-          <p className="mt-2 text-white/50">This invoice is still being prepared.</p>
+          <p className="mt-2 text-white/50">
+            This invoice is still being prepared.
+          </p>
         </div>
       </div>
     );
@@ -60,11 +83,11 @@ export default async function PublicPaymentPage({ params, searchParams }: PagePr
         {/* Status Banner */}
         <div
           className={`mb-8 rounded-md p-4 text-center ${
-            invoice.status === 'paid'
-              ? 'bg-emerald-500/10 text-emerald-400'
-              : invoice.status === 'overdue'
-              ? 'bg-red-500/10 text-red-400'
-              : 'bg-cyan-500/10 text-cyan-400'
+            invoice.status === "paid"
+              ? "bg-emerald-500/10 text-emerald-400"
+              : invoice.status === "overdue"
+                ? "bg-red-500/10 text-red-400"
+                : "bg-cyan-500/10 text-cyan-400"
           }`}
         >
           <h2 className="text-lg font-semibold">{statusInfo.title}</h2>
@@ -74,7 +97,9 @@ export default async function PublicPaymentPage({ params, searchParams }: PagePr
         {/* Invoice Summary */}
         <div className="mb-8 rounded-md border border-white/10 bg-white/5 p-6">
           <h3 className="mb-4 text-sm font-medium text-white/50">BILL TO</h3>
-          <p className="text-lg font-semibold text-white">{invoice.clientName}</p>
+          <p className="text-lg font-semibold text-white">
+            {invoice.clientName}
+          </p>
           {invoice.clientCompany && (
             <p className="text-white/50">{invoice.clientCompany}</p>
           )}
@@ -90,7 +115,10 @@ export default async function PublicPaymentPage({ params, searchParams }: PagePr
                   {item.description} × {item.quantity}
                 </span>
                 <span className="text-white">
-                  <PriceDisplay amount={item.amount} sourceCurrency={invoice.currency} />
+                  <PriceDisplay
+                    amount={item.amount}
+                    sourceCurrency={invoice.currency}
+                  />
                 </span>
               </div>
             ))}
@@ -102,12 +130,18 @@ export default async function PublicPaymentPage({ params, searchParams }: PagePr
           <div className="space-y-2">
             <div className="flex justify-between text-sm text-white/50">
               <span>Subtotal</span>
-              <PriceDisplay amount={invoice.subtotal} sourceCurrency={invoice.currency} />
+              <PriceDisplay
+                amount={invoice.subtotal}
+                sourceCurrency={invoice.currency}
+              />
             </div>
             {invoice.tax && invoice.tax > 0 && (
               <div className="flex justify-between text-sm text-white/50">
                 <span>Tax</span>
-                <PriceDisplay amount={invoice.tax} sourceCurrency={invoice.currency} />
+                <PriceDisplay
+                  amount={invoice.tax}
+                  sourceCurrency={invoice.currency}
+                />
               </div>
             )}
             {invoice.discount && invoice.discount > 0 && (
@@ -125,7 +159,10 @@ export default async function PublicPaymentPage({ params, searchParams }: PagePr
             <div className="flex justify-between pt-2 text-lg font-bold">
               <span className="text-white">Total</span>
               <span className="text-white">
-                <PriceDisplay amount={invoice.total} sourceCurrency={invoice.currency} />
+                <PriceDisplay
+                  amount={invoice.total}
+                  sourceCurrency={invoice.currency}
+                />
               </span>
             </div>
             {invoice.paidAmount > 0 && (
@@ -144,17 +181,20 @@ export default async function PublicPaymentPage({ params, searchParams }: PagePr
               <span className="text-white">Balance Due</span>
               <span
                 className={
-                  invoice.balanceDue > 0 ? 'text-cyan-400' : 'text-emerald-400'
+                  invoice.balanceDue > 0 ? "text-cyan-400" : "text-emerald-400"
                 }
               >
-                <PriceDisplay amount={invoice.balanceDue} sourceCurrency={invoice.currency} />
+                <PriceDisplay
+                  amount={invoice.balanceDue}
+                  sourceCurrency={invoice.currency}
+                />
               </span>
             </div>
           </div>
         </div>
 
         {/* Payment Section */}
-        {invoice.balanceDue > 0 && invoice.status !== 'cancelled' && (
+        {invoice.balanceDue > 0 && invoice.status !== "cancelled" && (
           <PaymentButton
             invoice={invoice}
             onSuccess={() => {
@@ -167,7 +207,7 @@ export default async function PublicPaymentPage({ params, searchParams }: PagePr
         <div className="mt-8 text-center text-xs text-white/30">
           <p>Due Date: {new Date(invoice.dueDate).toLocaleDateString()}</p>
           <p className="mt-2">
-            Questions? Contact us at{' '}
+            Questions? Contact us at{" "}
             <a
               href="mailto:hello@jeffdev.studio"
               className="text-cyan-400 hover:underline"
@@ -175,9 +215,7 @@ export default async function PublicPaymentPage({ params, searchParams }: PagePr
               hello@jeffdev.studio
             </a>
           </p>
-          <p className="mt-4">
-            © {new Date().getFullYear()} Syntaxure Labs
-          </p>
+          <p className="mt-4">© {new Date().getFullYear()} Syntaxure Labs</p>
         </div>
       </div>
     </div>

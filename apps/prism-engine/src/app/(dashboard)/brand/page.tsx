@@ -68,7 +68,7 @@ function BrandCard({ brand }: { brand: Record<string, unknown> }) {
   const name = brand.companyName as string;
   const industry = brand.industry as string;
   const colors = brand.colors as { primary: string; accent: string };
-  
+
   return (
     <Link
       href={`/brand/${slug}`}
@@ -76,20 +76,20 @@ function BrandCard({ brand }: { brand: Record<string, unknown> }) {
     >
       {/* Color Preview */}
       <div className="flex gap-1.5 mb-4">
-        <div 
-          className="h-6 w-6 rounded-full border border-white/10" 
+        <div
+          className="h-6 w-6 rounded-full border border-white/10"
           style={{ backgroundColor: colors.primary }}
         />
-        <div 
-          className="h-6 w-6 rounded-full border border-white/10" 
+        <div
+          className="h-6 w-6 rounded-full border border-white/10"
           style={{ backgroundColor: colors.accent }}
         />
       </div>
-      
+
       <h3 className="text-base font-medium text-white group-hover:text-cyan-400 transition-colors">
         {name}
       </h3>
-      
+
       <div className="mt-2">
         <span className="inline-flex items-center rounded-full bg-white/5 px-2 py-0.5 text-xs text-white/50 capitalize">
           {industry}

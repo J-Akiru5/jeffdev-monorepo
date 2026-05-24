@@ -39,7 +39,12 @@ export function ProgressBar({
 
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      <div className={cn("flex-1 overflow-hidden rounded-full bg-white/10", height)}>
+      <div
+        className={cn(
+          "flex-1 overflow-hidden rounded-full bg-white/10",
+          height,
+        )}
+      >
         <div
           className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 transition-all duration-500"
           style={{ width: `${clampedValue}%` }}

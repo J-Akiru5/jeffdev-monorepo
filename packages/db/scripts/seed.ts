@@ -2,14 +2,14 @@
 /**
  * @module packages/db/scripts/seed
  * @description Genesis Seeding Script - Bootstraps the Prism DB with core rules.
- * 
+ *
  * This script injects your architectural constitutions (design-system, tech-stack, etc.)
  * into Azure Cosmos DB so the MCP Server can immediately serve them to AI assistants.
- * 
+ *
  * @example
  * # Run from monorepo root
  * npm run db:seed -w packages/db
- * 
+ *
  * # Or with Doppler injection
  * doppler run -- tsx packages/db/scripts/seed.ts
  */
@@ -243,7 +243,9 @@ export async function createEntry(formData: FormData) {
 
 async function seed() {
   if (!MONGODB_URI) {
-    console.error("❌ MONGODB_URI is not set. Ensure Doppler is injecting env vars.");
+    console.error(
+      "❌ MONGODB_URI is not set. Ensure Doppler is injecting env vars.",
+    );
     process.exit(1);
   }
 
@@ -256,7 +258,7 @@ async function seed() {
     client = new MongoClient(MONGODB_URI, {
       retryWrites: false, // Cosmos DB doesn't support retryable writes
     });
-    
+
     await client.connect();
     console.log("✅ Connected to Azure Cosmos DB (MongoDB API)");
 
@@ -277,7 +279,9 @@ async function seed() {
     }));
 
     const insertResult = await rules.insertMany(documentsToInsert);
-    console.log(`✨ Successfully seeded ${insertResult.insertedCount} Core Rules.`);
+    console.log(
+      `✨ Successfully seeded ${insertResult.insertedCount} Core Rules.`,
+    );
 
     // 5. Verify
     const count = await rules.countDocuments({ userId: SYSTEM_USER_ID });

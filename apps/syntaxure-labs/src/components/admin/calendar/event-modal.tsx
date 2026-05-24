@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Event Modal Component
@@ -6,10 +6,14 @@
  * Create/Edit calendar event modal.
  */
 
-import { useState, useEffect, useTransition } from 'react';
-import { X, Trash2 } from 'lucide-react';
-import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from '@/app/actions/calendar';
-import type { CalendarEvent, EventType } from '@/types/supabase';
+import { useState, useEffect, useTransition } from "react";
+import { X, Trash2 } from "lucide-react";
+import {
+  createCalendarEvent,
+  updateCalendarEvent,
+  deleteCalendarEvent,
+} from "@/app/actions/calendar";
+import type { CalendarEvent, EventType } from "@/types/supabase";
 
 interface EventModalProps {
   isOpen: boolean;
@@ -20,11 +24,11 @@ interface EventModalProps {
 }
 
 const eventTypes: { value: EventType; label: string; color: string }[] = [
-  { value: 'deadline', label: 'Deadline', color: '#ef4444' },
-  { value: 'meeting', label: 'Meeting', color: '#06b6d4' },
-  { value: 'milestone', label: 'Milestone', color: '#8b5cf6' },
-  { value: 'reminder', label: 'Reminder', color: '#f59e0b' },
-  { value: 'holiday', label: 'Holiday', color: '#10b981' },
+  { value: "deadline", label: "Deadline", color: "#ef4444" },
+  { value: "meeting", label: "Meeting", color: "#06b6d4" },
+  { value: "milestone", label: "Milestone", color: "#8b5cf6" },
+  { value: "reminder", label: "Reminder", color: "#f59e0b" },
+  { value: "holiday", label: "Holiday", color: "#10b981" },
 ];
 
 export function EventModal({
@@ -35,11 +39,11 @@ export function EventModal({
   onSave,
 }: EventModalProps) {
   const [isPending, startTransition] = useTransition();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [type, setType] = useState<EventType>('meeting');
-  const [start, setStart] = useState('');
-  const [end, setEnd] = useState('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [type, setType] = useState<EventType>("meeting");
+  const [start, setStart] = useState("");
+  const [end, setEnd] = useState("");
   const [allDay, setAllDay] = useState(true);
 
   // Reset form when modal opens
@@ -49,17 +53,19 @@ export function EventModal({
     const timer = setTimeout(() => {
       if (event) {
         setTitle(event.title);
-        setDescription(event.description || '');
+        setDescription(event.description || "");
         setType(event.type);
-        setStart(event.start.split('T')[0]);
-        setEnd(event.end?.split('T')[0] || '');
+        setStart(event.start.split("T")[0]);
+        setEnd(event.end?.split("T")[0] || "");
         setAllDay(event.allDay ?? true);
       } else {
-        setTitle('');
-        setDescription('');
-        setType('meeting');
-        setStart(defaultDate?.split('T')[0] || new Date().toISOString().split('T')[0]);
-        setEnd('');
+        setTitle("");
+        setDescription("");
+        setType("meeting");
+        setStart(
+          defaultDate?.split("T")[0] || new Date().toISOString().split("T")[0],
+        );
+        setEnd("");
         setAllDay(true);
       }
     }, 0);
@@ -91,7 +97,7 @@ export function EventModal({
   };
 
   const handleDelete = () => {
-    if (!event?.id || !confirm('Delete this event?')) return;
+    if (!event?.id || !confirm("Delete this event?")) return;
 
     startTransition(async () => {
       await deleteCalendarEvent(event.id!);
@@ -115,7 +121,7 @@ export function EventModal({
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-white">
-            {event ? 'Edit Event' : 'New Event'}
+            {event ? "Edit Event" : "New Event"}
           </h2>
           <button
             onClick={onClose}
@@ -150,13 +156,15 @@ export function EventModal({
                   onClick={() => setType(t.value)}
                   className={`rounded-sm px-3 py-1 text-sm transition-all ${
                     type === t.value
-                      ? 'text-white'
-                      : 'text-white/50 hover:text-white'
+                      ? "text-white"
+                      : "text-white/50 hover:text-white"
                   }`}
                   style={{
                     backgroundColor:
-                      type === t.value ? `${t.color}30` : 'rgba(255,255,255,0.05)',
-                    border: `1px solid ${type === t.value ? t.color : 'rgba(255,255,255,0.1)'}`,
+                      type === t.value
+                        ? `${t.color}30`
+                        : "rgba(255,255,255,0.05)",
+                    border: `1px solid ${type === t.value ? t.color : "rgba(255,255,255,0.1)"}`,
                   }}
                 >
                   {t.label}
@@ -240,7 +248,7 @@ export function EventModal({
               disabled={isPending || !title.trim()}
               className="rounded-md bg-cyan-500/20 px-4 py-2 text-sm text-cyan-400 transition-colors hover:bg-cyan-500/30 disabled:opacity-50"
             >
-              {isPending ? 'Saving...' : event ? 'Update' : 'Create'}
+              {isPending ? "Saving..." : event ? "Update" : "Create"}
             </button>
           </div>
         </div>

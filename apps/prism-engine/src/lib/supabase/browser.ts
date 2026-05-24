@@ -7,7 +7,7 @@ export function createClient() {
   if (!url || !anonKey) {
     return createBrowserClient(
       "https://placeholder-url.supabase.co",
-      "placeholder-anon-key"
+      "placeholder-anon-key",
     );
   }
 

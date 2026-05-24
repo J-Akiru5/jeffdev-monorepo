@@ -4,7 +4,10 @@ import { join } from "path";
 import { mkdirSync, writeFileSync, existsSync } from "fs";
 import { generateContent } from "./ai-router.js";
 
-const CHAT_MODEL = process.env.GEMINI_MODEL || process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "gemini-3.5-flash";
+const CHAT_MODEL =
+  process.env.GEMINI_MODEL ||
+  process.env.AZURE_OPENAI_DEPLOYMENT_NAME ||
+  "gemini-3.5-flash";
 
 export interface GeneratedRules {
   rulesMd: string;
@@ -15,7 +18,7 @@ export interface GeneratedRules {
 }
 export async function generateRulesFromTokens(
   tokens: ExtractedDesignTokens,
-  modelOverride?: string
+  modelOverride?: string,
 ): Promise<GeneratedRules> {
   const model = modelOverride || CHAT_MODEL;
 
@@ -97,7 +100,8 @@ ${patternBlock || "none detected"}
   } else {
     // If model didn't split cleanly, treat everything as rules
     rulesMd = fullOutput.trim();
-    skillsMd = "# Skills\n\nNo skill guides were generated automatically. Add them manually.";
+    skillsMd =
+      "# Skills\n\nNo skill guides were generated automatically. Add them manually.";
   }
 
   const rulesCount = (rulesMd.match(/\*\*[^*]+\*\*/g) || []).length;
@@ -125,7 +129,7 @@ export async function saveRulesToCosmos(
   rulesMd: string,
   skillsMd: string,
   projectId: string,
-  userId: string
+  userId: string,
 ): Promise<void> {
   const { getCollection } = await import("@jeffdev/db/cosmos");
   const collection = await getCollection("rules");

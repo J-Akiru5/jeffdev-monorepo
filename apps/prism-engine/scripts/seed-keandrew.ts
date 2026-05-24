@@ -1,13 +1,13 @@
 /**
  * 🎨 Keandrew Photography Studio - Brand Seed Script
- * 
+ *
  * Seeds the database with:
  * 1. Keandrew brand profile
  * 2. Prism Rules for the brand
  * 3. Component design patterns
- * 
+ *
  * Run: npm run seed:keandrew
- * 
+ *
  * The npm script uses dotenv-cli to load .env.local before running tsx.
  */
 
@@ -19,17 +19,17 @@ const KEANDREW_BRAND = {
   companyName: "Keandrew Photography Studio",
   tagline: "Capturing Life's Authentic Moments",
   industry: "photography",
-  
+
   colors: {
-    primary: "#1A1A1A",      // Rich black
-    secondary: "#2D2D2D",    // Dark grey
-    accent: "#A08B5B",       // Warm gold/bronze
-    background: "#0F0F0F",   // Deep black
-    surface: "#1A1A1A",      // Card black
-    text: "#F5F2EE",         // Cream white
-    textMuted: "#6B6B6B",    // Medium grey
+    primary: "#1A1A1A", // Rich black
+    secondary: "#2D2D2D", // Dark grey
+    accent: "#A08B5B", // Warm gold/bronze
+    background: "#0F0F0F", // Deep black
+    surface: "#1A1A1A", // Card black
+    text: "#F5F2EE", // Cream white
+    textMuted: "#6B6B6B", // Medium grey
   },
-  
+
   typography: {
     headingFont: "Plus Jakarta Sans",
     bodyFont: "Plus Jakarta Sans",
@@ -37,24 +37,31 @@ const KEANDREW_BRAND = {
     accentFont: "Cormorant Garamond", // For elegant quotes
     scale: "default",
   },
-  
+
   voice: {
     personality: "minimal",
     formality: "balanced",
-    keywords: ["authentic", "timeless", "elegant", "intimate", "refined", "storytelling"],
+    keywords: [
+      "authentic",
+      "timeless",
+      "elegant",
+      "intimate",
+      "refined",
+      "storytelling",
+    ],
   },
-  
+
   imagery: {
     style: "photography",
     mood: "moody",
     subjects: ["portraits", "weddings", "events", "studio shots"],
   },
-  
+
   spacing: {
     unit: 4,
     borderRadius: "sm",
   },
-  
+
   createdAt: new Date().toISOString(),
 };
 
@@ -381,7 +388,6 @@ async function main() {
     console.log("1. Navigate to /brand in the dashboard");
     console.log("2. Look for 'Keandrew Photography Studio'");
     console.log("3. Export rules to your IDE!\n");
-
   } catch (error) {
     console.error("❌ Error:", error);
     process.exit(1);

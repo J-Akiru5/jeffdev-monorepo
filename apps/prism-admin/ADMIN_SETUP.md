@@ -3,15 +3,18 @@
 ## Setting Up Your Admin Account in Clerk
 
 ### Step 1: Sign in to Clerk Dashboard
+
 1. Go to https://dashboard.clerk.com
 2. Select your project (the one matching your publishable key: `pk_test_c3RyaWtpbmctcGlnZW9uLTIyLmNsZXJrLmFjY291bnRzLmRldiQ`)
 
 ### Step 2: Find Your User Account
+
 1. In the left sidebar, click **"Users"**
 2. Find your account by your business email
 3. Click on your user to open the profile
 
 ### Step 3: Add Admin Role Metadata
+
 1. Scroll down to **"Public metadata"** section
 2. Click **"Edit"**
 3. Add this JSON:
@@ -23,12 +26,14 @@
 ```
 
 **Role Hierarchy:**
+
 - `founder` - Full access (highest)
 - `admin` - Admin access
 - `partner` - Partner access
 - `employee` - Basic access
 
 ### Step 4: Save Changes
+
 1. Click **"Save"**
 2. Sign out and sign in again to refresh your session
 
@@ -58,6 +63,7 @@ curl -X PATCH https://api.clerk.com/v1/users/USER_ID/metadata \
 ## Access Levels
 
 ### Founder (Your Account)
+
 ✅ Access to all routes  
 ✅ Can view/manage users  
 ✅ Can view/manage subscriptions  
@@ -66,12 +72,14 @@ curl -X PATCH https://api.clerk.com/v1/users/USER_ID/metadata \
 ✅ Can access Settings (System section visible)
 
 ### Admin
+
 ✅ Access to most routes  
 ✅ Can view/manage users  
 ✅ Can view/manage subscriptions  
 ❌ Cannot access System settings (founder only)
 
 ### Partner
+
 ✅ Limited access  
 ✅ Can view inquiries  
 ✅ Can view projects  
@@ -79,6 +87,7 @@ curl -X PATCH https://api.clerk.com/v1/users/USER_ID/metadata \
 ❌ Cannot access System settings
 
 ### Employee (Default)
+
 ❌ Redirected to `/unauthorized`  
 ❌ No admin access
 
@@ -87,6 +96,7 @@ curl -X PATCH https://api.clerk.com/v1/users/USER_ID/metadata \
 ## Current Setup
 
 **Your Apps:**
+
 - **Prism Dashboard** (port 3001) - Users manage their rules/projects
 - **Prism Admin** (port 3003) - You manage the platform
 
@@ -104,6 +114,7 @@ After setting your role to `founder`:
 4. Check the top-right badge - should show "Founder" role
 
 **If you still see "Unauthorized":**
+
 - Clear cookies and sign out
 - Hard refresh (Ctrl+Shift+R)
 - Sign in again

@@ -1,10 +1,10 @@
 /**
  * Mux Webhook Handler
- * 
+ *
  * POST /api/webhooks/mux
  * Receives events from Mux when video processing completes.
  * When transcript is ready, we extract it and create Rules using Azure OpenAI.
- * 
+ *
  * @webhook video.asset.ready - Asset fully processed
  * @webhook video.asset.track.ready - Subtitle track ready (transcript)
  */
@@ -13,7 +13,10 @@ import { NextResponse } from "next/server";
 import { getCollection } from "@jeffdev/db";
 import { z } from "zod";
 import { fetchMuxTranscript } from "@/lib/mux-transcript";
-import { extractRulesFromTranscript, generateEmbedding } from "@/lib/azure-openai";
+import {
+  extractRulesFromTranscript,
+  generateEmbedding,
+} from "@/lib/azure-openai";
 
 /**
  * Mux Webhook Event Schema (partial - only what we need)
@@ -23,16 +26,24 @@ const MuxWebhookSchema = z.object({
   data: z.object({
     id: z.string(),
     asset_id: z.string().optional(),
-    playback_ids: z.array(z.object({
-      id: z.string(),
-      policy: z.string(),
-    })).optional(),
-    tracks: z.array(z.object({
-      id: z.string(),
-      type: z.string(),
-      text_type: z.string().optional(),
-      language_code: z.string().optional(),
-    })).optional(),
+    playback_ids: z
+      .array(
+        z.object({
+          id: z.string(),
+          policy: z.string(),
+        }),
+      )
+      .optional(),
+    tracks: z
+      .array(
+        z.object({
+          id: z.string(),
+          type: z.string(),
+          text_type: z.string().optional(),
+          language_code: z.string().optional(),
+        }),
+      )
+      .optional(),
     passthrough: z.string().optional(),
     type: z.string().optional(), // For track events: "text"
   }),
@@ -63,7 +74,7 @@ export async function POST(request: Request) {
 
     // Parse the verified body
     const body = JSON.parse(rawBody);
-    
+
     // Validate webhook payload
     const parsed = MuxWebhookSchema.safeParse(body);
     if (!parsed.success) {
@@ -80,20 +91,19 @@ export async function POST(request: Request) {
       case "video.asset.ready":
         await handleAssetReady(event.data);
         break;
-        
+
       case "video.asset.track.ready":
         // This fires when the auto-generated subtitle track is ready
         if (event.data.type === "text") {
           await handleTrackReady(event.data);
         }
         break;
-        
+
       default:
         console.log(`[Mux Webhook] Ignoring event type: ${event.type}`);
     }
 
     return NextResponse.json({ received: true });
-
   } catch (error) {
     console.error("[Mux Webhook] Error processing event:", error);
     // Return 200 anyway to prevent Mux retries for app errors
@@ -105,9 +115,11 @@ export async function POST(request: Request) {
  * Handle video.asset.ready event
  * Video is fully processed, but we wait for the transcript track
  */
-async function handleAssetReady(data: z.infer<typeof MuxWebhookSchema>["data"]) {
+async function handleAssetReady(
+  data: z.infer<typeof MuxWebhookSchema>["data"],
+) {
   console.log(`[Mux] Asset ready: ${data.id}`);
-  
+
   // Parse passthrough data
   let metadata: Record<string, unknown> = {};
   if (data.passthrough) {
@@ -119,7 +131,9 @@ async function handleAssetReady(data: z.infer<typeof MuxWebhookSchema>["data"]) 
   }
 
   // Log for debugging - actual rule creation happens when transcript is ready
-  console.log(`[Mux] Asset ${data.id} belongs to user: ${metadata.userId || "unknown"}`);
+  console.log(
+    `[Mux] Asset ${data.id} belongs to user: ${metadata.userId || "unknown"}`,
+  );
 }
 
 /**
@@ -127,20 +141,23 @@ async function handleAssetReady(data: z.infer<typeof MuxWebhookSchema>["data"]) 
  * This is where we fetch the transcript, process it with Azure OpenAI,
  * and create Rules + VideoTranscript documents
  */
-async function handleTrackReady(data: z.infer<typeof MuxWebhookSchema>["data"]) {
+async function handleTrackReady(
+  data: z.infer<typeof MuxWebhookSchema>["data"],
+) {
   const assetId = data.asset_id;
   const trackId = data.id;
-  
+
   if (!assetId || !trackId) {
     console.error("[Mux] Missing asset_id or track id in track.ready event");
     return;
   }
-  
+
   console.log(`[Mux] Text track ready for asset ${assetId}, track ${trackId}`);
 
   try {
     // Parse passthrough metadata
-    let metadata: { userId?: string; projectId?: string; videoTitle?: string } = {};
+    let metadata: { userId?: string; projectId?: string; videoTitle?: string } =
+      {};
     if (data.passthrough) {
       try {
         metadata = JSON.parse(data.passthrough);
@@ -152,17 +169,21 @@ async function handleTrackReady(data: z.infer<typeof MuxWebhookSchema>["data"]) 
     // Step 1: Fetch transcript from Mux
     console.log(`[Mux] Fetching transcript...`);
     const transcript = await fetchMuxTranscript(assetId, trackId);
-    
+
     // Step 2: Extract rules using Azure OpenAI
-    console.log(`[Mux] Processing transcript with Azure OpenAI (${transcript.fullText.length} chars)...`);
+    console.log(
+      `[Mux] Processing transcript with Azure OpenAI (${transcript.fullText.length} chars)...`,
+    );
     const videoTitle = metadata.videoTitle || `Video ${assetId.slice(0, 8)}`;
     const aiResult = await extractRulesFromTranscript(
       transcript.fullText,
       videoTitle,
-      metadata.projectId
+      metadata.projectId,
     );
-    
-    console.log(`[Mux] ✅ Extracted ${aiResult.rules.length} rules (confidence: ${aiResult.confidence})`);
+
+    console.log(
+      `[Mux] ✅ Extracted ${aiResult.rules.length} rules (confidence: ${aiResult.confidence})`,
+    );
 
     // Step 2.5: Generate embedding for semantic search (optional - may fail if not configured)
     let embedding: number[] = [];
@@ -170,26 +191,33 @@ async function handleTrackReady(data: z.infer<typeof MuxWebhookSchema>["data"]) 
       if (process.env.AZURE_OPENAI_EMBEDDING_DEPLOYMENT) {
         console.log(`[Mux] Generating embedding for semantic search...`);
         embedding = await generateEmbedding(transcript.fullText);
-        console.log(`[Mux] ✅ Generated ${embedding.length}-dimensional embedding`);
+        console.log(
+          `[Mux] ✅ Generated ${embedding.length}-dimensional embedding`,
+        );
       } else {
-        console.log(`[Mux] ⏭️ Skipping embeddings - AZURE_OPENAI_EMBEDDING_DEPLOYMENT not configured`);
+        console.log(
+          `[Mux] ⏭️ Skipping embeddings - AZURE_OPENAI_EMBEDDING_DEPLOYMENT not configured`,
+        );
       }
     } catch (embeddingError) {
-      console.warn(`[Mux] ⚠️ Failed to generate embedding, continuing without it:`, embeddingError);
+      console.warn(
+        `[Mux] ⚠️ Failed to generate embedding, continuing without it:`,
+        embeddingError,
+      );
     }
 
     // Step 3: Store VideoTranscript document
     const transcriptsCollection = await getCollection("videoTranscripts");
     const playbackId = data.playback_ids?.[0]?.id;
-    
+
     const videoTranscript = {
       muxAssetId: assetId,
-      muxPlaybackId: playbackId || '',
+      muxPlaybackId: playbackId || "",
       videoTitle,
       transcriptText: transcript.fullText,
       segments: transcript.segments,
       duration: transcript.duration,
-      language: transcript.language || 'en',
+      language: transcript.language || "en",
       embedding: embedding.length > 0 ? embedding : undefined, // Only add if generated
       extractedRules: [], // Will populate with rule IDs after inserting rules
       userId: metadata.userId,
@@ -199,15 +227,18 @@ async function handleTrackReady(data: z.infer<typeof MuxWebhookSchema>["data"]) 
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    
-    const transcriptResult = await transcriptsCollection.insertOne(videoTranscript);
-    console.log(`[Mux] ✅ Saved VideoTranscript: ${transcriptResult.insertedId}`);
+
+    const transcriptResult =
+      await transcriptsCollection.insertOne(videoTranscript);
+    console.log(
+      `[Mux] ✅ Saved VideoTranscript: ${transcriptResult.insertedId}`,
+    );
 
     // Step 4: Insert extracted rules into Cosmos DB
     if (aiResult.rules.length > 0) {
       const rulesCollection = await getCollection("rules");
       const extractedRuleIds: string[] = [];
-      
+
       for (const extractedRule of aiResult.rules) {
         const rule = {
           name: extractedRule.title,
@@ -219,7 +250,7 @@ async function handleTrackReady(data: z.infer<typeof MuxWebhookSchema>["data"]) 
 
 ${extractedRule.description}
 
-${extractedRule.examples?.good || extractedRule.examples?.bad ? '### Examples\n' : ''}${extractedRule.examples?.good ? `**✅ Good:**\n\`\`\`\n${extractedRule.examples.good}\n\`\`\`\n\n` : ''}${extractedRule.examples?.bad ? `**❌ Bad:**\n\`\`\`\n${extractedRule.examples.bad}\n\`\`\`\n` : ''}
+${extractedRule.examples?.good || extractedRule.examples?.bad ? "### Examples\n" : ""}${extractedRule.examples?.good ? `**✅ Good:**\n\`\`\`\n${extractedRule.examples.good}\n\`\`\`\n\n` : ""}${extractedRule.examples?.bad ? `**❌ Bad:**\n\`\`\`\n${extractedRule.examples.bad}\n\`\`\`\n` : ""}
 ---
 **Source:** Video transcript - ${videoTitle}
 **Asset ID:** \`${assetId}\`
@@ -245,22 +276,23 @@ ${extractedRule.examples?.good || extractedRule.examples?.bad ? '### Examples\n'
       // Step 5: Update VideoTranscript with rule IDs
       await transcriptsCollection.updateOne(
         { _id: transcriptResult.insertedId },
-        { $set: { extractedRules: extractedRuleIds } }
+        { $set: { extractedRules: extractedRuleIds } },
       );
     }
 
-    console.log(`[Mux] 🎉 Successfully processed video ${assetId}: ${aiResult.rules.length} rules extracted`);
+    console.log(
+      `[Mux] 🎉 Successfully processed video ${assetId}: ${aiResult.rules.length} rules extracted`,
+    );
     console.log(`[Mux] Summary: ${aiResult.summary}`);
-
   } catch (error) {
     console.error("[Mux] Failed to process transcript:", error);
-    
+
     // Create error placeholder rule so we don't lose the event
     try {
       const rulesCollection = await getCollection("rules");
       await rulesCollection.insertOne({
         name: `⚠️ Processing Failed: ${assetId?.slice(0, 8)}`,
-        description: `Failed to process video transcript. Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        description: `Failed to process video transcript. Error: ${error instanceof Error ? error.message : "Unknown error"}`,
         category: "general",
         tags: ["error", "failed-processing", "mux"],
         content: `## Processing Error\n\nAsset: ${assetId}\nTrack: ${trackId}\n\nPlease check logs and retry.`,
@@ -274,7 +306,7 @@ ${extractedRule.examples?.good || extractedRule.examples?.bad ? '### Examples\n'
     } catch {
       // Silently fail - we already logged the original error
     }
-    
+
     throw error;
   }
 }
@@ -282,21 +314,28 @@ ${extractedRule.examples?.good || extractedRule.examples?.bad ? '### Examples\n'
 /**
  * Verify Mux webhook signature using HMAC-SHA256
  * @see https://docs.mux.com/guides/video/verify-webhook-signatures
- * 
+ *
  * Mux signature header format: t={timestamp},v1={signature}
  * Signature is computed as HMAC-SHA256(secret, timestamp + "." + rawBody)
  */
-async function verifyMuxSignature(request: Request, rawBody: string): Promise<boolean> {
+async function verifyMuxSignature(
+  request: Request,
+  rawBody: string,
+): Promise<boolean> {
   const signatureHeader = request.headers.get("mux-signature");
   const webhookSecret = process.env.MUX_WEBHOOK_SECRET;
 
   // If no secret configured, allow in development but log warning
   if (!webhookSecret) {
     if (process.env.NODE_ENV === "development") {
-      console.warn("[Mux Webhook] ⚠️ MUX_WEBHOOK_SECRET not set - skipping verification in development");
+      console.warn(
+        "[Mux Webhook] ⚠️ MUX_WEBHOOK_SECRET not set - skipping verification in development",
+      );
       return true;
     }
-    console.error("[Mux Webhook] ❌ MUX_WEBHOOK_SECRET is required in production");
+    console.error(
+      "[Mux Webhook] ❌ MUX_WEBHOOK_SECRET is required in production",
+    );
     return false;
   }
 
@@ -324,7 +363,9 @@ async function verifyMuxSignature(request: Request, rawBody: string): Promise<bo
   const tolerance = 300; // 5 minutes
 
   if (currentTime - timestampSeconds > tolerance) {
-    console.error("[Mux Webhook] ❌ Timestamp too old - possible replay attack");
+    console.error(
+      "[Mux Webhook] ❌ Timestamp too old - possible replay attack",
+    );
     return false;
   }
 
@@ -341,7 +382,7 @@ async function verifyMuxSignature(request: Request, rawBody: string): Promise<bo
     keyData,
     { name: "HMAC", hash: "SHA-256" },
     false,
-    ["sign"]
+    ["sign"],
   );
 
   const signatureBuffer = await crypto.subtle.sign("HMAC", key, messageData);
@@ -357,7 +398,8 @@ async function verifyMuxSignature(request: Request, rawBody: string): Promise<bo
 
   let mismatch = 0;
   for (let i = 0; i < expectedSignature.length; i++) {
-    mismatch |= expectedSignature.charCodeAt(i) ^ receivedSignature.charCodeAt(i);
+    mismatch |=
+      expectedSignature.charCodeAt(i) ^ receivedSignature.charCodeAt(i);
   }
 
   if (mismatch !== 0) {
@@ -368,4 +410,3 @@ async function verifyMuxSignature(request: Request, rawBody: string): Promise<bo
   console.log("[Mux Webhook] ✅ Signature verified successfully");
   return true;
 }
-

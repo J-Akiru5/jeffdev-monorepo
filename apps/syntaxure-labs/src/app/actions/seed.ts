@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 /**
  * Seed Actions
@@ -7,7 +7,7 @@
  * Use with caution - these should only run once.
  */
 
-import { getAdminClient } from '@/lib/supabase/admin';
+import { getAdminClient } from "@/lib/supabase/admin";
 
 /**
  * Bootstrap the current logged-in user as founder
@@ -16,67 +16,65 @@ import { getAdminClient } from '@/lib/supabase/admin';
 export async function bootstrapCurrentUserAsFounder(
   uid: string,
   email: string,
-  displayName: string
+  displayName: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = getAdminClient() as any;
 
     // Check if user document already exists
     const { data: existingUser } = await supabase
-      .from('user_profiles')
-      .select('id')
-      .eq('id', uid)
+      .from("user_profiles")
+      .select("id")
+      .eq("id", uid)
       .maybeSingle();
 
     if (existingUser) {
       // Update existing document to founder role
       const { error: updateError } = await supabase
-        .from('user_profiles')
+        .from("user_profiles")
         .update({
-          role: 'admin',
+          role: "admin",
           updated_at: new Date().toISOString(),
         } as any)
-        .eq('id', uid);
+        .eq("id", uid);
 
       if (updateError) throw updateError;
 
       // Set app_metadata for role-based access
       await supabase.auth.admin.updateUserById(uid, {
-        app_metadata: { role: 'admin' },
+        app_metadata: { role: "admin" },
       });
 
       return { success: true };
     }
 
     // Create new founder document
-    const { error: insertError } = await supabase
-      .from('user_profiles')
-      .insert({
-        id: uid,
-        email,
-        full_name: displayName,
-        role: 'admin',
-        company_name: 'Syntaxure Labs',
-        timezone: 'Asia/Manila',
-        preferences: {
-          namecard: {},
-          socials: {},
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      } as any);
+    const { error: insertError } = await supabase.from("user_profiles").insert({
+      id: uid,
+      email,
+      full_name: displayName,
+      role: "admin",
+      company_name: "Syntaxure Labs",
+      timezone: "Asia/Manila",
+      preferences: {
+        namecard: {},
+        socials: {},
+      },
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    } as any);
 
     if (insertError) throw insertError;
 
     // Set app_metadata for role-based access
     await supabase.auth.admin.updateUserById(uid, {
-      app_metadata: { role: 'admin' },
+      app_metadata: { role: "admin" },
     });
 
     return { success: true };
   } catch (error) {
-    console.error('[BOOTSTRAP FOUNDER ERROR]', error);
-    return { success: false, error: 'Failed to bootstrap founder account' };
+    console.error("[BOOTSTRAP FOUNDER ERROR]", error);
+    return { success: false, error: "Failed to bootstrap founder account" };
   }
 }
 
@@ -99,16 +97,16 @@ export async function upsertUserProfile(
       linkedin?: string;
       twitter?: string;
     };
-  }
+  },
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = getAdminClient() as any;
 
     // Check if user exists
     const { data: existingUser } = await supabase
-      .from('user_profiles')
-      .select('id, preferences')
-      .eq('id', uid)
+      .from("user_profiles")
+      .select("id, preferences")
+      .eq("id", uid)
       .maybeSingle();
 
     if (existingUser) {
@@ -124,7 +122,10 @@ export async function upsertUserProfile(
 
       if (data.socials || data.title || data.website) {
         updates.preferences = {
-          ...((existingUser as Record<string, unknown>).preferences as Record<string, unknown>),
+          ...((existingUser as Record<string, unknown>).preferences as Record<
+            string,
+            unknown
+          >),
           title: data.title,
           website: data.website,
           socials: data.socials,
@@ -132,36 +133,34 @@ export async function upsertUserProfile(
       }
 
       const { error } = await supabase
-        .from('user_profiles')
+        .from("user_profiles")
         .update(updates as any)
-        .eq('id', uid);
+        .eq("id", uid);
 
       if (error) throw error;
     } else {
       // Create new with defaults
-      const { error } = await supabase
-        .from('user_profiles')
-        .insert({
-          id: uid,
-          email: '',
-          full_name: data.displayName || '',
-          role: 'employee',
-          timezone: 'UTC',
-          preferences: {
-            title: data.title || '',
-            website: data.website || '',
-            socials: data.socials || {},
-          },
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        } as any);
+      const { error } = await supabase.from("user_profiles").insert({
+        id: uid,
+        email: "",
+        full_name: data.displayName || "",
+        role: "employee",
+        timezone: "UTC",
+        preferences: {
+          title: data.title || "",
+          website: data.website || "",
+          socials: data.socials || {},
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as any);
 
       if (error) throw error;
     }
 
     return { success: true };
   } catch (error) {
-    console.error('[UPSERT USER PROFILE ERROR]', error);
-    return { success: false, error: 'Failed to update profile' };
+    console.error("[UPSERT USER PROFILE ERROR]", error);
+    return { success: false, error: "Failed to update profile" };
   }
 }

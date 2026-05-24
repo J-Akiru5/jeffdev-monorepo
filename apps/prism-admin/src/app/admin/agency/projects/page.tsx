@@ -35,37 +35,48 @@ export default async function AgencyProjectsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Projects</h1>
-          <p className="mt-1 text-sm text-white/50">{projects?.length || 0} total projects</p>
+          <p className="mt-1 text-sm text-white/50">
+            {projects?.length || 0} total projects
+          </p>
         </div>
       </div>
 
       <div className="grid gap-4">
-        {projects && projects.length > 0 ? projects.map((project) => (
-          <div
-            key={project.id}
-            className="rounded-lg border border-white/5 bg-white/[0.02] p-4 hover:border-white/10 transition-all"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-medium text-white">{project.title}</h3>
-                <p className="text-xs text-white/40 mt-0.5">
-                  {(project as any).client_name || "Client"} {project.start_date ? `· ${project.start_date}` : ""}
-                </p>
+        {projects && projects.length > 0 ? (
+          projects.map((project) => (
+            <div
+              key={project.id}
+              className="rounded-lg border border-white/5 bg-white/[0.02] p-4 hover:border-white/10 transition-all"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-medium text-white">
+                    {project.title}
+                  </h3>
+                  <p className="text-xs text-white/40 mt-0.5">
+                    {(project as any).client_name || "Client"}{" "}
+                    {project.start_date ? `· ${project.start_date}` : ""}
+                  </p>
+                </div>
+                <span
+                  className={`rounded-sm px-2 py-0.5 text-[10px] uppercase tracking-wider ${
+                    statusColors[project.status] || statusColors.archived
+                  }`}
+                >
+                  {project.status}
+                </span>
               </div>
-              <span
-                className={`rounded-sm px-2 py-0.5 text-[10px] uppercase tracking-wider ${
-                  statusColors[project.status] || statusColors.archived
-                }`}
-              >
-                {project.status}
-              </span>
+              {project.description && (
+                <p className="mt-2 text-xs text-white/30 line-clamp-2">
+                  {project.description}
+                </p>
+              )}
             </div>
-            {project.description && (
-              <p className="mt-2 text-xs text-white/30 line-clamp-2">{project.description}</p>
-            )}
+          ))
+        ) : (
+          <div className="py-12 text-center text-white/30">
+            No projects found
           </div>
-        )) : (
-          <div className="py-12 text-center text-white/30">No projects found</div>
         )}
       </div>
     </div>

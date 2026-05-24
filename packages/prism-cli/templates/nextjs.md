@@ -22,13 +22,14 @@ app/
 ## Server vs Client Components
 
 ### Server Component (Default)
+
 ```tsx
 // app/components/UserList.tsx
 // No 'use client' - runs on server
 
 async function UserList() {
   const users = await db.users.findMany();
-  
+
   return (
     <ul>
       {users.map((user) => (
@@ -42,10 +43,11 @@ export default UserList;
 ```
 
 ### Client Component (Interactive)
-```tsx
-'use client';
 
-import { useState } from 'react';
+```tsx
+"use client";
+
+import { useState } from "react";
 
 interface CounterProps {
   initialCount?: number;
@@ -53,42 +55,42 @@ interface CounterProps {
 
 export function Counter({ initialCount = 0 }: CounterProps) {
   const [count, setCount] = useState(initialCount);
-  
-  return (
-    <button onClick={() => setCount(count + 1)}>
-      Count: {count}
-    </button>
-  );
+
+  return <button onClick={() => setCount(count + 1)}>Count: {count}</button>;
 }
 ```
 
 ## Data Fetching
 
 ### Server Component Fetching
+
 ```tsx
 // Runs on server - no loading states needed
 async function ProductPage({ params }: { params: { id: string } }) {
-  const product = await fetch(`/api/products/${params.id}`).then(r => r.json());
-  
+  const product = await fetch(`/api/products/${params.id}`).then((r) =>
+    r.json(),
+  );
+
   return <ProductDetails product={product} />;
 }
 ```
 
 ### Client Fetching (useTransition)
-```tsx
-'use client';
 
-import { useTransition } from 'react';
+```tsx
+"use client";
+
+import { useTransition } from "react";
 
 export function SaveButton({ onSave }: { onSave: () => Promise<void> }) {
   const [isPending, startTransition] = useTransition();
-  
+
   return (
     <button
       disabled={isPending}
       onClick={() => startTransition(() => onSave())}
     >
-      {isPending ? 'Saving...' : 'Save'}
+      {isPending ? "Saving..." : "Save"}
     </button>
   );
 }
@@ -98,14 +100,14 @@ export function SaveButton({ onSave }: { onSave: () => Promise<void> }) {
 
 ```tsx
 // app/actions.ts
-'use server';
+"use server";
 
 export async function createPost(formData: FormData) {
-  const title = formData.get('title') as string;
-  const content = formData.get('content') as string;
-  
+  const title = formData.get("title") as string;
+  const content = formData.get("content") as string;
+
   await db.posts.create({ title, content });
-  revalidatePath('/posts');
+  revalidatePath("/posts");
 }
 ```
 
@@ -121,23 +123,23 @@ export async function createPost(formData: FormData) {
 ## Routing with Link
 
 ```tsx
-import Link from 'next/link';
+import Link from "next/link";
 
 <Link href="/dashboard" className="text-blue-500 hover:underline">
   Dashboard
-</Link>
+</Link>;
 
 // Programmatic navigation
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
 const router = useRouter();
-router.push('/dashboard');
+router.push("/dashboard");
 ```
 
 ## Image Optimization
 
 ```tsx
-import Image from 'next/image';
+import Image from "next/image";
 
 <Image
   src="/hero.png"
@@ -145,18 +147,18 @@ import Image from 'next/image';
   width={1200}
   height={600}
   priority // Load immediately for LCP
-/>
+/>;
 ```
 
 ## Metadata
 
 ```tsx
 // app/layout.tsx or page.tsx
-import type { Metadata } from 'next';
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'Page Title',
-  description: 'Page description',
+  title: "Page Title",
+  description: "Page description",
 };
 ```
 
@@ -169,9 +171,12 @@ export default function Loading() {
 }
 
 // app/dashboard/error.tsx
-'use client';
+("use client");
 
-export default function Error({ error, reset }: {
+export default function Error({
+  error,
+  reset,
+}: {
   error: Error;
   reset: () => void;
 }) {

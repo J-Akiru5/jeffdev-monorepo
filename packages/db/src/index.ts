@@ -1,21 +1,20 @@
 /**
  * @module @jeffdev/db
  * @description The "Data Nexus" - unified database access for the JeffDev ecosystem.
- * 
+ *
  * This package provides:
  * - MongoDB / Cosmos DB client for Prism
  * - Gremlin graph client for Cosmos DB
  * - Shared Zod schemas for type-safe validation
- * 
+ *
  * @example
  * // Cosmos DB (Prism)
  * import { getCollection } from "@jeffdev/db/cosmos";
  * const rules = await getCollection("rules");
- * 
+ *
  * // Schemas
  * import { UserSchema, RuleSchema } from "@jeffdev/db/schema";
  */
-
 
 // Cosmos/MongoDB exports
 export {
@@ -76,6 +75,7 @@ export {
   SubscriptionStatusSchema,
   UsageSchema,
   VideoTranscriptSchema,
+  AvailabilitySlotSchema,
   type DesignSystem,
   type Stack,
   type PrismProject,
@@ -85,4 +85,5 @@ export {
   type SubscriptionStatus,
   type Usage,
   type VideoTranscript,
+  type AvailabilitySlot,
 } from "./schema";

@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
 
 /**
  * Root Page
@@ -6,5 +6,5 @@ import { redirect } from 'next/navigation';
  * Redirects to the default tasks view.
  */
 export default function HomePage() {
-  redirect('/tasks');
+  redirect("/tasks");
 }

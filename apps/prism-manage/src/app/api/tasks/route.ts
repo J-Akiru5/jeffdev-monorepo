@@ -12,7 +12,7 @@ export async function GET() {
   } catch {
     return NextResponse.json(
       { error: "Failed to fetch tasks" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

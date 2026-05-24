@@ -1,6 +1,6 @@
-import Link from 'next/link';
-import { Mail, MapPin, ArrowUpRight } from 'lucide-react';
-import { SyntaxureLogo } from '@syntaxure/ui';
+import Link from "next/link";
+import { Mail, MapPin, ArrowUpRight } from "lucide-react";
+import { SyntaxureLogo } from "@syntaxure/ui";
 
 /**
  * Footer Component
@@ -14,24 +14,32 @@ import { SyntaxureLogo } from '@syntaxure/ui';
 
 const footerLinks = {
   services: [
-    { href: '/services/web-development', label: 'Web Development' },
-    { href: '/services/saas-platforms', label: 'SaaS Platforms' },
-    { href: '/services/cloud-architecture', label: 'Cloud Architecture' },
-    { href: '/services/ai-integration', label: 'AI Integration' },
+    { href: "/services/web-development", label: "Web Development" },
+    { href: "/services/saas-platforms", label: "SaaS Platforms" },
+    { href: "/services/cloud-architecture", label: "Cloud Architecture" },
+    { href: "/services/ai-integration", label: "AI Integration" },
   ],
   products: [
-    { href: 'https://prism.jeffdev.studio', label: 'Prism Context Engine', external: true },
-    { href: 'https://prism.jeffdev.studio/guide/getting-started', label: 'Documentation', external: true },
+    {
+      href: "https://prism.jeffdev.studio",
+      label: "Prism Context Engine",
+      external: true,
+    },
+    {
+      href: "https://prism.jeffdev.studio/guide/getting-started",
+      label: "Documentation",
+      external: true,
+    },
   ],
   company: [
-    { href: '/about', label: 'About Studio' },
-    { href: '/work', label: 'Case Studies' },
-    { href: '/blog', label: 'Insights' },
-    { href: '/contact', label: 'Contact' },
+    { href: "/about", label: "About Studio" },
+    { href: "/work", label: "Case Studies" },
+    { href: "/blog", label: "Insights" },
+    { href: "/contact", label: "Contact" },
   ],
   legal: [
-    { href: '/terms', label: 'Terms of Service' },
-    { href: '/privacy', label: 'Privacy Policy' },
+    { href: "/terms", label: "Terms of Service" },
+    { href: "/privacy", label: "Privacy Policy" },
   ],
 };
 

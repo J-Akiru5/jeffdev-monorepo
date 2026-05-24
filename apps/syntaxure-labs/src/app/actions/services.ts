@@ -1,21 +1,19 @@
-'use server';
-
- 
+"use server";
 
 /**
  * Services Server Actions
  * -----------------------
  * CRUD operations for agency services with pricing tiers.
- * 
- * NOTE: Type casting with 'as any' is used due to Supabase's limitation with 
+ *
+ * NOTE: Type casting with 'as any' is used due to Supabase's limitation with
  * dynamically determined table schemas. The actual runtime behavior is correct.
  */
 
-import { getAdminClient } from '@/lib/supabase/admin';
-import type { Service } from '@/types/services';
-import { logAuditEvent } from '@/lib/audit';
+import { getAdminClient } from "@/lib/supabase/admin";
+import type { Service } from "@/types/services";
+import { logAuditEvent } from "@/lib/audit";
 
-const COLLECTION = 'services';
+const COLLECTION = "services";
 
 /**
  * Get all services
@@ -25,14 +23,14 @@ export async function getServices(): Promise<Service[]> {
     const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(COLLECTION)
-      .select('*')
-      .order('order', { ascending: true });
+      .select("*")
+      .order("order", { ascending: true });
 
     if (error || !data) return [];
 
     return data as Service[];
   } catch (error) {
-    console.error('[GET SERVICES ERROR]', error);
+    console.error("[GET SERVICES ERROR]", error);
     return [];
   }
 }
@@ -45,9 +43,9 @@ export async function getPublishedServices(): Promise<Service[]> {
     const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(COLLECTION)
-      .select('*')
-      .eq('status', 'published')
-      .order('order', { ascending: true });
+      .select("*")
+      .eq("status", "published")
+      .order("order", { ascending: true });
 
     if (error || !data) return [];
 
@@ -56,7 +54,7 @@ export async function getPublishedServices(): Promise<Service[]> {
       ...doc,
     })) as Service[];
   } catch (error) {
-    console.error('[GET PUBLISHED SERVICES ERROR]', error);
+    console.error("[GET PUBLISHED SERVICES ERROR]", error);
     return [];
   }
 }
@@ -69,8 +67,8 @@ export async function getServiceBySlug(slug: string): Promise<Service | null> {
     const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(COLLECTION)
-      .select('*')
-      .eq('slug', slug)
+      .select("*")
+      .eq("slug", slug)
       .limit(1)
       .single();
 
@@ -81,7 +79,7 @@ export async function getServiceBySlug(slug: string): Promise<Service | null> {
       ...data,
     } as Service;
   } catch (error) {
-    console.error('[GET SERVICE BY SLUG ERROR]', error);
+    console.error("[GET SERVICE BY SLUG ERROR]", error);
     return null;
   }
 }
@@ -90,16 +88,16 @@ export async function getServiceBySlug(slug: string): Promise<Service | null> {
  * Create a new service
  */
 export async function createService(
-  data: Omit<Service, 'id' | 'created_at' | 'updated_at'>
+  data: Omit<Service, "id" | "created_at" | "updated_at">,
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
     // Check for duplicate slug
     const existing = await getServiceBySlug(data.slug);
     if (existing) {
-      return { success: false, error: 'Service with this slug already exists' };
+      return { success: false, error: "Service with this slug already exists" };
     }
 
-    const service: Omit<Service, 'id'> = {
+    const service: Omit<Service, "id"> = {
       ...data,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -115,16 +113,16 @@ export async function createService(
     if (error) throw error;
 
     await logAuditEvent({
-      action: 'CREATE',
-      resource: 'services',
+      action: "CREATE",
+      resource: "services",
       resourceId: result.id,
       details: { name: data.name, slug: data.slug },
     });
 
     return { success: true, id: result.id };
   } catch (error) {
-    console.error('[CREATE SERVICE ERROR]', error);
-    return { success: false, error: 'Failed to create service' };
+    console.error("[CREATE SERVICE ERROR]", error);
+    return { success: false, error: "Failed to create service" };
   }
 }
 
@@ -133,7 +131,7 @@ export async function createService(
  */
 export async function updateService(
   id: string,
-  data: Partial<Service>
+  data: Partial<Service>,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     // Remove protected fields
@@ -147,21 +145,21 @@ export async function updateService(
         ...updateData,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', id);
+      .eq("id", id);
 
     if (error) throw error;
 
     await logAuditEvent({
-      action: 'UPDATE',
-      resource: 'services',
+      action: "UPDATE",
+      resource: "services",
       resourceId: id,
       details: { fields: Object.keys(updateData) },
     });
 
     return { success: true };
   } catch (error) {
-    console.error('[UPDATE SERVICE ERROR]', error);
-    return { success: false, error: 'Failed to update service' };
+    console.error("[UPDATE SERVICE ERROR]", error);
+    return { success: false, error: "Failed to update service" };
   }
 }
 
@@ -169,27 +167,24 @@ export async function updateService(
  * Delete a service
  */
 export async function deleteService(
-  id: string
+  id: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = getAdminClient() as any;
-    const { error } = await supabase
-      .from(COLLECTION)
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from(COLLECTION).delete().eq("id", id);
 
     if (error) throw error;
 
     await logAuditEvent({
-      action: 'DELETE',
-      resource: 'services',
+      action: "DELETE",
+      resource: "services",
       resourceId: id,
     });
 
     return { success: true };
   } catch (error) {
-    console.error('[DELETE SERVICE ERROR]', error);
-    return { success: false, error: 'Failed to delete service' };
+    console.error("[DELETE SERVICE ERROR]", error);
+    return { success: false, error: "Failed to delete service" };
   }
 }
 
@@ -197,28 +192,28 @@ export async function deleteService(
  * Reorder services
  */
 export async function reorderServices(
-  orderedIds: string[]
+  orderedIds: string[],
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = getAdminClient() as any;
-    
+
     // Update each service with its new order
     for (let index = 0; index < orderedIds.length; index++) {
       const id = orderedIds[index];
       const { error } = await supabase
         .from(COLLECTION)
-        .update({ 
-          order: index, 
-          updated_at: new Date().toISOString() 
+        .update({
+          order: index,
+          updated_at: new Date().toISOString(),
         })
-        .eq('id', id);
+        .eq("id", id);
 
       if (error) throw error;
     }
 
     return { success: true };
   } catch (error) {
-    console.error('[REORDER SERVICES ERROR]', error);
-    return { success: false, error: 'Failed to reorder services' };
+    console.error("[REORDER SERVICES ERROR]", error);
+    return { success: false, error: "Failed to reorder services" };
   }
 }

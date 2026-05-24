@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Dashboard Charts Section
@@ -6,7 +6,7 @@
  * Client component wrapper for Recharts.
  */
 
-import { ActivityChart, ProjectStatusChart, RevenueChart } from './charts';
+import { ActivityChart, ProjectStatusChart, RevenueChart } from "./charts";
 
 interface DashboardChartsProps {
   activityData: { date: string; quotes: number; messages: number }[];

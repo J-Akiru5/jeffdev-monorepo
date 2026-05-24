@@ -5,6 +5,7 @@
 > **Companion to:** `revamp.md` — the full implementation plan.
 >
 > **Legend:**
+>
 > - [👤 Jeff] — Only Jeff can do this (account owner)
 > - [👤 Lou] — Only Lou can do this (CTO, DevOps access)
 > - [👥 Both] — Either can do
@@ -62,11 +63,11 @@
 
 After creation, go to Project Settings → API:
 
-| Credential | Where | Save To |
-|-----------|-------|----------|
-| **Project URL** | Configuration → URL | Doppler: `NEXT_PUBLIC_SUPABASE_URL` (across all Doppler configs) |
-| **Anon Key** | Configuration → anon/public key | Doppler: `NEXT_PUBLIC_SUPABASE_ANON_KEY` |
-| **Service Role Key** | Configuration → service_role key | Doppler: `SUPABASE_SERVICE_ROLE_KEY` |
+| Credential           | Where                            | Save To                                                          |
+| -------------------- | -------------------------------- | ---------------------------------------------------------------- |
+| **Project URL**      | Configuration → URL              | Doppler: `NEXT_PUBLIC_SUPABASE_URL` (across all Doppler configs) |
+| **Anon Key**         | Configuration → anon/public key  | Doppler: `NEXT_PUBLIC_SUPABASE_ANON_KEY`                         |
+| **Service Role Key** | Configuration → service_role key | Doppler: `SUPABASE_SERVICE_ROLE_KEY`                             |
 
 ⚠️ **The service_role key bypasses RLS.** Never expose it to the browser. Only use in server actions/API routes.
 
@@ -75,14 +76,17 @@ After creation, go to Project Settings → API:
 Go to Authentication → Settings:
 
 **User Sign Ups:**
+
 - [x] Allow new users to sign up
 - [ ] Allow anonymous sign-ins (DISABLED for now)
 - [x] Enable email confirmations
 
 **Passwords:**
+
 - Minimum password length: 8
 
 **Email Auth:**
+
 - [x] Enable email provider (default — magic link + password)
 - Custom SMTP: Use Resend SMTP (you already have Resend configured):
   - **Host:** smtp.resend.com
@@ -92,6 +96,7 @@ Go to Authentication → Settings:
   - **Sender:** noreply@jeffdev.studio
 
 **OAuth Providers:** (do NOT configure yet — Phase 1 is email-only)
+
 - Skip Google, GitHub, etc. for now. Add post-MVP.
 
 ### 1.5 Configure Site URLs (Auth → URL Configuration)
@@ -113,12 +118,14 @@ Redirect URLs:
 ### 1.6 Configure Storage
 
 Go to Storage → Create new bucket:
+
 - **Name:** `assets`
 - **Public bucket:** NO (use signed URLs or RLS policies)
 - **File size limit:** 10MB (matches current R2 setup)
 - **Allowed MIME types:** `image/jpeg, image/png, image/webp, application/pdf`
 
 **CORS Configuration** (for browser uploads):
+
 ```
 Allowed Origins: https://syntaxurelabs.com, http://localhost:3000
 Allowed Methods: GET, POST, PUT, DELETE
@@ -153,6 +160,7 @@ This creates `supabase/config.toml` and provides local database, auth, and stora
 After the AI agent creates the migration file (`supabase/migrations/00001_initial_schema.sql`) based on the schema in `revamp.md §3`:
 
 **Local:**
+
 ```bash
 # Apply migration to local Supabase
 npx supabase db push
@@ -162,6 +170,7 @@ npx supabase db dump --local --data-only > local_schema_test.sql
 ```
 
 **Production:**
+
 ```bash
 # Link to remote project (first time)
 npx supabase link --project-ref <project-ref-id>
@@ -177,16 +186,19 @@ npx supabase db push
 ### 2.2 Enable RLS on All Tables
 
 Go to Authentication → Policies:
+
 - For each table, click "Enable RLS"
 - Apply the RLS policies from `revamp.md §3`
 
 ### 2.3 Create Test User (Manual)
 
 Go to Authentication → Users → Create user:
+
 - Email: `test@syntaxurelabs.com`
 - Password: `<temporary>`
 - Check "Auto Confirm User"
 - After creation, go to SQL Editor:
+
 ```sql
 UPDATE user_profiles SET role = 'admin', tier = 'enterprise' WHERE id = '<user-id>';
 ```
@@ -208,6 +220,7 @@ UPDATE user_profiles SET role = 'admin', tier = 'enterprise' WHERE id = '<user-i
 ### 3.2 Verify Export Contains
 
 Each user entry should include:
+
 - `id` (clerk user ID)
 - `email_addresses[0].email_address`
 - `first_name`, `last_name`
@@ -227,9 +240,11 @@ pnpm tsx scripts/import-clerk-users.ts --file clerk-users-export-<date>.json
 1. Supabase Dashboard → Authentication → Users → check total count
 2. Compare vs Clerk export count
 3. Run verification SQL:
+
 ```sql
 SELECT role, COUNT(*) FROM user_profiles GROUP BY role;
 ```
+
 4. Compare with Clerk user count by role (check Clerk Dashboard)
 
 ### 3.5 Send Password Reset Emails
@@ -239,9 +254,11 @@ SELECT role, COUNT(*) FROM user_profiles GROUP BY role;
 1. Go to Supabase Dashboard → Authentication → Templates
 2. Edit the **"Reset Password"** template (see §14 for template text)
 3. Run the reset email script (AI agent creates):
+
 ```bash
 pnpm tsx scripts/send-reset-emails.ts
 ```
+
 4. Monitor email delivery: Supabase Auth → Logs → Email
 
 ### 3.6 Post-Cutover: Keep Clerk Alive for 30 Days
@@ -262,52 +279,55 @@ pnpm tsx scripts/send-reset-emails.ts
 ### 4.1 Review Current Configs
 
 Go to Doppler Dashboard → jeffdev-monorepo project:
+
 - Check current environments: `dev`, `staging`, `production` (or similar)
 - Note all existing variables
 
 ### 4.2 Add New Variables (Doppler Dashboard)
 
-| Phase | Variable | Value Source | Environment |
-|-------|----------|-------------|-------------|
-| Phase 1 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase Dashboard → Settings → API | All |
-| Phase 1 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard → Settings → API | All |
-| Phase 1 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard → Settings → API | All |
-| Phase 1 | `SUPABASE_STORAGE_BUCKET` | `assets` | All |
-| Phase 1 | `UPSTASH_REDIS_REST_URL` | Upstash Dashboard → Details | All |
-| Phase 1 | `UPSTASH_REDIS_REST_TOKEN` | Upstash Dashboard → Details | All |
-| Phase 5 | `GOOGLE_CLIENT_ID` | Google Cloud Console → APIs & Services → Credentials | All |
-| Phase 5 | `GOOGLE_CLIENT_SECRET` | Same as above | All |
+| Phase   | Variable                        | Value Source                                         | Environment |
+| ------- | ------------------------------- | ---------------------------------------------------- | ----------- |
+| Phase 1 | `NEXT_PUBLIC_SUPABASE_URL`      | Supabase Dashboard → Settings → API                  | All         |
+| Phase 1 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard → Settings → API                  | All         |
+| Phase 1 | `SUPABASE_SERVICE_ROLE_KEY`     | Supabase Dashboard → Settings → API                  | All         |
+| Phase 1 | `SUPABASE_STORAGE_BUCKET`       | `assets`                                             | All         |
+| Phase 1 | `UPSTASH_REDIS_REST_URL`        | Upstash Dashboard → Details                          | All         |
+| Phase 1 | `UPSTASH_REDIS_REST_TOKEN`      | Upstash Dashboard → Details                          | All         |
+| Phase 5 | `GOOGLE_CLIENT_ID`              | Google Cloud Console → APIs & Services → Credentials | All         |
+| Phase 5 | `GOOGLE_CLIENT_SECRET`          | Same as above                                        | All         |
 
 ### 4.3 Remove Obsolete Variables (After Migration Verified)
 
 **Only remove these AFTER the migration is live and verified for 7+ days:**
 
-| Variable | Reason |
-|----------|--------|
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk replaced by Supabase Auth |
-| `CLERK_SECRET_KEY` | Same |
-| `R2_ACCOUNT_ID` | Cloudflare R2 replaced by Supabase Storage |
-| `R2_ACCESS_KEY_ID` | Same |
-| `R2_SECRET_ACCESS_KEY` | Same |
-| `R2_BUCKET_NAME` | Same |
-| `R2_PUBLIC_URL` | Same |
-| `AGENCY_FIREBASE_KEY` | Firestore replaced by Supabase |
-| `NEXT_PUBLIC_FIREBASE_*` | Same (all Firebase env vars for agency/mht/tracker) |
-| `FIREBASE_PROJECT_ID` | Keep temporarily if prism-admin reads legacy data |
-| `FIREBASE_CLIENT_EMAIL` | Same |
-| `FIREBASE_PRIVATE_KEY` | Same |
+| Variable                            | Reason                                              |
+| ----------------------------------- | --------------------------------------------------- |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk replaced by Supabase Auth                     |
+| `CLERK_SECRET_KEY`                  | Same                                                |
+| `R2_ACCOUNT_ID`                     | Cloudflare R2 replaced by Supabase Storage          |
+| `R2_ACCESS_KEY_ID`                  | Same                                                |
+| `R2_SECRET_ACCESS_KEY`              | Same                                                |
+| `R2_BUCKET_NAME`                    | Same                                                |
+| `R2_PUBLIC_URL`                     | Same                                                |
+| `AGENCY_FIREBASE_KEY`               | Firestore replaced by Supabase                      |
+| `NEXT_PUBLIC_FIREBASE_*`            | Same (all Firebase env vars for agency/mht/tracker) |
+| `FIREBASE_PROJECT_ID`               | Keep temporarily if prism-admin reads legacy data   |
+| `FIREBASE_CLIENT_EMAIL`             | Same                                                |
+| `FIREBASE_PRIVATE_KEY`              | Same                                                |
 
 ### 4.4 Create Per-App Doppler Configs (for Vercel)
 
 For Vercel deployments, you'll need per-app environment configs:
 
 **Doppler CLI approach:**
+
 ```bash
 # Set per-app vars in Doppler
 doppler secrets set NEXT_PUBLIC_SUPABASE_URL=$VALUE --config dev --project jeffdev-monorepo
 ```
 
 **Or: Set directly in Vercel** (preferred for per-app vars)
+
 - See §5 Vercel below
 
 ---
@@ -320,6 +340,7 @@ doppler secrets set NEXT_PUBLIC_SUPABASE_URL=$VALUE --config dev --project jeffd
 ### 5.1 Current Vercel Projects (Document First)
 
 Before doing anything, go to vercel.com/dashboard and document:
+
 - All existing projects
 - Their connected git repositories
 - Current domains
@@ -329,11 +350,11 @@ Before doing anything, go to vercel.com/dashboard and document:
 
 For each renamed/new app, create a new Vercel project:
 
-| App | Git Root Directory | Framework | Build Command | Output |
-|-----|-------------------|-----------|---------------|--------|
-| **syntaxure-labs** | `apps/syntaxure-labs` | Next.js | `doppler run -- turbo build` | `.next` |
-| **prism-engine** | `apps/prism-engine` | Next.js | `doppler run -- turbo build` | `.next` |
-| **prism-manage** | `apps/prism-manage` | Next.js | `doppler run -- turbo build` | `.next` |
+| App                | Git Root Directory    | Framework | Build Command                | Output  |
+| ------------------ | --------------------- | --------- | ---------------------------- | ------- |
+| **syntaxure-labs** | `apps/syntaxure-labs` | Next.js   | `doppler run -- turbo build` | `.next` |
+| **prism-engine**   | `apps/prism-engine`   | Next.js   | `doppler run -- turbo build` | `.next` |
+| **prism-manage**   | `apps/prism-manage`   | Next.js   | `doppler run -- turbo build` | `.next` |
 
 1. Vercel Dashboard → Add New Project
 2. Select the monorepo git repository
@@ -352,18 +373,21 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY   = <from Doppler>
 ```
 
 **prism-engine additionally:**
+
 ```
 SUPABASE_SERVICE_ROLE_KEY       = <from Doppler>
 MONGODB_URI, COSMOS_DATABASE_NAME, MUX_*, GEMINI_API_KEY, PAYPAL_*, SENTRY_*, etc.
 ```
 
 **prism-admin additionally:**
+
 ```
 SUPABASE_SERVICE_ROLE_KEY       = <from Doppler>
 MONGODB_URI, COSMOS_DATABASE_NAME, RESEND_*, etc.
 ```
 
 **prism-manage additionally:**
+
 ```
 SUPABASE_SERVICE_ROLE_KEY       = <from Doppler>
 GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
@@ -374,6 +398,7 @@ GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
 **You need to decide on new domains first** (see §13 DNS).
 
 For each Vercel project:
+
 1. Go to Project Settings → Domains
 2. Add custom domain
 3. Follow Vercel's DNS instructions (usually: add CNAME `cname.vercel-dns.com`)
@@ -383,6 +408,7 @@ For each Vercel project:
 ### 5.5 Delete Old Vercel Projects (After 7 Days Stable)
 
 After new projects are live and stable for 7+ days:
+
 - Remove old Vercel projects: `agency`, `prism-dashboard`, `tracker`, `mht`, `nexure`, `joularix`, `marketing`
 - Keep DNS records for old domains as redirects (via Vercel or Cloudflare)
 
@@ -425,9 +451,9 @@ After new projects are live and stable for 7+ days:
 
 ### 6.4 Save Credentials
 
-| Credential | Value | Doppler |
-|-----------|-------|---------|
-| Client ID | `<from Google>` | `GOOGLE_CLIENT_ID` |
+| Credential    | Value           | Doppler                |
+| ------------- | --------------- | ---------------------- |
+| Client ID     | `<from Google>` | `GOOGLE_CLIENT_ID`     |
 | Client Secret | `<from Google>` | `GOOGLE_CLIENT_SECRET` |
 
 ---
@@ -468,6 +494,7 @@ npm publish --access public
 1. Go to https://www.npmjs.com/package/@prism-engine/cli
 2. Verify version matches `packages/prism-cli/package.json`
 3. Test install:
+
 ```bash
 npx @prism-engine/cli
 ```
@@ -493,6 +520,7 @@ npx @prism-engine/cli
 ### Option B: Self-Hosted Redis (Docker)
 
 Add to `docker-compose.yml`:
+
 ```yaml
 redis:
   image: redis:7-alpine
@@ -504,12 +532,12 @@ Set in Doppler: `REDIS_URL=redis://localhost:6379`
 
 ### Decision: Upstash vs Self-Hosted
 
-| Factor | Upstash | Self-Hosted |
-|--------|---------|-------------|
-| Vercel compatibility | Native (HTTP) | Needs TCP — doesn't work with Vercel serverless |
-| Maintenance | Zero | Docker + backups |
-| Cost | Pay-per-request | Fixed (VPS cost) |
-| **Verdict** | **Use Upstash** — Vercel can't connect to self-hosted TCP Redis | Only if you switch to non-serverless deployment |
+| Factor               | Upstash                                                         | Self-Hosted                                     |
+| -------------------- | --------------------------------------------------------------- | ----------------------------------------------- |
+| Vercel compatibility | Native (HTTP)                                                   | Needs TCP — doesn't work with Vercel serverless |
+| Maintenance          | Zero                                                            | Docker + backups                                |
+| Cost                 | Pay-per-request                                                 | Fixed (VPS cost)                                |
+| **Verdict**          | **Use Upstash** — Vercel can't connect to self-hosted TCP Redis | Only if you switch to non-serverless deployment |
 
 ---
 
@@ -521,6 +549,7 @@ Set in Doppler: `REDIS_URL=redis://localhost:6379`
 ### 9.1 Do NOT Delete Immediately
 
 After migration:
+
 - Keep Firebase project active for **30 days**
 - Do not delete Firestore data
 - Do not delete Firebase Auth users
@@ -530,16 +559,19 @@ After migration:
 You can consider these options:
 
 **Option A: Downgrade to Spark (free) plan**
+
 - Keep project as read-only backup
 - No cost
 
 **Option B: Delete project**
+
 - Only if Supabase has been stable for 30+ days with zero data issues
 - Export final Firestore backup first (`gcloud firestore export`)
 
 ### 9.3 Remove from Code
 
 After 30 days:
+
 - Remove `firebase-admin` dependency from `@jeffdev/db` package
 - Remove Firebase env vars from Doppler
 - Delete `packages/db/src/firebase.ts`
@@ -593,10 +625,10 @@ aws s3 sync s3://jeffdev-assets ./r2-backup/ \
 
 ### 11.3 Collect Connection Details
 
-| Credential | Where | Doppler |
-|-----------|-------|---------|
+| Credential       | Where                                  | Doppler                                                                               |
+| ---------------- | -------------------------------------- | ------------------------------------------------------------------------------------- |
 | Gremlin Endpoint | Azure Portal → Keys → Gremlin Endpoint | `COSMOS_GREMLIN_ENDPOINT` (format: `wss://prism-graph.gremlin.cosmos.azure.com:443/`) |
-| Primary Key | Azure Portal → Keys → Primary Key | `COSMOS_GREMLIN_KEY` |
+| Primary Key      | Azure Portal → Keys → Primary Key      | `COSMOS_GREMLIN_KEY`                                                                  |
 
 ### 11.4 Test Connection
 
@@ -618,16 +650,17 @@ Should output: "Connected to Gremlin. Graph vertex count: 0"
 
 Repository: `J-Akiru5/jeffdev-monorepo` → Settings → Secrets and variables → Actions
 
-| Secret | Value | When |
-|--------|-------|------|
-| `NPM_TOKEN` | npm access token | Phase 1 |
+| Secret                  | Value                                          | When    |
+| ----------------------- | ---------------------------------------------- | ------- |
+| `NPM_TOKEN`             | npm access token                               | Phase 1 |
 | `SUPABASE_ACCESS_TOKEN` | Supabase personal access token (for CLI in CI) | Phase 2 |
-| `SUPABASE_DB_PASSWORD` | Database password | Phase 2 |
-| `SUPABASE_PROJECT_ID` | Project reference ID | Phase 2 |
+| `SUPABASE_DB_PASSWORD`  | Database password                              | Phase 2 |
+| `SUPABASE_PROJECT_ID`   | Project reference ID                           | Phase 2 |
 
 ### 12.2 Update Branch Protection Rules
 
 Settings → Branches → Add rule → `main`:
+
 - [x] Require status checks to pass before merging
 - Status checks: `lint`, `test (prism-cli)`, `test (prism-mcp-server)`, `build (prism-engine)`, `build (prism-docs)`, `build (prism-mcp-server)`
 
@@ -656,6 +689,7 @@ Settings → Branches → Add rule → `main`:
 ### 13.2 DNS Setup (Assuming Vercel + Existing Domains)
 
 For each domain:
+
 1. Go to domain registrar (Namecheap, Cloudflare, GoDaddy, etc.)
 2. Add CNAME record:
    - **Name:** `prism` (or subdomain)
@@ -665,6 +699,7 @@ For each domain:
 ### 13.3 Supabase Redirect URLs Update
 
 After domains are decided, update Supabase (see §1.5):
+
 ```
 Redirect URLs:
   https://syntaxurelabs.com/**
@@ -688,20 +723,28 @@ Go to Supabase Dashboard → Authentication → Email Templates → Reset Passwo
 Replace default template:
 
 **Subject:**
+
 ```
 Reset your Syntaxure Labs password
 ```
 
 **Body (HTML):**
+
 ```html
 <h2>Reset your password</h2>
 
-<p>We've upgraded our platform. As part of this update, you need to set a new password for your account.</p>
+<p>
+  We've upgraded our platform. As part of this update, you need to set a new
+  password for your account.
+</p>
 
 <p>Click the button below to set your password:</p>
 
 <p style="margin: 30px 0;">
-  <a href="{{ .ConfirmationURL }}" style="background-color: #06b6d4; padding: 14px 32px; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
+  <a
+    href="{{ .ConfirmationURL }}"
+    style="background-color: #06b6d4; padding: 14px 32px; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;"
+  >
     Set New Password
   </a>
 </p>
@@ -709,21 +752,24 @@ Reset your Syntaxure Labs password
 <p>Or copy this link:</p>
 <p style="color: #6b7280;">{{ .ConfirmationURL }}</p>
 
-<hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 30px 0;" />
+<hr
+  style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 30px 0;"
+/>
 
 <p style="color: #6b7280; font-size: 13px;">
-  This reset was triggered by our platform migration. Your data is safe and your previous information has been preserved. If you did not expect this email, you can safely ignore it.
+  This reset was triggered by our platform migration. Your data is safe and your
+  previous information has been preserved. If you did not expect this email, you
+  can safely ignore it.
 </p>
 
-<p style="color: #6b7280; font-size: 13px;">
-  — The Syntaxure Labs Team
-</p>
+<p style="color: #6b7280; font-size: 13px;">— The Syntaxure Labs Team</p>
 ```
 
 ### 14.2 Test the Template
 
 1. Supabase Dashboard → Authentication → Email Templates → Preview
 2. Or: create a test user and trigger reset:
+
 ```sql
 SELECT auth.admin.generate_link('recovery', '<test-user-id>');
 ```
@@ -738,6 +784,7 @@ SELECT auth.admin.generate_link('recovery', '<test-user-id>');
 Copy this checklist per deployment:
 
 ### Phase 2 — Auth Migration Cutover
+
 ```
 [ ] Clerk users exported (JSON file saved)
 [ ] Clerk user count: _____
@@ -754,6 +801,7 @@ Copy this checklist per deployment:
 ```
 
 ### Phase 2 — DB Migration Cutover
+
 ```
 [ ] Firestore → Supabase migration script dry-run passed
 [ ] Row counts verified for all 11 collections
@@ -766,6 +814,7 @@ Copy this checklist per deployment:
 ```
 
 ### Phase 3 — App Rename Deployment
+
 ```
 [ ] Each app builds successfully locally
 [ ] Each app builds on Vercel
@@ -787,6 +836,7 @@ Copy this checklist per deployment:
 **Who:** [👥 Both]
 
 ### Day 1 (Hourly Checks)
+
 ```
 [ ] Auth: sign-up flow works
 [ ] Auth: sign-in flow works
@@ -801,6 +851,7 @@ Copy this checklist per deployment:
 ```
 
 ### Day 2-7 (Daily Checks)
+
 ```
 [ ] Supabase: no auth errors in logs (Dashboard → Authentication → Logs)
 [ ] Supabase: no database errors (Dashboard → Database → Logs)
@@ -813,6 +864,7 @@ Copy this checklist per deployment:
 ```
 
 ### Day 30 (Before Cleanup)
+
 ```
 [ ] Zero user reports of "can't log in" in last 14 days
 [ ] Zero data inconsistency reports
@@ -829,22 +881,22 @@ Copy this checklist per deployment:
 
 ## Quick Reference: Account Access List
 
-| Service | URL | Who Has Access |
-|---------|-----|----------------|
-| Supabase Dashboard | https://supabase.com/dashboard | Both (org members) |
-| Doppler Dashboard | https://dashboard.doppler.com | Lou (admin), Jeff (viewer?) |
-| Vercel Dashboard | https://vercel.com/dashboard | Both |
-| Clerk Dashboard | https://dashboard.clerk.com | Jeff |
-| Firebase Console | https://console.firebase.google.com | Jeff |
-| Cloudflare Dashboard | https://dash.cloudflare.com | Jeff |
-| Azure Portal | https://portal.azure.com | Lou |
-| Google Cloud Console | https://console.cloud.google.com | Both |
-| npm | https://www.npmjs.com | Jeff |
-| Upstash Console | https://console.upstash.com | Lou |
-| GitHub (repo) | https://github.com/J-Akiru5/jeffdev-monorepo | Both |
-| Domain Registrar | (depends on provider) | Jeff |
-| Resend Dashboard | https://resend.com/dashboard | Both |
+| Service              | URL                                          | Who Has Access              |
+| -------------------- | -------------------------------------------- | --------------------------- |
+| Supabase Dashboard   | https://supabase.com/dashboard               | Both (org members)          |
+| Doppler Dashboard    | https://dashboard.doppler.com                | Lou (admin), Jeff (viewer?) |
+| Vercel Dashboard     | https://vercel.com/dashboard                 | Both                        |
+| Clerk Dashboard      | https://dashboard.clerk.com                  | Jeff                        |
+| Firebase Console     | https://console.firebase.google.com          | Jeff                        |
+| Cloudflare Dashboard | https://dash.cloudflare.com                  | Jeff                        |
+| Azure Portal         | https://portal.azure.com                     | Lou                         |
+| Google Cloud Console | https://console.cloud.google.com             | Both                        |
+| npm                  | https://www.npmjs.com                        | Jeff                        |
+| Upstash Console      | https://console.upstash.com                  | Lou                         |
+| GitHub (repo)        | https://github.com/J-Akiru5/jeffdev-monorepo | Both                        |
+| Domain Registrar     | (depends on provider)                        | Jeff                        |
+| Resend Dashboard     | https://resend.com/dashboard                 | Both                        |
 
 ---
 
-*End of revamp-guide.md — Return to revamp.md for the implementation plan*
+_End of revamp-guide.md — Return to revamp.md for the implementation plan_

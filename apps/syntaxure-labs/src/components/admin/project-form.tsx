@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Project Form Component
@@ -7,15 +7,15 @@
  * Includes client user association, budget, progress, team, metrics, and cover image.
  */
 
-import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Loader2, Save, ArrowLeft, X } from 'lucide-react';
-import Link from 'next/link';
-import { toast } from 'sonner';
-import { createProject, updateProject } from '@/app/actions/projects';
-import { CaseStudyImageUpload } from './case-study-image-upload';
-import type { FirestoreProject } from '@/types/firestore';
-import type { UserProfile } from '@/types/user';
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { Plus, Trash2, Loader2, Save, ArrowLeft, X } from "lucide-react";
+import Link from "next/link";
+import { toast } from "sonner";
+import { createProject, updateProject } from "@/app/actions/projects";
+import { CaseStudyImageUpload } from "./case-study-image-upload";
+import type { FirestoreProject } from "@/types/firestore";
+import type { UserProfile } from "@/types/user";
 
 interface Metric {
   metric: string;
@@ -43,7 +43,7 @@ interface FormData {
   image: string | null;
   featured: boolean;
   order: number;
-  status: 'pending' | 'active' | 'paused' | 'completed';
+  status: "pending" | "active" | "paused" | "completed";
   progress: number;
   startDate: string;
   deadline: string;
@@ -54,27 +54,27 @@ interface FormData {
 }
 
 interface Props {
-  mode: 'create' | 'edit';
+  mode: "create" | "edit";
   initialData?: FirestoreProject;
   users: UserProfile[];
 }
 
 const CATEGORIES = [
-  'SaaS Platform',
-  'Web Application',
-  'E-Commerce',
-  'Mobile App',
-  'Internal Tool',
-  'API / Backend',
-  'Landing Page',
-  'Other',
+  "SaaS Platform",
+  "Web Application",
+  "E-Commerce",
+  "Mobile App",
+  "Internal Tool",
+  "API / Backend",
+  "Landing Page",
+  "Other",
 ];
 
 const STATUSES = [
-  { value: 'pending', label: 'Pending' },
-  { value: 'active', label: 'Active' },
-  { value: 'paused', label: 'Paused' },
-  { value: 'completed', label: 'Completed' },
+  { value: "pending", label: "Pending" },
+  { value: "active", label: "Active" },
+  { value: "paused", label: "Paused" },
+  { value: "completed", label: "Completed" },
 ];
 
 export function ProjectForm({ mode, initialData, users }: Props) {
@@ -82,59 +82,76 @@ export function ProjectForm({ mode, initialData, users }: Props) {
   const [isPending, startTransition] = useTransition();
 
   // Filter clients, partners, and employees from users list
-  const clients = users.filter((u) => u.role === 'employee' || u.role === 'partner' || u.role === 'admin' || u.role === 'founder');
-  const partners = users.filter((u) => u.role === 'partner' || u.role === 'admin' || u.role === 'founder');
-  const employees = users.filter((u) => u.role === 'employee' || u.role === 'partner' || u.role === 'admin');
+  const clients = users.filter(
+    (u) =>
+      u.role === "employee" ||
+      u.role === "partner" ||
+      u.role === "admin" ||
+      u.role === "founder",
+  );
+  const partners = users.filter(
+    (u) => u.role === "partner" || u.role === "admin" || u.role === "founder",
+  );
+  const employees = users.filter(
+    (u) => u.role === "employee" || u.role === "partner" || u.role === "admin",
+  );
 
   // Form state
   const [formData, setFormData] = useState<FormData>({
-    slug: initialData?.slug || '',
-    title: initialData?.title || '',
-    userId: (initialData as any)?.user_id || (initialData as any)?.userId || '',
-    client: initialData?.client || '',
-    clientEmail: (initialData as any)?.client_email || (initialData as any)?.clientEmail || '',
+    slug: initialData?.slug || "",
+    title: initialData?.title || "",
+    userId: (initialData as any)?.user_id || (initialData as any)?.userId || "",
+    client: initialData?.client || "",
+    clientEmail:
+      (initialData as any)?.client_email ||
+      (initialData as any)?.clientEmail ||
+      "",
     category: initialData?.category || CATEGORIES[0],
-    tagline: initialData?.tagline || '',
-    description: initialData?.description || '',
-    challenge: initialData?.challenge || '',
-    solution: initialData?.solution || '',
+    tagline: initialData?.tagline || "",
+    description: initialData?.description || "",
+    challenge: initialData?.challenge || "",
+    solution: initialData?.solution || "",
     results: initialData?.results || [],
     technologies: initialData?.technologies || [],
-    testimonial: initialData?.testimonial || { quote: '', author: '', role: '' },
+    testimonial: initialData?.testimonial || {
+      quote: "",
+      author: "",
+      role: "",
+    },
     image: initialData?.image || null,
     featured: initialData?.featured || false,
     order: initialData?.order || 0,
-    status: initialData?.status || 'active',
+    status: initialData?.status || "active",
     progress: initialData?.progress || 0,
-    startDate: initialData?.startDate || '',
-    deadline: initialData?.deadline || '',
+    startDate: initialData?.startDate || "",
+    deadline: initialData?.deadline || "",
     budget: initialData?.budget || 0,
     paidAmount: initialData?.paidAmount || 0,
-    assignedPartner: initialData?.assignedPartner || '',
+    assignedPartner: initialData?.assignedPartner || "",
     assignedEmployees: initialData?.assignedEmployees || [],
   });
 
   // Local state for tech input
-  const [techInput, setTechInput] = useState('');
+  const [techInput, setTechInput] = useState("");
 
   // Local helper to map user full name
   const getUserName = (u: UserProfile) => {
-    return (u as any).full_name || u.displayName || u.email || 'No Name';
+    return (u as any).full_name || u.displayName || u.email || "No Name";
   };
 
   const updateField = <K extends keyof FormData>(
     field: K,
-    value: FormData[K]
+    value: FormData[K],
   ) => {
     setFormData((prev) => {
       const updated = { ...prev, [field]: value };
-      
+
       // Auto-fill client name and email if a userId is selected
-      if (field === 'userId') {
+      if (field === "userId") {
         const selectedUser = users.find((u) => u.uid === value);
         if (selectedUser) {
           updated.client = getUserName(selectedUser);
-          updated.clientEmail = selectedUser.email || '';
+          updated.clientEmail = selectedUser.email || "";
         }
       }
       return updated;
@@ -145,15 +162,19 @@ export function ProjectForm({ mode, initialData, users }: Props) {
   const addMetric = () => {
     setFormData((prev) => ({
       ...prev,
-      results: [...prev.results, { metric: '', value: '' }],
+      results: [...prev.results, { metric: "", value: "" }],
     }));
   };
 
-  const updateMetric = (index: number, field: 'metric' | 'value', value: string) => {
+  const updateMetric = (
+    index: number,
+    field: "metric" | "value",
+    value: string,
+  ) => {
     setFormData((prev) => ({
       ...prev,
       results: prev.results.map((m, i) =>
-        i === index ? { ...m, [field]: value } : m
+        i === index ? { ...m, [field]: value } : m,
       ),
     }));
   };
@@ -169,14 +190,14 @@ export function ProjectForm({ mode, initialData, users }: Props) {
   const addTech = () => {
     if (!techInput.trim()) return;
     if (formData.technologies.includes(techInput.trim())) {
-      toast.error('Technology already added');
+      toast.error("Technology already added");
       return;
     }
     setFormData((prev) => ({
       ...prev,
       technologies: [...prev.technologies, techInput.trim()],
     }));
-    setTechInput('');
+    setTechInput("");
   };
 
   const removeTech = (tech: string) => {
@@ -187,7 +208,7 @@ export function ProjectForm({ mode, initialData, users }: Props) {
   };
 
   const handleTechKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       addTech();
     }
@@ -209,27 +230,27 @@ export function ProjectForm({ mode, initialData, users }: Props) {
 
     // Validation
     if (!formData.title.trim()) {
-      toast.error('Title is required');
+      toast.error("Title is required");
       return;
     }
     if (!formData.slug.trim()) {
-      toast.error('Slug is required');
+      toast.error("Slug is required");
       return;
     }
     if (!formData.userId) {
-      toast.error('Client User selection is required');
+      toast.error("Client User selection is required");
       return;
     }
     if (!formData.client.trim()) {
-      toast.error('Client name is required');
+      toast.error("Client name is required");
       return;
     }
 
     // Sanitize slug
     const cleanSlug = formData.slug
       .toLowerCase()
-      .replace(/[^a-z0-9-]+/g, '-')
-      .replace(/(^-|-$)/g, '');
+      .replace(/[^a-z0-9-]+/g, "-")
+      .replace(/(^-|-$)/g, "");
 
     const submissionData = {
       ...formData,
@@ -244,7 +265,7 @@ export function ProjectForm({ mode, initialData, users }: Props) {
 
     startTransition(async () => {
       let result;
-      if (mode === 'create') {
+      if (mode === "create") {
         result = await createProject(submissionData);
       } else {
         result = await updateProject(initialData!.slug, submissionData);
@@ -252,12 +273,14 @@ export function ProjectForm({ mode, initialData, users }: Props) {
 
       if (result.success) {
         toast.success(
-          mode === 'create' ? 'Project created successfully!' : 'Project updated successfully!'
+          mode === "create"
+            ? "Project created successfully!"
+            : "Project updated successfully!",
         );
-        router.push('/admin/projects');
+        router.push("/admin/projects");
         router.refresh();
       } else {
-        toast.error(result.error || 'Failed to save project');
+        toast.error(result.error || "Failed to save project");
       }
     });
   };
@@ -275,7 +298,7 @@ export function ProjectForm({ mode, initialData, users }: Props) {
             Back to Projects
           </Link>
           <h1 className="mt-4 text-2xl font-bold text-white">
-            {mode === 'create' ? 'New Project' : `Edit: ${initialData?.title}`}
+            {mode === "create" ? "New Project" : `Edit: ${initialData?.title}`}
           </h1>
         </div>
         <button
@@ -288,7 +311,7 @@ export function ProjectForm({ mode, initialData, users }: Props) {
           ) : (
             <Save className="h-4 w-4" />
           )}
-          {mode === 'create' ? 'Create Project' : 'Save Changes'}
+          {mode === "create" ? "Create Project" : "Save Changes"}
         </button>
       </div>
 
@@ -300,19 +323,21 @@ export function ProjectForm({ mode, initialData, users }: Props) {
             <h2 className="mb-4 font-semibold text-white">Basic Information</h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
-                <label className="mb-1.5 block text-sm text-white/70">Project Title *</label>
+                <label className="mb-1.5 block text-sm text-white/70">
+                  Project Title *
+                </label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => {
-                    updateField('title', e.target.value);
-                    if (mode === 'create') {
+                    updateField("title", e.target.value);
+                    if (mode === "create") {
                       // Generate slug automatically
                       const generated = e.target.value
                         .toLowerCase()
-                        .replace(/[^a-z0-9]+/g, '-')
-                        .replace(/(^-|-$)/g, '');
-                      updateField('slug', generated);
+                        .replace(/[^a-z0-9]+/g, "-")
+                        .replace(/(^-|-$)/g, "");
+                      updateField("slug", generated);
                     }
                   }}
                   placeholder="e.g., Enterprise E-Commerce Platform"
@@ -321,21 +346,25 @@ export function ProjectForm({ mode, initialData, users }: Props) {
               </div>
 
               <div className="sm:col-span-2">
-                <label className="mb-1.5 block text-sm text-white/70">Project Slug *</label>
+                <label className="mb-1.5 block text-sm text-white/70">
+                  Project Slug *
+                </label>
                 <input
                   type="text"
                   value={formData.slug}
-                  onChange={(e) => updateField('slug', e.target.value)}
+                  onChange={(e) => updateField("slug", e.target.value)}
                   placeholder="e.g., enterprise-ecommerce-platform"
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none font-mono"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-white/70">Client User Profile *</label>
+                <label className="mb-1.5 block text-sm text-white/70">
+                  Client User Profile *
+                </label>
                 <select
                   value={formData.userId}
-                  onChange={(e) => updateField('userId', e.target.value)}
+                  onChange={(e) => updateField("userId", e.target.value)}
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none bg-[#0a0a0a]"
                 >
                   <option value="">-- Select Client Profile --</option>
@@ -348,32 +377,38 @@ export function ProjectForm({ mode, initialData, users }: Props) {
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-white/70">Client Display Name *</label>
+                <label className="mb-1.5 block text-sm text-white/70">
+                  Client Display Name *
+                </label>
                 <input
                   type="text"
                   value={formData.client}
-                  onChange={(e) => updateField('client', e.target.value)}
+                  onChange={(e) => updateField("client", e.target.value)}
                   placeholder="e.g., Acme Corporation"
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-white/70">Client Contact Email</label>
+                <label className="mb-1.5 block text-sm text-white/70">
+                  Client Contact Email
+                </label>
                 <input
                   type="email"
                   value={formData.clientEmail}
-                  onChange={(e) => updateField('clientEmail', e.target.value)}
+                  onChange={(e) => updateField("clientEmail", e.target.value)}
                   placeholder="e.g., contact@acme.com"
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-white/70">Category *</label>
+                <label className="mb-1.5 block text-sm text-white/70">
+                  Category *
+                </label>
                 <select
                   value={formData.category}
-                  onChange={(e) => updateField('category', e.target.value)}
+                  onChange={(e) => updateField("category", e.target.value)}
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none bg-[#0a0a0a]"
                 >
                   {CATEGORIES.map((cat) => (
@@ -385,11 +420,13 @@ export function ProjectForm({ mode, initialData, users }: Props) {
               </div>
 
               <div className="sm:col-span-2">
-                <label className="mb-1.5 block text-sm text-white/70">Tagline *</label>
+                <label className="mb-1.5 block text-sm text-white/70">
+                  Tagline *
+                </label>
                 <input
                   type="text"
                   value={formData.tagline}
-                  onChange={(e) => updateField('tagline', e.target.value)}
+                  onChange={(e) => updateField("tagline", e.target.value)}
                   placeholder="Short tagline summarizing the project outcome"
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
                 />
@@ -399,13 +436,17 @@ export function ProjectForm({ mode, initialData, users }: Props) {
 
           {/* Project Management Settings */}
           <div className="rounded-md border border-white/[0.08] bg-white/[0.02] p-6">
-            <h2 className="mb-4 font-semibold text-white">Project Management & Timelines</h2>
+            <h2 className="mb-4 font-semibold text-white">
+              Project Management & Timelines
+            </h2>
             <div className="grid gap-4 sm:grid-cols-3">
               <div>
-                <label className="mb-1.5 block text-sm text-white/70">Project Status</label>
+                <label className="mb-1.5 block text-sm text-white/70">
+                  Project Status
+                </label>
                 <select
                   value={formData.status}
-                  onChange={(e) => updateField('status', e.target.value as any)}
+                  onChange={(e) => updateField("status", e.target.value as any)}
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none bg-[#0a0a0a]"
                 >
                   {STATUSES.map((st) => (
@@ -426,7 +467,9 @@ export function ProjectForm({ mode, initialData, users }: Props) {
                     min="0"
                     max="100"
                     value={formData.progress}
-                    onChange={(e) => updateField('progress', parseInt(e.target.value) || 0)}
+                    onChange={(e) =>
+                      updateField("progress", parseInt(e.target.value) || 0)
+                    }
                     className="flex-1 accent-cyan-500"
                   />
                   <input
@@ -434,62 +477,90 @@ export function ProjectForm({ mode, initialData, users }: Props) {
                     min="0"
                     max="100"
                     value={formData.progress}
-                    onChange={(e) => updateField('progress', Math.max(0, Math.min(100, parseInt(e.target.value) || 0)))}
+                    onChange={(e) =>
+                      updateField(
+                        "progress",
+                        Math.max(
+                          0,
+                          Math.min(100, parseInt(e.target.value) || 0),
+                        ),
+                      )
+                    }
                     className="w-16 text-center rounded-md border border-white/10 bg-white/5 py-1 text-white text-sm"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-white/70">Start Date</label>
+                <label className="mb-1.5 block text-sm text-white/70">
+                  Start Date
+                </label>
                 <input
                   type="date"
-                  value={formData.startDate ? formData.startDate.split('T')[0] : ''}
-                  onChange={(e) => updateField('startDate', e.target.value)}
+                  value={
+                    formData.startDate ? formData.startDate.split("T")[0] : ""
+                  }
+                  onChange={(e) => updateField("startDate", e.target.value)}
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2 text-white focus:border-cyan-500/50 focus:outline-none text-sm"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-white/70">Deadline / End Date</label>
+                <label className="mb-1.5 block text-sm text-white/70">
+                  Deadline / End Date
+                </label>
                 <input
                   type="date"
-                  value={formData.deadline ? formData.deadline.split('T')[0] : ''}
-                  onChange={(e) => updateField('deadline', e.target.value)}
+                  value={
+                    formData.deadline ? formData.deadline.split("T")[0] : ""
+                  }
+                  onChange={(e) => updateField("deadline", e.target.value)}
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2 text-white focus:border-cyan-500/50 focus:outline-none text-sm"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-white/70">Display Order</label>
+                <label className="mb-1.5 block text-sm text-white/70">
+                  Display Order
+                </label>
                 <input
                   type="number"
                   min="0"
                   value={formData.order}
-                  onChange={(e) => updateField('order', parseInt(e.target.value) || 0)}
+                  onChange={(e) =>
+                    updateField("order", parseInt(e.target.value) || 0)
+                  }
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-white/70">Total Budget ($)</label>
+                <label className="mb-1.5 block text-sm text-white/70">
+                  Total Budget ($)
+                </label>
                 <input
                   type="number"
                   min="0"
                   value={formData.budget}
-                  onChange={(e) => updateField('budget', parseFloat(e.target.value) || 0)}
+                  onChange={(e) =>
+                    updateField("budget", parseFloat(e.target.value) || 0)
+                  }
                   placeholder="0.00"
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="mb-1.5 block text-sm text-white/70">Paid Amount ($)</label>
+                <label className="mb-1.5 block text-sm text-white/70">
+                  Paid Amount ($)
+                </label>
                 <input
                   type="number"
                   min="0"
                   value={formData.paidAmount}
-                  onChange={(e) => updateField('paidAmount', parseFloat(e.target.value) || 0)}
+                  onChange={(e) =>
+                    updateField("paidAmount", parseFloat(e.target.value) || 0)
+                  }
                   placeholder="0.00"
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none"
                 />
@@ -500,21 +571,25 @@ export function ProjectForm({ mode, initialData, users }: Props) {
           {/* Description & Detail Texts */}
           <div className="rounded-md border border-white/[0.08] bg-white/[0.02] p-6 space-y-4">
             <div>
-              <h2 className="mb-1 font-semibold text-white font-sans">Full Description</h2>
+              <h2 className="mb-1 font-semibold text-white font-sans">
+                Full Description
+              </h2>
               <textarea
                 value={formData.description}
-                onChange={(e) => updateField('description', e.target.value)}
+                onChange={(e) => updateField("description", e.target.value)}
                 placeholder="Describe the scope, objectives, and parameters of the project..."
                 rows={4}
                 className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none mt-2"
               />
             </div>
-            
+
             <div>
-              <label className="mb-1.5 block text-sm text-white/70">The Challenge</label>
+              <label className="mb-1.5 block text-sm text-white/70">
+                The Challenge
+              </label>
               <textarea
                 value={formData.challenge}
-                onChange={(e) => updateField('challenge', e.target.value)}
+                onChange={(e) => updateField("challenge", e.target.value)}
                 placeholder="What challenges or issues were encountered in this project?"
                 rows={3}
                 className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
@@ -522,10 +597,12 @@ export function ProjectForm({ mode, initialData, users }: Props) {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm text-white/70">Our Solution</label>
+              <label className="mb-1.5 block text-sm text-white/70">
+                Our Solution
+              </label>
               <textarea
                 value={formData.solution}
-                onChange={(e) => updateField('solution', e.target.value)}
+                onChange={(e) => updateField("solution", e.target.value)}
                 placeholder="How did the team resolve these challenges?"
                 rows={3}
                 className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
@@ -536,7 +613,9 @@ export function ProjectForm({ mode, initialData, users }: Props) {
           {/* Results / Metrics Card */}
           <div className="rounded-md border border-white/[0.08] bg-white/[0.02] p-6">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-semibold text-white">Project Results / Metrics</h2>
+              <h2 className="font-semibold text-white">
+                Project Results / Metrics
+              </h2>
               <button
                 type="button"
                 onClick={addMetric}
@@ -547,7 +626,9 @@ export function ProjectForm({ mode, initialData, users }: Props) {
               </button>
             </div>
             {formData.results.length === 0 ? (
-              <p className="text-sm text-white/30 text-center py-2">No metrics added yet.</p>
+              <p className="text-sm text-white/30 text-center py-2">
+                No metrics added yet.
+              </p>
             ) : (
               <div className="space-y-3">
                 {formData.results.map((metric, index) => (
@@ -555,14 +636,18 @@ export function ProjectForm({ mode, initialData, users }: Props) {
                     <input
                       type="text"
                       value={metric.value}
-                      onChange={(e) => updateMetric(index, 'value', e.target.value)}
+                      onChange={(e) =>
+                        updateMetric(index, "value", e.target.value)
+                      }
                       placeholder="e.g., 99.9%"
                       className="w-32 rounded-md border border-white/10 bg-white/5 px-4 py-2 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
                     />
                     <input
                       type="text"
                       value={metric.metric}
-                      onChange={(e) => updateMetric(index, 'metric', e.target.value)}
+                      onChange={(e) =>
+                        updateMetric(index, "metric", e.target.value)
+                      }
                       placeholder="e.g., Uptime Guarantee"
                       className="flex-1 rounded-md border border-white/10 bg-white/5 px-4 py-2 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
                     />
@@ -586,7 +671,7 @@ export function ProjectForm({ mode, initialData, users }: Props) {
           <div className="rounded-md border border-white/[0.08] bg-white/[0.02] p-6">
             <CaseStudyImageUpload
               currentImage={formData.image}
-              onImageChange={(url) => updateField('image', url)}
+              onImageChange={(url) => updateField("image", url)}
             />
           </div>
 
@@ -599,7 +684,7 @@ export function ProjectForm({ mode, initialData, users }: Props) {
                 <input
                   type="checkbox"
                   checked={formData.featured}
-                  onChange={(e) => updateField('featured', e.target.checked)}
+                  onChange={(e) => updateField("featured", e.target.checked)}
                   className="peer sr-only"
                 />
                 <div className="h-6 w-11 rounded-full bg-white/10 transition-colors peer-checked:bg-cyan-500/50" />
@@ -611,12 +696,14 @@ export function ProjectForm({ mode, initialData, users }: Props) {
           {/* Team Assignment */}
           <div className="rounded-md border border-white/[0.08] bg-white/[0.02] p-6 space-y-4">
             <h2 className="font-semibold text-white">Team Assignment</h2>
-            
+
             <div>
-              <label className="mb-1.5 block text-sm text-white/70">Lead Partner</label>
+              <label className="mb-1.5 block text-sm text-white/70">
+                Lead Partner
+              </label>
               <select
                 value={formData.assignedPartner}
-                onChange={(e) => updateField('assignedPartner', e.target.value)}
+                onChange={(e) => updateField("assignedPartner", e.target.value)}
                 className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2 text-white focus:border-cyan-500/50 focus:outline-none bg-[#0a0a0a]"
               >
                 <option value="">-- No Partner Assigned --</option>
@@ -629,15 +716,24 @@ export function ProjectForm({ mode, initialData, users }: Props) {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm text-white/70">Assigned Employees</label>
+              <label className="mb-1.5 block text-sm text-white/70">
+                Assigned Employees
+              </label>
               {employees.length === 0 ? (
-                <p className="text-xs text-white/30">No employees registered.</p>
+                <p className="text-xs text-white/30">
+                  No employees registered.
+                </p>
               ) : (
                 <div className="space-y-2 mt-2 max-h-48 overflow-y-auto pr-2">
                   {employees.map((u) => {
-                    const isChecked = formData.assignedEmployees.includes(u.uid);
+                    const isChecked = formData.assignedEmployees.includes(
+                      u.uid,
+                    );
                     return (
-                      <label key={u.uid} className="flex items-center gap-3 cursor-pointer text-sm text-white/70 hover:text-white">
+                      <label
+                        key={u.uid}
+                        className="flex items-center gap-3 cursor-pointer text-sm text-white/70 hover:text-white"
+                      >
                         <input
                           type="checkbox"
                           checked={isChecked}
@@ -700,12 +796,12 @@ export function ProjectForm({ mode, initialData, users }: Props) {
             <div>
               <label className="mb-1 block text-xs text-white/50">Quote</label>
               <textarea
-                value={formData.testimonial?.quote || ''}
+                value={formData.testimonial?.quote || ""}
                 onChange={(e) =>
-                  updateField('testimonial', {
+                  updateField("testimonial", {
                     quote: e.target.value,
-                    author: formData.testimonial?.author || '',
-                    role: formData.testimonial?.role || '',
+                    author: formData.testimonial?.author || "",
+                    role: formData.testimonial?.role || "",
                   })
                 }
                 placeholder="What did the client say?"
@@ -715,15 +811,17 @@ export function ProjectForm({ mode, initialData, users }: Props) {
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-xs text-white/50">Author Name</label>
+                <label className="mb-1 block text-xs text-white/50">
+                  Author Name
+                </label>
                 <input
                   type="text"
-                  value={formData.testimonial?.author || ''}
+                  value={formData.testimonial?.author || ""}
                   onChange={(e) =>
-                    updateField('testimonial', {
-                      quote: formData.testimonial?.quote || '',
+                    updateField("testimonial", {
+                      quote: formData.testimonial?.quote || "",
                       author: e.target.value,
-                      role: formData.testimonial?.role || '',
+                      role: formData.testimonial?.role || "",
                     })
                   }
                   placeholder="e.g., John Doe"
@@ -731,14 +829,16 @@ export function ProjectForm({ mode, initialData, users }: Props) {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs text-white/50">Author Role</label>
+                <label className="mb-1 block text-xs text-white/50">
+                  Author Role
+                </label>
                 <input
                   type="text"
-                  value={formData.testimonial?.role || ''}
+                  value={formData.testimonial?.role || ""}
                   onChange={(e) =>
-                    updateField('testimonial', {
-                      quote: formData.testimonial?.quote || '',
-                      author: formData.testimonial?.author || '',
+                    updateField("testimonial", {
+                      quote: formData.testimonial?.quote || "",
+                      author: formData.testimonial?.author || "",
                       role: e.target.value,
                     })
                   }

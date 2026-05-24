@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { formatRulesResponse, deduplicateRules, clearEmbeddingCache, type SmartSelectResult, type RankedRule } from "./smart-select.js";
+import {
+  formatRulesResponse,
+  deduplicateRules,
+  clearEmbeddingCache,
+  type SmartSelectResult,
+  type RankedRule,
+} from "./smart-select.js";
 
 function makeRankedRule(overrides: Partial<RankedRule> = {}): RankedRule {
   return {
@@ -21,10 +27,22 @@ describe("formatRulesResponse with skills", () => {
 
   it("should include skills metadata in markdown output", () => {
     const result: SmartSelectResult = {
-      rules: [makeRankedRule({ id: "r1", name: "Color Usage", similarity: 0.91 })],
+      rules: [
+        makeRankedRule({ id: "r1", name: "Color Usage", similarity: 0.91 }),
+      ],
       skills: [
-        { id: "s1", name: "Styling a Button", summary: "How to style buttons using the design system", tokenCount: 320 },
-        { id: "s2", name: "Adding a Page", summary: "Step-by-step guide to create new pages", tokenCount: 450 },
+        {
+          id: "s1",
+          name: "Styling a Button",
+          summary: "How to style buttons using the design system",
+          tokenCount: 320,
+        },
+        {
+          id: "s2",
+          name: "Adding a Page",
+          summary: "Step-by-step guide to create new pages",
+          tokenCount: 450,
+        },
       ],
       skippedRules: 2,
       dedupedRules: 0,
@@ -45,7 +63,14 @@ describe("formatRulesResponse with skills", () => {
   it("should include skills metadata in JSON output", () => {
     const result: SmartSelectResult = {
       rules: [makeRankedRule({ id: "r1", name: "Color Usage" })],
-      skills: [{ id: "s1", name: "Styling a Button", summary: "Button styling guide", tokenCount: 320 }],
+      skills: [
+        {
+          id: "s1",
+          name: "Styling a Button",
+          summary: "Button styling guide",
+          tokenCount: 320,
+        },
+      ],
       skippedRules: 0,
       dedupedRules: 0,
       totalRules: 2,
@@ -63,7 +88,14 @@ describe("formatRulesResponse with skills", () => {
   it("should show skills-only result when no rules match", () => {
     const result: SmartSelectResult = {
       rules: [],
-      skills: [{ id: "s1", name: "Component Guide", summary: "How to build components", tokenCount: 500 }],
+      skills: [
+        {
+          id: "s1",
+          name: "Component Guide",
+          summary: "How to build components",
+          tokenCount: 500,
+        },
+      ],
       skippedRules: 0,
       dedupedRules: 0,
       totalRules: 1,
@@ -91,10 +123,17 @@ describe("formatRulesResponse with skills", () => {
 
 describe("deduplicateRules", () => {
   it("should merge rules with overlapping content", () => {
-    const longContent = "Use Tailwind CSS for all styling. Avoid inline styles. Tailwind provides utility classes for padding, margin, colors, typography, and layout. Never use inline styles as they break the design system consistency and make maintenance harder. Instead, compose Tailwind classes using clsx or cn utilities.";
+    const longContent =
+      "Use Tailwind CSS for all styling. Avoid inline styles. Tailwind provides utility classes for padding, margin, colors, typography, and layout. Never use inline styles as they break the design system consistency and make maintenance harder. Instead, compose Tailwind classes using clsx or cn utilities.";
     const rules: RankedRule[] = [
       makeRankedRule({ id: "a", content: longContent, priority: 3 }),
-      makeRankedRule({ id: "b", content: longContent.replace("Use Tailwind", "Always use Tailwind") + " This is nearly identical content that should be deduplicated.", priority: 2 }),
+      makeRankedRule({
+        id: "b",
+        content:
+          longContent.replace("Use Tailwind", "Always use Tailwind") +
+          " This is nearly identical content that should be deduplicated.",
+        priority: 2,
+      }),
     ];
     const { rules: deduped, dedupedCount } = deduplicateRules(rules);
     expect(deduped.length).toBeLessThan(rules.length);
@@ -103,8 +142,16 @@ describe("deduplicateRules", () => {
 
   it("should keep distinct rules", () => {
     const rules: RankedRule[] = [
-      makeRankedRule({ id: "a", content: "Use Tailwind CSS for all styling.", priority: 3 }),
-      makeRankedRule({ id: "b", content: "All API routes must validate input with Zod.", priority: 1 }),
+      makeRankedRule({
+        id: "a",
+        content: "Use Tailwind CSS for all styling.",
+        priority: 3,
+      }),
+      makeRankedRule({
+        id: "b",
+        content: "All API routes must validate input with Zod.",
+        priority: 1,
+      }),
     ];
     const { rules: deduped, dedupedCount } = deduplicateRules(rules);
     expect(deduped).toHaveLength(2);

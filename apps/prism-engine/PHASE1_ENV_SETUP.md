@@ -113,7 +113,7 @@ AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4o-mini
 1. Go to "Settings" → "Access Tokens"
 2. Click "Generate new token"
 3. Name: "Prism Context Engine"
-4. Permissions: 
+4. Permissions:
    - ✅ Video: Read
    - ✅ Video: Write
    - ✅ Data: Read
@@ -189,12 +189,14 @@ curl -X GET https://api.mux.com/video/v1/assets \
 ## Cost Estimates
 
 ### Azure OpenAI (GPT-4o-mini)
+
 - **Input:** $0.15 per 1M tokens (~750k words)
 - **Output:** $0.60 per 1M tokens
 - **Typical video:** 10-minute video ≈ 1,500 words ≈ 2,000 tokens ≈ **$0.001 per video**
 - **Monthly estimate:** 100 videos/month ≈ **$0.10/month**
 
 ### Mux
+
 - **Video encoding:** $0.005 per minute
 - **Storage:** $0.01 per GB/month
 - **Streaming:** $0.01 per GB delivered
@@ -202,6 +204,7 @@ curl -X GET https://api.mux.com/video/v1/assets \
 - **Typical usage:** 10 videos × 10 minutes = 100 minutes ≈ **$0.50/month**
 
 ### Total Monthly Cost
+
 **~$0.60/month** for Phase 1 implementation (100 videos)
 
 ---
@@ -257,6 +260,7 @@ After setting up environment variables:
 ## Security Best Practices
 
 ### ✅ DO:
+
 - Use Doppler for secrets management
 - Rotate API keys every 90 days
 - Enable webhook signature verification (MUX_WEBHOOK_SECRET)
@@ -264,6 +268,7 @@ After setting up environment variables:
 - Set up IP allowlisting for Mux webhooks
 
 ### ❌ DON'T:
+
 - Commit `.env` files to git
 - Share API keys in Slack/email
 - Use test keys in production

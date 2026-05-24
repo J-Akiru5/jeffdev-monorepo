@@ -30,13 +30,21 @@ describe("findLineColumn", () => {
 
 describe("buildSuggestion", () => {
   it("wraps matched text in backticks", () => {
-    const result = buildSuggestion("No inline styles", "Avoid using inline styles like style={{}}", "style={{}}");
+    const result = buildSuggestion(
+      "No inline styles",
+      "Avoid using inline styles like style={{}}",
+      "style={{}}",
+    );
     expect(result).toContain("`style={{}}`");
     expect(result).toContain("No inline styles");
   });
 
   it("strips bold markers from content", () => {
-    const result = buildSuggestion("Rule", "**Important:** Do **not** do this", "this");
+    const result = buildSuggestion(
+      "Rule",
+      "**Important:** Do **not** do this",
+      "this",
+    );
     expect(result).not.toContain("**");
     expect(result).toContain("Important:");
   });

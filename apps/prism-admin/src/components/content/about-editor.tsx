@@ -357,31 +357,29 @@ export function AboutEditor({
           Enter comma-separated list of technologies for each category.
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
-          {Object.entries(content.techStack).map(
-            ([category, techs]) => (
-              <div key={category}>
-                <label className="block text-sm capitalize text-white/60 mb-1.5">
-                  {category}
-                </label>
-                <Input
-                  value={techs.join(", ")}
-                  onChange={(e) =>
-                    setContent((prev) => ({
-                      ...prev,
-                      techStack: {
-                        ...prev.techStack,
-                        [category]: e.target.value
-                          .split(",")
-                          .map((t) => t.trim())
-                          .filter(Boolean),
-                      },
-                    }))
-                  }
-                  className="w-full"
-                />
-              </div>
-            ),
-          )}
+          {Object.entries(content.techStack).map(([category, techs]) => (
+            <div key={category}>
+              <label className="block text-sm capitalize text-white/60 mb-1.5">
+                {category}
+              </label>
+              <Input
+                value={techs.join(", ")}
+                onChange={(e) =>
+                  setContent((prev) => ({
+                    ...prev,
+                    techStack: {
+                      ...prev.techStack,
+                      [category]: e.target.value
+                        .split(",")
+                        .map((t) => t.trim())
+                        .filter(Boolean),
+                    },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+          ))}
         </div>
       </section>
 
@@ -438,9 +436,7 @@ export function AboutEditor({
                       onChange={(e) =>
                         setContent((prev) => {
                           const values = prev.values.map((v, j) =>
-                            j === i
-                              ? { ...v, description: e.target.value }
-                              : v,
+                            j === i ? { ...v, description: e.target.value } : v,
                           );
                           return { ...prev, values };
                         })

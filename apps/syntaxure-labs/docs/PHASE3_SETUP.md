@@ -11,7 +11,6 @@ Copy `.env.example` to `.env.local` and fill in your credentials:
 3. **Get Client SDK credentials:**
    - Project Settings → General → Your apps
    - Copy the config values to `.env.local`
-   
 4. **Get Admin SDK credentials:**
    - Project Settings → Service Accounts
    - Click "Generate new private key"
@@ -41,14 +40,17 @@ Copy `.env.example` to `.env.local` and fill in your credentials:
 ### 3. Session Secret
 
 Generate a random session secret:
+
 ```bash
 openssl rand -base64 32
 ```
+
 Copy the output to `SESSION_SECRET` in `.env.local`
 
 ## ✅ Testing
 
 1. **Start dev server:**
+
    ```bash
    npm run dev
    ```
@@ -74,16 +76,19 @@ Copy the output to `SESSION_SECRET` in `.env.local`
 ## 🐛 Troubleshooting
 
 **Email not sending?**
+
 - Verify domain in Resend dashboard
 - Check API key is correct
 - Check server logs for errors
 
 **Firebase error?**
+
 - Double-check all env variables
 - Ensure private key has `\n` newlines
 - Verify Google OAuth is enabled
 
 **Admin login failing?**
+
 - Clear browser cookies
 - Check Firebase console for auth logs
 - Ensure `jeffdev.studio` is in authorized domains

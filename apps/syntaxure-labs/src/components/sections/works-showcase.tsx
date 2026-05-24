@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useRef, useEffect, useState, useCallback } from 'react';
-import Link from 'next/link';
-import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { getFeaturedProjects } from '@/data/projects';
-import type { Project } from '@/data/projects';
+import { useRef, useEffect, useState, useCallback } from "react";
+import Link from "next/link";
+import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { getFeaturedProjects } from "@/data/projects";
+import type { Project } from "@/data/projects";
 
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
@@ -27,7 +27,7 @@ export function WorksShowcase() {
     if (!card) return;
     container.scrollTo({
       left: card.offsetLeft - container.offsetLeft - 24,
-      behavior: 'smooth',
+      behavior: "smooth",
     });
   }, []);
 
@@ -55,8 +55,8 @@ export function WorksShowcase() {
       setActiveIndex(Math.max(0, Math.min(featuredProjects.length - 1, idx)));
     };
 
-    container.addEventListener('scroll', handleScroll, { passive: true });
-    return () => container.removeEventListener('scroll', handleScroll);
+    container.addEventListener("scroll", handleScroll, { passive: true });
+    return () => container.removeEventListener("scroll", handleScroll);
   }, [featuredProjects.length]);
 
   useEffect(() => {
@@ -70,9 +70,9 @@ export function WorksShowcase() {
           duration: 0.6,
           scrollTrigger: {
             trigger: headerRef.current,
-            start: 'top 85%',
+            start: "top 85%",
           },
-        }
+        },
       );
 
       gsap.fromTo(
@@ -84,9 +84,9 @@ export function WorksShowcase() {
           duration: 0.7,
           scrollTrigger: {
             trigger: carouselRef.current,
-            start: 'top 85%',
+            start: "top 85%",
           },
-        }
+        },
       );
     }, sectionRef);
 
@@ -96,20 +96,16 @@ export function WorksShowcase() {
   if (featuredProjects.length === 0) return null;
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative py-24 md:py-32"
-      id="work"
-    >
+    <section ref={sectionRef} className="relative py-24 md:py-32" id="work">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Section Header */}
         <div ref={headerRef} className="flex items-end justify-between mb-12">
           <div>
             <span className="font-mono text-xs uppercase tracking-wider text-cyan-400">
-              {'// Featured Work'}
+              {"// Featured Work"}
             </span>
             <h2 className="mt-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
-              Our Recent{' '}
+              Our Recent{" "}
               <span className="text-gradient-holographic">Projects</span>
             </h2>
             <p className="mt-2 text-white/50">
@@ -229,8 +225,8 @@ export function WorksShowcase() {
               }}
               className={`h-2 rounded-full transition-all duration-300 ${
                 idx === activeIndex
-                  ? 'w-6 bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.6)]'
-                  : 'w-2 bg-white/20 hover:bg-white/40'
+                  ? "w-6 bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.6)]"
+                  : "w-2 bg-white/20 hover:bg-white/40"
               }`}
               aria-label={`Go to project ${idx + 1}`}
             />

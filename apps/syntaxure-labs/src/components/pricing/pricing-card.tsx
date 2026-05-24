@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * PricingCard Component
@@ -11,32 +11,32 @@
  * - "Most Popular" ribbon
  */
 
-import Link from 'next/link';
-import { Check, X, ArrowUpRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import type { PricingTier } from '@/data/pricing';
+import Link from "next/link";
+import { Check, X, ArrowUpRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { PricingTier } from "@/data/pricing";
 
 interface PricingCardProps {
   tier: PricingTier;
-  currency: 'php' | 'usd';
+  currency: "php" | "usd";
 }
 
 export function PricingCard({ tier, currency }: PricingCardProps) {
   const price = tier.price[currency];
-  const currencySymbol = currency === 'php' ? '₱' : '$';
-  const isEnterprise = tier.id === 'enterprise';
+  const currencySymbol = currency === "php" ? "₱" : "$";
+  const isEnterprise = tier.id === "enterprise";
 
   const formatPrice = (amount: number) => {
-    return amount.toLocaleString('en-US');
+    return amount.toLocaleString("en-US");
   };
 
   return (
     <div
       className={cn(
-        'relative flex flex-col rounded-lg border transition-all duration-300',
+        "relative flex flex-col rounded-lg border transition-all duration-300",
         tier.popular
-          ? 'border-cyan-500/50 bg-gradient-to-b from-cyan-500/10 to-transparent shadow-[0_0_40px_rgba(6,182,212,0.15)]'
-          : 'border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]'
+          ? "border-cyan-500/50 bg-gradient-to-b from-cyan-500/10 to-transparent shadow-[0_0_40px_rgba(6,182,212,0.15)]"
+          : "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]",
       )}
     >
       {/* Popular Badge */}
@@ -58,7 +58,7 @@ export function PricingCard({ tier, currency }: PricingCardProps) {
       )}
 
       {/* Card Content */}
-      <div className={cn('flex flex-1 flex-col p-6', tier.popular && 'pt-8')}>
+      <div className={cn("flex flex-1 flex-col p-6", tier.popular && "pt-8")}>
         {/* Header */}
         <div className="mb-6">
           <h3 className="text-xl font-bold text-white">{tier.name}</h3>
@@ -110,23 +110,23 @@ export function PricingCard({ tier, currency }: PricingCardProps) {
         <Link
           href={tier.cta.href}
           className={cn(
-            'group relative mb-6 flex items-center justify-center gap-2 overflow-hidden rounded-md px-6 py-3 font-medium transition-all',
-            tier.cta.variant === 'primary'
-              ? 'bg-white text-black hover:bg-white/90'
-              : tier.cta.variant === 'contact'
-              ? 'border border-white/20 bg-transparent text-white hover:border-white/40 hover:bg-white/5'
-              : 'border border-white/10 bg-black/50 text-white hover:border-white/20'
+            "group relative mb-6 flex items-center justify-center gap-2 overflow-hidden rounded-md px-6 py-3 font-medium transition-all",
+            tier.cta.variant === "primary"
+              ? "bg-white text-black hover:bg-white/90"
+              : tier.cta.variant === "contact"
+                ? "border border-white/20 bg-transparent text-white hover:border-white/40 hover:bg-white/5"
+                : "border border-white/10 bg-black/50 text-white hover:border-white/20",
           )}
         >
           {tier.cta.label}
-          {tier.cta.variant !== 'contact' && (
+          {tier.cta.variant !== "contact" && (
             <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
           )}
         </Link>
 
         {/* Feature Label */}
         <div className="mb-4 text-xs font-medium uppercase tracking-wider text-white/40">
-          {isEnterprise ? 'Everything in Custom, plus:' : 'What you get:'}
+          {isEnterprise ? "Everything in Custom, plus:" : "What you get:"}
         </div>
 
         {/* Features List */}
@@ -136,8 +136,8 @@ export function PricingCard({ tier, currency }: PricingCardProps) {
               {feature.included ? (
                 <Check
                   className={cn(
-                    'mt-0.5 h-4 w-4 flex-shrink-0',
-                    feature.highlight ? 'text-cyan-400' : 'text-emerald-400'
+                    "mt-0.5 h-4 w-4 flex-shrink-0",
+                    feature.highlight ? "text-cyan-400" : "text-emerald-400",
                   )}
                 />
               ) : (
@@ -145,8 +145,8 @@ export function PricingCard({ tier, currency }: PricingCardProps) {
               )}
               <span
                 className={cn(
-                  feature.included ? 'text-white/80' : 'text-white/30',
-                  feature.highlight && 'font-medium text-white'
+                  feature.included ? "text-white/80" : "text-white/30",
+                  feature.highlight && "font-medium text-white",
                 )}
               >
                 {feature.label}

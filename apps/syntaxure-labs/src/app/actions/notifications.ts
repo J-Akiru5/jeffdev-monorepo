@@ -1,51 +1,49 @@
-'use server';
-
- 
+"use server";
 
 /**
  * Notification Server Actions
  * ---------------------------
  * Server-side operations for managing user notifications.
- * 
- * NOTE: Type casting with 'as any' is used due to Supabase's limitation with 
+ *
+ * NOTE: Type casting with 'as any' is used due to Supabase's limitation with
  * dynamically determined table schemas. The actual runtime behavior is correct.
  */
 
-import { getAdminClient } from '@/lib/supabase/admin';
-import type { Database } from '@/types/database';
+import { getAdminClient } from "@/lib/supabase/admin";
+import type { Database } from "@/types/database";
 
-type Notification = Database['public']['Tables']['notifications']['Row'];
+type Notification = Database["public"]["Tables"]["notifications"]["Row"];
 type NotificationCreateInput = {
   user_id: string;
-  type: 'info' | 'success' | 'warning' | 'error';
+  type: "info" | "success" | "warning" | "error";
   title: string;
   message?: string;
   link?: string;
 };
 
-const NOTIFICATIONS_COLLECTION = 'notifications';
+const NOTIFICATIONS_COLLECTION = "notifications";
 
 /**
  * Get notifications for a user
  */
 export async function getNotifications(
   userId: string,
-  limit = 20
+  limit = 20,
 ): Promise<Notification[]> {
   try {
     const supabase = getAdminClient() as any;
-    const { data, error } = await supabase
+    const { data, error } = (await supabase
       .from(NOTIFICATIONS_COLLECTION)
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(limit) as any;
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(limit)) as any;
 
     if (error || !data) return [];
 
     return data as Notification[];
   } catch (error) {
-    console.error('Failed to get notifications:', error);
+    console.error("Failed to get notifications:", error);
     return [];
   }
 }
@@ -56,16 +54,16 @@ export async function getNotifications(
 export async function getUnreadCount(userId: string): Promise<number> {
   try {
     const supabase = getAdminClient() as any;
-    const { count, error } = await supabase
+    const { count, error } = (await supabase
       .from(NOTIFICATIONS_COLLECTION)
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('read', false) as any;
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("read", false)) as any;
 
     if (error) return 0;
     return count || 0;
   } catch (error) {
-    console.error('Failed to get unread count:', error);
+    console.error("Failed to get unread count:", error);
     return 0;
   }
 }
@@ -74,19 +72,19 @@ export async function getUnreadCount(userId: string): Promise<number> {
  * Mark a notification as read
  */
 export async function markAsRead(
-  notificationId: string
+  notificationId: string,
 ): Promise<{ success: boolean }> {
   try {
     const supabase = getAdminClient() as any;
-    const { error } = await supabase
+    const { error } = (await supabase
       .from(NOTIFICATIONS_COLLECTION)
       .update({ read: true } as any)
-      .eq('id', notificationId) as any;
+      .eq("id", notificationId)) as any;
 
     if (error) throw error;
     return { success: true };
   } catch (error) {
-    console.error('Failed to mark as read:', error);
+    console.error("Failed to mark as read:", error);
     return { success: false };
   }
 }
@@ -95,20 +93,20 @@ export async function markAsRead(
  * Mark all notifications as read for a user
  */
 export async function markAllAsRead(
-  userId: string
+  userId: string,
 ): Promise<{ success: boolean }> {
   try {
     const supabase = getAdminClient() as any;
-    const { error } = await supabase
+    const { error } = (await supabase
       .from(NOTIFICATIONS_COLLECTION)
       .update({ read: true } as any)
-      .eq('user_id', userId)
-      .eq('read', false) as any;
+      .eq("user_id", userId)
+      .eq("read", false)) as any;
 
     if (error) throw error;
     return { success: true };
   } catch (error) {
-    console.error('Failed to mark all as read:', error);
+    console.error("Failed to mark all as read:", error);
     return { success: false };
   }
 }
@@ -117,19 +115,19 @@ export async function markAllAsRead(
  * Dismiss (delete) a notification
  */
 export async function dismissNotification(
-  notificationId: string
+  notificationId: string,
 ): Promise<{ success: boolean }> {
   try {
     const supabase = getAdminClient() as any;
-    const { error } = await supabase
+    const { error } = (await supabase
       .from(NOTIFICATIONS_COLLECTION)
       .delete()
-      .eq('id', notificationId) as any;
+      .eq("id", notificationId)) as any;
 
     if (error) throw error;
     return { success: true };
   } catch (error) {
-    console.error('Failed to dismiss notification:', error);
+    console.error("Failed to dismiss notification:", error);
     return { success: false };
   }
 }
@@ -139,11 +137,11 @@ export async function dismissNotification(
  * This is typically called from other server actions when events occur.
  */
 export async function createNotification(
-  input: NotificationCreateInput
+  input: NotificationCreateInput,
 ): Promise<{ success: boolean; id?: string }> {
   try {
     const supabase = getAdminClient() as any;
-    const { data, error } = await supabase
+    const { data, error } = (await supabase
       .from(NOTIFICATIONS_COLLECTION)
       .insert({
         ...input,
@@ -152,12 +150,12 @@ export async function createNotification(
         updated_at: new Date().toISOString(),
       } as any)
       .select()
-      .single() as any;
+      .single()) as any;
 
     if (error) throw error;
     return { success: true, id: data?.id };
   } catch (error) {
-    console.error('Failed to create notification:', error);
+    console.error("Failed to create notification:", error);
     return { success: false };
   }
 }

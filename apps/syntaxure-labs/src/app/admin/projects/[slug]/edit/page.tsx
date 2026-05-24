@@ -1,10 +1,10 @@
-import { getProjectBySlug } from '@/lib/data';
-import { getAllUsers } from '@/app/actions/users';
-import { ProjectForm } from '@/components/admin/project-form';
-import { notFound } from 'next/navigation';
-import type { FirestoreProject } from '@/types/firestore';
+import { getProjectBySlug } from "@/lib/data";
+import { getAllUsers } from "@/app/actions/users";
+import { ProjectForm } from "@/components/admin/project-form";
+import { notFound } from "next/navigation";
+import type { FirestoreProject } from "@/types/firestore";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -17,7 +17,7 @@ interface Props {
  */
 export default async function EditProjectPage({ params }: Props) {
   const { slug } = await params;
-  const project = await getProjectBySlug(slug) as FirestoreProject | null;
+  const project = (await getProjectBySlug(slug)) as FirestoreProject | null;
 
   if (!project) {
     notFound();

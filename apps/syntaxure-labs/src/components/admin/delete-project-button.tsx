@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Delete Project Button Component
@@ -6,11 +6,11 @@
  * Client component to handle project deletion with confirmation.
  */
 
-import { useTransition } from 'react';
-import { useRouter } from 'next/navigation';
-import { Trash2, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { deleteProject } from '@/app/actions/projects';
+import { useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { Trash2, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { deleteProject } from "@/app/actions/projects";
 
 interface Props {
   slug: string;
@@ -21,18 +21,22 @@ export function DeleteProjectButton({ slug }: Props) {
   const [isPending, startTransition] = useTransition();
 
   const handleDelete = () => {
-    if (!confirm('Are you sure you want to delete this project? This will permanently remove all project details.')) {
+    if (
+      !confirm(
+        "Are you sure you want to delete this project? This will permanently remove all project details.",
+      )
+    ) {
       return;
     }
 
     startTransition(async () => {
       const result = await deleteProject(slug);
       if (result.success) {
-        toast.success('Project deleted successfully');
-        router.push('/admin/projects');
+        toast.success("Project deleted successfully");
+        router.push("/admin/projects");
         router.refresh();
       } else {
-        toast.error(result.error || 'Failed to delete project');
+        toast.error(result.error || "Failed to delete project");
       }
     });
   };

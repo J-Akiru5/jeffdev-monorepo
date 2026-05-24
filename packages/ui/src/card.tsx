@@ -20,47 +20,42 @@ import { cn } from "./utils";
  * </Card>
  */
 
-const cardVariants = cva(
-  [
-    "rounded-md border",
-    "transition-all duration-200",
-  ],
-  {
-    variants: {
-      variant: {
-        // Default glass panel
-        default: [
-          "border-white/[0.05] bg-white/[0.02]",
-          "hover:border-white/[0.08]",
-        ],
-        // Elevated with more opacity
-        elevated: [
-          "border-white/[0.08] bg-white/[0.04]",
-          "shadow-lg shadow-black/20",
-        ],
-        // Interactive (for clickable cards)
-        interactive: [
-          "border-white/[0.05] bg-white/[0.02]",
-          "cursor-pointer",
-          "hover:border-white/[0.12] hover:bg-white/[0.04]",
-          "active:scale-[0.99]",
-        ],
-        // Highlighted (for featured items)
-        highlighted: [
-          "border-cyan-500/20 bg-cyan-500/5",
-          "hover:border-cyan-500/30",
-        ],
-      },
+const cardVariants = cva(["rounded-md border", "transition-all duration-200"], {
+  variants: {
+    variant: {
+      // Default glass panel
+      default: [
+        "border-white/[0.05] bg-white/[0.02]",
+        "hover:border-white/[0.08]",
+      ],
+      // Elevated with more opacity
+      elevated: [
+        "border-white/[0.08] bg-white/[0.04]",
+        "shadow-lg shadow-black/20",
+      ],
+      // Interactive (for clickable cards)
+      interactive: [
+        "border-white/[0.05] bg-white/[0.02]",
+        "cursor-pointer",
+        "hover:border-white/[0.12] hover:bg-white/[0.04]",
+        "active:scale-[0.99]",
+      ],
+      // Highlighted (for featured items)
+      highlighted: [
+        "border-cyan-500/20 bg-cyan-500/5",
+        "hover:border-cyan-500/30",
+      ],
     },
-    defaultVariants: {
-      variant: "default",
-    },
-  }
-);
+  },
+  defaultVariants: {
+    variant: "default",
+  },
+});
 
 export interface CardProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-  VariantProps<typeof cardVariants> { }
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof cardVariants> {}
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, variant, ...props }, ref) => (
@@ -69,7 +64,7 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       className={cn(cardVariants({ variant, className }))}
       {...props}
     />
-  )
+  ),
 );
 Card.displayName = "Card";
 
@@ -93,7 +88,7 @@ const CardTitle = React.forwardRef<
     ref={ref}
     className={cn(
       "text-lg font-semibold leading-none tracking-tight text-white",
-      className
+      className,
     )}
     {...props}
   />
@@ -104,11 +99,7 @@ const CardDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <p
-    ref={ref}
-    className={cn("text-sm text-white/50", className)}
-    {...props}
-  />
+  <p ref={ref} className={cn("text-sm text-white/50", className)} {...props} />
 ));
 CardDescription.displayName = "CardDescription";
 
@@ -132,4 +123,12 @@ const CardFooter = React.forwardRef<
 ));
 CardFooter.displayName = "CardFooter";
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent, cardVariants };
+export {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  cardVariants,
+};

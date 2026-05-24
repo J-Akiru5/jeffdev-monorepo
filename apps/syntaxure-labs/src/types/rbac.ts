@@ -4,7 +4,7 @@
  * Role-based access control for admin panel.
  */
 
-export type UserRole = 'founder' | 'admin' | 'partner' | 'employee';
+export type UserRole = "founder" | "admin" | "partner" | "employee";
 
 export interface AppUser {
   uid: string;
@@ -13,86 +13,111 @@ export interface AppUser {
   photoURL?: string;
   role: UserRole;
   assignedProjects: string[]; // Project slugs for partners
-  permissions: Permission[];  // Granular overrides
+  permissions: Permission[]; // Granular overrides
   createdAt: string;
   updatedAt: string;
 }
 
 export type Permission =
-  | 'dashboard:view'
-  | 'dashboard:full'
-  | 'projects:view'
-  | 'projects:edit'
-  | 'projects:delete'
-  | 'services:view'
-  | 'services:edit'
-  | 'services:delete'
-  | 'quotes:view'
-  | 'quotes:edit'
-  | 'messages:view'
-  | 'messages:edit'
-  | 'feedback:view'
-  | 'feedback:edit'
-  | 'invoices:view'
-  | 'invoices:create'
-  | 'invoices:edit'
-  | 'subscriptions:view'
-  | 'subscriptions:manage'
-  | 'users:view'
-  | 'users:manage'
-  | 'access:manage'
-  | 'settings:app'
-  | 'settings:profile'
-  | 'audit:view'
-  | 'calendar:view'
-  | 'calendar:edit';
+  | "dashboard:view"
+  | "dashboard:full"
+  | "projects:view"
+  | "projects:edit"
+  | "projects:delete"
+  | "services:view"
+  | "services:edit"
+  | "services:delete"
+  | "quotes:view"
+  | "quotes:edit"
+  | "messages:view"
+  | "messages:edit"
+  | "feedback:view"
+  | "feedback:edit"
+  | "invoices:view"
+  | "invoices:create"
+  | "invoices:edit"
+  | "subscriptions:view"
+  | "subscriptions:manage"
+  | "users:view"
+  | "users:manage"
+  | "access:manage"
+  | "settings:app"
+  | "settings:profile"
+  | "audit:view"
+  | "calendar:view"
+  | "calendar:edit";
 
 /**
  * Default permissions by role
  */
 export const rolePermissions: Record<UserRole, Permission[]> = {
   founder: [
-    'dashboard:full',
-    'projects:view', 'projects:edit', 'projects:delete',
-    'services:view', 'services:edit', 'services:delete',
-    'quotes:view', 'quotes:edit',
-    'messages:view', 'messages:edit',
-    'feedback:view', 'feedback:edit',
-    'invoices:view', 'invoices:create', 'invoices:edit',
-    'subscriptions:view', 'subscriptions:manage',
-    'users:view', 'users:manage',
-    'access:manage',
-    'settings:app', 'settings:profile',
-    'audit:view',
-    'calendar:view', 'calendar:edit',
+    "dashboard:full",
+    "projects:view",
+    "projects:edit",
+    "projects:delete",
+    "services:view",
+    "services:edit",
+    "services:delete",
+    "quotes:view",
+    "quotes:edit",
+    "messages:view",
+    "messages:edit",
+    "feedback:view",
+    "feedback:edit",
+    "invoices:view",
+    "invoices:create",
+    "invoices:edit",
+    "subscriptions:view",
+    "subscriptions:manage",
+    "users:view",
+    "users:manage",
+    "access:manage",
+    "settings:app",
+    "settings:profile",
+    "audit:view",
+    "calendar:view",
+    "calendar:edit",
   ],
   admin: [
-    'dashboard:full',
-    'projects:view', 'projects:edit', 'projects:delete',
-    'services:view', 'services:edit', 'services:delete',
-    'quotes:view', 'quotes:edit',
-    'messages:view', 'messages:edit',
-    'feedback:view', 'feedback:edit',
-    'invoices:view', 'invoices:create', 'invoices:edit',
-    'subscriptions:view', 'subscriptions:manage',
-    'settings:app', 'settings:profile',
-    'audit:view',
-    'calendar:view', 'calendar:edit',
+    "dashboard:full",
+    "projects:view",
+    "projects:edit",
+    "projects:delete",
+    "services:view",
+    "services:edit",
+    "services:delete",
+    "quotes:view",
+    "quotes:edit",
+    "messages:view",
+    "messages:edit",
+    "feedback:view",
+    "feedback:edit",
+    "invoices:view",
+    "invoices:create",
+    "invoices:edit",
+    "subscriptions:view",
+    "subscriptions:manage",
+    "settings:app",
+    "settings:profile",
+    "audit:view",
+    "calendar:view",
+    "calendar:edit",
   ],
   partner: [
-    'dashboard:view',
-    'projects:view',
-    'quotes:view',
-    'feedback:view',
-    'invoices:view',
-    'settings:profile',
-    'calendar:view',
+    "dashboard:view",
+    "projects:view",
+    "quotes:view",
+    "feedback:view",
+    "invoices:view",
+    "settings:profile",
+    "calendar:view",
   ],
   employee: [
-    'dashboard:view',
-    'projects:view',
-    'settings:profile',
-    'calendar:view',
+    "dashboard:view",
+    "projects:view",
+    "settings:profile",
+    "calendar:view",
   ],
 };
 
@@ -101,13 +126,13 @@ export const rolePermissions: Record<UserRole, Permission[]> = {
  */
 export function hasPermission(
   user: AppUser | null,
-  permission: Permission
+  permission: Permission,
 ): boolean {
   if (!user) return false;
-  
+
   // Check explicit permissions first
   if (user.permissions.includes(permission)) return true;
-  
+
   // Fall back to role defaults
   return rolePermissions[user.role]?.includes(permission) ?? false;
 }
@@ -117,13 +142,13 @@ export function hasPermission(
  */
 export function canAccessProject(
   user: AppUser | null,
-  projectSlug: string
+  projectSlug: string,
 ): boolean {
   if (!user) return false;
-  
+
   // Founder and admin can access all
-  if (user.role === 'founder' || user.role === 'admin') return true;
-  
+  if (user.role === "founder" || user.role === "admin") return true;
+
   // Partner/employee only assigned projects
   return user.assignedProjects.includes(projectSlug);
 }
@@ -141,14 +166,17 @@ export const roleHierarchy: Record<UserRole, number> = {
 /**
  * Check if user A can manage user B
  */
-export function canManageUser(manager: AppUser | null, target: AppUser): boolean {
+export function canManageUser(
+  manager: AppUser | null,
+  target: AppUser,
+): boolean {
   if (!manager) return false;
   if (manager.uid === target.uid) return false; // Can't manage self
-  
+
   const managerLevel = roleHierarchy[manager.role];
   const targetLevel = roleHierarchy[target.role];
-  
+
   // Founder can manage anyone, others can manage lower roles
-  if (manager.role === 'founder') return true;
+  if (manager.role === "founder") return true;
   return managerLevel > targetLevel;
 }

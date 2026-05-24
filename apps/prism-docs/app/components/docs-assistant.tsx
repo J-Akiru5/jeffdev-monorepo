@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { ChatAssistant } from '@syntaxure/ui/chat-assistant';
+import { ChatAssistant } from "@syntaxure/ui/chat-assistant";
 
 interface DocsAssistantProps {
   className?: string;
@@ -14,9 +14,9 @@ export function DocsAssistant({ className }: DocsAssistantProps) {
       title="Prism Assistant"
       welcomeMessage="Ask me anything about Prism Context Engine documentation."
       suggestions={[
-        'How do I install the MCP server?',
-        'What is context governance?',
-        'How do I create my first rule?'
+        "How do I install the MCP server?",
+        "What is context governance?",
+        "How do I create my first rule?",
       ]}
     />
   );

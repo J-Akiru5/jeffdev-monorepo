@@ -6,38 +6,34 @@
  * 2. Saves to Supabase
  * 3. Sends email notification to hire@jeffdev.studio
  */
-'use server';
+"use server";
 
- 
-
-import { z } from 'zod';
-import { getAdminClient } from '@/lib/supabase/admin';
-import {
-  sendEmail,
-  quoteEmailTemplate,
-  EMAIL_ADDRESSES,
-} from '@/lib/email';
-import { generateQuoteRef } from '@/lib/ref-generator';
+import { z } from "zod";
+import { getAdminClient } from "@/lib/supabase/admin";
+import { sendEmail, quoteEmailTemplate, EMAIL_ADDRESSES } from "@/lib/email";
+import { generateQuoteRef } from "@/lib/ref-generator";
 
 const quoteSchema = z.object({
   // Step 1: Project Type
-  projectType: z.enum(['web', 'saas', 'mobile', 'ai', 'other'], {
-    message: 'Please select a project type',
+  projectType: z.enum(["web", "saas", "mobile", "ai", "other"], {
+    message: "Please select a project type",
   }),
 
   // Step 2: Budget & Timeline
-  budget: z.enum(['50k-100k', '100k-250k', '250k-500k', '500k+'], {
-    message: 'Please select a budget range',
+  budget: z.enum(["50k-100k", "100k-250k", "250k-500k", "500k+"], {
+    message: "Please select a budget range",
   }),
-  timeline: z.enum(['1-2-weeks', '1-month', '2-3-months', 'flexible'], {
-    message: 'Please select a timeline',
+  timeline: z.enum(["1-2-weeks", "1-month", "2-3-months", "flexible"], {
+    message: "Please select a timeline",
   }),
 
   // Step 3: Contact Info
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
   company: z.string().optional(),
-  details: z.string().min(20, 'Please provide at least 20 characters of detail'),
+  details: z
+    .string()
+    .min(20, "Please provide at least 20 characters of detail"),
 });
 
 export type QuoteFormData = z.infer<typeof quoteSchema>;
@@ -54,27 +50,29 @@ export async function submitQuoteForm(data: QuoteFormData) {
 
     // Save to Supabase
     const { data: result, error } = await supabase
-      .from('quotes')
-      .insert([{
-        user_id: '',
-        project_id: null,
-        title: validated.name,
-        description: validated.details,
-        amount: '0',
-        status: 'draft' as const,
-        valid_until: null,
-        line_items: [],
-        metadata: {
-          projectType: validated.projectType,
-          budget: validated.budget,
-          timeline: validated.timeline,
-          company: validated.company,
-          refNo,
+      .from("quotes")
+      .insert([
+        {
+          user_id: "",
+          project_id: null,
+          title: validated.name,
+          description: validated.details,
+          amount: "0",
+          status: "draft" as const,
+          valid_until: null,
+          line_items: [],
+          metadata: {
+            projectType: validated.projectType,
+            budget: validated.budget,
+            timeline: validated.timeline,
+            company: validated.company,
+            refNo,
+          },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }] as any)
-      .select('id');
+      ] as any)
+      .select("id");
 
     if (error) throw error;
 
@@ -88,23 +86,25 @@ export async function submitQuoteForm(data: QuoteFormData) {
 
     return {
       success: true,
-      message: 'Quote request submitted! We\'ll respond within 24 hours with a custom quote.',
+      message:
+        "Quote request submitted! We'll respond within 24 hours with a custom quote.",
       id: result?.[0]?.id,
     };
   } catch (error) {
-    console.error('[QUOTE FORM ERROR]', error);
+    console.error("[QUOTE FORM ERROR]", error);
 
     if (error instanceof z.ZodError) {
       return {
         success: false,
-        message: 'Validation error',
+        message: "Validation error",
         errors: error.issues,
       };
     }
 
     return {
       success: false,
-      message: 'Failed to submit quote request. Please try again or contact us directly.',
+      message:
+        "Failed to submit quote request. Please try again or contact us directly.",
     };
   }
 }
@@ -114,20 +114,20 @@ export async function submitQuoteForm(data: QuoteFormData) {
  */
 export async function updateQuoteStatus(
   quoteId: string,
-  status: 'draft' | 'sent' | 'accepted' | 'rejected' | 'expired'
+  status: "draft" | "sent" | "accepted" | "rejected" | "expired",
 ) {
   try {
-    const { logAuditEvent } = await import('@/lib/audit');
+    const { logAuditEvent } = await import("@/lib/audit");
     const supabase = getAdminClient() as any;
 
     // Fetch current quote
     const { data: quotes, error: fetchError } = await supabase
-      .from('quotes')
-      .select('status')
-      .eq('id', quoteId);
+      .from("quotes")
+      .select("status")
+      .eq("id", quoteId);
 
     if (fetchError || !quotes || quotes.length === 0) {
-      return { success: false, error: 'Quote not found' };
+      return { success: false, error: "Quote not found" };
     }
 
     const quote = quotes[0] as any;
@@ -135,28 +135,28 @@ export async function updateQuoteStatus(
 
     // Update quote status
     const { error: updateError } = await supabase
-      .from('quotes')
+      .from("quotes")
       .update({
         status,
         updated_at: new Date().toISOString(),
       } as any)
-      .eq('id', quoteId);
+      .eq("id", quoteId);
 
     if (updateError) throw updateError;
 
     await logAuditEvent({
-      action: 'STATUS_CHANGE',
-      resource: 'quotes',
+      action: "STATUS_CHANGE",
+      resource: "quotes",
       resourceId: quoteId,
       details: { oldStatus, newStatus: status },
     });
 
-    const { revalidatePath } = await import('next/cache');
-    revalidatePath('/admin/quotes');
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath("/admin/quotes");
 
     return { success: true };
   } catch (error) {
-    console.error('[UPDATE QUOTE STATUS ERROR]', error);
-    return { success: false, error: 'Failed to update status' };
+    console.error("[UPDATE QUOTE STATUS ERROR]", error);
+    return { success: false, error: "Failed to update status" };
   }
 }

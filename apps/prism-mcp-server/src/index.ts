@@ -2,11 +2,11 @@
 /**
  * @module prism-mcp-server
  * @description Prism Context Engine MCP Server - Context Governance for LLMs
- * 
+ *
  * This server implements the Model Context Protocol (MCP) to provide
  * architectural rules and context to AI coding assistants. It connects
  * to Azure Cosmos DB (MongoDB API) to fetch real rules.
- * 
+ *
  * @example
  * # Build and run
  * npm run build && node dist/index.js
@@ -23,18 +23,34 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { MongoClient, type Collection, type Document, ObjectId } from "mongodb";
 import { generateQueryEmbedding } from "./lib/azure-openai.js";
-import { findTopKSimilar, extractRelevantSnippet } from "./lib/vector-search.js";
+import {
+  findTopKSimilar,
+  extractRelevantSnippet,
+} from "./lib/vector-search.js";
 import { handlePrismScan } from "./tools/prism-scan.js";
 import { handleGetSkill } from "./tools/get-skill.js";
 import { handleListSkills } from "./tools/list-skills.js";
 import { handlePrismCheck } from "./tools/prism-check.js";
 import { handlePrismFix } from "./tools/prism-fix.js";
 import { extractRulesFromRepoScan } from "./tools/repo-extract.js";
-import { trackToolResponse, logTelemetryEvent } from "./middleware/token-counter.js";
-import { rankRulesByTask, formatRulesResponse, type RuleDoc } from "./middleware/smart-select.js";
+import {
+  trackToolResponse,
+  logTelemetryEvent,
+} from "./middleware/token-counter.js";
+import {
+  rankRulesByTask,
+  formatRulesResponse,
+  type RuleDoc,
+} from "./middleware/smart-select.js";
 import { getCached, setCached, getCacheKey } from "./middleware/cache.js";
-import { setCurrentClient, getCurrentClient } from "./middleware/client-detector.js";
-import { resolveFormat, resolveMaxTokens } from "./middleware/platform-formatter.js";
+import {
+  setCurrentClient,
+  getCurrentClient,
+} from "./middleware/client-detector.js";
+import {
+  resolveFormat,
+  resolveMaxTokens,
+} from "./middleware/platform-formatter.js";
 
 // =============================================================================
 // CONFIGURATION
@@ -47,7 +63,8 @@ const DATABASE_NAME = process.env.COSMOS_DATABASE_NAME || "prism";
 
 // API Key Authentication
 const PRISM_API_KEY = process.env.PRISM_API_KEY;
-const PRISM_API_URL = process.env.PRISM_API_URL || "https://prism.jeffdev.studio";
+const PRISM_API_URL =
+  process.env.PRISM_API_URL || "https://prism.jeffdev.studio";
 
 // Cached auth state
 let authenticatedUserId: string | null = null;
@@ -73,8 +90,12 @@ interface AuthResponse {
 async function validateApiKey(): Promise<void> {
   // If no API key provided, skip authentication (for local dev)
   if (!PRISM_API_KEY) {
-    console.error(`[${SERVER_NAME}] No PRISM_API_KEY set. Running in unauthenticated mode.`);
-    console.error(`[${SERVER_NAME}] Set PRISM_API_KEY to enable subscription-based access.`);
+    console.error(
+      `[${SERVER_NAME}] No PRISM_API_KEY set. Running in unauthenticated mode.`,
+    );
+    console.error(
+      `[${SERVER_NAME}] Set PRISM_API_KEY to enable subscription-based access.`,
+    );
     return;
   }
 
@@ -82,17 +103,21 @@ async function validateApiKey(): Promise<void> {
     console.error(`[${SERVER_NAME}] Validating API key...`);
 
     const response = await fetch(`${PRISM_API_URL}/api/api-keys/verify`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ apiKey: PRISM_API_KEY }),
     });
 
-    const data = await response.json() as AuthResponse;
+    const data = (await response.json()) as AuthResponse;
 
     if (!data.valid) {
-      console.error(`[${SERVER_NAME}] ❌ API key validation failed: ${data.error}`);
+      console.error(
+        `[${SERVER_NAME}] ❌ API key validation failed: ${data.error}`,
+      );
       if (data.upgradeUrl) {
-        console.error(`[${SERVER_NAME}] Upgrade your plan at: ${PRISM_API_URL}${data.upgradeUrl}`);
+        console.error(
+          `[${SERVER_NAME}] Upgrade your plan at: ${PRISM_API_URL}${data.upgradeUrl}`,
+        );
       }
       process.exit(1);
     }
@@ -100,9 +125,14 @@ async function validateApiKey(): Promise<void> {
     authenticatedUserId = data.userId || null;
     authenticatedTier = data.tier || "free";
 
-    console.error(`[${SERVER_NAME}] ✅ Authenticated as user: ${authenticatedUserId} (${authenticatedTier} tier)`);
+    console.error(
+      `[${SERVER_NAME}] ✅ Authenticated as user: ${authenticatedUserId} (${authenticatedTier} tier)`,
+    );
   } catch (error) {
-    console.error(`[${SERVER_NAME}] ⚠️ Could not validate API key:`, error instanceof Error ? error.message : error);
+    console.error(
+      `[${SERVER_NAME}] ⚠️ Could not validate API key:`,
+      error instanceof Error ? error.message : error,
+    );
     console.error(`[${SERVER_NAME}] Continuing in unauthenticated mode.`);
   }
 }
@@ -128,7 +158,7 @@ async function getDB(): Promise<Collection<Document>> {
 
   if (!MONGODB_URI) {
     throw new Error(
-      "[prism-mcp-server] MONGODB_URI not set. Pass it via env in MCP config."
+      "[prism-mcp-server] MONGODB_URI not set. Pass it via env in MCP config.",
     );
   }
 
@@ -145,7 +175,9 @@ async function getDB(): Promise<Collection<Document>> {
     client = null;
     rulesCollection = null;
 
-    console.error(`[${SERVER_NAME}] First connection attempt failed, retrying...`);
+    console.error(
+      `[${SERVER_NAME}] First connection attempt failed, retrying...`,
+    );
     client = new MongoClient(MONGODB_URI, {
       retryWrites: false,
       maxPoolSize: 5,
@@ -175,7 +207,7 @@ const server = new Server(
       resources: {},
       tools: {},
     },
-  }
+  },
 );
 
 // =============================================================================
@@ -183,10 +215,14 @@ const server = new Server(
 // =============================================================================
 
 server.setRequestHandler(InitializeRequestSchema, async (request) => {
-  const clientInfo = request.params?.clientInfo as { name: string; version: string } | undefined;
+  const clientInfo = request.params?.clientInfo as
+    | { name: string; version: string }
+    | undefined;
   if (clientInfo) {
     setCurrentClient(clientInfo);
-    console.error(`[${SERVER_NAME}] Client detected: ${clientInfo.name} v${clientInfo.version} (${getCurrentClient().platform})`);
+    console.error(
+      `[${SERVER_NAME}] Client detected: ${clientInfo.name} v${clientInfo.version} (${getCurrentClient().platform})`,
+    );
   }
 
   return {
@@ -233,7 +269,7 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
   const id = uri.replace("prism://rules/", "");
 
   const rules = await getDB();
-  
+
   let rule;
   try {
     rule = await rules.findOne({ _id: new ObjectId(id) });
@@ -298,11 +334,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             projectId: {
               type: "string",
-              description: "Optional project ID to scope rules to a specific project",
+              description:
+                "Optional project ID to scope rules to a specific project",
             },
             format: {
               type: "string",
-              description: "Response format: 'markdown' (default, human-readable) or 'json' (compact machine-readable)",
+              description:
+                "Response format: 'markdown' (default, human-readable) or 'json' (compact machine-readable)",
               enum: ["markdown", "json"],
             },
             category: {
@@ -312,7 +350,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             tag: {
               type: "string",
-              description: "Optional filter by tag (e.g., 'design', 'monorepo', 'validation')",
+              description:
+                "Optional filter by tag (e.g., 'design', 'monorepo', 'validation')",
             },
           },
           required: ["task"],
@@ -336,7 +375,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             category: {
               type: "string",
-              description: "Filter rules by category (architecture, styling, security, etc.)",
+              description:
+                "Filter rules by category (architecture, styling, security, etc.)",
             },
           },
           required: ["code"],
@@ -366,11 +406,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             projectId: {
               type: "string",
-              description: "Optional Prism project ID to sync results to Cosmos DB",
+              description:
+                "Optional Prism project ID to sync results to Cosmos DB",
             },
             model: {
               type: "string",
-              description: "Optional model override (gpt-4o-mini | gemini-flash-lite)",
+              description:
+                "Optional model override (gpt-4o-mini | gemini-flash-lite)",
             },
           },
           required: ["url"],
@@ -378,13 +420,15 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "search_video_transcript",
-        description: "Semantic search across video transcripts using Azure OpenAI embeddings. Finds relevant architectural discussions from uploaded screen recordings.",
+        description:
+          "Semantic search across video transcripts using Azure OpenAI embeddings. Finds relevant architectural discussions from uploaded screen recordings.",
         inputSchema: {
           type: "object",
           properties: {
             query: {
               type: "string",
-              description: "Search query (e.g., 'TypeScript patterns', 'component architecture')",
+              description:
+                "Search query (e.g., 'TypeScript patterns', 'component architecture')",
             },
             projectId: {
               type: "string",
@@ -450,7 +494,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             ruleIds: {
               type: "array" as const,
               items: { type: "string" },
-              description: "Optional: specific rule IDs to check against (checks all pattern rules if omitted)",
+              description:
+                "Optional: specific rule IDs to check against (checks all pattern rules if omitted)",
             },
             projectId: {
               type: "string",
@@ -476,11 +521,21 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         inputSchema: {
           type: "object" as const,
           properties: {
-            code: { type: "string", description: "The source code to validate" },
-            ruleIds: { type: "array" as const, items: { type: "string" }, description: "Optional specific rule IDs" },
+            code: {
+              type: "string",
+              description: "The source code to validate",
+            },
+            ruleIds: {
+              type: "array" as const,
+              items: { type: "string" },
+              description: "Optional specific rule IDs",
+            },
             projectId: { type: "string", description: "Optional project ID" },
             filePath: { type: "string", description: "Optional file path" },
-            category: { type: "string", description: "Optional category filter" },
+            category: {
+              type: "string",
+              description: "Optional category filter",
+            },
           },
           required: ["code"],
         },
@@ -544,7 +599,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
             model: {
               type: "string",
-              description: "Optional model override (gpt-4o-mini | gemini-flash-lite)",
+              description:
+                "Optional model override (gpt-4o-mini | gemini-flash-lite)",
             },
           },
           required: ["scan"],
@@ -562,215 +618,282 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
 
   const rawResult = await (async () => {
-  switch (name) {
-    case "get_architectural_rules": {
-      const args_ = args as Record<string, unknown>;
-      const task = args_?.task as string | undefined;
-      const requestedMaxTokens = (args_?.maxTokens as number) || 4000;
-      const maxTokens = resolveMaxTokens(requestedMaxTokens);
-      const projectId = args_?.projectId as string | undefined;
-      const format = resolveFormat(args_?.format as "markdown" | "json" | undefined);
-      const category = args_?.category as string | undefined;
-      const tag = args_?.tag as string | undefined;
+    switch (name) {
+      case "get_architectural_rules": {
+        const args_ = args as Record<string, unknown>;
+        const task = args_?.task as string | undefined;
+        const requestedMaxTokens = (args_?.maxTokens as number) || 4000;
+        const maxTokens = resolveMaxTokens(requestedMaxTokens);
+        const projectId = args_?.projectId as string | undefined;
+        const format = resolveFormat(
+          args_?.format as "markdown" | "json" | undefined,
+        );
+        const category = args_?.category as string | undefined;
+        const tag = args_?.tag as string | undefined;
 
-      // Check full response cache (same inputs → return instantly)
-      const responseCacheKey = getCacheKey(`response_${projectId || "global"}`, [task || "", String(maxTokens), format, category || "", tag || ""]);
-      const cachedResponse = getCached<{ text: string; meta: Record<string, unknown> }>(responseCacheKey);
-      if (cachedResponse) {
-        return {
-          content: [{ type: "text" as const, text: cachedResponse.text }],
-          _meta: { ...cachedResponse.meta, cacheHit: true },
-        };
-      }
+        // Check full response cache (same inputs → return instantly)
+        const responseCacheKey = getCacheKey(
+          `response_${projectId || "global"}`,
+          [task || "", String(maxTokens), format, category || "", tag || ""],
+        );
+        const cachedResponse = getCached<{
+          text: string;
+          meta: Record<string, unknown>;
+        }>(responseCacheKey);
+        if (cachedResponse) {
+          return {
+            content: [{ type: "text" as const, text: cachedResponse.text }],
+            _meta: { ...cachedResponse.meta, cacheHit: true },
+          };
+        }
 
-      let foundRules: RuleDoc[];
-      let fromCache = false;
+        let foundRules: RuleDoc[];
+        let fromCache = false;
 
-      // Check rules cache: avoid DB round trip
-      const rulesCacheKey = getCacheKey(projectId || "global", [category || "", tag || ""]);
-      const cachedRules = getCached<RuleDoc[]>(rulesCacheKey);
-      if (cachedRules && cachedRules.length > 0) {
-        foundRules = cachedRules;
-        fromCache = true;
-      } else {
-        // Fetch from database with offline fallback
-        try {
-          const rules = await getDB();
-          const query: Record<string, unknown> = { isActive: true };
-          if (category) query.category = category;
-          if (tag) query.tags = tag;
-          if (projectId) query.projectId = projectId;
+        // Check rules cache: avoid DB round trip
+        const rulesCacheKey = getCacheKey(projectId || "global", [
+          category || "",
+          tag || "",
+        ]);
+        const cachedRules = getCached<RuleDoc[]>(rulesCacheKey);
+        if (cachedRules && cachedRules.length > 0) {
+          foundRules = cachedRules;
+          fromCache = true;
+        } else {
+          // Fetch from database with offline fallback
+          try {
+            const rules = await getDB();
+            const query: Record<string, unknown> = { isActive: true };
+            if (category) query.category = category;
+            if (tag) query.tags = tag;
+            if (projectId) query.projectId = projectId;
 
-          foundRules = (await rules
-            .find(query)
-            .sort({ priority: 1 })
-            .toArray()) as unknown as RuleDoc[];
+            foundRules = (await rules
+              .find(query)
+              .sort({ priority: 1 })
+              .toArray()) as unknown as RuleDoc[];
 
-          // Cache rules for next call
-          setCached(rulesCacheKey, foundRules);
-        } catch (dbError) {
-          console.error("[get_architectural_rules] DB fetch failed, trying cache fallback:", dbError);
-          const fallbackRules = getCached<RuleDoc[]>(rulesCacheKey);
-          if (fallbackRules && fallbackRules.length > 0) {
-            foundRules = fallbackRules;
-            fromCache = true;
-            console.error("[get_architectural_rules] Serving from cache (stale)");
-          } else {
-            return {
-              content: [{ type: "text" as const, text: `Error: Database unavailable and no cached rules available.` }],
-              isError: true,
-            };
+            // Cache rules for next call
+            setCached(rulesCacheKey, foundRules);
+          } catch (dbError) {
+            console.error(
+              "[get_architectural_rules] DB fetch failed, trying cache fallback:",
+              dbError,
+            );
+            const fallbackRules = getCached<RuleDoc[]>(rulesCacheKey);
+            if (fallbackRules && fallbackRules.length > 0) {
+              foundRules = fallbackRules;
+              fromCache = true;
+              console.error(
+                "[get_architectural_rules] Serving from cache (stale)",
+              );
+            } else {
+              return {
+                content: [
+                  {
+                    type: "text" as const,
+                    text: `Error: Database unavailable and no cached rules available.`,
+                  },
+                ],
+                isError: true,
+              };
+            }
           }
         }
-      }
 
-      if (foundRules.length === 0) {
-        return {
-          content: [
-            {
-              type: "text" as const,
-              text: `No active rules found${category ? ` for category "${category}"` : ""}${tag ? ` with tag "${tag}"` : ""}.`,
-            },
-          ],
-        };
-      }
+        if (foundRules.length === 0) {
+          return {
+            content: [
+              {
+                type: "text" as const,
+                text: `No active rules found${category ? ` for category "${category}"` : ""}${tag ? ` with tag "${tag}"` : ""}.`,
+              },
+            ],
+          };
+        }
 
-      // If no task provided, fall back to legacy priority-based sort
-      if (!task) {
-        const top5 = foundRules.slice(0, 5);
-        const formatted = top5
-          .map((r) => `## ${r.name}\n\n**Priority:** ${r.priority} | **Category:** ${r.category}\n\n${r.content}`)
-          .join("\n\n---\n\n");
-        const text = `# Prism Architectural Rules\n\nFound ${top5.length} rule(s):\n\n${formatted}`;
-        setCached(responseCacheKey, { text, meta: { cacheHit: false, fromCache, returnedRules: top5.length } });
-        return {
-          content: [{ type: "text" as const, text }],
-          _meta: { cacheHit: false, fromCache },
-        };
-      }
+        // If no task provided, fall back to legacy priority-based sort
+        if (!task) {
+          const top5 = foundRules.slice(0, 5);
+          const formatted = top5
+            .map(
+              (r) =>
+                `## ${r.name}\n\n**Priority:** ${r.priority} | **Category:** ${r.category}\n\n${r.content}`,
+            )
+            .join("\n\n---\n\n");
+          const text = `# Prism Architectural Rules\n\nFound ${top5.length} rule(s):\n\n${formatted}`;
+          setCached(responseCacheKey, {
+            text,
+            meta: { cacheHit: false, fromCache, returnedRules: top5.length },
+          });
+          return {
+            content: [{ type: "text" as const, text }],
+            _meta: { cacheHit: false, fromCache },
+          };
+        }
 
-      // Smart selection: embed task, rank by similarity, apply truncation
-      try {
-        const ranked = await rankRulesByTask(task, foundRules, maxTokens);
-        const text = formatRulesResponse(ranked, task, format);
-        setCached(responseCacheKey, {
-          text,
-          meta: { cacheHit: false, fromCache, returnedRules: ranked.rules.length, totalRules: ranked.totalRules, skippedRules: ranked.skippedRules, tokenCount: ranked.tokenCount },
-        });
-        return {
-          content: [{ type: "text" as const, text }],
-          _meta: {
-            cacheHit: false,
-            fromCache,
-            taskResult: {
+        // Smart selection: embed task, rank by similarity, apply truncation
+        try {
+          const ranked = await rankRulesByTask(task, foundRules, maxTokens);
+          const text = formatRulesResponse(ranked, task, format);
+          setCached(responseCacheKey, {
+            text,
+            meta: {
+              cacheHit: false,
+              fromCache,
               returnedRules: ranked.rules.length,
               totalRules: ranked.totalRules,
               skippedRules: ranked.skippedRules,
               tokenCount: ranked.tokenCount,
             },
-          },
-        };
-      } catch (error) {
-        console.error("[get_architectural_rules] Smart selection failed:", error);
-        // Fall back to priority sort on embedding failure
-        const top5 = foundRules.slice(0, 5);
-        const formatted = top5
-          .map((r) => `## ${r.name}\n\n**Priority:** ${r.priority} | **Category:** ${r.category}\n\n${r.content}`)
-          .join("\n\n---\n\n");
-        const text = `# Prism Architectural Rules (embedding unavailable — fallback)\n\nFound ${top5.length} rule(s):\n\n${formatted}`;
-        setCached(responseCacheKey, { text, meta: { cacheHit: false, fromCache, returnedRules: top5.length, fallback: true } });
-        return {
-          content: [{ type: "text" as const, text }],
-          _meta: { cacheHit: false, fromCache, fallback: true },
-        };
-      }
-    }
-
-    case "prism_scan": {
-      const scanResult = await handlePrismScan(args as unknown as Parameters<typeof handlePrismScan>[0]);
-      return {
-        content: scanResult.content.map((c) => ({ type: c.type as "text", text: c.text })),
-        isError: scanResult.isError,
-      };
-    }
-
-    case "search_video_transcript": {
-      const query = (args as Record<string, unknown>)?.query as string;
-      const projectId = (args as Record<string, unknown>)?.projectId as string | undefined;
-      const limit = ((args as Record<string, unknown>)?.limit as number) || 5;
-
-      if (!query) {
-        return {
-          content: [{ type: "text" as const, text: "Error: No search query provided." }],
-          isError: true,
-        };
-      }
-
-      try {
-        // Step 1: Generate embedding for search query
-        const queryEmbedding = await generateQueryEmbedding(query);
-
-        // Step 2: Fetch video transcripts from database
-        await getDB(); // Ensure client is connected
-        if (!client) {
-          throw new Error("Database connection not established");
-        }
-        const database = client.db(DATABASE_NAME);
-        const transcriptsCollection = database.collection("videoTranscripts");
-
-        const filter: Record<string, unknown> = {};
-        if (projectId) {
-          filter.projectId = projectId;
-        }
-
-        const transcriptsRaw = await transcriptsCollection.find(filter).toArray();
-        const transcripts = transcriptsRaw as unknown as Array<{
-          embedding?: number[];
-          transcriptText: string;
-          videoTitle: string;
-          duration: number;
-          muxPlaybackId: string;
-          createdAt: string;
-          extractedRules?: string[];
-        }>;
-
-        if (transcripts.length === 0) {
+          });
           return {
-            content: [
-              {
-                type: "text" as const,
-                text: `No video transcripts found${projectId ? ` in project ${projectId}` : ""}.`,
+            content: [{ type: "text" as const, text }],
+            _meta: {
+              cacheHit: false,
+              fromCache,
+              taskResult: {
+                returnedRules: ranked.rules.length,
+                totalRules: ranked.totalRules,
+                skippedRules: ranked.skippedRules,
+                tokenCount: ranked.tokenCount,
               },
-            ],
+            },
+          };
+        } catch (error) {
+          console.error(
+            "[get_architectural_rules] Smart selection failed:",
+            error,
+          );
+          // Fall back to priority sort on embedding failure
+          const top5 = foundRules.slice(0, 5);
+          const formatted = top5
+            .map(
+              (r) =>
+                `## ${r.name}\n\n**Priority:** ${r.priority} | **Category:** ${r.category}\n\n${r.content}`,
+            )
+            .join("\n\n---\n\n");
+          const text = `# Prism Architectural Rules (embedding unavailable — fallback)\n\nFound ${top5.length} rule(s):\n\n${formatted}`;
+          setCached(responseCacheKey, {
+            text,
+            meta: {
+              cacheHit: false,
+              fromCache,
+              returnedRules: top5.length,
+              fallback: true,
+            },
+          });
+          return {
+            content: [{ type: "text" as const, text }],
+            _meta: { cacheHit: false, fromCache, fallback: true },
           };
         }
+      }
 
-        // Step 3: Find most similar transcripts using cosine similarity
-        const results = findTopKSimilar(
-          queryEmbedding,
-          transcripts,
-          Math.min(limit, 10) // Max 10 results
+      case "prism_scan": {
+        const scanResult = await handlePrismScan(
+          args as unknown as Parameters<typeof handlePrismScan>[0],
         );
+        return {
+          content: scanResult.content.map((c) => ({
+            type: c.type as "text",
+            text: c.text,
+          })),
+          isError: scanResult.isError,
+        };
+      }
 
-        if (results.length === 0) {
+      case "search_video_transcript": {
+        const query = (args as Record<string, unknown>)?.query as string;
+        const projectId = (args as Record<string, unknown>)?.projectId as
+          | string
+          | undefined;
+        const limit = ((args as Record<string, unknown>)?.limit as number) || 5;
+
+        if (!query) {
           return {
             content: [
               {
                 type: "text" as const,
-                text: `No relevant transcripts found for "${query}".`,
+                text: "Error: No search query provided.",
               },
             ],
+            isError: true,
           };
         }
 
-        // Step 4: Format results as markdown
-        const formatted = results
-          .map((result, index) => {
-            const similarity = Math.round(result.similarity * 100);
-            const snippet = extractRelevantSnippet(result.transcriptText, 200);
-            const duration = result.duration ? `${Math.floor(result.duration / 60)}:${String(Math.floor(result.duration % 60)).padStart(2, '0')}` : 'N/A';
+        try {
+          // Step 1: Generate embedding for search query
+          const queryEmbedding = await generateQueryEmbedding(query);
 
-            return `### ${index + 1}. ${result.videoTitle}
+          // Step 2: Fetch video transcripts from database
+          await getDB(); // Ensure client is connected
+          if (!client) {
+            throw new Error("Database connection not established");
+          }
+          const database = client.db(DATABASE_NAME);
+          const transcriptsCollection = database.collection("videoTranscripts");
+
+          const filter: Record<string, unknown> = {};
+          if (projectId) {
+            filter.projectId = projectId;
+          }
+
+          const transcriptsRaw = await transcriptsCollection
+            .find(filter)
+            .toArray();
+          const transcripts = transcriptsRaw as unknown as Array<{
+            embedding?: number[];
+            transcriptText: string;
+            videoTitle: string;
+            duration: number;
+            muxPlaybackId: string;
+            createdAt: string;
+            extractedRules?: string[];
+          }>;
+
+          if (transcripts.length === 0) {
+            return {
+              content: [
+                {
+                  type: "text" as const,
+                  text: `No video transcripts found${projectId ? ` in project ${projectId}` : ""}.`,
+                },
+              ],
+            };
+          }
+
+          // Step 3: Find most similar transcripts using cosine similarity
+          const results = findTopKSimilar(
+            queryEmbedding,
+            transcripts,
+            Math.min(limit, 10), // Max 10 results
+          );
+
+          if (results.length === 0) {
+            return {
+              content: [
+                {
+                  type: "text" as const,
+                  text: `No relevant transcripts found for "${query}".`,
+                },
+              ],
+            };
+          }
+
+          // Step 4: Format results as markdown
+          const formatted = results
+            .map((result, index) => {
+              const similarity = Math.round(result.similarity * 100);
+              const snippet = extractRelevantSnippet(
+                result.transcriptText,
+                200,
+              );
+              const duration = result.duration
+                ? `${Math.floor(result.duration / 60)}:${String(Math.floor(result.duration % 60)).padStart(2, "0")}`
+                : "N/A";
+
+              return `### ${index + 1}. ${result.videoTitle}
 
 **Relevance:** ${similarity}% match
 **Duration:** ${duration}
@@ -780,156 +903,192 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 > ${snippet}
 
 **Playback:** https://stream.mux.com/${result.muxPlaybackId}
-${result.extractedRules && result.extractedRules.length > 0 ? `\n**Extracted Rules:** ${result.extractedRules.length} architectural patterns` : ''}`;
-          })
-          .join("\n\n---\n\n");
+${result.extractedRules && result.extractedRules.length > 0 ? `\n**Extracted Rules:** ${result.extractedRules.length} architectural patterns` : ""}`;
+            })
+            .join("\n\n---\n\n");
 
-        return {
-          content: [
-            {
-              type: "text" as const,
-              text: `# Video Transcript Search Results\n\n**Query:** "${query}"\n**Found:** ${results.length} relevant video(s)\n\n${formatted}`,
-            },
-          ],
-        };
-      } catch (error) {
-        console.error("[search_video_transcript] Error:", error);
-        return {
-          content: [
-            {
-              type: "text" as const,
-              text: `Error searching transcripts: ${error instanceof Error ? error.message : 'Unknown error'}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    }
-
-    case "validate_code_pattern": {
-      const code = (args as Record<string, unknown>)?.code as string;
-      const context = (args as Record<string, unknown>)?.context as string | undefined;
-      const category = (args as Record<string, unknown>)?.category as string | undefined;
-      
-      if (!code) {
-        return {
-          content: [{ type: "text" as const, text: "Error: No code provided to validate." }],
-          isError: true,
-        };
+          return {
+            content: [
+              {
+                type: "text" as const,
+                text: `# Video Transcript Search Results\n\n**Query:** "${query}"\n**Found:** ${results.length} relevant video(s)\n\n${formatted}`,
+              },
+            ],
+          };
+        } catch (error) {
+          console.error("[search_video_transcript] Error:", error);
+          return {
+            content: [
+              {
+                type: "text" as const,
+                text: `Error searching transcripts: ${error instanceof Error ? error.message : "Unknown error"}`,
+              },
+            ],
+            isError: true,
+          };
+        }
       }
 
-      const violations: string[] = [];
+      case "validate_code_pattern": {
+        const code = (args as Record<string, unknown>)?.code as string;
+        const context = (args as Record<string, unknown>)?.context as
+          | string
+          | undefined;
+        const category = (args as Record<string, unknown>)?.category as
+          | string
+          | undefined;
 
-      // Fetch pattern-based rules from database
-      const rulesDb = await getDB();
-      const query: Record<string, unknown> = {
-        isActive: true,
-        pattern: { $exists: true, $ne: null }
-      };
-      if (category) query.category = category;
+        if (!code) {
+          return {
+            content: [
+              {
+                type: "text" as const,
+                text: "Error: No code provided to validate.",
+              },
+            ],
+            isError: true,
+          };
+        }
 
-      const patternRules = await rulesDb
-        .find(query)
-        .sort({ priority: 1 })
-        .toArray();
+        const violations: string[] = [];
 
-      // Check code against each pattern rule
-      for (const rule of patternRules) {
-        if (!rule.pattern) continue;
+        // Fetch pattern-based rules from database
+        const rulesDb = await getDB();
+        const query: Record<string, unknown> = {
+          isActive: true,
+          pattern: { $exists: true, $ne: null },
+        };
+        if (category) query.category = category;
 
-        try {
-          const regex = new RegExp(rule.pattern as string, "gi");
-          if (regex.test(code)) {
-            const severity = rule.severity === "error" ? "❌" : rule.severity === "warning" ? "⚠️" : "ℹ️";
-            const label = rule.severity === "error" ? "VIOLATION" : rule.severity === "warning" ? "WARNING" : "INFO";
+        const patternRules = await rulesDb
+          .find(query)
+          .sort({ priority: 1 })
+          .toArray();
 
-            violations.push(
-              `${severity} **${label}: ${rule.name}**\n` +
-              `   Category: ${rule.category}\n\n` +
-              `   ${rule.content}`
+        // Check code against each pattern rule
+        for (const rule of patternRules) {
+          if (!rule.pattern) continue;
+
+          try {
+            const regex = new RegExp(rule.pattern as string, "gi");
+            if (regex.test(code)) {
+              const severity =
+                rule.severity === "error"
+                  ? "❌"
+                  : rule.severity === "warning"
+                    ? "⚠️"
+                    : "ℹ️";
+              const label =
+                rule.severity === "error"
+                  ? "VIOLATION"
+                  : rule.severity === "warning"
+                    ? "WARNING"
+                    : "INFO";
+
+              violations.push(
+                `${severity} **${label}: ${rule.name}**\n` +
+                  `   Category: ${rule.category}\n\n` +
+                  `   ${rule.content}`,
+              );
+            }
+          } catch (regexError) {
+            console.error(
+              `[validate_code_pattern] Invalid regex in rule "${rule.name}":`,
+              regexError,
             );
           }
-        } catch (regexError) {
-          console.error(`[validate_code_pattern] Invalid regex in rule "${rule.name}":`, regexError);
-        }
-      }
-
-      // Fallback built-in checks (keep for backward compatibility)
-      if (patternRules.length === 0) {
-        // Cross-app imports
-        if (code.includes("../../apps/") || code.includes("../apps/")) {
-          violations.push(
-            "❌ **VIOLATION: Cross-App Import Detected**\n" +
-            "   Never import from `../../apps/*`. Use shared packages instead:\n" +
-            "   ```typescript\n" +
-            "   // ✅ Correct\n" +
-            '   import { Button } from "@repo/ui/button";\n' +
-            "   ```"
-          );
         }
 
-        // Inline styles
-        if (code.includes("style={{") || code.includes("style:")) {
-          violations.push(
-            "⚠️ **WARNING: Inline Styles Detected**\n" +
-            "   Use Tailwind CSS classes instead of inline styles."
-          );
-        }
-      }
+        // Fallback built-in checks (keep for backward compatibility)
+        if (patternRules.length === 0) {
+          // Cross-app imports
+          if (code.includes("../../apps/") || code.includes("../apps/")) {
+            violations.push(
+              "❌ **VIOLATION: Cross-App Import Detected**\n" +
+                "   Never import from `../../apps/*`. Use shared packages instead:\n" +
+                "   ```typescript\n" +
+                "   // ✅ Correct\n" +
+                '   import { Button } from "@repo/ui/button";\n' +
+                "   ```",
+            );
+          }
 
-      if (violations.length === 0) {
-        const ruleCount = patternRules.length;
+          // Inline styles
+          if (code.includes("style={{") || code.includes("style:")) {
+            violations.push(
+              "⚠️ **WARNING: Inline Styles Detected**\n" +
+                "   Use Tailwind CSS classes instead of inline styles.",
+            );
+          }
+        }
+
+        if (violations.length === 0) {
+          const ruleCount = patternRules.length;
+          return {
+            content: [
+              {
+                type: "text" as const,
+                text: `✅ **Code Validation Passed**\n\n${context ? `Context: ${context}\n\n` : ""}Checked against ${ruleCount} pattern rule(s). No violations detected.`,
+              },
+            ],
+          };
+        }
+
         return {
           content: [
             {
               type: "text" as const,
-              text: `✅ **Code Validation Passed**\n\n${context ? `Context: ${context}\n\n` : ""}Checked against ${ruleCount} pattern rule(s). No violations detected.`,
+              text: `# Code Validation Report\n\n${context ? `**Context:** ${context}\n\n` : ""}Found ${violations.length} issue(s):\n\n${violations.join("\n\n")}`,
             },
           ],
         };
       }
 
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: `# Code Validation Report\n\n${context ? `**Context:** ${context}\n\n` : ""}Found ${violations.length} issue(s):\n\n${violations.join("\n\n")}`,
-          },
-        ],
-      };
-    }
+      case "get_skill": {
+        return await handleGetSkill(
+          args as unknown as Parameters<typeof handleGetSkill>[0],
+        );
+      }
 
-    case "get_skill": {
-      return await handleGetSkill(args as unknown as Parameters<typeof handleGetSkill>[0]);
-    }
+      case "list_skills": {
+        return await handleListSkills(
+          args as unknown as Parameters<typeof handleListSkills>[0],
+        );
+      }
 
-    case "list_skills": {
-      return await handleListSkills(args as unknown as Parameters<typeof handleListSkills>[0]);
-    }
+      case "prism_check":
+      case "validate_code": {
+        return await handlePrismCheck(
+          args as unknown as Parameters<typeof handlePrismCheck>[0],
+        );
+      }
 
-    case "prism_check":
-    case "validate_code": {
-      return await handlePrismCheck(args as unknown as Parameters<typeof handlePrismCheck>[0]);
-    }
+      case "prism_fix": {
+        return await handlePrismFix(
+          args as unknown as Parameters<typeof handlePrismFix>[0],
+        );
+      }
 
-    case "prism_fix": {
-      return await handlePrismFix(args as unknown as Parameters<typeof handlePrismFix>[0]);
-    }
+      case "repo_extract": {
+        return await extractRulesFromRepoScan(
+          args as unknown as Parameters<typeof extractRulesFromRepoScan>[0],
+        );
+      }
 
-    case "repo_extract": {
-      return await extractRulesFromRepoScan(args as unknown as Parameters<typeof extractRulesFromRepoScan>[0]);
+      default:
+        return {
+          content: [
+            { type: "text" as const, text: `Error: Unknown tool "${name}"` },
+          ],
+          isError: true,
+        };
     }
-
-    default:
-      return {
-        content: [{ type: "text" as const, text: `Error: Unknown tool "${name}"` }],
-        isError: true,
-      };
-  }
   })();
 
   const trackedResult = trackToolResponse(rawResult);
-  const rMeta = (rawResult as Record<string, unknown>)?._meta as Record<string, unknown> | undefined;
+  const rMeta = (rawResult as Record<string, unknown>)?._meta as
+    | Record<string, unknown>
+    | undefined;
 
   logTelemetryEvent({
     toolName: name,
@@ -938,7 +1097,9 @@ ${result.extractedRules && result.extractedRules.length > 0 ? `\n**Extracted Rul
     isError: !!(rawResult as { isError?: boolean }).isError,
     cacheHit: rMeta?.cacheHit as boolean | undefined,
     fromCache: rMeta?.fromCache as boolean | undefined,
-    projectId: (args as Record<string, unknown>)?.projectId as string | undefined,
+    projectId: (args as Record<string, unknown>)?.projectId as
+      | string
+      | undefined,
     model: (args as Record<string, unknown>)?.model as string | undefined,
     clientPlatform: getCurrentClient().platform,
   });
@@ -951,7 +1112,9 @@ ${result.extractedRules && result.extractedRules.length > 0 ? `\n**Extracted Rul
 // =============================================================================
 
 async function main() {
-  console.error(`[${SERVER_NAME}] Starting Prism MCP Server v${SERVER_VERSION}...`);
+  console.error(
+    `[${SERVER_NAME}] Starting Prism MCP Server v${SERVER_VERSION}...`,
+  );
 
   await validateApiKey();
 

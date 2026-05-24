@@ -1,28 +1,28 @@
-'use server';
+"use server";
 
 /**
  * Calendar Event Server Actions
  * ------------------------------
  * CRUD operations for calendar events.
- * 
- * NOTE: Type casting with 'as any' is used due to Supabase's limitation with 
+ *
+ * NOTE: Type casting with 'as any' is used due to Supabase's limitation with
  * dynamically determined table schemas. The actual runtime behavior is correct;
  * TypeScript just cannot infer the response types from `.from('table_name')`.
  */
 
-import { z } from 'zod';
-import { getAdminClient } from '@/lib/supabase/admin';
-import { logAuditEvent } from '@/lib/audit';
-import { revalidatePath } from 'next/cache';
-import type { Database } from '@/types/database';
+import { z } from "zod";
+import { getAdminClient } from "@/lib/supabase/admin";
+import { logAuditEvent } from "@/lib/audit";
+import { revalidatePath } from "next/cache";
+import type { Database } from "@/types/database";
 
-type CalendarEvent = Database['public']['Tables']['calendar_events']['Row'];
+type CalendarEvent = Database["public"]["Tables"]["calendar_events"]["Row"];
 
 // Validation schema
 const eventSchema = z.object({
   title: z.string().min(1).max(200),
   description: z.string().max(1000).optional(),
-  type: z.enum(['deadline', 'meeting', 'milestone', 'reminder', 'holiday']),
+  type: z.enum(["deadline", "meeting", "milestone", "reminder", "holiday"]),
   start: z.string(),
   end: z.string().optional(),
   allDay: z.boolean().optional(),
@@ -36,16 +36,16 @@ const eventSchema = z.object({
 export async function getCalendarEvents(): Promise<CalendarEvent[]> {
   try {
     const supabase = getAdminClient() as any;
-    const { data, error } = await supabase
-      .from('calendar_events')
-      .select('*')
-      .order('start_time', { ascending: true }) as any;
+    const { data, error } = (await supabase
+      .from("calendar_events")
+      .select("*")
+      .order("start_time", { ascending: true })) as any;
 
     if (error || !data) return [];
 
     return data as CalendarEvent[];
   } catch (error) {
-    console.error('[GET CALENDAR EVENTS ERROR]', error);
+    console.error("[GET CALENDAR EVENTS ERROR]", error);
     return [];
   }
 }
@@ -53,9 +53,7 @@ export async function getCalendarEvents(): Promise<CalendarEvent[]> {
 /**
  * Create a new calendar event
  */
-export async function createCalendarEvent(
-  data: z.infer<typeof eventSchema>
-) {
+export async function createCalendarEvent(data: z.infer<typeof eventSchema>) {
   try {
     const validated = eventSchema.parse(data);
 
@@ -66,33 +64,33 @@ export async function createCalendarEvent(
       start_time: validated.start,
       end_time: validated.end || validated.start,
       color: validated.color,
-      user_id: '', // TODO: Get from session
+      user_id: "", // TODO: Get from session
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
 
     const supabase = getAdminClient() as any;
-    const { data: result, error } = await supabase
-      .from('calendar_events')
+    const { data: result, error } = (await supabase
+      .from("calendar_events")
       .insert(event as any)
       .select()
-      .single() as any;
+      .single()) as any;
 
     if (error) throw error;
 
     await logAuditEvent({
-      action: 'CREATE',
-      resource: 'calendar_events',
-      resourceId: result?.id || '',
+      action: "CREATE",
+      resource: "calendar_events",
+      resourceId: result?.id || "",
       details: { title: validated.title, type: validated.type },
     });
 
-    revalidatePath('/admin/calendar');
+    revalidatePath("/admin/calendar");
 
     return { success: true, id: result?.id };
   } catch (error) {
-    console.error('[CREATE CALENDAR EVENT ERROR]', error);
-    return { success: false, error: 'Failed to create event' };
+    console.error("[CREATE CALENDAR EVENT ERROR]", error);
+    return { success: false, error: "Failed to create event" };
   }
 }
 
@@ -101,7 +99,7 @@ export async function createCalendarEvent(
  */
 export async function updateCalendarEvent(
   id: string,
-  data: Partial<z.infer<typeof eventSchema>>
+  data: Partial<z.infer<typeof eventSchema>>,
 ) {
   try {
     const validated = eventSchema.partial().parse(data);
@@ -118,27 +116,27 @@ export async function updateCalendarEvent(
     if (validated.color !== undefined) updateData.color = validated.color;
 
     const supabase = getAdminClient() as any;
-     
+
     const { error } = await (supabase as any)
-      .from('calendar_events')
+      .from("calendar_events")
       .update(updateData)
-      .eq('id', id);
+      .eq("id", id);
 
     if (error) throw error;
 
     await logAuditEvent({
-      action: 'UPDATE',
-      resource: 'calendar_events',
+      action: "UPDATE",
+      resource: "calendar_events",
       resourceId: id,
       details: validated,
     });
 
-    revalidatePath('/admin/calendar');
+    revalidatePath("/admin/calendar");
 
     return { success: true };
   } catch (error) {
-    console.error('[UPDATE CALENDAR EVENT ERROR]', error);
-    return { success: false, error: 'Failed to update event' };
+    console.error("[UPDATE CALENDAR EVENT ERROR]", error);
+    return { success: false, error: "Failed to update event" };
   }
 }
 
@@ -149,23 +147,23 @@ export async function deleteCalendarEvent(id: string) {
   try {
     const supabase = getAdminClient() as any;
     const { error } = await supabase
-      .from('calendar_events')
+      .from("calendar_events")
       .delete()
-      .eq('id', id);
+      .eq("id", id);
 
     if (error) throw error;
 
     await logAuditEvent({
-      action: 'DELETE',
-      resource: 'calendar_events',
+      action: "DELETE",
+      resource: "calendar_events",
       resourceId: id,
     });
 
-    revalidatePath('/admin/calendar');
+    revalidatePath("/admin/calendar");
 
     return { success: true };
   } catch (error) {
-    console.error('[DELETE CALENDAR EVENT ERROR]', error);
-    return { success: false, error: 'Failed to delete event' };
+    console.error("[DELETE CALENDAR EVENT ERROR]", error);
+    return { success: false, error: "Failed to delete event" };
   }
 }

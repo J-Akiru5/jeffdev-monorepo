@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Task Item Component
@@ -6,9 +6,14 @@
  * Individual task row with checkbox, title, and actions.
  */
 
-import { useState } from 'react';
-import { Star, MoreVertical, Calendar as CalendarIcon, Trash2 } from 'lucide-react';
-import type { Task } from '@/lib/schemas';
+import { useState } from "react";
+import {
+  Star,
+  MoreVertical,
+  Calendar as CalendarIcon,
+  Trash2,
+} from "lucide-react";
+import type { Task } from "@/lib/schemas";
 
 interface TaskItemProps {
   task: Task;
@@ -28,7 +33,7 @@ export function TaskItem({
   return (
     <div
       className={`group flex items-start gap-3 rounded-lg border border-white/5 bg-white/[0.02] p-3 transition-all hover:border-white/10 hover:bg-white/[0.04] ${
-        task.completed ? 'opacity-50' : ''
+        task.completed ? "opacity-50" : ""
       }`}
     >
       {/* Checkbox */}
@@ -36,8 +41,8 @@ export function TaskItem({
         onClick={() => onToggleComplete?.(task.id)}
         className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all ${
           task.completed
-            ? 'border-cyan-500 bg-cyan-500'
-            : 'border-white/20 hover:border-cyan-500'
+            ? "border-cyan-500 bg-cyan-500"
+            : "border-white/20 hover:border-cyan-500"
         }`}
       >
         {task.completed && (
@@ -61,7 +66,7 @@ export function TaskItem({
       <div className="min-w-0 flex-1">
         <p
           className={`text-sm ${
-            task.completed ? 'text-white/30 line-through' : 'text-white'
+            task.completed ? "text-white/30 line-through" : "text-white"
           }`}
         >
           {task.title}
@@ -73,9 +78,9 @@ export function TaskItem({
             {task.dueDate && (
               <span className="flex items-center gap-1">
                 <CalendarIcon className="h-3 w-3" />
-                {new Date(task.dueDate).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
+                {new Date(task.dueDate).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
                 })}
               </span>
             )}
@@ -93,13 +98,13 @@ export function TaskItem({
           onClick={() => onToggleStar?.(task.id)}
           className={`rounded p-1 transition-colors ${
             task.starred
-              ? 'text-yellow-400 hover:text-yellow-300'
-              : 'text-white/30 hover:text-yellow-400'
+              ? "text-yellow-400 hover:text-yellow-300"
+              : "text-white/30 hover:text-yellow-400"
           }`}
         >
           <Star
             className="h-4 w-4"
-            fill={task.starred ? 'currentColor' : 'none'}
+            fill={task.starred ? "currentColor" : "none"}
           />
         </button>
 

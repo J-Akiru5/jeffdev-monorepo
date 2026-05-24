@@ -1,3 +1,3 @@
-export { AdminCalendar } from './admin-calendar';
-export { EventModal } from './event-modal';
-export { CalendarLegend } from './calendar-legend';
+export { AdminCalendar } from "./admin-calendar";
+export { EventModal } from "./event-modal";
+export { CalendarLegend } from "./calendar-legend";

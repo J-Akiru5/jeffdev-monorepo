@@ -1,37 +1,40 @@
 /**
  * PayPal Webhook Handler
- * 
+ *
  * POST /api/webhooks/paypal
  * Handles PayPal subscription events with signature verification
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { getCollection } from '@jeffdev/db';
-import { Resend } from 'resend';
+import { NextRequest, NextResponse } from "next/server";
+import { getCollection } from "@jeffdev/db";
+import { Resend } from "resend";
 
 const PAYPAL_WEBHOOK_ID = process.env.PAYPAL_WEBHOOK_ID;
 
 async function verifyPayPalWebhook(
   request: NextRequest,
-  body: string
+  body: string,
 ): Promise<boolean> {
   if (!PAYPAL_WEBHOOK_ID) {
-    console.warn('[paypal-webhook] PAYPAL_WEBHOOK_ID not set — skipping verification');
+    console.warn(
+      "[paypal-webhook] PAYPAL_WEBHOOK_ID not set — skipping verification",
+    );
     return true;
   }
   try {
-    const transmissionId = request.headers.get('paypal-transmission-id') || '';
-    const transmissionSig = request.headers.get('paypal-transmission-sig') || '';
-    const certUrl = request.headers.get('paypal-cert-url') || '';
-    const authAlgo = request.headers.get('paypal-auth-algo') || '';
+    const transmissionId = request.headers.get("paypal-transmission-id") || "";
+    const transmissionSig =
+      request.headers.get("paypal-transmission-sig") || "";
+    const certUrl = request.headers.get("paypal-cert-url") || "";
+    const authAlgo = request.headers.get("paypal-auth-algo") || "";
 
     const verificationResponse = await fetch(
-      'https://api-m.paypal.com/v1/notifications/verify-webhook-signature',
+      "https://api-m.paypal.com/v1/notifications/verify-webhook-signature",
       {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Basic ${Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`).toString('base64')}`,
+          "Content-Type": "application/json",
+          Authorization: `Basic ${Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`).toString("base64")}`,
         },
         body: JSON.stringify({
           auth_algo: authAlgo,
@@ -41,13 +44,15 @@ async function verifyPayPalWebhook(
           webhook_id: PAYPAL_WEBHOOK_ID,
           webhook_event: JSON.parse(body),
         }),
-      }
+      },
     );
 
-    const result = await verificationResponse.json() as { verification_status?: string };
-    return result.verification_status === 'SUCCESS';
+    const result = (await verificationResponse.json()) as {
+      verification_status?: string;
+    };
+    return result.verification_status === "SUCCESS";
   } catch (error) {
-    console.error('[paypal-webhook] Verification error:', error);
+    console.error("[paypal-webhook] Verification error:", error);
     return false;
   }
 }
@@ -72,34 +77,34 @@ export async function POST(request: NextRequest) {
 
     const isValid = await verifyPayPalWebhook(request, rawBody);
     if (!isValid) {
-      console.error('[paypal-webhook] Signature verification failed');
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+      console.error("[paypal-webhook] Signature verification failed");
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
     const { event_type, resource } = body;
     const userId = resource.custom_id;
 
     if (!userId) {
-      console.error('[paypal-webhook] No userId in payload');
+      console.error("[paypal-webhook] No userId in payload");
       return NextResponse.json({ received: true });
     }
 
     console.log(`[paypal-webhook] Event: ${event_type} for user ${userId}`);
 
     switch (event_type) {
-      case 'BILLING.SUBSCRIPTION.ACTIVATED':
+      case "BILLING.SUBSCRIPTION.ACTIVATED":
         await handleSubscriptionActivated(userId, resource);
         break;
-      case 'BILLING.SUBSCRIPTION.CANCELLED':
+      case "BILLING.SUBSCRIPTION.CANCELLED":
         await handleSubscriptionCancelled(userId);
         break;
-      case 'BILLING.SUBSCRIPTION.SUSPENDED':
+      case "BILLING.SUBSCRIPTION.SUSPENDED":
         await handleSubscriptionSuspended(userId);
         break;
-      case 'PAYMENT.SALE.COMPLETED':
+      case "PAYMENT.SALE.COMPLETED":
         await handlePaymentCompleted(userId);
         break;
-      case 'BILLING.SUBSCRIPTION.PAYMENT.FAILED':
+      case "BILLING.SUBSCRIPTION.PAYMENT.FAILED":
         await handlePaymentFailed(userId);
         break;
       default:
@@ -108,31 +113,33 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('[paypal-webhook] Error:', error);
+    console.error("[paypal-webhook] Error:", error);
     return NextResponse.json(
-      { error: 'Webhook processing failed' },
-      { status: 500 }
+      { error: "Webhook processing failed" },
+      { status: 500 },
     );
   }
 }
 
 async function handleSubscriptionActivated(
   userId: string,
-  resource: PayPalEvent['resource']
+  resource: PayPalEvent["resource"],
 ) {
   const tier = getTierFromPlanId(resource.plan_id);
   const nextBilling = resource.billing_info?.next_billing_time;
   const now = new Date();
 
-  const subscriptions = await getCollection('subscriptions');
+  const subscriptions = await getCollection("subscriptions");
   await subscriptions.updateOne(
     { userId },
     {
       $set: {
         tier,
-        status: 'active',
+        status: "active",
         paypalSubscriptionId: resource.id,
-        currentPeriodEnd: nextBilling ? new Date(nextBilling) : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000),
+        currentPeriodEnd: nextBilling
+          ? new Date(nextBilling)
+          : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000),
         updatedAt: now,
       },
       $setOnInsert: {
@@ -141,81 +148,82 @@ async function handleSubscriptionActivated(
         createdAt: now,
       },
     },
-    { upsert: true }
+    { upsert: true },
   );
 
   console.log(`[paypal-webhook] Activated ${tier} for ${userId}`);
 }
 
-async function handleSubscriptionCancelled(
-  userId: string
-) {
-  const subscriptions = await getCollection('subscriptions');
+async function handleSubscriptionCancelled(userId: string) {
+  const subscriptions = await getCollection("subscriptions");
   await subscriptions.updateOne(
     { userId },
-    { $set: { status: 'cancelled', updatedAt: new Date() } }
+    { $set: { status: "cancelled", updatedAt: new Date() } },
   );
   console.log(`[paypal-webhook] Cancelled subscription for ${userId}`);
 }
 
-async function handleSubscriptionSuspended(
-  userId: string
-) {
-  const subscriptions = await getCollection('subscriptions');
+async function handleSubscriptionSuspended(userId: string) {
+  const subscriptions = await getCollection("subscriptions");
   await subscriptions.updateOne(
     { userId },
-    { $set: { status: 'past_due', updatedAt: new Date() } }
+    { $set: { status: "past_due", updatedAt: new Date() } },
   );
   console.log(`[paypal-webhook] Suspended subscription for ${userId}`);
 }
 
-async function handlePaymentCompleted(
-  userId: string
-) {
-  const usage = await getCollection('usage');
+async function handlePaymentCompleted(userId: string) {
+  const usage = await getCollection("usage");
   const now = new Date();
-  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
   await usage.updateOne(
     { userId, month },
-    { $set: { aiGenerations: 0, rulesCreated: 0, componentsCreated: 0, updatedAt: now } },
-    { upsert: true }
+    {
+      $set: {
+        aiGenerations: 0,
+        rulesCreated: 0,
+        componentsCreated: 0,
+        updatedAt: now,
+      },
+    },
+    { upsert: true },
   );
 
   console.log(`[paypal-webhook] Reset usage counters for ${userId}`);
 }
 
-async function handlePaymentFailed(
-  userId: string
-) {
-  const subscriptions = await getCollection('subscriptions');
+async function handlePaymentFailed(userId: string) {
+  const subscriptions = await getCollection("subscriptions");
   await subscriptions.updateOne(
     { userId },
-    { $set: { status: 'past_due', updatedAt: new Date() } }
+    { $set: { status: "past_due", updatedAt: new Date() } },
   );
 
   if (process.env.RESEND_API_KEY) {
     try {
       const resend = new Resend(process.env.RESEND_API_KEY);
       await resend.emails.send({
-        from: 'Prism <billing@prism.jeffdev.studio>',
+        from: "Prism <billing@prism.jeffdev.studio>",
         to: userId, // will be resolved by email lookup
-        subject: 'Payment Failed — Prism Subscription',
+        subject: "Payment Failed — Prism Subscription",
         html: `<p>Your Prism subscription payment failed. Please update your payment method.</p>`,
       });
     } catch (error) {
-      console.error('[paypal-webhook] Email notification failed:', error);
+      console.error("[paypal-webhook] Email notification failed:", error);
     }
   }
 
   console.log(`[paypal-webhook] Payment failed for ${userId}`);
 }
 
-function getTierFromPlanId(planId?: string): 'pro' | 'team' | 'enterprise' {
-  if (!planId) return 'pro';
-  if (planId === process.env.PAYPAL_PLAN_TEAM_MONTHLY ||
-      planId === process.env.PAYPAL_PLAN_TEAM_ANNUAL) {
-    return 'team';
+function getTierFromPlanId(planId?: string): "pro" | "team" | "enterprise" {
+  if (!planId) return "pro";
+  if (
+    planId === process.env.PAYPAL_PLAN_TEAM_MONTHLY ||
+    planId === process.env.PAYPAL_PLAN_TEAM_ANNUAL
+  ) {
+    return "team";
   }
-  return 'pro';
+  return "pro";
 }

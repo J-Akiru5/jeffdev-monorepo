@@ -1,11 +1,19 @@
-'use client';
+"use client";
 
-import { useRef, useEffect } from 'react';
-import { Bot, PiggyBank, Shield, MessageSquare, Zap, HeartHandshake, type LucideIcon } from 'lucide-react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useRef, useEffect } from "react";
+import {
+  Bot,
+  PiggyBank,
+  Shield,
+  MessageSquare,
+  Zap,
+  HeartHandshake,
+  type LucideIcon,
+} from "lucide-react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
@@ -19,46 +27,58 @@ type Feature = {
 
 const features: Feature[] = [
   {
-    id: 'ai-native',
+    id: "ai-native",
     icon: Bot,
-    title: 'AI-Native Development',
-    description: 'IDE-native agents execute with precision, context awareness, and autonomous problem-solving capability.',
-    detailed: 'Our development pipeline integrates AI agents directly into the IDE, giving them full workspace context to map dependencies, trace issues, and execute tasks end-to-end without human micromanagement.',
+    title: "AI-Native Development",
+    description:
+      "IDE-native agents execute with precision, context awareness, and autonomous problem-solving capability.",
+    detailed:
+      "Our development pipeline integrates AI agents directly into the IDE, giving them full workspace context to map dependencies, trace issues, and execute tasks end-to-end without human micromanagement.",
   },
   {
-    id: 'fixed-pricing',
+    id: "fixed-pricing",
     icon: PiggyBank,
-    title: 'Fixed Investment Pricing',
-    description: 'Clear scope, milestone-based delivery, and fixed quotes — no surprise invoices or scope creep.',
-    detailed: 'Every project follows a structured Statement of Work with defined milestones, deliverables, and fixed pricing. You know exactly what you pay and when — zero billing anxiety.',
+    title: "Fixed Investment Pricing",
+    description:
+      "Clear scope, milestone-based delivery, and fixed quotes — no surprise invoices or scope creep.",
+    detailed:
+      "Every project follows a structured Statement of Work with defined milestones, deliverables, and fixed pricing. You know exactly what you pay and when — zero billing anxiety.",
   },
   {
-    id: 'enterprise-security',
+    id: "enterprise-security",
     icon: Shield,
-    title: 'Enterprise-Grade Security',
-    description: 'Firebase Auth, session-based RBAC, encrypted data at rest — built for compliance from day one.',
-    detailed: 'We implement defense-in-depth with Firebase Authentication, custom session management, role-based access controls, encrypted Firestore collections, and comprehensive audit logging for SOC 2 readiness.',
+    title: "Enterprise-Grade Security",
+    description:
+      "Firebase Auth, session-based RBAC, encrypted data at rest — built for compliance from day one.",
+    detailed:
+      "We implement defense-in-depth with Firebase Authentication, custom session management, role-based access controls, encrypted Firestore collections, and comprehensive audit logging for SOC 2 readiness.",
   },
   {
-    id: 'socratic-planning',
+    id: "socratic-planning",
     icon: MessageSquare,
-    title: 'Socratic Planning',
-    description: 'Zero assumptions. We ask targeted questions before writing a single line of code.',
-    detailed: 'Our Clarification-First Doctrine means every project starts with a structured Q&A loop. We challenge assumptions, map edge cases, and validate requirements before any engineering begins — saving weeks of rework.',
+    title: "Socratic Planning",
+    description:
+      "Zero assumptions. We ask targeted questions before writing a single line of code.",
+    detailed:
+      "Our Clarification-First Doctrine means every project starts with a structured Q&A loop. We challenge assumptions, map edge cases, and validate requirements before any engineering begins — saving weeks of rework.",
   },
   {
-    id: 'rapid-mvp',
+    id: "rapid-mvp",
     icon: Zap,
-    title: 'Rapid MVP Delivery',
-    description: 'From concept to working prototype in weeks, not months — validated, tested, and production-ready.',
-    detailed: 'Using our proprietary build sequences and pre-built architecture templates, we compress typical 3-month timelines into 2-3 weeks for functional, polished MVP launches.',
+    title: "Rapid MVP Delivery",
+    description:
+      "From concept to working prototype in weeks, not months — validated, tested, and production-ready.",
+    detailed:
+      "Using our proprietary build sequences and pre-built architecture templates, we compress typical 3-month timelines into 2-3 weeks for functional, polished MVP launches.",
   },
   {
-    id: 'post-launch',
+    id: "post-launch",
     icon: HeartHandshake,
-    title: 'Post-Launch Partnership',
-    description: 'Ongoing maintenance, feature evolution, and performance monitoring — we grow with you.',
-    detailed: 'Every project includes a transition period and optional retainer packages covering bug fixes, performance optimization, feature iterations, and architecture evolution as your product scales.',
+    title: "Post-Launch Partnership",
+    description:
+      "Ongoing maintenance, feature evolution, and performance monitoring — we grow with you.",
+    detailed:
+      "Every project includes a transition period and optional retainer packages covering bug fixes, performance optimization, feature iterations, and architecture evolution as your product scales.",
   },
 ];
 
@@ -78,9 +98,9 @@ export function Features() {
           duration: 0.6,
           scrollTrigger: {
             trigger: headerRef.current,
-            start: 'top 85%',
+            start: "top 85%",
           },
-        }
+        },
       );
 
       gsap.fromTo(
@@ -92,12 +112,12 @@ export function Features() {
           scale: 1,
           duration: 0.6,
           stagger: 0.1,
-          ease: 'power3.out',
+          ease: "power3.out",
           scrollTrigger: {
             trigger: cardsRef.current,
-            start: 'top 80%',
+            start: "top 80%",
           },
-        }
+        },
       );
     }, sectionRef);
 
@@ -105,20 +125,18 @@ export function Features() {
   }, []);
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative py-24 md:py-32"
-      id="features"
-    >
+    <section ref={sectionRef} className="relative py-24 md:py-32" id="features">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Section Header */}
         <div ref={headerRef} className="mx-auto max-w-2xl text-center">
           <span className="font-mono text-xs uppercase tracking-wider text-purple-400">
-            {'// Why Choose Us'}
+            {"// Why Choose Us"}
           </span>
           <h2 className="mt-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
-            Built Different.{' '}
-            <span className="text-gradient-holographic">Engineered Better.</span>
+            Built Different.{" "}
+            <span className="text-gradient-holographic">
+              Engineered Better.
+            </span>
           </h2>
           <p className="mt-4 text-white/50">
             Six pillars that define how we build — from AI-native workflows to
@@ -138,7 +156,10 @@ export function Features() {
             >
               {/* Icon */}
               <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg border border-white/10 bg-white/5 transition-all duration-300 group-hover:border-cyan-500/30 group-hover:bg-cyan-500/10 group-hover:shadow-glow-cyan">
-                <feature.icon className="h-6 w-6 text-white/60 transition-all duration-300 group-hover:text-cyan-400 group-hover:scale-110" strokeWidth={1.5} />
+                <feature.icon
+                  className="h-6 w-6 text-white/60 transition-all duration-300 group-hover:text-cyan-400 group-hover:scale-110"
+                  strokeWidth={1.5}
+                />
               </div>
 
               {/* Content */}

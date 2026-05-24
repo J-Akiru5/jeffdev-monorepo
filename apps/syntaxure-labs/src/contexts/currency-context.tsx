@@ -1,13 +1,19 @@
-'use client';
+"use client";
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   type CurrencyCode,
   DEFAULT_EXCHANGE_RATE,
   formatPrice as formatPriceUtil,
   formatPriceRange as formatPriceRangeUtil,
   getCurrencyFromCookie,
-} from '@/lib/currency';
+} from "@/lib/currency";
 
 interface CurrencyContextValue {
   /** Current currency code */
@@ -31,28 +37,30 @@ const CurrencyContext = createContext<CurrencyContextValue | null>(null);
  * Reads the currency cookie set by middleware and fetches live exchange rate.
  */
 export function CurrencyProvider({ children }: { children: ReactNode }) {
-  const [currency, setCurrency] = useState<CurrencyCode>('USD');
+  const [currency, setCurrency] = useState<CurrencyCode>("USD");
   const [exchangeRate, setExchangeRate] = useState(DEFAULT_EXCHANGE_RATE);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Read currency from cookie
-    const cookies = document.cookie.split(';');
-    const currencyCookie = cookies.find((c) => c.trim().startsWith('currency='));
-    const cookieValue = currencyCookie?.split('=')[1]?.trim();
+    const cookies = document.cookie.split(";");
+    const currencyCookie = cookies.find((c) =>
+      c.trim().startsWith("currency="),
+    );
+    const cookieValue = currencyCookie?.split("=")[1]?.trim();
     const detectedCurrency = getCurrencyFromCookie(cookieValue);
     setCurrency(detectedCurrency);
 
     // Fetch live exchange rate
     const fetchRate = async () => {
       try {
-        const response = await fetch('/api/exchange-rate');
+        const response = await fetch("/api/exchange-rate");
         const data = await response.json();
         if (data.rate) {
           setExchangeRate(data.rate);
         }
       } catch (error) {
-        console.error('Failed to fetch exchange rate:', error);
+        console.error("Failed to fetch exchange rate:", error);
         // Keep default rate on error
       } finally {
         setIsLoading(false);
@@ -91,7 +99,7 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
 export function useCurrency() {
   const context = useContext(CurrencyContext);
   if (!context) {
-    throw new Error('useCurrency must be used within a CurrencyProvider');
+    throw new Error("useCurrency must be used within a CurrencyProvider");
   }
   return context;
 }

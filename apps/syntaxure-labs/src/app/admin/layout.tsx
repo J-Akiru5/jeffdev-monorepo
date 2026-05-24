@@ -1,7 +1,7 @@
-import { AdminSidebar } from '@/components/admin/sidebar';
-import { AdminHeader } from '@/components/admin/header';
-import { UserProvider } from '@/contexts/user-context';
-import { Toaster } from 'sonner';
+import { AdminSidebar } from "@/components/admin/sidebar";
+import { AdminHeader } from "@/components/admin/header";
+import { UserProvider } from "@/contexts/user-context";
+import { Toaster } from "sonner";
 
 /**
  * Admin Layout
@@ -10,7 +10,7 @@ import { Toaster } from 'sonner';
  * Includes sidebar navigation and header.
  */
 
-import { MobileNav } from '@/components/admin/mobile-nav';
+import { MobileNav } from "@/components/admin/mobile-nav";
 
 export default function AdminLayout({
   children,

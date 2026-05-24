@@ -18,11 +18,18 @@ const CLIENT_PATTERNS: Array<{ pattern: RegExp; platform: ClientPlatform }> = [
   { pattern: /windsurf/i, platform: "windsurf" },
   { pattern: /claude/i, platform: "claude-desktop" },
   { pattern: /cline/i, platform: "cline" },
-  { pattern: /github copilot|github-copilot|ghcp/i, platform: "github-copilot" },
+  {
+    pattern: /github copilot|github-copilot|ghcp/i,
+    platform: "github-copilot",
+  },
   { pattern: /vs.?code|visual studio/i, platform: "vscode" },
 ];
 
-let _currentClient: ClientInfo = { name: "unknown", version: "0.0.0", platform: "unknown" };
+let _currentClient: ClientInfo = {
+  name: "unknown",
+  version: "0.0.0",
+  platform: "unknown",
+};
 
 export function detectPlatform(clientName: string): ClientPlatform {
   for (const { pattern, platform } of CLIENT_PATTERNS) {
@@ -31,7 +38,10 @@ export function detectPlatform(clientName: string): ClientPlatform {
   return "unknown";
 }
 
-export function setCurrentClient(clientInfo: { name: string; version: string }): void {
+export function setCurrentClient(clientInfo: {
+  name: string;
+  version: string;
+}): void {
   _currentClient = {
     name: clientInfo.name,
     version: clientInfo.version,

@@ -1,36 +1,39 @@
-'use client';
+"use client";
 
 /**
  * Pricing Grid Component
- * 
+ *
  * Displays all subscription tiers in a grid
  */
 
-import { useRouter } from 'next/navigation';
-import { PricingCard } from './pricing-card';
-import type { SubscriptionTier } from '@/lib/subscriptions';
+import { useRouter } from "next/navigation";
+import { PricingCard } from "./pricing-card";
+import type { SubscriptionTier } from "@/lib/subscriptions";
 
 interface PricingGridProps {
   currentTier?: SubscriptionTier;
 }
 
-export function PricingGrid({ currentTier = 'free' }: PricingGridProps) {
+export function PricingGrid({ currentTier = "free" }: PricingGridProps) {
   const router = useRouter();
 
-  const handleSubscribe = async (tier: SubscriptionTier, billing: 'monthly' | 'annual') => {
-    if (tier === 'enterprise') {
-      router.push('/contact?subject=enterprise');
+  const handleSubscribe = async (
+    tier: SubscriptionTier,
+    billing: "monthly" | "annual",
+  ) => {
+    if (tier === "enterprise") {
+      router.push("/contact?subject=enterprise");
       return;
     }
 
-    if (tier === 'free') {
+    if (tier === "free") {
       return;
     }
 
     try {
-      const response = await fetch('/api/subscriptions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/subscriptions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tier, billing }),
       });
 
@@ -42,10 +45,10 @@ export function PricingGrid({ currentTier = 'free' }: PricingGridProps) {
       } else if (data.redirect) {
         router.push(data.redirect);
       } else {
-        console.error('No approval URL returned');
+        console.error("No approval URL returned");
       }
     } catch (error) {
-      console.error('Subscription error:', error);
+      console.error("Subscription error:", error);
     }
   };
 

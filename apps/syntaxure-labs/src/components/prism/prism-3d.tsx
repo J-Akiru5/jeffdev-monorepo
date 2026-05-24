@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Prism3D Component
@@ -7,7 +7,7 @@
  * Uses CSS transforms and animations to create a futuristic, abstract artifact.
  */
 
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 
 interface Prism3DProps {
   className?: string;
@@ -15,7 +15,12 @@ interface Prism3DProps {
 
 export function Prism3D({ className }: Prism3DProps) {
   return (
-    <div className={cn("relative flex items-center justify-center py-20", className)}>
+    <div
+      className={cn(
+        "relative flex items-center justify-center py-20",
+        className,
+      )}
+    >
       <div className="prism-scene">
         <div className="prism-pivot">
           {/* Side 1 */}
@@ -30,12 +35,12 @@ export function Prism3D({ className }: Prism3DProps) {
           <div className="prism-face prism-side side-3">
             <div className="prism-shine" />
           </div>
-          
+
           {/* Top Cap (Triangle) */}
           <div className="prism-face prism-cap cap-top" />
           {/* Bottom Cap (Triangle) */}
           <div className="prism-face prism-cap cap-bottom" />
-          
+
           {/* Internal Glow Core */}
           <div className="prism-core" />
         </div>
@@ -70,7 +75,11 @@ export function Prism3D({ className }: Prism3DProps) {
         .prism-side {
           width: 200px;
           height: 300px;
-          background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+          background: linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.05) 0%,
+            rgba(255, 255, 255, 0.01) 100%
+          );
           overflow: hidden;
         }
 
@@ -97,7 +106,7 @@ export function Prism3D({ className }: Prism3DProps) {
            Apothem (center to face) for equilateral triangle of side 200px:
            a = side / (2 * tan(180/3)) = 200 / 3.464 = 57.7px
         */
-        
+
         .side-1 {
           transform: translateZ(58px);
         }
@@ -123,7 +132,8 @@ export function Prism3D({ className }: Prism3DProps) {
           top: 0;
           left: 0;
           transform-origin: 50% 100%;
-          transform: translateY(-173.2px) rotateX(90deg) translateZ(58px) scaleY(-1);
+          transform: translateY(-173.2px) rotateX(90deg) translateZ(58px)
+            scaleY(-1);
           opacity: 0.5;
         }
 
@@ -134,25 +144,29 @@ export function Prism3D({ className }: Prism3DProps) {
           transform: rotateX(-90deg) translateZ(242px); /* height - apothem adjustments */
           opacity: 0.5;
         }
-        
+
         /* Fix for caps to use full shape/clip-path preferred for transparency, 
            but border hack works for structure. Let's try clip-path for glass effect. */
-        
+
         .prism-cap {
           width: 200px;
           height: 174px; /* sqrt(3)/2 * 200 */
           border: none;
-          background: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+          background: linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0.1),
+            rgba(255, 255, 255, 0.02)
+          );
           clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
         }
-        
+
         .cap-top {
           transform: rotateX(90deg) translateZ(150px);
           /* Top cap alignment is tricky manually */
           top: -87px; /* half height */
           display: none; /* Hiding caps for now to ensure clean glass lines logic first */
         }
-        
+
         /* The Core - a glowing orb inside */
         .prism-core {
           position: absolute;
@@ -162,7 +176,11 @@ export function Prism3D({ className }: Prism3DProps) {
           height: 100px;
           transform: translate(-50%, -50%);
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(6,182,212,0.8) 0%, transparent 70%);
+          background: radial-gradient(
+            circle,
+            rgba(6, 182, 212, 0.8) 0%,
+            transparent 70%
+          );
           filter: blur(20px);
           animation: pulse 4s ease-in-out infinite;
         }
@@ -180,13 +198,27 @@ export function Prism3D({ className }: Prism3DProps) {
         }
 
         @keyframes shine {
-          0%, 100% { transform: translateY(-100%) rotate(45deg); opacity: 0; }
-          50% { transform: translateY(100%) rotate(45deg); opacity: 1; }
+          0%,
+          100% {
+            transform: translateY(-100%) rotate(45deg);
+            opacity: 0;
+          }
+          50% {
+            transform: translateY(100%) rotate(45deg);
+            opacity: 1;
+          }
         }
 
         @keyframes pulse {
-          0%, 100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
-          50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+          0%,
+          100% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0.5;
+          }
+          50% {
+            transform: translate(-50%, -50%) scale(1.2);
+            opacity: 0.8;
+          }
         }
       `}</style>
     </div>

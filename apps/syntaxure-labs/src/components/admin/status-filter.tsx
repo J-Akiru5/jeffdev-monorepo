@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Status Filter Component
@@ -17,7 +17,7 @@ export function StatusFilter({
   value,
   onChange,
   options,
-  placeholder = 'All Statuses',
+  placeholder = "All Statuses",
 }: StatusFilterProps) {
   return (
     <select
@@ -29,7 +29,11 @@ export function StatusFilter({
         {placeholder}
       </option>
       {options.map((option) => (
-        <option key={option.value} value={option.value} className="bg-[#0a0a0a]">
+        <option
+          key={option.value}
+          value={option.value}
+          className="bg-[#0a0a0a]"
+        >
           {option.label}
         </option>
       ))}

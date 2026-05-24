@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * PricingFAQ Component
@@ -6,10 +6,10 @@
  * Accordion-style FAQ section for the pricing page.
  */
 
-import { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import type { FAQItem } from '@/data/pricing';
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { FAQItem } from "@/data/pricing";
 
 interface PricingFAQProps {
   items: FAQItem[];
@@ -35,15 +35,15 @@ export function PricingFAQ({ items }: PricingFAQProps) {
             </span>
             <ChevronDown
               className={cn(
-                'h-5 w-5 flex-shrink-0 text-white/50 transition-transform duration-200',
-                openIndex === idx && 'rotate-180 text-cyan-400'
+                "h-5 w-5 flex-shrink-0 text-white/50 transition-transform duration-200",
+                openIndex === idx && "rotate-180 text-cyan-400",
               )}
             />
           </button>
           <div
             className={cn(
-              'overflow-hidden transition-all duration-300',
-              openIndex === idx ? 'mt-4 max-h-96' : 'max-h-0'
+              "overflow-hidden transition-all duration-300",
+              openIndex === idx ? "mt-4 max-h-96" : "max-h-0",
             )}
           >
             <p className="text-white/60 leading-relaxed">{item.answer}</p>

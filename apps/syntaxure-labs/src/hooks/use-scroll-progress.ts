@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 export function useScrollProgress() {
   const [scrollY, setScrollY] = useState(0);
@@ -18,16 +18,17 @@ export function useScrollProgress() {
     handleScroll();
     handleResize();
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleResize, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleResize, { passive: true });
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
-  const progress = viewportHeight > 0 ? Math.min(scrollY / viewportHeight, 1) : 0;
+  const progress =
+    viewportHeight > 0 ? Math.min(scrollY / viewportHeight, 1) : 0;
 
   return { scrollY, progress, viewportHeight };
 }

@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useRef, useEffect } from 'react';
-import Link from 'next/link';
-import { ArrowUpRight, Zap } from 'lucide-react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useRef, useEffect } from "react";
+import Link from "next/link";
+import { ArrowUpRight, Zap } from "lucide-react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 // Register GSAP plugin
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
@@ -21,7 +21,11 @@ if (typeof window !== 'undefined') {
  * - Urgency/availability indicator
  */
 
-export function CTA() {
+export function CTA({
+  availabilityText,
+}: {
+  availabilityText?: string | null;
+}) {
   const sectionRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -36,9 +40,9 @@ export function CTA() {
           duration: 0.7,
           scrollTrigger: {
             trigger: contentRef.current,
-            start: 'top 85%',
+            start: "top 85%",
           },
-        }
+        },
       );
     }, sectionRef);
 
@@ -61,16 +65,18 @@ export function CTA() {
           {/* Content */}
           <div className="relative z-10 flex flex-col items-center text-center">
             {/* Availability Badge */}
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5">
-              <Zap className="h-3.5 w-3.5 text-emerald-400" />
-              <span className="font-mono text-xs text-emerald-400">
-                2 Slots Available for Q1 2026
-              </span>
-            </div>
+            {availabilityText && (
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5">
+                <Zap className="h-3.5 w-3.5 text-emerald-400" />
+                <span className="font-mono text-xs text-emerald-400">
+                  {availabilityText}
+                </span>
+              </div>
+            )}
 
             {/* Headline */}
             <h2 className="max-w-2xl text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl">
-              Ready to Build Something{' '}
+              Ready to Build Something{" "}
               <span className="text-gradient-holographic">Exceptional?</span>
             </h2>
 

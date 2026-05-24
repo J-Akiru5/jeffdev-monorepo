@@ -9,18 +9,20 @@ import { toast } from "sonner";
  * @component VideoContextUploader
  * @description Upload context videos to Mux for automatic transcription.
  * The transcript is processed by Azure OpenAI to generate architectural rules.
- * 
+ *
  * @example
  * <VideoContextUploader projectId="prj_abc123" />
  */
-export function VideoContextUploader({ 
+export function VideoContextUploader({
   projectId,
-  onUploadComplete 
-}: { 
-    projectId?: string;
+  onUploadComplete,
+}: {
+  projectId?: string;
   onUploadComplete?: (assetId: string) => void;
 }) {
-  const [status, setStatus] = useState<"idle" | "uploading" | "processing" | "success" | "error">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "uploading" | "processing" | "success" | "error"
+  >("idle");
   const [uploadUrl, setUploadUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +31,8 @@ export function VideoContextUploader({
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (status === "uploading") {
         e.preventDefault();
-        e.returnValue = "Video is still uploading. Are you sure you want to leave?";
+        e.returnValue =
+          "Video is still uploading. Are you sure you want to leave?";
         return e.returnValue;
       }
     };
@@ -49,16 +52,18 @@ export function VideoContextUploader({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ projectId }),
       });
-      
+
       if (!res.ok) {
         throw new Error("Failed to initialize upload");
       }
-      
+
       const data = await res.json();
       setUploadUrl(data.url);
       toast.success("Ready to upload! Select your video.", { id: "upload" });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload initialization failed");
+      setError(
+        err instanceof Error ? err.message : "Upload initialization failed",
+      );
       setStatus("error");
       toast.error("Failed to initialize upload", { id: "upload" });
     }
@@ -68,7 +73,7 @@ export function VideoContextUploader({
     setStatus("processing");
     toast.loading("Video uploaded! Processing transcript...", { id: "upload" });
     console.log("✅ Upload complete, processing transcript...");
-    
+
     // After Mux processes the video, the webhook will handle the rest
     setTimeout(() => {
       setStatus("success");
@@ -96,14 +101,16 @@ export function VideoContextUploader({
             <span className="text-lg">📹</span>
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white">Upload Context Video</h3>
+            <h3 className="text-sm font-semibold text-white">
+              Upload Context Video
+            </h3>
             <p className="text-xs text-white/50 font-mono">
               AI will extract architectural rules from your recording
             </p>
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent className="pt-6">
         {status === "idle" && (
           <button
@@ -112,8 +119,18 @@ export function VideoContextUploader({
           >
             <div className="flex flex-col items-center gap-3">
               <div className="rounded-full bg-white/5 p-4 transition-transform group-hover:scale-110">
-                <svg className="h-8 w-8 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                <svg
+                  className="h-8 w-8 text-white/40"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  />
                 </svg>
               </div>
               <span className="font-mono text-sm text-white/60">
@@ -133,12 +150,14 @@ export function VideoContextUploader({
               onSuccess={handleSuccess}
               onError={handleError}
               className="w-full"
-              style={{
-                "--uploader-font-family": "JetBrains Mono, monospace",
-                "--button-background-color": "transparent",
-                "--button-border": "1px solid rgba(255,255,255,0.1)",
-                "--button-hover-background": "rgba(6, 182, 212, 0.1)",
-              } as React.CSSProperties}
+              style={
+                {
+                  "--uploader-font-family": "JetBrains Mono, monospace",
+                  "--button-background-color": "transparent",
+                  "--button-border": "1px solid rgba(255,255,255,0.1)",
+                  "--button-hover-background": "rgba(6, 182, 212, 0.1)",
+                } as React.CSSProperties
+              }
             />
             <div className="flex items-center justify-center gap-2 text-cyan-400">
               <div className="h-2 w-2 animate-pulse rounded-full bg-cyan-400" />
@@ -159,7 +178,9 @@ export function VideoContextUploader({
               </div>
             </div>
             <div className="text-center">
-              <p className="font-mono text-sm text-white">Processing Transcript...</p>
+              <p className="font-mono text-sm text-white">
+                Processing Transcript...
+              </p>
               <p className="font-mono text-xs text-white/40 mt-1">
                 Mux AI is extracting text from your video
               </p>
@@ -170,12 +191,24 @@ export function VideoContextUploader({
         {status === "success" && (
           <div className="flex flex-col items-center gap-4 py-8">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20 border border-emerald-500/30">
-              <svg className="h-8 w-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <svg
+                className="h-8 w-8 text-emerald-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
             </div>
             <div className="text-center">
-              <p className="font-mono text-sm text-emerald-400">Video Context Captured!</p>
+              <p className="font-mono text-sm text-emerald-400">
+                Video Context Captured!
+              </p>
               <p className="font-mono text-xs text-white/40 mt-1">
                 Rules will be generated when transcript is ready (1-3 mins)
               </p>
@@ -192,8 +225,18 @@ export function VideoContextUploader({
         {status === "error" && (
           <div className="flex flex-col items-center gap-4 py-8">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-500/20 border border-red-500/30">
-              <svg className="h-8 w-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="h-8 w-8 text-red-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </div>
             <div className="text-center">
@@ -215,4 +258,3 @@ export function VideoContextUploader({
     </Card>
   );
 }
-

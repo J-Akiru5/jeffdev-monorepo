@@ -1,11 +1,19 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, ArrowUpRight, MapPin, Mail, Calendar, Download } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  MapPin,
+  Mail,
+  Calendar,
+  Download,
+} from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { CTA } from "@/components/sections/cta";
+import { CTASection } from "@/components/sections/cta-section";
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveAvailability } from "@/lib/availability";
 
 export const metadata: Metadata = {
   title: "About",
@@ -65,15 +73,12 @@ async function getAboutData(): Promise<AboutData> {
 
 export default async function AboutPage() {
   const content = await getAboutData();
+  const activeAvailability = await getActiveAvailability();
 
-  const {
-    hero,
-    stats,
-    founder,
-    techStack,
-    values,
-    brandAssets,
-  } = content;
+  const { hero, stats, founder, techStack, values, brandAssets } = content;
+
+  const founderAvailability =
+    activeAvailability?.aboutText ?? founder.availability;
 
   return (
     <>
@@ -157,7 +162,7 @@ export default async function AboutPage() {
                   </div>
                   <div className="flex items-center gap-3 text-sm text-white/50">
                     <Calendar className="h-4 w-4" />
-                    {founder.availability}
+                    {founderAvailability}
                   </div>
                   <a
                     href={`mailto:${founder.email}`}
@@ -236,9 +241,7 @@ export default async function AboutPage() {
         {/* Brand Assets Section */}
         <section className="px-6 py-16 lg:px-8">
           <div className="mx-auto max-w-5xl">
-            <h2 className="text-2xl font-bold text-white mb-8">
-              Brand Assets
-            </h2>
+            <h2 className="text-2xl font-bold text-white mb-8">Brand Assets</h2>
             <div className="rounded-md border border-white/[0.06] bg-white/[0.02] p-8 md:p-12">
               <div className="flex flex-col">
                 <div className="flex-1 flex items-center justify-center rounded-lg overflow-hidden border border-white/10 bg-[#050505]">
@@ -273,7 +276,7 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        <CTA />
+        <CTASection />
       </main>
       <Footer />
     </>

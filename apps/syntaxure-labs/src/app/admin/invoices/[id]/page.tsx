@@ -1,11 +1,11 @@
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { ArrowLeft, Check, X, ExternalLink } from 'lucide-react';
-import { getInvoices } from '@/app/actions/invoice';
-import { InvoiceDownload } from '@/components/invoice/invoice-download';
-import type { InvoiceStatus, PaymentRecord } from '@/types/invoice';
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ArrowLeft, Check, X, ExternalLink } from "lucide-react";
+import { getInvoices } from "@/app/actions/invoice";
+import { InvoiceDownload } from "@/components/invoice/invoice-download";
+import type { InvoiceStatus, PaymentRecord } from "@/types/invoice";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 /**
  * Invoice Detail Page
@@ -18,12 +18,12 @@ interface PageProps {
 }
 
 const statusColors: Record<InvoiceStatus, string> = {
-  draft: 'bg-white/10 text-white/60 border-white/20',
-  sent: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  partial: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-  paid: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-  overdue: 'bg-red-500/20 text-red-400 border-red-500/30',
-  cancelled: 'bg-white/5 text-white/30 border-white/10',
+  draft: "bg-white/10 text-white/60 border-white/20",
+  sent: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+  partial: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+  paid: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+  overdue: "bg-red-500/20 text-red-400 border-red-500/30",
+  cancelled: "bg-white/5 text-white/30 border-white/10",
 };
 
 export default async function InvoiceDetailPage({ params }: PageProps) {
@@ -75,7 +75,9 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
             className="flex items-center gap-2 rounded-md border border-white/10 px-4 py-2 text-sm text-white/70 transition-colors hover:border-white/20 hover:text-white"
           >
             <ExternalLink className="h-4 w-4" />
-            {invoice.status === 'draft' ? 'Preview Payment Page' : 'View Payment Page'}
+            {invoice.status === "draft"
+              ? "Preview Payment Page"
+              : "View Payment Page"}
           </Link>
         </div>
       </div>
@@ -103,11 +105,11 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
                       {item.quantity}
                     </td>
                     <td className="py-3 text-right text-white/70">
-                      {invoice.currency === 'USD' ? '$' : '₱'}
+                      {invoice.currency === "USD" ? "$" : "₱"}
                       {item.unitPrice.toLocaleString()}
                     </td>
                     <td className="py-3 text-right font-medium text-white">
-                      {invoice.currency === 'USD' ? '$' : '₱'}
+                      {invoice.currency === "USD" ? "$" : "₱"}
                       {item.amount.toLocaleString()}
                     </td>
                   </tr>
@@ -120,15 +122,17 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
               <div className="flex justify-between text-white/50">
                 <span>Subtotal</span>
                 <span>
-                  {invoice.currency === 'USD' ? '$' : '₱'}
+                  {invoice.currency === "USD" ? "$" : "₱"}
                   {invoice.subtotal.toLocaleString()}
                 </span>
               </div>
               {invoice.tax && invoice.tax > 0 && (
                 <div className="flex justify-between text-white/50">
-                  <span>Tax ({((invoice.taxRate || 0) * 100).toFixed(0)}%)</span>
                   <span>
-                    {invoice.currency === 'USD' ? '$' : '₱'}
+                    Tax ({((invoice.taxRate || 0) * 100).toFixed(0)}%)
+                  </span>
+                  <span>
+                    {invoice.currency === "USD" ? "$" : "₱"}
                     {invoice.tax.toLocaleString()}
                   </span>
                 </div>
@@ -137,7 +141,7 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
                 <div className="flex justify-between text-emerald-400">
                   <span>Discount</span>
                   <span>
-                    -{invoice.currency === 'USD' ? '$' : '₱'}
+                    -{invoice.currency === "USD" ? "$" : "₱"}
                     {invoice.discount.toLocaleString()}
                   </span>
                 </div>
@@ -145,14 +149,14 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
               <div className="flex justify-between border-t border-white/10 pt-2 text-lg font-bold text-white">
                 <span>Total</span>
                 <span>
-                  {invoice.currency === 'USD' ? '$' : '₱'}
+                  {invoice.currency === "USD" ? "$" : "₱"}
                   {invoice.total.toLocaleString()}
                 </span>
               </div>
               <div className="flex justify-between text-white/50">
                 <span>Paid</span>
                 <span className="text-emerald-400">
-                  {invoice.currency === 'USD' ? '$' : '₱'}
+                  {invoice.currency === "USD" ? "$" : "₱"}
                   {invoice.paidAmount.toLocaleString()}
                 </span>
               </div>
@@ -160,10 +164,12 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
                 <span className="text-white">Balance Due</span>
                 <span
                   className={
-                    invoice.balanceDue > 0 ? 'text-yellow-400' : 'text-emerald-400'
+                    invoice.balanceDue > 0
+                      ? "text-yellow-400"
+                      : "text-emerald-400"
                   }
                 >
-                  {invoice.currency === 'USD' ? '$' : '₱'}
+                  {invoice.currency === "USD" ? "$" : "₱"}
                   {invoice.balanceDue.toLocaleString()}
                 </span>
               </div>
@@ -187,14 +193,14 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
                           {payment.id}
                         </p>
                         <p className="text-white">
-                          {payment.method.toUpperCase()} •{' '}
+                          {payment.method.toUpperCase()} •{" "}
                           {new Date(payment.paidAt).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-emerald-400">
-                        +{invoice.currency === 'USD' ? '$' : '₱'}
+                        +{invoice.currency === "USD" ? "$" : "₱"}
                       </p>
                       {payment.transactionId && (
                         <p className="text-xs text-white/30">
@@ -253,9 +259,9 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
                 <span
                   className={
                     new Date(invoice.dueDate) < new Date() &&
-                    invoice.status !== 'paid'
-                      ? 'text-red-400'
-                      : 'text-white'
+                    invoice.status !== "paid"
+                      ? "text-red-400"
+                      : "text-white"
                   }
                 >
                   {new Date(invoice.dueDate).toLocaleDateString()}
@@ -298,11 +304,11 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
   );
 }
 
-function PaymentStatusBadge({ status }: { status: PaymentRecord['status'] }) {
+function PaymentStatusBadge({ status }: { status: PaymentRecord["status"] }) {
   const colors = {
-    pending: 'bg-yellow-500/20 text-yellow-400',
-    verified: 'bg-emerald-500/20 text-emerald-400',
-    rejected: 'bg-red-500/20 text-red-400',
+    pending: "bg-yellow-500/20 text-yellow-400",
+    verified: "bg-emerald-500/20 text-emerald-400",
+    rejected: "bg-red-500/20 text-red-400",
   };
 
   const icons = {

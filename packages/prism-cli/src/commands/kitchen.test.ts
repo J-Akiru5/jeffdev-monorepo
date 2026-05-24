@@ -21,7 +21,13 @@ vi.mock("path", () => ({
   join: (...parts: string[]) => parts.join("\\"),
 }));
 
-import { kitchenAnalyze, kitchenPreview, kitchenTrim, kitchenHistory, kitchenOptimize } from "./kitchen.js";
+import {
+  kitchenAnalyze,
+  kitchenPreview,
+  kitchenTrim,
+  kitchenHistory,
+  kitchenOptimize,
+} from "./kitchen.js";
 
 const MOCK_RULES = `# Prism Rules
 
@@ -66,7 +72,9 @@ describe("kitchenAnalyze", () => {
   it("should show warning when no rules exist", async () => {
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     await kitchenAnalyze({ task: "test" });
-    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("No local rules found"));
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining("No local rules found"),
+    );
     logSpy.mockRestore();
   });
 
@@ -84,7 +92,9 @@ describe("kitchenAnalyze", () => {
     setupFiles(MOCK_RULES, MOCK_SKILLS);
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     await kitchenAnalyze({ task: "button", json: true });
-    const jsonCall = logSpy.mock.calls.find((c) => typeof c[0] === "string" && c[0].includes("task"));
+    const jsonCall = logSpy.mock.calls.find(
+      (c) => typeof c[0] === "string" && c[0].includes("task"),
+    );
     expect(jsonCall).toBeTruthy();
     if (jsonCall) {
       const parsed = JSON.parse(jsonCall[0]);
@@ -105,7 +115,9 @@ describe("kitchenPreview", () => {
   it("should show warning when no rules exist", async () => {
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     await kitchenPreview({});
-    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("No local rules found"));
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining("No local rules found"),
+    );
     logSpy.mockRestore();
   });
 
@@ -128,7 +140,9 @@ describe("kitchenTrim", () => {
   it("should show warning when no rules exist", async () => {
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     await kitchenTrim({ budget: 1000 });
-    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("No local rules found"));
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining("No local rules found"),
+    );
     logSpy.mockRestore();
   });
 
@@ -152,7 +166,9 @@ describe("kitchenHistory", () => {
   it("should show message when no history exists", async () => {
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     await kitchenHistory({});
-    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("No kitchen sessions"));
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining("No kitchen sessions"),
+    );
     logSpy.mockRestore();
   });
 });
@@ -166,7 +182,9 @@ describe("kitchenOptimize", () => {
   it("should show message when no telemetry exists", async () => {
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
     await kitchenOptimize({});
-    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("No telemetry"));
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.stringContaining("No telemetry"),
+    );
     logSpy.mockRestore();
   });
 });

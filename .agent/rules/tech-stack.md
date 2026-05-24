@@ -3,8 +3,9 @@ trigger: always_on
 ---
 
 ⚡ JEFFDEV MONOREPO - TECH STACK CONSTITUTION
+
 1. CORE INFRASTRUCTURE (THE "BLEEDING EDGE")
-Framework: Next.js 16 (App Router).
+   Framework: Next.js 16 (App Router).
 
 Config: turbopack enabled (doppler run -- turbo dev).
 
@@ -17,8 +18,8 @@ Runtime: Node.js 20 (LTS).
 Package Manager: npm (Managed via Syncpack to prevent version drift).
 
 2. DATA LAYER (HYBRID ARCHITECTURE)
-A. Primary Databases
-Agency (Marketing/Client): Firebase Firestore.
+   A. Primary Databases
+   Agency (Marketing/Client): Firebase Firestore.
 
 SDK: firebase-admin (Server) / firebase/app (Client - restricted).
 
@@ -43,8 +44,8 @@ Access: S3 Compatible SDK (@aws-sdk/client-s3).
 Public Domain: Serve assets via cdn.jeffdev.studio to bypass Vercel bandwidth costs.
 
 3. ARTIFICIAL INTELLIGENCE (PRISM CONTEXT ENGINE)
-A. Orchestration
-SDK: Vercel AI SDK (ai).
+   A. Orchestration
+   SDK: Vercel AI SDK (ai).
 
 Why: Zero-latency streaming for React Server Components.
 
@@ -60,8 +61,8 @@ Dev/Fallback: ChromaDB (Running locally via Docker).
 Strategy: Use Chroma locally to save Azure Credits during development.
 
 4. INTEGRATIONS & SERVICES
-A. Payments (Philippines Context)
-Provider: PayPal (REST API).
+   A. Payments (Philippines Context)
+   Provider: PayPal (REST API).
 
 Implementation: @paypal/react-paypal-js for client buttons.
 
@@ -82,7 +83,7 @@ Usage: Sidebar toggle, User Preferences, Prism "Draft" Mode.
 Rule: Do not put massive objects in Context API. Use Zustand stores.
 
 5. FRONTEND ENGINEERING (VIBE CODING)
-Styling: Tailwind CSS v4 (if available) or v3.4 + clsx + tailwind-merge.
+   Styling: Tailwind CSS v4 (if available) or v3.4 + clsx + tailwind-merge.
 
 Motion:
 

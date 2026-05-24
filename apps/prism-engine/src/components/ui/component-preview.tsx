@@ -43,37 +43,40 @@ class PreviewErrorBoundary extends Component<
 
 function sanitizeForSandpack(code: string): string {
   let sanitized = code;
-  
+
   // Remove all Next.js specific directives
   sanitized = sanitized.replace(/"use client";?\s*\n?/g, "");
   sanitized = sanitized.replace(/'use client';?\s*\n?/g, "");
   sanitized = sanitized.replace(/"use server";?\s*\n?/g, "");
   sanitized = sanitized.replace(/'use server';?\s*\n?/g, "");
-  
+
   // Remove ALL Next.js imports
-  sanitized = sanitized.replace(/import\s+[\w{},\s*]+\s+from\s+['"]next\/[^'"]+['"];?\s*\n?/g, "");
-  
+  sanitized = sanitized.replace(
+    /import\s+[\w{},\s*]+\s+from\s+['"]next\/[^'"]+['"];?\s*\n?/g,
+    "",
+  );
+
   // Replace Next.js components with HTML equivalents
   sanitized = sanitized.replace(/<Link\s+([^>]*)>/g, "<a $1>");
   sanitized = sanitized.replace(/<\/Link>/g, "</a>");
   sanitized = sanitized.replace(/<Image\s+([^>]*)\/>/g, "<img $1 />");
   sanitized = sanitized.replace(/<Image\s+([^>]*)>/g, "<img $1>");
   sanitized = sanitized.replace(/<\/Image>/g, "");
-  
+
   // Fix href to onClick for sandbox
   sanitized = sanitized.replace(/href=["'][^"']*["']/g, 'href="#"');
-  
+
   // Remove TypeScript interface blocks that might cause issues
   // Keep interfaces but simplify complex types
   sanitized = sanitized.replace(/:\s*React\.FC<[^>]+>/g, "");
   sanitized = sanitized.replace(/:\s*FC<[^>]+>/g, "");
-  
+
   // Fix Lucide imports - ensure they work
   if (sanitized.includes("lucide-react")) {
     // Replace individual icon imports with destructured import
     sanitized = sanitized.replace(
       /import\s+{\s*([^}]+)\s*}\s+from\s+['"]lucide-react['"];?/g,
-      'import { $1 } from "lucide-react";'
+      'import { $1 } from "lucide-react";',
     );
   }
 
@@ -89,12 +92,12 @@ function extractComponentName(code: string): string {
     /function\s+(\w+)\s*\(/,
     /const\s+(\w+)\s*=.*=>/,
   ];
-  
+
   for (const pattern of patterns) {
     const match = code.match(pattern);
     if (match) return match[1];
   }
-  
+
   return "Component";
 }
 
@@ -102,11 +105,11 @@ function extractComponentName(code: string): string {
 // LAZY SANDPACK LOADER
 // =============================================================================
 
-function SandpackPreviewInner({ 
-  code, 
-  onError 
-}: { 
-  code: string; 
+function SandpackPreviewInner({
+  code,
+  onError,
+}: {
+  code: string;
   onError: (msg: string) => void;
 }) {
   const [SandpackComponents, setSandpackComponents] = useState<{
@@ -125,7 +128,8 @@ function SandpackPreviewInner({
           SandpackPreview: sandpack.SandpackPreview,
         });
       } catch (err) {
-        const msg = err instanceof Error ? err.message : "Failed to load preview";
+        const msg =
+          err instanceof Error ? err.message : "Failed to load preview";
         setLoadError(msg);
         onError(msg);
       }
@@ -199,7 +203,7 @@ export default function App() {
           errorSurface: "#1f1f1f",
         },
         font: {
-          body: 'Inter, system-ui, sans-serif',
+          body: "Inter, system-ui, sans-serif",
           mono: '"JetBrains Mono", monospace',
           size: "14px",
           lineHeight: "1.6",
@@ -242,7 +246,7 @@ export function ComponentPreview({ code }: ComponentPreviewProps) {
 
   const handleRetry = useCallback(() => {
     setError(null);
-    setKey(prev => prev + 1);
+    setKey((prev) => prev + 1);
   }, []);
 
   // Disabled state
@@ -276,8 +280,8 @@ export function ComponentPreview({ code }: ComponentPreviewProps) {
               {error}
             </p>
             <p className="text-xs text-amber-300/50 mb-4">
-              Complex components with Next.js features may not preview correctly.
-              View the Code tab to see the generated component.
+              Complex components with Next.js features may not preview
+              correctly. View the Code tab to see the generated component.
             </p>
             <div className="flex items-center gap-3">
               <button
@@ -308,10 +312,12 @@ export function ComponentPreview({ code }: ComponentPreviewProps) {
           <div className="flex items-start gap-4">
             <Code2 className="h-6 w-6 text-amber-400 shrink-0" />
             <div>
-              <h3 className="font-medium text-amber-400 mb-2">Preview Unavailable</h3>
+              <h3 className="font-medium text-amber-400 mb-2">
+                Preview Unavailable
+              </h3>
               <p className="text-sm text-amber-300/70">
-                This component uses features that can&apos;t be previewed in the browser.
-                Check the Code tab to view the generated source.
+                This component uses features that can&apos;t be previewed in the
+                browser. Check the Code tab to view the generated source.
               </p>
             </div>
           </div>

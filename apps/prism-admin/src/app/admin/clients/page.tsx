@@ -150,7 +150,8 @@ function ClientCard({ client }: { client: ClientEntry }) {
         <div className="flex items-center gap-2 text-white/40">
           <FolderKanban className="h-3 w-3" />
           <span>
-            {client.project_count} project{client.project_count !== 1 ? "s" : ""}
+            {client.project_count} project
+            {client.project_count !== 1 ? "s" : ""}
           </span>
         </div>
       </div>

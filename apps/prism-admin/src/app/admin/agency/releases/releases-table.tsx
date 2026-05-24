@@ -3,7 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Terminal, Box, Bug, Pencil, Trash2, ExternalLink, Star } from "lucide-react";
+import {
+  Terminal,
+  Box,
+  Bug,
+  Pencil,
+  Trash2,
+  ExternalLink,
+  Star,
+} from "lucide-react";
 import { cn } from "@syntaxure/ui";
 import { deleteRelease } from "@/app/actions/releases";
 import type { ReleaseFormData } from "@/app/actions/releases";
@@ -23,9 +31,24 @@ interface Release {
 }
 
 const typeConfig = {
-  tool: { icon: Terminal, color: "text-purple-400", bg: "bg-purple-500/10", label: "Tool" },
-  update: { icon: Box, color: "text-cyan-400", bg: "bg-cyan-500/10", label: "Update" },
-  patch: { icon: Bug, color: "text-emerald-400", bg: "bg-emerald-500/10", label: "Patch" },
+  tool: {
+    icon: Terminal,
+    color: "text-purple-400",
+    bg: "bg-purple-500/10",
+    label: "Tool",
+  },
+  update: {
+    icon: Box,
+    color: "text-cyan-400",
+    bg: "bg-cyan-500/10",
+    label: "Update",
+  },
+  patch: {
+    icon: Bug,
+    color: "text-emerald-400",
+    bg: "bg-emerald-500/10",
+    label: "Patch",
+  },
 };
 
 export function ReleasesTable({ releases }: { releases: Release[] }) {
@@ -95,13 +118,20 @@ export function ReleasesTable({ releases }: { releases: Release[] }) {
                 className="transition-colors hover:bg-white/[0.02]"
               >
                 <td className="px-4 py-3">
-                  <div className={cn("flex h-8 w-8 items-center justify-center rounded-md border", config.bg)}>
+                  <div
+                    className={cn(
+                      "flex h-8 w-8 items-center justify-center rounded-md border",
+                      config.bg,
+                    )}
+                  >
                     <Icon className={cn("h-4 w-4", config.color)} />
                   </div>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-white/90">{release.title}</span>
+                    <span className="text-sm text-white/90">
+                      {release.title}
+                    </span>
                     {release.link && (
                       <a
                         href={release.link}
@@ -161,5 +191,3 @@ export function ReleasesTable({ releases }: { releases: Release[] }) {
     </div>
   );
 }
-
-

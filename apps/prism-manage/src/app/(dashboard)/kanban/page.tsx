@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Kanban Page
@@ -6,23 +6,23 @@
  * Drag-and-drop kanban board for visual task management with Supabase persistence.
  */
 
-import { useState, useEffect } from 'react';
-import { useProjects } from '@/contexts/project-context';
-import { GripVertical, Plus } from 'lucide-react';
-import { updateTaskStatus, createTask } from '@/app/actions/tasks';
-import type { Task } from '@/lib/schemas';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react";
+import { useProjects } from "@/contexts/project-context";
+import { GripVertical, Plus } from "lucide-react";
+import { updateTaskStatus, createTask } from "@/app/actions/tasks";
+import type { Task } from "@/lib/schemas";
+import { toast } from "sonner";
 
-type KanbanColumn = 'backlog' | 'in_progress' | 'done';
+type KanbanColumn = "backlog" | "in_progress" | "done";
 
 interface KanbanTask extends Task {
   column: KanbanColumn;
 }
 
 const columns: { id: KanbanColumn; title: string; color: string }[] = [
-  { id: 'backlog', title: 'Backlog', color: '#6b7280' },
-  { id: 'in_progress', title: 'In Progress', color: '#f59e0b' },
-  { id: 'done', title: 'Done', color: '#10b981' },
+  { id: "backlog", title: "Backlog", color: "#6b7280" },
+  { id: "in_progress", title: "In Progress", color: "#f59e0b" },
+  { id: "done", title: "Done", color: "#10b981" },
 ];
 
 export default function KanbanPage() {
@@ -35,23 +35,27 @@ export default function KanbanPage() {
   useEffect(() => {
     async function loadTasks() {
       try {
-        const res = await fetch('/api/tasks');
+        const res = await fetch("/api/tasks");
         const data = await res.json();
         // Map API tasks to kanban format with column assignment
-        const mapped: KanbanTask[] = (data || []).map((t: Record<string, unknown>) => ({
-          id: (t.id as string)?.toString() || String(Math.random()),
-          projectId: (t.project_id as string) || (t.projectId as string) || '',
-          title: t.title,
-          completed: t.status === 'done',
-          starred: t.priority ? t.priority > 0 : false,
-          order: t.order || 0,
-          notes: t.notes || t.description || '',
-          column: mapStatusToColumn(t.status || 'todo'),
-          createdAt: t.created_at || t.createdAt || new Date().toISOString(),
-          updatedAt: t.updated_at || t.updatedAt || new Date().toISOString(),
-        }));
-        setTasks(mapped);    } catch {
-      console.error('Failed to load tasks');
+        const mapped: KanbanTask[] = (data || []).map(
+          (t: Record<string, unknown>) => ({
+            id: (t.id as string)?.toString() || String(Math.random()),
+            projectId:
+              (t.project_id as string) || (t.projectId as string) || "",
+            title: t.title,
+            completed: t.status === "done",
+            starred: t.priority ? t.priority > 0 : false,
+            order: t.order || 0,
+            notes: t.notes || t.description || "",
+            column: mapStatusToColumn(t.status || "todo"),
+            createdAt: t.created_at || t.createdAt || new Date().toISOString(),
+            updatedAt: t.updated_at || t.updatedAt || new Date().toISOString(),
+          }),
+        );
+        setTasks(mapped);
+      } catch {
+        console.error("Failed to load tasks");
       } finally {
         setLoading(false);
       }
@@ -78,25 +82,30 @@ export default function KanbanPage() {
     if (!task) return;
 
     try {
-      await updateTaskStatus(draggedTask, column === 'done' ? 'done' : column);
+      await updateTaskStatus(draggedTask, column === "done" ? "done" : column);
       setTasks((prev) =>
         prev.map((t) =>
           t.id === draggedTask
-            ? { ...t, column, completed: column === 'done', updatedAt: new Date().toISOString() }
-            : t
-        )
+            ? {
+                ...t,
+                column,
+                completed: column === "done",
+                updatedAt: new Date().toISOString(),
+              }
+            : t,
+        ),
       );
     } catch {
-      toast.error('Failed to update task status');
+      toast.error("Failed to update task status");
     }
     setDraggedTask(null);
   };
 
   const handleAddTask = async (column: KanbanColumn) => {
-    const title = prompt('Task title:');
+    const title = prompt("Task title:");
     if (!title) return;
 
-    const projectId = activeProjectId || projects[0]?.id || '1';
+    const projectId = activeProjectId || projects[0]?.id || "1";
     try {
       await createTask({ title, projectId: projectId.toString() });
       const newTask: KanbanTask = {
@@ -111,9 +120,9 @@ export default function KanbanPage() {
         updatedAt: new Date().toISOString(),
       };
       setTasks((prev) => [newTask, ...prev]);
-      toast.success('Task added');
+      toast.success("Task added");
     } catch {
-      toast.error('Failed to create task');
+      toast.error("Failed to create task");
     }
   };
 
@@ -156,7 +165,9 @@ export default function KanbanPage() {
                 className="h-2 w-2 rounded-full"
                 style={{ backgroundColor: column.color }}
               />
-              <h2 className="text-sm font-semibold text-white">{column.title}</h2>
+              <h2 className="text-sm font-semibold text-white">
+                {column.title}
+              </h2>
               <span className="ml-auto font-mono text-xs text-white/30">
                 {getTasksByColumn(column.id).length}
               </span>
@@ -173,7 +184,7 @@ export default function KanbanPage() {
                     draggable
                     onDragStart={() => handleDragStart(task.id)}
                     className={`cursor-grab rounded-lg border border-white/5 bg-white/[0.04] p-3 transition-all hover:border-white/10 active:cursor-grabbing ${
-                      draggedTask === task.id ? 'opacity-50' : ''
+                      draggedTask === task.id ? "opacity-50" : ""
                     }`}
                   >
                     <div className="flex items-start gap-2">
@@ -184,7 +195,9 @@ export default function KanbanPage() {
                           <div className="mt-2 flex items-center gap-2">
                             <span
                               className="h-2 w-2 rounded-full"
-                              style={{ backgroundColor: project.color || '#06b6d4' }}
+                              style={{
+                                backgroundColor: project.color || "#06b6d4",
+                              }}
                             />
                             <span className="text-[11px] text-white/40">
                               {project.name}
@@ -215,11 +228,11 @@ export default function KanbanPage() {
 
 function mapStatusToColumn(status: string): KanbanColumn {
   switch (status) {
-    case 'in_progress':
-      return 'in_progress';
-    case 'done':
-      return 'done';
+    case "in_progress":
+      return "in_progress";
+    case "done":
+      return "done";
     default:
-      return 'backlog';
+      return "backlog";
   }
 }

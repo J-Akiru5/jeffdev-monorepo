@@ -3,11 +3,13 @@
 ## ✅ What's Been Built
 
 ### Firebase Integration
+
 - ✅ Client SDK (`lib/firebase/config.ts`)
 - ✅ Admin SDK (`lib/firebase/admin.ts`)
 - ✅ Environment template (`.env.example`)
 
 ### Server Actions
+
 - ✅ Contact form (`app/actions/contact.ts`)
   - Zod validation
   - Firestore write
@@ -18,11 +20,13 @@
   - Email to `hire@jeffdev.studio`
 
 ### Email System (Resend)
+
 - ✅ Email helper (`lib/email.ts`)
 - ✅ HTML templates for contact/quote
 - ✅ Branded styling
 
 ### Admin Panel
+
 - ✅ Middleware (`middleware.ts`) - Protects `/admin/*`
 - ✅ Login page (`/admin/login`) - Google OAuth
 - ✅ Dashboard (`/admin`)
@@ -31,6 +35,7 @@
 - ✅ Session API (`/api/auth/session`)
 
 ### Forms Wired
+
 - ✅ Contact page uses Server Action
 - ✅ Quote page uses Server Action
 - ✅ Error handling + display
@@ -41,6 +46,7 @@
 There's a TypeScript/build error that needs to be resolved. The issue is related to Firebase client SDK initialization in client components.
 
 **Possible Solutions:**
+
 1. Make Firebase config exports non-optional (initialize with default/mock values)
 2. Add proper null checks in all client components using `auth`
 3. Consider lazy initialization pattern

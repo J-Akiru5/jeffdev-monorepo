@@ -1,15 +1,31 @@
-import { NextRequest } from 'next/server';
-import { getCollection } from '@jeffdev/db/cosmos';
-import { z } from 'zod';
-import { authenticate, errorResponse, successResponse } from '@/lib/api-auth';
+import { NextRequest } from "next/server";
+import { getCollection } from "@jeffdev/db/cosmos";
+import { z } from "zod";
+import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
 
-const INDUSTRIES = ['photography', 'tech', 'agency', 'ecommerce', 'saas', 'healthcare', 'finance', 'education', 'other'] as const;
-const PERSONALITIES = ['minimal', 'warm', 'bold', 'playful', 'corporate'] as const;
-const FORMALITIES = ['casual', 'balanced', 'formal'] as const;
-const SCALES = ['compact', 'default', 'spacious'] as const;
-const IMAGERY_STYLES = ['photography', 'illustration', '3d', 'mixed'] as const;
-const MOODS = ['light', 'dark', 'moody', 'vibrant'] as const;
-const BORDER_RADII = ['none', 'sm', 'md', 'lg', 'full'] as const;
+const INDUSTRIES = [
+  "photography",
+  "tech",
+  "agency",
+  "ecommerce",
+  "saas",
+  "healthcare",
+  "finance",
+  "education",
+  "other",
+] as const;
+const PERSONALITIES = [
+  "minimal",
+  "warm",
+  "bold",
+  "playful",
+  "corporate",
+] as const;
+const FORMALITIES = ["casual", "balanced", "formal"] as const;
+const SCALES = ["compact", "default", "spacious"] as const;
+const IMAGERY_STYLES = ["photography", "illustration", "3d", "mixed"] as const;
+const MOODS = ["light", "dark", "moody", "vibrant"] as const;
+const BORDER_RADII = ["none", "sm", "md", "lg", "full"] as const;
 
 const ColorsSchema = z.object({
   primary: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
@@ -36,7 +52,7 @@ const VoiceSchema = z.object({
 
 const CreateBrandSchema = z.object({
   companyName: z.string().min(2).max(100),
-  tagline: z.string().max(200).optional().default(''),
+  tagline: z.string().max(200).optional().default(""),
   industry: z.enum(INDUSTRIES),
   colors: ColorsSchema,
   typography: TypographySchema,
@@ -47,12 +63,15 @@ const CreateBrandSchema = z.object({
   }),
   spacing: z.object({
     unit: z.number().int().min(2).max(8).default(4),
-    borderRadius: z.enum(BORDER_RADII).default('sm'),
+    borderRadius: z.enum(BORDER_RADII).default("sm"),
   }),
 });
 
 function slugify(name: string): string {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 export async function GET(request: NextRequest) {
@@ -60,14 +79,18 @@ export async function GET(request: NextRequest) {
   if (auth instanceof Response) return auth;
 
   const { searchParams } = new URL(request.url);
-  const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
-  const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20')));
-  const industry = searchParams.get('industry');
-  const modifiedAfter = searchParams.get('modifiedAfter');
+  const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
+  const limit = Math.min(
+    50,
+    Math.max(1, parseInt(searchParams.get("limit") || "20")),
+  );
+  const industry = searchParams.get("industry");
+  const modifiedAfter = searchParams.get("modifiedAfter");
 
-  const brands = await getCollection('brands');
+  const brands = await getCollection("brands");
   const query: Record<string, unknown> = { userId: auth.userId };
-  if (industry && INDUSTRIES.includes(industry as typeof INDUSTRIES[number])) query.industry = industry;
+  if (industry && INDUSTRIES.includes(industry as (typeof INDUSTRIES)[number]))
+    query.industry = industry;
   if (modifiedAfter) query.updatedAt = { $gte: modifiedAfter };
 
   const total = await brands.countDocuments(query);
@@ -78,16 +101,19 @@ export async function GET(request: NextRequest) {
     .limit(limit)
     .toArray();
 
-  return successResponse(items.map(b => ({
-    id: b._id.toString(),
-    slug: b.slug,
-    companyName: b.companyName,
-    tagline: b.tagline,
-    industry: b.industry,
-    colors: b.colors,
-    createdAt: b.createdAt,
-    updatedAt: b.updatedAt,
-  })), { page, limit, total, totalPages: Math.ceil(total / limit) });
+  return successResponse(
+    items.map((b) => ({
+      id: b._id.toString(),
+      slug: b.slug,
+      companyName: b.companyName,
+      tagline: b.tagline,
+      industry: b.industry,
+      colors: b.colors,
+      createdAt: b.createdAt,
+      updatedAt: b.updatedAt,
+    })),
+    { page, limit, total, totalPages: Math.ceil(total / limit) },
+  );
 }
 
 export async function POST(request: NextRequest) {
@@ -95,17 +121,26 @@ export async function POST(request: NextRequest) {
   if (auth instanceof Response) return auth;
 
   let body: unknown;
-  try { body = await request.json(); } catch { return errorResponse('Invalid JSON body', 400); }
+  try {
+    body = await request.json();
+  } catch {
+    return errorResponse("Invalid JSON body", 400);
+  }
 
   const parsed = CreateBrandSchema.safeParse(body);
-  if (!parsed.success) return errorResponse(parsed.error.issues.map(e => e.message).join(', '), 422);
+  if (!parsed.success)
+    return errorResponse(
+      parsed.error.issues.map((e) => e.message).join(", "),
+      422,
+    );
 
   const { companyName, ...rest } = parsed.data;
   const slug = slugify(companyName);
 
-  const brands = await getCollection('brands');
+  const brands = await getCollection("brands");
   const existing = await brands.findOne({ userId: auth.userId, slug });
-  if (existing) return errorResponse('A brand with this name already exists', 409);
+  if (existing)
+    return errorResponse("A brand with this name already exists", 409);
 
   const now = new Date().toISOString();
   const doc = {
@@ -118,5 +153,8 @@ export async function POST(request: NextRequest) {
   };
 
   const result = await brands.insertOne(doc);
-  return successResponse({ id: result.insertedId.toString(), ...doc }, { created: true });
+  return successResponse(
+    { id: result.insertedId.toString(), ...doc },
+    { created: true },
+  );
 }

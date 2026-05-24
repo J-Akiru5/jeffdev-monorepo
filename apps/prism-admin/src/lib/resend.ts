@@ -75,13 +75,17 @@ export async function sendInquiryResponse({
             <div style="color: #ffffffcc; font-size: 15px; line-height: 1.6; white-space: pre-wrap;">${message}</div>
           </div>
           
-          ${originalInquiry ? `
+          ${
+            originalInquiry
+              ? `
           <!-- Original Message -->
           <div style="margin-top: 24px; padding: 16px; background: #ffffff05; border-radius: 8px; border-left: 2px solid #f59e0b;">
             <p style="color: #ffffff60; font-size: 12px; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px;">Your original message:</p>
             <p style="color: #ffffff80; font-size: 13px; margin: 0; white-space: pre-wrap;">${originalInquiry}</p>
           </div>
-          ` : ""}
+          `
+              : ""
+          }
           
           <!-- Footer -->
           <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #ffffff10; text-align: center;">

@@ -2,13 +2,13 @@
  * Subscription Types and Helpers
  */
 
-export type SubscriptionTier = 'free' | 'pro' | 'team' | 'enterprise';
+export type SubscriptionTier = "free" | "pro" | "team" | "enterprise";
 
 export interface Subscription {
   id: string;
   userId: string;
   tier: SubscriptionTier;
-  status: 'active' | 'cancelled' | 'past_due' | 'trialing';
+  status: "active" | "cancelled" | "past_due" | "trialing";
   paypalSubscriptionId: string | null;
   currentPeriodStart: Date;
   currentPeriodEnd: Date;
@@ -83,27 +83,27 @@ export const TIER_PRICES = {
 export function canUseFeature(
   tier: SubscriptionTier,
   feature: keyof TierLimits,
-  currentUsage: number = 0
+  currentUsage: number = 0,
 ): boolean {
   const limit = TIER_LIMITS[tier][feature];
-  
-  if (typeof limit === 'boolean') {
+
+  if (typeof limit === "boolean") {
     return limit;
   }
-  
+
   if (limit === -1) {
     return true; // unlimited
   }
-  
+
   return currentUsage < limit;
 }
 
 export function getTierDisplayName(tier: SubscriptionTier): string {
   const names: Record<SubscriptionTier, string> = {
-    free: 'Free',
-    pro: 'Pro',
-    team: 'Team',
-    enterprise: 'Enterprise',
+    free: "Free",
+    pro: "Pro",
+    team: "Team",
+    enterprise: "Enterprise",
   };
   return names[tier];
 }

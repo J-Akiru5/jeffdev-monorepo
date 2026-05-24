@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Feedback Status Selector
@@ -6,33 +6,36 @@
  * Dropdown to change feedback status (pending, approved, featured, rejected).
  */
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { ChevronDown } from 'lucide-react';
-import { updateFeedbackStatus } from '@/app/actions/feedback';
-import type { FeedbackStatus } from '@/types/supabase';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { ChevronDown } from "lucide-react";
+import { updateFeedbackStatus } from "@/app/actions/feedback";
+import type { FeedbackStatus } from "@/types/supabase";
 
 interface FeedbackStatusSelectorProps {
   feedbackId: string;
   currentStatus: FeedbackStatus;
 }
 
-const statusConfig: Record<FeedbackStatus, { label: string; className: string }> = {
+const statusConfig: Record<
+  FeedbackStatus,
+  { label: string; className: string }
+> = {
   pending: {
-    label: 'Pending',
-    className: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+    label: "Pending",
+    className: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
   },
   approved: {
-    label: 'Approved',
-    className: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    label: "Approved",
+    className: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
   },
   featured: {
-    label: 'Featured',
-    className: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    label: "Featured",
+    className: "bg-purple-500/10 text-purple-400 border-purple-500/20",
   },
   rejected: {
-    label: 'Rejected',
-    className: 'bg-red-500/10 text-red-400 border-red-500/20',
+    label: "Rejected",
+    className: "bg-red-500/10 text-red-400 border-red-500/20",
   },
 };
 
@@ -67,7 +70,7 @@ export function FeedbackStatusSelector({
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={isUpdating}
-        className={`inline-flex items-center gap-1 rounded-sm border px-2 py-0.5 text-[10px] uppercase tracking-wider transition-all ${config.className} ${isUpdating ? 'opacity-50' : ''}`}
+        className={`inline-flex items-center gap-1 rounded-sm border px-2 py-0.5 text-[10px] uppercase tracking-wider transition-all ${config.className} ${isUpdating ? "opacity-50" : ""}`}
       >
         {config.label}
         <ChevronDown className="h-3 w-3" />
@@ -85,7 +88,7 @@ export function FeedbackStatusSelector({
                 key={s}
                 onClick={() => handleStatusChange(s)}
                 className={`w-full px-3 py-1.5 text-left text-xs transition-colors hover:bg-white/5 ${
-                  s === status ? 'text-white' : 'text-white/60'
+                  s === status ? "text-white" : "text-white/60"
                 }`}
               >
                 {statusConfig[s].label}

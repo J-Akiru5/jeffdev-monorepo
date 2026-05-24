@@ -1,11 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { NextRequest, NextResponse } from "next/server";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Rate limiting store (in-memory for simplicity, use Redis in production)
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
 // Response cache (in-memory, use Redis in production)
-const responseCache = new Map<string, { response: string; timestamp: number }>();
+const responseCache = new Map<
+  string,
+  { response: string; timestamp: number }
+>();
 
 const RATE_LIMIT_MAX = 20; // requests per window
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
@@ -137,32 +140,32 @@ Prism follows enterprise security best practices:
 `;
 
 function getClientIP(request: NextRequest): string {
-  const forwarded = request.headers.get('x-forwarded-for');
-  const realIP = request.headers.get('x-real-ip');
-  
+  const forwarded = request.headers.get("x-forwarded-for");
+  const realIP = request.headers.get("x-real-ip");
+
   if (forwarded) {
-    const firstIP = forwarded.split(',')[0];
-    return firstIP ? firstIP.trim() : 'unknown';
+    const firstIP = forwarded.split(",")[0];
+    return firstIP ? firstIP.trim() : "unknown";
   }
   if (realIP) {
     return realIP;
   }
-  return 'unknown';
+  return "unknown";
 }
 
 function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
   const now = Date.now();
   const record = rateLimitStore.get(ip);
-  
+
   if (!record || now > record.resetTime) {
     rateLimitStore.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
     return { allowed: true, remaining: RATE_LIMIT_MAX - 1 };
   }
-  
+
   if (record.count >= RATE_LIMIT_MAX) {
     return { allowed: false, remaining: 0 };
   }
-  
+
   record.count++;
   return { allowed: true, remaining: RATE_LIMIT_MAX - record.count };
 }
@@ -170,22 +173,22 @@ function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
 function getCachedResponse(question: string): string | null {
   const cacheKey = question.toLowerCase().trim();
   const cached = responseCache.get(cacheKey);
-  
+
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     return cached.response;
   }
-  
+
   if (cached) {
     responseCache.delete(cacheKey);
   }
-  
+
   return null;
 }
 
 function setCachedResponse(question: string, response: string): void {
   const cacheKey = question.toLowerCase().trim();
   responseCache.set(cacheKey, { response, timestamp: Date.now() });
-  
+
   // Clean old entries if cache is too large
   if (responseCache.size > 1000) {
     const entries = Array.from(responseCache.entries());
@@ -203,17 +206,20 @@ export async function POST(request: NextRequest) {
     // Rate limiting
     const clientIP = getClientIP(request);
     const { allowed, remaining } = checkRateLimit(clientIP);
-    
+
     if (!allowed) {
       return NextResponse.json(
-        { error: 'Rate limit exceeded. Please wait a moment before trying again.' },
-        { 
+        {
+          error:
+            "Rate limit exceeded. Please wait a moment before trying again.",
+        },
+        {
           status: 429,
           headers: {
-            'X-RateLimit-Remaining': '0',
-            'X-RateLimit-Reset': String(Math.ceil(RATE_LIMIT_WINDOW / 1000))
-          }
-        }
+            "X-RateLimit-Remaining": "0",
+            "X-RateLimit-Reset": String(Math.ceil(RATE_LIMIT_WINDOW / 1000)),
+          },
+        },
       );
     }
 
@@ -222,27 +228,24 @@ export async function POST(request: NextRequest) {
 
     // Support both formats: { messages: [...] } or { message: string, history: [...] }
     let allMessages: Array<{ role: string; content: string }>;
-    
+
     if (messages && Array.isArray(messages) && messages.length > 0) {
       allMessages = messages;
     } else if (message) {
       // Convert legacy format to messages array
-      allMessages = [
-        ...(history || []),
-        { role: 'user', content: message }
-      ];
+      allMessages = [...(history || []), { role: "user", content: message }];
     } else {
       return NextResponse.json(
-        { error: 'Messages are required' },
-        { status: 400 }
+        { error: "Messages are required" },
+        { status: 400 },
       );
     }
 
     const lastMessage = allMessages[allMessages.length - 1];
-    if (!lastMessage || lastMessage.role !== 'user' || !lastMessage.content) {
+    if (!lastMessage || lastMessage.role !== "user" || !lastMessage.content) {
       return NextResponse.json(
-        { error: 'Invalid message format' },
-        { status: 400 }
+        { error: "Invalid message format" },
+        { status: 400 },
       );
     }
 
@@ -251,35 +254,42 @@ export async function POST(request: NextRequest) {
     // Check cache for common questions
     const cachedResponse = getCachedResponse(userQuestion);
     if (cachedResponse) {
-      return NextResponse.json({
-        response: cachedResponse,
-        cached: true
-      }, {
-        headers: {
-          'X-RateLimit-Remaining': String(remaining),
-          'X-Cache': 'HIT'
-        }
-      });
+      return NextResponse.json(
+        {
+          response: cachedResponse,
+          cached: true,
+        },
+        {
+          headers: {
+            "X-RateLimit-Remaining": String(remaining),
+            "X-Cache": "HIT",
+          },
+        },
+      );
     }
 
     // Check for API key
-    const apiKey = process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+    const apiKey =
+      process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
-        { error: 'AI service not configured. Please contact support.' },
-        { status: 503 }
+        { error: "AI service not configured. Please contact support." },
+        { status: 503 },
       );
     }
 
     // Initialize Gemini
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     // Build conversation history for context
     const conversationHistory = allMessages
       .slice(0, -1) // Exclude the last message (we'll add it separately)
-      .map((m: { role: string; content: string }) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
-      .join('\n\n');
+      .map(
+        (m: { role: string; content: string }) =>
+          `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`,
+      )
+      .join("\n\n");
 
     // Create the prompt with RAG context
     const systemPrompt = `You are the Prism Context Engine documentation assistant. Your role is to help users understand and use Prism Context Engine effectively.
@@ -296,7 +306,7 @@ export async function POST(request: NextRequest) {
 ## Documentation Context:
 ${DOCS_CONTEXT}
 
-${conversationHistory ? `## Previous Conversation:\n${conversationHistory}\n` : ''}
+${conversationHistory ? `## Previous Conversation:\n${conversationHistory}\n` : ""}
 
 ## User Question:
 ${userQuestion}
@@ -310,39 +320,51 @@ Provide a helpful, accurate response based on the documentation context above. I
     // Cache the response
     setCachedResponse(userQuestion, response);
 
-    return NextResponse.json({
-      response,
-      cached: false
-    }, {
-      headers: {
-        'X-RateLimit-Remaining': String(remaining),
-        'X-Cache': 'MISS'
-      }
-    });
-
+    return NextResponse.json(
+      {
+        response,
+        cached: false,
+      },
+      {
+        headers: {
+          "X-RateLimit-Remaining": String(remaining),
+          "X-Cache": "MISS",
+        },
+      },
+    );
   } catch (error) {
-    console.error('Docs assistant error:', error);
-    
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    
+    console.error("Docs assistant error:", error);
+
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+
     // Check for specific error types
-    if (errorMessage.includes('API key')) {
+    if (errorMessage.includes("API key")) {
       return NextResponse.json(
-        { error: 'AI service authentication failed. Please check configuration.' },
-        { status: 503 }
+        {
+          error:
+            "AI service authentication failed. Please check configuration.",
+        },
+        { status: 503 },
       );
     }
-    
-    if (errorMessage.includes('quota') || errorMessage.includes('rate')) {
+
+    if (errorMessage.includes("quota") || errorMessage.includes("rate")) {
       return NextResponse.json(
-        { error: 'AI service is temporarily unavailable. Please try again later.' },
-        { status: 503 }
+        {
+          error:
+            "AI service is temporarily unavailable. Please try again later.",
+        },
+        { status: 503 },
       );
     }
 
     return NextResponse.json(
-      { error: 'An error occurred while processing your request. Please try again.' },
-      { status: 500 }
+      {
+        error:
+          "An error occurred while processing your request. Please try again.",
+      },
+      { status: 500 },
     );
   }
 }

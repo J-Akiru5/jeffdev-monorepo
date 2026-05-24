@@ -4,13 +4,17 @@ import type { RepoScanData } from "./repo-extract.js";
 
 describe("extractRulesFromRepoScan", () => {
   it("returns error when scan is missing", async () => {
-    const result = await extractRulesFromRepoScan({ scan: undefined as unknown as RepoScanData });
+    const result = await extractRulesFromRepoScan({
+      scan: undefined as unknown as RepoScanData,
+    });
     expect(result.isError).toBe(true);
     expect(result.content[0]?.text).toContain("valid scan report");
   });
 
   it("returns error when scan has no structure", async () => {
-    const result = await extractRulesFromRepoScan({ scan: { root: "/test" } as unknown as RepoScanData });
+    const result = await extractRulesFromRepoScan({
+      scan: { root: "/test" } as unknown as RepoScanData,
+    });
     expect(result.isError).toBe(true);
     expect(result.content[0]?.text).toContain("valid scan report");
   });
@@ -24,9 +28,19 @@ describe("extractRulesFromRepoScan", () => {
     const result = await extractRulesFromRepoScan({
       scan: {
         root: "/test",
-        namingConventions: { files: {}, functions: {}, components: {}, variables: {} },
+        namingConventions: {
+          files: {},
+          functions: {},
+          components: {},
+          variables: {},
+        },
         imports: { relative: 0, absolute: 0, external: {}, internal: {} },
-        structure: { directories: [], fileCount: 0, dirCount: 0, languages: {} },
+        structure: {
+          directories: [],
+          fileCount: 0,
+          dirCount: 0,
+          languages: {},
+        },
         configs: {},
         summary: "empty",
       },
@@ -63,10 +77,15 @@ describe("extractRulesFromRepoScan", () => {
         languages: { ".ts": 60, ".tsx": 40, ".css": 20 },
       },
       configs: {
-        "package.json": { name: "test-app", dependencies: { react: "^18" }, devDependencies: { typescript: "^5" } },
+        "package.json": {
+          name: "test-app",
+          dependencies: { react: "^18" },
+          devDependencies: { typescript: "^5" },
+        },
         "tsconfig.json": { compilerOptions: { strict: true } },
       },
-      summary: "Scanned 120 files in 15 directories. Languages: .ts: 60, .tsx: 40, .css: 20",
+      summary:
+        "Scanned 120 files in 15 directories. Languages: .ts: 60, .tsx: 40, .css: 20",
     };
 
     // Without Azure OpenAI configured, this should fail gracefully

@@ -1,1 +1,1 @@
-export { ScrollProvider, gsap, ScrollTrigger } from './scroll-provider';
+export { ScrollProvider, gsap, ScrollTrigger } from "./scroll-provider";

@@ -1,21 +1,22 @@
-'use server';
-
- 
+"use server";
 
 /**
  * Support Server Actions
  * ----------------------
  * Handles support requests and sends them to support email via Resend.
  */
-import { z } from 'zod';
-import { getAdminClient } from '@/lib/supabase/admin';
-import { sendEmail, BRANDED_SENDER } from '@/lib/email';
+import { z } from "zod";
+import { getAdminClient } from "@/lib/supabase/admin";
+import { sendEmail, BRANDED_SENDER } from "@/lib/email";
 
 const supportSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(100),
-  email: z.string().email('Invalid email address'),
-  subject: z.string().min(1, 'Subject is required').max(200),
-  message: z.string().min(10, 'Message must be at least 10 characters').max(2000),
+  name: z.string().min(1, "Name is required").max(100),
+  email: z.string().email("Invalid email address"),
+  subject: z.string().min(1, "Subject is required").max(200),
+  message: z
+    .string()
+    .min(10, "Message must be at least 10 characters")
+    .max(2000),
 });
 
 interface ActionResult {
@@ -26,44 +27,48 @@ interface ActionResult {
 /**
  * Send a support request email
  */
-export async function sendSupportRequest(formData: FormData): Promise<ActionResult> {
+export async function sendSupportRequest(
+  formData: FormData,
+): Promise<ActionResult> {
   try {
     const data = {
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
-      subject: formData.get('subject') as string,
-      message: formData.get('message') as string,
+      name: formData.get("name") as string,
+      email: formData.get("email") as string,
+      subject: formData.get("subject") as string,
+      message: formData.get("message") as string,
     };
 
     // Validate input
     const validated = supportSchema.parse(data);
 
     // Support email address
-    const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || 'support@jeffdev.studio';
+    const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || "support@jeffdev.studio";
 
     const supabase = getAdminClient() as any;
 
     // Create support ticket in database
     const { error: ticketError } = await supabase
-      .from('support_tickets')
-      .insert([{
-        user_id: null,
-        title: validated.subject,
-        description: validated.message,
-        priority: 'medium' as const,
-        status: 'open' as const,
-        assigned_to: null,
-        tags: ['web_form'],
-        metadata: {
-          email: validated.email,
-          name: validated.name,
+      .from("support_tickets")
+      .insert([
+        {
+          user_id: null,
+          title: validated.subject,
+          description: validated.message,
+          priority: "medium" as const,
+          status: "open" as const,
+          assigned_to: null,
+          tags: ["web_form"],
+          metadata: {
+            email: validated.email,
+            name: validated.name,
+          },
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }] as any);
+      ] as any);
 
     if (ticketError) {
-      console.error('[SUPPORT TICKET CREATE ERROR]', ticketError);
+      console.error("[SUPPORT TICKET CREATE ERROR]", ticketError);
       // Don't fail - still send email even if ticket creation fails
     }
 
@@ -80,7 +85,7 @@ export async function sendSupportRequest(formData: FormData): Promise<ActionResu
     await sendEmail({
       to: validated.email,
       from: BRANDED_SENDER,
-      subject: 'We received your support request - Syntaxure Labs',
+      subject: "We received your support request - Syntaxure Labs",
       html: supportConfirmationTemplate(validated),
     });
 
@@ -89,8 +94,11 @@ export async function sendSupportRequest(formData: FormData): Promise<ActionResu
     if (error instanceof z.ZodError) {
       return { success: false, error: error.issues[0].message };
     }
-    console.error('[SUPPORT REQUEST ERROR]', error);
-    return { success: false, error: 'Failed to send support request. Please try again.' };
+    console.error("[SUPPORT REQUEST ERROR]", error);
+    return {
+      success: false,
+      error: "Failed to send support request. Please try again.",
+    };
   }
 }
 
@@ -152,10 +160,7 @@ function supportEmailTemplate(data: {
 /**
  * Confirmation email template (sent to user)
  */
-function supportConfirmationTemplate(data: {
-  name: string;
-  subject: string;
-}) {
+function supportConfirmationTemplate(data: { name: string; subject: string }) {
   const dataName = data.name;
   const dataSubject = data.subject;
 

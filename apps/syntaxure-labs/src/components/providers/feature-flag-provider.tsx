@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Feature Flag Context
@@ -7,7 +7,7 @@
  * Flags are fetched server-side and passed to this provider.
  */
 
-import { createContext, useContext, type ReactNode } from 'react';
+import { createContext, useContext, type ReactNode } from "react";
 
 export interface FeatureFlags {
   prismEngineEnabled: boolean;
@@ -26,7 +26,10 @@ interface FeatureFlagProviderProps {
   children: ReactNode;
 }
 
-export function FeatureFlagProvider({ flags, children }: FeatureFlagProviderProps) {
+export function FeatureFlagProvider({
+  flags,
+  children,
+}: FeatureFlagProviderProps) {
   return (
     <FeatureFlagContext.Provider value={flags}>
       {children}

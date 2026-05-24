@@ -1,5 +1,13 @@
-import { generateEmbedding as geminiEmbed, batchGenerateEmbeddings as geminiBatchEmbed, generateChat as geminiChat } from "./gemini.js";
-import { generateQueryEmbedding as azureEmbed, generateBatchEmbeddings as azureBatchEmbed, generateChatCompletion as azureChat } from "./azure-openai.js";
+import {
+  generateEmbedding as geminiEmbed,
+  batchGenerateEmbeddings as geminiBatchEmbed,
+  generateChat as geminiChat,
+} from "./gemini.js";
+import {
+  generateQueryEmbedding as azureEmbed,
+  generateBatchEmbeddings as azureBatchEmbed,
+  generateChatCompletion as azureChat,
+} from "./azure-openai.js";
 
 export const AI_PROVIDER = (process.env.AI_PROVIDER || "gemini").toLowerCase();
 

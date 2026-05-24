@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
 /**
  * Exchange Rate API Route
@@ -26,17 +26,17 @@ export async function GET() {
       return NextResponse.json({
         rate: 56.0,
         updatedAt: new Date().toISOString(),
-        source: 'fallback',
+        source: "fallback",
       });
     }
 
     const response = await fetch(
       `https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`,
-      { next: { revalidate: 3600 } } // ISR: revalidate every hour
+      { next: { revalidate: 3600 } }, // ISR: revalidate every hour
     );
 
     if (!response.ok) {
-      throw new Error('Failed to fetch exchange rate');
+      throw new Error("Failed to fetch exchange rate");
     }
 
     const data: ExchangeRateResponse = await response.json();
@@ -44,16 +44,16 @@ export async function GET() {
     return NextResponse.json({
       rate: data.conversion_rates.PHP, // 1 USD = X PHP
       updatedAt: new Date().toISOString(),
-      source: 'exchangerate-api',
+      source: "exchangerate-api",
     });
   } catch (error) {
-    console.error('Exchange rate fetch error:', error);
+    console.error("Exchange rate fetch error:", error);
 
     // Return fallback rate on error
     return NextResponse.json({
       rate: 56.0,
       updatedAt: new Date().toISOString(),
-      source: 'fallback',
+      source: "fallback",
     });
   }
 }

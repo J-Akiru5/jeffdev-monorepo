@@ -54,11 +54,17 @@ export default function OnboardingPage() {
       const res = await fetch("/api/v1/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: projectName.trim(), stack, designSystem: "jdstudio" }),
+        body: JSON.stringify({
+          name: projectName.trim(),
+          stack,
+          designSystem: "jdstudio",
+        }),
       });
       if (res.ok) {
         const data = await res.json();
-        setProjectSlug(data.slug || projectName.toLowerCase().replace(/[^a-z0-9]+/g, "-"));
+        setProjectSlug(
+          data.slug || projectName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+        );
         setStep("scan");
       }
     });
@@ -78,7 +84,8 @@ export default function OnboardingPage() {
           Welcome to Prism
         </h1>
         <p className="text-white/50 max-w-md">
-          Extract your architecture rules and connect your AI assistant. Takes about 60 seconds.
+          Extract your architecture rules and connect your AI assistant. Takes
+          about 60 seconds.
         </p>
       </div>
 
@@ -92,11 +99,15 @@ export default function OnboardingPage() {
                   i < currentStepIndex
                     ? "bg-cyan-500 text-black"
                     : i === currentStepIndex
-                    ? "border-2 border-cyan-500 text-cyan-400"
-                    : "border border-white/10 text-white/30"
+                      ? "border-2 border-cyan-500 text-cyan-400"
+                      : "border border-white/10 text-white/30"
                 }`}
               >
-                {i < currentStepIndex ? <CheckCircle2 className="h-4 w-4" /> : i + 1}
+                {i < currentStepIndex ? (
+                  <CheckCircle2 className="h-4 w-4" />
+                ) : (
+                  i + 1
+                )}
               </div>
               <span
                 className={`text-xs font-medium hidden sm:block ${
@@ -185,7 +196,11 @@ function StepWelcome({
   const stacks = [
     { id: "nextjs", label: "Next.js", icon: <Layers className="h-4 w-4" /> },
     { id: "react", label: "React", icon: <Code2 className="h-4 w-4" /> },
-    { id: "react-native", label: "React Native", icon: <Box className="h-4 w-4" /> },
+    {
+      id: "react-native",
+      label: "React Native",
+      icon: <Box className="h-4 w-4" />,
+    },
   ];
 
   return (
@@ -195,8 +210,12 @@ function StepWelcome({
           <Layers className="h-5 w-5 text-cyan-400" />
         </div>
         <div>
-          <h2 className="text-xl font-semibold text-white">Name your project</h2>
-          <p className="text-sm text-white/50">This organises your rules in Prism.</p>
+          <h2 className="text-xl font-semibold text-white">
+            Name your project
+          </h2>
+          <p className="text-sm text-white/50">
+            This organises your rules in Prism.
+          </p>
         </div>
       </div>
 
@@ -209,7 +228,9 @@ function StepWelcome({
             type="text"
             value={projectName}
             onChange={(e) => setProjectName(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && projectName.trim() && onNext()}
+            onKeyDown={(e) =>
+              e.key === "Enter" && projectName.trim() && onNext()
+            }
             placeholder="e.g., My SaaS App"
             autoFocus
             className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none transition-colors"
@@ -289,7 +310,9 @@ function StepScan({
           <Globe className="h-5 w-5 text-violet-400" />
         </div>
         <div>
-          <h2 className="text-xl font-semibold text-white">Extract your rules</h2>
+          <h2 className="text-xl font-semibold text-white">
+            Extract your rules
+          </h2>
           <p className="text-sm text-white/50">
             Prism scans your site and auto-generates rules from it.
           </p>
@@ -300,11 +323,16 @@ function StepScan({
       <div className="rounded-md border border-white/10 p-5 mb-4 bg-white/[0.02]">
         <div className="flex items-center gap-2 mb-3">
           <Globe className="h-4 w-4 text-cyan-400" />
-          <span className="text-sm font-semibold text-white">Scan your site</span>
-          <span className="text-xs text-white/30 bg-white/5 px-2 py-0.5 rounded-full">Recommended</span>
+          <span className="text-sm font-semibold text-white">
+            Scan your site
+          </span>
+          <span className="text-xs text-white/30 bg-white/5 px-2 py-0.5 rounded-full">
+            Recommended
+          </span>
         </div>
         <p className="text-xs text-white/50 mb-3">
-          Start your dev server, paste the URL — Prism crawls it with Playwright and generates 15–25 rules in ~30s.
+          Start your dev server, paste the URL — Prism crawls it with Playwright
+          and generates 15–25 rules in ~30s.
         </p>
         <input
           type="url"
@@ -325,10 +353,13 @@ function StepScan({
       <div className="rounded-md border border-white/10 p-5 mb-4 bg-white/[0.02]">
         <div className="flex items-center gap-2 mb-3">
           <GitBranch className="h-4 w-4 text-emerald-400" />
-          <span className="text-sm font-semibold text-white">Scan your repo</span>
+          <span className="text-sm font-semibold text-white">
+            Scan your repo
+          </span>
         </div>
         <p className="text-xs text-white/50 mb-3">
-          Extracts naming conventions and import patterns from your codebase files.
+          Extracts naming conventions and import patterns from your codebase
+          files.
         </p>
         <code className="block text-xs text-emerald-300 bg-black/30 border border-white/5 rounded p-3 font-mono">
           prism sync --repo ./
@@ -339,7 +370,9 @@ function StepScan({
       <div className="rounded-md border border-white/10 p-5 mb-6 bg-white/[0.02]">
         <div className="flex items-center gap-2 mb-2">
           <Terminal className="h-4 w-4 text-amber-400" />
-          <span className="text-sm font-semibold text-white">Create rules manually</span>
+          <span className="text-sm font-semibold text-white">
+            Create rules manually
+          </span>
         </div>
         <p className="text-xs text-white/50">
           Write rules by hand in the dashboard.{" "}
@@ -359,7 +392,11 @@ function StepScan({
         >
           Skip for now
         </button>
-        <Button variant="primary" onClick={onNext} className="flex items-center gap-2">
+        <Button
+          variant="primary"
+          onClick={onNext}
+          className="flex items-center gap-2"
+        >
           Continue
           <ArrowRight className="h-4 w-4" />
         </Button>
@@ -370,8 +407,16 @@ function StepScan({
 
 // ─── Step 3: Connect IDE ──────────────────────────────────────────────────────
 
-function StepConnect({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
-  const [activeTab, setActiveTab] = useState<"auto" | "cursor" | "vscode" | "windsurf">("auto");
+function StepConnect({
+  onNext,
+  onSkip,
+}: {
+  onNext: () => void;
+  onSkip: () => void;
+}) {
+  const [activeTab, setActiveTab] = useState<
+    "auto" | "cursor" | "vscode" | "windsurf"
+  >("auto");
 
   const tabs = [
     { id: "auto" as const, label: "Auto (Recommended)" },
@@ -414,12 +459,19 @@ function StepConnect({ onNext, onSkip }: { onNext: () => void; onSkip: () => voi
       {activeTab === "auto" && (
         <div className="space-y-4">
           <p className="text-sm text-white/70">
-            Run this once — it detects your editors and writes the config automatically:
+            Run this once — it detects your editors and writes the config
+            automatically:
           </p>
           <div className="bg-black/40 border border-white/10 rounded-md p-4 font-mono text-sm">
-            <p className="text-white/40 text-xs mb-2"># Install CLI (if not done)</p>
-            <p className="text-emerald-300">npm install -g prism-context-engine</p>
-            <p className="text-white/40 text-xs mt-3 mb-2"># Sync rules + configure IDE</p>
+            <p className="text-white/40 text-xs mb-2">
+              # Install CLI (if not done)
+            </p>
+            <p className="text-emerald-300">
+              npm install -g prism-context-engine
+            </p>
+            <p className="text-white/40 text-xs mt-3 mb-2">
+              # Sync rules + configure IDE
+            </p>
             <p className="text-cyan-300">prism sync</p>
             <p className="text-cyan-300">prism init</p>
           </div>
@@ -431,7 +483,11 @@ function StepConnect({ onNext, onSkip }: { onNext: () => void; onSkip: () => voi
 
       {activeTab === "cursor" && (
         <div className="space-y-3">
-          <p className="text-xs text-white/50">Create <code className="text-white/80 font-mono">.cursor/mcp.json</code> in your project root:</p>
+          <p className="text-xs text-white/50">
+            Create{" "}
+            <code className="text-white/80 font-mono">.cursor/mcp.json</code> in
+            your project root:
+          </p>
           <pre className="bg-black/40 border border-white/10 rounded-md p-4 text-xs text-white/80 font-mono overflow-x-auto">{`{
   "mcpServers": {
     "prism": {
@@ -443,13 +499,18 @@ function StepConnect({ onNext, onSkip }: { onNext: () => void; onSkip: () => voi
     }
   }
 }`}</pre>
-          <p className="text-xs text-white/30">Get your API key: Settings → API Keys → Generate Key (Pro plan)</p>
+          <p className="text-xs text-white/30">
+            Get your API key: Settings → API Keys → Generate Key (Pro plan)
+          </p>
         </div>
       )}
 
       {activeTab === "vscode" && (
         <div className="space-y-3">
-          <p className="text-xs text-white/50">Add to VS Code <code className="text-white/80 font-mono">settings.json</code>:</p>
+          <p className="text-xs text-white/50">
+            Add to VS Code{" "}
+            <code className="text-white/80 font-mono">settings.json</code>:
+          </p>
           <pre className="bg-black/40 border border-white/10 rounded-md p-4 text-xs text-white/80 font-mono overflow-x-auto">{`{
   "mcp": {
     "servers": {
@@ -469,12 +530,28 @@ function StepConnect({ onNext, onSkip }: { onNext: () => void; onSkip: () => voi
 
       {activeTab === "windsurf" && (
         <div className="space-y-3">
-          <p className="text-xs text-white/50">In Windsurf: Settings → MCP Servers → Add Server:</p>
+          <p className="text-xs text-white/50">
+            In Windsurf: Settings → MCP Servers → Add Server:
+          </p>
           <div className="bg-black/40 border border-white/10 rounded-md p-4 text-xs font-mono space-y-1">
-            <p><span className="text-white/40">Name:</span> <span className="text-white">prism</span></p>
-            <p><span className="text-white/40">Command:</span> <span className="text-cyan-300">prism</span></p>
-            <p><span className="text-white/40">Args:</span> <span className="text-cyan-300">serve</span></p>
-            <p><span className="text-white/40">Env:</span> <span className="text-emerald-300">PRISM_API_KEY=pk_live_...</span></p>
+            <p>
+              <span className="text-white/40">Name:</span>{" "}
+              <span className="text-white">prism</span>
+            </p>
+            <p>
+              <span className="text-white/40">Command:</span>{" "}
+              <span className="text-cyan-300">prism</span>
+            </p>
+            <p>
+              <span className="text-white/40">Args:</span>{" "}
+              <span className="text-cyan-300">serve</span>
+            </p>
+            <p>
+              <span className="text-white/40">Env:</span>{" "}
+              <span className="text-emerald-300">
+                PRISM_API_KEY=pk_live_...
+              </span>
+            </p>
           </div>
         </div>
       )}
@@ -486,7 +563,11 @@ function StepConnect({ onNext, onSkip }: { onNext: () => void; onSkip: () => voi
         >
           I&apos;ll do this later
         </button>
-        <Button variant="primary" onClick={onNext} className="flex items-center gap-2">
+        <Button
+          variant="primary"
+          onClick={onNext}
+          className="flex items-center gap-2"
+        >
           I&apos;ve connected it
           <ArrowRight className="h-4 w-4" />
         </Button>
@@ -512,13 +593,19 @@ function StepDone({
       <h2 className="text-2xl font-bold text-white mb-3">You&apos;re ready!</h2>
       <p className="text-white/50 max-w-sm mx-auto mb-8">
         Prism is configured. Ask your AI assistant{" "}
-        <em className="text-white/80">&quot;What are the architectural rules for this project?&quot;</em>{" "}
+        <em className="text-white/80">
+          &quot;What are the architectural rules for this project?&quot;
+        </em>{" "}
         to verify the connection.
       </p>
 
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         {projectSlug && (
-          <Button variant="primary" onClick={() => router.push(`/projects/${projectSlug}`)} className="flex items-center gap-2">
+          <Button
+            variant="primary"
+            onClick={() => router.push(`/projects/${projectSlug}`)}
+            className="flex items-center gap-2"
+          >
             View My Project
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -530,9 +617,17 @@ function StepDone({
 
       <div className="mt-8 pt-6 border-t border-white/5 grid grid-cols-3 gap-4 text-center">
         {[
-          { label: "Docs", href: "https://docs.prism.jeffdev.studio", icon: "📚" },
+          {
+            label: "Docs",
+            href: "https://docs.prism.jeffdev.studio",
+            icon: "📚",
+          },
           { label: "Quick Connect", href: "/quickstart", icon: "⚡" },
-          { label: "CLI Reference", href: "https://docs.prism.jeffdev.studio/cli-reference", icon: "🖥️" },
+          {
+            label: "CLI Reference",
+            href: "https://docs.prism.jeffdev.studio/cli-reference",
+            icon: "🖥️",
+          },
         ].map((link) => (
           <a
             key={link.href}

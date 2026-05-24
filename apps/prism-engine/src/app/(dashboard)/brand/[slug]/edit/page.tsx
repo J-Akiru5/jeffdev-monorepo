@@ -13,7 +13,7 @@ interface Props {
 export default async function EditBrandPage({ params }: Props) {
   const { slug } = await params;
   const brand = await getBrand(slug);
-  
+
   if (!brand) {
     notFound();
   }

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * GSAP ScrollTrigger Provider
@@ -7,12 +7,12 @@
  * Uses React 19 useLayoutEffect for synchronous setup.
  */
 
-import { useLayoutEffect, useRef, type ReactNode } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useLayoutEffect, useRef, type ReactNode } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 // Register GSAP plugins once
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
@@ -29,7 +29,7 @@ export function ScrollProvider({ children }: ScrollProviderProps) {
 
     // Configure ScrollTrigger defaults
     ScrollTrigger.defaults({
-      toggleActions: 'play none none reverse',
+      toggleActions: "play none none reverse",
     });
 
     // Refresh ScrollTrigger on resize
@@ -37,10 +37,10 @@ export function ScrollProvider({ children }: ScrollProviderProps) {
       ScrollTrigger.refresh();
     };
 
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
       // Kill all ScrollTriggers on cleanup
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };

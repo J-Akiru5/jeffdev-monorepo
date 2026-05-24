@@ -219,32 +219,32 @@ doppler run -- turbo dev
 
 ## 11. Recent Session Changes
 
-| Date | Change |
-|------|--------|
+| Date         | Change                                                                                                                                                           |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | May 22, 2026 | **Phase 1 Bulletproof Startup Pack**: Added LICENSE, SECURITY.md, CONTRIBUTING.md, PR template. Created /api/health routes across 8 apps. Added bundle analyzer. |
-| May 22, 2026 | **Quality & Safety Automation**: Husky, lint-staged, Commitlint, editorconfig, CODEOWNERS, Gitleaks CI workflow. |
-| May 22, 2026 | **100% Warn-Free Monorepo Cleanups**: Cleaned up all remaining ESLint, TypeScript, and React compilation warnings. |
-| May 22, 2026 | Added Pre-built Rule Templates (Next.js 16, React 19, Tailwind v4, Security). |
-| May 22, 2026 | Added `list_skills` MCP tool for AI agent discovery pattern. |
-| May 22, 2026 | Separated "Rules" and "Skills" into two collections. Created Skill Studio UI. |
-| May 22, 2026 | Created `PRISM_CONTEXT.md` and updated `PRISM_ROADMAP.md` |
-| May 22, 2026 | Fixed `gpt-tokenizer` missing dependency — reinstalled pnpm deps |
-| May 22, 2026 | Removed `--standalone` guard — server starts unconditionally on stdio connect |
-| May 22, 2026 | Added DB reconnection logic — health check + retry on connection loss |
-| May 22, 2026 | Updated `PHASE2_COMPLETE.md` — stale `prism connect` → `prism serve` |
-| May 22, 2026 | Renamed npm package from `@prism-engine/cli` → `prism-context-engine` |
-| May 22, 2026 | Published `prism-context-engine@1.1.1` to npm public registry |
-| May 2026 | Fixed `connect.ts` → broken IDE proxy replaced with `prism serve` |
-| May 2026 | Rewrote `serve.ts` — spawns full MCP server with lite fallback |
-| May 2026 | Updated `prism init` → configures IDEs with `prism serve` |
-| May 2026 | Fixed data fragmentation — `sync` generates all 3 formats |
-| May 2026 | Fixed VS Code `mcpClient.ts` → spawns `prism serve` |
-| May 2026 | Fixed cache `cacheHit` metadata bug |
-| May 2026 | Fixed Azure endpoint stripping in `azure-openai.ts` |
-| May 2026 | Removed dead `--port` from serve command |
-| May 2026 | Migrated AI from Azure to Gemini: `gemini-3.5-flash` + `gemini-embedding-2` |
-| May 2026 | Created `src/lib/gemini.ts`, `src/lib/ai-router.ts` |
-| May 2026 | Created `scripts/smoke-test.ts` — 18-step E2E test |
+| May 22, 2026 | **Quality & Safety Automation**: Husky, lint-staged, Commitlint, editorconfig, CODEOWNERS, Gitleaks CI workflow.                                                 |
+| May 22, 2026 | **100% Warn-Free Monorepo Cleanups**: Cleaned up all remaining ESLint, TypeScript, and React compilation warnings.                                               |
+| May 22, 2026 | Added Pre-built Rule Templates (Next.js 16, React 19, Tailwind v4, Security).                                                                                    |
+| May 22, 2026 | Added `list_skills` MCP tool for AI agent discovery pattern.                                                                                                     |
+| May 22, 2026 | Separated "Rules" and "Skills" into two collections. Created Skill Studio UI.                                                                                    |
+| May 22, 2026 | Created `PRISM_CONTEXT.md` and updated `PRISM_ROADMAP.md`                                                                                                        |
+| May 22, 2026 | Fixed `gpt-tokenizer` missing dependency — reinstalled pnpm deps                                                                                                 |
+| May 22, 2026 | Removed `--standalone` guard — server starts unconditionally on stdio connect                                                                                    |
+| May 22, 2026 | Added DB reconnection logic — health check + retry on connection loss                                                                                            |
+| May 22, 2026 | Updated `PHASE2_COMPLETE.md` — stale `prism connect` → `prism serve`                                                                                             |
+| May 22, 2026 | Renamed npm package from `@prism-engine/cli` → `prism-context-engine`                                                                                            |
+| May 22, 2026 | Published `prism-context-engine@1.1.1` to npm public registry                                                                                                    |
+| May 2026     | Fixed `connect.ts` → broken IDE proxy replaced with `prism serve`                                                                                                |
+| May 2026     | Rewrote `serve.ts` — spawns full MCP server with lite fallback                                                                                                   |
+| May 2026     | Updated `prism init` → configures IDEs with `prism serve`                                                                                                        |
+| May 2026     | Fixed data fragmentation — `sync` generates all 3 formats                                                                                                        |
+| May 2026     | Fixed VS Code `mcpClient.ts` → spawns `prism serve`                                                                                                              |
+| May 2026     | Fixed cache `cacheHit` metadata bug                                                                                                                              |
+| May 2026     | Fixed Azure endpoint stripping in `azure-openai.ts`                                                                                                              |
+| May 2026     | Removed dead `--port` from serve command                                                                                                                         |
+| May 2026     | Migrated AI from Azure to Gemini: `gemini-3.5-flash` + `gemini-embedding-2`                                                                                      |
+| May 2026     | Created `src/lib/gemini.ts`, `src/lib/ai-router.ts`                                                                                                              |
+| May 2026     | Created `scripts/smoke-test.ts` — 18-step E2E test                                                                                                               |
 
 ## 12. Next Steps
 

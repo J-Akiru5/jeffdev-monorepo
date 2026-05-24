@@ -16,29 +16,29 @@ This skill covers building user interfaces according to JeffDev's proprietary "G
 
 ### Backgrounds
 
-| Token | Hex | Usage | CSS |
-|-------|-----|-------|-----|
-| **bg-void** | `#050505` | Base application background | `bg-black` (or `#050505`) |
-| **bg-glass** | `rgba(10,10,10,0.6)` | Cards, panels (with `backdrop-blur-xl`) | `bg-black/60 backdrop-blur-xl` |
-| **bg-surface** | `#0a0a0a` | Solid alternative (no blur) | `bg-gray-950` |
+| Token          | Hex                  | Usage                                   | CSS                            |
+| -------------- | -------------------- | --------------------------------------- | ------------------------------ |
+| **bg-void**    | `#050505`            | Base application background             | `bg-black` (or `#050505`)      |
+| **bg-glass**   | `rgba(10,10,10,0.6)` | Cards, panels (with `backdrop-blur-xl`) | `bg-black/60 backdrop-blur-xl` |
+| **bg-surface** | `#0a0a0a`            | Solid alternative (no blur)             | `bg-gray-950`                  |
 
 ### Accents (Holographic Gradients)
 
-| Token | Hex | Usage | Purpose |
-|-------|-----|-------|---------|
-| **primary-cyan** | `#06b6d4` (Cyan-500) | Buttons, highlights | Information / Tech |
-| **primary-purple** | `#8b5cf6` (Violet-500) | Secondary actions | Creative / Vibe |
-| **success-emerald** | `#10b981` (Emerald-500) | Status indicators | Status: Online / Paid |
-| **warning-amber** | `#f59e0b` (Amber-500) | Warnings | Caution / Review |
-| **error-red** | `#ef4444` (Red-500) | Errors / Destructive | Error / Delete |
+| Token               | Hex                     | Usage                | Purpose               |
+| ------------------- | ----------------------- | -------------------- | --------------------- |
+| **primary-cyan**    | `#06b6d4` (Cyan-500)    | Buttons, highlights  | Information / Tech    |
+| **primary-purple**  | `#8b5cf6` (Violet-500)  | Secondary actions    | Creative / Vibe       |
+| **success-emerald** | `#10b981` (Emerald-500) | Status indicators    | Status: Online / Paid |
+| **warning-amber**   | `#f59e0b` (Amber-500)   | Warnings             | Caution / Review      |
+| **error-red**       | `#ef4444` (Red-500)     | Errors / Destructive | Error / Delete        |
 
 ### Borders (The "Wireframe")
 
-| Token | Value | Usage |
-|-------|-------|-------|
+| Token             | Value                    | Usage                      |
+| ----------------- | ------------------------ | -------------------------- |
 | **border-subtle** | `rgba(255,255,255,0.08)` | Default dividers, inactive |
-| **border-active** | `rgba(255,255,255,0.15)` | Hover states, focus |
-| **border-hover** | `rgba(255,255,255,0.20)` | Interactive elements |
+| **border-active** | `rgba(255,255,255,0.15)` | Hover states, focus        |
+| **border-hover**  | `rgba(255,255,255,0.20)` | Interactive elements       |
 
 ---
 
@@ -58,6 +58,7 @@ This skill covers building user interfaces according to JeffDev's proprietary "G
 ```
 
 **Rules:**
+
 - Headings: Weights 600 (Semibold) to 900 (Black)
 - Tracking: `-0.02em` (tight, professional)
 - Color: Always `text-white` in dark mode
@@ -76,6 +77,7 @@ This skill covers building user interfaces according to JeffDev's proprietary "G
 ```
 
 **Rules:**
+
 - Tags, IDs, prices, dates, code snippets
 - Weight: 400-600 (Regular to SemiBold)
 - Tracking: `-0.01em`
@@ -91,13 +93,13 @@ The signature interaction element—transparent button with glowing border on ho
 
 ```tsx
 // packages/ui/src/Button.tsx
-'use client';
+"use client";
 
-export function Button({ 
-  variant = 'default', 
-  size = 'md',
+export function Button({
+  variant = "default",
+  size = "md",
   children,
-  ...props 
+  ...props
 }) {
   return (
     <button
@@ -120,7 +122,7 @@ export function Button({
       <div className="absolute inset-0 -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-cyan-500/20 blur-xl" />
       </div>
-      
+
       <span className="relative font-mono text-sm uppercase tracking-wider text-white">
         {children}
       </span>
@@ -130,6 +132,7 @@ export function Button({
 ```
 
 **Variants:**
+
 - `variant="cyan"` → Cyan accent
 - `variant="purple"` → Purple accent
 - `variant="ghost"` → Minimal border
@@ -141,13 +144,9 @@ Data containers with subtle glass effect.
 
 ```tsx
 // packages/ui/src/Card.tsx
-'use client';
+"use client";
 
-export function Card({ 
-  variant = 'default',
-  children,
-  ...props
-}) {
+export function Card({ variant = "default", children, ...props }) {
   return (
     <div
       className={`
@@ -156,9 +155,10 @@ export function Card({
         bg-white/[0.02] backdrop-blur-md
         p-6
         
-        ${variant === 'interactive' 
-          ? 'hover:border-white/[0.1] hover:bg-white/[0.03] transition-all' 
-          : ''
+        ${
+          variant === "interactive"
+            ? "hover:border-white/[0.1] hover:bg-white/[0.03] transition-all"
+            : ""
         }
       `}
       {...props}
@@ -172,7 +172,7 @@ export function Card({
 <Card variant="interactive">
   <h3 className="font-semibold text-white">Project Title</h3>
   <p className="text-white/60 text-sm mt-2">Description here</p>
-</Card>
+</Card>;
 ```
 
 ### Pattern 3: Input Field (Minimal Border)
@@ -181,12 +181,9 @@ No background, border appears on focus only.
 
 ```tsx
 // packages/ui/src/Input.tsx
-'use client';
+"use client";
 
-export function Input({ 
-  placeholder,
-  ...props 
-}) {
+export function Input({ placeholder, ...props }) {
   return (
     <input
       className={`
@@ -219,7 +216,7 @@ Lightweight tag for categorization.
 // packages/ui/src/Badge.tsx
 'use client';
 
-export function Badge({ 
+export function Badge({
   variant = 'default',
   children,
   ...props
@@ -260,6 +257,7 @@ export function Badge({
 ### Navigation: Sidebar → Bottom Bar
 
 **Desktop:**
+
 ```tsx
 // layouts/desktop-sidebar.tsx
 <aside className="fixed left-0 top-0 h-screen w-64 bg-black/50 border-r border-white/10 backdrop-blur">
@@ -270,6 +268,7 @@ export function Badge({
 ```
 
 **Mobile:**
+
 ```tsx
 // layouts/mobile-bottom-nav.tsx
 <nav className="fixed bottom-0 left-0 right-0 h-16 bg-black/80 border-t border-white/10 backdrop-blur-lg z-50">
@@ -285,11 +284,11 @@ export function Badge({
 
 ```tsx
 // Conditional rendering
-import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 export function Navigation() {
-  const isMobile = useMediaQuery('(max-width: 768px)');
-  
+  const isMobile = useMediaQuery("(max-width: 768px)");
+
   return isMobile ? <MobileNav /> : <DesktopSidebar />;
 }
 ```
@@ -297,19 +296,17 @@ export function Navigation() {
 ### Bottom Sheet for Mobile Filters
 
 ```tsx
-'use client';
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+"use client";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function FilterSheet() {
   const [isOpen, setIsOpen] = useState(false);
-  
+
   return (
     <>
-      <button onClick={() => setIsOpen(true)}>
-        Filters
-      </button>
-      
+      <button onClick={() => setIsOpen(true)}>Filters</button>
+
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -321,9 +318,9 @@ export function FilterSheet() {
           >
             <motion.div
               className="fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 rounded-t-lg"
-              initial={{ y: '100%' }}
+              initial={{ y: "100%" }}
               animate={{ y: 0 }}
-              exit={{ y: '100%' }}
+              exit={{ y: "100%" }}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Filter controls */}
@@ -354,8 +351,8 @@ export function FilterSheet() {
 ### Macro: Layout Shifts & Modal Opens
 
 ```tsx
-'use client';
-import { motion } from 'framer-motion';
+"use client";
+import { motion } from "framer-motion";
 
 export function ModalDialog({ isOpen, onClose, children }) {
   return (
@@ -370,18 +367,16 @@ export function ModalDialog({ isOpen, onClose, children }) {
             exit={{ opacity: 0 }}
             onClick={onClose}
           />
-          
+
           {/* Modal */}
           <motion.div
             className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ type: 'spring', damping: 20 }}
+            transition={{ type: "spring", damping: 20 }}
           >
-            <Card>
-              {children}
-            </Card>
+            <Card>{children}</Card>
           </motion.div>
         </>
       )}
@@ -393,23 +388,23 @@ export function ModalDialog({ isOpen, onClose, children }) {
 ### Scroll Animations
 
 ```tsx
-'use client';
-import Lenis from '@studio-freight/lenis';
-import { useEffect } from 'react';
+"use client";
+import Lenis from "@studio-freight/lenis";
+import { useEffect } from "react";
 
 export function SmoothScroll({ children }) {
   useEffect(() => {
     const lenis = new Lenis();
-    
+
     const raf = (time) => {
       lenis.raf(time);
       requestAnimationFrame(raf);
     };
-    
+
     requestAnimationFrame(raf);
     return () => lenis.destroy();
   }, []);
-  
+
   return children;
 }
 ```
@@ -424,15 +419,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        'void': '#050505',
-        'glass': 'rgba(10, 10, 10, 0.6)',
+        void: "#050505",
+        glass: "rgba(10, 10, 10, 0.6)",
       },
       fontFamily: {
-        'sans': ['Inter', 'sans-serif'],
-        'mono': ['JetBrains Mono', 'monospace'],
+        sans: ["Inter", "sans-serif"],
+        mono: ["JetBrains Mono", "monospace"],
       },
       backdropBlur: {
-        xl: '80px',
+        xl: "80px",
       },
     },
   },

@@ -4,7 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Input } from "@syntaxure/ui";
 import { Save, ArrowLeft, X, Plus } from "lucide-react";
-import { createRelease, updateRelease, type ReleaseFormData } from "@/app/actions/releases";
+import {
+  createRelease,
+  updateRelease,
+  type ReleaseFormData,
+} from "@/app/actions/releases";
 import Link from "next/link";
 
 interface FormState {
@@ -19,7 +23,7 @@ interface FormState {
 }
 
 interface ReleaseFormProps {
-  initialData?: (FormState & { id: string });
+  initialData?: FormState & { id: string };
   isEditing?: boolean;
 }
 
@@ -34,7 +38,9 @@ const DEFAULT_FORM: FormState = {
   is_featured: false,
 };
 
-function toFormState(data: ReleaseFormData & { id: string }): FormState & { id: string } {
+function toFormState(
+  data: ReleaseFormData & { id: string },
+): FormState & { id: string } {
   return {
     id: data.id,
     title: data.title,
@@ -62,8 +68,16 @@ function toPayload(form: FormState): ReleaseFormData {
 }
 
 const releaseTypes = [
-  { value: "tool", label: "Tool", description: "Major tool or product release" },
-  { value: "update", label: "Update", description: "Feature update or improvement" },
+  {
+    value: "tool",
+    label: "Tool",
+    description: "Major tool or product release",
+  },
+  {
+    value: "update",
+    label: "Update",
+    description: "Feature update or improvement",
+  },
   { value: "patch", label: "Patch", description: "Bug fix or minor change" },
 ] as const;
 
@@ -74,7 +88,10 @@ export function ReleaseForm({ initialData, isEditing }: ReleaseFormProps) {
   );
   const [tagInput, setTagInput] = useState("");
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [message, setMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   const handleSave = async () => {
     setSaving(true);
@@ -89,7 +106,10 @@ export function ReleaseForm({ initialData, isEditing }: ReleaseFormProps) {
         : await createRelease(payload);
 
       if (result.success) {
-        setMessage({ type: "success", text: isEditing ? "Release updated." : "Release created." });
+        setMessage({
+          type: "success",
+          text: isEditing ? "Release updated." : "Release created.",
+        });
         setTimeout(() => router.push("/admin/agency/releases"), 1000);
       } else {
         setMessage({ type: "error", text: result.error || "Failed to save." });
@@ -110,7 +130,10 @@ export function ReleaseForm({ initialData, isEditing }: ReleaseFormProps) {
   };
 
   const removeTag = (tag: string) => {
-    setForm((prev) => ({ ...prev, tags: prev.tags?.filter((t) => t !== tag) ?? [] }));
+    setForm((prev) => ({
+      ...prev,
+      tags: prev.tags?.filter((t) => t !== tag) ?? [],
+    }));
   };
 
   return (
@@ -138,7 +161,11 @@ export function ReleaseForm({ initialData, isEditing }: ReleaseFormProps) {
           className="inline-flex items-center gap-2 rounded-md bg-amber-500 px-4 py-2 text-sm font-semibold text-black hover:bg-amber-400 transition-colors disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
-          {saving ? "Saving..." : isEditing ? "Update Release" : "Create Release"}
+          {saving
+            ? "Saving..."
+            : isEditing
+              ? "Update Release"
+              : "Create Release"}
         </button>
       </div>
 
@@ -161,35 +188,49 @@ export function ReleaseForm({ initialData, isEditing }: ReleaseFormProps) {
         </h2>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-white/60 mb-1.5">Title *</label>
+            <label className="block text-sm text-white/60 mb-1.5">
+              Title *
+            </label>
             <Input
               value={form.title}
-              onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, title: e.target.value }))
+              }
               className="w-full"
               placeholder="e.g., Prism Context Engine"
             />
           </div>
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
-              <label className="block text-sm text-white/60 mb-1.5">Version</label>
+              <label className="block text-sm text-white/60 mb-1.5">
+                Version
+              </label>
               <Input
                 value={form.version}
-                onChange={(e) => setForm((prev) => ({ ...prev, version: e.target.value }))}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, version: e.target.value }))
+                }
                 className="w-full"
                 placeholder="e.g., v2.4.0"
               />
             </div>
             <div>
-              <label className="block text-sm text-white/60 mb-1.5">Date *</label>
+              <label className="block text-sm text-white/60 mb-1.5">
+                Date *
+              </label>
               <Input
                 type="date"
                 value={form.date}
-                onChange={(e) => setForm((prev) => ({ ...prev, date: e.target.value }))}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, date: e.target.value }))
+                }
                 className="w-full"
               />
             </div>
             <div>
-              <label className="block text-sm text-white/60 mb-1.5">Type *</label>
+              <label className="block text-sm text-white/60 mb-1.5">
+                Type *
+              </label>
               <select
                 value={form.type}
                 onChange={(e) =>
@@ -201,7 +242,11 @@ export function ReleaseForm({ initialData, isEditing }: ReleaseFormProps) {
                 className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white focus:border-amber-500/50 focus:outline-none"
               >
                 {releaseTypes.map((t) => (
-                  <option key={t.value} value={t.value} className="bg-[#030303]">
+                  <option
+                    key={t.value}
+                    value={t.value}
+                    className="bg-[#030303]"
+                  >
                     {t.label}
                   </option>
                 ))}
@@ -209,20 +254,28 @@ export function ReleaseForm({ initialData, isEditing }: ReleaseFormProps) {
             </div>
           </div>
           <div>
-            <label className="block text-sm text-white/60 mb-1.5">Description *</label>
+            <label className="block text-sm text-white/60 mb-1.5">
+              Description *
+            </label>
             <textarea
               value={form.description}
-              onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, description: e.target.value }))
+              }
               rows={4}
               className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-amber-500/50 focus:outline-none"
               placeholder="Describe what's new in this release..."
             />
           </div>
           <div>
-            <label className="block text-sm text-white/60 mb-1.5">Link (optional)</label>
+            <label className="block text-sm text-white/60 mb-1.5">
+              Link (optional)
+            </label>
             <Input
               value={form.link}
-              onChange={(e) => setForm((prev) => ({ ...prev, link: e.target.value }))}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, link: e.target.value }))
+              }
               className="w-full"
               placeholder="https://prism.jeffdev.studio"
             />
@@ -288,7 +341,9 @@ export function ReleaseForm({ initialData, isEditing }: ReleaseFormProps) {
             <input
               type="checkbox"
               checked={form.is_featured}
-              onChange={(e) => setForm((prev) => ({ ...prev, is_featured: e.target.checked }))}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, is_featured: e.target.checked }))
+              }
               className="sr-only peer"
             />
             <div className="h-6 w-11 rounded-full border border-white/10 bg-white/5 peer-checked:bg-amber-500/30 peer-checked:border-amber-500/50 transition-colors" />
@@ -311,7 +366,11 @@ export function ReleaseForm({ initialData, isEditing }: ReleaseFormProps) {
           className="inline-flex items-center gap-2 rounded-md bg-amber-500 px-6 py-2.5 text-sm font-semibold text-black hover:bg-amber-400 transition-colors disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
-          {saving ? "Saving..." : isEditing ? "Update Release" : "Create Release"}
+          {saving
+            ? "Saving..."
+            : isEditing
+              ? "Update Release"
+              : "Create Release"}
         </button>
       </div>
     </div>

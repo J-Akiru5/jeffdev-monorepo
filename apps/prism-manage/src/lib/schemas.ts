@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 /**
  * Project/List Schema
@@ -8,10 +8,10 @@ import { z } from 'zod';
 export const ProjectSchema = z.object({
   id: z.string(),
   name: z.string().min(1).max(100),
-  color: z.string().optional(),   // Hex color for list indicator
-  icon: z.string().optional(),    // Lucide icon name
+  color: z.string().optional(), // Hex color for list indicator
+  icon: z.string().optional(), // Lucide icon name
   order: z.number(),
-  createdAt: z.string(),          // ISO timestamp
+  createdAt: z.string(), // ISO timestamp
   updatedAt: z.string(),
 });
 
@@ -29,8 +29,8 @@ export const TaskSchema = z.object({
   notes: z.string().optional(),
   completed: z.boolean().default(false),
   starred: z.boolean().default(false),
-  dueDate: z.string().optional(),       // ISO date (YYYY-MM-DD)
-  dueTime: z.string().optional(),       // HH:mm format
+  dueDate: z.string().optional(), // ISO date (YYYY-MM-DD)
+  dueTime: z.string().optional(), // HH:mm format
   googleEventId: z.string().optional(), // Linked calendar event
   order: z.number(),
   createdAt: z.string(),
@@ -48,8 +48,8 @@ export const CalendarEventSchema = z.object({
   id: z.string(),
   googleCalendarId: z.string(),
   title: z.string(),
-  start: z.string(),                    // ISO datetime
-  end: z.string(),                      // ISO datetime
+  start: z.string(), // ISO datetime
+  end: z.string(), // ISO datetime
   allDay: z.boolean(),
   linkedTaskId: z.string().optional(),
   syncedAt: z.string(),

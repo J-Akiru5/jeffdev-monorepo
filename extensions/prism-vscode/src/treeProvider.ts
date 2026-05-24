@@ -1,8 +1,8 @@
-import * as vscode from 'vscode';
-import { Rule } from './mcpClient';
+import * as vscode from "vscode";
+import { Rule } from "./mcpClient";
 
 export interface ProjectData {
-  type: 'project';
+  type: "project";
   id: string;
   name: string;
   slug: string;
@@ -12,7 +12,7 @@ export interface ProjectData {
 }
 
 export interface BrandData {
-  type: 'brand';
+  type: "brand";
   id: string;
   slug: string;
   companyName: string;
@@ -20,7 +20,7 @@ export interface BrandData {
 }
 
 export interface ComponentData {
-  type: 'component';
+  type: "component";
   id: string;
   name: string;
 }
@@ -54,10 +54,17 @@ export class DashboardTreeItem extends vscode.TreeItem {
 }
 
 export class DashboardTreeProvider implements vscode.TreeDataProvider<DashboardTreeItem> {
-  private _onDidChangeTreeData = new vscode.EventEmitter<DashboardTreeItem | undefined>();
+  private _onDidChangeTreeData = new vscode.EventEmitter<
+    DashboardTreeItem | undefined
+  >();
   readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
-  private data: DashboardData = { projects: [], brands: [], components: [], rules: [] };
+  private data: DashboardData = {
+    projects: [],
+    brands: [],
+    components: [],
+    rules: [],
+  };
 
   refresh(data: DashboardData): void {
     this.data = data;
@@ -81,17 +88,17 @@ export class DashboardTreeProvider implements vscode.TreeDataProvider<DashboardT
       const projectsHeader = new DashboardTreeItem(
         `Projects (${this.data.projects.length})`,
         vscode.TreeItemCollapsibleState.Expanded,
-        'section',
-        'folder-library',
+        "section",
+        "folder-library",
       );
 
       for (const p of this.data.projects) {
         const projectItem = new DashboardTreeItem(
           p.name,
           vscode.TreeItemCollapsibleState.Collapsed,
-          'project',
-          'project',
-          `${p.stack || ''} / ${p.designSystem || ''}`,
+          "project",
+          "project",
+          `${p.stack || ""} / ${p.designSystem || ""}`,
           `Rules: ${p.ruleCount}`,
         );
 
@@ -99,14 +106,14 @@ export class DashboardTreeProvider implements vscode.TreeDataProvider<DashboardT
           new DashboardTreeItem(
             `Rules (${p.ruleCount})`,
             vscode.TreeItemCollapsibleState.None,
-            'project-rules',
-            'symbol-property',
+            "project-rules",
+            "symbol-property",
           ),
           new DashboardTreeItem(
-            'Create Rule',
+            "Create Rule",
             vscode.TreeItemCollapsibleState.None,
-            'create-rule',
-            'add',
+            "create-rule",
+            "add",
           ),
         ];
 
@@ -120,16 +127,16 @@ export class DashboardTreeProvider implements vscode.TreeDataProvider<DashboardT
       const brandsHeader = new DashboardTreeItem(
         `Brands (${this.data.brands.length})`,
         vscode.TreeItemCollapsibleState.Expanded,
-        'section',
-        'symbol-color',
+        "section",
+        "symbol-color",
       );
 
       for (const b of this.data.brands) {
         const brandItem = new DashboardTreeItem(
           b.companyName,
           vscode.TreeItemCollapsibleState.None,
-          'brand',
-          'paintcan',
+          "brand",
+          "paintcan",
           b.industry,
         );
         brandsHeader.children.push(brandItem);
@@ -142,16 +149,16 @@ export class DashboardTreeProvider implements vscode.TreeDataProvider<DashboardT
       const componentsHeader = new DashboardTreeItem(
         `Components (${this.data.components.length})`,
         vscode.TreeItemCollapsibleState.Expanded,
-        'section',
-        'symbol-class',
+        "section",
+        "symbol-class",
       );
 
       for (const c of this.data.components) {
         const compItem = new DashboardTreeItem(
           c.name,
           vscode.TreeItemCollapsibleState.None,
-          'component',
-          'symbol-misc',
+          "component",
+          "symbol-misc",
         );
         componentsHeader.children.push(compItem);
       }
@@ -163,24 +170,24 @@ export class DashboardTreeProvider implements vscode.TreeDataProvider<DashboardT
       const rulesHeader = new DashboardTreeItem(
         `All Rules (${this.data.rules.length})`,
         vscode.TreeItemCollapsibleState.Collapsed,
-        'section',
-        'book',
+        "section",
+        "book",
       );
 
       for (const r of this.data.rules) {
         const iconMap: Record<string, string> = {
-          architecture: 'symbol-structure',
-          styling: 'symbol-color',
-          security: 'shield',
-          performance: 'dashboard',
-          testing: 'beaker',
-          documentation: 'book',
+          architecture: "symbol-structure",
+          styling: "symbol-color",
+          security: "shield",
+          performance: "dashboard",
+          testing: "beaker",
+          documentation: "book",
         };
         const ruleItem = new DashboardTreeItem(
           r.name,
           vscode.TreeItemCollapsibleState.None,
-          'rule',
-          iconMap[r.category] || 'symbol-misc',
+          "rule",
+          iconMap[r.category] || "symbol-misc",
           r.category,
           r.content.slice(0, 200),
         );
@@ -191,12 +198,14 @@ export class DashboardTreeProvider implements vscode.TreeDataProvider<DashboardT
 
     // Quick actions
     if (items.length === 0) {
-      items.push(new DashboardTreeItem(
-        'No data loaded. Run "Prism: Connect" or "Prism: Refresh All"',
-        vscode.TreeItemCollapsibleState.None,
-        'empty',
-        'info',
-      ));
+      items.push(
+        new DashboardTreeItem(
+          'No data loaded. Run "Prism: Connect" or "Prism: Refresh All"',
+          vscode.TreeItemCollapsibleState.None,
+          "empty",
+          "info",
+        ),
+      );
     }
 
     return items;

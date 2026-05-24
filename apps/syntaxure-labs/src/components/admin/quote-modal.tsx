@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Quote Details Modal
@@ -9,10 +9,19 @@
  * - Update Status
  */
 
-import { useState } from 'react';
-import { X, Mail, Calendar, Building, Clock, DollarSign, FileText, User } from 'lucide-react';
-import { QuoteStatusSelector } from './quote-status-selector';
-import { createCalendarEvent } from '@/app/actions/calendar';
+import { useState } from "react";
+import {
+  X,
+  Mail,
+  Calendar,
+  Building,
+  Clock,
+  DollarSign,
+  FileText,
+  User,
+} from "lucide-react";
+import { QuoteStatusSelector } from "./quote-status-selector";
+import { createCalendarEvent } from "@/app/actions/calendar";
 
 interface Quote {
   id: string;
@@ -24,7 +33,7 @@ interface Quote {
   budget: string;
   timeline: string;
   details: string;
-  status: 'new' | 'contacted' | 'in-progress' | 'closed';
+  status: "new" | "contacted" | "in-progress" | "closed";
   created_at: string;
 }
 
@@ -34,11 +43,11 @@ interface QuoteModalProps {
 }
 
 const projectTypeLabels: Record<string, string> = {
-  web: 'Web Application',
-  saas: 'SaaS Platform',
-  mobile: 'Mobile App',
-  ai: 'AI Integration',
-  other: 'Other',
+  web: "Web Application",
+  saas: "SaaS Platform",
+  mobile: "Mobile App",
+  ai: "AI Integration",
+  other: "Other",
 };
 
 export function QuoteModal({ quote, onClose }: QuoteModalProps) {
@@ -49,10 +58,10 @@ export function QuoteModal({ quote, onClose }: QuoteModalProps) {
 
   // Build mailto link with quote context
   const mailtoSubject = encodeURIComponent(
-    `Re: Quote Request - ${projectTypeLabels[quote.projectType] || quote.projectType} (${quote.refNo || quote.id})`
+    `Re: Quote Request - ${projectTypeLabels[quote.projectType] || quote.projectType} (${quote.refNo || quote.id})`,
   );
   const mailtoBody = encodeURIComponent(
-    `Hi ${quote.name},\n\nThank you for your interest in our services.\n\nRegarding your ${projectTypeLabels[quote.projectType] || quote.projectType} project with a budget of ${quote.budget}:\n\n---\n\nBest regards,\nSyntaxure Labs`
+    `Hi ${quote.name},\n\nThank you for your interest in our services.\n\nRegarding your ${projectTypeLabels[quote.projectType] || quote.projectType} project with a budget of ${quote.budget}:\n\n---\n\nBest regards,\nSyntaxure Labs`,
   );
   const mailtoLink = `mailto:${quote.email}?subject=${mailtoSubject}&body=${mailtoBody}`;
 
@@ -68,14 +77,14 @@ export function QuoteModal({ quote, onClose }: QuoteModalProps) {
       await createCalendarEvent({
         title: `Discovery Call: ${quote.name}`,
         description: `Quote discussion for ${projectTypeLabels[quote.projectType] || quote.projectType} project.\nBudget: ${quote.budget}\nTimeline: ${quote.timeline}\n\nDetails: ${quote.details}`,
-        type: 'meeting',
+        type: "meeting",
         start: meetingDate.toISOString(),
         end: new Date(meetingDate.getTime() + 60 * 60 * 1000).toISOString(), // 1 hour
         allDay: false,
       });
       setEventCreated(true);
     } catch (error) {
-      console.error('Failed to create calendar event:', error);
+      console.error("Failed to create calendar event:", error);
     } finally {
       setIsCreatingEvent(false);
     }
@@ -103,10 +112,15 @@ export function QuoteModal({ quote, onClose }: QuoteModalProps) {
         <div className="mb-6">
           <div className="flex items-center gap-3">
             <h2 className="text-2xl font-bold text-white">{quote.name}</h2>
-            <QuoteStatusSelector quoteId={quote.id} currentStatus={quote.status} />
+            <QuoteStatusSelector
+              quoteId={quote.id}
+              currentStatus={quote.status}
+            />
           </div>
           {quote.refNo && (
-            <p className="mt-1 font-mono text-xs text-white/40">REF: {quote.refNo}</p>
+            <p className="mt-1 font-mono text-xs text-white/40">
+              REF: {quote.refNo}
+            </p>
           )}
         </div>
 
@@ -126,10 +140,10 @@ export function QuoteModal({ quote, onClose }: QuoteModalProps) {
           <InfoRow
             icon={User}
             label="Submitted"
-            value={new Date(quote.created_at).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
+            value={new Date(quote.created_at).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
             })}
           />
         </div>
@@ -141,7 +155,7 @@ export function QuoteModal({ quote, onClose }: QuoteModalProps) {
           </h3>
           <div className="rounded-md bg-white/[0.02] border border-white/[0.06] p-4">
             <p className="text-sm text-white/70 whitespace-pre-wrap">
-              {quote.details || 'No additional details provided.'}
+              {quote.details || "No additional details provided."}
             </p>
           </div>
         </div>
@@ -161,16 +175,16 @@ export function QuoteModal({ quote, onClose }: QuoteModalProps) {
             disabled={isCreatingEvent || eventCreated}
             className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all ${
               eventCreated
-                ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                : 'bg-purple-500/10 border border-purple-500/20 text-purple-400 hover:bg-purple-500/20'
+                ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
+                : "bg-purple-500/10 border border-purple-500/20 text-purple-400 hover:bg-purple-500/20"
             } disabled:opacity-50`}
           >
             <Calendar className="h-4 w-4" />
             {eventCreated
-              ? 'Added to Calendar'
+              ? "Added to Calendar"
               : isCreatingEvent
-                ? 'Creating...'
-                : 'Add to Calendar'}
+                ? "Creating..."
+                : "Add to Calendar"}
           </button>
         </div>
       </div>
@@ -193,7 +207,9 @@ function InfoRow({
         <Icon className="h-4 w-4 text-white/40" />
       </div>
       <div>
-        <div className="text-xs text-white/40 uppercase tracking-wider">{label}</div>
+        <div className="text-xs text-white/40 uppercase tracking-wider">
+          {label}
+        </div>
         <div className="text-sm text-white">{value}</div>
       </div>
     </div>

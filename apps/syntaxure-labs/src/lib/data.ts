@@ -8,7 +8,7 @@
  *       but query the Supabase tables instead.
  */
 
-import { getAdminClient } from '@/lib/supabase/admin';
+import { getAdminClient } from "@/lib/supabase/admin";
 
 // =============================================================================
 // TYPES (matching the FirestoreService shape for backward compat)
@@ -89,35 +89,39 @@ export async function getServices(): Promise<DataService[]> {
   try {
     const supabase = (await getAdminClient()) as any;
     const { data, error } = await supabase
-      .from('services')
-      .select('*')
-      .order('name', { ascending: true });
+      .from("services")
+      .select("*")
+      .order("name", { ascending: true });
 
     if (error) throw error;
     if (!data) return [];
 
     // Map Supabase columns to DataService shape
     return data.map((svc: any, idx: number) => ({
-      slug: svc.name?.toLowerCase().replace(/\s+/g, '-') || `service-${idx}`,
+      slug: svc.name?.toLowerCase().replace(/\s+/g, "-") || `service-${idx}`,
       icon: mapCategoryToIcon(svc.category),
-      title: svc.name || '',
-      tagline: svc.description?.slice(0, 120) || '',
-      description: svc.description || '',
+      title: svc.name || "",
+      tagline: svc.description?.slice(0, 120) || "",
+      description: svc.description || "",
       features: [],
       deliverables: [],
       investment: {
-        starting: svc.price_min ? `$${Number(svc.price_min).toLocaleString()}` : '',
-        timeline: '',
+        starting: svc.price_min
+          ? `$${Number(svc.price_min).toLocaleString()}`
+          : "",
+        timeline: "",
       },
       order: idx,
     }));
   } catch (error) {
-    console.error('[GET SERVICES ERROR]', error);
+    console.error("[GET SERVICES ERROR]", error);
     return [];
   }
 }
 
-export async function getServiceBySlug(slug: string): Promise<DataService | null> {
+export async function getServiceBySlug(
+  slug: string,
+): Promise<DataService | null> {
   const services = await getServices();
   return services.find((s) => s.slug === slug) || null;
 }
@@ -125,14 +129,14 @@ export async function getServiceBySlug(slug: string): Promise<DataService | null
 // Map Supabase category to icon string
 function mapCategoryToIcon(category: string): string {
   const map: Record<string, string> = {
-    web: 'Globe',
-    cloud: 'Cloud',
-    ai: 'Sparkles',
-    mobile: 'Smartphone',
-    design: 'Palette',
-    consulting: 'Briefcase',
-    saas: 'Cloud',
-    default: 'Globe',
+    web: "Globe",
+    cloud: "Cloud",
+    ai: "Sparkles",
+    mobile: "Smartphone",
+    design: "Palette",
+    consulting: "Briefcase",
+    saas: "Cloud",
+    default: "Globe",
   };
   return map[category?.toLowerCase()] || map.default;
 }
@@ -144,44 +148,47 @@ export async function getProjects(): Promise<DataProject[]> {
   try {
     const supabase = (await getAdminClient()) as any;
     const { data, error } = await supabase
-      .from('projects')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .from("projects")
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
     if (!data) return [];
 
-    return data.map((p: any) => ({
-      slug: p.slug || p.id,
-      refNo: undefined,
-      title: p.title || '',
-      client: p.client_name || '',
-      category: p.metadata?.category || '',
-      tagline: p.description?.slice(0, 120) || '',
-      description: p.description || '',
-      challenge: p.metadata?.challenge || '',
-      solution: p.metadata?.solution || '',
-      results: p.metadata?.results || [],
-      technologies: p.metadata?.technologies || [],
-      testimonial: p.metadata?.testimonial || null,
-      image: p.metadata?.image || null,
-      featured: p.metadata?.featured === true,
-      order: p.metadata?.order || 0,
-      status: p.status || 'active',
-      progress: p.metadata?.progress ?? 0,
-      deadline: p.end_date || undefined,
-      startDate: p.start_date || undefined,
-      budget: p.budget ? Number(p.budget) : undefined,
-      paidAmount: p.budget_spent ? Number(p.budget_spent) : undefined,
-      assignedPartner: p.metadata?.assignedPartner || undefined,
-      assignedEmployees: p.metadata?.assignedEmployees || [],
-      user_id: p.user_id,
-      client_email: p.client_email,
-      created_at: p.created_at,
-      updated_at: p.updated_at,
-    } as any));
+    return data.map(
+      (p: any) =>
+        ({
+          slug: p.slug || p.id,
+          refNo: undefined,
+          title: p.title || "",
+          client: p.client_name || "",
+          category: p.metadata?.category || "",
+          tagline: p.description?.slice(0, 120) || "",
+          description: p.description || "",
+          challenge: p.metadata?.challenge || "",
+          solution: p.metadata?.solution || "",
+          results: p.metadata?.results || [],
+          technologies: p.metadata?.technologies || [],
+          testimonial: p.metadata?.testimonial || null,
+          image: p.metadata?.image || null,
+          featured: p.metadata?.featured === true,
+          order: p.metadata?.order || 0,
+          status: p.status || "active",
+          progress: p.metadata?.progress ?? 0,
+          deadline: p.end_date || undefined,
+          startDate: p.start_date || undefined,
+          budget: p.budget ? Number(p.budget) : undefined,
+          paidAmount: p.budget_spent ? Number(p.budget_spent) : undefined,
+          assignedPartner: p.metadata?.assignedPartner || undefined,
+          assignedEmployees: p.metadata?.assignedEmployees || [],
+          user_id: p.user_id,
+          client_email: p.client_email,
+          created_at: p.created_at,
+          updated_at: p.updated_at,
+        }) as any,
+    );
   } catch (error) {
-    console.error('[GET PROJECTS ERROR]', error);
+    console.error("[GET PROJECTS ERROR]", error);
     return [];
   }
 }
@@ -192,14 +199,14 @@ export async function getFeaturedProjects(): Promise<DataProject[]> {
 }
 
 export async function getProjectBySlug(
-  slug: string
+  slug: string,
 ): Promise<DataProject | null> {
   try {
     const supabase = (await getAdminClient()) as any;
     const { data, error } = await supabase
-      .from('projects')
-      .select('*, milestones(*)')
-      .eq('slug', slug)
+      .from("projects")
+      .select("*, milestones(*)")
+      .eq("slug", slug)
       .maybeSingle();
 
     if (error) throw error;
@@ -208,20 +215,20 @@ export async function getProjectBySlug(
     return {
       slug: data.slug || data.id,
       refNo: undefined,
-      title: data.title || '',
-      client: data.client_name || '',
-      category: data.metadata?.category || '',
-      tagline: data.description?.slice(0, 120) || '',
-      description: data.description || '',
-      challenge: data.metadata?.challenge || '',
-      solution: data.metadata?.solution || '',
+      title: data.title || "",
+      client: data.client_name || "",
+      category: data.metadata?.category || "",
+      tagline: data.description?.slice(0, 120) || "",
+      description: data.description || "",
+      challenge: data.metadata?.challenge || "",
+      solution: data.metadata?.solution || "",
       results: data.metadata?.results || [],
       technologies: data.metadata?.technologies || [],
       testimonial: data.metadata?.testimonial || null,
       image: data.metadata?.image || null,
       featured: data.metadata?.featured === true,
       order: data.metadata?.order || 0,
-      status: data.status || 'active',
+      status: data.status || "active",
       progress: data.metadata?.progress ?? 0,
       deadline: data.end_date || undefined,
       startDate: data.start_date || undefined,
@@ -232,8 +239,8 @@ export async function getProjectBySlug(
       milestones: (data.milestones || []).map((m: any) => ({
         id: m.id,
         title: m.title,
-        description: m.description || '',
-        status: m.status === 'in_progress' ? 'in-progress' : m.status,
+        description: m.description || "",
+        status: m.status === "in_progress" ? "in-progress" : m.status,
         dueDate: m.due_date || undefined,
         completedAt: m.metadata?.completedAt || undefined,
         order: m.metadata?.order || 0,
@@ -244,7 +251,7 @@ export async function getProjectBySlug(
       updated_at: data.updated_at,
     } as any;
   } catch (error) {
-    console.error('[GET PROJECT ERROR]', error);
+    console.error("[GET PROJECT ERROR]", error);
     return null;
   }
 }
@@ -256,28 +263,28 @@ export async function getQuotes(limit = 50): Promise<DataQuote[]> {
   try {
     const supabase = (await getAdminClient()) as any;
     const { data, error } = await supabase
-      .from('quotes')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .from("quotes")
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
     if (!data) return [];
 
     return (data as any[]).slice(0, limit).map((q: any) => ({
       id: q.id,
-      projectType: q.title || '',
-      budget: q.amount ? `$${Number(q.amount).toLocaleString()}` : '',
-      timeline: '',
-      name: q.metadata?.name || '',
-      email: q.metadata?.email || '',
+      projectType: q.title || "",
+      budget: q.amount ? `$${Number(q.amount).toLocaleString()}` : "",
+      timeline: "",
+      name: q.metadata?.name || "",
+      email: q.metadata?.email || "",
       company: q.metadata?.company,
-      details: q.description || '',
-      status: q.status || 'new',
+      details: q.description || "",
+      status: q.status || "new",
       created_at: q.created_at,
       updated_at: q.updated_at,
     }));
   } catch (error) {
-    console.error('[GET QUOTES ERROR]', error);
+    console.error("[GET QUOTES ERROR]", error);
     return [];
   }
 }
@@ -289,25 +296,25 @@ export async function getMessages(limit = 50): Promise<DataMessage[]> {
   try {
     const supabase = (await getAdminClient()) as any;
     const { data, error } = await supabase
-      .from('messages')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .from("messages")
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
     if (!data) return [];
 
     return (data as any[]).slice(0, limit).map((m: any) => ({
       id: m.id,
-      name: m.name || '',
-      email: m.email || '',
-      subject: m.subject || '',
-      message: m.message || '',
-      status: m.status || 'received',
+      name: m.name || "",
+      email: m.email || "",
+      subject: m.subject || "",
+      message: m.message || "",
+      status: m.status || "received",
       created_at: m.created_at,
       updated_at: m.updated_at,
     }));
   } catch (error) {
-    console.error('[GET MESSAGES ERROR]', error);
+    console.error("[GET MESSAGES ERROR]", error);
     return [];
   }
 }

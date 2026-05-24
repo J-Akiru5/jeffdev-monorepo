@@ -2,13 +2,19 @@
  * @module @jeffdev/db/cosmos
  * @description MongoDB client for Azure Cosmos DB (MongoDB API).
  * Uses MONGODB_URI from Doppler environment.
- * 
+ *
  * @example
  * import { getDatabase, getCollection } from "@jeffdev/db/cosmos";
  * const rules = await getCollection("rules").find({}).toArray();
  */
 
-import { MongoClient, ObjectId, type Db, type Collection, type Document } from "mongodb";
+import {
+  MongoClient,
+  ObjectId,
+  type Db,
+  type Collection,
+  type Document,
+} from "mongodb";
 
 let client: MongoClient | null = null;
 let database: Db | null = null;
@@ -28,7 +34,7 @@ export async function getMongoClient(): Promise<MongoClient> {
   if (!MONGODB_URI) {
     throw new Error(
       "[packages/db] MONGODB_URI is not set. " +
-      "Ensure Doppler is injecting environment variables."
+        "Ensure Doppler is injecting environment variables.",
     );
   }
 
@@ -43,11 +49,11 @@ export async function getMongoClient(): Promise<MongoClient> {
 
     await client.connect();
     console.log("[packages/db] Connected to Azure Cosmos DB (MongoDB API)");
-    
+
     return client;
   } catch (error) {
     throw new Error(
-      `[packages/db] Failed to connect to MongoDB: ${error instanceof Error ? error.message : "Unknown error"}`
+      `[packages/db] Failed to connect to MongoDB: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
   }
 }
@@ -63,7 +69,7 @@ export async function getDatabase(): Promise<Db> {
 
   const mongoClient = await getMongoClient();
   database = mongoClient.db(DATABASE_NAME);
-  
+
   return database;
 }
 
@@ -71,12 +77,12 @@ export async function getDatabase(): Promise<Db> {
  * Get a typed collection from the Prism database.
  * @param collectionName - Name of the collection
  * @returns Typed MongoDB collection
- * 
+ *
  * @example
  * const rules = await getCollection<RuleDocument>("rules");
  */
 export async function getCollection<T extends Document = Document>(
-  collectionName: string
+  collectionName: string,
 ): Promise<Collection<T>> {
   const db = await getDatabase();
   return db.collection<T>(collectionName);

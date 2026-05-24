@@ -1,7 +1,7 @@
-import { getAllUsers } from '@/app/actions/users';
-import { ProjectForm } from '@/components/admin/project-form';
+import { getAllUsers } from "@/app/actions/users";
+import { ProjectForm } from "@/components/admin/project-form";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 /**
  * New Project Page

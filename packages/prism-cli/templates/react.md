@@ -21,20 +21,20 @@ src/
 ## Component Pattern
 
 ```tsx
-import { type FC, type ReactNode } from 'react';
+import { type FC, type ReactNode } from "react";
 
 interface ButtonProps {
   children: ReactNode;
-  variant?: 'primary' | 'secondary' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: "primary" | "secondary" | "ghost";
+  size?: "sm" | "md" | "lg";
   disabled?: boolean;
   onClick?: () => void;
 }
 
 export const Button: FC<ButtonProps> = ({
   children,
-  variant = 'primary',
-  size = 'md',
+  variant = "primary",
+  size = "md",
   disabled = false,
   onClick,
 }) => {
@@ -53,27 +53,29 @@ export const Button: FC<ButtonProps> = ({
 ## Styling Approach
 
 ### CSS Modules (Default)
-```tsx
-import styles from './Button.module.css';
 
-<button className={styles.button}>Click</button>
+```tsx
+import styles from "./Button.module.css";
+
+<button className={styles.button}>Click</button>;
 ```
 
 ### Tailwind CSS (If Installed)
+
 ```tsx
-<button className="px-4 py-2 rounded-md bg-blue-500 text-white">
-  Click
-</button>
+<button className="px-4 py-2 rounded-md bg-blue-500 text-white">Click</button>
 ```
 
 ## State Management
 
 ### Local State
+
 ```tsx
 const [isOpen, setIsOpen] = useState(false);
 ```
 
 ### Complex State (useReducer)
+
 ```tsx
 const [state, dispatch] = useReducer(reducer, initialState);
 ```
@@ -136,10 +138,7 @@ const computed = useMemo(() => expensiveCalculation(data), [data]);
 - Maintain focus management in modals
 
 ```tsx
-<button
-  aria-label="Close dialog"
-  onClick={onClose}
->
+<button aria-label="Close dialog" onClick={onClose}>
   <CloseIcon />
 </button>
 ```

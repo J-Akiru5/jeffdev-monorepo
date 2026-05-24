@@ -35,20 +35,18 @@ const inputVariants = cva(
           "focus:border-white/20 focus:bg-white/8",
         ],
         // Ghost: no border until focus
-        ghost: [
-          "bg-transparent",
-          "focus:bg-white/5",
-        ],
+        ghost: ["bg-transparent", "focus:bg-white/5"],
       },
     },
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 export interface InputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">,
+  extends
+    Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">,
     VariantProps<typeof inputVariants> {
   /** Optional label above input */
   label?: string;
@@ -77,17 +75,15 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           className={cn(
             inputVariants({ variant }),
             error && "border-red-500/50 focus:border-red-500",
-            className
+            className,
           )}
           ref={ref}
           {...props}
         />
-        {error && (
-          <p className="text-xs text-red-400">{error}</p>
-        )}
+        {error && <p className="text-xs text-red-400">{error}</p>}
       </div>
     );
-  }
+  },
 );
 
 Input.displayName = "Input";

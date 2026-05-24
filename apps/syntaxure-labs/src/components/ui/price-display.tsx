@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useCurrency } from '@/contexts/currency-context';
+import { useCurrency } from "@/contexts/currency-context";
 
 /**
  * Price Display Component
@@ -13,9 +13,9 @@ interface PriceDisplayProps {
   /** Amount to display */
   amount: number | string;
   /** Source currency of the amount (default: PHP) */
-  sourceCurrency?: 'PHP' | 'USD';
+  sourceCurrency?: "PHP" | "USD";
   /** Display style */
-  variant?: 'default' | 'compact';
+  variant?: "default" | "compact";
   /** Additional class names */
   className?: string;
 }
@@ -24,35 +24,36 @@ interface PriceDisplayProps {
  * Parse a number string to extract the numeric value
  */
 function parseAmount(value: string): number {
-  const cleaned = value.replace(/[₱$,\s]/g, '');
-  
-  if (cleaned.toUpperCase().includes('K')) {
-    const num = parseFloat(cleaned.replace(/[Kk]/g, ''));
+  const cleaned = value.replace(/[₱$,\s]/g, "");
+
+  if (cleaned.toUpperCase().includes("K")) {
+    const num = parseFloat(cleaned.replace(/[Kk]/g, ""));
     return num * 1000;
   }
-  
-  if (cleaned.toUpperCase().includes('M')) {
-    const num = parseFloat(cleaned.replace(/[Mm]/g, ''));
+
+  if (cleaned.toUpperCase().includes("M")) {
+    const num = parseFloat(cleaned.replace(/[Mm]/g, ""));
     return num * 1000000;
   }
-  
+
   return parseFloat(cleaned) || 0;
 }
 
 export function PriceDisplay({
   amount,
-  sourceCurrency = 'PHP',
-  variant = 'default',
-  className = '',
+  sourceCurrency = "PHP",
+  variant = "default",
+  className = "",
 }: PriceDisplayProps) {
   const { exchangeRate, formatPrice, isLoading } = useCurrency();
 
   // 1. Get numeric amount
-  const numericAmount = typeof amount === 'number' ? amount : parseAmount(amount);
+  const numericAmount =
+    typeof amount === "number" ? amount : parseAmount(amount);
 
   // 2. Normalize to PHP (our base for formatPrice)
   let phpAmount = numericAmount;
-  if (sourceCurrency === 'USD') {
+  if (sourceCurrency === "USD") {
     phpAmount = numericAmount * (exchangeRate || 56);
   }
 
@@ -61,7 +62,7 @@ export function PriceDisplay({
 
   // 3. Format (formatPrice handles PHP -> Target conversion)
   const formattedPrice = formatPrice(phpAmount, {
-    compact: variant === 'compact',
+    compact: variant === "compact",
   });
 
   return (
@@ -88,7 +89,7 @@ interface PriceRangeDisplayProps {
 export function PriceRangeDisplay({
   minPhp,
   maxPhp,
-  className = '',
+  className = "",
 }: PriceRangeDisplayProps) {
   const { formatPriceRange, isLoading } = useCurrency();
 

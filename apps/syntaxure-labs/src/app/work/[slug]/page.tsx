@@ -1,13 +1,13 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import { notFound } from 'next/navigation';
-import { ArrowLeft, ArrowUpRight, Quote } from 'lucide-react';
-import { Header } from '@/components/layout/header';
-import { Footer } from '@/components/layout/footer';
-import { CTA } from '@/components/sections/cta';
-import { getProjectBySlug, getProjects } from '@/lib/data';
-import { projects as staticProjects } from '@/data/projects';
-import type { Metadata } from 'next';
+import Link from "next/link";
+import Image from "next/image";
+import { notFound } from "next/navigation";
+import { ArrowLeft, ArrowUpRight, Quote } from "lucide-react";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { CTASection } from "@/components/sections/cta-section";
+import { getProjectBySlug, getProjects } from "@/lib/data";
+import { projects as staticProjects } from "@/data/projects";
+import type { Metadata } from "next";
 
 /**
  * Project Detail Page
@@ -34,7 +34,7 @@ export async function generateMetadata({
   const project = await getProjectBySlug(slug);
 
   if (!project) {
-    return { title: 'Project Not Found' };
+    return { title: "Project Not Found" };
   }
 
   return {
@@ -83,7 +83,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               <h1 className="mt-4 text-4xl font-bold tracking-tight text-white md:text-5xl">
                 {activeProject.title}
               </h1>
-              <p className="mt-2 text-lg text-white/50">{activeProject.client}</p>
+              <p className="mt-2 text-lg text-white/50">
+                {activeProject.client}
+              </p>
               <p className="mt-6 text-xl leading-relaxed text-white/60">
                 {activeProject.description}
               </p>
@@ -202,7 +204,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
                     <span className="font-mono text-[10px] uppercase tracking-wider text-cyan-400/70">
                       {p.category}
                     </span>
-                    <div className="mt-1 font-semibold text-white">{p.title}</div>
+                    <div className="mt-1 font-semibold text-white">
+                      {p.title}
+                    </div>
                     <div className="mt-0.5 text-sm text-white/50">
                       {p.tagline}
                     </div>
@@ -214,7 +218,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
         </section>
 
-        <CTA />
+        <CTASection />
       </main>
       <Footer />
     </>

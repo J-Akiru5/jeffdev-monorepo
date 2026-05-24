@@ -1,64 +1,69 @@
-'use client'
+"use client";
 
-import { usePathname, useRouter } from 'next/navigation'
-import { useState, useRef, useEffect } from 'react'
-import { Globe } from 'lucide-react'
+import { usePathname, useRouter } from "next/navigation";
+import { useState, useRef, useEffect } from "react";
+import { Globe } from "lucide-react";
 
 const LANGUAGES = [
-  { locale: 'en-US', text: 'English (US)' },
-  { locale: 'tl', text: 'Tagalog' },
-  { locale: 'ja', text: '日本語' },
-  { locale: 'es', text: 'Español' },
-  { locale: 'id', text: 'Indonesia' },
-  { locale: 'en-GB', text: 'English (UK)' },
-  { locale: 'ru', text: 'Русский' },
-  { locale: 'nl', text: 'Nederlands' }
-]
+  { locale: "en-US", text: "English (US)" },
+  { locale: "tl", text: "Tagalog" },
+  { locale: "ja", text: "日本語" },
+  { locale: "es", text: "Español" },
+  { locale: "id", text: "Indonesia" },
+  { locale: "en-GB", text: "English (UK)" },
+  { locale: "ru", text: "Русский" },
+  { locale: "nl", text: "Nederlands" },
+];
 
-const LOCALE_COOKIE = 'PRISM_LOCALE'
+const LOCALE_COOKIE = "PRISM_LOCALE";
 
 function setLocaleCookie(locale: string) {
-  if (typeof document !== 'undefined') {
-    document.cookie = `${LOCALE_COOKIE}=${locale}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`
+  if (typeof document !== "undefined") {
+    document.cookie = `${LOCALE_COOKIE}=${locale}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
   }
 }
 
 export function LanguageSwitcher() {
-  const pathname = usePathname()
-  const router = useRouter()
-  const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  const pathname = usePathname();
+  const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Determine current language from URL
   // path format: /en-US/foo or /en-US
-  const currentLang = LANGUAGES.find(l => pathname?.startsWith(`/${l.locale}`)) ?? LANGUAGES[0]!
+  const currentLang =
+    LANGUAGES.find((l) => pathname?.startsWith(`/${l.locale}`)) ??
+    LANGUAGES[0]!;
 
   const handleSwitch = (locale: string) => {
-    if (!pathname) return
-    
+    if (!pathname) return;
+
     // Save locale preference in cookie (expires in 1 year)
-    setLocaleCookie(locale)
-    
+    setLocaleCookie(locale);
+
     // Replace the first segment (locale) with the new locale
-    const segments = pathname.split('/')
+    const segments = pathname.split("/");
     // segments[0] is empty, segments[1] is locale
-    segments[1] = locale
-    const newPath = segments.join('/')
-    
-    router.push(newPath)
-    setIsOpen(false)
-  }
+    segments[1] = locale;
+    const newPath = segments.join("/");
+
+    router.push(newPath);
+    setIsOpen(false);
+  };
 
   // Close on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
       }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -78,7 +83,9 @@ export function LanguageSwitcher() {
                 key={lang.locale}
                 onClick={() => handleSwitch(lang.locale)}
                 className={`w-full text-left px-4 py-2 text-sm transition-colors hover:bg-cyan-500/10 hover:text-cyan-400 ${
-                  currentLang.locale === lang.locale ? 'text-cyan-400 bg-cyan-500/5' : 'text-white/70'
+                  currentLang.locale === lang.locale
+                    ? "text-cyan-400 bg-cyan-500/5"
+                    : "text-white/70"
                 }`}
               >
                 {lang.text}
@@ -88,5 +95,5 @@ export function LanguageSwitcher() {
         </div>
       )}
     </div>
-  )
+  );
 }

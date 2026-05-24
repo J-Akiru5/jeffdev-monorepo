@@ -1,10 +1,10 @@
-import Link from 'next/link';
-import { ArrowLeft, Plus } from 'lucide-react';
-import { getProjects } from '@/lib/data';
-import type { FirestoreProject } from '@/types/supabase';
-import { ProjectCard } from '@/components/admin/project-card';
+import Link from "next/link";
+import { ArrowLeft, Plus } from "lucide-react";
+import { getProjects } from "@/lib/data";
+import type { FirestoreProject } from "@/types/supabase";
+import { ProjectCard } from "@/components/admin/project-card";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 /**
  * Admin Projects Page
@@ -12,15 +12,15 @@ export const dynamic = 'force-dynamic';
  * List of all projects with status and progress.
  */
 
-const statusOrder = ['active', 'pending', 'paused', 'completed'];
+const statusOrder = ["active", "pending", "paused", "completed"];
 
 export default async function AdminProjectsPage() {
   const projects = (await getProjects()) as FirestoreProject[];
 
   // Sort by status priority, then by order
   const sortedProjects = [...projects].sort((a, b) => {
-    const statusA = statusOrder.indexOf(a.status || 'pending');
-    const statusB = statusOrder.indexOf(b.status || 'pending');
+    const statusA = statusOrder.indexOf(a.status || "pending");
+    const statusB = statusOrder.indexOf(b.status || "pending");
     if (statusA !== statusB) return statusA - statusB;
     return a.order - b.order;
   });

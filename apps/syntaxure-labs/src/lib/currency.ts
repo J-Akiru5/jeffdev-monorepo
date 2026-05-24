@@ -5,7 +5,7 @@
  * USD is the default currency. PHP is used for geo-detected PH users.
  */
 
-export type CurrencyCode = 'PHP' | 'USD';
+export type CurrencyCode = "PHP" | "USD";
 
 export interface CurrencyConfig {
   code: CurrencyCode;
@@ -14,8 +14,8 @@ export interface CurrencyConfig {
 }
 
 export const CURRENCIES: Record<CurrencyCode, CurrencyConfig> = {
-  PHP: { code: 'PHP', symbol: '₱', locale: 'en-PH' },
-  USD: { code: 'USD', symbol: '$', locale: 'en-US' },
+  PHP: { code: "PHP", symbol: "₱", locale: "en-PH" },
+  USD: { code: "USD", symbol: "$", locale: "en-US" },
 };
 
 /**
@@ -47,15 +47,15 @@ function roundUSD(amount: number): number {
  */
 export function formatPrice(
   phpAmount: number,
-  currency: CurrencyCode = 'PHP',
+  currency: CurrencyCode = "PHP",
   exchangeRate: number = DEFAULT_EXCHANGE_RATE,
-  options: { showSymbol?: boolean; compact?: boolean } = {}
+  options: { showSymbol?: boolean; compact?: boolean } = {},
 ): string {
   const { showSymbol = true, compact = false } = options;
   const config = CURRENCIES[currency];
 
   let amount: number;
-  if (currency === 'PHP') {
+  if (currency === "PHP") {
     amount = phpAmount;
   } else {
     // Convert PHP to USD and round
@@ -66,7 +66,7 @@ export function formatPrice(
   let formatted: string;
   if (compact && amount >= 1000) {
     // Compact format: 75K, 150K, etc.
-    const suffix = amount >= 1000000 ? 'M' : 'K';
+    const suffix = amount >= 1000000 ? "M" : "K";
     const divisor = amount >= 1000000 ? 1000000 : 1000;
     const value = amount / divisor;
     formatted = value % 1 === 0 ? value.toString() : value.toFixed(1);
@@ -88,8 +88,8 @@ export function formatPrice(
 export function formatPriceRange(
   minPhp: number,
   maxPhp: number | null,
-  currency: CurrencyCode = 'PHP',
-  exchangeRate: number = DEFAULT_EXCHANGE_RATE
+  currency: CurrencyCode = "PHP",
+  exchangeRate: number = DEFAULT_EXCHANGE_RATE,
 ): string {
   const min = formatPrice(minPhp, currency, exchangeRate, { compact: true });
 
@@ -104,9 +104,11 @@ export function formatPriceRange(
 /**
  * Get currency code from cookie value
  */
-export function getCurrencyFromCookie(cookieValue: string | undefined): CurrencyCode {
-  if (cookieValue === 'PHP' || cookieValue === 'USD') {
+export function getCurrencyFromCookie(
+  cookieValue: string | undefined,
+): CurrencyCode {
+  if (cookieValue === "PHP" || cookieValue === "USD") {
     return cookieValue;
   }
-  return 'USD'; // Default to USD for international visitors
+  return "USD"; // Default to USD for international visitors
 }

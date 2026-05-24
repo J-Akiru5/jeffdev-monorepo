@@ -9,7 +9,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 [![Turborepo](https://img.shields.io/badge/Turborepo-2.7-EF4444?logo=turborepo)](https://turbo.build/)
 
-*Building the future of AI-assisted development*
+_Building the future of AI-assisted development_
 
 [Agency](https://jeffdev.studio) · [Prism Docs](https://prism.jeffdev.studio) · [Changelog](./CHANGELOG.md)
 
@@ -50,38 +50,46 @@ This monorepo powers **JeffDev Studio** — a premium web development agency —
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| **Framework** | Next.js 16 (App Router) |
-| **UI** | React 19, Tailwind CSS, Headless UI |
-| **Database** | Firebase (Agency), Azure Cosmos DB (Prism) |
-| **Auth** | Clerk |
-| **AI Protocol** | Model Context Protocol (MCP) |
-| **Secrets** | Doppler |
-| **Monorepo** | Turborepo |
+| Layer           | Technology                                 |
+| --------------- | ------------------------------------------ |
+| **Framework**   | Next.js 16 (App Router)                    |
+| **UI**          | React 19, Tailwind CSS, Headless UI        |
+| **Database**    | Firebase (Agency), Azure Cosmos DB (Prism) |
+| **Auth**        | Clerk                                      |
+| **AI Protocol** | Model Context Protocol (MCP)               |
+| **Secrets**     | Doppler                                    |
+| **Monorepo**    | Turborepo                                  |
 
 ---
 
 ## Applications
 
 ### 🏢 Agency (`apps/agency`)
+
 The JeffDev Studio marketing site and client management system.
+
 - **Port**: 3000
 - **Stack**: Next.js 16, Firebase, Tailwind
 
 ### 🔮 Prism Dashboard (`apps/prism-dashboard`)
+
 SaaS platform for developers to manage AI context rules.
+
 - **Port**: 3001
 - **Stack**: Next.js 16, Clerk Auth, Cosmos DB
 - **Features**: Brand management, video context pipeline, AI component generator
 
 ### 📚 Prism Docs (`apps/prism-docs`)
+
 Documentation for the Prism Context Engine.
+
 - **Port**: 3002
 - **Stack**: Nextra 4
 
 ### 🧠 Prism MCP Server (`apps/prism-mcp-server`)
+
 AI context server implementing the Model Context Protocol.
+
 - **Transport**: stdio
 - **Tools**: `get_architectural_rules`, `validate_code_pattern`
 - **Version**: 0.1.3
@@ -91,6 +99,7 @@ AI context server implementing the Model Context Protocol.
 ## Packages
 
 ### @jdstudio/ui
+
 Ghost Glow component library following the JeffDev Design System.
 
 ```tsx
@@ -99,12 +108,13 @@ import { Button, Card, Badge } from "@jdstudio/ui";
 <Card variant="interactive">
   <Button variant="cyan">Deploy</Button>
   <Badge variant="success">Active</Badge>
-</Card>
+</Card>;
 ```
 
 **Components**: Button, Card, Input, Badge, ProgressBar, DataTable
 
 ### @jeffdev/db
+
 Unified database clients for Firebase and Azure Cosmos DB with Zod schemas.
 
 ---
@@ -136,11 +146,11 @@ doppler run -- turbo dev
 
 ### Development Ports
 
-| App | URL |
-|-----|-----|
-| Agency | http://localhost:3000 |
+| App             | URL                   |
+| --------------- | --------------------- |
+| Agency          | http://localhost:3000 |
 | Prism Dashboard | http://localhost:3001 |
-| Prism Docs | http://localhost:3002 |
+| Prism Docs      | http://localhost:3002 |
 
 ---
 
@@ -152,19 +162,19 @@ graph TB
         CURSOR[Cursor/Windsurf]
         WEB[Web Browser]
     end
-    
+
     subgraph Apps
         AGENCY[Agency :3000]
         DASH[Dashboard :3001]
         DOCS[Docs :3002]
         MCP[MCP Server]
     end
-    
+
     subgraph Data
         FIREBASE[(Firebase)]
         COSMOS[(Cosmos DB)]
     end
-    
+
     WEB --> AGENCY
     WEB --> DASH
     WEB --> DOCS

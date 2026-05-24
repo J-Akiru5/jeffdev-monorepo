@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 /**
  * Project Management Server Actions
@@ -7,14 +7,14 @@
  * Uses Supabase `projects` table + `milestones` table (previously embedded in Firestore).
  */
 
-import { z } from 'zod';
-import { getAdminClient } from '@/lib/supabase/admin';
-import { logAuditEvent } from '@/lib/audit';
-import { revalidatePath } from 'next/cache';
+import { z } from "zod";
+import { getAdminClient } from "@/lib/supabase/admin";
+import { logAuditEvent } from "@/lib/audit";
+import { revalidatePath } from "next/cache";
 
 // Validation schemas
 const projectUpdateSchema = z.object({
-  status: z.enum(['pending', 'active', 'paused', 'completed']).optional(),
+  status: z.enum(["pending", "active", "paused", "completed"]).optional(),
   progress: z.number().min(0).max(100).optional(),
   deadline: z.string().optional(),
   startDate: z.string().optional(),
@@ -29,7 +29,9 @@ const milestoneSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
   due_date: z.string().min(1),
-  status: z.enum(['pending', 'in_progress', 'completed', 'blocked']).default('pending'),
+  status: z
+    .enum(["pending", "in_progress", "completed", "blocked"])
+    .default("pending"),
   deliverables: z.array(z.string()).optional(),
 });
 
@@ -39,9 +41,9 @@ const milestoneSchema = z.object({
 async function getProjectId(slug: string): Promise<string | null> {
   const supabase = getAdminClient() as any;
   const { data } = await supabase
-    .from('projects')
-    .select('id')
-    .eq('slug', slug)
+    .from("projects")
+    .select("id")
+    .eq("slug", slug)
     .maybeSingle();
   return data?.id || null;
 }
@@ -49,107 +51,104 @@ async function getProjectId(slug: string): Promise<string | null> {
 /**
  * Update project status
  */
-export async function updateProjectStatus(
-  slug: string,
-  status: string
-) {
+export async function updateProjectStatus(slug: string, status: string) {
   try {
     const supabase = getAdminClient() as any;
 
     const { data: project } = await supabase
-      .from('projects')
-      .select('id, metadata')
-      .eq('slug', slug)
+      .from("projects")
+      .select("id, metadata")
+      .eq("slug", slug)
       .maybeSingle();
 
     if (!project) {
-      return { success: false, error: 'Project not found' };
+      return { success: false, error: "Project not found" };
     }
 
-    const oldStatus = project.metadata && typeof project.metadata === 'object' && 'status' in (project.metadata as Record<string, unknown>)
-      ? (project.metadata as Record<string, unknown>).status as string
-      : undefined;
+    const oldStatus =
+      project.metadata &&
+      typeof project.metadata === "object" &&
+      "status" in (project.metadata as Record<string, unknown>)
+        ? ((project.metadata as Record<string, unknown>).status as string)
+        : undefined;
 
     const metadata = (project.metadata || {}) as Record<string, unknown>;
     metadata.status = status;
 
     const { error } = await supabase
-      .from('projects')
+      .from("projects")
       .update({
-        status: status as 'active' | 'paused' | 'completed' | 'archived',
+        status: status as "active" | "paused" | "completed" | "archived",
         metadata,
         updated_at: new Date().toISOString(),
       } as any)
-      .eq('slug', slug);
+      .eq("slug", slug);
 
     if (error) throw error;
 
     await logAuditEvent({
-      action: 'STATUS_CHANGE',
-      resource: 'projects',
+      action: "STATUS_CHANGE",
+      resource: "projects",
       resourceId: slug,
       details: { oldStatus, newStatus: status },
     });
 
-    revalidatePath('/admin/projects');
+    revalidatePath("/admin/projects");
     revalidatePath(`/admin/projects/${slug}`);
 
     return { success: true };
   } catch (error) {
-    console.error('[UPDATE PROJECT STATUS ERROR]', error);
-    return { success: false, error: 'Failed to update status' };
+    console.error("[UPDATE PROJECT STATUS ERROR]", error);
+    return { success: false, error: "Failed to update status" };
   }
 }
 
 /**
  * Update project progress (0-100)
  */
-export async function updateProjectProgress(
-  slug: string,
-  progress: number
-) {
+export async function updateProjectProgress(slug: string, progress: number) {
   try {
     const validProgress = Math.max(0, Math.min(100, progress));
 
     const supabase = getAdminClient() as any;
 
     const { data: project } = await supabase
-      .from('projects')
-      .select('id, metadata')
-      .eq('slug', slug)
+      .from("projects")
+      .select("id, metadata")
+      .eq("slug", slug)
       .maybeSingle();
 
     if (!project) {
-      return { success: false, error: 'Project not found' };
+      return { success: false, error: "Project not found" };
     }
 
     const metadata = (project.metadata || {}) as Record<string, unknown>;
     metadata.progress = validProgress;
 
     const { error } = await supabase
-      .from('projects')
+      .from("projects")
       .update({
         metadata,
         updated_at: new Date().toISOString(),
       } as any)
-      .eq('slug', slug);
+      .eq("slug", slug);
 
     if (error) throw error;
 
     await logAuditEvent({
-      action: 'UPDATE',
-      resource: 'projects',
+      action: "UPDATE",
+      resource: "projects",
       resourceId: slug,
-      details: { field: 'progress', value: validProgress },
+      details: { field: "progress", value: validProgress },
     });
 
-    revalidatePath('/admin/projects');
+    revalidatePath("/admin/projects");
     revalidatePath(`/admin/projects/${slug}`);
 
     return { success: true };
   } catch (error) {
-    console.error('[UPDATE PROJECT PROGRESS ERROR]', error);
-    return { success: false, error: 'Failed to update progress' };
+    console.error("[UPDATE PROJECT PROGRESS ERROR]", error);
+    return { success: false, error: "Failed to update progress" };
   }
 }
 
@@ -158,7 +157,7 @@ export async function updateProjectProgress(
  */
 export async function updateProjectDetails(
   slug: string,
-  data: z.infer<typeof projectUpdateSchema>
+  data: z.infer<typeof projectUpdateSchema>,
 ) {
   try {
     const validated = projectUpdateSchema.parse(data);
@@ -166,13 +165,13 @@ export async function updateProjectDetails(
     const supabase = getAdminClient() as any;
 
     const { data: project } = await supabase
-      .from('projects')
-      .select('id, metadata')
-      .eq('slug', slug)
+      .from("projects")
+      .select("id, metadata")
+      .eq("slug", slug)
       .maybeSingle();
 
     if (!project) {
-      return { success: false, error: 'Project not found' };
+      return { success: false, error: "Project not found" };
     }
 
     // Build column updates
@@ -181,7 +180,11 @@ export async function updateProjectDetails(
     };
 
     if (validated.status) {
-      updates.status = validated.status as 'active' | 'paused' | 'completed' | 'archived';
+      updates.status = validated.status as
+        | "active"
+        | "paused"
+        | "completed"
+        | "archived";
     }
     if (validated.deadline) {
       updates.end_date = validated.deadline;
@@ -195,37 +198,41 @@ export async function updateProjectDetails(
 
     // Store extra fields in metadata
     const metadata = (project.metadata || {}) as Record<string, unknown>;
-    if (validated.progress !== undefined) metadata.progress = validated.progress;
-    if (validated.paidAmount !== undefined) metadata.paid_amount = validated.paidAmount;
-    if (validated.assignedPartner) metadata.assigned_partner = validated.assignedPartner;
-    if (validated.assignedEmployees) metadata.assigned_employees = validated.assignedEmployees;
+    if (validated.progress !== undefined)
+      metadata.progress = validated.progress;
+    if (validated.paidAmount !== undefined)
+      metadata.paid_amount = validated.paidAmount;
+    if (validated.assignedPartner)
+      metadata.assigned_partner = validated.assignedPartner;
+    if (validated.assignedEmployees)
+      metadata.assigned_employees = validated.assignedEmployees;
 
     updates.metadata = metadata;
 
     const { error } = await supabase
-      .from('projects')
+      .from("projects")
       .update(updates as any)
-      .eq('slug', slug);
+      .eq("slug", slug);
 
     if (error) throw error;
 
     await logAuditEvent({
-      action: 'UPDATE',
-      resource: 'projects',
+      action: "UPDATE",
+      resource: "projects",
       resourceId: slug,
       details: validated,
     });
 
-    revalidatePath('/admin/projects');
+    revalidatePath("/admin/projects");
     revalidatePath(`/admin/projects/${slug}`);
 
     return { success: true };
   } catch (error) {
-    console.error('[UPDATE PROJECT DETAILS ERROR]', error);
+    console.error("[UPDATE PROJECT DETAILS ERROR]", error);
     if (error instanceof z.ZodError) {
       return { success: false, error: error.issues[0].message };
     }
-    return { success: false, error: 'Failed to update project' };
+    return { success: false, error: "Failed to update project" };
   }
 }
 
@@ -234,7 +241,7 @@ export async function updateProjectDetails(
  */
 export async function addMilestone(
   slug: string,
-  milestone: Omit<z.infer<typeof milestoneSchema>, 'id'>
+  milestone: Omit<z.infer<typeof milestoneSchema>, "id">,
 ) {
   try {
     const validated = milestoneSchema.parse(milestone);
@@ -242,29 +249,29 @@ export async function addMilestone(
 
     const projectId = await getProjectId(slug);
     if (!projectId) {
-      return { success: false, error: 'Project not found' };
+      return { success: false, error: "Project not found" };
     }
 
     const { data: newMilestone, error } = await supabase
-      .from('milestones')
+      .from("milestones")
       .insert({
         project_id: projectId,
         title: validated.title,
         description: validated.description || null,
         due_date: validated.due_date,
-        status: validated.status || 'pending',
+        status: validated.status || "pending",
         deliverables: validated.deliverables || null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       } as any)
-      .select('*')
+      .select("*")
       .single();
 
     if (error) throw error;
 
     await logAuditEvent({
-      action: 'CREATE',
-      resource: 'projects',
+      action: "CREATE",
+      resource: "projects",
       resourceId: slug,
       details: { milestone: newMilestone.title },
     });
@@ -273,8 +280,8 @@ export async function addMilestone(
 
     return { success: true, milestone: newMilestone };
   } catch (error) {
-    console.error('[ADD MILESTONE ERROR]', error);
-    return { success: false, error: 'Failed to add milestone' };
+    console.error("[ADD MILESTONE ERROR]", error);
+    return { success: false, error: "Failed to add milestone" };
   }
 }
 
@@ -284,58 +291,59 @@ export async function addMilestone(
 export async function updateMilestoneStatus(
   slug: string,
   milestoneId: string,
-  status: string
+  status: string,
 ) {
   try {
     const supabase = getAdminClient() as any;
 
     const projectId = await getProjectId(slug);
     if (!projectId) {
-      return { success: false, error: 'Project not found' };
+      return { success: false, error: "Project not found" };
     }
 
     const { error } = await supabase
-      .from('milestones')
+      .from("milestones")
       .update({
-        status: status as 'pending' | 'in_progress' | 'completed' | 'blocked',
+        status: status as "pending" | "in_progress" | "completed" | "blocked",
         updated_at: new Date().toISOString(),
       } as any)
-      .eq('id', milestoneId)
-      .eq('project_id', projectId);
+      .eq("id", milestoneId)
+      .eq("project_id", projectId);
 
     if (error) throw error;
 
     // Calculate progress based on completed milestones
     const { data: milestones } = await supabase
-      .from('milestones')
-      .select('status')
-      .eq('project_id', projectId);
+      .from("milestones")
+      .select("status")
+      .eq("project_id", projectId);
 
     const total = milestones?.length || 0;
-    const completed = milestones?.filter((m: any) => m.status === 'completed').length || 0;
+    const completed =
+      milestones?.filter((m: any) => m.status === "completed").length || 0;
     const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
 
     // Update project progress in metadata
     const { data: project } = await supabase
-      .from('projects')
-      .select('metadata')
-      .eq('slug', slug)
+      .from("projects")
+      .select("metadata")
+      .eq("slug", slug)
       .maybeSingle();
 
     const metadata = (project?.metadata || {}) as Record<string, unknown>;
     metadata.progress = progress;
 
     await supabase
-      .from('projects')
+      .from("projects")
       .update({
         metadata,
         updated_at: new Date().toISOString(),
       } as any)
-      .eq('slug', slug);
+      .eq("slug", slug);
 
     await logAuditEvent({
-      action: 'STATUS_CHANGE',
-      resource: 'projects',
+      action: "STATUS_CHANGE",
+      resource: "projects",
       resourceId: slug,
       details: { milestoneId, status },
     });
@@ -344,8 +352,8 @@ export async function updateMilestoneStatus(
 
     return { success: true, progress };
   } catch (error) {
-    console.error('[UPDATE MILESTONE STATUS ERROR]', error);
-    return { success: false, error: 'Failed to update milestone' };
+    console.error("[UPDATE MILESTONE STATUS ERROR]", error);
+    return { success: false, error: "Failed to update milestone" };
   }
 }
 
@@ -358,20 +366,20 @@ export async function deleteMilestone(slug: string, milestoneId: string) {
 
     const projectId = await getProjectId(slug);
     if (!projectId) {
-      return { success: false, error: 'Project not found' };
+      return { success: false, error: "Project not found" };
     }
 
     const { error } = await supabase
-      .from('milestones')
+      .from("milestones")
       .delete()
-      .eq('id', milestoneId)
-      .eq('project_id', projectId);
+      .eq("id", milestoneId)
+      .eq("project_id", projectId);
 
     if (error) throw error;
 
     await logAuditEvent({
-      action: 'DELETE',
-      resource: 'projects',
+      action: "DELETE",
+      resource: "projects",
       resourceId: slug,
       details: { milestoneId },
     });
@@ -380,7 +388,7 @@ export async function deleteMilestone(slug: string, milestoneId: string) {
 
     return { success: true };
   } catch (error) {
-    console.error('[DELETE MILESTONE ERROR]', error);
-    return { success: false, error: 'Failed to delete milestone' };
+    console.error("[DELETE MILESTONE ERROR]", error);
+    return { success: false, error: "Failed to delete milestone" };
   }
 }

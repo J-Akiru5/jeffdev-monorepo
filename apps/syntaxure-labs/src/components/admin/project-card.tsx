@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Project Card Component
@@ -6,10 +6,10 @@
  * Client component for project list item with interactive status selector.
  */
 
-import Link from 'next/link';
-import { ProgressBar } from '@/components/admin/progress-bar';
-import { ProjectStatusSelector } from '@/components/admin/project-status-selector';
-import type { FirestoreProject, ProjectMilestone } from '@/types/supabase';
+import Link from "next/link";
+import { ProgressBar } from "@/components/admin/progress-bar";
+import { ProjectStatusSelector } from "@/components/admin/project-status-selector";
+import type { FirestoreProject, ProjectMilestone } from "@/types/supabase";
 
 interface ProjectCardProps {
   project: FirestoreProject;
@@ -32,7 +32,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
             <div onClick={(e) => e.stopPropagation()}>
               <ProjectStatusSelector
                 slug={project.slug}
-                currentStatus={project.status || 'pending'}
+                currentStatus={project.status || "pending"}
               />
             </div>
           </div>
@@ -40,7 +40,9 @@ export function ProjectCard({ project }: ProjectCardProps) {
             {project.client} • {project.category}
           </p>
           {project.refNo && (
-            <p className="mt-1 font-mono text-xs text-white/30">{project.refNo}</p>
+            <p className="mt-1 font-mono text-xs text-white/30">
+              {project.refNo}
+            </p>
           )}
         </div>
 
@@ -58,11 +60,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
               <div
                 key={m.id}
                 className={`h-2 w-2 rounded-full ${
-                  m.status === 'completed'
-                    ? 'bg-emerald-400'
-                    : m.status === 'in-progress'
-                    ? 'bg-yellow-400'
-                    : 'bg-white/20'
+                  m.status === "completed"
+                    ? "bg-emerald-400"
+                    : m.status === "in-progress"
+                      ? "bg-yellow-400"
+                      : "bg-white/20"
                 }`}
               />
             ))}

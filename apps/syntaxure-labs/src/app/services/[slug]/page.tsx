@@ -1,15 +1,15 @@
-import { createElement } from 'react';
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { ArrowLeft, ArrowUpRight, Check } from 'lucide-react';
-import { Header } from '@/components/layout/header';
-import { Footer } from '@/components/layout/footer';
-import { CTA } from '@/components/sections/cta';
-import { ServiceInvestmentCard } from '@/components/services/service-investment-card';
-import { getServiceBySlug, getServices } from '@/lib/data';
-import { getIcon } from '@/lib/icons';
-import { services as staticServices } from '@/data/services';
-import type { Metadata } from 'next';
+import { createElement } from "react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ArrowLeft, ArrowUpRight, Check } from "lucide-react";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { CTASection } from "@/components/sections/cta-section";
+import { ServiceInvestmentCard } from "@/components/services/service-investment-card";
+import { getServiceBySlug, getServices } from "@/lib/data";
+import { getIcon } from "@/lib/icons";
+import { services as staticServices } from "@/data/services";
+import type { Metadata } from "next";
 
 /**
  * Service Detail Page
@@ -36,7 +36,7 @@ export async function generateMetadata({
   const service = await getServiceBySlug(slug);
 
   if (!service) {
-    return { title: 'Service Not Found' };
+    return { title: "Service Not Found" };
   }
 
   return {
@@ -96,7 +96,9 @@ export default async function ServicePage({ params }: ServicePageProps) {
               {/* Left: Content */}
               <div>
                 <div className="inline-flex rounded-md border border-white/10 bg-white/5 p-3">
-                  {createElement(getIcon(activeService.icon), { className: 'h-8 w-8 text-cyan-400' })}
+                  {createElement(getIcon(activeService.icon), {
+                    className: "h-8 w-8 text-cyan-400",
+                  })}
                 </div>
 
                 <h1 className="mt-6 text-4xl font-bold tracking-tight text-white md:text-5xl">
@@ -143,7 +145,9 @@ export default async function ServicePage({ params }: ServicePageProps) {
         {/* Features Section */}
         <section className="px-6 py-16 lg:px-8">
           <div className="mx-auto max-w-7xl">
-            <h2 className="text-2xl font-bold text-white">What&apos;s Included</h2>
+            <h2 className="text-2xl font-bold text-white">
+              What&apos;s Included
+            </h2>
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {activeService.features.map((feature) => (
                 <div
@@ -164,7 +168,8 @@ export default async function ServicePage({ params }: ServicePageProps) {
             <h2 className="text-2xl font-bold text-white">Other Services</h2>
             <div className="mt-8 grid gap-6 md:grid-cols-2">
               {otherServices.map((s) => {
-                const otherIconComponent = typeof s.icon === 'string' ? getIcon(s.icon) : s.icon;
+                const otherIconComponent =
+                  typeof s.icon === "string" ? getIcon(s.icon) : s.icon;
                 return (
                   <Link
                     key={s.slug}
@@ -172,11 +177,15 @@ export default async function ServicePage({ params }: ServicePageProps) {
                     className="group flex items-center gap-4 rounded-md border border-white/[0.06] bg-white/[0.02] p-6 transition-all hover:border-white/[0.12] hover:bg-white/[0.04]"
                   >
                     <div className="rounded-md border border-white/10 bg-white/5 p-2">
-                      {createElement(otherIconComponent, { className: 'h-5 w-5 text-cyan-400' })}
+                      {createElement(otherIconComponent, {
+                        className: "h-5 w-5 text-cyan-400",
+                      })}
                     </div>
                     <div className="flex-1">
                       <div className="font-semibold text-white">{s.title}</div>
-                      <div className="mt-0.5 text-sm text-white/50">{s.tagline}</div>
+                      <div className="mt-0.5 text-sm text-white/50">
+                        {s.tagline}
+                      </div>
                     </div>
                     <ArrowUpRight className="h-4 w-4 text-white/30 transition-colors group-hover:text-white" />
                   </Link>
@@ -186,7 +195,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
           </div>
         </section>
 
-        <CTA />
+        <CTASection />
       </main>
       <Footer />
     </>

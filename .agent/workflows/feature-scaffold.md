@@ -31,4 +31,4 @@ Step 4: The Quality Gate
 
 Verify that Editorial New is used for headings and JetBrains Mono for technical data.
 
-Run a check to ensure no NEXT_PUBLIC_ keys are exposed.
+Run a check to ensure no NEXT*PUBLIC* keys are exposed.

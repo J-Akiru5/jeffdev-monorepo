@@ -242,6 +242,7 @@ Developer types in IDE
   - Output: full skill content (procedural guide, code examples) from `skillsContent` field on rules
   - Fallback lookup: by ObjectId, name, or regex name match
 - [x] Modify `get_arch_rules` response shape:
+
   ```json
   {
     "rules": [
@@ -262,6 +263,7 @@ Developer types in IDE
   - `rules` array: high-priority rules with full content
   - `skills` array: metadata only (name + 1-line summary), no full content
   - JSON format returns structured `rules` + `skills` + `meta`; markdown shows skills section with `get_skill` usage hint
+
 - [x] Add `?detail=full` query param to REST rule endpoints (`GET /api/v1/rules` + `GET /api/v1/rules/:id`)
 - [x] Add deduplication engine
   - Jaccard similarity between normalized rule content; merge if similarity > 0.8 or substring overlap

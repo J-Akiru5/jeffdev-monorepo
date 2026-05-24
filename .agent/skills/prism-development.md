@@ -22,16 +22,19 @@ IDE Tools (Cursor, Windsurf, VS Code, Claude)
 ## 📱 App-by-App Architecture
 
 ### 1. **prism-dashboard** (Next.js 16 + Clerk + Cosmos DB)
+
 **Port:** 3001  
 **Purpose:** SaaS platform where developers manage architectural rules and context
 
 #### Key Features
+
 - **Brand Wizard** (5-step form) → Export as `.cursorrules`
 - **Video Upload** → Auto-extract rules via Azure OpenAI
 - **AI Component Generator** → Generate code using Gemini
 - **Billing** → Stripe/PayPal integration with subscription tiers
 
 #### Directory Structure
+
 ```
 apps/prism-dashboard/src/
 ├── app/
@@ -59,6 +62,7 @@ apps/prism-dashboard/src/
 #### Key Patterns
 
 **Cosmos DB Singleton:**
+
 ```typescript
 // lib/cosmos.ts
 import { CosmosClient } from "@azure/cosmos";
@@ -66,12 +70,12 @@ let container: Container | null = null;
 
 export async function getPrismContainer() {
   if (container) return container;
-  
+
   const client = new CosmosClient({
     endpoint: process.env.COSMOS_ENDPOINT!,
     key: process.env.COSMOS_KEY!,
   });
-  
+
   const db = client.database(process.env.COSMOS_DB!);
   container = db.container("rules");
   return container;
@@ -79,9 +83,10 @@ export async function getPrismContainer() {
 ```
 
 **Server Actions (Video Upload → Rule Extraction):**
+
 ```typescript
 // app/actions/extract-rules.ts
-'use server';
+"use server";
 
 import { z } from "zod";
 import { OpenAIClient } from "@azure/openai";
@@ -93,21 +98,21 @@ const schema = z.object({
 
 export async function extractRulesFromVideo(input: unknown) {
   const { videoUrl, projectId } = schema.parse(input);
-  
+
   // 1. Fetch video transcript via Mux
   const transcript = await getTranscript(videoUrl);
-  
+
   // 2. Generate embeddings via Azure OpenAI
   const client = new OpenAIClient({
     endpoint: process.env.AZURE_OPENAI_ENDPOINT,
     apiKey: process.env.AZURE_OPENAI_KEY,
   });
-  
+
   const embedding = await client.embeddings.create({
     model: "text-embedding-3-small",
     input: transcript,
   });
-  
+
   // 3. Store in Cosmos with embedding vector
   const container = await getPrismContainer();
   await container.items.create({
@@ -117,12 +122,13 @@ export async function extractRulesFromVideo(input: unknown) {
     embedding: embedding.data[0].embedding,
     createdAt: new Date().toISOString(),
   });
-  
+
   return { success: true };
 }
 ```
 
 **Clerk Authentication with Role Sync:**
+
 ```typescript
 // lib/clerk.ts
 import { auth } from "@clerk/nextjs/server";
@@ -130,37 +136,40 @@ import { auth } from "@clerk/nextjs/server";
 export async function requireAuth(roles?: string[]) {
   const { userId } = await auth();
   if (!userId) throw new Error("Unauthorized");
-  
+
   const container = await getPrismContainer();
-  const user = await container
-    .items.query({
+  const user = await container.items
+    .query({
       query: "SELECT * FROM users WHERE id = @userId",
       parameters: [{ name: "@userId", value: userId }],
     })
     .fetchAll();
-  
+
   if (roles && !roles.includes(user[0]?.role)) {
     throw new Error("Forbidden");
   }
-  
+
   return user[0];
 }
 ```
 
 #### Subscription Tiers
-| Tier | Price | Rules | Videos | API Calls/mo |
-|------|-------|-------|--------|-------------|
-| Free | $0 | 5 | 1 | 1,000 |
-| Pro | $29/mo | Unlimited | 20 | 100,000 |
-| Team | $99/mo | Unlimited | Unlimited | 1M |
-| Enterprise | Custom | All | All | All |
+
+| Tier       | Price  | Rules     | Videos    | API Calls/mo |
+| ---------- | ------ | --------- | --------- | ------------ |
+| Free       | $0     | 5         | 1         | 1,000        |
+| Pro        | $29/mo | Unlimited | 20        | 100,000      |
+| Team       | $99/mo | Unlimited | Unlimited | 1M           |
+| Enterprise | Custom | All       | All       | All          |
 
 ---
 
 ### 2. **prism-mcp-server** (Node.js 20 + MCP SDK)
+
 **Purpose:** Model Context Protocol server that serves rules to IDE plugins
 
 #### Directory Structure
+
 ```
 apps/prism-mcp-server/src/
 ├── server.ts                # MCP transport setup
@@ -180,6 +189,7 @@ apps/prism-mcp-server/src/
 #### Key Patterns
 
 **MCP Server Setup:**
+
 ```typescript
 // server.ts
 import Anthropic from "@anthropic-sdk/sdk";
@@ -209,14 +219,15 @@ await server.connect(transport);
 ```
 
 **Semantic Search (Vector Embeddings):**
+
 ```typescript
 // services/embeddings.ts
 export async function semanticSearch(query: string, limit = 5) {
   const container = await getPrismContainer();
-  
+
   // 1. Get embedding for query
   const queryEmbedding = await generateEmbedding(query);
-  
+
   // 2. Use Cosmos vector search
   const results = await container.items
     .query({
@@ -233,40 +244,41 @@ export async function semanticSearch(query: string, limit = 5) {
       ],
     })
     .fetchAll();
-  
+
   return results.resources;
 }
 ```
 
 **Code Pattern Validation:**
+
 ```typescript
 // services/code-validator.ts
 export function validateCode(code: string, rule: Rule): ValidationResult {
   const patterns = rule.patterns || [];
-  
+
   const issues: ValidationIssue[] = [];
-  
+
   for (const pattern of patterns) {
-    const regex = new RegExp(pattern.regex, 'g');
+    const regex = new RegExp(pattern.regex, "g");
     const matches = code.match(regex);
-    
+
     if (pattern.shouldMatch && !matches) {
       issues.push({
-        type: 'error',
+        type: "error",
         message: `Code should follow pattern: ${pattern.description}`,
         pattern: pattern.regex,
       });
     }
-    
+
     if (pattern.shouldNotMatch && matches) {
       issues.push({
-        type: 'error',
+        type: "error",
         message: `Code violates pattern: ${pattern.description}`,
         pattern: pattern.regex,
       });
     }
   }
-  
+
   return {
     isValid: issues.length === 0,
     issues,
@@ -277,10 +289,12 @@ export function validateCode(code: string, rule: Rule): ValidationResult {
 ---
 
 ### 3. **prism-docs** (Nextra 4)
+
 **Port:** 3002  
 **Purpose:** Multi-language documentation site
 
 #### Structure
+
 ```
 apps/prism-docs/
 ├── content/
@@ -298,6 +312,7 @@ apps/prism-docs/
 ```
 
 #### Key Features
+
 - Multi-language support (en-US, ja, tl)
 - API documentation
 - Interactive examples
@@ -306,16 +321,19 @@ apps/prism-docs/
 ---
 
 ### 4. **prism-exercise** (Next.js 16 + Supabase)
+
 **Port:** 3003  
 **Purpose:** Interactive coding practice platform
 
 #### Key Features
+
 - **Speech Recognition** → Voice commands for exercises
 - **Real-time Sync** → Supabase Realtime
 - **PWA Support** → Offline mode
 - **Video Integration** → Embedded lessons via Mux
 
 #### Database (Supabase/PostgreSQL)
+
 ```sql
 CREATE TABLE exercises (
   id UUID PRIMARY KEY,
@@ -343,10 +361,12 @@ CREATE TABLE submissions (
 ---
 
 ### 5. **prism-admin** (Next.js 16 + Firebase)
+
 **Port:** 3004  
 **Purpose:** System administration dashboard
 
 #### Key Pages
+
 - `/admin/bootstrap` → Initialize system
 - `/admin/users` → User management
 - `/admin/rules` → Rule library curation
@@ -365,19 +385,19 @@ export const RuleSchema = z.object({
   id: z.string(),
   projectId: z.string(),
   category: z.enum([
-    'architecture',
-    'styling',
-    'security',
-    'performance',
-    'testing', // NEW
+    "architecture",
+    "styling",
+    "security",
+    "performance",
+    "testing", // NEW
   ]),
   content: z.string(),
   createdAt: z.string().datetime(),
 });
 
 // apps/prism-dashboard/app/actions/create-rule.ts
-'use server';
-import { RuleSchema } from '@jeffdev/db';
+("use server");
+import { RuleSchema } from "@jeffdev/db";
 
 export async function createRule(data: unknown) {
   const rule = RuleSchema.parse(data);
@@ -399,7 +419,7 @@ npm run build
 
 # Test connection from IDE
 # In Cursor/Windsurf settings:
-# "MCP Servers": [{ 
+# "MCP Servers": [{
 #   "name": "prism",
 #   "command": "node /path/to/server.js"
 # }]
@@ -409,28 +429,30 @@ npm run build
 
 ```typescript
 // apps/prism-dashboard/app/actions/process-video.ts
-'use server';
+"use server";
 
-import { muxClient } from '@/lib/mux';
-import { openaiClient } from '@/lib/openai';
+import { muxClient } from "@/lib/mux";
+import { openaiClient } from "@/lib/openai";
 
 export async function processVideo(videoId: string) {
   // 1. Get transcript from Mux
   const transcript = await muxClient.video.getTranscript(videoId);
-  
+
   // 2. Extract key concepts via GPT
   const completion = await openaiClient.chat.completions.create({
-    model: 'gpt-4-turbo',
-    messages: [{
-      role: 'user',
-      content: `Extract architectural rules from this transcript:\n\n${transcript}`,
-    }],
+    model: "gpt-4-turbo",
+    messages: [
+      {
+        role: "user",
+        content: `Extract architectural rules from this transcript:\n\n${transcript}`,
+      },
+    ],
   });
-  
+
   // 3. Parse rules and store
   const rules = parseRules(completion.choices[0].message.content);
   const container = await getPrismContainer();
-  
+
   for (const rule of rules) {
     await container.items.create({
       ...rule,
@@ -438,7 +460,7 @@ export async function processVideo(videoId: string) {
       createdAt: new Date().toISOString(),
     });
   }
-  
+
   return rules;
 }
 ```
@@ -447,13 +469,13 @@ export async function processVideo(videoId: string) {
 
 ## 🚨 Common Issues & Fixes
 
-| Issue | Cause | Fix |
-|-------|-------|-----|
-| Cosmos connection timeout | Missing env vars | Check Doppler: `COSMOS_ENDPOINT`, `COSMOS_KEY` |
-| MCP server not responding | Stdio transport error | Check `npx prism-mcp-server` runs without error |
-| Video upload fails | Mux credentials | Verify `MUX_TOKEN_ID`, `MUX_TOKEN_SECRET` |
-| Rules not appearing in IDE | MCP handler not registered | Check `server.tools.register()` calls |
-| Embeddings mismatch | Dimension mismatch (768 vs 3072) | Ensure consistent embedding model |
+| Issue                      | Cause                            | Fix                                             |
+| -------------------------- | -------------------------------- | ----------------------------------------------- |
+| Cosmos connection timeout  | Missing env vars                 | Check Doppler: `COSMOS_ENDPOINT`, `COSMOS_KEY`  |
+| MCP server not responding  | Stdio transport error            | Check `npx prism-mcp-server` runs without error |
+| Video upload fails         | Mux credentials                  | Verify `MUX_TOKEN_ID`, `MUX_TOKEN_SECRET`       |
+| Rules not appearing in IDE | MCP handler not registered       | Check `server.tools.register()` calls           |
+| Embeddings mismatch        | Dimension mismatch (768 vs 3072) | Ensure consistent embedding model               |
 
 ---
 

@@ -105,7 +105,9 @@ function RuleCard({
         {/* Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-sm font-medium text-white truncate">{rule.name}</p>
+            <p className="text-sm font-medium text-white truncate">
+              {rule.name}
+            </p>
             <PriorityBadge priority={rule.priority} />
           </div>
           <p className="text-xs text-white/40 mt-1 truncate">
@@ -113,7 +115,8 @@ function RuleCard({
           </p>
           {rule.content && (
             <p className="text-xs text-white/25 mt-1.5 line-clamp-2 leading-relaxed">
-              {rule.content.slice(0, 120)}{rule.content.length > 120 ? "…" : ""}
+              {rule.content.slice(0, 120)}
+              {rule.content.length > 120 ? "…" : ""}
             </p>
           )}
         </div>
@@ -172,7 +175,9 @@ export function RulesList({
   };
 
   const handleToggle = (id: string, next: boolean) => {
-    setRules((prev) => prev.map((r) => (r.id === id ? { ...r, isActive: next } : r)));
+    setRules((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, isActive: next } : r)),
+    );
   };
 
   const activeCount = rules.filter((r) => r.isActive).length;

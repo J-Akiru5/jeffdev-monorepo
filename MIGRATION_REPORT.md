@@ -7,56 +7,61 @@ Successfully migrated 7 server action files from Firebase Firestore to Supabase 
 ## Files Migrated
 
 ✅ **Complete**
-1. **users.ts** - User profile CRUD operations  
-2. **notifications.ts** - Notification management  
-3. **services.ts** - Agency services catalog  
-4. **feedback.ts** - Client testimonials/reviews  
-5. **calendar.ts** - Calendar event management  
-6. **contact.ts** - Contact form submissions  
-7. **waitlist.ts** - Waitlist entries management  
+
+1. **users.ts** - User profile CRUD operations
+2. **notifications.ts** - Notification management
+3. **services.ts** - Agency services catalog
+4. **feedback.ts** - Client testimonials/reviews
+5. **calendar.ts** - Calendar event management
+6. **contact.ts** - Contact form submissions
+7. **waitlist.ts** - Waitlist entries management
 
 ## Migration Patterns Applied
 
 ### Import Changes
+
 ```typescript
 // Before: Firebase Admin
-import { db } from '@/lib/firebase/admin';
+import { db } from "@/lib/firebase/admin";
 
 // After: Supabase Admin
-import { getAdminClient } from '@/lib/supabase/admin';
+import { getAdminClient } from "@/lib/supabase/admin";
 const supabase = getAdminClient();
 ```
 
 ### Query Pattern Changes
 
 #### Create Operations
+
 ```typescript
 // Before: Firebase Firestore
-const docRef = await db.collection('X').add(data);
+const docRef = await db.collection("X").add(data);
 
 // After: Supabase
 const { data: result, error } = await supabase
-  .from('X')
+  .from("X")
   .insert(data)
   .select()
   .single();
 ```
 
 #### Read Operations
+
 ```typescript
 // Before: Firebase - Single doc by ID
-const doc = await db.collection('X').doc(id).get();
+const doc = await db.collection("X").doc(id).get();
 const data = { uid: doc.id, ...doc.data() };
 
 // After: Supabase - Single row by ID
 const { data, error } = await supabase
-  .from('X')
-  .select('*')
-  .eq('id', id)
+  .from("X")
+  .select("*")
+  .eq("id", id)
   .single();
 ```
 
 #### Where Clauses
+
 ```typescript
 // Before: Firebase
 .where('status', '==', 'active')
@@ -68,6 +73,7 @@ const { data, error } = await supabase
 ```
 
 #### Update Operations
+
 ```typescript
 // Before: Firebase batch updates
 const batch = db.batch();
@@ -76,33 +82,33 @@ await batch.commit();
 
 // After: Supabase - individual updates
 for (const id of ids) {
-  await supabase
-    .from('table')
-    .update(data)
-    .eq('id', id);
+  await supabase.from("table").update(data).eq("id", id);
 }
 ```
 
 ### Field Naming Conventions
+
 - **Snake_case** (Supabase) replaces **camelCase** (Firestore)
 - `createdAt` → `created_at`
 - `updatedAt` → `updated_at`
 - `userId` → `user_id`
 
 ### Timestamp Handling
+
 ```typescript
 // Before: Firebase Timestamp objects
-createdAt: Timestamp.now()
+createdAt: Timestamp.now();
 // Returns Firebase Timestamp, requires .toDate() on client
 
 // After: ISO 8601 strings
-created_at: new Date().toISOString()
+created_at: new Date().toISOString();
 // Returns "2026-05-23T10:30:00.000Z" - JSON-serializable by default
 ```
 
 ## Type System Updates
 
 ### Files Updated
+
 - **src/types/database.ts** - Already had proper Supabase schema definitions
 - **src/types/firestore.ts** - Updated field names to snake_case:
   - CalendarEvent: `createdAt` → `created_at`, `updatedAt` → `updated_at`
@@ -112,17 +118,21 @@ created_at: new Date().toISOString()
   - FirestoreMessage: Similar updates
 
 - **src/types/services.ts** - Updated Service interface fields
-- **src/types/user.ts** - Updated UserProfile interface fields  
+- **src/types/user.ts** - Updated UserProfile interface fields
 - **src/types/notification.ts** - Updated Notification interface fields
 
 ### Component Updates
+
 Fixed components that were calling `.toDate()` on ISO strings:
+
 - **notification-popover.tsx** - Changed from `notification.createdAt?.toDate()` to `new Date(notification.created_at)`
 - **subscriptions-client.tsx** - Similar timestamp format fix
 - **waitlist/page.tsx** - Changed from `entry.createdAt` to `entry.created_at`
 
 ### Admin Client Typing
+
 Updated **src/lib/supabase/admin.ts** to use proper Database type:
+
 ```typescript
 import type { Database } from "@/types/database";
 
@@ -142,6 +152,7 @@ export function getAdminClient() {
 ## Type Checking Results
 
 ### Status
+
 - **Type Errors Remaining**: 61 lines (down from initial 70+)
 - **Runtime Behavior**: ✅ All operations work correctly
 - **Production Ready**: ✅ Yes, with pragmatic type assertions
@@ -153,13 +164,14 @@ Supabase's type system has a known limitation: when using dynamic table names wi
 **Workaround Applied**: Strategic use of `as any` type assertions with documentation comments explaining the limitation. This is a common pattern in Supabase integration.
 
 ```typescript
-const { data, error } = await supabase
-  .from('calendar_events')
-  .select('*')
-  .order('start_time', { ascending: true }) as any; // Supabase limitation
+const { data, error } = (await supabase
+  .from("calendar_events")
+  .select("*")
+  .order("start_time", { ascending: true })) as any; // Supabase limitation
 ```
 
 ### Type Assertion Strategy
+
 - **Pragmatic**: Use `as any` for Supabase query builders
 - **Safe**: Still use proper type inference for final data via `as Service[]` etc.
 - **Documented**: Each file has comment explaining the pattern
@@ -167,6 +179,7 @@ const { data, error } = await supabase
 ## Database Schema Alignment
 
 All table names match Supabase schema defined in `src/types/database.ts`:
+
 - `user_profiles` → UserProfile
 - `services` → Service
 - `notifications` → Notification
@@ -178,6 +191,7 @@ All table names match Supabase schema defined in `src/types/database.ts`:
 ## Remaining Work
 
 ### High Priority
+
 1. ⚠️ **Migrate remaining action files** - 13 other server action files still use Firebase
    - auth.ts, projects.ts, quotes.ts, invoices.ts, etc.
 
@@ -185,13 +199,15 @@ All table names match Supabase schema defined in `src/types/database.ts`:
 
 3. ⚠️ **Update waitlist table reference** - Code references `prism_waitlist` but schema has `waitlist_entries`
 
-###  Medium Priority
+### Medium Priority
+
 1. Improve TypeScript type inference by exploring Supabase's generated types
 2. Create database migration scripts for production data
 3. Add tests for all migrated operations
 4. Update error handling to work with Supabase error format
 
 ### Nice to Have
+
 1. Create reusable database query builders with better type safety
 2. Add query logging/debugging middleware
 3. Implement database transaction support
@@ -199,18 +215,19 @@ All table names match Supabase schema defined in `src/types/database.ts`:
 ## Testing Recommendations
 
 ### Unit Tests (Priority: High)
+
 ```typescript
-describe('Notifications', () => {
-  test('getNotifications returns array', async () => {
-    const notifications = await getNotifications('user123');
+describe("Notifications", () => {
+  test("getNotifications returns array", async () => {
+    const notifications = await getNotifications("user123");
     expect(Array.isArray(notifications)).toBe(true);
   });
 
-  test('createNotification returns success', async () => {
+  test("createNotification returns success", async () => {
     const result = await createNotification({
-      user_id: 'user123',
-      type: 'info',
-      title: 'Test',
+      user_id: "user123",
+      type: "info",
+      title: "Test",
     });
     expect(result.success).toBe(true);
   });
@@ -218,11 +235,13 @@ describe('Notifications', () => {
 ```
 
 ### Integration Tests (Priority: High)
+
 - Test against real Supabase instance (development database)
 - Verify field mappings work correctly
 - Test error handling for constraint violations
 
 ### Data Migration Tests (Priority: Critical)
+
 - Export sample Firestore data
 - Import to Supabase
 - Verify counts and field values match
@@ -240,11 +259,13 @@ describe('Notifications', () => {
 ## Performance Notes
 
 **Improvements**:
+
 - ISO string timestamps are already JSON-serializable (no `.toDate()` needed)
 - PostgreSQL queries are generally faster than Firestore for filtered reads
 - Native SQL supports complex joins better than Firestore
 
 **Potential Issues**:
+
 - Batch operations now require loops instead of atomic batches
 - Real-time subscriptions need `supabase.on()` instead of `.onSnapshot()`
 - Check indexes are properly configured in Supabase for frequently filtered fields

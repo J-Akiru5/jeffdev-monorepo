@@ -1,8 +1,8 @@
-import * as vscode from 'vscode';
-import { McpClient, Rule } from './mcpClient';
-import { PrismStatusBar } from './statusBar';
-import { DashboardTreeProvider, DashboardTreeItem } from './treeProvider';
-import { registerDiagnostics, clearDiagnostics } from './diagnostics';
+import * as vscode from "vscode";
+import { McpClient, Rule } from "./mcpClient";
+import { PrismStatusBar } from "./statusBar";
+import { DashboardTreeProvider, DashboardTreeItem } from "./treeProvider";
+import { registerDiagnostics, clearDiagnostics } from "./diagnostics";
 
 let client: McpClient;
 let statusBar: PrismStatusBar;
@@ -13,49 +13,57 @@ export function activate(context: vscode.ExtensionContext): void {
   statusBar = new PrismStatusBar();
   treeProvider = new DashboardTreeProvider();
 
-  const config = vscode.workspace.getConfiguration('prism');
+  const config = vscode.workspace.getConfiguration("prism");
 
-  vscode.window.registerTreeDataProvider('prism-rules', treeProvider);
+  vscode.window.registerTreeDataProvider("prism-rules", treeProvider);
 
   context.subscriptions.push(
     statusBar,
-    vscode.commands.registerCommand('prism.connect', connect),
-    vscode.commands.registerCommand('prism.disconnect', disconnect),
-    vscode.commands.registerCommand('prism.showRules', showRules),
-    vscode.commands.registerCommand('prism.refreshRules', refreshRules),
-    vscode.commands.registerCommand('prism.login', login),
-    vscode.commands.registerCommand('prism.createRule', createRule),
-    vscode.commands.registerCommand('prism.deleteRule', deleteRule),
-    vscode.commands.registerCommand('prism.createProject', createProject),
-    vscode.commands.registerCommand('prism.listProjects', listProjects),
-    vscode.commands.registerCommand('prism.deleteProject', deleteProject),
-    vscode.commands.registerCommand('prism.createBrand', createBrand),
-    vscode.commands.registerCommand('prism.listBrands', listBrands),
-    vscode.commands.registerCommand('prism.exportBrand', exportBrand),
-    vscode.commands.registerCommand('prism.deleteBrand', deleteBrand),
-    vscode.commands.registerCommand('prism.generate', generate),
-    vscode.commands.registerCommand('prism.marketplace', marketplace),
-    vscode.commands.registerCommand('prism.showAnalytics', showAnalytics),
-    vscode.commands.registerCommand('prism.manageApiKeys', manageApiKeys),
-    vscode.commands.registerCommand('prism.refreshTree', refreshAll),
-    vscode.commands.registerCommand('prism.applyFix', applyFix),
-    vscode.commands.registerCommand('prism.showRuleDetail', showRuleDetail),
+    vscode.commands.registerCommand("prism.connect", connect),
+    vscode.commands.registerCommand("prism.disconnect", disconnect),
+    vscode.commands.registerCommand("prism.showRules", showRules),
+    vscode.commands.registerCommand("prism.refreshRules", refreshRules),
+    vscode.commands.registerCommand("prism.login", login),
+    vscode.commands.registerCommand("prism.createRule", createRule),
+    vscode.commands.registerCommand("prism.deleteRule", deleteRule),
+    vscode.commands.registerCommand("prism.createProject", createProject),
+    vscode.commands.registerCommand("prism.listProjects", listProjects),
+    vscode.commands.registerCommand("prism.deleteProject", deleteProject),
+    vscode.commands.registerCommand("prism.createBrand", createBrand),
+    vscode.commands.registerCommand("prism.listBrands", listBrands),
+    vscode.commands.registerCommand("prism.exportBrand", exportBrand),
+    vscode.commands.registerCommand("prism.deleteBrand", deleteBrand),
+    vscode.commands.registerCommand("prism.generate", generate),
+    vscode.commands.registerCommand("prism.marketplace", marketplace),
+    vscode.commands.registerCommand("prism.showAnalytics", showAnalytics),
+    vscode.commands.registerCommand("prism.manageApiKeys", manageApiKeys),
+    vscode.commands.registerCommand("prism.refreshTree", refreshAll),
+    vscode.commands.registerCommand("prism.applyFix", applyFix),
+    vscode.commands.registerCommand("prism.showRuleDetail", showRuleDetail),
     registerDiagnostics(client),
     vscode.workspace.onDidChangeConfiguration((e) => {
-      if (e.affectsConfiguration('prism') && config.get<boolean>('autoConnect', true)) {
+      if (
+        e.affectsConfiguration("prism") &&
+        config.get<boolean>("autoConnect", true)
+      ) {
         connect();
       }
-    })
+    }),
   );
 
   client.onRulesChanged = () => {
     if (!client.isConnected) {
       statusBar.setDisconnected();
-      treeProvider.refresh({ projects: [], brands: [], components: [], rules: [] });
+      treeProvider.refresh({
+        projects: [],
+        brands: [],
+        components: [],
+        rules: [],
+      });
     }
   };
 
-  if (config.get<boolean>('autoConnect', true)) {
+  if (config.get<boolean>("autoConnect", true)) {
     connect();
   }
 }
@@ -66,10 +74,10 @@ export function deactivate(): void {
 }
 
 function getConfig() {
-  const config = vscode.workspace.getConfiguration('prism');
+  const config = vscode.workspace.getConfiguration("prism");
   return {
-    token: config.get<string>('token') || process.env.PRISM_TOKEN || '',
-    apiUrl: config.get<string>('apiUrl') || 'https://prism.jeffdev.studio',
+    token: config.get<string>("token") || process.env.PRISM_TOKEN || "",
+    apiUrl: config.get<string>("apiUrl") || "https://prism.jeffdev.studio",
   };
 }
 
@@ -77,63 +85,80 @@ async function apiGet<T>(path: string): Promise<T | null> {
   const { token, apiUrl } = getConfig();
   try {
     const res = await fetch(`${apiUrl}${path}`, {
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
     });
     const json = await res.json();
     return json.data || json;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
-async function apiPost(path: string, body: unknown): Promise<{ error?: string } | null> {
+async function apiPost(
+  path: string,
+  body: unknown,
+): Promise<{ error?: string } | null> {
   const { token, apiUrl } = getConfig();
   try {
     const res = await fetch(`${apiUrl}${path}`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify(body),
     });
     return await res.json();
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 async function apiDelete(path: string): Promise<boolean> {
   const { token, apiUrl } = getConfig();
   try {
     const res = await fetch(`${apiUrl}${path}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` },
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
     });
     return res.ok;
-  } catch { return false; }
+  } catch {
+    return false;
+  }
 }
 
 // === Connection ===
 
 async function connect(): Promise<void> {
-  const config = vscode.workspace.getConfiguration('prism');
-  let token = config.get<string>('token') || process.env.PRISM_TOKEN || '';
-  const apiUrl = config.get<string>('apiUrl') || 'https://prism.jeffdev.studio';
+  const config = vscode.workspace.getConfiguration("prism");
+  let token = config.get<string>("token") || process.env.PRISM_TOKEN || "";
+  const apiUrl = config.get<string>("apiUrl") || "https://prism.jeffdev.studio";
 
   if (!token) {
     const input = await vscode.window.showInputBox({
-      prompt: 'Enter your Prism API token',
+      prompt: "Enter your Prism API token",
       password: true,
-      placeHolder: 'Get your token at prism.jeffdev.studio/settings',
+      placeHolder: "Get your token at prism.jeffdev.studio/settings",
       ignoreFocusOut: true,
     });
     if (!input) return;
     token = input;
-    await config.update('token', token, vscode.ConfigurationTarget.Global);
+    await config.update("token", token, vscode.ConfigurationTarget.Global);
   }
 
   try {
     await client.connect(token, apiUrl);
     statusBar.setConnected(0);
     await refreshAllData();
-    vscode.window.showInformationMessage('Prism connected');
+    vscode.window.showInformationMessage("Prism connected");
   } catch (error) {
     statusBar.setError(`Connection failed: ${error}`);
-    vscode.window.showErrorMessage(`Prism connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    vscode.window.showErrorMessage(
+      `Prism connection failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
   }
 }
 
@@ -142,63 +167,112 @@ async function disconnect(): Promise<void> {
   statusBar.setDisconnected();
   treeProvider.refresh({ projects: [], brands: [], components: [], rules: [] });
   clearDiagnostics();
-  vscode.window.showInformationMessage('Prism disconnected');
+  vscode.window.showInformationMessage("Prism disconnected");
 }
 
 async function refreshAllData() {
   const [projects, brands, components, rules] = await Promise.all([
-    apiGet<Array<{ id: string; name: string; slug: string; ruleCount: number }>>('/api/v1/projects'),
-    apiGet<Array<{ id: string; slug: string; companyName: string }>>('/api/v1/brands'),
-    apiGet<Array<{ id: string; name: string }>>('/api/v1/components'),
-    client.isConnected ? client.getArchitecturalRules() : Promise.resolve([] as Rule[]),
+    apiGet<
+      Array<{ id: string; name: string; slug: string; ruleCount: number }>
+    >("/api/v1/projects"),
+    apiGet<Array<{ id: string; slug: string; companyName: string }>>(
+      "/api/v1/brands",
+    ),
+    apiGet<Array<{ id: string; name: string }>>("/api/v1/components"),
+    client.isConnected
+      ? client.getArchitecturalRules()
+      : Promise.resolve([] as Rule[]),
   ]);
   treeProvider.refresh({
-    projects: (projects || []).map(p => ({ ...p, type: 'project' as const })),
-    brands: (brands || []).map(b => ({ ...b, type: 'brand' as const })),
-    components: (components || []).map(c => ({ ...c, type: 'component' as const })),
+    projects: (projects || []).map((p) => ({ ...p, type: "project" as const })),
+    brands: (brands || []).map((b) => ({ ...b, type: "brand" as const })),
+    components: (components || []).map((c) => ({
+      ...c,
+      type: "component" as const,
+    })),
     rules: rules || [],
   });
   statusBar.setConnected((rules || []).length);
 }
 
-async function refreshAll() { await refreshAllData(); }
+async function refreshAll() {
+  await refreshAllData();
+}
 
 // === Rules ===
 
 async function showRules(): Promise<void> {
   if (!client.isConnected) {
-    const action = await vscode.window.showWarningMessage('Prism is not connected.', 'Connect');
-    if (action === 'Connect') await connect();
+    const action = await vscode.window.showWarningMessage(
+      "Prism is not connected.",
+      "Connect",
+    );
+    if (action === "Connect") await connect();
     return;
   }
   const rules = await client.getArchitecturalRules();
-  const panel = vscode.window.createWebviewPanel('prismRules', 'Prism Rules', vscode.ViewColumn.One, {});
+  const panel = vscode.window.createWebviewPanel(
+    "prismRules",
+    "Prism Rules",
+    vscode.ViewColumn.One,
+    {},
+  );
   panel.webview.html = getRulesHtml(rules);
 }
 
 async function refreshRules(): Promise<void> {
   if (!client.isConnected) return;
   await refreshAllData();
-  vscode.window.showInformationMessage('Prism data refreshed');
+  vscode.window.showInformationMessage("Prism data refreshed");
 }
 
 async function createRule(): Promise<void> {
-  const name = await vscode.window.showInputBox({ prompt: 'Rule name', placeHolder: 'e.g. Use CSS modules' });
+  const name = await vscode.window.showInputBox({
+    prompt: "Rule name",
+    placeHolder: "e.g. Use CSS modules",
+  });
   if (!name) return;
   const category = await vscode.window.showQuickPick(
-    ['architecture', 'styling', 'security', 'performance', 'testing', 'documentation', 'custom'],
-    { placeHolder: 'Category' }
+    [
+      "architecture",
+      "styling",
+      "security",
+      "performance",
+      "testing",
+      "documentation",
+      "custom",
+    ],
+    { placeHolder: "Category" },
   );
   if (!category) return;
-  const content = await vscode.window.showInputBox({ prompt: 'Rule content (markdown)', placeHolder: 'Describe the rule...' });
+  const content = await vscode.window.showInputBox({
+    prompt: "Rule content (markdown)",
+    placeHolder: "Describe the rule...",
+  });
   if (!content) return;
 
-  const projects = await apiGet<Array<{ id: string; name: string }>>('/api/v1/projects');
-  const projectPicks = [{ label: '(none)', id: '' }, ...(projects || []).map(p => ({ label: p.name, id: p.id }))];
-  const project = await vscode.window.showQuickPick(projectPicks.map(p => p.label), { placeHolder: 'Project (optional)' });
-  const projectId = project && project !== '(none)' ? projectPicks.find(p => p.label === project)?.id : undefined;
+  const projects =
+    await apiGet<Array<{ id: string; name: string }>>("/api/v1/projects");
+  const projectPicks = [
+    { label: "(none)", id: "" },
+    ...(projects || []).map((p) => ({ label: p.name, id: p.id })),
+  ];
+  const project = await vscode.window.showQuickPick(
+    projectPicks.map((p) => p.label),
+    { placeHolder: "Project (optional)" },
+  );
+  const projectId =
+    project && project !== "(none)"
+      ? projectPicks.find((p) => p.label === project)?.id
+      : undefined;
 
-  const result = await apiPost('/api/v1/rules', { name, category, content, priority: 50, projectId });
+  const result = await apiPost("/api/v1/rules", {
+    name,
+    category,
+    content,
+    priority: 50,
+    projectId,
+  });
   if (result?.error) {
     vscode.window.showErrorMessage(`Failed to create rule: ${result.error}`);
   } else {
@@ -208,9 +282,16 @@ async function createRule(): Promise<void> {
 }
 
 async function deleteRule(): Promise<void> {
-  const rules = await apiGet<Array<{ id: string; name: string }>>('/api/v1/rules');
-  if (!rules || rules.length === 0) { vscode.window.showInformationMessage('No rules to delete.'); return; }
-  const pick = await vscode.window.showQuickPick(rules.map(r => ({ label: r.name, id: r.id })), { placeHolder: 'Select rule to delete' });
+  const rules =
+    await apiGet<Array<{ id: string; name: string }>>("/api/v1/rules");
+  if (!rules || rules.length === 0) {
+    vscode.window.showInformationMessage("No rules to delete.");
+    return;
+  }
+  const pick = await vscode.window.showQuickPick(
+    rules.map((r) => ({ label: r.name, id: r.id })),
+    { placeHolder: "Select rule to delete" },
+  );
   if (!pick) return;
   const ok = await apiDelete(`/api/v1/rules/${pick.id}`);
   if (ok) {
@@ -222,31 +303,70 @@ async function deleteRule(): Promise<void> {
 // === Projects ===
 
 async function listProjects(): Promise<void> {
-  const projects = await apiGet<Array<{ name: string; slug: string; stack: string; designSystem: string; ruleCount: number; videoCount: number }>>('/api/v1/projects');
-  if (!projects || projects.length === 0) { vscode.window.showInformationMessage('No projects found.'); return; }
+  const projects =
+    await apiGet<
+      Array<{
+        name: string;
+        slug: string;
+        stack: string;
+        designSystem: string;
+        ruleCount: number;
+        videoCount: number;
+      }>
+    >("/api/v1/projects");
+  if (!projects || projects.length === 0) {
+    vscode.window.showInformationMessage("No projects found.");
+    return;
+  }
   const pick = await vscode.window.showQuickPick(
-    projects.map(p => ({ label: p.name, description: `${p.stack} / ${p.designSystem}`, detail: `Rules: ${p.ruleCount}, Videos: ${p.videoCount}` })),
-    { placeHolder: 'Select a project' }
+    projects.map((p) => ({
+      label: p.name,
+      description: `${p.stack} / ${p.designSystem}`,
+      detail: `Rules: ${p.ruleCount}, Videos: ${p.videoCount}`,
+    })),
+    { placeHolder: "Select a project" },
   );
   if (!pick) return;
-  const project = projects.find(p => p.name === pick.label);
+  const project = projects.find((p) => p.name === pick.label);
   if (!project) return;
-  const panel = vscode.window.createWebviewPanel('prismProject', `Project: ${project.name}`, vscode.ViewColumn.One, {});
+  const panel = vscode.window.createWebviewPanel(
+    "prismProject",
+    `Project: ${project.name}`,
+    vscode.ViewColumn.One,
+    {},
+  );
   panel.webview.html = getProjectHtml(project);
 }
 
 async function createProject(): Promise<void> {
-  const name = await vscode.window.showInputBox({ prompt: 'Project name', placeHolder: 'My Next.js App' });
+  const name = await vscode.window.showInputBox({
+    prompt: "Project name",
+    placeHolder: "My Next.js App",
+  });
   if (!name) return;
-  const stack = await vscode.window.showQuickPick(['react', 'nextjs', 'react-native'], { placeHolder: 'Tech stack' });
+  const stack = await vscode.window.showQuickPick(
+    ["react", "nextjs", "react-native"],
+    { placeHolder: "Tech stack" },
+  );
   if (!stack) return;
   const design = await vscode.window.showQuickPick(
-    ['jdstudio', 'bare-minimum', 'glassmorphic', '8bit-nostalgia', 'keandrew', 'custom'],
-    { placeHolder: 'Design system' }
+    [
+      "jdstudio",
+      "bare-minimum",
+      "glassmorphic",
+      "8bit-nostalgia",
+      "keandrew",
+      "custom",
+    ],
+    { placeHolder: "Design system" },
   );
   if (!design) return;
 
-  const result = await apiPost('/api/v1/projects', { name, designSystem: design, stack });
+  const result = await apiPost("/api/v1/projects", {
+    name,
+    designSystem: design,
+    stack,
+  });
   if (result?.error) {
     vscode.window.showErrorMessage(`Failed to create project: ${result.error}`);
   } else {
@@ -256,43 +376,82 @@ async function createProject(): Promise<void> {
 }
 
 async function deleteProject(): Promise<void> {
-  const projects = await apiGet<Array<{ id: string; name: string }>>('/api/v1/projects');
-  if (!projects || projects.length === 0) { vscode.window.showInformationMessage('No projects.'); return; }
-  const pick = await vscode.window.showQuickPick(projects.map(p => ({ label: p.name, id: p.id })), { placeHolder: 'Select project to delete' });
+  const projects =
+    await apiGet<Array<{ id: string; name: string }>>("/api/v1/projects");
+  if (!projects || projects.length === 0) {
+    vscode.window.showInformationMessage("No projects.");
+    return;
+  }
+  const pick = await vscode.window.showQuickPick(
+    projects.map((p) => ({ label: p.name, id: p.id })),
+    { placeHolder: "Select project to delete" },
+  );
   if (!pick) return;
-  const confirm = await vscode.window.showWarningMessage(`Delete "${pick.label}"? This cannot be undone.`, { modal: true }, 'Delete');
-  if (confirm !== 'Delete') return;
+  const confirm = await vscode.window.showWarningMessage(
+    `Delete "${pick.label}"? This cannot be undone.`,
+    { modal: true },
+    "Delete",
+  );
+  if (confirm !== "Delete") return;
   const ok = await apiDelete(`/api/v1/projects/${pick.id}`);
-  if (ok) { vscode.window.showInformationMessage('Project deleted'); await refreshAllData(); }
+  if (ok) {
+    vscode.window.showInformationMessage("Project deleted");
+    await refreshAllData();
+  }
 }
 
 // === Brands ===
 
 async function listBrands(): Promise<void> {
-  const brands = await apiGet<Array<{ slug: string; companyName: string; industry: string }>>('/api/v1/brands');
-  if (!brands || brands.length === 0) { vscode.window.showInformationMessage('No brands found.'); return; }
+  const brands =
+    await apiGet<
+      Array<{ slug: string; companyName: string; industry: string }>
+    >("/api/v1/brands");
+  if (!brands || brands.length === 0) {
+    vscode.window.showInformationMessage("No brands found.");
+    return;
+  }
   const pick = await vscode.window.showQuickPick(
-    brands.map(b => ({ label: b.companyName, description: b.industry, slug: b.slug })),
-    { placeHolder: 'Select a brand' }
+    brands.map((b) => ({
+      label: b.companyName,
+      description: b.industry,
+      slug: b.slug,
+    })),
+    { placeHolder: "Select a brand" },
   );
   if (!pick) return;
-  const brand = await apiGet<Record<string, unknown>>(`/api/v1/brands/${pick.slug}`);
+  const brand = await apiGet<Record<string, unknown>>(
+    `/api/v1/brands/${pick.slug}`,
+  );
   if (!brand) return;
-  const panel = vscode.window.createWebviewPanel('prismBrand', `Brand: ${brand.companyName}`, vscode.ViewColumn.One, {});
+  const panel = vscode.window.createWebviewPanel(
+    "prismBrand",
+    `Brand: ${brand.companyName}`,
+    vscode.ViewColumn.One,
+    {},
+  );
   panel.webview.html = getBrandHtml(brand);
 }
 
 async function createBrand(): Promise<void> {
-  const panel = vscode.window.createWebviewPanel('prismBrandWizard', 'Brand Wizard', vscode.ViewColumn.One, { enableScripts: true });
+  const panel = vscode.window.createWebviewPanel(
+    "prismBrandWizard",
+    "Brand Wizard",
+    vscode.ViewColumn.One,
+    { enableScripts: true },
+  );
   const { token, apiUrl } = getConfig();
   panel.webview.html = getBrandWizardHtml(token, apiUrl);
   panel.webview.onDidReceiveMessage(async (message) => {
-    if (message.command === 'createBrand') {
-      const result = await apiPost('/api/v1/brands', message.data);
+    if (message.command === "createBrand") {
+      const result = await apiPost("/api/v1/brands", message.data);
       if (result?.error) {
-        panel.webview.postMessage({ command: 'error', message: result.error });
+        panel.webview.postMessage({ command: "error", message: result.error });
       } else {
-        panel.webview.postMessage({ command: 'success', message: 'Brand created!' });
+        panel.webview.postMessage({
+          command: "success",
+          message: "Brand created!",
+        });
         await refreshAllData();
       }
     }
@@ -300,54 +459,93 @@ async function createBrand(): Promise<void> {
 }
 
 async function exportBrand(): Promise<void> {
-  const brands = await apiGet<Array<{ id: string; slug: string; companyName: string }>>('/api/v1/brands');
-  if (!brands || brands.length === 0) { vscode.window.showInformationMessage('No brands.'); return; }
-  const pick = await vscode.window.showQuickPick(brands.map(b => ({ label: b.companyName, slug: b.slug })), { placeHolder: 'Brand' });
+  const brands =
+    await apiGet<Array<{ id: string; slug: string; companyName: string }>>(
+      "/api/v1/brands",
+    );
+  if (!brands || brands.length === 0) {
+    vscode.window.showInformationMessage("No brands.");
+    return;
+  }
+  const pick = await vscode.window.showQuickPick(
+    brands.map((b) => ({ label: b.companyName, slug: b.slug })),
+    { placeHolder: "Brand" },
+  );
   if (!pick) return;
   const format = await vscode.window.showQuickPick(
-    ['cursor', 'windsurf', 'vscode', 'claude', 'css', 'tailwind'],
-    { placeHolder: 'Export format' }
+    ["cursor", "windsurf", "vscode", "claude", "css", "tailwind"],
+    { placeHolder: "Export format" },
   );
   if (!format) return;
 
   const { token, apiUrl } = getConfig();
   try {
-    const res = await fetch(`${apiUrl}/api/v1/brands/${pick.slug}/export?format=${format}`, {
-      headers: { 'Authorization': `Bearer ${token}` },
-    });
+    const res = await fetch(
+      `${apiUrl}/api/v1/brands/${pick.slug}/export?format=${format}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
     const content = await res.text();
-    const doc = await vscode.workspace.openTextDocument({ content, language: format === 'json' ? 'json' : format === 'css' ? 'css' : format === 'tailwind' ? 'javascript' : 'markdown' });
+    const doc = await vscode.workspace.openTextDocument({
+      content,
+      language:
+        format === "json"
+          ? "json"
+          : format === "css"
+            ? "css"
+            : format === "tailwind"
+              ? "javascript"
+              : "markdown",
+    });
     await vscode.window.showTextDocument(doc);
   } catch {
-    vscode.window.showErrorMessage('Failed to export brand');
+    vscode.window.showErrorMessage("Failed to export brand");
   }
 }
 
 async function deleteBrand(): Promise<void> {
-  const brands = await apiGet<Array<{ id: string; companyName: string }>>('/api/v1/brands');
-  if (!brands || brands.length === 0) { vscode.window.showInformationMessage('No brands.'); return; }
-  const pick = await vscode.window.showQuickPick(brands.map(b => ({ label: b.companyName, id: b.id })), { placeHolder: 'Brand to delete' });
+  const brands =
+    await apiGet<Array<{ id: string; companyName: string }>>("/api/v1/brands");
+  if (!brands || brands.length === 0) {
+    vscode.window.showInformationMessage("No brands.");
+    return;
+  }
+  const pick = await vscode.window.showQuickPick(
+    brands.map((b) => ({ label: b.companyName, id: b.id })),
+    { placeHolder: "Brand to delete" },
+  );
   if (!pick) return;
   const ok = await apiDelete(`/api/v1/brands/${pick.id}`);
-  if (ok) { vscode.window.showInformationMessage('Brand deleted'); await refreshAllData(); }
+  if (ok) {
+    vscode.window.showInformationMessage("Brand deleted");
+    await refreshAllData();
+  }
 }
 
 // === AI Kitchen ===
 
 async function generate(): Promise<void> {
-  const panel = vscode.window.createWebviewPanel('prismKitchen', 'AI Kitchen', vscode.ViewColumn.Two, { enableScripts: true });
+  const panel = vscode.window.createWebviewPanel(
+    "prismKitchen",
+    "AI Kitchen",
+    vscode.ViewColumn.Two,
+    { enableScripts: true },
+  );
   const { token, apiUrl } = getConfig();
   panel.webview.html = getKitchenHtml(token, apiUrl);
   panel.webview.onDidReceiveMessage(async (message) => {
-    if (message.command === 'generate') {
-      const result = await apiPost('/api/generate', message.data);
-      panel.webview.postMessage({ command: 'result', data: result });
+    if (message.command === "generate") {
+      const result = await apiPost("/api/generate", message.data);
+      panel.webview.postMessage({ command: "result", data: result });
     }
-    if (message.command === 'insert') {
+    if (message.command === "insert") {
       const editor = vscode.window.activeTextEditor;
       if (editor) {
-        editor.edit(builder => { builder.insert(editor.selection.active, message.code); });
-        vscode.window.showInformationMessage('Component inserted at cursor');
+        editor.edit((builder) => {
+          builder.insert(editor.selection.active, message.code);
+        });
+        vscode.window.showInformationMessage("Component inserted at cursor");
       }
     }
   });
@@ -356,13 +554,21 @@ async function generate(): Promise<void> {
 // === Marketplace ===
 
 async function marketplace(): Promise<void> {
-  const panel = vscode.window.createWebviewPanel('prismMarketplace', 'Marketplace', vscode.ViewColumn.One, { enableScripts: true });
+  const panel = vscode.window.createWebviewPanel(
+    "prismMarketplace",
+    "Marketplace",
+    vscode.ViewColumn.One,
+    { enableScripts: true },
+  );
   const { token, apiUrl } = getConfig();
   panel.webview.html = getMarketplaceHtml(token, apiUrl);
   panel.webview.onDidReceiveMessage(async (message) => {
-    if (message.command === 'install') {
-      const result = await apiPost(`/api/v1/marketplace/install/${message.id}`, {});
-      panel.webview.postMessage({ command: 'installed', data: result });
+    if (message.command === "install") {
+      const result = await apiPost(
+        `/api/v1/marketplace/install/${message.id}`,
+        {},
+      );
+      panel.webview.postMessage({ command: "installed", data: result });
       await refreshAllData();
     }
   });
@@ -371,109 +577,183 @@ async function marketplace(): Promise<void> {
 // === Analytics ===
 
 async function showAnalytics(): Promise<void> {
-  const data = await apiGet<{ tier: string; usage: Record<string, { used: number; limit: number | string }>; resetDate: string }>('/api/v1/analytics');
-  if (!data) { vscode.window.showErrorMessage('Failed to load analytics'); return; }
-  const panel = vscode.window.createWebviewPanel('prismAnalytics', 'Analytics', vscode.ViewColumn.One, {});
+  const data = await apiGet<{
+    tier: string;
+    usage: Record<string, { used: number; limit: number | string }>;
+    resetDate: string;
+  }>("/api/v1/analytics");
+  if (!data) {
+    vscode.window.showErrorMessage("Failed to load analytics");
+    return;
+  }
+  const panel = vscode.window.createWebviewPanel(
+    "prismAnalytics",
+    "Analytics",
+    vscode.ViewColumn.One,
+    {},
+  );
   panel.webview.html = getAnalyticsHtml(data);
 }
 
 // === API Keys ===
 
 async function manageApiKeys(): Promise<void> {
-  const keysData = await apiGet<{ keys: Array<{ id: string; name: string; keyPrefix: string; createdAt: string }>; canCreate: boolean }>('/api/v1/api-keys');
-  if (!keysData) { vscode.window.showErrorMessage('Failed to load API keys'); return; }
+  const keysData = await apiGet<{
+    keys: Array<{
+      id: string;
+      name: string;
+      keyPrefix: string;
+      createdAt: string;
+    }>;
+    canCreate: boolean;
+  }>("/api/v1/api-keys");
+  if (!keysData) {
+    vscode.window.showErrorMessage("Failed to load API keys");
+    return;
+  }
 
-  const actions = keysData.canCreate ? ['List Keys', 'Create New Key', 'Revoke Key'] : ['List Keys', 'Revoke Key'];
-  const action = await vscode.window.showQuickPick(actions, { placeHolder: 'API Keys' });
+  const actions = keysData.canCreate
+    ? ["List Keys", "Create New Key", "Revoke Key"]
+    : ["List Keys", "Revoke Key"];
+  const action = await vscode.window.showQuickPick(actions, {
+    placeHolder: "API Keys",
+  });
   if (!action) return;
 
-  if (action === 'List Keys') {
+  if (action === "List Keys") {
     if (keysData.keys.length === 0) {
-      vscode.window.showInformationMessage('No API keys.');
+      vscode.window.showInformationMessage("No API keys.");
     } else {
       const pick = await vscode.window.showQuickPick(
-        keysData.keys.map(k => ({ label: k.name, description: `${k.keyPrefix}...`, detail: `Created: ${k.createdAt.slice(0, 10)}`, id: k.id })),
-        { placeHolder: 'Your API keys' }
+        keysData.keys.map((k) => ({
+          label: k.name,
+          description: `${k.keyPrefix}...`,
+          detail: `Created: ${k.createdAt.slice(0, 10)}`,
+          id: k.id,
+        })),
+        { placeHolder: "Your API keys" },
       );
     }
   }
 
-  if (action === 'Create New Key') {
-    const name = await vscode.window.showInputBox({ prompt: 'Key name', placeHolder: 'e.g. CLI' });
+  if (action === "Create New Key") {
+    const name = await vscode.window.showInputBox({
+      prompt: "Key name",
+      placeHolder: "e.g. CLI",
+    });
     if (!name) return;
-    const result = await apiPost('/api/v1/api-keys', { name });
+    const result = await apiPost("/api/v1/api-keys", { name });
     if (result?.error) {
       vscode.window.showErrorMessage(result.error);
     } else {
       const keyData = result as { key?: string };
       if (keyData?.key) {
         await vscode.env.clipboard.writeText(keyData.key);
-        vscode.window.showInformationMessage('API key copied to clipboard! Save it now - it won\'t be shown again.');
+        vscode.window.showInformationMessage(
+          "API key copied to clipboard! Save it now - it won't be shown again.",
+        );
       }
     }
   }
 
-  if (action === 'Revoke Key') {
+  if (action === "Revoke Key") {
     const keys = keysData.keys;
-    if (keys.length === 0) { vscode.window.showInformationMessage('No keys to revoke.'); return; }
-    const pick = await vscode.window.showQuickPick(keys.map(k => ({ label: k.name, id: k.id })), { placeHolder: 'Key to revoke' });
+    if (keys.length === 0) {
+      vscode.window.showInformationMessage("No keys to revoke.");
+      return;
+    }
+    const pick = await vscode.window.showQuickPick(
+      keys.map((k) => ({ label: k.name, id: k.id })),
+      { placeHolder: "Key to revoke" },
+    );
     if (!pick) return;
     const ok = await apiDelete(`/api/v1/api-keys/${pick.id}`);
-    if (ok) vscode.window.showInformationMessage('API key revoked');
+    if (ok) vscode.window.showInformationMessage("API key revoked");
   }
 }
 
 // === Fix & Rule Detail ===
 
-async function applyFix(params: { ruleId: string; ruleName: string; line: number; column: number; endLine: number; endColumn: number; matchedText: string; message: string; severity: string }, docUri: string): Promise<void> {
+async function applyFix(
+  params: {
+    ruleId: string;
+    ruleName: string;
+    line: number;
+    column: number;
+    endLine: number;
+    endColumn: number;
+    matchedText: string;
+    message: string;
+    severity: string;
+  },
+  docUri: string,
+): Promise<void> {
   if (!client.isConnected) {
-    vscode.window.showErrorMessage('Prism is not connected.');
+    vscode.window.showErrorMessage("Prism is not connected.");
     return;
   }
 
-  const editor = vscode.window.visibleTextEditors.find(e => e.document.uri.toString() === docUri);
+  const editor = vscode.window.visibleTextEditors.find(
+    (e) => e.document.uri.toString() === docUri,
+  );
   if (!editor) {
-    vscode.window.showErrorMessage('Cannot find the document to fix.');
+    vscode.window.showErrorMessage("Cannot find the document to fix.");
     return;
   }
 
   const code = editor.document.getText();
   const fixResult = await client.fixCode(params, code);
   if (!fixResult || !fixResult.correctedCode) {
-    vscode.window.showWarningMessage(`No automatic fix available for "${params.ruleName}". Manual review required.`);
+    vscode.window.showWarningMessage(
+      `No automatic fix available for "${params.ruleName}". Manual review required.`,
+    );
     return;
   }
 
   const fullRange = new vscode.Range(
     editor.document.positionAt(0),
-    editor.document.positionAt(code.length)
+    editor.document.positionAt(code.length),
   );
 
-  await editor.edit(builder => {
+  await editor.edit((builder) => {
     builder.replace(fullRange, fixResult.correctedCode);
   });
 
   const confidence = Math.round(fixResult.confidence * 100);
   if (fixResult.confidence >= 0.8) {
-    vscode.window.showInformationMessage(`Fixed "${params.ruleName}" (${confidence}% confidence)`);
+    vscode.window.showInformationMessage(
+      `Fixed "${params.ruleName}" (${confidence}% confidence)`,
+    );
   } else if (fixResult.confidence >= 0.5) {
-    vscode.window.showWarningMessage(`Applied partial fix for "${params.ruleName}" (${confidence}% confidence) — please review`);
+    vscode.window.showWarningMessage(
+      `Applied partial fix for "${params.ruleName}" (${confidence}% confidence) — please review`,
+    );
   } else {
-    vscode.window.showWarningMessage(`Low-confidence fix applied for "${params.ruleName}" — manual review required`);
+    vscode.window.showWarningMessage(
+      `Low-confidence fix applied for "${params.ruleName}" — manual review required`,
+    );
   }
 }
 
-async function showRuleDetail(params: { ruleId: string; ruleName: string }): Promise<void> {
-  const panel = vscode.window.createWebviewPanel('prismRuleDetail', `Rule: ${params.ruleName}`, vscode.ViewColumn.One, {});
+async function showRuleDetail(params: {
+  ruleId: string;
+  ruleName: string;
+}): Promise<void> {
+  const panel = vscode.window.createWebviewPanel(
+    "prismRuleDetail",
+    `Rule: ${params.ruleName}`,
+    vscode.ViewColumn.One,
+    {},
+  );
   try {
     const rules = await client.getArchitecturalRules();
-    const rule = rules.find(r => r.name === params.ruleName);
+    const rule = rules.find((r) => r.name === params.ruleName);
     panel.webview.html = `<!DOCTYPE html><html><head><style>
       body { font-family: system-ui; padding: 1rem; background: var(--vscode-editor-background); color: var(--vscode-editor-foreground); }
       pre { background: var(--vscode-textCodeBlock-background); padding: 1rem; border-radius: 4px; overflow-x: auto; }
     </style></head><body>
       <h1>${rule?.name || params.ruleName}</h1>
-      <pre>${rule?.content || 'Rule content not available'}</pre>
+      <pre>${rule?.content || "Rule content not available"}</pre>
     </body></html>`;
   } catch {
     panel.webview.html = `<h1>${params.ruleName}</h1><p>Error loading rule details.</p>`;
@@ -483,9 +763,9 @@ async function showRuleDetail(params: { ruleId: string; ruleName: string }): Pro
 // === Login ===
 
 async function login(): Promise<void> {
-  const terminal = vscode.window.createTerminal('Prism Login');
+  const terminal = vscode.window.createTerminal("Prism Login");
   terminal.show();
-  terminal.sendText('npx prism-context-engine login');
+  terminal.sendText("npx prism-context-engine login");
 }
 
 // === Webview HTML generators ===
@@ -498,7 +778,7 @@ function getRulesHtml(rules: Rule[]): string {
     h2 { margin: 0 0 0.25rem 0; }
   </style></head><body>
     <h1>Prism Rules (${rules.length})</h1>
-    ${rules.map(r => `<div class="rule"><div class="category">${r.category}</div><h2>${r.name}</h2><pre>${r.content.slice(0, 500)}${r.content.length > 500 ? '...' : ''}</pre></div>`).join('')}
+    ${rules.map((r) => `<div class="rule"><div class="category">${r.category}</div><h2>${r.name}</h2><pre>${r.content.slice(0, 500)}${r.content.length > 500 ? "..." : ""}</pre></div>`).join("")}
   </body></html>`;
 }
 
@@ -524,11 +804,16 @@ function getBrandHtml(brand: Record<string, unknown>): string {
     .color-row { display: flex; align-items: center; gap: 0.5rem; margin: 0.25rem 0; }
   </style></head><body>
     <h1>${brand.companyName}</h1>
-    <p>Industry: ${brand.industry}${brand.tagline ? ` | "${brand.tagline}"` : ''}</p>
+    <p>Industry: ${brand.industry}${brand.tagline ? ` | "${brand.tagline}"` : ""}</p>
     <h3>Colors</h3>
-    ${Object.entries(colors).map(([k, v]) => `<div class="color-row"><div class="swatch" style="background:${v}"></div>${k}: ${v}</div>`).join('')}
+    ${Object.entries(colors)
+      .map(
+        ([k, v]) =>
+          `<div class="color-row"><div class="swatch" style="background:${v}"></div>${k}: ${v}</div>`,
+      )
+      .join("")}
     <h3>Typography</h3>
-    <p>Heading: ${(brand.typography as Record<string,string>)?.headingFont} | Body: ${(brand.typography as Record<string,string>)?.bodyFont}</p>
+    <p>Heading: ${(brand.typography as Record<string, string>)?.headingFont} | Body: ${(brand.typography as Record<string, string>)?.bodyFont}</p>
   </body></html>`;
 }
 
@@ -700,9 +985,17 @@ function getMarketplaceHtml(token: string, apiUrl: string): string {
     </script></body></html>`;
 }
 
-function getAnalyticsHtml(data: { tier: string; usage: Record<string, { used: number; limit: number | string }>; resetDate: string }): string {
-  const formatLabel = (k: string) => k === 'aiGenerations' ? 'AI Generations' : k.charAt(0).toUpperCase() + k.slice(1);
-  const formatLimit = (v: number | string) => v === 'unlimited' || v === -1 ? '∞' : String(v);
+function getAnalyticsHtml(data: {
+  tier: string;
+  usage: Record<string, { used: number; limit: number | string }>;
+  resetDate: string;
+}): string {
+  const formatLabel = (k: string) =>
+    k === "aiGenerations"
+      ? "AI Generations"
+      : k.charAt(0).toUpperCase() + k.slice(1);
+  const formatLimit = (v: number | string) =>
+    v === "unlimited" || v === -1 ? "∞" : String(v);
   return `<!DOCTYPE html><html><head><style>
     body { font-family: system-ui; padding: 1rem; background: var(--vscode-editor-background); color: var(--vscode-editor-foreground); }
     .metric { margin: 0.75rem 0; }
@@ -713,10 +1006,25 @@ function getAnalyticsHtml(data: { tier: string; usage: Record<string, { used: nu
     .reset { opacity: 0.6; font-size: 0.8rem; margin-top: 1rem; }
   </style></head><body>
     <h1>Usage & Limits <span class="tier">[${data.tier.toUpperCase()}]</span></h1>
-    ${Object.entries(data.usage).map(([k, v]) => {
-      const pct = v.limit === 'unlimited' || v.limit === -1 || Number(v.limit) === 0 ? 0 : Math.min(100, (v.used / Number(v.limit)) * 100);
-      return '<div class="metric"><div class="label"><span>'+formatLabel(k)+'</span><span>'+v.used+' / '+formatLimit(v.limit)+'</span></div><div class="bar"><div class="bar-fill" style="width:'+pct+'%"></div></div></div>';
-    }).join('')}
+    ${Object.entries(data.usage)
+      .map(([k, v]) => {
+        const pct =
+          v.limit === "unlimited" || v.limit === -1 || Number(v.limit) === 0
+            ? 0
+            : Math.min(100, (v.used / Number(v.limit)) * 100);
+        return (
+          '<div class="metric"><div class="label"><span>' +
+          formatLabel(k) +
+          "</span><span>" +
+          v.used +
+          " / " +
+          formatLimit(v.limit) +
+          '</span></div><div class="bar"><div class="bar-fill" style="width:' +
+          pct +
+          '%"></div></div></div>'
+        );
+      })
+      .join("")}
     <div class="reset">Resets: ${data.resetDate.slice(0, 10)}</div>
   </body></html>`;
 }

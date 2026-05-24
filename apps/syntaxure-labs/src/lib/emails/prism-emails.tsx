@@ -33,7 +33,11 @@ export const prismWaitlistConfirmation = `
 </html>
 `;
 
-export function prismWaitlistNotification(data: { email: string; role?: string; source: string }) {
+export function prismWaitlistNotification(data: {
+  email: string;
+  role?: string;
+  source: string;
+}) {
   return `
 <!DOCTYPE html>
 <html>

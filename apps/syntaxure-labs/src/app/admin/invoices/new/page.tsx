@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * New Invoice Form
@@ -6,12 +6,12 @@
  * Create a new invoice with line items.
  */
 
-import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { ArrowLeft, Plus, Trash2, Loader2 } from 'lucide-react';
-import { createInvoice } from '@/app/actions/invoice';
-import type { Currency } from '@/types/invoice';
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft, Plus, Trash2, Loader2 } from "lucide-react";
+import { createInvoice } from "@/app/actions/invoice";
+import type { Currency } from "@/types/invoice";
 
 interface LineItem {
   id: string;
@@ -27,19 +27,19 @@ export default function NewInvoicePage() {
   const [error, setError] = useState<string | null>(null);
 
   // Form state
-  const [clientName, setClientName] = useState('');
-  const [clientEmail, setClientEmail] = useState('');
-  const [clientCompany, setClientCompany] = useState('');
-  const [currency, setCurrency] = useState<Currency>('USD');
+  const [clientName, setClientName] = useState("");
+  const [clientEmail, setClientEmail] = useState("");
+  const [clientCompany, setClientCompany] = useState("");
+  const [currency, setCurrency] = useState<Currency>("USD");
   const [dueDate, setDueDate] = useState(() => {
     const date = new Date();
     date.setDate(date.getDate() + 14);
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split("T")[0];
   });
   const [items, setItems] = useState<LineItem[]>([
-    { id: '1', description: '', quantity: 1, unitPrice: 0, amount: 0 },
+    { id: "1", description: "", quantity: 1, unitPrice: 0, amount: 0 },
   ]);
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState("");
   const [sendOnCreate, setSendOnCreate] = useState(true);
 
   const addItem = () => {
@@ -47,7 +47,7 @@ export default function NewInvoicePage() {
       ...items,
       {
         id: Date.now().toString(),
-        description: '',
+        description: "",
         quantity: 1,
         unitPrice: 0,
         amount: 0,
@@ -60,7 +60,11 @@ export default function NewInvoicePage() {
     setItems(items.filter((item) => item.id !== id));
   };
 
-  const updateItem = (id: string, field: keyof LineItem, value: string | number) => {
+  const updateItem = (
+    id: string,
+    field: keyof LineItem,
+    value: string | number,
+  ) => {
     setItems(
       items.map((item) => {
         if (item.id !== id) return item;
@@ -68,12 +72,12 @@ export default function NewInvoicePage() {
         const updated = { ...item, [field]: value };
 
         // Recalculate amount
-        if (field === 'quantity' || field === 'unitPrice') {
+        if (field === "quantity" || field === "unitPrice") {
           updated.amount = updated.quantity * updated.unitPrice;
         }
 
         return updated;
-      })
+      }),
     );
   };
 
@@ -84,12 +88,12 @@ export default function NewInvoicePage() {
     setError(null);
 
     if (!clientName.trim() || !clientEmail.trim()) {
-      setError('Client name and email are required');
+      setError("Client name and email are required");
       return;
     }
 
     if (items.some((item) => !item.description.trim())) {
-      setError('All line items must have a description');
+      setError("All line items must have a description");
       return;
     }
 
@@ -106,9 +110,9 @@ export default function NewInvoicePage() {
       });
 
       if (result.success) {
-        router.push('/admin/invoices');
+        router.push("/admin/invoices");
       } else {
-        setError(result.error || 'Failed to create invoice');
+        setError(result.error || "Failed to create invoice");
       }
     });
   };
@@ -211,7 +215,7 @@ export default function NewInvoicePage() {
                       type="text"
                       value={item.description}
                       onChange={(e) =>
-                        updateItem(item.id, 'description', e.target.value)
+                        updateItem(item.id, "description", e.target.value)
                       }
                       className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-white placeholder-white/30 outline-none focus:border-cyan-500/50"
                       placeholder="Service description..."
@@ -223,7 +227,11 @@ export default function NewInvoicePage() {
                       type="number"
                       value={item.quantity}
                       onChange={(e) =>
-                        updateItem(item.id, 'quantity', parseInt(e.target.value) || 1)
+                        updateItem(
+                          item.id,
+                          "quantity",
+                          parseInt(e.target.value) || 1,
+                        )
                       }
                       min="1"
                       className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-right text-white outline-none focus:border-cyan-500/50"
@@ -234,7 +242,11 @@ export default function NewInvoicePage() {
                       type="number"
                       value={item.unitPrice}
                       onChange={(e) =>
-                        updateItem(item.id, 'unitPrice', parseFloat(e.target.value) || 0)
+                        updateItem(
+                          item.id,
+                          "unitPrice",
+                          parseFloat(e.target.value) || 0,
+                        )
                       }
                       min="0"
                       step="0.01"
@@ -242,7 +254,7 @@ export default function NewInvoicePage() {
                     />
                   </td>
                   <td className="py-2 text-right font-medium text-white">
-                    {currency === 'USD' ? '$' : '₱'}
+                    {currency === "USD" ? "$" : "₱"}
                     {item.amount.toLocaleString()}
                   </td>
                   <td className="py-2">
@@ -274,7 +286,7 @@ export default function NewInvoicePage() {
               <div className="flex justify-between text-lg font-bold text-white">
                 <span>Total</span>
                 <span>
-                  {currency === 'USD' ? '$' : '₱'}
+                  {currency === "USD" ? "$" : "₱"}
                   {subtotal.toLocaleString()}
                 </span>
               </div>
@@ -325,7 +337,10 @@ export default function NewInvoicePage() {
               onChange={(e) => setSendOnCreate(e.target.checked)}
               className="h-4 w-4 rounded border-white/10 bg-white/5 text-cyan-500 focus:ring-cyan-500/20"
             />
-            <label htmlFor="sendOnCreate" className="text-sm text-white/70 cursor-pointer select-none">
+            <label
+              htmlFor="sendOnCreate"
+              className="text-sm text-white/70 cursor-pointer select-none"
+            >
               Send invoice via email immediately
             </label>
           </div>
@@ -342,7 +357,7 @@ export default function NewInvoicePage() {
             className="flex items-center gap-2 rounded-md bg-cyan-500/20 px-6 py-2 font-medium text-cyan-400 transition-colors hover:bg-cyan-500/30 disabled:opacity-50"
           >
             {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-            {sendOnCreate ? 'Create & Send Invoice' : 'Create Invoice'}
+            {sendOnCreate ? "Create & Send Invoice" : "Create Invoice"}
           </button>
         </div>
       </form>

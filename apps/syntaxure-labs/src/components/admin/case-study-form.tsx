@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Case Study Form Component
@@ -7,14 +7,14 @@
  * Includes dynamic metrics, tech stack, and image upload.
  */
 
-import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Loader2, Save, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
-import { toast } from 'sonner';
-import { createCaseStudy, updateCaseStudy } from '@/app/actions/case-studies';
-import { CaseStudyImageUpload } from './case-study-image-upload';
-import type { FirestoreProject } from '@/types/supabase';
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { Plus, Trash2, Loader2, Save, ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { toast } from "sonner";
+import { createCaseStudy, updateCaseStudy } from "@/app/actions/case-studies";
+import { CaseStudyImageUpload } from "./case-study-image-upload";
+import type { FirestoreProject } from "@/types/supabase";
 
 // =============================================================================
 // TYPES
@@ -41,7 +41,7 @@ interface FormData {
 }
 
 interface Props {
-  mode: 'create' | 'edit';
+  mode: "create" | "edit";
   initialData?: FirestoreProject;
 }
 
@@ -50,14 +50,14 @@ interface Props {
 // =============================================================================
 
 const CATEGORIES = [
-  'SaaS Platform',
-  'Web Application',
-  'E-Commerce',
-  'Mobile App',
-  'Internal Tool',
-  'API / Backend',
-  'Landing Page',
-  'Other',
+  "SaaS Platform",
+  "Web Application",
+  "E-Commerce",
+  "Mobile App",
+  "Internal Tool",
+  "API / Backend",
+  "Landing Page",
+  "Other",
 ];
 
 // =============================================================================
@@ -70,14 +70,14 @@ export function CaseStudyForm({ mode, initialData }: Props) {
 
   // Form state
   const [formData, setFormData] = useState<FormData>({
-    title: initialData?.title || '',
-    client: initialData?.client || '',
+    title: initialData?.title || "",
+    client: initialData?.client || "",
     category: initialData?.category || CATEGORIES[0],
-    tagline: initialData?.tagline || '',
-    description: initialData?.description || '',
-    challenge: initialData?.challenge || '',
-    solution: initialData?.solution || '',
-    results: initialData?.results || [{ value: '', metric: '' }],
+    tagline: initialData?.tagline || "",
+    description: initialData?.description || "",
+    challenge: initialData?.challenge || "",
+    solution: initialData?.solution || "",
+    results: initialData?.results || [{ value: "", metric: "" }],
     technologies: initialData?.technologies || [],
     image: initialData?.image || null,
     featured: initialData?.featured || false,
@@ -85,7 +85,7 @@ export function CaseStudyForm({ mode, initialData }: Props) {
   });
 
   // Tech input state
-  const [techInput, setTechInput] = useState('');
+  const [techInput, setTechInput] = useState("");
 
   // ==========================================================================
   // HANDLERS
@@ -93,7 +93,7 @@ export function CaseStudyForm({ mode, initialData }: Props) {
 
   const updateField = <K extends keyof FormData>(
     field: K,
-    value: FormData[K]
+    value: FormData[K],
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -102,22 +102,26 @@ export function CaseStudyForm({ mode, initialData }: Props) {
   const addMetric = () => {
     setFormData((prev) => ({
       ...prev,
-      results: [...prev.results, { value: '', metric: '' }],
+      results: [...prev.results, { value: "", metric: "" }],
     }));
   };
 
-  const updateMetric = (index: number, field: 'value' | 'metric', value: string) => {
+  const updateMetric = (
+    index: number,
+    field: "value" | "metric",
+    value: string,
+  ) => {
     setFormData((prev) => ({
       ...prev,
       results: prev.results.map((m, i) =>
-        i === index ? { ...m, [field]: value } : m
+        i === index ? { ...m, [field]: value } : m,
       ),
     }));
   };
 
   const removeMetric = (index: number) => {
     if (formData.results.length <= 1) {
-      toast.error('At least one metric is required');
+      toast.error("At least one metric is required");
       return;
     }
     setFormData((prev) => ({
@@ -130,14 +134,14 @@ export function CaseStudyForm({ mode, initialData }: Props) {
   const addTech = () => {
     if (!techInput.trim()) return;
     if (formData.technologies.includes(techInput.trim())) {
-      toast.error('Technology already added');
+      toast.error("Technology already added");
       return;
     }
     setFormData((prev) => ({
       ...prev,
       technologies: [...prev.technologies, techInput.trim()],
     }));
-    setTechInput('');
+    setTechInput("");
   };
 
   const removeTech = (tech: string) => {
@@ -148,7 +152,7 @@ export function CaseStudyForm({ mode, initialData }: Props) {
   };
 
   const handleTechKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       addTech();
     }
@@ -160,26 +164,26 @@ export function CaseStudyForm({ mode, initialData }: Props) {
 
     // Basic validation
     if (!formData.title.trim()) {
-      toast.error('Title is required');
+      toast.error("Title is required");
       return;
     }
     if (!formData.client.trim()) {
-      toast.error('Client name is required');
+      toast.error("Client name is required");
       return;
     }
     if (formData.technologies.length === 0) {
-      toast.error('At least one technology is required');
+      toast.error("At least one technology is required");
       return;
     }
     if (formData.results.some((r) => !r.value.trim() || !r.metric.trim())) {
-      toast.error('All metrics must have both value and label');
+      toast.error("All metrics must have both value and label");
       return;
     }
 
     startTransition(async () => {
       let result;
 
-      if (mode === 'create') {
+      if (mode === "create") {
         result = await createCaseStudy(formData);
       } else {
         result = await updateCaseStudy(initialData!.slug, formData);
@@ -187,11 +191,11 @@ export function CaseStudyForm({ mode, initialData }: Props) {
 
       if (result.success) {
         toast.success(
-          mode === 'create' ? 'Case study created!' : 'Case study updated!'
+          mode === "create" ? "Case study created!" : "Case study updated!",
         );
-        router.push('/admin/case-studies');
+        router.push("/admin/case-studies");
       } else {
-        toast.error(result.error || 'Something went wrong');
+        toast.error(result.error || "Something went wrong");
       }
     });
   };
@@ -213,7 +217,9 @@ export function CaseStudyForm({ mode, initialData }: Props) {
             Back to Case Studies
           </Link>
           <h1 className="mt-4 text-2xl font-bold text-white">
-            {mode === 'create' ? 'New Case Study' : `Edit: ${initialData?.title}`}
+            {mode === "create"
+              ? "New Case Study"
+              : `Edit: ${initialData?.title}`}
           </h1>
         </div>
         <button
@@ -226,7 +232,7 @@ export function CaseStudyForm({ mode, initialData }: Props) {
           ) : (
             <Save className="h-4 w-4" />
           )}
-          {mode === 'create' ? 'Create Case Study' : 'Save Changes'}
+          {mode === "create" ? "Create Case Study" : "Save Changes"}
         </button>
       </div>
 
@@ -244,7 +250,7 @@ export function CaseStudyForm({ mode, initialData }: Props) {
                 <input
                   type="text"
                   value={formData.title}
-                  onChange={(e) => updateField('title', e.target.value)}
+                  onChange={(e) => updateField("title", e.target.value)}
                   placeholder="e.g., SineAI Hub"
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
                 />
@@ -256,7 +262,7 @@ export function CaseStudyForm({ mode, initialData }: Props) {
                 <input
                   type="text"
                   value={formData.client}
-                  onChange={(e) => updateField('client', e.target.value)}
+                  onChange={(e) => updateField("client", e.target.value)}
                   placeholder="e.g., Internal Project"
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
                 />
@@ -267,7 +273,7 @@ export function CaseStudyForm({ mode, initialData }: Props) {
                 </label>
                 <select
                   value={formData.category}
-                  onChange={(e) => updateField('category', e.target.value)}
+                  onChange={(e) => updateField("category", e.target.value)}
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none"
                 >
                   {CATEGORIES.map((cat) => (
@@ -284,7 +290,7 @@ export function CaseStudyForm({ mode, initialData }: Props) {
                 <input
                   type="text"
                   value={formData.tagline}
-                  onChange={(e) => updateField('tagline', e.target.value)}
+                  onChange={(e) => updateField("tagline", e.target.value)}
                   placeholder="Short one-liner about the project"
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
                 />
@@ -297,7 +303,7 @@ export function CaseStudyForm({ mode, initialData }: Props) {
             <h2 className="mb-4 font-semibold text-white">Description</h2>
             <textarea
               value={formData.description}
-              onChange={(e) => updateField('description', e.target.value)}
+              onChange={(e) => updateField("description", e.target.value)}
               placeholder="Full description of the project..."
               rows={4}
               className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
@@ -316,7 +322,7 @@ export function CaseStudyForm({ mode, initialData }: Props) {
                 </label>
                 <textarea
                   value={formData.challenge}
-                  onChange={(e) => updateField('challenge', e.target.value)}
+                  onChange={(e) => updateField("challenge", e.target.value)}
                   placeholder="What problem needed to be solved?"
                   rows={3}
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
@@ -328,7 +334,7 @@ export function CaseStudyForm({ mode, initialData }: Props) {
                 </label>
                 <textarea
                   value={formData.solution}
-                  onChange={(e) => updateField('solution', e.target.value)}
+                  onChange={(e) => updateField("solution", e.target.value)}
                   placeholder="How did you solve it?"
                   rows={3}
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
@@ -356,14 +362,18 @@ export function CaseStudyForm({ mode, initialData }: Props) {
                   <input
                     type="text"
                     value={metric.value}
-                    onChange={(e) => updateMetric(index, 'value', e.target.value)}
+                    onChange={(e) =>
+                      updateMetric(index, "value", e.target.value)
+                    }
                     placeholder="Value (e.g., 60%)"
                     className="w-32 rounded-md border border-white/10 bg-white/5 px-4 py-2 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
                   />
                   <input
                     type="text"
                     value={metric.metric}
-                    onChange={(e) => updateMetric(index, 'metric', e.target.value)}
+                    onChange={(e) =>
+                      updateMetric(index, "metric", e.target.value)
+                    }
                     placeholder="Label (e.g., Time Saved)"
                     className="flex-1 rounded-md border border-white/10 bg-white/5 px-4 py-2 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
                   />
@@ -386,7 +396,7 @@ export function CaseStudyForm({ mode, initialData }: Props) {
           <div className="rounded-md border border-white/[0.08] bg-white/[0.02] p-6">
             <CaseStudyImageUpload
               currentImage={formData.image}
-              onImageChange={(url) => updateField('image', url)}
+              onImageChange={(url) => updateField("image", url)}
             />
           </div>
 
@@ -447,7 +457,7 @@ export function CaseStudyForm({ mode, initialData }: Props) {
                   <input
                     type="checkbox"
                     checked={formData.featured}
-                    onChange={(e) => updateField('featured', e.target.checked)}
+                    onChange={(e) => updateField("featured", e.target.checked)}
                     className="peer sr-only"
                   />
                   <div className="h-6 w-11 rounded-full bg-white/10 transition-colors peer-checked:bg-cyan-500/50" />
@@ -463,11 +473,15 @@ export function CaseStudyForm({ mode, initialData }: Props) {
                 <input
                   type="number"
                   value={formData.order}
-                  onChange={(e) => updateField('order', parseInt(e.target.value) || 0)}
+                  onChange={(e) =>
+                    updateField("order", parseInt(e.target.value) || 0)
+                  }
                   min={0}
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2 text-white focus:border-cyan-500/50 focus:outline-none"
                 />
-                <p className="mt-1 text-xs text-white/30">Lower = appears first</p>
+                <p className="mt-1 text-xs text-white/30">
+                  Lower = appears first
+                </p>
               </div>
             </div>
           </div>
@@ -478,4 +492,4 @@ export function CaseStudyForm({ mode, initialData }: Props) {
 }
 
 // Missing import fix
-import { X } from 'lucide-react';
+import { X } from "lucide-react";

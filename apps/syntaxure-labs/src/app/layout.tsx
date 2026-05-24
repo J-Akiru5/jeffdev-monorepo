@@ -1,14 +1,14 @@
-import type { Metadata } from 'next';
-import { Inter, JetBrains_Mono } from 'next/font/google';
-import { Analytics } from '@vercel/analytics/react';
-import { SmoothScroll } from '@/components/providers/smooth-scroll';
-import { CurrencyProvider } from '@/contexts/currency-context';
-import { FeatureFlagProvider } from '@/components/providers/feature-flag-provider';
-import { getFeatureFlags } from '@/lib/feature-flags';
-import { CookieConsent } from '@/components/cookie-consent';
-import { AnalyticsProvider } from '@/components/analytics-provider';
-import { ChatAssistant } from '@syntaxure/ui/chat-assistant';
-import './globals.css';
+import type { Metadata } from "next";
+import { Inter, JetBrains_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/react";
+import { SmoothScroll } from "@/components/providers/smooth-scroll";
+import { CurrencyProvider } from "@/contexts/currency-context";
+import { FeatureFlagProvider } from "@/components/providers/feature-flag-provider";
+import { getFeatureFlags } from "@/lib/feature-flags";
+import { CookieConsent } from "@/components/cookie-consent";
+import { AnalyticsProvider } from "@/components/analytics-provider";
+import { ChatAssistant } from "@syntaxure/ui/chat-assistant";
+import "./globals.css";
 
 /**
  * TYPOGRAPHY SYSTEM
@@ -17,15 +17,15 @@ import './globals.css';
  * JetBrains Mono: Technical font for code, data, and tags.
  */
 const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
 });
 
 const jetbrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  variable: '--font-mono',
-  display: 'swap',
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
 });
 
 /**
@@ -36,48 +36,48 @@ const jetbrainsMono = JetBrains_Mono({
  */
 export const metadata: Metadata = {
   title: {
-    default: 'Syntaxure Labs — Enterprise Web Development & SaaS Solutions',
-    template: '%s // Syntaxure Labs',
+    default: "Syntaxure Labs — Enterprise Web Development & SaaS Solutions",
+    template: "%s // Syntaxure Labs",
   },
   description:
-    'We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises. Next.js, Firebase, and AI-powered solutions.',
+    "We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises. Next.js, Firebase, and AI-powered solutions.",
   keywords: [
-    'web development agency',
-    'SaaS development',
-    'Next.js development',
-    'enterprise web solutions',
-    'cloud architecture',
-    'Syntaxure Labs',
+    "web development agency",
+    "SaaS development",
+    "Next.js development",
+    "enterprise web solutions",
+    "cloud architecture",
+    "Syntaxure Labs",
   ],
-  authors: [{ name: 'Syntaxure Labs' }],
-  creator: 'Syntaxure Labs',
-  metadataBase: new URL('https://jeffdev.studio'),
+  authors: [{ name: "Syntaxure Labs" }],
+  creator: "Syntaxure Labs",
+  metadataBase: new URL("https://jeffdev.studio"),
   openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    url: 'https://jeffdev.studio',
-    siteName: 'Syntaxure Labs',
-    title: 'Syntaxure Labs — Enterprise Web Development & SaaS Solutions',
+    type: "website",
+    locale: "en_US",
+    url: "https://jeffdev.studio",
+    siteName: "Syntaxure Labs",
+    title: "Syntaxure Labs — Enterprise Web Development & SaaS Solutions",
     description:
-      'We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises.',
+      "We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises.",
     images: [
       {
-        url: '/api/og',
+        url: "/api/og",
         width: 1200,
         height: 630,
-        alt: 'Syntaxure Labs',
+        alt: "Syntaxure Labs",
       },
     ],
   },
   alternates: {
-    canonical: '/',
+    canonical: "/",
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'Syntaxure Labs — Enterprise Web Development & SaaS Solutions',
+    card: "summary_large_image",
+    title: "Syntaxure Labs — Enterprise Web Development & SaaS Solutions",
     description:
-      'We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises.',
-    images: ['/api/og'],
+      "We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises.",
+    images: ["/api/og"],
   },
   robots: {
     index: true,
@@ -85,16 +85,16 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon.svg' },
-      { url: '/favicon/icon-48x48.png', sizes: '48x48', type: 'image/png' },
+      { url: "/favicon.svg" },
+      { url: "/favicon/icon-48x48.png", sizes: "48x48", type: "image/png" },
     ],
-    shortcut: '/favicon/favicon.ico',
-    apple: '/favicon/apple-icon.png',
+    shortcut: "/favicon/favicon.ico",
+    apple: "/favicon/apple-icon.png",
   },
 };
 
 export const viewport = {
-  themeColor: '#1c2124',
+  themeColor: "#1c2124",
 };
 
 /**
@@ -146,13 +146,19 @@ export default async function RootLayout({
           aria-hidden="true"
         >
           {/* Radial spotlight gradient */}
-          <div className="absolute inset-0" style={{ background: 'var(--overlay-spotlight)' }} />
+          <div
+            className="absolute inset-0"
+            style={{ background: "var(--overlay-spotlight)" }}
+          />
 
           {/* Grid pattern overlay */}
           <div className="grid-overlay absolute inset-0" />
 
           {/* Noise texture for depth */}
-          <div className="absolute inset-0 bg-noise" style={{ opacity: 'var(--overlay-noise-opacity)' }} />
+          <div
+            className="absolute inset-0 bg-noise"
+            style={{ opacity: "var(--overlay-noise-opacity)" }}
+          />
         </div>
 
         {/* Application Content */}
@@ -166,19 +172,19 @@ export default async function RootLayout({
                     __html: JSON.stringify({
                       "@context": "https://schema.org",
                       "@type": "ProfessionalService",
-                      "name": "Syntaxure Labs",
-                      "alternateName": ["JeffDev Studio"],
-                      "url": "https://jeffdev.studio",
-                      "logo": "https://jeffdev.studio/favicon.svg",
-                      "contactPoint": {
+                      name: "Syntaxure Labs",
+                      alternateName: ["JeffDev Studio"],
+                      url: "https://jeffdev.studio",
+                      logo: "https://jeffdev.studio/favicon.svg",
+                      contactPoint: {
                         "@type": "ContactPoint",
-                        "telephone": "+63-951-916-7103",
-                        "contactType": "customer service",
-                        "email": "contact@jeffdev.studio",
-                        "areaServed": "Global",
-                        "availableLanguage": ["English", "Tagalog"]
-                      }
-                    })
+                        telephone: "+63-951-916-7103",
+                        contactType: "customer service",
+                        email: "contact@jeffdev.studio",
+                        areaServed: "Global",
+                        availableLanguage: ["English", "Tagalog"],
+                      },
+                    }),
                   }}
                 />
                 {children}
@@ -195,9 +201,9 @@ export default async function RootLayout({
           title="JeffDev System Assistant"
           welcomeMessage="How can I help you understand the JeffDev ecosystem today?"
           suggestions={[
-            'What is the difference between Agency and Prism?',
-            'What is the turborepo structure?',
-            'What is the Doppler Law?'
+            "What is the difference between Agency and Prism?",
+            "What is the turborepo structure?",
+            "What is the Doppler Law?",
           ]}
         />
       </body>

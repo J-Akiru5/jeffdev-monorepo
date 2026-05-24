@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 /**
  * Feature Flags
@@ -24,10 +24,10 @@ const DEFAULT_FLAGS: FeatureFlags = {
 export async function getFeatureFlags(): Promise<FeatureFlags> {
   return {
     prismEngineEnabled:
-      process.env.FEATURE_PRISM_ENGINE_ENABLED === 'true' ||
+      process.env.FEATURE_PRISM_ENGINE_ENABLED === "true" ||
       DEFAULT_FLAGS.prismEngineEnabled,
     prismEngineTeaser:
-      process.env.FEATURE_PRISM_ENGINE_TEASER !== 'false' ||
+      process.env.FEATURE_PRISM_ENGINE_TEASER !== "false" ||
       DEFAULT_FLAGS.prismEngineTeaser,
   };
 }
@@ -37,11 +37,12 @@ export async function getFeatureFlags(): Promise<FeatureFlags> {
  * Flags must be updated via Vercel/Doppler environment variables.
  */
 export async function updateFeatureFlags(
-  flags: Partial<FeatureFlags>
+  flags: Partial<FeatureFlags>,
 ): Promise<{ success: boolean; error?: string }> {
-  console.log('[FEATURE FLAGS] Update attempted (no-op in env mode):', flags);
+  console.log("[FEATURE FLAGS] Update attempted (no-op in env mode):", flags);
   return {
     success: false,
-    error: 'Feature flags are managed via environment variables. Deploy with updated FEATURE_* vars to change flags.',
+    error:
+      "Feature flags are managed via environment variables. Deploy with updated FEATURE_* vars to change flags.",
   };
 }

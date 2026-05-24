@@ -33,7 +33,8 @@ export async function getReleases() {
     console.error("[releases] getReleases error:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to fetch releases",
+      error:
+        error instanceof Error ? error.message : "Failed to fetch releases",
       data: [],
     };
   }
@@ -93,7 +94,8 @@ export async function createRelease(
     console.error("[releases] createRelease error:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to create release",
+      error:
+        error instanceof Error ? error.message : "Failed to create release",
     };
   }
 }
@@ -133,7 +135,8 @@ export async function updateRelease(
     console.error("[releases] updateRelease error:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to update release",
+      error:
+        error instanceof Error ? error.message : "Failed to update release",
     };
   }
 }
@@ -152,7 +155,8 @@ export async function deleteRelease(
     console.error("[releases] deleteRelease error:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "Failed to delete release",
+      error:
+        error instanceof Error ? error.message : "Failed to delete release",
     };
   }
 }

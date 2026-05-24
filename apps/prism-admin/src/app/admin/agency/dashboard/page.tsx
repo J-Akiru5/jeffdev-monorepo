@@ -22,7 +22,9 @@ import {
 
 export default async function AgencyDashboardPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) return null;
 
@@ -33,15 +35,37 @@ export default async function AgencyDashboardPage() {
     { data: projects },
     { data: calendarEvents },
   ] = await Promise.all([
-    supabase.from("quotes").select("*").order("created_at", { ascending: false }),
-    supabase.from("messages").select("*").order("created_at", { ascending: false }),
-    supabase.from("projects").select("*").order("created_at", { ascending: false }),
-    supabase.from("calendar_events").select("*").gte("start_time", new Date().toISOString()).lte("start_time", new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()).order("start_time", { ascending: true }).limit(5),
+    supabase
+      .from("quotes")
+      .select("*")
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("messages")
+      .select("*")
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("projects")
+      .select("*")
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("calendar_events")
+      .select("*")
+      .gte("start_time", new Date().toISOString())
+      .lte(
+        "start_time",
+        new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      )
+      .order("start_time", { ascending: true })
+      .limit(5),
   ]);
 
-  const newQuotes = quotes?.filter((q) => q.status === "received" || q.status === "new").length || 0;
-  const newMessages = messages?.filter((m) => m.status === "received").length || 0;
-  const activeProjects = projects?.filter((p) => p.status === "active").length || 0;
+  const newQuotes =
+    quotes?.filter((q) => q.status === "received" || q.status === "new")
+      .length || 0;
+  const newMessages =
+    messages?.filter((m) => m.status === "received").length || 0;
+  const activeProjects =
+    projects?.filter((p) => p.status === "active").length || 0;
   const totalProjects = projects?.length || 0;
 
   return (
@@ -115,9 +139,12 @@ export default async function AgencyDashboardPage() {
                 className="flex items-center justify-between rounded-md bg-white/[0.02] p-3 hover:bg-white/5 transition-all"
               >
                 <div>
-                  <div className="text-sm font-medium text-white">{quote.title}</div>
+                  <div className="text-sm font-medium text-white">
+                    {quote.title}
+                  </div>
                   <div className="text-xs text-white/40">
-                    {(quote as any).client_name || "Client"} &middot; ${(quote as any).amount || 0}
+                    {(quote as any).client_name || "Client"} &middot; $
+                    {(quote as any).amount || 0}
                   </div>
                 </div>
                 <span
@@ -142,7 +169,9 @@ export default async function AgencyDashboardPage() {
         {/* Upcoming Schedule */}
         <div className="rounded-lg border border-white/5 bg-white/[0.02] p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-white">Upcoming Schedule</h2>
+            <h2 className="text-sm font-semibold text-white">
+              Upcoming Schedule
+            </h2>
             <Link
               href="/admin/agency/calendar"
               className="flex items-center gap-1 text-xs text-white/40 hover:text-white transition-colors"
@@ -166,7 +195,9 @@ export default async function AgencyDashboardPage() {
                   }`}
                 />
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-white truncate">{event.title}</div>
+                  <div className="text-sm font-medium text-white truncate">
+                    {event.title}
+                  </div>
                   <div className="text-xs text-white/40">
                     {new Date(event.start_time).toLocaleDateString("en-US", {
                       weekday: "short",
@@ -186,10 +217,22 @@ export default async function AgencyDashboardPage() {
 
       {/* Quick Links */}
       <div className="flex flex-wrap gap-2">
-        <QuickLink href="/admin/agency/projects" icon={FolderKanban} label="Projects" />
-        <QuickLink href="/admin/agency/calendar" icon={Calendar} label="Calendar" />
+        <QuickLink
+          href="/admin/agency/projects"
+          icon={FolderKanban}
+          label="Projects"
+        />
+        <QuickLink
+          href="/admin/agency/calendar"
+          icon={Calendar}
+          label="Calendar"
+        />
         <QuickLink href="/admin/agency/users" icon={Users} label="Users" />
-        <QuickLink href="/admin/agency/settings" icon={BarChart3} label="Settings" />
+        <QuickLink
+          href="/admin/agency/settings"
+          icon={BarChart3}
+          label="Settings"
+        />
       </div>
     </div>
   );
@@ -239,7 +282,9 @@ function MetricCard({
       <div className="mt-3">
         <div className="text-2xl font-bold text-white">{value}</div>
         <div className="mt-1 text-xs text-white/50">{title}</div>
-        {subtitle && <div className="text-[10px] text-white/30">{subtitle}</div>}
+        {subtitle && (
+          <div className="text-[10px] text-white/30">{subtitle}</div>
+        )}
       </div>
     </Link>
   );

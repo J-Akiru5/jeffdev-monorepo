@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 /**
  * Invoice Server Actions
@@ -7,14 +7,14 @@
  * Uses the `invoices` table with payments stored in `metadata` JSONB.
  */
 
-import { z } from 'zod';
-import { getAdminClient } from '@/lib/supabase/admin';
-import { createClient } from '@/lib/supabase/server';
-import { logAuditEvent } from '@/lib/audit';
-import { revalidatePath } from 'next/cache';
-import { generateInvoiceRef, generatePaymentRef } from '@/lib/ref-generator';
-import { sendEmail, invoiceEmailTemplate, BRANDED_SENDER } from '@/lib/email';
-import type { Invoice, InvoiceStatus, PaymentRecord } from '@/types/invoice';
+import { z } from "zod";
+import { getAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
+import { logAuditEvent } from "@/lib/audit";
+import { revalidatePath } from "next/cache";
+import { generateInvoiceRef, generatePaymentRef } from "@/lib/ref-generator";
+import { sendEmail, invoiceEmailTemplate, BRANDED_SENDER } from "@/lib/email";
+import type { Invoice, InvoiceStatus, PaymentRecord } from "@/types/invoice";
 
 // =============================================================================
 // VALIDATION SCHEMAS
@@ -35,7 +35,7 @@ const createInvoiceSchema = z.object({
   projectSlug: z.string().optional(),
   projectTitle: z.string().optional(),
   items: z.array(lineItemSchema).min(1),
-  currency: z.enum(['USD', 'PHP']),
+  currency: z.enum(["USD", "PHP"]),
   taxRate: z.number().min(0).max(1).optional(),
   discount: z.number().min(0).optional(),
   dueDate: z.string(),
@@ -46,7 +46,7 @@ const createInvoiceSchema = z.object({
 
 const paymentSchema = z.object({
   amount: z.number().min(0.01),
-  method: z.enum(['paypal', 'gcash', 'bank_transfer', 'cash']),
+  method: z.enum(["paypal", "gcash", "bank_transfer", "cash"]),
   transactionId: z.string().optional(),
   proofUrl: z.string().optional(),
   notes: z.string().optional(),
@@ -58,7 +58,7 @@ const paymentSchema = z.object({
 function calculateInvoiceTotals(
   items: { amount: number }[],
   taxRate?: number,
-  discount?: number
+  discount?: number,
 ) {
   const subtotal = items.reduce((sum, item) => sum + item.amount, 0);
   const tax = taxRate ? subtotal * taxRate : 0;
@@ -70,20 +70,20 @@ function determineInvoiceStatus(
   paidAmount: number,
   total: number,
   dueDate: string,
-  currentStatus: InvoiceStatus
+  currentStatus: InvoiceStatus,
 ): InvoiceStatus {
-  if (currentStatus === 'draft' || currentStatus === 'cancelled') {
+  if (currentStatus === "draft" || currentStatus === "cancelled") {
     return currentStatus;
   }
-  if (paidAmount >= total) return 'paid';
+  if (paidAmount >= total) return "paid";
   if (paidAmount > 0) {
     // Partial payment — 'partial' not in DB CHECK constraint.
     // The UI detects partial from metadata.paidAmount instead.
-    if (new Date(dueDate) < new Date()) return 'overdue';
-    return 'sent';
+    if (new Date(dueDate) < new Date()) return "overdue";
+    return "sent";
   }
-  if (new Date(dueDate) < new Date()) return 'overdue';
-  return 'sent';
+  if (new Date(dueDate) < new Date()) return "overdue";
+  return "sent";
 }
 
 // =============================================================================
@@ -93,33 +93,35 @@ export async function getInvoices(): Promise<Invoice[]> {
   try {
     const supabase = getAdminClient() as any;
     const { data, error } = await supabase
-      .from('invoices')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .from("invoices")
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error || !data) return [];
 
     return data.map((row: any) => normalizeInvoiceRow(row));
   } catch (error) {
-    console.error('[GET INVOICES ERROR]', error);
+    console.error("[GET INVOICES ERROR]", error);
     return [];
   }
 }
 
-export async function getInvoiceByRefNo(refNo: string): Promise<Invoice | null> {
+export async function getInvoiceByRefNo(
+  refNo: string,
+): Promise<Invoice | null> {
   try {
     const supabase = getAdminClient() as any;
     const { data, error } = await supabase
-      .from('invoices')
-      .select('*')
-      .eq('invoice_number', refNo)
+      .from("invoices")
+      .select("*")
+      .eq("invoice_number", refNo)
       .maybeSingle();
 
     if (error || !data) return null;
 
     return normalizeInvoiceRow(data);
   } catch (error) {
-    console.error('[GET INVOICE ERROR]', error);
+    console.error("[GET INVOICE ERROR]", error);
     return null;
   }
 }
@@ -134,21 +136,23 @@ function normalizeInvoiceRow(row: Record<string, unknown>): Invoice {
   return {
     id: row.id as string,
     refNo: row.invoice_number as string,
-    clientName: (metadata.clientName as string) || '',
-    clientEmail: (metadata.clientEmail as string) || '',
+    clientName: (metadata.clientName as string) || "",
+    clientEmail: (metadata.clientEmail as string) || "",
     clientCompany: metadata.clientCompany as string | undefined,
     clientAddress: metadata.clientAddress as string | undefined,
     projectSlug: metadata.projectSlug as string | undefined,
     projectTitle: metadata.projectTitle as string | undefined,
-    items: row.line_items as Invoice['items'] || [],
-    currency: (metadata.currency as Invoice['currency']) || 'USD',
+    items: (row.line_items as Invoice["items"]) || [],
+    currency: (metadata.currency as Invoice["currency"]) || "USD",
     subtotal: parseFloat(row.amount as string) || 0,
     tax: parseFloat(row.tax_amount as string) || 0,
     taxRate: metadata.taxRate as number | undefined,
     discount: metadata.discount as number | undefined,
     total: parseFloat(row.total_amount as string) || 0,
     paidAmount: (metadata.paidAmount as number) || 0,
-    balanceDue: parseFloat(row.total_amount as string) - ((metadata.paidAmount as number) || 0),
+    balanceDue:
+      parseFloat(row.total_amount as string) -
+      ((metadata.paidAmount as number) || 0),
     status: row.status as InvoiceStatus,
     issueDate: row.issued_date as string,
     dueDate: row.due_date as string,
@@ -172,29 +176,31 @@ export async function createInvoice(data: z.infer<typeof createInvoiceSchema>) {
     const { subtotal, tax, total } = calculateInvoiceTotals(
       validated.items,
       validated.taxRate,
-      validated.discount
+      validated.discount,
     );
 
-    const refNo = generateInvoiceRef();    // Get authenticated user ID
+    const refNo = generateInvoiceRef(); // Get authenticated user ID
     const authClient = await createClient();
-    const { data: { user } } = await authClient.auth.getUser();
+    const {
+      data: { user },
+    } = await authClient.auth.getUser();
     const userId = user?.id;
 
     if (!userId) {
-      return { success: false, error: 'Authentication required' };
+      return { success: false, error: "Authentication required" };
     }
 
     const supabase = getAdminClient() as any;
 
     const { data: result, error } = await supabase
-      .from('invoices')
+      .from("invoices")
       .insert({
         user_id: userId,
         amount: subtotal.toString(),
         tax_amount: tax.toString(),
         total_amount: total.toString(),
-        status: 'draft',
-        issued_date: new Date().toISOString().split('T')[0],
+        status: "draft",
+        issued_date: new Date().toISOString().split("T")[0],
         due_date: validated.dueDate,
         line_items: validated.items as unknown as Record<string, unknown>[],
         notes: validated.notes || null,
@@ -217,14 +223,14 @@ export async function createInvoice(data: z.infer<typeof createInvoiceSchema>) {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       } as any)
-      .select('id')
+      .select("id")
       .single();
 
     if (error) throw error;
 
     await logAuditEvent({
-      action: 'CREATE',
-      resource: 'invoices',
+      action: "CREATE",
+      resource: "invoices",
       resourceId: result.id,
       details: { refNo, total, currency: validated.currency },
     });
@@ -234,17 +240,22 @@ export async function createInvoice(data: z.infer<typeof createInvoiceSchema>) {
       await sendInvoice(result.id);
     }
 
-    revalidatePath('/admin/invoices');
+    revalidatePath("/admin/invoices");
 
     return { success: true, id: result.id, refNo };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error('[CREATE INVOICE VALIDATION ERROR]', JSON.stringify(error.issues, null, 2));
-      const fieldErrors = error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
+      console.error(
+        "[CREATE INVOICE VALIDATION ERROR]",
+        JSON.stringify(error.issues, null, 2),
+      );
+      const fieldErrors = error.issues
+        .map((e) => `${e.path.join(".")}: ${e.message}`)
+        .join(", ");
       return { success: false, error: `Validation failed: ${fieldErrors}` };
     }
-    console.error('[CREATE INVOICE ERROR]', error);
-    return { success: false, error: 'Failed to create invoice' };
+    console.error("[CREATE INVOICE ERROR]", error);
+    return { success: false, error: "Failed to create invoice" };
   }
 }
 
@@ -253,37 +264,44 @@ export async function createInvoice(data: z.infer<typeof createInvoiceSchema>) {
 // =============================================================================
 export async function updateInvoice(
   id: string,
-  data: Partial<z.infer<typeof createInvoiceSchema>>
+  data: Partial<z.infer<typeof createInvoiceSchema>>,
 ) {
   try {
     const supabase = getAdminClient() as any;
 
     const { data: existing, error: fetchError } = await supabase
-      .from('invoices')
-      .select('*')
-      .eq('id', id)
+      .from("invoices")
+      .select("*")
+      .eq("id", id)
       .maybeSingle();
 
     if (fetchError || !existing) {
-      return { success: false, error: 'Invoice not found' };
+      return { success: false, error: "Invoice not found" };
     }
 
-    if (existing.status !== 'draft') {
-      return { success: false, error: 'Can only edit draft invoices' };
+    if (existing.status !== "draft") {
+      return { success: false, error: "Can only edit draft invoices" };
     }
 
     const validated = createInvoiceSchema.partial().parse(data);
-    const existingMetadata = (existing.metadata || {}) as Record<string, unknown>;
+    const existingMetadata = (existing.metadata || {}) as Record<
+      string,
+      unknown
+    >;
     const updates: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
     };
 
     // Map fields
     if (validated.notes !== undefined) updates.notes = validated.notes;
-    if (validated.termsAndConditions !== undefined) updates.payment_terms = validated.termsAndConditions;
+    if (validated.termsAndConditions !== undefined)
+      updates.payment_terms = validated.termsAndConditions;
     if (validated.dueDate) updates.due_date = validated.dueDate;
     if (validated.items) {
-      updates.line_items = validated.items as unknown as Record<string, unknown>[];
+      updates.line_items = validated.items as unknown as Record<
+        string,
+        unknown
+      >[];
       const { subtotal, tax, total } = calculateInvoiceTotals(
         validated.items,
         validated.taxRate ?? (existingMetadata.taxRate as number),
@@ -299,36 +317,44 @@ export async function updateInvoice(
       ...existingMetadata,
       ...(validated.clientName && { clientName: validated.clientName }),
       ...(validated.clientEmail && { clientEmail: validated.clientEmail }),
-      ...(validated.clientCompany !== undefined && { clientCompany: validated.clientCompany }),
-      ...(validated.clientAddress !== undefined && { clientAddress: validated.clientAddress }),
-      ...(validated.projectSlug !== undefined && { projectSlug: validated.projectSlug }),
-      ...(validated.projectTitle !== undefined && { projectTitle: validated.projectTitle }),
+      ...(validated.clientCompany !== undefined && {
+        clientCompany: validated.clientCompany,
+      }),
+      ...(validated.clientAddress !== undefined && {
+        clientAddress: validated.clientAddress,
+      }),
+      ...(validated.projectSlug !== undefined && {
+        projectSlug: validated.projectSlug,
+      }),
+      ...(validated.projectTitle !== undefined && {
+        projectTitle: validated.projectTitle,
+      }),
       ...(validated.currency && { currency: validated.currency }),
       ...(validated.taxRate !== undefined && { taxRate: validated.taxRate }),
       ...(validated.discount !== undefined && { discount: validated.discount }),
     };
 
     const { error } = await supabase
-      .from('invoices')
+      .from("invoices")
       .update(updates as any)
-      .eq('id', id);
+      .eq("id", id);
 
     if (error) throw error;
 
     await logAuditEvent({
-      action: 'UPDATE',
-      resource: 'invoices',
+      action: "UPDATE",
+      resource: "invoices",
       resourceId: id,
       details: validated as Record<string, unknown>,
     });
 
-    revalidatePath('/admin/invoices');
+    revalidatePath("/admin/invoices");
     revalidatePath(`/admin/invoices/${id}`);
 
     return { success: true };
   } catch (error) {
-    console.error('[UPDATE INVOICE ERROR]', error);
-    return { success: false, error: 'Failed to update invoice' };
+    console.error("[UPDATE INVOICE ERROR]", error);
+    return { success: false, error: "Failed to update invoice" };
   }
 }
 
@@ -340,27 +366,29 @@ export async function sendInvoice(id: string) {
     const supabase = getAdminClient() as any;
 
     const { data: existing, error: fetchError } = await supabase
-      .from('invoices')
-      .select('*')
-      .eq('id', id)
+      .from("invoices")
+      .select("*")
+      .eq("id", id)
       .maybeSingle();
 
     if (fetchError || !existing) {
-      return { success: false, error: 'Invoice not found' };
+      return { success: false, error: "Invoice not found" };
     }
 
-    if (existing.status !== 'draft') {
-      return { success: false, error: 'Invoice already sent' };
+    if (existing.status !== "draft") {
+      return { success: false, error: "Invoice already sent" };
     }
 
     const invoice = normalizeInvoiceRow(existing);
 
     // Generate PDF buffer for attachment
-    const { generateInvoicePDFBuffer } = await import('@/lib/invoice-pdf-buffer');
+    const { generateInvoicePDFBuffer } =
+      await import("@/lib/invoice-pdf-buffer");
     const pdfBuffer = await generateInvoicePDFBuffer(invoice);
 
     // Prepare payment link
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://jeffdev.studio';
+    const baseUrl =
+      process.env.NEXT_PUBLIC_SITE_URL || "https://jeffdev.studio";
     const paymentLink = `${baseUrl}/pay/${invoice.refNo}`;
 
     // Send email with PDF attachment
@@ -394,30 +422,30 @@ export async function sendInvoice(id: string) {
     metadata.sentAt = new Date().toISOString();
 
     const { error } = await supabase
-      .from('invoices')
+      .from("invoices")
       .update({
-        status: 'sent',
+        status: "sent",
         metadata,
         updated_at: new Date().toISOString(),
       } as any)
-      .eq('id', id);
+      .eq("id", id);
 
     if (error) throw error;
 
     await logAuditEvent({
-      action: 'STATUS_CHANGE',
-      resource: 'invoices',
+      action: "STATUS_CHANGE",
+      resource: "invoices",
       resourceId: id,
-      details: { oldStatus: 'draft', newStatus: 'sent', emailSent: true },
+      details: { oldStatus: "draft", newStatus: "sent", emailSent: true },
     });
 
-    revalidatePath('/admin/invoices');
+    revalidatePath("/admin/invoices");
     revalidatePath(`/admin/invoices/${id}`);
 
     return { success: true };
   } catch (error) {
-    console.error('[SEND INVOICE ERROR]', error);
-    return { success: false, error: 'Failed to send invoice' };
+    console.error("[SEND INVOICE ERROR]", error);
+    return { success: false, error: "Failed to send invoice" };
   }
 }
 
@@ -426,20 +454,20 @@ export async function sendInvoice(id: string) {
 // =============================================================================
 export async function recordPayment(
   invoiceId: string,
-  data: z.infer<typeof paymentSchema>
+  data: z.infer<typeof paymentSchema>,
 ) {
   try {
     const validated = paymentSchema.parse(data);
     const supabase = getAdminClient() as any;
 
     const { data: existing, error: fetchError } = await supabase
-      .from('invoices')
-      .select('*')
-      .eq('id', invoiceId)
+      .from("invoices")
+      .select("*")
+      .eq("id", invoiceId)
       .maybeSingle();
 
     if (fetchError || !existing) {
-      return { success: false, error: 'Invoice not found' };
+      return { success: false, error: "Invoice not found" };
     }
 
     const metadata = (existing.metadata || {}) as Record<string, unknown>;
@@ -454,7 +482,7 @@ export async function recordPayment(
       transactionId: validated.transactionId,
       proofUrl: validated.proofUrl,
       notes: validated.notes,
-      status: validated.method === 'gcash' ? 'pending' : 'verified',
+      status: validated.method === "gcash" ? "pending" : "verified",
       paidAt: new Date().toISOString(),
     };
 
@@ -475,32 +503,36 @@ export async function recordPayment(
       updated_at: new Date().toISOString(),
     };
 
-    if (newStatus === 'paid') {
-      updates.paid_date = new Date().toISOString().split('T')[0];
+    if (newStatus === "paid") {
+      updates.paid_date = new Date().toISOString().split("T")[0];
     }
 
     const { error } = await supabase
-      .from('invoices')
+      .from("invoices")
       .update(updates as any)
-      .eq('id', invoiceId);
+      .eq("id", invoiceId);
 
     if (error) throw error;
 
     await logAuditEvent({
-      action: 'UPDATE',
-      resource: 'invoices',
+      action: "UPDATE",
+      resource: "invoices",
       resourceId: invoiceId,
-      details: { paymentId: payment.id, amount: validated.amount, method: validated.method },
+      details: {
+        paymentId: payment.id,
+        amount: validated.amount,
+        method: validated.method,
+      },
     });
 
-    revalidatePath('/admin/invoices');
+    revalidatePath("/admin/invoices");
     revalidatePath(`/admin/invoices/${invoiceId}`);
     revalidatePath(`/pay/${existing.invoice_number}`);
 
     return { success: true, paymentId: payment.id };
   } catch (error) {
-    console.error('[RECORD PAYMENT ERROR]', error);
-    return { success: false, error: 'Failed to record payment' };
+    console.error("[RECORD PAYMENT ERROR]", error);
+    return { success: false, error: "Failed to record payment" };
   }
 }
 
@@ -510,19 +542,19 @@ export async function recordPayment(
 export async function verifyGcashPayment(
   invoiceId: string,
   paymentId: string,
-  verified: boolean
+  verified: boolean,
 ) {
   try {
     const supabase = getAdminClient() as any;
 
     const { data: existing, error: fetchError } = await supabase
-      .from('invoices')
-      .select('*')
-      .eq('id', invoiceId)
+      .from("invoices")
+      .select("*")
+      .eq("id", invoiceId)
       .maybeSingle();
 
     if (fetchError || !existing) {
-      return { success: false, error: 'Invoice not found' };
+      return { success: false, error: "Invoice not found" };
     }
 
     const metadata = (existing.metadata || {}) as Record<string, unknown>;
@@ -530,13 +562,13 @@ export async function verifyGcashPayment(
     const paymentIndex = payments.findIndex((p) => p.id === paymentId);
 
     if (paymentIndex === -1) {
-      return { success: false, error: 'Payment not found' };
+      return { success: false, error: "Payment not found" };
     }
 
     const updatedPayments = [...payments];
     updatedPayments[paymentIndex] = {
       ...updatedPayments[paymentIndex],
-      status: verified ? 'verified' : 'rejected',
+      status: verified ? "verified" : "rejected",
       verifiedAt: new Date().toISOString(),
     };
 
@@ -562,31 +594,31 @@ export async function verifyGcashPayment(
       updated_at: new Date().toISOString(),
     };
 
-    if (status === 'paid') {
-      updates.paid_date = new Date().toISOString().split('T')[0];
+    if (status === "paid") {
+      updates.paid_date = new Date().toISOString().split("T")[0];
     }
 
     const { error } = await supabase
-      .from('invoices')
+      .from("invoices")
       .update(updates as any)
-      .eq('id', invoiceId);
+      .eq("id", invoiceId);
 
     if (error) throw error;
 
     await logAuditEvent({
-      action: 'UPDATE',
-      resource: 'invoices',
+      action: "UPDATE",
+      resource: "invoices",
       resourceId: invoiceId,
       details: { paymentId, verified },
     });
 
-    revalidatePath('/admin/invoices');
+    revalidatePath("/admin/invoices");
     revalidatePath(`/admin/invoices/${invoiceId}`);
 
     return { success: true };
   } catch (error) {
-    console.error('[VERIFY PAYMENT ERROR]', error);
-    return { success: false, error: 'Failed to verify payment' };
+    console.error("[VERIFY PAYMENT ERROR]", error);
+    return { success: false, error: "Failed to verify payment" };
   }
 }
 
@@ -598,37 +630,34 @@ export async function deleteInvoice(id: string) {
     const supabase = getAdminClient() as any;
 
     const { data: existing, error: fetchError } = await supabase
-      .from('invoices')
-      .select('id, status')
-      .eq('id', id)
+      .from("invoices")
+      .select("id, status")
+      .eq("id", id)
       .maybeSingle();
 
     if (fetchError || !existing) {
-      return { success: false, error: 'Invoice not found' };
+      return { success: false, error: "Invoice not found" };
     }
 
-    if (existing.status !== 'draft') {
-      return { success: false, error: 'Can only delete draft invoices' };
+    if (existing.status !== "draft") {
+      return { success: false, error: "Can only delete draft invoices" };
     }
 
-    const { error } = await supabase
-      .from('invoices')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from("invoices").delete().eq("id", id);
 
     if (error) throw error;
 
     await logAuditEvent({
-      action: 'DELETE',
-      resource: 'invoices',
+      action: "DELETE",
+      resource: "invoices",
       resourceId: id,
     });
 
-    revalidatePath('/admin/invoices');
+    revalidatePath("/admin/invoices");
 
     return { success: true };
   } catch (error) {
-    console.error('[DELETE INVOICE ERROR]', error);
-    return { success: false, error: 'Failed to delete invoice' };
+    console.error("[DELETE INVOICE ERROR]", error);
+    return { success: false, error: "Failed to delete invoice" };
   }
 }

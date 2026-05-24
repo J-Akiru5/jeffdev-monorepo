@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Add Task Input
@@ -6,8 +6,8 @@
  * Quick inline input for adding new tasks.
  */
 
-import { useState, useRef, KeyboardEvent } from 'react';
-import { Plus } from 'lucide-react';
+import { useState, useRef, KeyboardEvent } from "react";
+import { Plus } from "lucide-react";
 
 interface AddTaskInputProps {
   projectId: string;
@@ -16,22 +16,22 @@ interface AddTaskInputProps {
 
 export function AddTaskInput({ projectId, onAdd }: AddTaskInputProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = () => {
     if (value.trim()) {
       onAdd?.(value.trim(), projectId);
-      setValue('');
+      setValue("");
       setIsExpanded(false);
     }
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleSubmit();
-    } else if (e.key === 'Escape') {
-      setValue('');
+    } else if (e.key === "Escape") {
+      setValue("");
       setIsExpanded(false);
     }
   };
@@ -70,7 +70,7 @@ export function AddTaskInput({ projectId, onAdd }: AddTaskInputProps) {
       <div className="flex items-center justify-end gap-2 border-t border-white/5 bg-white/[0.02] px-3 py-2">
         <button
           onClick={() => {
-            setValue('');
+            setValue("");
             setIsExpanded(false);
           }}
           className="rounded-md px-3 py-1.5 text-xs text-white/50 hover:bg-white/5 hover:text-white"

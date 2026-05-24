@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Case Studies Client Component
@@ -9,8 +9,8 @@
  * - Search/filter by category
  */
 
-import { useState, useTransition } from 'react';
-import Link from 'next/link';
+import { useState, useTransition } from "react";
+import Link from "next/link";
 import {
   Plus,
   Star,
@@ -20,10 +20,10 @@ import {
   ExternalLink,
   Layers,
   GripVertical,
-} from 'lucide-react';
-import { toast } from 'sonner';
-import { toggleFeatured, deleteCaseStudy } from '@/app/actions/case-studies';
-import type { FirestoreProject } from '@/types/supabase';
+} from "lucide-react";
+import { toast } from "sonner";
+import { toggleFeatured, deleteCaseStudy } from "@/app/actions/case-studies";
+import type { FirestoreProject } from "@/types/supabase";
 
 interface Props {
   caseStudies: FirestoreProject[];
@@ -32,12 +32,12 @@ interface Props {
 export function CaseStudiesClient({ caseStudies: initialCaseStudies }: Props) {
   const [isPending, startTransition] = useTransition();
   const [caseStudies, setCaseStudies] = useState(initialCaseStudies);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   // Get unique categories
   const categories = Array.from(
-    new Set(caseStudies.map((cs) => cs.category))
+    new Set(caseStudies.map((cs) => cs.category)),
   ).sort();
 
   // Filter case studies
@@ -46,7 +46,7 @@ export function CaseStudiesClient({ caseStudies: initialCaseStudies }: Props) {
       cs.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       cs.client.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory =
-      categoryFilter === 'all' || cs.category === categoryFilter;
+      categoryFilter === "all" || cs.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
 
@@ -57,14 +57,14 @@ export function CaseStudiesClient({ caseStudies: initialCaseStudies }: Props) {
       if (result.success) {
         setCaseStudies((prev) =>
           prev.map((cs) =>
-            cs.slug === slug ? { ...cs, featured: result.featured! } : cs
-          )
+            cs.slug === slug ? { ...cs, featured: result.featured! } : cs,
+          ),
         );
         toast.success(
-          result.featured ? 'Marked as featured' : 'Removed from featured'
+          result.featured ? "Marked as featured" : "Removed from featured",
         );
       } else {
-        toast.error(result.error || 'Failed to toggle featured');
+        toast.error(result.error || "Failed to toggle featured");
       }
     });
   };
@@ -77,9 +77,9 @@ export function CaseStudiesClient({ caseStudies: initialCaseStudies }: Props) {
       const result = await deleteCaseStudy(slug);
       if (result.success) {
         setCaseStudies((prev) => prev.filter((cs) => cs.slug !== slug));
-        toast.success('Case study deleted');
+        toast.success("Case study deleted");
       } else {
-        toast.error(result.error || 'Failed to delete');
+        toast.error(result.error || "Failed to delete");
       }
     });
   };
@@ -140,11 +140,11 @@ export function CaseStudiesClient({ caseStudies: initialCaseStudies }: Props) {
             No case studies found
           </h3>
           <p className="mt-1 text-sm text-white/50">
-            {searchQuery || categoryFilter !== 'all'
-              ? 'Try adjusting your filters'
-              : 'Create your first case study to get started'}
+            {searchQuery || categoryFilter !== "all"
+              ? "Try adjusting your filters"
+              : "Create your first case study to get started"}
           </p>
-          {!searchQuery && categoryFilter === 'all' && (
+          {!searchQuery && categoryFilter === "all" && (
             <Link
               href="/admin/case-studies/new"
               className="mt-4 inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300"
@@ -178,13 +178,15 @@ export function CaseStudiesClient({ caseStudies: initialCaseStudies }: Props) {
                     disabled={isPending}
                     className={`rounded-sm p-1 transition-colors ${
                       cs.featured
-                        ? 'text-amber-400 hover:text-amber-300'
-                        : 'text-white/20 hover:text-white/40'
+                        ? "text-amber-400 hover:text-amber-300"
+                        : "text-white/20 hover:text-white/40"
                     }`}
-                    title={cs.featured ? 'Remove from featured' : 'Mark as featured'}
+                    title={
+                      cs.featured ? "Remove from featured" : "Mark as featured"
+                    }
                   >
                     <Star
-                      className={`h-4 w-4 ${cs.featured ? 'fill-current' : ''}`}
+                      className={`h-4 w-4 ${cs.featured ? "fill-current" : ""}`}
                     />
                   </button>
                 </div>

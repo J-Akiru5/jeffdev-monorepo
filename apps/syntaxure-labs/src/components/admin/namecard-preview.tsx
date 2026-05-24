@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { UserProfile } from '@/types/user';
-import { Mail, Phone, Globe, Linkedin, Github, Twitter } from 'lucide-react';
+import { UserProfile } from "@/types/user";
+import { Mail, Phone, Globe, Linkedin, Github, Twitter } from "lucide-react";
 
 interface NamecardPreviewProps {
   displayName: string;
@@ -17,7 +17,7 @@ interface NamecardPreviewProps {
     twitter?: string;
     website?: string;
   };
-  namecard: NonNullable<UserProfile['namecard']>;
+  namecard: NonNullable<UserProfile["namecard"]>;
 }
 
 export function NamecardPreview({
@@ -32,25 +32,25 @@ export function NamecardPreview({
 }: NamecardPreviewProps) {
   // Determine background style
   const getBackgroundStyle = () => {
-    const bg = namecard.background || 'gradient-dark';
-    
+    const bg = namecard.background || "gradient-dark";
+
     switch (bg) {
-      case 'gradient-dark':
-        return 'bg-gradient-to-br from-gray-900 to-black';
-      case 'gradient-light':
-        return 'bg-gradient-to-br from-gray-100 to-white';
-      case 'glass-1':
-        return 'bg-white/10 backdrop-blur-md border border-white/20';
-      case 'glass-2': // Dark glass
-        return 'bg-black/40 backdrop-blur-xl border border-white/10';
+      case "gradient-dark":
+        return "bg-gradient-to-br from-gray-900 to-black";
+      case "gradient-light":
+        return "bg-gradient-to-br from-gray-100 to-white";
+      case "glass-1":
+        return "bg-white/10 backdrop-blur-md border border-white/20";
+      case "glass-2": // Dark glass
+        return "bg-black/40 backdrop-blur-xl border border-white/10";
       default:
         // Assume hex color
-        if (bg.startsWith('#')) return undefined; // Handled by style
-        return 'bg-black'; // Fallback
+        if (bg.startsWith("#")) return undefined; // Handled by style
+        return "bg-black"; // Fallback
     }
   };
 
-  const isHexBg = namecard.background?.startsWith('#');
+  const isHexBg = namecard.background?.startsWith("#");
 
   return (
     <div className="sticky top-8 space-y-4">
@@ -59,7 +59,7 @@ export function NamecardPreview({
           Live Preview
         </h3>
         <span className="text-[10px] text-white/30 truncate max-w-[150px]">
-          jeffdev.studio/card/{namecard.username || 'username'}
+          jeffdev.studio/card/{namecard.username || "username"}
         </span>
       </div>
 
@@ -76,25 +76,32 @@ export function NamecardPreview({
 
         {/* Content Container */}
         <div className="relative z-10 flex h-full flex-col justify-between p-6 pt-16 text-center">
-          
           {/* Top Section */}
           <div className="flex flex-col items-center">
             {/* Avatar */}
             <div className="relative mb-4 h-24 w-24 overflow-hidden rounded-full border-4 border-white/10 shadow-xl">
               {photoURL ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={photoURL} alt={displayName} className="h-full w-full object-cover" />
+                <img
+                  src={photoURL}
+                  alt={displayName}
+                  className="h-full w-full object-cover"
+                />
               ) : (
                 <div className="flex h-full w-full items-center justify-center bg-white/10 text-2xl font-bold text-white">
-                  {displayName?.charAt(0) || '?'}
+                  {displayName?.charAt(0) || "?"}
                 </div>
               )}
             </div>
 
             {/* Name & Title */}
-            <h2 className="text-xl font-bold text-white tracking-tight">{displayName || 'Your Name'}</h2>
-            <p className="mt-1 text-sm text-white/60 font-medium">{title || 'Your Title'}</p>
-            
+            <h2 className="text-xl font-bold text-white tracking-tight">
+              {displayName || "Your Name"}
+            </h2>
+            <p className="mt-1 text-sm text-white/60 font-medium">
+              {title || "Your Title"}
+            </p>
+
             {/* Tagline */}
             {namecard.tagline && (
               <div
@@ -104,7 +111,7 @@ export function NamecardPreview({
                 <p className="text-[10px] text-white/80">{namecard.tagline}</p>
               </div>
             )}
-            
+
             {/* Bio */}
             {bio && (
               <p className="mt-4 line-clamp-3 text-xs text-white/50 px-2">
@@ -140,42 +147,65 @@ export function NamecardPreview({
             {/* Social Grid */}
             <div className="mt-4 flex flex-wrap justify-center gap-3">
               {namecard.socials?.linkedin && social.linkedin && (
-                <SocialIcon href={social.linkedin} icon={Linkedin} color="#0077b5" />
+                <SocialIcon
+                  href={social.linkedin}
+                  icon={Linkedin}
+                  color="#0077b5"
+                />
               )}
               {namecard.socials?.github && social.github && (
-                <SocialIcon href={social.github} icon={Github} color="#ffffff" />
+                <SocialIcon
+                  href={social.github}
+                  icon={Github}
+                  color="#ffffff"
+                />
               )}
               {namecard.socials?.twitter && social.twitter && (
-                <SocialIcon href={social.twitter} icon={Twitter} color="#1da1f2" />
+                <SocialIcon
+                  href={social.twitter}
+                  icon={Twitter}
+                  color="#1da1f2"
+                />
               )}
               {namecard.socials?.website && social.website && (
-                <SocialIcon href={social.website} icon={Globe} color={namecard.accentColor} />
+                <SocialIcon
+                  href={social.website}
+                  icon={Globe}
+                  color={namecard.accentColor}
+                />
               )}
             </div>
           </div>
-          
+
           {/* Footer Branding */}
           <div className="mb-2 text-center">
-             <p className="text-[9px] text-white/20 uppercase tracking-widest font-semibold flex items-center justify-center gap-1">
-               <span>Powered by</span> 
-               <span className='text-white/40'>Syntaxure Labs</span>
-             </p>
+            <p className="text-[9px] text-white/20 uppercase tracking-widest font-semibold flex items-center justify-center gap-1">
+              <span>Powered by</span>
+              <span className="text-white/40">Syntaxure Labs</span>
+            </p>
           </div>
-
         </div>
       </div>
     </div>
   );
 }
 
-function SocialIcon({ href, icon: Icon, color }: { href: string; icon: React.ComponentType<{ className?: string }>; color?: string }) {
+function SocialIcon({
+  href,
+  icon: Icon,
+  color,
+}: {
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  color?: string;
+}) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
       className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 border border-white/5 transition-all hover:scale-110 hover:bg-white/10"
-      style={{ color: color || 'white' }}
+      style={{ color: color || "white" }}
     >
       <Icon className="h-5 w-5" />
     </a>

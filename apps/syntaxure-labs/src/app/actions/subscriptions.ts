@@ -1,6 +1,4 @@
-'use server';
-
- 
+"use server";
 
 /**
  * Subscription Server Actions
@@ -8,17 +6,17 @@
  * Server-side operations for managing service subscriptions.
  * Note: Uses actual Supabase database schema with plan, billing_cycle, etc.
  */
-import { getAdminClient } from '@/lib/supabase/admin';
-import { revalidatePath } from 'next/cache';
+import { getAdminClient } from "@/lib/supabase/admin";
+import { revalidatePath } from "next/cache";
 
-const SUBSCRIPTIONS_TABLE = 'subscriptions';
+const SUBSCRIPTIONS_TABLE = "subscriptions";
 
 export interface SubscriptionRow {
   id: string;
   user_id: string;
-  plan: 'free' | 'pro' | 'enterprise';
-  status: 'active' | 'cancelled' | 'paused';
-  billing_cycle: 'monthly' | 'annual';
+  plan: "free" | "pro" | "enterprise";
+  status: "active" | "cancelled" | "paused";
+  billing_cycle: "monthly" | "annual";
   amount: string;
   currency: string;
   current_period_start: string;
@@ -35,18 +33,18 @@ export interface SubscriptionRow {
  * Get all subscriptions with optional status filter
  */
 export async function getSubscriptions(
-  status?: SubscriptionRow['status']
+  status?: SubscriptionRow["status"],
 ): Promise<SubscriptionRow[]> {
   try {
     const supabase = getAdminClient() as any;
 
     let query = supabase
       .from(SUBSCRIPTIONS_TABLE)
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (status) {
-      query = query.eq('status', status);
+      query = query.eq("status", status);
     }
 
     const { data, error } = await query;
@@ -55,7 +53,7 @@ export async function getSubscriptions(
 
     return (data || []) as SubscriptionRow[];
   } catch (error) {
-    console.error('Failed to get subscriptions:', error);
+    console.error("Failed to get subscriptions:", error);
     return [];
   }
 }
@@ -63,21 +61,23 @@ export async function getSubscriptions(
 /**
  * Get a single subscription by ID
  */
-export async function getSubscription(id: string): Promise<SubscriptionRow | null> {
+export async function getSubscription(
+  id: string,
+): Promise<SubscriptionRow | null> {
   try {
     const supabase = getAdminClient() as any;
 
     const { data, error } = await supabase
       .from(SUBSCRIPTIONS_TABLE)
-      .select('*')
-      .eq('id', id)
+      .select("*")
+      .eq("id", id)
       .maybeSingle();
 
     if (error || !data) return null;
 
     return data as SubscriptionRow;
   } catch (error) {
-    console.error('Failed to get subscription:', error);
+    console.error("Failed to get subscription:", error);
     return null;
   }
 }
@@ -85,23 +85,21 @@ export async function getSubscription(id: string): Promise<SubscriptionRow | nul
 /**
  * Create a new subscription
  */
-export async function createSubscription(
-  input: {
-    user_id: string;
-    plan: 'free' | 'pro' | 'enterprise';
-    billing_cycle: 'monthly' | 'annual';
-    amount: string;
-    currency?: string;
-    start_date: Date;
-    metadata?: Record<string, any>;
-  }
-): Promise<{ success: boolean; id?: string; error?: string }> {
+export async function createSubscription(input: {
+  user_id: string;
+  plan: "free" | "pro" | "enterprise";
+  billing_cycle: "monthly" | "annual";
+  amount: string;
+  currency?: string;
+  start_date: Date;
+  metadata?: Record<string, any>;
+}): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
     // Calculate next billing period based on cycle
     const startDate = new Date(input.start_date);
     const endDate = new Date(startDate);
 
-    if (input.billing_cycle === 'monthly') {
+    if (input.billing_cycle === "monthly") {
       endDate.setMonth(endDate.getMonth() + 1);
     } else {
       endDate.setFullYear(endDate.getFullYear() + 1);
@@ -111,31 +109,33 @@ export async function createSubscription(
 
     const { data: result, error } = await supabase
       .from(SUBSCRIPTIONS_TABLE)
-      .insert([{
-        user_id: input.user_id,
-        plan: input.plan,
-        status: 'active',
-        billing_cycle: input.billing_cycle,
-        amount: input.amount,
-        currency: input.currency || 'USD',
-        current_period_start: startDate.toISOString().split('T')[0],
-        current_period_end: endDate.toISOString().split('T')[0],
-        cancel_at_period_end: false,
-        cancelled_at: null,
-        payment_method_id: null,
-        metadata: input.metadata || {},
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }] as any)
-      .select('id');
+      .insert([
+        {
+          user_id: input.user_id,
+          plan: input.plan,
+          status: "active",
+          billing_cycle: input.billing_cycle,
+          amount: input.amount,
+          currency: input.currency || "USD",
+          current_period_start: startDate.toISOString().split("T")[0],
+          current_period_end: endDate.toISOString().split("T")[0],
+          cancel_at_period_end: false,
+          cancelled_at: null,
+          payment_method_id: null,
+          metadata: input.metadata || {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      ] as any)
+      .select("id");
 
     if (error) throw error;
 
-    revalidatePath('/admin/subscriptions');
+    revalidatePath("/admin/subscriptions");
     return { success: true, id: result?.[0]?.id };
   } catch (error) {
-    console.error('Failed to create subscription:', error);
-    return { success: false, error: 'Failed to create subscription' };
+    console.error("Failed to create subscription:", error);
+    return { success: false, error: "Failed to create subscription" };
   }
 }
 
@@ -144,7 +144,7 @@ export async function createSubscription(
  */
 export async function updateSubscription(
   id: string,
-  input: Partial<Omit<SubscriptionRow, 'id' | 'created_at'>>
+  input: Partial<Omit<SubscriptionRow, "id" | "created_at">>,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = getAdminClient() as any;
@@ -180,7 +180,7 @@ export async function updateSubscription(
     }
 
     // Handle status changes
-    if (input.status === 'cancelled' && !input.cancelled_at) {
+    if (input.status === "cancelled" && !input.cancelled_at) {
       updateData.cancelled_at = new Date().toISOString();
     } else if (input.cancelled_at !== undefined) {
       updateData.cancelled_at = input.cancelled_at;
@@ -191,15 +191,15 @@ export async function updateSubscription(
     const { error } = await supabase
       .from(SUBSCRIPTIONS_TABLE)
       .update(updateData as any)
-      .eq('id', id);
+      .eq("id", id);
 
     if (error) throw error;
 
-    revalidatePath('/admin/subscriptions');
+    revalidatePath("/admin/subscriptions");
     return { success: true };
   } catch (error) {
-    console.error('Failed to update subscription:', error);
-    return { success: false, error: 'Failed to update subscription' };
+    console.error("Failed to update subscription:", error);
+    return { success: false, error: "Failed to update subscription" };
   }
 }
 
@@ -207,10 +207,10 @@ export async function updateSubscription(
  * Cancel a subscription
  */
 export async function cancelSubscription(
-  id: string
+  id: string,
 ): Promise<{ success: boolean; error?: string }> {
   return updateSubscription(id, {
-    status: 'cancelled',
+    status: "cancelled",
     cancelled_at: new Date().toISOString(),
   });
 }
@@ -219,10 +219,10 @@ export async function cancelSubscription(
  * Pause a subscription
  */
 export async function pauseSubscription(
-  id: string
+  id: string,
 ): Promise<{ success: boolean; error?: string }> {
   return updateSubscription(id, {
-    status: 'paused',
+    status: "paused",
   });
 }
 
@@ -230,9 +230,9 @@ export async function pauseSubscription(
  * Resume a suspended subscription
  */
 export async function resumeSubscription(
-  id: string
+  id: string,
 ): Promise<{ success: boolean; error?: string }> {
-  return updateSubscription(id, { status: 'active' });
+  return updateSubscription(id, { status: "active" });
 }
 
 /**
@@ -249,7 +249,7 @@ export async function getSubscriptionStats(): Promise<{
 
     const { data, error } = await supabase
       .from(SUBSCRIPTIONS_TABLE)
-      .select('*');
+      .select("*");
 
     if (error) throw error;
 
@@ -260,14 +260,14 @@ export async function getSubscriptionStats(): Promise<{
     (data || []).forEach((subscription: any) => {
       total++;
 
-      if (subscription.status === 'active') {
+      if (subscription.status === "active") {
         active++;
 
         // Calculate MRR based on billing cycle
         const amount = parseFloat(subscription.amount);
-        if (subscription.billing_cycle === 'monthly') {
+        if (subscription.billing_cycle === "monthly") {
           mrr += amount;
-        } else if (subscription.billing_cycle === 'annual') {
+        } else if (subscription.billing_cycle === "annual") {
           mrr += amount / 12;
         }
       }
@@ -275,7 +275,7 @@ export async function getSubscriptionStats(): Promise<{
 
     return { total, active, mrr: Math.round(mrr * 100) / 100 };
   } catch (error) {
-    console.error('Failed to get subscription stats:', error);
+    console.error("Failed to get subscription stats:", error);
     return { total: 0, active: 0, mrr: 0 };
   }
 }

@@ -1,7 +1,7 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import { PublicNav } from '@/components/layout/public-nav';
-import { AnimatedHero } from '@/components/hero';
+import Link from "next/link";
+import Image from "next/image";
+import { PublicNav } from "@/components/layout/public-nav";
+import { AnimatedHero } from "@/components/hero";
 
 export default function HomePage() {
   return (
@@ -25,7 +25,9 @@ export default function HomePage() {
                   width={24}
                   height={24}
                 />
-                <span className="text-gradient-cyan font-bold">Prism Context Engine</span>
+                <span className="text-gradient-cyan font-bold">
+                  Prism Context Engine
+                </span>
               </div>
               <p className="text-white/40 text-sm">
                 The Context Operating System for developers who ship fast.
@@ -34,20 +36,32 @@ export default function HomePage() {
 
             {/* Product */}
             <div>
-              <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Product</h3>
+              <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">
+                Product
+              </h3>
               <ul className="space-y-2">
                 <li>
-                  <Link href="/features" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
+                  <Link
+                    href="/features"
+                    className="text-white/60 hover:text-cyan-400 text-sm transition-colors"
+                  >
                     Features
                   </Link>
                 </li>
                 <li>
-                  <Link href="/pricing" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
+                  <Link
+                    href="/pricing"
+                    className="text-white/60 hover:text-cyan-400 text-sm transition-colors"
+                  >
                     Pricing
                   </Link>
                 </li>
                 <li>
-                  <Link href="https://docs.jeffdev.studio" target="_blank" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
+                  <Link
+                    href="https://docs.jeffdev.studio"
+                    target="_blank"
+                    className="text-white/60 hover:text-cyan-400 text-sm transition-colors"
+                  >
                     Docs
                   </Link>
                 </li>
@@ -56,15 +70,25 @@ export default function HomePage() {
 
             {/* Company */}
             <div>
-              <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Company</h3>
+              <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">
+                Company
+              </h3>
               <ul className="space-y-2">
                 <li>
-                  <Link href="https://jeffdev.studio" target="_blank" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
+                  <Link
+                    href="https://jeffdev.studio"
+                    target="_blank"
+                    className="text-white/60 hover:text-cyan-400 text-sm transition-colors"
+                  >
                     About Syntaxure Labs
                   </Link>
                 </li>
                 <li>
-                  <Link href="https://jeffdev.studio/contact" target="_blank" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
+                  <Link
+                    href="https://jeffdev.studio/contact"
+                    target="_blank"
+                    className="text-white/60 hover:text-cyan-400 text-sm transition-colors"
+                  >
                     Contact
                   </Link>
                 </li>
@@ -73,7 +97,9 @@ export default function HomePage() {
 
             {/* CTA */}
             <div>
-              <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Get Started</h3>
+              <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">
+                Get Started
+              </h3>
               <p className="text-white/60 text-sm mb-4">
                 Ready to eliminate context pollution?
               </p>
@@ -88,13 +114,20 @@ export default function HomePage() {
 
           <div className="border-t border-white/5 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
             <p className="text-white/30 text-xs font-mono">
-              © {new Date().getFullYear()} Syntaxure Labs. Built with Prism Context Engine.
+              © {new Date().getFullYear()} Syntaxure Labs. Built with Prism
+              Context Engine.
             </p>
             <div className="flex gap-6 mt-4 md:mt-0">
-              <Link href="/terms" className="text-white/30 hover:text-white/60 text-xs transition-colors">
+              <Link
+                href="/terms"
+                className="text-white/30 hover:text-white/60 text-xs transition-colors"
+              >
                 Terms
               </Link>
-              <Link href="/privacy" className="text-white/30 hover:text-white/60 text-xs transition-colors">
+              <Link
+                href="/privacy"
+                className="text-white/30 hover:text-white/60 text-xs transition-colors"
+              >
                 Privacy
               </Link>
             </div>

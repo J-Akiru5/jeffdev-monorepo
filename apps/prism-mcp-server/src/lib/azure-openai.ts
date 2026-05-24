@@ -4,18 +4,18 @@
  * Generates embeddings for semantic search queries and chat completions.
  */
 
-import { AzureOpenAI } from 'openai';
+import { AzureOpenAI } from "openai";
 
 function getBaseEndpoint(raw: string): string {
   try {
     const url = new URL(raw);
-    if (url.pathname.includes('/deployments/')) {
-      url.pathname = '/';
-      url.search = '';
+    if (url.pathname.includes("/deployments/")) {
+      url.pathname = "/";
+      url.search = "";
     }
-    return url.toString().replace(/\/+$/, '');
+    return url.toString().replace(/\/+$/, "");
   } catch {
-    return raw.replace(/\/+$/, '');
+    return raw.replace(/\/+$/, "");
   }
 }
 
@@ -29,14 +29,14 @@ function getAzureOpenAIClient(): AzureOpenAI {
 
   if (!endpoint || !apiKey) {
     throw new Error(
-      'Azure OpenAI not configured. Set AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY environment variables.'
+      "Azure OpenAI not configured. Set AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY environment variables.",
     );
   }
 
   _azureClient = new AzureOpenAI({
     endpoint: getBaseEndpoint(endpoint),
     apiKey,
-    apiVersion: '2024-10-01-preview',
+    apiVersion: "2024-10-01-preview",
   });
 
   return _azureClient;
@@ -50,15 +50,17 @@ export async function generateQueryEmbedding(query: string): Promise<number[]> {
 
   try {
     const response = await client.embeddings.create({
-      model: process.env.AZURE_OPENAI_EMBEDDING_DEPLOYMENT || 'text-embedding-3-small',
+      model:
+        process.env.AZURE_OPENAI_EMBEDDING_DEPLOYMENT ||
+        "text-embedding-3-small",
       input: query,
     });
 
     return response.data[0]?.embedding || [];
   } catch (error) {
-    console.error('[Azure OpenAI] Query embedding generation failed:', error);
+    console.error("[Azure OpenAI] Query embedding generation failed:", error);
     throw new Error(
-      `Failed to generate query embedding: ${error instanceof Error ? error.message : 'Unknown error'}`
+      `Failed to generate query embedding: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
   }
 }
@@ -66,9 +68,12 @@ export async function generateQueryEmbedding(query: string): Promise<number[]> {
 /**
  * Generate embeddings for multiple texts in batch
  */
-export async function generateBatchEmbeddings(texts: string[]): Promise<number[][]> {
+export async function generateBatchEmbeddings(
+  texts: string[],
+): Promise<number[][]> {
   const client = getAzureOpenAIClient();
-  const model = process.env.AZURE_OPENAI_EMBEDDING_DEPLOYMENT || 'text-embedding-3-small';
+  const model =
+    process.env.AZURE_OPENAI_EMBEDDING_DEPLOYMENT || "text-embedding-3-small";
 
   const results: number[][] = [];
   for (let i = 0; i < texts.length; i += 10) {
@@ -89,16 +94,16 @@ export async function generateChatCompletion(
   userMessage: string,
 ): Promise<string> {
   const client = getAzureOpenAIClient();
-  const deployment = process.env.AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt-4o-mini';
+  const deployment = process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "gpt-4o-mini";
 
   const response = await client.chat.completions.create({
     model: deployment,
     messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userMessage },
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userMessage },
     ],
     max_tokens: 2000,
   });
 
-  return response.choices[0]?.message?.content || '';
+  return response.choices[0]?.message?.content || "";
 }

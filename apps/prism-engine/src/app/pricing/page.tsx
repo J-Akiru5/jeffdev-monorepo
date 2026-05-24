@@ -1,121 +1,188 @@
-import Image from 'next/image';
-import Link from 'next/link';
-import { Check, X, Sparkles, ChevronDown } from 'lucide-react';
+import Image from "next/image";
+import Link from "next/link";
+import { Check, X, Sparkles, ChevronDown } from "lucide-react";
 
 export const metadata = {
-  title: 'Pricing | Prism Context Engine',
-  description: 'Choose the right plan for your context governance needs. Start free, upgrade when you need more power.',
+  title: "Pricing | Prism Context Engine",
+  description:
+    "Choose the right plan for your context governance needs. Start free, upgrade when you need more power.",
 };
 
 const plans = [
   {
-    name: 'Free',
-    tagline: 'Get started with the basics',
+    name: "Free",
+    tagline: "Get started with the basics",
     price: { monthly: 0, annual: 0 },
     features: [
-      '5 rules',
-      '3 components',
-      '1 project',
-      '10 AI generations/month',
-      'Export as Markdown',
+      "5 rules",
+      "3 components",
+      "1 project",
+      "10 AI generations/month",
+      "Export as Markdown",
     ],
-    cta: 'Get Started',
-    href: '/sign-up',
+    cta: "Get Started",
+    href: "/sign-up",
   },
   {
-    name: 'Pro',
-    tagline: 'For serious developers',
+    name: "Pro",
+    tagline: "For serious developers",
     price: { monthly: 18, annual: 180 },
     features: [
-      'Unlimited rules',
-      'Unlimited components',
-      '10 projects',
-      '500 AI generations/month',
-      'IDE auto-sync',
-      'All design systems',
-      'All stack templates',
-      'Priority support',
+      "Unlimited rules",
+      "Unlimited components",
+      "10 projects",
+      "500 AI generations/month",
+      "IDE auto-sync",
+      "All design systems",
+      "All stack templates",
+      "Priority support",
     ],
     popular: true,
-    cta: 'Start Free Trial',
-    href: '/sign-up',
+    cta: "Start Free Trial",
+    href: "/sign-up",
   },
   {
-    name: 'Team',
-    tagline: 'Collaborate with your team',
+    name: "Team",
+    tagline: "Collaborate with your team",
     price: { monthly: 54, annual: 540 },
     features: [
-      'Everything in Pro',
-      'Unlimited projects',
-      '2,000 AI generations/month',
-      'Up to 10 team members',
-      'Shared component library',
-      'Team rule management',
-      'Admin dashboard',
+      "Everything in Pro",
+      "Unlimited projects",
+      "2,000 AI generations/month",
+      "Up to 10 team members",
+      "Shared component library",
+      "Team rule management",
+      "Admin dashboard",
     ],
-    cta: 'Start Free Trial',
-    href: '/sign-up',
+    cta: "Start Free Trial",
+    href: "/sign-up",
   },
   {
-    name: 'Enterprise',
-    tagline: 'Custom solutions for scale',
+    name: "Enterprise",
+    tagline: "Custom solutions for scale",
     price: null,
     features: [
-      'Everything in Team',
-      'Unlimited team members',
-      'Unlimited AI generations',
-      'SSO/SAML',
-      'Audit logs',
-      'Dedicated support',
-      'Custom integrations',
+      "Everything in Team",
+      "Unlimited team members",
+      "Unlimited AI generations",
+      "SSO/SAML",
+      "Audit logs",
+      "Dedicated support",
+      "Custom integrations",
     ],
-    cta: 'Contact Sales',
-    href: 'https://jeffdev.studio/contact',
+    cta: "Contact Sales",
+    href: "https://jeffdev.studio/contact",
   },
 ];
 
 const comparisonFeatures = [
-  { name: 'Rules', free: '5', pro: 'Unlimited', team: 'Unlimited', enterprise: 'Unlimited' },
-  { name: 'Components', free: '3', pro: 'Unlimited', team: 'Unlimited', enterprise: 'Unlimited' },
-  { name: 'Projects', free: '1', pro: '10', team: 'Unlimited', enterprise: 'Unlimited' },
-  { name: 'AI Generations/mo', free: '10', pro: '500', team: '2,000', enterprise: 'Unlimited' },
-  { name: 'IDE Auto-sync', free: false, pro: true, team: true, enterprise: true },
-  { name: 'Team Members', free: '-', pro: '-', team: '10', enterprise: 'Unlimited' },
-  { name: 'Shared Library', free: false, pro: false, team: true, enterprise: true },
-  { name: 'SSO/SAML', free: false, pro: false, team: false, enterprise: true },
-  { name: 'Audit Logs', free: false, pro: false, team: false, enterprise: true },
-  { name: 'Priority Support', free: false, pro: true, team: true, enterprise: true },
-  { name: 'Dedicated Support', free: false, pro: false, team: false, enterprise: true },
+  {
+    name: "Rules",
+    free: "5",
+    pro: "Unlimited",
+    team: "Unlimited",
+    enterprise: "Unlimited",
+  },
+  {
+    name: "Components",
+    free: "3",
+    pro: "Unlimited",
+    team: "Unlimited",
+    enterprise: "Unlimited",
+  },
+  {
+    name: "Projects",
+    free: "1",
+    pro: "10",
+    team: "Unlimited",
+    enterprise: "Unlimited",
+  },
+  {
+    name: "AI Generations/mo",
+    free: "10",
+    pro: "500",
+    team: "2,000",
+    enterprise: "Unlimited",
+  },
+  {
+    name: "IDE Auto-sync",
+    free: false,
+    pro: true,
+    team: true,
+    enterprise: true,
+  },
+  {
+    name: "Team Members",
+    free: "-",
+    pro: "-",
+    team: "10",
+    enterprise: "Unlimited",
+  },
+  {
+    name: "Shared Library",
+    free: false,
+    pro: false,
+    team: true,
+    enterprise: true,
+  },
+  { name: "SSO/SAML", free: false, pro: false, team: false, enterprise: true },
+  {
+    name: "Audit Logs",
+    free: false,
+    pro: false,
+    team: false,
+    enterprise: true,
+  },
+  {
+    name: "Priority Support",
+    free: false,
+    pro: true,
+    team: true,
+    enterprise: true,
+  },
+  {
+    name: "Dedicated Support",
+    free: false,
+    pro: false,
+    team: false,
+    enterprise: true,
+  },
 ];
 
 const faqs = [
   {
-    question: 'Can I cancel anytime?',
-    answer: 'Yes! You can cancel your subscription at any time. You\'ll retain access until the end of your billing period.',
+    question: "Can I cancel anytime?",
+    answer:
+      "Yes! You can cancel your subscription at any time. You'll retain access until the end of your billing period.",
   },
   {
-    question: 'What payment methods do you accept?',
-    answer: 'We accept PayPal, which supports credit cards, debit cards, and PayPal balance.',
+    question: "What payment methods do you accept?",
+    answer:
+      "We accept PayPal, which supports credit cards, debit cards, and PayPal balance.",
   },
   {
-    question: 'Can I upgrade or downgrade later?',
-    answer: 'Absolutely. You can change your plan at any time. Upgrades take effect immediately, and downgrades apply at the next billing cycle.',
+    question: "Can I upgrade or downgrade later?",
+    answer:
+      "Absolutely. You can change your plan at any time. Upgrades take effect immediately, and downgrades apply at the next billing cycle.",
   },
   {
-    question: 'What happens to my data if I cancel?',
-    answer: 'Your rules and components remain accessible in read-only mode for 30 days. You can always export them or resubscribe to regain full access.',
+    question: "What happens to my data if I cancel?",
+    answer:
+      "Your rules and components remain accessible in read-only mode for 30 days. You can always export them or resubscribe to regain full access.",
   },
   {
-    question: 'Do you offer refunds?',
-    answer: 'We offer a 14-day money-back guarantee for annual subscriptions. Monthly subscriptions can be cancelled anytime but are non-refundable for the current period.',
+    question: "Do you offer refunds?",
+    answer:
+      "We offer a 14-day money-back guarantee for annual subscriptions. Monthly subscriptions can be cancelled anytime but are non-refundable for the current period.",
   },
   {
-    question: 'Is there a free trial?',
-    answer: 'Yes! Pro and Team plans include a 7-day free trial. No credit card required to start.',
+    question: "Is there a free trial?",
+    answer:
+      "Yes! Pro and Team plans include a 7-day free trial. No credit card required to start.",
   },
 ];
 
-import { PublicNav } from '@/components/layout/public-nav';
+import { PublicNav } from "@/components/layout/public-nav";
 
 export default function PublicPricingPage() {
   return (
@@ -133,13 +200,14 @@ export default function PublicPricingPage() {
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             <span className="bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
               Simple, Transparent
-            </span>{' '}
+            </span>{" "}
             <span className="bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent">
               Pricing
             </span>
           </h1>
           <p className="text-white/60 text-lg max-w-2xl mx-auto">
-            Start free, upgrade when you need more power. No hidden fees, no surprises.
+            Start free, upgrade when you need more power. No hidden fees, no
+            surprises.
           </p>
         </div>
       </section>
@@ -152,8 +220,8 @@ export default function PublicPricingPage() {
               key={plan.name}
               className={`relative flex flex-col rounded-lg border p-6 ${
                 plan.popular
-                  ? 'border-cyan-500/50 bg-gradient-to-b from-cyan-500/10 to-transparent'
-                : 'border-white/10 bg-white/2'
+                  ? "border-cyan-500/50 bg-gradient-to-b from-cyan-500/10 to-transparent"
+                  : "border-white/10 bg-white/2"
               }`}
             >
               {plan.popular && (
@@ -178,7 +246,7 @@ export default function PublicPricingPage() {
                 ) : (
                   <div className="flex items-baseline gap-1">
                     <span className="text-3xl font-bold text-white">
-                          ${plan.price.monthly}
+                      ${plan.price.monthly}
                     </span>
                     <span className="text-white/60">/month</span>
                   </div>
@@ -187,7 +255,10 @@ export default function PublicPricingPage() {
 
               <ul className="mb-6 flex-1 space-y-3">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2 text-sm text-white/80">
+                  <li
+                    key={feature}
+                    className="flex items-start gap-2 text-sm text-white/80"
+                  >
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-cyan-400" />
                     {feature}
                   </li>
@@ -198,12 +269,12 @@ export default function PublicPricingPage() {
                 href={plan.href}
                 className={`w-full rounded-md py-2.5 font-medium text-center transition-all ${
                   plan.popular
-                    ? 'bg-cyan-500 text-black hover:bg-cyan-400'
+                    ? "bg-cyan-500 text-black hover:bg-cyan-400"
                     : plan.price?.monthly === 0
-                    ? 'border border-white/20 text-white hover:bg-white/5'
-                    : plan.price === null
-                    ? 'border border-white/20 text-white hover:bg-white/5'
-                    : 'bg-white text-black hover:bg-white/90'
+                      ? "border border-white/20 text-white hover:bg-white/5"
+                      : plan.price === null
+                        ? "border border-white/20 text-white hover:bg-white/5"
+                        : "bg-white text-black hover:bg-white/90"
                 }`}
               >
                 {plan.cta}
@@ -224,33 +295,49 @@ export default function PublicPricingPage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-white/10">
-                  <th className="text-left py-4 px-4 text-white/60 font-medium">Feature</th>
-                  <th className="text-center py-4 px-4 text-white font-medium">Free</th>
-                  <th className="text-center py-4 px-4 text-cyan-400 font-medium">Pro</th>
-                  <th className="text-center py-4 px-4 text-white font-medium">Team</th>
-                  <th className="text-center py-4 px-4 text-white font-medium">Enterprise</th>
+                  <th className="text-left py-4 px-4 text-white/60 font-medium">
+                    Feature
+                  </th>
+                  <th className="text-center py-4 px-4 text-white font-medium">
+                    Free
+                  </th>
+                  <th className="text-center py-4 px-4 text-cyan-400 font-medium">
+                    Pro
+                  </th>
+                  <th className="text-center py-4 px-4 text-white font-medium">
+                    Team
+                  </th>
+                  <th className="text-center py-4 px-4 text-white font-medium">
+                    Enterprise
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {comparisonFeatures.map((feature) => (
                   <tr key={feature.name} className="border-b border-white/5">
-                    <td className="py-4 px-4 text-white/80 text-sm">{feature.name}</td>
-                    {(['free', 'pro', 'team', 'enterprise'] as const).map((plan) => {
-                      const value = feature[plan];
-                      return (
-                        <td key={plan} className="py-4 px-4 text-center">
-                          {typeof value === 'boolean' ? (
-                            value ? (
-                              <Check className="h-5 w-5 text-emerald-400 mx-auto" />
+                    <td className="py-4 px-4 text-white/80 text-sm">
+                      {feature.name}
+                    </td>
+                    {(["free", "pro", "team", "enterprise"] as const).map(
+                      (plan) => {
+                        const value = feature[plan];
+                        return (
+                          <td key={plan} className="py-4 px-4 text-center">
+                            {typeof value === "boolean" ? (
+                              value ? (
+                                <Check className="h-5 w-5 text-emerald-400 mx-auto" />
+                              ) : (
+                                <X className="h-5 w-5 text-white/20 mx-auto" />
+                              )
                             ) : (
-                              <X className="h-5 w-5 text-white/20 mx-auto" />
-                            )
-                          ) : (
-                            <span className="text-white/80 text-sm font-mono">{value}</span>
-                          )}
-                        </td>
-                      );
-                    })}
+                              <span className="text-white/80 text-sm font-mono">
+                                {value}
+                              </span>
+                            )}
+                          </td>
+                        );
+                      },
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -292,7 +379,8 @@ export default function PublicPricingPage() {
             Ready to eliminate context pollution?
           </h2>
           <p className="text-white/60 mb-8">
-            Start with Free, upgrade when you need more. No credit card required.
+            Start with Free, upgrade when you need more. No credit card
+            required.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -327,7 +415,9 @@ export default function PublicPricingPage() {
                   width={24}
                   height={24}
                 />
-                <span className="text-gradient-cyan font-bold">Prism Context Engine</span>
+                <span className="text-gradient-cyan font-bold">
+                  Prism Context Engine
+                </span>
               </div>
               <p className="text-white/40 text-sm">
                 The Context Operating System for developers who ship fast.
@@ -335,20 +425,32 @@ export default function PublicPricingPage() {
             </div>
 
             <div>
-              <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Product</h3>
+              <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">
+                Product
+              </h3>
               <ul className="space-y-2">
                 <li>
-                  <Link href="/" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
+                  <Link
+                    href="/"
+                    className="text-white/60 hover:text-cyan-400 text-sm transition-colors"
+                  >
                     Features
                   </Link>
                 </li>
                 <li>
-                  <Link href="/pricing" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
+                  <Link
+                    href="/pricing"
+                    className="text-white/60 hover:text-cyan-400 text-sm transition-colors"
+                  >
                     Pricing
                   </Link>
                 </li>
                 <li>
-                  <Link href="https://docs.jeffdev.studio" target="_blank" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
+                  <Link
+                    href="https://docs.jeffdev.studio"
+                    target="_blank"
+                    className="text-white/60 hover:text-cyan-400 text-sm transition-colors"
+                  >
                     Docs
                   </Link>
                 </li>
@@ -356,15 +458,25 @@ export default function PublicPricingPage() {
             </div>
 
             <div>
-              <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Company</h3>
+              <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">
+                Company
+              </h3>
               <ul className="space-y-2">
                 <li>
-                  <Link href="https://jeffdev.studio" target="_blank" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
+                  <Link
+                    href="https://jeffdev.studio"
+                    target="_blank"
+                    className="text-white/60 hover:text-cyan-400 text-sm transition-colors"
+                  >
                     About Syntaxure Labs
                   </Link>
                 </li>
                 <li>
-                  <Link href="https://jeffdev.studio/contact" target="_blank" className="text-white/60 hover:text-cyan-400 text-sm transition-colors">
+                  <Link
+                    href="https://jeffdev.studio/contact"
+                    target="_blank"
+                    className="text-white/60 hover:text-cyan-400 text-sm transition-colors"
+                  >
                     Contact
                   </Link>
                 </li>
@@ -372,7 +484,9 @@ export default function PublicPricingPage() {
             </div>
 
             <div>
-              <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">Get Started</h3>
+              <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">
+                Get Started
+              </h3>
               <p className="text-white/60 text-sm mb-4">
                 Ready to eliminate context pollution?
               </p>
@@ -387,13 +501,20 @@ export default function PublicPricingPage() {
 
           <div className="border-t border-white/5 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
             <p className="text-white/30 text-xs font-mono">
-              © {new Date().getFullYear()} Syntaxure Labs. Built with Prism Context Engine.
+              © {new Date().getFullYear()} Syntaxure Labs. Built with Prism
+              Context Engine.
             </p>
             <div className="flex gap-6 mt-4 md:mt-0">
-              <Link href="/terms" className="text-white/30 hover:text-white/60 text-xs transition-colors">
+              <Link
+                href="/terms"
+                className="text-white/30 hover:text-white/60 text-xs transition-colors"
+              >
                 Terms
               </Link>
-              <Link href="/privacy" className="text-white/30 hover:text-white/60 text-xs transition-colors">
+              <Link
+                href="/privacy"
+                className="text-white/30 hover:text-white/60 text-xs transition-colors"
+              >
                 Privacy
               </Link>
             </div>

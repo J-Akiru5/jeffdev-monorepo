@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Case Study Image Upload Component
@@ -7,12 +7,12 @@
  * Shows preview and allows deletion.
  */
 
-import { useState, useCallback } from 'react';
-import Image from 'next/image';
-import { useDropzone } from 'react-dropzone';
-import { Upload, X, ImageIcon, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { uploadFile } from '@/app/actions/upload';
+import { useState, useCallback } from "react";
+import Image from "next/image";
+import { useDropzone } from "react-dropzone";
+import { Upload, X, ImageIcon, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { uploadFile } from "@/app/actions/upload";
 
 interface Props {
   currentImage: string | null;
@@ -30,13 +30,13 @@ export function CaseStudyImageUpload({ currentImage, onImageChange }: Props) {
 
       // Validate size (10MB)
       if (file.size > 10 * 1024 * 1024) {
-        toast.error('Image must be less than 10MB');
+        toast.error("Image must be less than 10MB");
         return;
       }
 
       // Validate type
-      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-        toast.error('Only JPG, PNG, and WebP images are allowed');
+      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+        toast.error("Only JPG, PNG, and WebP images are allowed");
         return;
       }
 
@@ -45,7 +45,7 @@ export function CaseStudyImageUpload({ currentImage, onImageChange }: Props) {
       try {
         // Create FormData
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append("file", file);
 
         // Upload via server action
         const result = await uploadFile(formData);
@@ -53,26 +53,26 @@ export function CaseStudyImageUpload({ currentImage, onImageChange }: Props) {
         if (result.success && result.url) {
           setPreview(result.url);
           onImageChange(result.url);
-          toast.success('Image uploaded');
+          toast.success("Image uploaded");
         } else {
-          toast.error(result.error || 'Upload failed');
+          toast.error(result.error || "Upload failed");
         }
       } catch (error) {
-        console.error('Upload error:', error);
-        toast.error('Failed to upload image');
+        console.error("Upload error:", error);
+        toast.error("Failed to upload image");
       } finally {
         setIsUploading(false);
       }
     },
-    [onImageChange]
+    [onImageChange],
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/jpeg': ['.jpg', '.jpeg'],
-      'image/png': ['.png'],
-      'image/webp': ['.webp'],
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/png": [".png"],
+      "image/webp": [".webp"],
     },
     maxFiles: 1,
     disabled: isUploading,
@@ -113,9 +113,9 @@ export function CaseStudyImageUpload({ currentImage, onImageChange }: Props) {
           {...getRootProps()}
           className={`flex cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed px-6 py-10 transition-colors ${
             isDragActive
-              ? 'border-cyan-500 bg-cyan-500/10'
-              : 'border-white/10 hover:border-white/20 hover:bg-white/5'
-          } ${isUploading ? 'pointer-events-none opacity-50' : ''}`}
+              ? "border-cyan-500 bg-cyan-500/10"
+              : "border-white/10 hover:border-white/20 hover:bg-white/5"
+          } ${isUploading ? "pointer-events-none opacity-50" : ""}`}
         >
           <input {...getInputProps()} />
           {isUploading ? (

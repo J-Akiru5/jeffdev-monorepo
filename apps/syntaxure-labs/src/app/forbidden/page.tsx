@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { ShieldOff } from 'lucide-react';
-import { useState } from 'react';
-import { SupportForm } from '@/components/support-form';
+import Link from "next/link";
+import { ShieldOff } from "lucide-react";
+import { useState } from "react";
+import { SupportForm } from "@/components/support-form";
 
 /**
  * 403 Forbidden Page
@@ -33,8 +33,8 @@ export default function ForbiddenPage() {
 
         {/* Description */}
         <p className="mt-3 text-white/50">
-          You don&apos;t have permission to access this resource. If you believe this is
-          an error, please contact your administrator.
+          You don&apos;t have permission to access this resource. If you believe
+          this is an error, please contact your administrator.
         </p>
 
         {/* Actions */}
@@ -57,11 +57,10 @@ export default function ForbiddenPage() {
         <div className="mt-8">
           {showForm ? (
             <div className="text-left rounded-md border border-white/10 bg-white/5 p-6">
-              <h3 className="text-sm font-medium text-white mb-4">Contact Support</h3>
-              <SupportForm
-                defaultSubject="Access Denied - Need Help"
-                compact
-              />
+              <h3 className="text-sm font-medium text-white mb-4">
+                Contact Support
+              </h3>
+              <SupportForm defaultSubject="Access Denied - Need Help" compact />
               <button
                 onClick={() => setShowForm(false)}
                 className="mt-4 text-xs text-white/40 hover:text-white/60"
@@ -71,14 +70,14 @@ export default function ForbiddenPage() {
             </div>
           ) : (
             <p className="text-xs text-white/30">
-              Need help?{' '}
-                <button
-                  onClick={() => setShowForm(true)}
-                  className="text-cyan-400 hover:underline"
-                >
-                  Contact Support
-                </button>
-              </p>
+              Need help?{" "}
+              <button
+                onClick={() => setShowForm(true)}
+                className="text-cyan-400 hover:underline"
+              >
+                Contact Support
+              </button>
+            </p>
           )}
         </div>
       </div>

@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { getConfig, resolveFormat, resolveMaxTokens, overridePlatform } from "./platform-formatter.js";
+import {
+  getConfig,
+  resolveFormat,
+  resolveMaxTokens,
+  overridePlatform,
+} from "./platform-formatter.js";
 import { setCurrentClient } from "./client-detector.js";
 
 describe("platform-formatter", () => {

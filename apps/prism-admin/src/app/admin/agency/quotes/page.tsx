@@ -36,36 +36,45 @@ export default async function AgencyQuotesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Quote Requests</h1>
-          <p className="mt-1 text-sm text-white/50">{quotes?.length || 0} total submissions</p>
+          <p className="mt-1 text-sm text-white/50">
+            {quotes?.length || 0} total submissions
+          </p>
         </div>
       </div>
 
       <div className="grid gap-3">
-        {quotes && quotes.length > 0 ? quotes.map((quote) => (
-          <div
-            key={quote.id}
-            className="rounded-lg border border-white/5 bg-white/[0.02] p-4 hover:border-white/10 transition-all"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-medium text-white">{quote.title}</h3>
-                <p className="text-xs text-white/40 mt-0.5">
-                  {(quote as any).client_name || "Client"} &middot; ${(quote as any).amount || 0}
-                </p>
+        {quotes && quotes.length > 0 ? (
+          quotes.map((quote) => (
+            <div
+              key={quote.id}
+              className="rounded-lg border border-white/5 bg-white/[0.02] p-4 hover:border-white/10 transition-all"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-medium text-white">
+                    {quote.title}
+                  </h3>
+                  <p className="text-xs text-white/40 mt-0.5">
+                    {(quote as any).client_name || "Client"} &middot; $
+                    {(quote as any).amount || 0}
+                  </p>
+                </div>
+                <span
+                  className={`rounded-sm px-2 py-0.5 text-[10px] uppercase tracking-wider ${
+                    statusColors[quote.status] || "bg-white/10 text-white/40"
+                  }`}
+                >
+                  {quote.status}
+                </span>
               </div>
-              <span
-                className={`rounded-sm px-2 py-0.5 text-[10px] uppercase tracking-wider ${
-                  statusColors[quote.status] || "bg-white/10 text-white/40"
-                }`}
-              >
-                {quote.status}
-              </span>
+              {quote.description && (
+                <p className="mt-2 text-xs text-white/30 line-clamp-2">
+                  {quote.description}
+                </p>
+              )}
             </div>
-            {quote.description && (
-              <p className="mt-2 text-xs text-white/30 line-clamp-2">{quote.description}</p>
-            )}
-          </div>
-        )) : (
+          ))
+        ) : (
           <div className="py-12 text-center text-white/30">No quotes yet</div>
         )}
       </div>

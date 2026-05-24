@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Project Context
@@ -6,8 +6,8 @@
  * Manages the currently active project and project list.
  */
 
-import { createContext, useContext, useState, ReactNode } from 'react';
-import type { Project } from '@/lib/schemas';
+import { createContext, useContext, useState, ReactNode } from "react";
+import type { Project } from "@/lib/schemas";
 
 interface ProjectContextType {
   projects: Project[];
@@ -51,7 +51,7 @@ export function ProjectProvider({
 export function useProjects() {
   const context = useContext(ProjectContext);
   if (context === undefined) {
-    throw new Error('useProjects must be used within a ProjectProvider');
+    throw new Error("useProjects must be used within a ProjectProvider");
   }
   return context;
 }

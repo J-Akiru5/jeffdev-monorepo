@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Bootstrap Button
@@ -7,11 +7,11 @@
  * Shows in System Info section of Settings page.
  */
 
-import { useState } from 'react';
-import { Shield, Loader2, Check } from 'lucide-react';
-import { toast } from 'sonner';
-import { bootstrapCurrentUserAsFounder } from '@/app/actions/seed';
-import { useUser } from '@/contexts/user-context';
+import { useState } from "react";
+import { Shield, Loader2, Check } from "lucide-react";
+import { toast } from "sonner";
+import { bootstrapCurrentUserAsFounder } from "@/app/actions/seed";
+import { useUser } from "@/contexts/user-context";
 
 export function BootstrapButton() {
   const { user } = useUser();
@@ -20,7 +20,7 @@ export function BootstrapButton() {
 
   const handleBootstrap = async () => {
     if (!user) {
-      toast.error('You must be logged in to bootstrap your account');
+      toast.error("You must be logged in to bootstrap your account");
       return;
     }
 
@@ -29,18 +29,18 @@ export function BootstrapButton() {
       const result = await bootstrapCurrentUserAsFounder(
         user.uid,
         user.email,
-        user.displayName
+        user.displayName,
       );
 
       if (result.success) {
-        toast.success('Founder account created! Refresh the page.');
+        toast.success("Founder account created! Refresh the page.");
         setIsDone(true);
       } else {
-        toast.error(result.error || 'Failed to bootstrap account');
+        toast.error(result.error || "Failed to bootstrap account");
       }
     } catch (error) {
-      console.error('Bootstrap error:', error);
-      toast.error('Failed to bootstrap account');
+      console.error("Bootstrap error:", error);
+      toast.error("Failed to bootstrap account");
     } finally {
       setIsLoading(false);
     }
@@ -50,13 +50,15 @@ export function BootstrapButton() {
     return (
       <div className="flex items-center gap-2 text-emerald-400">
         <Check className="h-4 w-4" />
-        <span className="text-sm">Account bootstrapped! Refresh to see changes.</span>
+        <span className="text-sm">
+          Account bootstrapped! Refresh to see changes.
+        </span>
       </div>
     );
   }
 
   // Only show if user appears to be an employee (fallback role)
-  if (user?.role !== 'employee') {
+  if (user?.role !== "employee") {
     return null;
   }
 
@@ -71,7 +73,7 @@ export function BootstrapButton() {
       ) : (
         <Shield className="h-4 w-4" />
       )}
-      {isLoading ? 'Setting up...' : 'Bootstrap as Founder'}
+      {isLoading ? "Setting up..." : "Bootstrap as Founder"}
     </button>
   );
 }

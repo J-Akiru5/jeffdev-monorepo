@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import Script from 'next/script';
+import * as React from "react";
+import Script from "next/script";
 
 export function AnalyticsProvider() {
   const [consentGiven, setConsentGiven] = React.useState(false);
@@ -9,8 +9,8 @@ export function AnalyticsProvider() {
 
   React.useEffect(() => {
     // Check if user has explicitly accepted cookies
-    const consent = localStorage.getItem('cookie-consent');
-    if (consent === 'accepted') {
+    const consent = localStorage.getItem("cookie-consent");
+    if (consent === "accepted") {
       setConsentGiven(true);
     }
   }, []);

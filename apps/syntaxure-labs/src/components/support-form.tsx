@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Support Form Component
@@ -6,9 +6,9 @@
  * Contact form for support requests. Used on error pages and support page.
  */
 
-import { useState } from 'react';
-import { Send, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
-import { sendSupportRequest } from '@/app/actions/support';
+import { useState } from "react";
+import { Send, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { sendSupportRequest } from "@/app/actions/support";
 
 interface SupportFormProps {
   /** Prefill the subject field */
@@ -20,11 +20,11 @@ interface SupportFormProps {
 export function SupportForm({ defaultSubject, compact }: SupportFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
 
     const formData = new FormData(e.currentTarget);
@@ -33,7 +33,7 @@ export function SupportForm({ defaultSubject, compact }: SupportFormProps) {
     if (result.success) {
       setSuccess(true);
     } else {
-      setError(result.error || 'Failed to send message');
+      setError(result.error || "Failed to send message");
     }
 
     setIsLoading(false);
@@ -41,7 +41,9 @@ export function SupportForm({ defaultSubject, compact }: SupportFormProps) {
 
   if (success) {
     return (
-      <div className={`rounded-md border border-emerald-500/20 bg-emerald-500/10 p-6 text-center ${compact ? '' : 'py-12'}`}>
+      <div
+        className={`rounded-md border border-emerald-500/20 bg-emerald-500/10 p-6 text-center ${compact ? "" : "py-12"}`}
+      >
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/20">
           <CheckCircle className="h-6 w-6 text-emerald-400" />
         </div>
@@ -53,8 +55,9 @@ export function SupportForm({ defaultSubject, compact }: SupportFormProps) {
     );
   }
 
-  const inputClass = `w-full rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm text-white placeholder-white/30 outline-none focus:border-cyan-500/50 ${compact ? 'py-2' : 'py-2.5'}`;
-  const labelClass = 'block text-xs uppercase tracking-wider text-white/40 mb-1.5';
+  const inputClass = `w-full rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm text-white placeholder-white/30 outline-none focus:border-cyan-500/50 ${compact ? "py-2" : "py-2.5"}`;
+  const labelClass =
+    "block text-xs uppercase tracking-wider text-white/40 mb-1.5";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -65,9 +68,11 @@ export function SupportForm({ defaultSubject, compact }: SupportFormProps) {
         </div>
       )}
 
-      <div className={compact ? '' : 'grid gap-4 sm:grid-cols-2'}>
+      <div className={compact ? "" : "grid gap-4 sm:grid-cols-2"}>
         <div>
-          <label htmlFor="name" className={labelClass}>Name</label>
+          <label htmlFor="name" className={labelClass}>
+            Name
+          </label>
           <input
             id="name"
             name="name"
@@ -78,7 +83,9 @@ export function SupportForm({ defaultSubject, compact }: SupportFormProps) {
           />
         </div>
         <div>
-          <label htmlFor="email" className={labelClass}>Email</label>
+          <label htmlFor="email" className={labelClass}>
+            Email
+          </label>
           <input
             id="email"
             name="email"
@@ -91,7 +98,9 @@ export function SupportForm({ defaultSubject, compact }: SupportFormProps) {
       </div>
 
       <div>
-        <label htmlFor="subject" className={labelClass}>Subject</label>
+        <label htmlFor="subject" className={labelClass}>
+          Subject
+        </label>
         <input
           id="subject"
           name="subject"
@@ -104,7 +113,9 @@ export function SupportForm({ defaultSubject, compact }: SupportFormProps) {
       </div>
 
       <div>
-        <label htmlFor="message" className={labelClass}>Message</label>
+        <label htmlFor="message" className={labelClass}>
+          Message
+        </label>
         <textarea
           id="message"
           name="message"

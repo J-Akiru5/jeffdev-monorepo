@@ -20,14 +20,21 @@ export interface PrismCheckInput {
   category?: string;
 }
 
-export function findLineColumn(code: string, index: number): { line: number; column: number } {
+export function findLineColumn(
+  code: string,
+  index: number,
+): { line: number; column: number } {
   const before = code.slice(0, index);
   const lines = before.split("\n");
   const last = lines[lines.length - 1];
   return { line: lines.length, column: (last || "").length + 1 };
 }
 
-export function buildSuggestion(ruleName: string, content: string, matchedText: string): string {
+export function buildSuggestion(
+  ruleName: string,
+  content: string,
+  matchedText: string,
+): string {
   const clean = content.replace(/\*\*/g, "").trim();
   return `Fix for "${ruleName}": ${clean.replace(matchedText, `\`${matchedText}\``)}`;
 }
@@ -39,7 +46,10 @@ export async function handlePrismCheck(input: PrismCheckInput): Promise<{
   const { code, ruleIds, projectId, category } = input;
 
   if (!code || typeof code !== "string") {
-    return { content: [{ type: "text", text: "Error: code is required." }], isError: true };
+    return {
+      content: [{ type: "text", text: "Error: code is required." }],
+      isError: true,
+    };
   }
 
   try {
@@ -52,16 +62,28 @@ export async function handlePrismCheck(input: PrismCheckInput): Promise<{
     };
     if (ruleIds && ruleIds.length > 0) {
       const { ObjectId } = await import("mongodb");
-      query._id = { $in: ruleIds.map((id) => (ObjectId.isValid(id) ? new ObjectId(id) : id)) };
+      query._id = {
+        $in: ruleIds.map((id) =>
+          ObjectId.isValid(id) ? new ObjectId(id) : id,
+        ),
+      };
     }
     if (projectId) query.projectId = projectId;
     if (category) query.category = category;
 
-    const patternRules = await rules.find(query).sort({ priority: 1 }).toArray();
+    const patternRules = await rules
+      .find(query)
+      .sort({ priority: 1 })
+      .toArray();
 
     if (patternRules.length === 0) {
       return {
-        content: [{ type: "text", text: "No pattern-based rules found to check against." }],
+        content: [
+          {
+            type: "text",
+            text: "No pattern-based rules found to check against.",
+          },
+        ],
       };
     }
 
@@ -82,11 +104,12 @@ export async function handlePrismCheck(input: PrismCheckInput): Promise<{
           const start = findLineColumn(code, startPos);
           const end = findLineColumn(code, endPos);
 
-          const severity = (rule.severity as string) === "error"
-            ? "error"
-            : (rule.severity as string) === "warning"
-              ? "warning"
-              : "info";
+          const severity =
+            (rule.severity as string) === "error"
+              ? "error"
+              : (rule.severity as string) === "warning"
+                ? "warning"
+                : "info";
 
           violations.push({
             ruleId: rule._id.toString(),
@@ -99,7 +122,11 @@ export async function handlePrismCheck(input: PrismCheckInput): Promise<{
             endLine: end.line,
             endColumn: end.column,
             matchedText,
-            suggestion: buildSuggestion(rule.name as string, rule.content as string, matchedText),
+            suggestion: buildSuggestion(
+              rule.name as string,
+              rule.content as string,
+              matchedText,
+            ),
           });
         }
       } catch {
@@ -112,7 +139,11 @@ export async function handlePrismCheck(input: PrismCheckInput): Promise<{
         content: [
           {
             type: "text",
-            text: JSON.stringify({ status: "pass", violations: [], checkedRules: patternRules.length }),
+            text: JSON.stringify({
+              status: "pass",
+              violations: [],
+              checkedRules: patternRules.length,
+            }),
           },
         ],
       };
@@ -122,13 +153,22 @@ export async function handlePrismCheck(input: PrismCheckInput): Promise<{
       content: [
         {
           type: "text",
-          text: JSON.stringify({ status: "fail", violations, checkedRules: patternRules.length }),
+          text: JSON.stringify({
+            status: "fail",
+            violations,
+            checkedRules: patternRules.length,
+          }),
         },
       ],
     };
   } catch (error) {
     return {
-      content: [{ type: "text", text: `Error checking code: ${error instanceof Error ? error.message : "Unknown error"}` }],
+      content: [
+        {
+          type: "text",
+          text: `Error checking code: ${error instanceof Error ? error.message : "Unknown error"}`,
+        },
+      ],
       isError: true,
     };
   }

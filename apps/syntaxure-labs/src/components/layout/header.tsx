@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Header Component
@@ -10,12 +10,12 @@
  * - "Get Quote" CTA (Ghost Glow style)
  */
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { Menu, X, ArrowUpRight, Sparkles } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { SyntaxureLogo } from '@syntaxure/ui';
-import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Menu, X, ArrowUpRight, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { SyntaxureLogo } from "@syntaxure/ui";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 interface NavLink {
   href: string;
@@ -30,12 +30,16 @@ export function Header() {
   // Build navigation links based on feature flags
   const navLinks: NavLink[] = [
     // Prism Context Engine - always show as main product
-    { href: 'https://prism.jeffdev.studio', label: 'Prism Context Engine', highlight: true },
-    { href: '/services', label: 'Services' },
-    { href: '/work', label: 'Work' },
-    { href: '/community', label: 'Community' },
-    { href: '/about', label: 'About' },
-    { href: '/contact', label: 'Contact' },
+    {
+      href: "https://prism.jeffdev.studio",
+      label: "Prism Context Engine",
+      highlight: true,
+    },
+    { href: "/services", label: "Services" },
+    { href: "/work", label: "Work" },
+    { href: "/community", label: "Community" },
+    { href: "/about", label: "About" },
+    { href: "/contact", label: "Contact" },
   ];
 
   // Track scroll position for glass effect intensity
@@ -44,17 +48,17 @@ export function Header() {
       setIsScrolled(window.scrollY > 20);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         isScrolled
-          ? 'bg-void/80 backdrop-blur-xl border-b border-white/8'
-          : 'bg-transparent'
+          ? "bg-void/80 backdrop-blur-xl border-b border-white/8"
+          : "bg-transparent",
       )}
     >
       <nav className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -77,10 +81,10 @@ export function Header() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  'relative px-4 py-2 text-sm transition-colors',
+                  "relative px-4 py-2 text-sm transition-colors",
                   link.highlight
-                    ? 'flex items-center gap-1.5 text-purple-400 hover:text-purple-300'
-                    : 'text-white/70 hover:text-white'
+                    ? "flex items-center gap-1.5 text-purple-400 hover:text-purple-300"
+                    : "text-white/70 hover:text-white",
                 )}
               >
                 {link.highlight && <Sparkles className="h-3.5 w-3.5" />}
@@ -129,8 +133,8 @@ export function Header() {
       {/* Mobile Menu */}
       <div
         className={cn(
-          'overflow-hidden border-b border-white/8 bg-void/95 backdrop-blur-xl transition-all duration-300 md:hidden',
-          isMobileMenuOpen ? 'max-h-96' : 'max-h-0 border-transparent'
+          "overflow-hidden border-b border-white/8 bg-void/95 backdrop-blur-xl transition-all duration-300 md:hidden",
+          isMobileMenuOpen ? "max-h-96" : "max-h-0 border-transparent",
         )}
       >
         <div className="space-y-1 px-6 py-4">
@@ -140,10 +144,10 @@ export function Header() {
               href={link.href}
               onClick={() => setIsMobileMenuOpen(false)}
               className={cn(
-                'block rounded-md px-4 py-3 text-sm transition-colors hover:bg-white/5',
+                "block rounded-md px-4 py-3 text-sm transition-colors hover:bg-white/5",
                 link.highlight
-                  ? 'flex items-center gap-2 text-purple-400'
-                  : 'text-white/70 hover:text-white'
+                  ? "flex items-center gap-2 text-purple-400"
+                  : "text-white/70 hover:text-white",
               )}
             >
               {link.highlight && <Sparkles className="h-4 w-4" />}

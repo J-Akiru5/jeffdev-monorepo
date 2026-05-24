@@ -7,21 +7,17 @@
  * 3. Sends email notification to contact@jeffdev.studio
  */
 
-'use server';
+"use server";
 
-import { z } from 'zod';
-import { getAdminClient } from '@/lib/supabase/admin';
-import {
-  sendEmail,
-  contactEmailTemplate,
-  EMAIL_ADDRESSES,
-} from '@/lib/email';
+import { z } from "zod";
+import { getAdminClient } from "@/lib/supabase/admin";
+import { sendEmail, contactEmailTemplate, EMAIL_ADDRESSES } from "@/lib/email";
 
 const contactSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
-  subject: z.string().min(3, 'Subject must be at least 3 characters'),
-  message: z.string().min(10, 'Message must be at least 10 characters'),
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  subject: z.string().min(3, "Subject must be at least 3 characters"),
+  message: z.string().min(10, "Message must be at least 10 characters"),
 });
 
 export type ContactFormData = z.infer<typeof contactSchema>;
@@ -34,10 +30,10 @@ export async function submitContactForm(data: ContactFormData) {
     // Save to Supabase
     const supabase = getAdminClient() as any;
     const { data: result, error } = await supabase
-      .from('messages')
+      .from("messages")
       .insert({
         ...validated,
-        status: 'new',
+        status: "new",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       } as any)
@@ -56,23 +52,24 @@ export async function submitContactForm(data: ContactFormData) {
 
     return {
       success: true,
-      message: 'Message sent successfully! We\'ll get back to you within 24 hours.',
+      message:
+        "Message sent successfully! We'll get back to you within 24 hours.",
       id: result?.id,
     };
   } catch (error) {
-    console.error('[CONTACT FORM ERROR]', error);
+    console.error("[CONTACT FORM ERROR]", error);
 
     if (error instanceof z.ZodError) {
       return {
         success: false,
-        message: 'Validation error',
+        message: "Validation error",
         errors: error.issues,
       };
     }
 
     return {
       success: false,
-      message: 'Failed to send message. Please try again or email us directly.',
+      message: "Failed to send message. Please try again or email us directly.",
     };
   }
 }
@@ -82,49 +79,49 @@ export async function submitContactForm(data: ContactFormData) {
  */
 export async function updateMessageStatus(
   messageId: string,
-  status: 'new' | 'read' | 'responded'
+  status: "new" | "read" | "responded",
 ) {
   try {
-    const { logAuditEvent } = await import('@/lib/audit');
+    const { logAuditEvent } = await import("@/lib/audit");
 
     const supabase = getAdminClient() as any;
-    
+
     // Get current message for audit
     const { data: current, error: fetchError } = await supabase
-      .from('messages')
-      .select('status')
-      .eq('id', messageId)
+      .from("messages")
+      .select("status")
+      .eq("id", messageId)
       .single();
 
     if (fetchError || !current) {
-      return { success: false, error: 'Message not found' };
+      return { success: false, error: "Message not found" };
     }
 
     const oldStatus = current.status;
 
     const { error } = await supabase
-      .from('messages')
+      .from("messages")
       .update({
         status,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', messageId);
+      .eq("id", messageId);
 
     if (error) throw error;
 
     await logAuditEvent({
-      action: 'STATUS_CHANGE',
-      resource: 'messages',
+      action: "STATUS_CHANGE",
+      resource: "messages",
       resourceId: messageId,
       details: { oldStatus, newStatus: status },
     });
 
-    const { revalidatePath } = await import('next/cache');
-    revalidatePath('/admin/messages');
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath("/admin/messages");
 
     return { success: true };
   } catch (error) {
-    console.error('[UPDATE MESSAGE STATUS ERROR]', error);
-    return { success: false, error: 'Failed to update status' };
+    console.error("[UPDATE MESSAGE STATUS ERROR]", error);
+    return { success: false, error: "Failed to update status" };
   }
 }

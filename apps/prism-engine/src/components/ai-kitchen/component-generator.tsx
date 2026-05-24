@@ -1,20 +1,24 @@
-'use client';
+"use client";
 
 /**
  * AI Kitchen - Component Generator
- * 
+ *
  * Chat interface for generating components with Gemini
  * Features: Live preview, syntax highlighting, save to library, export
  */
 
-import { useState, useEffect, useRef } from 'react';
-import { Save, Download, Loader2, Library, ChevronDown } from 'lucide-react';
-import Link from 'next/link';
-import { ComponentTabs } from '@/components/ui/component-tabs';
-import { Button } from '@syntaxure/ui';
+import { useState, useEffect, useRef } from "react";
+import { Save, Download, Loader2, Library, ChevronDown } from "lucide-react";
+import Link from "next/link";
+import { ComponentTabs } from "@/components/ui/component-tabs";
+import { Button } from "@syntaxure/ui";
 
-type DesignSystem = 'jdstudio' | 'bare-minimum' | 'glassmorphic' | '8bit-nostalgia';
-type Stack = 'react' | 'nextjs' | 'react-native';
+type DesignSystem =
+  | "jdstudio"
+  | "bare-minimum"
+  | "glassmorphic"
+  | "8bit-nostalgia";
+type Stack = "react" | "nextjs" | "react-native";
 
 interface GeneratedComponent {
   code: string;
@@ -53,8 +57,8 @@ function CustomSelect<T extends string>({
         setOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const selectedLabel = options.find((o) => o.value === value)?.label || value;
@@ -71,7 +75,7 @@ function CustomSelect<T extends string>({
       >
         <span>{selectedLabel}</span>
         <ChevronDown
-          className={`h-4 w-4 text-white/50 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 text-white/50 transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
 
@@ -85,10 +89,11 @@ function CustomSelect<T extends string>({
                 onChange(opt.value);
                 setOpen(false);
               }}
-              className={`w-full px-3 py-2 text-left text-sm transition-colors hover:bg-white/10 ${opt.value === value
-                  ? 'bg-cyan-500/10 text-cyan-400'
-                  : 'text-white/80'
-                }`}
+              className={`w-full px-3 py-2 text-left text-sm transition-colors hover:bg-white/10 ${
+                opt.value === value
+                  ? "bg-cyan-500/10 text-cyan-400"
+                  : "text-white/80"
+              }`}
             >
               {opt.label}
             </button>
@@ -100,29 +105,32 @@ function CustomSelect<T extends string>({
 }
 
 const DESIGN_SYSTEM_OPTIONS: { value: DesignSystem; label: string }[] = [
-  { value: 'jdstudio', label: 'JDStudio (Glassmorphic)' },
-  { value: 'bare-minimum', label: 'Bare Minimum' },
-  { value: 'glassmorphic', label: 'Glassmorphic' },
-  { value: '8bit-nostalgia', label: '8-Bit Nostalgia' },
+  { value: "jdstudio", label: "JDStudio (Glassmorphic)" },
+  { value: "bare-minimum", label: "Bare Minimum" },
+  { value: "glassmorphic", label: "Glassmorphic" },
+  { value: "8bit-nostalgia", label: "8-Bit Nostalgia" },
 ];
 
 const STACK_OPTIONS: { value: Stack; label: string }[] = [
-  { value: 'nextjs', label: 'Next.js' },
-  { value: 'react', label: 'React.js' },
-  { value: 'react-native', label: 'React Native' },
+  { value: "nextjs", label: "Next.js" },
+  { value: "react", label: "React.js" },
+  { value: "react-native", label: "React Native" },
 ];
 
 export function ComponentGenerator() {
-  const [prompt, setPrompt] = useState('');
-  const [designSystem, setDesignSystem] = useState<DesignSystem>('jdstudio');
-  const [stack, setStack] = useState<Stack>('nextjs');
+  const [prompt, setPrompt] = useState("");
+  const [designSystem, setDesignSystem] = useState<DesignSystem>("jdstudio");
+  const [stack, setStack] = useState<Stack>("nextjs");
   const [generateRules, setGenerateRules] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [result, setResult] = useState<GeneratedComponent | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
-  const [libraryStats, setLibraryStats] = useState<LibraryStats>({ count: 0, limit: 5 });
+  const [libraryStats, setLibraryStats] = useState<LibraryStats>({
+    count: 0,
+    limit: 5,
+  });
 
   // Fetch library stats on mount
   useEffect(() => {
@@ -131,7 +139,7 @@ export function ComponentGenerator() {
 
   const fetchLibraryStats = async () => {
     try {
-      const response = await fetch('/api/components');
+      const response = await fetch("/api/components");
       if (response.ok) {
         const data = await response.json();
         setLibraryStats({ count: data.count, limit: data.limit });
@@ -150,9 +158,9 @@ export function ComponentGenerator() {
     setSaveMessage(null);
 
     try {
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt,
           designSystem,
@@ -164,7 +172,7 @@ export function ComponentGenerator() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Generation failed');
+        throw new Error(data.error || "Generation failed");
       }
 
       setResult({
@@ -173,7 +181,7 @@ export function ComponentGenerator() {
         rules: data.rules,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setIsLoading(false);
     }
@@ -188,11 +196,11 @@ export function ComponentGenerator() {
     try {
       // Extract component name from code
       const nameMatch = result.code.match(/(?:function|const)\s+(\w+)/);
-      const componentName = nameMatch?.[1] || 'Component';
+      const componentName = nameMatch?.[1] || "Component";
 
-      const response = await fetch('/api/components', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/components", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: componentName,
           description: result.explanation,
@@ -206,13 +214,13 @@ export function ComponentGenerator() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to save');
+        throw new Error(data.error || "Failed to save");
       }
 
-      setSaveMessage('✓ Saved to library');
+      setSaveMessage("✓ Saved to library");
       fetchLibraryStats(); // Refresh stats
     } catch (err) {
-      setSaveMessage(err instanceof Error ? err.message : 'Failed to save');
+      setSaveMessage(err instanceof Error ? err.message : "Failed to save");
     } finally {
       setIsSaving(false);
     }
@@ -223,15 +231,15 @@ export function ComponentGenerator() {
 
     // Create file content
     const content = result.code;
-    const blob = new Blob([content], { type: 'text/plain' });
+    const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
 
     // Extract component name
     const nameMatch = result.code.match(/(?:function|const)\s+(\w+)/);
-    const componentName = nameMatch?.[1] || 'Component';
+    const componentName = nameMatch?.[1] || "Component";
 
     // Trigger download
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `${componentName}.tsx`;
     document.body.appendChild(a);
@@ -247,8 +255,7 @@ export function ComponentGenerator() {
         <div className="text-sm text-white/40">
           {libraryStats.limit === -1
             ? `${libraryStats.count} components saved`
-            : `${libraryStats.count} of ${libraryStats.limit} components`
-          }
+            : `${libraryStats.count} of ${libraryStats.limit} components`}
         </div>
         <Link
           href="/generate/library"
@@ -314,13 +321,25 @@ export function ComponentGenerator() {
         {isLoading ? (
           <span className="flex items-center justify-center gap-2">
             <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+                fill="none"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
             </svg>
             Generating...
           </span>
         ) : (
-          '✨ Generate Component'
+          "✨ Generate Component"
         )}
       </button>
 
@@ -368,7 +387,9 @@ export function ComponentGenerator() {
             </Button>
 
             {saveMessage && (
-              <span className={`text-sm ${saveMessage.startsWith('✓') ? 'text-emerald-400' : 'text-red-400'}`}>
+              <span
+                className={`text-sm ${saveMessage.startsWith("✓") ? "text-emerald-400" : "text-red-400"}`}
+              >
                 {saveMessage}
               </span>
             )}

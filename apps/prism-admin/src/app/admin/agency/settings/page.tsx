@@ -10,7 +10,9 @@ import { createClient } from "@/lib/supabase/server";
 
 export default async function AgencySettingsPage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   return (
     <div className="space-y-6">
@@ -78,7 +80,9 @@ function SettingsCard({
           <Icon className="h-5 w-5 text-amber-400" />
         </div>
         <div>
-          <h3 className="text-sm font-medium text-white group-hover:text-amber-400 transition-colors">{title}</h3>
+          <h3 className="text-sm font-medium text-white group-hover:text-amber-400 transition-colors">
+            {title}
+          </h3>
           <p className="text-xs text-white/50 mt-0.5">{description}</p>
         </div>
       </div>

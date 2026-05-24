@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Release Timeline Component
@@ -10,16 +10,16 @@
  * - Dark stealth-luxury aesthetic matching the Syntaxure Labs design
  */
 
-import { Terminal, Box, Bug, ExternalLink, Calendar, Tag } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
+import { Terminal, Box, Bug, ExternalLink, Calendar, Tag } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 export interface Release {
   id: string;
   title: string;
   version: string | null;
   date: string;
-  type: 'tool' | 'update' | 'patch';
+  type: "tool" | "update" | "patch";
   description: string;
   link: string | null;
   tags: string[] | null;
@@ -34,27 +34,27 @@ interface ReleaseTimelineProps {
 const typeConfig = {
   tool: {
     icon: Terminal,
-    label: 'Tool Release',
-    color: 'text-purple-400',
-    border: 'border-purple-500/30',
-    bg: 'bg-purple-500/10',
-    glow: 'shadow-[0_0_20px_rgba(139,92,246,0.15)]',
+    label: "Tool Release",
+    color: "text-purple-400",
+    border: "border-purple-500/30",
+    bg: "bg-purple-500/10",
+    glow: "shadow-[0_0_20px_rgba(139,92,246,0.15)]",
   },
   update: {
     icon: Box,
-    label: 'Update',
-    color: 'text-cyan-400',
-    border: 'border-cyan-500/30',
-    bg: 'bg-cyan-500/10',
-    glow: 'shadow-[0_0_20px_rgba(6,182,212,0.15)]',
+    label: "Update",
+    color: "text-cyan-400",
+    border: "border-cyan-500/30",
+    bg: "bg-cyan-500/10",
+    glow: "shadow-[0_0_20px_rgba(6,182,212,0.15)]",
   },
   patch: {
     icon: Bug,
-    label: 'Patch',
-    color: 'text-emerald-400',
-    border: 'border-emerald-500/30',
-    bg: 'bg-emerald-500/10',
-    glow: 'shadow-[0_0_20px_rgba(16,185,129,0.15)]',
+    label: "Patch",
+    color: "text-emerald-400",
+    border: "border-emerald-500/30",
+    bg: "bg-emerald-500/10",
+    glow: "shadow-[0_0_20px_rgba(16,185,129,0.15)]",
   },
 };
 
@@ -65,22 +65,22 @@ function ReleaseCard({ release }: { release: Release }) {
   return (
     <div
       className={cn(
-        'group rounded-md border bg-white/[0.02] p-6 transition-all duration-300',
+        "group rounded-md border bg-white/[0.02] p-6 transition-all duration-300",
         config.border,
-        'hover:bg-white/[0.04]',
-        'hover:shadow-[0_0_30px_rgba(6,182,212,0.06)]',
+        "hover:bg-white/[0.04]",
+        "hover:shadow-[0_0_30px_rgba(6,182,212,0.06)]",
       )}
     >
       <div className="flex items-start gap-4">
         {/* Type Icon */}
         <div
           className={cn(
-            'flex h-10 w-10 shrink-0 items-center justify-center rounded-md border',
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-md border",
             config.border,
             config.bg,
           )}
         >
-          <Icon className={cn('h-5 w-5', config.color)} />
+          <Icon className={cn("h-5 w-5", config.color)} />
         </div>
 
         <div className="flex-1 min-w-0">
@@ -92,7 +92,7 @@ function ReleaseCard({ release }: { release: Release }) {
             {release.version && (
               <span
                 className={cn(
-                  'inline-flex items-center rounded-full border px-2.5 py-0.5 font-mono text-[11px]',
+                  "inline-flex items-center rounded-full border px-2.5 py-0.5 font-mono text-[11px]",
                   config.border,
                   config.bg,
                   config.color,
@@ -103,7 +103,7 @@ function ReleaseCard({ release }: { release: Release }) {
             )}
             <span
               className={cn(
-                'font-mono text-[10px] uppercase tracking-wider',
+                "font-mono text-[10px] uppercase tracking-wider",
                 config.color,
               )}
             >
@@ -114,7 +114,7 @@ function ReleaseCard({ release }: { release: Release }) {
           {/* Date */}
           <div className="mt-1.5 flex items-center gap-1.5 text-xs text-white/40">
             <Calendar className="h-3.5 w-3.5" />
-            <span>{format(new Date(release.date), 'MMM d, yyyy')}</span>
+            <span>{format(new Date(release.date), "MMM d, yyyy")}</span>
           </div>
 
           {/* Description */}
@@ -172,9 +172,9 @@ export function ReleaseTimeline({ featured, releases }: ReleaseTimelineProps) {
               <div
                 key={release.id}
                 className={cn(
-                  'group relative overflow-hidden rounded-md border bg-white/[0.02] p-6 transition-all duration-300',
+                  "group relative overflow-hidden rounded-md border bg-white/[0.02] p-6 transition-all duration-300",
                   typeConfig[release.type].border,
-                  'hover:bg-white/[0.04]',
+                  "hover:bg-white/[0.04]",
                   typeConfig[release.type].glow,
                 )}
               >
@@ -215,10 +215,10 @@ export function ReleaseTimeline({ featured, releases }: ReleaseTimelineProps) {
                   <div className="relative flex shrink-0 items-start pt-6">
                     <div
                       className={cn(
-                        'h-2.5 w-2.5 rounded-full border-2',
+                        "h-2.5 w-2.5 rounded-full border-2",
                         typeConfig[release.type].border,
                         typeConfig[release.type].bg,
-                        'ring-1 ring-white/5',
+                        "ring-1 ring-white/5",
                       )}
                     />
                   </div>

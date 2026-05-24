@@ -9,9 +9,9 @@
  * via supabase/ssr's updateSession().
  */
 
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
-import { acceptInvite } from '@/app/actions/accept-invite';
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { acceptInvite } from "@/app/actions/accept-invite";
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,19 +24,16 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
     // Handle invite if present
-    let redirectPath = '/admin';
+    let redirectPath = "/admin";
     if (inviteToken) {
       if (!user.email) {
         return NextResponse.json(
-          { error: 'Email is required for invite acceptance' },
-          { status: 400 }
+          { error: "Email is required for invite acceptance" },
+          { status: 400 },
         );
       }
 
@@ -44,23 +41,23 @@ export async function POST(request: NextRequest) {
 
       if (!inviteResult.success) {
         return NextResponse.json(
-          { error: inviteResult.error || 'Failed to accept invite' },
-          { status: 400 }
+          { error: inviteResult.error || "Failed to accept invite" },
+          { status: 400 },
         );
       }
 
-      redirectPath = '/admin/profile';
+      redirectPath = "/admin/profile";
     }
 
     return NextResponse.json(
       { success: true, uid: user.id, redirectPath },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
-    console.error('[SESSION ERROR]', error);
+    console.error("[SESSION ERROR]", error);
     return NextResponse.json(
-      { error: 'Authentication failed' },
-      { status: 401 }
+      { error: "Authentication failed" },
+      { status: 401 },
     );
   }
 }

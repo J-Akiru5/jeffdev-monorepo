@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { clsx } from 'clsx';
-import { BetaBadge } from '@/components/beta-badge';
-import { SyntaxureLogo } from '@syntaxure/ui';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { clsx } from "clsx";
+import { BetaBadge } from "@/components/beta-badge";
+import { SyntaxureLogo } from "@syntaxure/ui";
 
 export function PublicNav() {
   const pathname = usePathname();
@@ -37,7 +37,9 @@ export function PublicNav() {
               href="/pricing"
               className={clsx(
                 "transition-colors text-sm font-mono uppercase tracking-wider",
-                isActive('/pricing') ? "text-cyan-400" : "text-white/60 hover:text-cyan-400"
+                isActive("/pricing")
+                  ? "text-cyan-400"
+                  : "text-white/60 hover:text-cyan-400",
               )}
             >
               Pricing

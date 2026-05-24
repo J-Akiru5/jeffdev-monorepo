@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * PrismLogo3D Component
@@ -8,14 +8,14 @@
  * Uses pure CSS transforms and animations.
  */
 
-import clsx from 'clsx';
+import clsx from "clsx";
 
 interface PrismLogo3DProps {
   className?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
 }
 
-export function PrismLogo3D({ className, size = 'md' }: PrismLogo3DProps) {
+export function PrismLogo3D({ className, size = "md" }: PrismLogo3DProps) {
   const sizeConfig = {
     sm: { scene: 40, height: 50 },
     md: { scene: 60, height: 75 },
@@ -25,11 +25,13 @@ export function PrismLogo3D({ className, size = 'md' }: PrismLogo3DProps) {
   const { scene, height } = sizeConfig[size];
 
   return (
-    <div className={clsx('relative flex items-center justify-center', className)}>
-      <div 
+    <div
+      className={clsx("relative flex items-center justify-center", className)}
+    >
+      <div
         className="prism-logo-scene"
-        style={{ 
-          width: scene, 
+        style={{
+          width: scene,
           height: height,
           perspective: 500,
         }}
@@ -80,8 +82,8 @@ export function PrismLogo3D({ className, size = 'md' }: PrismLogo3DProps) {
           width: ${scene}px;
           height: ${height}px;
           background: linear-gradient(
-            135deg, 
-            rgba(6, 182, 212, 0.1) 0%, 
+            135deg,
+            rgba(6, 182, 212, 0.1) 0%,
             rgba(139, 92, 246, 0.05) 50%,
             rgba(255, 255, 255, 0.05) 100%
           );
@@ -126,8 +128,8 @@ export function PrismLogo3D({ className, size = 'md' }: PrismLogo3DProps) {
           transform: translate(-50%, -50%);
           border-radius: 50%;
           background: radial-gradient(
-            circle, 
-            rgba(6, 182, 212, 0.9) 0%, 
+            circle,
+            rgba(6, 182, 212, 0.9) 0%,
             rgba(139, 92, 246, 0.4) 50%,
             transparent 70%
           );
@@ -148,24 +150,26 @@ export function PrismLogo3D({ className, size = 'md' }: PrismLogo3DProps) {
         }
 
         @keyframes logo-shine {
-          0%, 100% { 
-            transform: translateY(-100%); 
-            opacity: 0; 
+          0%,
+          100% {
+            transform: translateY(-100%);
+            opacity: 0;
           }
-          50% { 
-            transform: translateY(100%); 
-            opacity: 1; 
+          50% {
+            transform: translateY(100%);
+            opacity: 1;
           }
         }
 
         @keyframes logo-pulse {
-          0%, 100% { 
-            transform: translate(-50%, -50%) scale(0.8); 
-            opacity: 0.6; 
+          0%,
+          100% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0.6;
           }
-          50% { 
-            transform: translate(-50%, -50%) scale(1.1); 
-            opacity: 0.9; 
+          50% {
+            transform: translate(-50%, -50%) scale(1.1);
+            opacity: 0.9;
           }
         }
       `}</style>

@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { use, useActionState } from "react";
-import { ArrowLeft, Layers, Code, Paintbrush, Shield, PlusCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  Layers,
+  Code,
+  Paintbrush,
+  Shield,
+  PlusCircle,
+} from "lucide-react";
 import { GlassPanel, Button } from "@syntaxure/ui";
 import { ruleTemplates } from "@/data/rule-templates";
 import { installTemplate, type InstallTemplateState } from "./actions";
@@ -34,13 +41,14 @@ export default function TemplatesPage({ params }: Props) {
       <div>
         <h1 className="text-2xl font-semibold text-white">Rule Templates</h1>
         <p className="text-sm text-white/50 mt-1 max-w-2xl">
-          Jumpstart your context engine with pre-built architectural rules for popular tech stacks. 
-          Install a template to instantly add these constraints to your project.
+          Jumpstart your context engine with pre-built architectural rules for
+          popular tech stacks. Install a template to instantly add these
+          constraints to your project.
         </p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        {ruleTemplates.map(template => (
+        {ruleTemplates.map((template) => (
           <TemplateCard key={template.id} template={template} slug={slug} />
         ))}
       </div>
@@ -48,12 +56,18 @@ export default function TemplatesPage({ params }: Props) {
   );
 }
 
-function TemplateCard({ template, slug }: { template: typeof ruleTemplates[0], slug: string }) {
+function TemplateCard({
+  template,
+  slug,
+}: {
+  template: (typeof ruleTemplates)[0];
+  slug: string;
+}) {
   const Icon = ICONS[template.icon] || Layers;
-  const [state, formAction, pending] = useActionState<InstallTemplateState, FormData>(
-    installTemplate,
-    null
-  );
+  const [state, formAction, pending] = useActionState<
+    InstallTemplateState,
+    FormData
+  >(installTemplate, null);
 
   return (
     <GlassPanel className="p-6 flex flex-col h-full">
@@ -76,23 +90,30 @@ function TemplateCard({ template, slug }: { template: typeof ruleTemplates[0], s
         {template.description}
       </p>
 
-      <form action={formAction} className="mt-auto pt-4 border-t border-white/5">
+      <form
+        action={formAction}
+        className="mt-auto pt-4 border-t border-white/5"
+      >
         <input type="hidden" name="projectSlug" value={slug} />
         <input type="hidden" name="templateId" value={template.id} />
-        <Button 
-          type="submit" 
-          variant="secondary" 
+        <Button
+          type="submit"
+          variant="secondary"
           disabled={pending}
           className="w-full group"
         >
-          {pending ? "Installing..." : (
+          {pending ? (
+            "Installing..."
+          ) : (
             <>
               <PlusCircle className="h-4 w-4 mr-2 group-hover:text-cyan-400 transition-colors" />
               Install {template.rules.length} Rules
             </>
           )}
         </Button>
-        {state?.error && <p className="text-xs text-red-400 mt-2 text-center">{state.error}</p>}
+        {state?.error && (
+          <p className="text-xs text-red-400 mt-2 text-center">{state.error}</p>
+        )}
       </form>
     </GlassPanel>
   );

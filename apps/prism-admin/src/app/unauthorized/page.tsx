@@ -10,13 +10,13 @@ export default function UnauthorizedPage() {
             <ShieldX className="h-8 w-8 text-red-400" />
           </div>
         </div>
-        
+
         <h1 className="text-2xl font-bold text-white mb-2">Access Denied</h1>
         <p className="text-white/50 mb-6">
-          You don&apos;t have permission to access the admin panel. 
-          Contact the founder if you believe this is an error.
+          You don&apos;t have permission to access the admin panel. Contact the
+          founder if you believe this is an error.
         </p>
-        
+
         <div className="flex gap-4 justify-center">
           <Link
             href="https://prism.jeffdev.studio"

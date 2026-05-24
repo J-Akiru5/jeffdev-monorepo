@@ -10,7 +10,10 @@ export interface ExtractedDesignTokens {
   typography: {
     fontFamily: string;
     fontSizes: string[];
-    headings: Record<string, { fontSize: string; fontWeight: string; fontFamily: string }>;
+    headings: Record<
+      string,
+      { fontSize: string; fontWeight: string; fontFamily: string }
+    >;
   };
   spacing: string[];
   componentPatterns: string[];
@@ -21,13 +24,19 @@ export interface ScanResult {
   rawMarkdown: string;
 }
 
-const MAX_TOKENS_ESTIMATE = (text: string): number => Math.ceil(text.length / 4);
+const MAX_TOKENS_ESTIMATE = (text: string): number =>
+  Math.ceil(text.length / 4);
 
 interface PageExtractResult {
   cssVariables: Record<string, string>;
   colors: string[];
   fontSizes: string[];
-  headings: Array<{ tag: string; fontSize: string; fontWeight: string; fontFamily: string }>;
+  headings: Array<{
+    tag: string;
+    fontSize: string;
+    fontWeight: string;
+    fontFamily: string;
+  }>;
   spacing: string[];
   componentPatterns: string[];
 }
@@ -53,12 +62,16 @@ function extractPageData(): PageExtractResult {
           for (let k = 0; k < rule.style.length; k++) {
             const prop = rule.style[k];
             if (prop && prop.startsWith("--")) {
-              results.cssVariables[prop] = rule.style.getPropertyValue(prop).trim();
+              results.cssVariables[prop] = rule.style
+                .getPropertyValue(prop)
+                .trim();
             }
           }
         }
       }
-    } catch { /* cross-origin */ }
+    } catch {
+      /* cross-origin */
+    }
   }
 
   const body = document.body;
@@ -73,10 +86,20 @@ function extractPageData(): PageExtractResult {
   allElements.forEach((el) => {
     const inline = el.getAttribute("style");
     if (inline) {
-      const colorMatch = inline.match(/(?:color|background-color|border-color):\s*([^;]+)/gi);
-      if (colorMatch) colorMatch.forEach((c) => { const v = c.split(":")[1]; if (v) results.colors.push(v.trim()); });
+      const colorMatch = inline.match(
+        /(?:color|background-color|border-color):\s*([^;]+)/gi,
+      );
+      if (colorMatch)
+        colorMatch.forEach((c) => {
+          const v = c.split(":")[1];
+          if (v) results.colors.push(v.trim());
+        });
       const spacingMatch = inline.match(/(?:margin|padding|gap):\s*([^;]+)/gi);
-      if (spacingMatch) spacingMatch.forEach((s) => { const v = s.split(":")[1]; if (v) results.spacing.push(v.trim()); });
+      if (spacingMatch)
+        spacingMatch.forEach((s) => {
+          const v = s.split(":")[1];
+          if (v) results.spacing.push(v.trim());
+        });
     }
   });
 
@@ -84,7 +107,12 @@ function extractPageData(): PageExtractResult {
     const els = document.querySelectorAll(tag);
     els.forEach((el) => {
       const cs = getComputedStyle(el);
-      results.headings.push({ tag, fontSize: cs.fontSize, fontWeight: cs.fontWeight, fontFamily: cs.fontFamily });
+      results.headings.push({
+        tag,
+        fontSize: cs.fontSize,
+        fontWeight: cs.fontWeight,
+        fontFamily: cs.fontFamily,
+      });
     });
   }
 
@@ -93,7 +121,8 @@ function extractPageData(): PageExtractResult {
     const cls = (el as HTMLElement).className;
     if (typeof cls === "string" && cls) {
       cls.split(/\s+/).forEach((p) => {
-        if (/^[A-Z]/.test(p) || p.includes("__") || p.includes("--")) classPatterns.add(p);
+        if (/^[A-Z]/.test(p) || p.includes("__") || p.includes("--"))
+          classPatterns.add(p);
       });
     }
   });
@@ -110,10 +139,16 @@ function findInternalLinks(baseUrl: string): string[] {
     try {
       const href = (a as HTMLAnchorElement).href;
       const u = new URL(href);
-      if (u.hostname === base.hostname && !u.hash && u.pathname !== base.pathname) {
+      if (
+        u.hostname === base.hostname &&
+        !u.hash &&
+        u.pathname !== base.pathname
+      ) {
         internal.push(href);
       }
-    } catch { /* skip */ }
+    } catch {
+      /* skip */
+    }
   });
   return [...new Set(internal)].slice(0, 10);
 }
@@ -121,7 +156,7 @@ function findInternalLinks(baseUrl: string): string[] {
 export async function scanUrl(
   url: string,
   maxPages: number = 5,
-  depth: number = 2
+  depth: number = 2,
 ): Promise<ScanResult> {
   let browser: Browser | null = null;
   const visited = new Set<string>();
@@ -132,7 +167,10 @@ export async function scanUrl(
   const allCssVariables: Record<string, string> = {};
   const allColors = new Set<string>();
   const allFontSizes = new Set<string>();
-  const allHeadings: Record<string, { fontSize: string; fontWeight: string; fontFamily: string }> = {};
+  const allHeadings: Record<
+    string,
+    { fontSize: string; fontWeight: string; fontFamily: string }
+  > = {};
   const allSpacing = new Set<string>();
   const allComponentPatterns = new Set<string>();
   let totalTokens = 0;
@@ -149,33 +187,60 @@ export async function scanUrl(
       const page: Page = await browser.newPage();
 
       try {
-        await page.goto(current.url, { waitUntil: "networkidle", timeout: 30000 });
+        await page.goto(current.url, {
+          waitUntil: "networkidle",
+          timeout: 30000,
+        });
 
-        const extracted: PageExtractResult = await page.evaluate(extractPageData);
+        const extracted: PageExtractResult =
+          await page.evaluate(extractPageData);
 
         Object.assign(allCssVariables, extracted.cssVariables);
         extracted.colors.forEach((c) => {
-          if (c && c !== "transparent" && c !== "initial" && c !== "inherit") allColors.add(c);
+          if (c && c !== "transparent" && c !== "initial" && c !== "inherit")
+            allColors.add(c);
         });
-        extracted.fontSizes.forEach((s) => { if (s) allFontSizes.add(s); });
-        extracted.spacing.forEach((s) => { if (s) allSpacing.add(s); });
+        extracted.fontSizes.forEach((s) => {
+          if (s) allFontSizes.add(s);
+        });
+        extracted.spacing.forEach((s) => {
+          if (s) allSpacing.add(s);
+        });
         extracted.componentPatterns.forEach((p) => allComponentPatterns.add(p));
         for (const h of extracted.headings) {
           const key = `${h.tag}`;
           if (!allHeadings[key] || h.fontSize) {
-            allHeadings[key] = { fontSize: h.fontSize, fontWeight: h.fontWeight, fontFamily: h.fontFamily };
+            allHeadings[key] = {
+              fontSize: h.fontSize,
+              fontWeight: h.fontWeight,
+              fontFamily: h.fontFamily,
+            };
           }
         }
 
         try {
-          const snapshot = await (page as unknown as { accessibility: { snapshot(): Promise<unknown> } }).accessibility.snapshot();
-          if (snapshot) totalTokens += MAX_TOKENS_ESTIMATE(JSON.stringify(snapshot));
-        } catch { /* accessibility snapshot unavailable */ }
+          const snapshot = await (
+            page as unknown as {
+              accessibility: { snapshot(): Promise<unknown> };
+            }
+          ).accessibility.snapshot();
+          if (snapshot)
+            totalTokens += MAX_TOKENS_ESTIMATE(JSON.stringify(snapshot));
+        } catch {
+          /* accessibility snapshot unavailable */
+        }
 
         if (current.currentDepth < depth) {
-          const links: string[] = await page.evaluate(findInternalLinks, current.url);
+          const links: string[] = await page.evaluate(
+            findInternalLinks,
+            current.url,
+          );
           for (const link of links) {
-            if (!visited.has(link)) pagesToVisit.push({ url: link, currentDepth: current.currentDepth + 1 });
+            if (!visited.has(link))
+              pagesToVisit.push({
+                url: link,
+                currentDepth: current.currentDepth + 1,
+              });
           }
         }
       } catch {
@@ -208,7 +273,9 @@ export async function scanUrl(
   return { tokens, rawMarkdown };
 }
 
-export function formatExtractionAsMarkdown(tokens: ExtractedDesignTokens): string {
+export function formatExtractionAsMarkdown(
+  tokens: ExtractedDesignTokens,
+): string {
   const lines: string[] = [
     `# Design Token Extraction Report`,
     ``,
@@ -237,7 +304,9 @@ export function formatExtractionAsMarkdown(tokens: ExtractedDesignTokens): strin
     lines.push(`| Tag | Font Size | Font Weight | Font Family |`);
     lines.push(`|-----|-----------|-------------|-------------|`);
     for (const [tag, h] of Object.entries(tokens.typography.headings)) {
-      lines.push(`| ${tag} | ${h.fontSize} | ${h.fontWeight} | ${h.fontFamily} |`);
+      lines.push(
+        `| ${tag} | ${h.fontSize} | ${h.fontWeight} | ${h.fontFamily} |`,
+      );
     }
     lines.push(``);
   }

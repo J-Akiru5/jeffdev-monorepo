@@ -607,8 +607,8 @@ Update all references to renamed/removed apps:
 
 #### Task 4.1 — Rename @jdstudio/ui → @syntaxure/ui
 
-| Step | Action                                                                                                 |
-| ---- | -------------------------------------------------------------------------------------------------------- |
+| Step | Action                                                                                                            |
+| ---- | ----------------------------------------------------------------------------------------------------------------- |
 | 1    | Update `packages/ui/package.json`: `"name": "@syntaxure/ui"`                                                      |
 | 2    | Update all apps' `package.json`: `"@jdstudio/ui": "workspace:*"` → `"@syntaxure/ui": "workspace:*"`               |
 | 3    | Update all import statements across 4 apps (prism-engine, syntaxure-labs, prism-admin, prism-manage) — ~50+ files |
@@ -1402,7 +1402,7 @@ prism-admin/src/app/
 | admin    | Full access     | —             | Full access             |
 | manager  | Full access     | —             | Full access             |
 | employee | Prism view only | —             | Full access (own tasks) |
-| client   | —               | Own data only | —             |
+| client   | —               | Own data only | —                       |
 
 ---
 

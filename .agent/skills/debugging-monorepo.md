@@ -47,6 +47,7 @@ turbo run check-types --filter=packages/ui
 ```
 
 **Common symptoms:**
+
 - `Invalid Hook Call` → React version mismatch
 - `Module not found` → Circular dependency
 - `ReferenceError: document` → Client code on server
@@ -83,12 +84,12 @@ Identify whether the issue is in UI, State, or Data:
 // Remove all UI/animations, keep data fetching
 export default function TestPage() {
   const [data, setData] = useState(null);
-  
+
   useEffect(async () => {
     const result = await fetchData();  // Does this work?
     setData(result);
   }, []);
-  
+
   if (!data) return <div>Loading...</div>;
   return <pre>{JSON.stringify(data, null, 2)}</pre>;
 }
@@ -105,6 +106,7 @@ export default function TestPage() {
 ```
 
 **Decision tree:**
+
 - **Data layer fails** → DB connection / Serialization issue
 - **UI layer fails** → Component / Styling issue
 - **Animation fails** → Framer Motion / GSAP issue
@@ -117,15 +119,15 @@ Use strategic logging to pinpoint the exact line:
 
 ```typescript
 // ❌ BAD: Vague console.log
-console.log('Error:', error);
+console.log("Error:", error);
 
 // ✅ GOOD: Structured logging with context
-console.error('[prism-dashboard:api/rules]', {
-  method: 'POST',
+console.error("[prism-dashboard:api/rules]", {
+  method: "POST",
   projectId: params.projectId,
   error: error.message,
   stack: error.stack,
-  cosmos: { endpoint: process.env.COSMOS_ENDPOINT?.slice(0, 10) + '...' },
+  cosmos: { endpoint: process.env.COSMOS_ENDPOINT?.slice(0, 10) + "..." },
 });
 ```
 
@@ -140,13 +142,13 @@ console.error('[prism-dashboard:api/rules]', {
 ```typescript
 // ❌ WRONG
 export async function getProject(id: string) {
-  const doc = await firestore.collection('projects').doc(id).get();
+  const doc = await firestore.collection("projects").doc(id).get();
   return doc.data(); // createdAt is a Timestamp!
 }
 
 // ✅ CORRECT
 export async function getProject(id: string) {
-  const doc = await firestore.collection('projects').doc(id).get();
+  const doc = await firestore.collection("projects").doc(id).get();
   const data = doc.data();
   return {
     ...data,
@@ -156,6 +158,7 @@ export async function getProject(id: string) {
 ```
 
 **Debugging steps:**
+
 1. Find the server action returning the data
 2. Check for all Firestore Timestamp fields
 3. Add `.toDate().toISOString()` conversion
@@ -222,11 +225,11 @@ export function Component() {
 // ✅ CORRECT: Use useEffect to sync
 export function Component() {
   const [random, setRandom] = useState(null);
-  
+
   useEffect(() => {
     setRandom(Math.random());
   }, []);
-  
+
   if (random === null) return null; // Or a loading state
   return <div>{random}</div>;
 }
@@ -260,15 +263,15 @@ grep '"react":' apps/*/package.json packages/*/package.json | sort | uniq
 
 ```typescript
 // ❌ WRONG: Top-level use of document
-const theme = localStorage.getItem('theme'); // Server context!
+const theme = localStorage.getItem("theme"); // Server context!
 
 // ✅ CORRECT: Add 'use client' directive
-'use client';
-const theme = localStorage.getItem('theme');
+("use client");
+const theme = localStorage.getItem("theme");
 
 // ✅ ALTERNATIVE: Use dynamic() for client-only components
-import dynamic from 'next/dynamic';
-const ClientComponent = dynamic(() => import('./client'), { ssr: false });
+import dynamic from "next/dynamic";
+const ClientComponent = dynamic(() => import("./client"), { ssr: false });
 ```
 
 ---
@@ -278,19 +281,19 @@ const ClientComponent = dynamic(() => import('./client'), { ssr: false });
 **Root Cause:** `revalidatePath()` not called
 
 ```typescript
-'use server';
-import { revalidatePath } from 'next/cache';
+"use server";
+import { revalidatePath } from "next/cache";
 
 export async function updateProject(data: unknown) {
   const validated = schema.parse(data);
-  
+
   // Update in database
   await db.update(validated);
-  
+
   // ⚡ Clear the cache so Next.js refetches
-  revalidatePath('/admin/projects');
+  revalidatePath("/admin/projects");
   revalidatePath(`/admin/projects/${validated.id}`);
-  
+
   return { success: true };
 }
 ```
@@ -325,27 +328,32 @@ Use this when debugging any issue:
 ## Issue: [Brief description]
 
 ### Phase 0: Infrastructure
+
 - [ ] `npx syncpack list-mismatches` → No mismatches
 - [ ] `doppler run -- env | grep KEY` → Secrets injected
 - [ ] `node --version` → >= 18
 - [ ] `turbo clean && pnpm install` → Success
 
 ### Phase 1: Boundaries
+
 - [ ] Check Node vs React versions across workspaces
 - [ ] Verify no cross-app imports
 - [ ] Check for 'use client' directives in right places
 
 ### Phase 2: Isolation
+
 - [ ] `turbo run build --filter=BROKEN_APP` → Error reproduced
 - [ ] `turbo run build --filter=BROKEN_APP^` → Dep chain works?
 - [ ] `turbo run lint --filter=BROKEN_PACKAGE` → Lint errors?
 
 ### Phase 3: Layer Stripping
+
 - [ ] Data layer working? (log raw fetch result)
 - [ ] UI rendering correctly? (remove animations)
 - [ ] Animations working? (add back incrementally)
 
 ### Phase 4: Root Cause
+
 - [ ] Identified exact file and line
 - [ ] Reproduced in minimal example
 - [ ] Fix applied and tested locally
@@ -356,14 +364,14 @@ Use this when debugging any issue:
 
 ## 🔧 Debugging Tools & Commands
 
-| Tool | Command | Purpose |
-|------|---------|---------|
-| Turbo Visualizer | `turbo run build --graph` | See dependency graph |
-| Type Check | `turbo run check-types` | Find TypeScript errors |
-| Lint | `turbo run lint -- --debug` | Debug ESLint issues |
-| Dependency Tree | `pnpm list @jdstudio/ui` | Check transitive deps |
+| Tool              | Command                      | Purpose                     |
+| ----------------- | ---------------------------- | --------------------------- |
+| Turbo Visualizer  | `turbo run build --graph`    | See dependency graph        |
+| Type Check        | `turbo run check-types`      | Find TypeScript errors      |
+| Lint              | `turbo run lint -- --debug`  | Debug ESLint issues         |
+| Dependency Tree   | `pnpm list @jdstudio/ui`     | Check transitive deps       |
 | Network Inspector | Browser DevTools Network tab | Check Cosmos/Firebase calls |
-| VS Code Debugger | `node --inspect-brk` | Debug Node.js server |
+| VS Code Debugger  | `node --inspect-brk`         | Debug Node.js server        |
 
 ---
 
@@ -403,10 +411,10 @@ cat .husky/pre-commit
 
 ```typescript
 // __tests__/serialization.test.ts
-import { Timestamp } from 'firebase-admin/firestore';
+import { Timestamp } from "firebase-admin/firestore";
 
-describe('Timestamp Serialization', () => {
-  it('should convert Timestamp to ISO string', () => {
+describe("Timestamp Serialization", () => {
+  it("should convert Timestamp to ISO string", () => {
     const ts = Timestamp.now();
     const iso = ts.toDate().toISOString();
     expect(JSON.stringify({ date: iso })).toBeDefined();

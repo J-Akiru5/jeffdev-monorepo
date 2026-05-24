@@ -43,6 +43,7 @@ Prism is an MCP (Model Context Protocol) server that sits between AI coding assi
 ## What Is Already Built (Never Rebuild These)
 
 ### Core MCP System (Phases 1–9) ✅
+
 - MCP Protocol — full JSON-RPC 2.0, stdio transport ✅
 - Auth — Clerk + API key verification + tier system (Free/Pro/Team/Enterprise) ✅
 - CRUD APIs — `/api/v1/rules`, `/api/v1/projects`, `/api/v1/brands`, `/api/v1/components`, `/api/v1/api-keys` ✅
@@ -57,7 +58,9 @@ Prism is an MCP (Model Context Protocol) server that sits between AI coding assi
 - **Phase 9 — Cross-platform optimization** (6 IDE platforms detected, per-IDE formatting, 22 tests) ✅
 
 ### CLI Commands — All Built ✅
+
 All commands registered in `packages/prism-cli/src/index.ts`:
+
 - `prism login` — authenticate with Prism Cloud
 - `prism init` — auto-detects IDEs, writes MCP config for Cursor/Windsurf/VS Code/Claude Desktop
 - `prism sync` — sync rules/projects/brands from cloud to local cache; `--repo ./` scans codebase
@@ -76,7 +79,9 @@ All commands registered in `packages/prism-cli/src/index.ts`:
 - `prism status` — **NEW** quick snapshot of current Prism state ✅
 
 ### Dashboard Pages — All Built ✅
+
 All pages in `apps/prism-dashboard/src/app/(dashboard)/`:
+
 - `/dashboard` — main metrics (real 30-day trends: projects, rules, AI generations, video contexts) ✅
 - `/projects` — project list ✅
 - `/projects/[slug]` — project detail with interactive rule cards (isActive toggle + delete, optimistic UI) ✅
@@ -87,6 +92,7 @@ All pages in `apps/prism-dashboard/src/app/(dashboard)/`:
 - `/quickstart` — **NEW** permanent IDE connection reference page ✅
 
 ### Dashboard APIs — All Built ✅
+
 - `/api/v1/rules` — CRUD rules + `/extract` endpoint ✅
 - `/api/v1/rules/[id]` — GET/PATCH/DELETE single rule (supports `isActive` toggle) ✅
 - `/api/v1/projects` — CRUD projects ✅
@@ -99,7 +105,9 @@ All pages in `apps/prism-dashboard/src/app/(dashboard)/`:
 - `/api/mcp/stdio` — 17-tool MCP proxy endpoint (cloud-hosted SSE route) ✅
 
 ### Documentation — All Built ✅
+
 All docs in `apps/prism-docs/content/en-US/`:
+
 - `page.mdx` — index/overview ✅
 - `getting-started.mdx` — **NEW** install, setup, first run ✅
 - `ide-setup.mdx` — **NEW** Cursor/Windsurf/VS Code/Claude Desktop config ✅
@@ -109,6 +117,7 @@ All docs in `apps/prism-docs/content/en-US/`:
 - `troubleshooting.mdx` — **NEW** common errors and fixes ✅
 
 ### Infrastructure — Fixed ✅
+
 - `AGENTS.md` — port conflicts resolved: nexure=3006, tracker=3007 (no more duplicate ports) ✅
 - Analytics route — fixed syntax error (rogue `}`) that was silently breaking the GET handler ✅
 - Middleware — `/api/health` added to public routes (no auth required for health checks) ✅
@@ -133,11 +142,13 @@ Developer types prompt in IDE
 ```
 
 **Canonical IDE path:**
+
 ```
 IDE → stdio → prism serve → spawns prism-mcp-server --standalone → Cosmos DB
 ```
 
 **Cloud-hosted path (Pro users):**
+
 ```
 IDE → HTTPS → prism.jeffdev.studio/api/mcp/stdio → Cosmos DB
 ```
@@ -163,15 +174,16 @@ After `prism init`, the IDE auto-launches `prism serve` on every startup. No fur
 
 ## Token Optimization Principles (Critical — Design Everything Around These)
 
-| Technique | Token Impact |
-|-----------|-------------|
-| Embedding-based rule selection (send relevant rules only) | −30% |
-| Progressive disclosure (skill metadata first, full content on demand) | −20% |
-| Local LRU cache with TTL (skip Cosmos DB for unchanged rules) | −10% |
-| Context Kitchen CLI (pre-flight trim + post-flight log) | −4% |
-| **Total target** | **−64%** |
+| Technique                                                             | Token Impact |
+| --------------------------------------------------------------------- | ------------ |
+| Embedding-based rule selection (send relevant rules only)             | −30%         |
+| Progressive disclosure (skill metadata first, full content on demand) | −20%         |
+| Local LRU cache with TTL (skip Cosmos DB for unchanged rules)         | −10%         |
+| Context Kitchen CLI (pre-flight trim + post-flight log)               | −4%          |
+| **Total target**                                                      | **−64%**     |
 
 **Progressive disclosure rule:**
+
 - Skills metadata = 30–50 tokens (name + 1-line summary)
 - Full skill content = only when AI calls `get_skill(skillId)` explicitly
 - High-priority rules = always full content
@@ -303,18 +315,18 @@ extensions/
 
 ## Environment Variables (Root `.env`, Doppler-managed)
 
-| Variable | Purpose |
-|----------|---------|
-| `MONGODB_URI` | Cosmos DB connection string |
-| `COSMOS_DATABASE_NAME` | Database name (default: `prism`) |
-| `GEMINI_API_KEY` | Google Gemini API key (primary AI) |
-| `GEMINI_MODEL` | Chat model (default: `gemini-3.5-flash`) |
-| `GEMINI_EMBEDDING_MODEL` | Embedding model (default: `gemini-embedding-2`) |
-| `AI_PROVIDER` | `gemini` (default) or `azure` |
-| `AZURE_OPENAI_ENDPOINT` | Azure fallback endpoint (optional) |
-| `AZURE_OPENAI_API_KEY` | Azure fallback key (optional) |
-| `PRISM_API_KEY` | User's API key for MCP server auth (set in IDE config) |
-| `PRISM_API_URL` | Dashboard URL (default: `https://prism.jeffdev.studio`) |
+| Variable                 | Purpose                                                 |
+| ------------------------ | ------------------------------------------------------- |
+| `MONGODB_URI`            | Cosmos DB connection string                             |
+| `COSMOS_DATABASE_NAME`   | Database name (default: `prism`)                        |
+| `GEMINI_API_KEY`         | Google Gemini API key (primary AI)                      |
+| `GEMINI_MODEL`           | Chat model (default: `gemini-3.5-flash`)                |
+| `GEMINI_EMBEDDING_MODEL` | Embedding model (default: `gemini-embedding-2`)         |
+| `AI_PROVIDER`            | `gemini` (default) or `azure`                           |
+| `AZURE_OPENAI_ENDPOINT`  | Azure fallback endpoint (optional)                      |
+| `AZURE_OPENAI_API_KEY`   | Azure fallback key (optional)                           |
+| `PRISM_API_KEY`          | User's API key for MCP server auth (set in IDE config)  |
+| `PRISM_API_URL`          | Dashboard URL (default: `https://prism.jeffdev.studio`) |
 
 ---
 
@@ -327,6 +339,7 @@ extensions/
 5. **Dashboard type errors in `mcp/stdio/route.ts`** — pre-existing: `headingFont`, `bodyFont`, `personality` properties on `{}` type; does not affect runtime
 
 ### Resolved Issues (Do Not Re-Fix)
+
 - ~~Port conflicts in AGENTS.md~~ — **Fixed**: nexure=3006, tracker=3007, all ports unique ✅
 - ~~Hardcoded metric trends on dashboard~~ — **Fixed**: real 30-day DB queries ✅
 - ~~Analytics route syntax error~~ — **Fixed**: removed rogue `}` breaking GET handler ✅
@@ -353,18 +366,18 @@ extensions/
 
 ## Industry Standard Benchmarks — Status (2026)
 
-| Benchmark | Target | Status |
-|-----------|--------|--------|
-| Time to first value | < 60 seconds | ✅ Done — onboarding wizard |
-| CLI health check | `prism doctor` | ✅ Done |
-| Interactive setup | `prism init` + wizard | ✅ Done |
-| Documentation | 7 pages, current | ✅ Done — 7 pages |
-| IDE support | 6 IDEs + auto-detect | ✅ Done |
-| Error messages | Actionable with fix commands | ✅ Done — `prism doctor` |
-| Analytics | Full dashboard with charts | ✅ Done — live telemetry |
-| Onboarding | 4-step guided wizard | ✅ Done — `/onboarding` |
-| Status monitoring | `prism status` + `prism doctor` | ✅ Done |
-| Offline support | Working + better UX feedback | ✅ Done — `prism serve --offline` |
+| Benchmark           | Target                          | Status                            |
+| ------------------- | ------------------------------- | --------------------------------- |
+| Time to first value | < 60 seconds                    | ✅ Done — onboarding wizard       |
+| CLI health check    | `prism doctor`                  | ✅ Done                           |
+| Interactive setup   | `prism init` + wizard           | ✅ Done                           |
+| Documentation       | 7 pages, current                | ✅ Done — 7 pages                 |
+| IDE support         | 6 IDEs + auto-detect            | ✅ Done                           |
+| Error messages      | Actionable with fix commands    | ✅ Done — `prism doctor`          |
+| Analytics           | Full dashboard with charts      | ✅ Done — live telemetry          |
+| Onboarding          | 4-step guided wizard            | ✅ Done — `/onboarding`           |
+| Status monitoring   | `prism status` + `prism doctor` | ✅ Done                           |
+| Offline support     | Working + better UX feedback    | ✅ Done — `prism serve --offline` |
 
 ---
 
@@ -400,6 +413,7 @@ Current focus: **Post-Polish — Publishing & Discoverability**
 All core system improvements are complete. The system meets 2026 industry standards.
 
 Next priority tasks:
+
 1. **Publish CLI to npm** — run `npm publish` from `packages/prism-cli/`. Package is ready (`publishConfig: public`, `prepublishOnly: pnpm run build`). This is the single most important step — nothing works for external users until this is done.
 2. **Deploy dashboard to Vercel** — configure Doppler secrets in Vercel project settings, then deploy `apps/prism-dashboard`.
 3. **Deploy docs to Vercel** — deploy `apps/prism-docs` as a separate Vercel project.
@@ -409,5 +423,5 @@ Next priority tasks:
 
 ---
 
-*Prism Context Engine — built by JeffDev Studio for the Southeast Asian developer market.*
-*MCP downloads: 97M/month. Problem: real. Solution: working. Market: growing.*
+_Prism Context Engine — built by JeffDev Studio for the Southeast Asian developer market._
+_MCP downloads: 97M/month. Problem: real. Solution: working. Market: growing._

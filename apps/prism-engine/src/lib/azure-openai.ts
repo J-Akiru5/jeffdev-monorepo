@@ -1,11 +1,11 @@
 /**
  * Azure OpenAI Client
- * 
+ *
  * Processes video transcripts to extract architectural rules, patterns, and conventions.
  * Uses GPT-4o-mini for cost-effective rule extraction.
  */
 
-import { AzureOpenAI } from 'openai';
+import { AzureOpenAI } from "openai";
 
 let _azureClient: AzureOpenAI | null = null;
 
@@ -14,11 +14,11 @@ function getAzureOpenAIClient(): AzureOpenAI {
 
   const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
   const apiKey = process.env.AZURE_OPENAI_API_KEY;
-  const deployment = process.env.AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt-4o-mini';
+  const deployment = process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "gpt-4o-mini";
 
   if (!endpoint || !apiKey) {
     throw new Error(
-      'Azure OpenAI not configured. Set AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY environment variables.'
+      "Azure OpenAI not configured. Set AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY environment variables.",
     );
   }
 
@@ -26,7 +26,7 @@ function getAzureOpenAIClient(): AzureOpenAI {
     endpoint,
     apiKey,
     deployment,
-    apiVersion: '2024-10-01-preview',
+    apiVersion: "2024-10-01-preview",
   });
 
   return _azureClient;
@@ -35,7 +35,15 @@ function getAzureOpenAIClient(): AzureOpenAI {
 export interface ExtractedRule {
   title: string;
   description: string;
-  category: 'architecture' | 'code-style' | 'naming' | 'testing' | 'performance' | 'security' | 'documentation' | 'general';
+  category:
+    | "architecture"
+    | "code-style"
+    | "naming"
+    | "testing"
+    | "performance"
+    | "security"
+    | "documentation"
+    | "general";
   tags: string[];
   priority: number; // 1 = highest, 10 = lowest
   examples?: {
@@ -47,7 +55,7 @@ export interface ExtractedRule {
 export interface RuleExtractionResult {
   rules: ExtractedRule[];
   summary: string;
-  confidence: 'high' | 'medium' | 'low';
+  confidence: "high" | "medium" | "low";
   processingTime: number;
 }
 
@@ -57,7 +65,7 @@ export interface RuleExtractionResult {
 export async function extractRulesFromTranscript(
   transcript: string,
   videoTitle: string,
-  projectId?: string
+  projectId?: string,
 ): Promise<RuleExtractionResult> {
   const startTime = Date.now();
 
@@ -86,7 +94,7 @@ For each rule you extract, provide:
 Be specific and actionable. Avoid generic advice like "write clean code" - extract concrete, implementable rules.`;
 
   const userPrompt = `Video Title: ${videoTitle}
-${projectId ? `Project ID: ${projectId}\n` : ''}
+${projectId ? `Project ID: ${projectId}\n` : ""}
 Transcript:
 ---
 ${transcript}
@@ -116,25 +124,25 @@ If the video doesn't contain technical content suitable for rule extraction, ret
 
   try {
     const response = await client.chat.completions.create({
-      model: process.env.AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt-4o-mini',
+      model: process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "gpt-4o-mini",
       messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
       ],
       temperature: 0.3, // Lower temperature for more consistent, factual extraction
       max_tokens: 4000,
-      response_format: { type: 'json_object' },
+      response_format: { type: "json_object" },
     });
 
     const content = response.choices[0]?.message?.content;
     if (!content) {
-      throw new Error('Azure OpenAI returned empty response');
+      throw new Error("Azure OpenAI returned empty response");
     }
 
     const parsed = JSON.parse(content) as {
       rules: ExtractedRule[];
       summary: string;
-      confidence: 'high' | 'medium' | 'low';
+      confidence: "high" | "medium" | "low";
     };
 
     const processingTime = Date.now() - startTime;
@@ -144,9 +152,9 @@ If the video doesn't contain technical content suitable for rule extraction, ret
       processingTime,
     };
   } catch (error) {
-    console.error('[Azure OpenAI] Rule extraction failed:', error);
+    console.error("[Azure OpenAI] Rule extraction failed:", error);
     throw new Error(
-      `Failed to extract rules from transcript: ${error instanceof Error ? error.message : 'Unknown error'}`
+      `Failed to extract rules from transcript: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
   }
 }
@@ -160,15 +168,17 @@ export async function generateEmbedding(text: string): Promise<number[]> {
 
   try {
     const response = await client.embeddings.create({
-      model: process.env.AZURE_OPENAI_EMBEDDING_DEPLOYMENT || 'text-embedding-3-small',
+      model:
+        process.env.AZURE_OPENAI_EMBEDDING_DEPLOYMENT ||
+        "text-embedding-3-small",
       input: text.substring(0, 8000), // Limit to ~8000 chars to stay under token limits
     });
 
     return response.data[0].embedding;
   } catch (error) {
-    console.error('[Azure OpenAI] Embedding generation failed:', error);
+    console.error("[Azure OpenAI] Embedding generation failed:", error);
     throw new Error(
-      `Failed to generate embeddings: ${error instanceof Error ? error.message : 'Unknown error'}`
+      `Failed to generate embeddings: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
   }
 }

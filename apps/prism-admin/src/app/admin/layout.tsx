@@ -16,6 +16,7 @@ import {
   Receipt,
   Calendar,
   FileText,
+  Clock,
 } from "lucide-react";
 
 /**
@@ -131,6 +132,9 @@ export default async function AdminLayout({
           <NavItem href="/admin/agency/releases" icon={FileText}>
             Releases
           </NavItem>
+          <NavItem href="/admin/agency/availability" icon={Clock}>
+            Availability
+          </NavItem>
 
           {isFounder && (
             <>
@@ -193,11 +197,7 @@ export default async function AdminLayout({
             <Mail className="h-5 w-5" />
           </Link>
         </div>
-        <MobileNavItem
-          href="/admin/users"
-          icon={Users}
-          label="Users"
-        />
+        <MobileNavItem href="/admin/users" icon={Users} label="Users" />
         <MobileNavItem
           href="/admin/agency/calendar"
           icon={Calendar}

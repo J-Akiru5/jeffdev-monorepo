@@ -1,11 +1,19 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, useState, ReactNode } from 'react';
-import { Database, Shield, Code, Palette, Sparkles, type LucideIcon, ChevronRight } from 'lucide-react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useEffect, useRef, useState, ReactNode } from "react";
+import {
+  Database,
+  Shield,
+  Code,
+  Palette,
+  Sparkles,
+  type LucideIcon,
+  ChevronRight,
+} from "lucide-react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
@@ -29,73 +37,99 @@ type BuildPhase = {
 
 const pillars: ProtocolPillar[] = [
   {
-    id: 'autonomy',
-    numeral: 'I',
-    title: 'Autonomous Solver Paradigm',
-    description: 'Agents map the full workspace, trace dependencies, and execute tasks end to end.',
-    points: ['Contextual autonomy', 'Execution over suggestion', 'Agnostic integration'],
+    id: "autonomy",
+    numeral: "I",
+    title: "Autonomous Solver Paradigm",
+    description:
+      "Agents map the full workspace, trace dependencies, and execute tasks end to end.",
+    points: [
+      "Contextual autonomy",
+      "Execution over suggestion",
+      "Agnostic integration",
+    ],
     icon: Sparkles,
   },
   {
-    id: 'clarification',
-    numeral: 'II',
-    title: 'Clarification-First Doctrine',
-    description: 'Zero-assumption execution requires a Socratic Q and A loop before building.',
-    points: ['Stop on ambiguity', 'Ask targeted questions', 'Measure twice, code once'],
+    id: "clarification",
+    numeral: "II",
+    title: "Clarification-First Doctrine",
+    description:
+      "Zero-assumption execution requires a Socratic Q and A loop before building.",
+    points: [
+      "Stop on ambiguity",
+      "Ask targeted questions",
+      "Measure twice, code once",
+    ],
     icon: Shield,
   },
   {
-    id: 'sequence',
-    numeral: 'III',
-    title: 'Hierarchical Build Sequence',
-    description: 'Form follows foundation with data, security, logic, then interface.',
-    points: ['Schema defines truth', 'Security gates access', 'UI reflects validated logic'],
+    id: "sequence",
+    numeral: "III",
+    title: "Hierarchical Build Sequence",
+    description:
+      "Form follows foundation with data, security, logic, then interface.",
+    points: [
+      "Schema defines truth",
+      "Security gates access",
+      "UI reflects validated logic",
+    ],
     icon: Database,
   },
   {
-    id: 'hitl',
-    numeral: 'IV',
-    title: 'Continuous Review and HITL',
-    description: 'Human review gates each phase and keeps every decision traceable.',
-    points: ['Stage-gated commits', 'Traceable logic notes', 'Human approval to proceed'],
+    id: "hitl",
+    numeral: "IV",
+    title: "Continuous Review and HITL",
+    description:
+      "Human review gates each phase and keeps every decision traceable.",
+    points: [
+      "Stage-gated commits",
+      "Traceable logic notes",
+      "Human approval to proceed",
+    ],
     icon: Code,
   },
 ];
 
 const buildSequence: BuildPhase[] = [
   {
-    phase: 'Phase 1',
-    title: 'Data Layer',
-    description: 'Define entities, relationships, constraints, and indexing.',
+    phase: "Phase 1",
+    title: "Data Layer",
+    description: "Define entities, relationships, constraints, and indexing.",
     icon: Database,
-    accent: 'text-cyan-400',
+    accent: "text-cyan-400",
   },
   {
-    phase: 'Phase 2',
-    title: 'Security Layer',
-    description: 'Auth, sessions, and RBAC before any public endpoints.',
+    phase: "Phase 2",
+    title: "Security Layer",
+    description: "Auth, sessions, and RBAC before any public endpoints.",
     icon: Shield,
-    accent: 'text-emerald-400',
+    accent: "text-emerald-400",
   },
   {
-    phase: 'Phase 3',
-    title: 'Logic and API',
-    description: 'Server logic, routes, and data mutations with validation.',
+    phase: "Phase 3",
+    title: "Logic and API",
+    description: "Server logic, routes, and data mutations with validation.",
     icon: Code,
-    accent: 'text-purple-400',
+    accent: "text-purple-400",
   },
   {
-    phase: 'Phase 4',
-    title: 'Interface Layer',
-    description: 'UI binds to state once the core system is proven.',
+    phase: "Phase 4",
+    title: "Interface Layer",
+    description: "UI binds to state once the core system is proven.",
     icon: Palette,
-    accent: 'text-white/70',
+    accent: "text-white/70",
   },
 ];
 
 // --- Subcomponents ---
 
-function SpotlightCard({ children, className = '' }: { children: ReactNode; className?: string }) {
+function SpotlightCard({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   const divRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [opacity, setOpacity] = useState(0);
@@ -145,12 +179,12 @@ export function AgenticProtocol() {
           y: 0,
           scale: 1,
           duration: 0.8,
-          ease: 'power3.out',
+          ease: "power3.out",
           scrollTrigger: {
             trigger: headerRef.current,
-            start: 'top 85%',
+            start: "top 85%",
           },
-        }
+        },
       );
 
       // Staggered 3D reveal for pillars
@@ -164,12 +198,12 @@ export function AgenticProtocol() {
           rotationX: 0,
           duration: 0.8,
           stagger: 0.15,
-          ease: 'power3.out',
+          ease: "power3.out",
           scrollTrigger: {
             trigger: pillarsRef.current,
-            start: 'top 80%',
+            start: "top 80%",
           },
-        }
+        },
       );
 
       // Slide up and fade for sequence terminal
@@ -180,12 +214,12 @@ export function AgenticProtocol() {
           opacity: 1,
           y: 0,
           duration: 0.8,
-          ease: 'power3.out',
+          ease: "power3.out",
           scrollTrigger: {
             trigger: sequenceRef.current,
-            start: 'top 85%',
+            start: "top 85%",
           },
-        }
+        },
       );
     }, sectionRef);
 
@@ -197,7 +231,7 @@ export function AgenticProtocol() {
       ref={sectionRef}
       id="agentic-protocol"
       className="relative overflow-hidden py-24 md:py-32 bg-void"
-      style={{ perspective: '1000px' }}
+      style={{ perspective: "1000px" }}
     >
       {/* Background Ambient Glows */}
       <div className="pointer-events-none absolute inset-0 z-0">
@@ -206,7 +240,6 @@ export function AgenticProtocol() {
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
-        
         {/* Header Section */}
         <div ref={headerRef} className="max-w-3xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 mb-4 backdrop-blur-sm">
@@ -218,14 +251,15 @@ export function AgenticProtocol() {
               Agentic.Protocol // Manifesto
             </span>
           </div>
-          
+
           <h2 className="text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl">
-            The Syntaxure Labs <br/>
+            The Syntaxure Labs <br />
             <span className="text-gradient-holographic">Agentic Protocol</span>
           </h2>
           <p className="mt-6 text-white/60 md:text-lg leading-relaxed">
             A manifesto for autonomous, AI-native engineering. Built for
-            IDE-native agents that execute with precision, clarity, and uncompromising human oversight.
+            IDE-native agents that execute with precision, clarity, and
+            uncompromising human oversight.
           </p>
         </div>
 
@@ -233,7 +267,7 @@ export function AgenticProtocol() {
         <div
           ref={pillarsRef}
           className="mt-16 grid gap-6 md:grid-cols-2"
-          style={{ transformStyle: 'preserve-3d' }}
+          style={{ transformStyle: "preserve-3d" }}
         >
           {pillars.map((pillar) => (
             <SpotlightCard key={pillar.id} className="flex flex-col">
@@ -255,7 +289,10 @@ export function AgenticProtocol() {
 
               <div className="mt-6 space-y-2.5 border-t border-white/5 pt-4">
                 {pillar.points.map((point) => (
-                  <div key={point} className="flex items-center gap-3 text-xs text-white/40 group-hover:text-white/60 transition-colors">
+                  <div
+                    key={point}
+                    className="flex items-center gap-3 text-xs text-white/40 group-hover:text-white/60 transition-colors"
+                  >
                     <ChevronRight className="h-3 w-3 text-cyan-500/50" />
                     <span className="font-mono">{point}</span>
                   </div>
@@ -280,7 +317,8 @@ export function AgenticProtocol() {
             <div className="font-mono text-[10px] uppercase text-white/40 tracking-wider">
               bash - ./agent_build_sequence.sh
             </div>
-            <div className="w-10" /> {/* Spacer to perfectly center the title */}
+            <div className="w-10" />{" "}
+            {/* Spacer to perfectly center the title */}
           </div>
 
           {/* Terminal Body */}
@@ -297,10 +335,14 @@ export function AgenticProtocol() {
                   Hierarchical Build Sequence
                 </h3>
                 <p className="text-sm text-white/50 leading-relaxed mb-8">
-                  <span className="text-purple-400/70"># Form follows foundation.</span><br/>
-                  Each phase locks in before the next begins, keeping the system coherent and technical debt-free.
+                  <span className="text-purple-400/70">
+                    # Form follows foundation.
+                  </span>
+                  <br />
+                  Each phase locks in before the next begins, keeping the system
+                  coherent and technical debt-free.
                 </p>
-                
+
                 {/* Secondary Logs */}
                 <div className="space-y-4 text-xs text-white/40 border-l border-white/10 pl-4 ml-2">
                   <div className="hover:text-white/60 transition-colors">
@@ -322,14 +364,18 @@ export function AgenticProtocol() {
                     className="group flex items-stretch gap-4 rounded-lg border border-white/[0.04] bg-white/[0.01] p-4 transition-all hover:bg-white/[0.03] hover:border-white/10"
                   >
                     <div className="flex flex-col items-center justify-start pt-1">
-                      <div className={`flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-black/50 transition-colors group-hover:border-${phase.accent.replace('text-', '')}/30`}>
-                        <phase.icon className={`h-4 w-4 ${phase.accent} opacity-70 group-hover:opacity-100 transition-opacity`} />
+                      <div
+                        className={`flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-black/50 transition-colors group-hover:border-${phase.accent.replace("text-", "")}/30`}
+                      >
+                        <phase.icon
+                          className={`h-4 w-4 ${phase.accent} opacity-70 group-hover:opacity-100 transition-opacity`}
+                        />
                       </div>
                       {idx !== buildSequence.length - 1 && (
                         <div className="w-[1px] flex-grow bg-gradient-to-b from-white/10 to-transparent my-2" />
                       )}
                     </div>
-                    
+
                     <div className="pb-2">
                       <div className="font-mono text-[10px] uppercase tracking-widest text-white/30 mb-1 group-hover:text-white/50 transition-colors">
                         {phase.phase}
@@ -348,7 +394,6 @@ export function AgenticProtocol() {
             </div>
           </div>
         </div>
-        
       </div>
     </section>
   );

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Invoice PDF Template
@@ -7,14 +7,8 @@
  * Includes Syntaxure Labs branding and payment details.
  */
 
-import {
-  Document,
-  Page,
-  Text,
-  View,
-  StyleSheet,
-} from '@react-pdf/renderer';
-import type { Invoice } from '@/types/invoice';
+import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import type { Invoice } from "@/types/invoice";
 
 // =============================================================================
 // STYLES
@@ -23,98 +17,98 @@ const styles = StyleSheet.create({
   page: {
     padding: 40,
     fontSize: 10,
-    fontFamily: 'Helvetica',
-    color: '#333',
-    backgroundColor: '#fff',
+    fontFamily: "Helvetica",
+    color: "#333",
+    backgroundColor: "#fff",
   },
-  
+
   // Header
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 30,
   },
   brand: {
     fontSize: 18,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: "Helvetica-Bold",
     letterSpacing: 1,
-    color: '#0891b2', // cyan-600
+    color: "#0891b2", // cyan-600
   },
   subBrand: {
     fontSize: 9,
-    color: '#666',
+    color: "#666",
     marginTop: 3,
   },
   invoiceTitle: {
     fontSize: 28,
-    color: '#ddd',
-    fontFamily: 'Helvetica-Bold',
+    color: "#ddd",
+    fontFamily: "Helvetica-Bold",
   },
   invoiceNumber: {
     fontSize: 11,
     marginTop: 8,
-    textAlign: 'right',
+    textAlign: "right",
   },
   invoiceDate: {
     fontSize: 10,
-    color: '#666',
-    textAlign: 'right',
+    color: "#666",
+    textAlign: "right",
   },
-  
+
   // Divider
   divider: {
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
     marginVertical: 15,
   },
-  
+
   // Client Info
   section: {
     marginVertical: 10,
   },
   label: {
     fontSize: 9,
-    color: '#888',
+    color: "#888",
     marginBottom: 3,
-    fontFamily: 'Helvetica-Bold',
-    textTransform: 'uppercase',
+    fontFamily: "Helvetica-Bold",
+    textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   value: {
     fontSize: 11,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: "Helvetica-Bold",
   },
   text: {
     fontSize: 10,
     marginTop: 2,
-    color: '#444',
+    color: "#444",
   },
-  
+
   // Two Column Layout
   row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   col: {
-    width: '48%',
+    width: "48%",
   },
-  
+
   // Table
   table: {
     marginTop: 20,
     borderWidth: 1,
-    borderColor: '#eee',
+    borderColor: "#eee",
   },
   tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#f5f5f5',
+    flexDirection: "row",
+    backgroundColor: "#f5f5f5",
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
   },
   tableRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: "#eee",
   },
   tableCell: {
     padding: 10,
@@ -123,123 +117,123 @@ const styles = StyleSheet.create({
   tableCellHeader: {
     padding: 10,
     fontSize: 9,
-    fontFamily: 'Helvetica-Bold',
-    textTransform: 'uppercase',
+    fontFamily: "Helvetica-Bold",
+    textTransform: "uppercase",
     letterSpacing: 0.5,
   },
-  colDescription: { width: '50%' },
-  colQty: { width: '10%', textAlign: 'center' },
-  colUnit: { width: '20%', textAlign: 'right' },
-  colAmount: { width: '20%', textAlign: 'right' },
-  
+  colDescription: { width: "50%" },
+  colQty: { width: "10%", textAlign: "center" },
+  colUnit: { width: "20%", textAlign: "right" },
+  colAmount: { width: "20%", textAlign: "right" },
+
   // Totals
   totalsContainer: {
-    alignSelf: 'flex-end',
-    width: '45%',
+    alignSelf: "flex-end",
+    width: "45%",
     marginTop: 15,
   },
   totalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingVertical: 5,
     paddingHorizontal: 10,
   },
   totalLabel: {
     fontSize: 10,
-    color: '#666',
+    color: "#666",
   },
   totalValue: {
     fontSize: 10,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: "Helvetica-Bold",
   },
   discountRow: {
-    color: '#dc2626', // red
+    color: "#dc2626", // red
   },
   grandTotalRow: {
     borderTopWidth: 2,
-    borderTopColor: '#333',
+    borderTopColor: "#333",
     marginTop: 5,
     paddingTop: 8,
   },
   grandTotalLabel: {
     fontSize: 12,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: "Helvetica-Bold",
   },
   grandTotalValue: {
     fontSize: 14,
-    fontFamily: 'Helvetica-Bold',
-    color: '#0891b2',
+    fontFamily: "Helvetica-Bold",
+    color: "#0891b2",
   },
-  
+
   // Payment Info
   paymentBox: {
     marginTop: 30,
     padding: 15,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: "#f9f9f9",
     borderRadius: 4,
   },
   paymentTitle: {
     fontSize: 10,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: "Helvetica-Bold",
     marginBottom: 8,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 0.5,
   },
   paymentRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginVertical: 2,
   },
   paymentLabel: {
     fontSize: 9,
-    color: '#666',
+    color: "#666",
     width: 80,
   },
   paymentValue: {
     fontSize: 9,
-    color: '#333',
+    color: "#333",
   },
-  
+
   // Footer
   footer: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 30,
     left: 40,
     right: 40,
-    textAlign: 'center',
+    textAlign: "center",
     borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderTopColor: "#eee",
     paddingTop: 12,
   },
   footerText: {
     fontSize: 8,
-    color: '#999',
+    color: "#999",
     lineHeight: 1.5,
   },
   footerUrl: {
     fontSize: 8,
-    color: '#0891b2',
+    color: "#0891b2",
     marginTop: 4,
   },
-  
+
   // Status Badge
   statusBadge: {
-    position: 'absolute',
+    position: "absolute",
     top: 40,
     right: 40,
     fontSize: 10,
-    fontFamily: 'Helvetica-Bold',
-    textTransform: 'uppercase',
+    fontFamily: "Helvetica-Bold",
+    textTransform: "uppercase",
     letterSpacing: 1,
-    padding: '4 8',
+    padding: "4 8",
     borderRadius: 2,
   },
   statusPaid: {
-    backgroundColor: '#dcfce7',
-    color: '#16a34a',
+    backgroundColor: "#dcfce7",
+    color: "#16a34a",
   },
   statusPartial: {
-    backgroundColor: '#fef3c7',
-    color: '#d97706',
+    backgroundColor: "#fef3c7",
+    color: "#d97706",
   },
 });
 
@@ -251,20 +245,20 @@ interface InvoicePDFProps {
 }
 
 export function InvoicePDF({ invoice }: InvoicePDFProps) {
-  const currencySymbol = invoice.currency === 'PHP' ? '₱' : '$';
-  
+  const currencySymbol = invoice.currency === "PHP" ? "₱" : "$";
+
   const formatAmount = (amount: number) => {
-    return `${currencySymbol}${Math.abs(amount).toLocaleString('en-US', {
+    return `${currencySymbol}${Math.abs(amount).toLocaleString("en-US", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
   };
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    return new Date(dateStr).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -272,12 +266,12 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
     <Document>
       <Page size="A4" style={styles.page}>
         {/* Status Badge */}
-        {invoice.status === 'paid' && (
+        {invoice.status === "paid" && (
           <View style={[styles.statusBadge, styles.statusPaid]}>
             <Text>PAID</Text>
           </View>
         )}
-        {invoice.status === 'partial' && (
+        {invoice.status === "partial" && (
           <View style={[styles.statusBadge, styles.statusPartial]}>
             <Text>PARTIAL</Text>
           </View>
@@ -292,7 +286,7 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
             <Text style={styles.subBrand}>+63 951 916 7103</Text>
             <Text style={styles.subBrand}>DTI No: VLLP979818395984</Text>
           </View>
-          <View style={{ alignItems: 'flex-end' }}>
+          <View style={{ alignItems: "flex-end" }}>
             <Text style={styles.invoiceTitle}>INVOICE</Text>
             <Text style={styles.invoiceNumber}>{invoice.refNo}</Text>
             <Text style={styles.invoiceDate}>
@@ -366,16 +360,20 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
         <View style={styles.totalsContainer}>
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Subtotal</Text>
-            <Text style={styles.totalValue}>{formatAmount(invoice.subtotal)}</Text>
+            <Text style={styles.totalValue}>
+              {formatAmount(invoice.subtotal)}
+            </Text>
           </View>
-          
+
           {invoice.discount && invoice.discount > 0 && (
             <View style={[styles.totalRow, styles.discountRow]}>
               <Text style={styles.totalLabel}>Discount</Text>
-              <Text style={styles.totalValue}>-{formatAmount(invoice.discount)}</Text>
+              <Text style={styles.totalValue}>
+                -{formatAmount(invoice.discount)}
+              </Text>
             </View>
           )}
-          
+
           {invoice.tax && invoice.tax > 0 && (
             <View style={styles.totalRow}>
               <Text style={styles.totalLabel}>
@@ -384,25 +382,25 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
               <Text style={styles.totalValue}>{formatAmount(invoice.tax)}</Text>
             </View>
           )}
-          
+
           <View style={[styles.totalRow, styles.grandTotalRow]}>
             <Text style={styles.grandTotalLabel}>Total Due</Text>
             <Text style={styles.grandTotalValue}>
               {formatAmount(invoice.balanceDue)}
             </Text>
           </View>
-          
+
           {invoice.paidAmount > 0 && invoice.balanceDue > 0 && (
             <>
               <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Paid</Text>
-                <Text style={[styles.totalValue, { color: '#16a34a' }]}>
+                <Text style={[styles.totalValue, { color: "#16a34a" }]}>
                   {formatAmount(invoice.paidAmount)}
                 </Text>
               </View>
               <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Balance</Text>
-                <Text style={[styles.totalValue, { color: '#dc2626' }]}>
+                <Text style={[styles.totalValue, { color: "#dc2626" }]}>
                   {formatAmount(invoice.balanceDue)}
                 </Text>
               </View>
@@ -413,7 +411,7 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
         {/* Payment Info */}
         <View style={styles.paymentBox}>
           <Text style={styles.paymentTitle}>Payment Details</Text>
-          
+
           <View style={styles.paymentRow}>
             <Text style={styles.paymentLabel}>Bank:</Text>
             <Text style={styles.paymentValue}>Landbank of the Philippines</Text>
@@ -426,7 +424,7 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
             <Text style={styles.paymentLabel}>Account Name:</Text>
             <Text style={styles.paymentValue}>Jeff Edrick Martinez</Text>
           </View>
-          
+
           <View style={{ marginTop: 8 }}>
             <View style={styles.paymentRow}>
               <Text style={styles.paymentLabel}>GCash:</Text>
@@ -442,12 +440,11 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerText}>
-            This document serves as a Statement of Account/Service Invoice for internal tracking.
-            Official Receipt (OR) is currently unavailable as BIR registration is in process.
+            This document serves as a Statement of Account/Service Invoice for
+            internal tracking. Official Receipt (OR) is currently unavailable as
+            BIR registration is in process.
           </Text>
-          <Text style={styles.footerText}>
-            Thank you for your business!
-          </Text>
+          <Text style={styles.footerText}>Thank you for your business!</Text>
           <Text style={styles.footerUrl}>www.jeffdev.studio</Text>
         </View>
       </Page>

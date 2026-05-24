@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Tasks Page
@@ -7,17 +7,22 @@
  * Uses Supabase server actions for data persistence.
  */
 
-import { useState, useEffect, Suspense, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { TaskList } from '@/components/task-list';
-import { useProjects } from '@/contexts/project-context';
-import { Star } from 'lucide-react';
-import { createTask, deleteTask, toggleTaskComplete, toggleTaskStar } from '@/app/actions/tasks';
-import type { Task } from '@/lib/schemas';
-import { toast } from 'sonner';
+import { useState, useEffect, Suspense, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
+import { TaskList } from "@/components/task-list";
+import { useProjects } from "@/contexts/project-context";
+import { Star } from "lucide-react";
+import {
+  createTask,
+  deleteTask,
+  toggleTaskComplete,
+  toggleTaskStar,
+} from "@/app/actions/tasks";
+import type { Task } from "@/lib/schemas";
+import { toast } from "sonner";
 
 async function fetchTasks(): Promise<Task[]> {
-  const res = await fetch('/api/tasks');
+  const res = await fetch("/api/tasks");
   if (!res.ok) return [];
   const data = await res.json();
   // Map snake_case from Supabase to camelCase Task type
@@ -27,17 +32,21 @@ async function fetchTasks(): Promise<Task[]> {
 /** Map a raw Supabase row (snake_case) to the Task type (camelCase). */
 function mapTask(raw: Record<string, unknown>): Task {
   return {
-    id: String(raw.id || ''),
-    projectId: String(raw.project_id || raw.projectId || ''),
-    title: String(raw.title || ''),
-    notes: String(raw.notes || raw.description || ''),
-    completed: raw.status === 'done',
+    id: String(raw.id || ""),
+    projectId: String(raw.project_id || raw.projectId || ""),
+    title: String(raw.title || ""),
+    notes: String(raw.notes || raw.description || ""),
+    completed: raw.status === "done",
     starred: raw.priority ? Number(raw.priority) > 0 : false,
     dueDate: raw.due_date ? String(raw.due_date) : undefined,
     dueTime: raw.due_time ? String(raw.due_time) : undefined,
     order: Number(raw.order || 0),
-    createdAt: String(raw.created_at || raw.createdAt || new Date().toISOString()),
-    updatedAt: String(raw.updated_at || raw.updatedAt || new Date().toISOString()),
+    createdAt: String(
+      raw.created_at || raw.createdAt || new Date().toISOString(),
+    ),
+    updatedAt: String(
+      raw.updated_at || raw.updatedAt || new Date().toISOString(),
+    ),
   };
 }
 
@@ -46,8 +55,8 @@ function TasksContent() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
-  const filter = searchParams.get('filter');
-  const isStarredFilter = filter === 'starred';
+  const filter = searchParams.get("filter");
+  const isStarredFilter = filter === "starred";
 
   // Load tasks from Supabase
   useEffect(() => {
@@ -57,13 +66,15 @@ function TasksContent() {
         const data = await fetchTasks();
         if (!cancelled) setTasks(data);
       } catch (err) {
-        console.error('Failed to load tasks:', err);
+        console.error("Failed to load tasks:", err);
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
     loadTasks();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Filter tasks by active project and/or starred filter
@@ -76,55 +87,74 @@ function TasksContent() {
   }
 
   // Group tasks by project
-  const tasksByProject = projects.reduce((acc, project) => {
-    const projectTasks = filteredTasks.filter((t) => t.projectId === project.id);
-    if (projectTasks.length > 0 || activeProjectId === project.id) {
-      acc[project.id] = projectTasks;
-    }
-    return acc;
-  }, {} as Record<string, Task[]>);
-
-  const handleToggleComplete = useCallback(async (taskId: string) => {
-    try {
-      const task = tasks.find((t) => t.id === taskId);
-      if (!task) return;
-      await toggleTaskComplete(taskId, !task.completed);
-      setTasks((prev) =>
-        prev.map((t) =>
-          t.id === taskId
-            ? { ...t, completed: !t.completed, updatedAt: new Date().toISOString() }
-            : t
-        )
+  const tasksByProject = projects.reduce(
+    (acc, project) => {
+      const projectTasks = filteredTasks.filter(
+        (t) => t.projectId === project.id,
       );
-    } catch {
-      toast.error('Failed to update task');
-    }
-  }, [tasks]);
+      if (projectTasks.length > 0 || activeProjectId === project.id) {
+        acc[project.id] = projectTasks;
+      }
+      return acc;
+    },
+    {} as Record<string, Task[]>,
+  );
 
-  const handleToggleStar = useCallback(async (taskId: string) => {
-    try {
-      const task = tasks.find((t) => t.id === taskId);
-      if (!task) return;
-      await toggleTaskStar(taskId, !task.starred);
-      setTasks((prev) =>
-        prev.map((t) =>
-          t.id === taskId
-            ? { ...t, starred: !t.starred, updatedAt: new Date().toISOString() }
-            : t
-        )
-      );
-    } catch {
-      toast.error('Failed to update task');
-    }
-  }, [tasks]);
+  const handleToggleComplete = useCallback(
+    async (taskId: string) => {
+      try {
+        const task = tasks.find((t) => t.id === taskId);
+        if (!task) return;
+        await toggleTaskComplete(taskId, !task.completed);
+        setTasks((prev) =>
+          prev.map((t) =>
+            t.id === taskId
+              ? {
+                  ...t,
+                  completed: !t.completed,
+                  updatedAt: new Date().toISOString(),
+                }
+              : t,
+          ),
+        );
+      } catch {
+        toast.error("Failed to update task");
+      }
+    },
+    [tasks],
+  );
+
+  const handleToggleStar = useCallback(
+    async (taskId: string) => {
+      try {
+        const task = tasks.find((t) => t.id === taskId);
+        if (!task) return;
+        await toggleTaskStar(taskId, !task.starred);
+        setTasks((prev) =>
+          prev.map((t) =>
+            t.id === taskId
+              ? {
+                  ...t,
+                  starred: !t.starred,
+                  updatedAt: new Date().toISOString(),
+                }
+              : t,
+          ),
+        );
+      } catch {
+        toast.error("Failed to update task");
+      }
+    },
+    [tasks],
+  );
 
   const handleDelete = useCallback(async (taskId: string) => {
     try {
       await deleteTask(taskId);
       setTasks((prev) => prev.filter((t) => t.id !== taskId));
-      toast.success('Task deleted');
+      toast.success("Task deleted");
     } catch {
-      toast.error('Failed to delete task');
+      toast.error("Failed to delete task");
     }
   }, []);
 
@@ -134,9 +164,9 @@ function TasksContent() {
       // Refetch to get server-assigned ID
       const data = await fetchTasks();
       setTasks(data);
-      toast.success('Task created');
+      toast.success("Task created");
     } catch {
-      toast.error('Failed to create task');
+      toast.error("Failed to create task");
     }
   }, []);
 
@@ -161,9 +191,9 @@ function TasksContent() {
               Starred
             </>
           ) : activeProjectId ? (
-            projects.find((p) => p.id === activeProjectId)?.name || 'Tasks'
+            projects.find((p) => p.id === activeProjectId)?.name || "Tasks"
           ) : (
-            'All Tasks'
+            "All Tasks"
           )}
         </h1>
         <p className="mt-1 text-sm text-white/40">
@@ -192,7 +222,9 @@ function TasksContent() {
 
         {Object.keys(tasksByProject).length === 0 && (
           <div className="py-12 text-center">
-            <p className="text-white/40">No tasks yet. Create a task to get started.</p>
+            <p className="text-white/40">
+              No tasks yet. Create a task to get started.
+            </p>
           </div>
         )}
       </div>
@@ -202,7 +234,11 @@ function TasksContent() {
 
 export default function TasksPage() {
   return (
-    <Suspense fallback={<div className="text-center py-12 text-white/40">Loading tasks...</div>}>
+    <Suspense
+      fallback={
+        <div className="text-center py-12 text-white/40">Loading tasks...</div>
+      }
+    >
       <TasksContent />
     </Suspense>
   );

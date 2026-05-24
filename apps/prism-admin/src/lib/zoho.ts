@@ -46,7 +46,7 @@ async function getAccessToken(): Promise<string | null> {
   try {
     const response = await fetch(
       `https://accounts.zoho.com/oauth/v2/token?refresh_token=${refreshToken}&client_id=${clientId}&client_secret=${clientSecret}&grant_type=refresh_token`,
-      { method: "POST" }
+      { method: "POST" },
     );
 
     if (!response.ok) {
@@ -67,7 +67,10 @@ async function getAccessToken(): Promise<string | null> {
 /**
  * Fetch emails from Zoho inbox
  */
-export async function fetchInboxEmails(folderId = "inbox", limit = 50): Promise<ZohoEmail[]> {
+export async function fetchInboxEmails(
+  folderId = "inbox",
+  limit = 50,
+): Promise<ZohoEmail[]> {
   const token = await getAccessToken();
   if (!token) return [];
 
@@ -85,7 +88,7 @@ export async function fetchInboxEmails(folderId = "inbox", limit = 50): Promise<
           Authorization: `Zoho-oauthtoken ${token}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -103,7 +106,9 @@ export async function fetchInboxEmails(folderId = "inbox", limit = 50): Promise<
 /**
  * Get full email content by message ID
  */
-export async function getEmailContent(messageId: string): Promise<string | null> {
+export async function getEmailContent(
+  messageId: string,
+): Promise<string | null> {
   const token = await getAccessToken();
   if (!token) return null;
 
@@ -118,7 +123,7 @@ export async function getEmailContent(messageId: string): Promise<string | null>
           Authorization: `Zoho-oauthtoken ${token}`,
           "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -156,7 +161,7 @@ export async function markAsRead(messageId: string): Promise<boolean> {
           messageId: [messageId],
           mode: "markAsRead",
         }),
-      }
+      },
     );
 
     return response.ok;
@@ -169,7 +174,10 @@ export async function markAsRead(messageId: string): Promise<boolean> {
 /**
  * Move email to folder (e.g., archive)
  */
-export async function moveToFolder(messageId: string, folderId: string): Promise<boolean> {
+export async function moveToFolder(
+  messageId: string,
+  folderId: string,
+): Promise<boolean> {
   const token = await getAccessToken();
   if (!token) return false;
 
@@ -190,7 +198,7 @@ export async function moveToFolder(messageId: string, folderId: string): Promise
           mode: "move",
           destFolderId: folderId,
         }),
-      }
+      },
     );
 
     return response.ok;

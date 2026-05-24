@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Notification Popover Component
@@ -7,20 +7,33 @@
  * Includes unread count badge and mark-all-as-read functionality.
  */
 
-import { useState, useEffect, useTransition } from 'react';
-import { Bell, Check, X, Loader2, Mail, MessageSquare, CreditCard, FolderKanban, AlertCircle } from 'lucide-react';
-import Link from 'next/link';
-import { 
-  getNotifications, 
-  getUnreadCount, 
-  markAsRead, 
+import { useState, useEffect, useTransition } from "react";
+import {
+  Bell,
+  Check,
+  X,
+  Loader2,
+  Mail,
+  MessageSquare,
+  CreditCard,
+  FolderKanban,
+  AlertCircle,
+} from "lucide-react";
+import Link from "next/link";
+import {
+  getNotifications,
+  getUnreadCount,
+  markAsRead,
   markAllAsRead,
-  dismissNotification 
-} from '@/app/actions/notifications';
-import type { Notification, NotificationType } from '@/types/notification';
-import { formatDistanceToNow } from 'date-fns';
+  dismissNotification,
+} from "@/app/actions/notifications";
+import type { Notification, NotificationType } from "@/types/notification";
+import { formatDistanceToNow } from "date-fns";
 
-const iconMap: Record<NotificationType, React.ComponentType<{ className?: string }>> = {
+const iconMap: Record<
+  NotificationType,
+  React.ComponentType<{ className?: string }>
+> = {
   quote: MessageSquare,
   message: Mail,
   system: Bell,
@@ -29,11 +42,11 @@ const iconMap: Record<NotificationType, React.ComponentType<{ className?: string
 };
 
 const colorMap: Record<NotificationType, string> = {
-  quote: 'text-cyan-400 bg-cyan-500/10',
-  message: 'text-purple-400 bg-purple-500/10',
-  system: 'text-yellow-400 bg-yellow-500/10',
-  payment: 'text-emerald-400 bg-emerald-500/10',
-  project: 'text-blue-400 bg-blue-500/10',
+  quote: "text-cyan-400 bg-cyan-500/10",
+  message: "text-purple-400 bg-purple-500/10",
+  system: "text-yellow-400 bg-yellow-500/10",
+  payment: "text-emerald-400 bg-emerald-500/10",
+  project: "text-blue-400 bg-blue-500/10",
 };
 
 interface NotificationPopoverProps {
@@ -72,7 +85,7 @@ export function NotificationPopover({ userId }: NotificationPopoverProps) {
     startTransition(async () => {
       await markAsRead(notificationId);
       setNotifications((prev) =>
-        prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
+        prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n)),
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
     });
@@ -109,7 +122,7 @@ export function NotificationPopover({ userId }: NotificationPopoverProps) {
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
           <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-cyan-500 text-[10px] font-bold text-black">
-            {unreadCount > 9 ? '9+' : unreadCount}
+            {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
@@ -154,18 +167,21 @@ export function NotificationPopover({ userId }: NotificationPopoverProps) {
                 <ul>
                   {notifications.map((notification) => {
                     const Icon = iconMap[notification.type] || Bell;
-                    const colorClass = colorMap[notification.type] || 'text-white/50 bg-white/5';
+                    const colorClass =
+                      colorMap[notification.type] || "text-white/50 bg-white/5";
 
                     return (
                       <li
                         key={notification.id}
                         className={`group relative border-b border-white/5 last:border-0 ${
-                          !notification.read ? 'bg-white/2' : ''
+                          !notification.read ? "bg-white/2" : ""
                         }`}
                       >
                         <div className="flex gap-3 p-4">
                           {/* Icon */}
-                          <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${colorClass}`}>
+                          <div
+                            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${colorClass}`}
+                          >
                             <Icon className="h-4 w-4" />
                           </div>
 
@@ -179,8 +195,11 @@ export function NotificationPopover({ userId }: NotificationPopoverProps) {
                             </p>
                             <p className="mt-1 text-[10px] text-white/30">
                               {notification.created_at
-                                ? formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })
-                                : 'Just now'}
+                                ? formatDistanceToNow(
+                                    new Date(notification.created_at),
+                                    { addSuffix: true },
+                                  )
+                                : "Just now"}
                             </p>
                           </div>
 
@@ -188,7 +207,9 @@ export function NotificationPopover({ userId }: NotificationPopoverProps) {
                           <div className="flex shrink-0 items-start gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                             {!notification.read && (
                               <button
-                                onClick={() => handleMarkAsRead(notification.id)}
+                                onClick={() =>
+                                  handleMarkAsRead(notification.id)
+                                }
                                 className="rounded p-1 text-white/40 hover:bg-white/10 hover:text-white"
                                 title="Mark as read"
                               >
@@ -196,7 +217,12 @@ export function NotificationPopover({ userId }: NotificationPopoverProps) {
                               </button>
                             )}
                             <button
-                              onClick={() => handleDismiss(notification.id, !notification.read)}
+                              onClick={() =>
+                                handleDismiss(
+                                  notification.id,
+                                  !notification.read,
+                                )
+                              }
                               className="rounded p-1 text-white/40 hover:bg-red-500/10 hover:text-red-400"
                               title="Dismiss"
                             >
@@ -210,7 +236,8 @@ export function NotificationPopover({ userId }: NotificationPopoverProps) {
                           <Link
                             href={notification.link}
                             onClick={() => {
-                              if (!notification.read) handleMarkAsRead(notification.id);
+                              if (!notification.read)
+                                handleMarkAsRead(notification.id);
                               setIsOpen(false);
                             }}
                             className="absolute inset-0 z-0"

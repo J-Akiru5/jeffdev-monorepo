@@ -90,6 +90,7 @@ Replace the API key, save, and restart Cursor.
 ### Windsurf
 
 Open **Windsurf Settings → MCP Servers** and add:
+
 - **Name:** `prism`
 - **Command:** `prism`
 - **Args:** `serve`
@@ -135,15 +136,15 @@ If Prism is connected, the AI will fetch your rules from the Prism Context Engin
 
 ## Troubleshooting
 
-| Problem | Fix |
-|---------|-----|
-| `prism: command not found` | Run `npm install -g prism-context-engine` again. Restart terminal. |
-| API key validation failed | Generate a new key from Settings → API Keys |
-| No rules returned | Run `prism sync` first to download your rules locally |
-| `prism serve` crashes immediately | Check Node.js version: must be ≥20. Run `node --version` |
-| Can't find settings.json (VS Code) | `Ctrl+Shift+P` → "Open User Settings (JSON)" |
-| IDE shows "server not running" | Verify `prism --version` works, then restart the IDE |
-| Rules are stale / not updating | Run `prism sync` then restart the MCP server in your IDE |
+| Problem                            | Fix                                                                |
+| ---------------------------------- | ------------------------------------------------------------------ |
+| `prism: command not found`         | Run `npm install -g prism-context-engine` again. Restart terminal. |
+| API key validation failed          | Generate a new key from Settings → API Keys                        |
+| No rules returned                  | Run `prism sync` first to download your rules locally              |
+| `prism serve` crashes immediately  | Check Node.js version: must be ≥20. Run `node --version`           |
+| Can't find settings.json (VS Code) | `Ctrl+Shift+P` → "Open User Settings (JSON)"                       |
+| IDE shows "server not running"     | Verify `prism --version` works, then restart the IDE               |
+| Rules are stale / not updating     | Run `prism sync` then restart the MCP server in your IDE           |
 
 ## Offline Mode
 

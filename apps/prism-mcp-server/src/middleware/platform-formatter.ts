@@ -72,7 +72,9 @@ export function getConfig(): PlatformConfig {
   return PLATFORM_CONFIGS[platform] || PLATFORM_CONFIGS.unknown;
 }
 
-export function resolveFormat(requestedFormat?: "markdown" | "json"): "markdown" | "json" {
+export function resolveFormat(
+  requestedFormat?: "markdown" | "json",
+): "markdown" | "json" {
   const config = getConfig();
   if (requestedFormat) return requestedFormat;
   return config.defaultFormat;
@@ -90,7 +92,8 @@ export function getFormatInstructions(): string {
   const config = getConfig();
   const notes: string[] = [];
   if (config.styleNote) notes.push(config.styleNote);
-  if (!config.includeMetadata) notes.push("Omit rule priority and tag metadata.");
+  if (!config.includeMetadata)
+    notes.push("Omit rule priority and tag metadata.");
   if (!config.includeSkills) notes.push("Omit skill references.");
   return notes.join(" ");
 }

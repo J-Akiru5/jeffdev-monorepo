@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Admin Header
@@ -6,21 +6,21 @@
  * Top header bar with user info and quick actions.
  */
 
-import Link from 'next/link';
-import { Search } from 'lucide-react';
-import { NotificationPopover } from './notification-popover';
-import { useUser } from '@/contexts/user-context';
+import Link from "next/link";
+import { Search } from "lucide-react";
+import { NotificationPopover } from "./notification-popover";
+import { useUser } from "@/contexts/user-context";
 
 export function AdminHeader() {
   const { user, loading } = useUser();
 
   // Fallback while loading
   const displayUser = user || {
-    uid: '',
-    displayName: 'Loading...',
-    email: '',
+    uid: "",
+    displayName: "Loading...",
+    email: "",
     photoURL: null,
-    role: 'employee' as const,
+    role: "employee" as const,
   };
 
   return (
@@ -37,9 +37,7 @@ export function AdminHeader() {
         </div>
 
         {/* Mobile Logo/Title (Optional, if you want something on the left) */}
-        <div className="md:hidden font-semibold text-white">
-          Dashboard
-        </div>
+        <div className="md:hidden font-semibold text-white">Dashboard</div>
       </div>
 
       {/* Right side */}
@@ -54,7 +52,7 @@ export function AdminHeader() {
         >
           <div className="hidden text-right md:block">
             <div className="text-sm font-medium text-white">
-              {loading ? 'Loading...' : displayUser.displayName}
+              {loading ? "Loading..." : displayUser.displayName}
             </div>
             <div className="font-mono text-[10px] uppercase tracking-wider text-white/40">
               {displayUser.role}
@@ -68,7 +66,7 @@ export function AdminHeader() {
               className="h-9 w-9 rounded-full object-cover"
             />
           ) : (
-              <div className="h-9 w-9 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500" />
+            <div className="h-9 w-9 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500" />
           )}
         </Link>
       </div>

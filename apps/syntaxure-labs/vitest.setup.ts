@@ -1,5 +1,5 @@
-import '@testing-library/jest-dom/vitest';
-import { vi } from 'vitest';
+import "@testing-library/jest-dom/vitest";
+import { vi } from "vitest";
 
 /**
  * Vitest Setup File
@@ -9,17 +9,16 @@ import { vi } from 'vitest';
  */
 
 // Mock Next.js router
-vi.mock('next/navigation', () => ({
+vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
     replace: vi.fn(),
     prefetch: vi.fn(),
     back: vi.fn(),
   }),
-  usePathname: () => '/admin',
+  usePathname: () => "/admin",
   useSearchParams: () => new URLSearchParams(),
 }));
 
 // Mock environment variables for tests
-process.env.NEXT_PUBLIC_SITE_URL = 'http://localhost:3000';
-
+process.env.NEXT_PUBLIC_SITE_URL = "http://localhost:3000";

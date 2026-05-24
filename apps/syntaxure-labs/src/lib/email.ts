@@ -4,13 +4,13 @@
  * Centralized email sending logic using Resend API.
  */
 
-import { Resend } from 'resend';
+import { Resend } from "resend";
 
 function getResendClient() {
   const apiKey = process.env.RESEND_API_KEY;
 
   if (!apiKey) {
-    throw new Error('Missing RESEND_API_KEY environment variable');
+    throw new Error("Missing RESEND_API_KEY environment variable");
   }
 
   return new Resend(apiKey);
@@ -18,16 +18,16 @@ function getResendClient() {
 
 // Brand sender names with display name for professional appearance
 export const EMAIL_ADDRESSES = {
-  contact: process.env.CONTACT_EMAIL || 'contact@jeffdev.studio',
-  hire: process.env.HIRE_EMAIL || 'hire@jeffdev.studio',
-  noreply: process.env.NOREPLY_EMAIL || 'noreply@jeffdev.studio',
+  contact: process.env.CONTACT_EMAIL || "contact@jeffdev.studio",
+  hire: process.env.HIRE_EMAIL || "hire@jeffdev.studio",
+  noreply: process.env.NOREPLY_EMAIL || "noreply@jeffdev.studio",
 } as const;
 
 // Branded sender format for external emails
 export const BRANDED_SENDER = `Syntaxure Labs <${EMAIL_ADDRESSES.noreply}>`;
 
 // Base URL for assets in emails
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://jeffdev.studio';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://jeffdev.studio";
 const LOGO_URL = `${BASE_URL}/favicon/icon1.png`;
 
 interface EmailAttachment {
@@ -65,13 +65,13 @@ export async function sendEmail({
     });
 
     if (error) {
-      console.error('[RESEND ERROR]', error);
+      console.error("[RESEND ERROR]", error);
       throw new Error(`Failed to send email: ${error.message}`);
     }
 
     return { success: true, data };
   } catch (error) {
-    console.error('[EMAIL SEND ERROR]', error);
+    console.error("[EMAIL SEND ERROR]", error);
     throw error;
   }
 }
@@ -150,11 +150,11 @@ export function quoteEmailTemplate(data: {
   details: string;
 }) {
   const projectTypes: Record<string, string> = {
-    web: 'Web Application',
-    saas: 'SaaS Platform',
-    mobile: 'Mobile App',
-    ai: 'AI Integration',
-    other: 'Other/Custom',
+    web: "Web Application",
+    saas: "SaaS Platform",
+    mobile: "Mobile App",
+    ai: "AI Integration",
+    other: "Other/Custom",
   };
 
   return `
@@ -189,7 +189,7 @@ export function quoteEmailTemplate(data: {
           <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: 600; color: #666;">Company:</td>
           <td style="padding: 10px 0; border-bottom: 1px solid #eee;">${data.company}</td>
         </tr>`
-            : ''
+            : ""
         }
       </table>
     </div>
@@ -249,17 +249,17 @@ export function inviteEmailTemplate(data: {
   expiresAt: string;
 }) {
   const roleColors: Record<string, string> = {
-    admin: '#06b6d4',
-    partner: '#10b981',
-    employee: '#8b5cf6',
+    admin: "#06b6d4",
+    partner: "#10b981",
+    employee: "#8b5cf6",
   };
 
-  const roleColor = roleColors[data.role] || '#06b6d4';
-  const expiresDate = new Date(data.expiresAt).toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  const roleColor = roleColors[data.role] || "#06b6d4";
+  const expiresDate = new Date(data.expiresAt).toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 
   return `
@@ -279,15 +279,19 @@ export function inviteEmailTemplate(data: {
   
   <div style="background: #111111; padding: 40px; border-radius: 0 0 12px 12px; border: 1px solid rgba(255,255,255,0.1); border-top: none;">
     <p style="margin: 0 0 20px 0; font-size: 16px;">
-      ${data.inviterName ? `<strong>${data.inviterName}</strong> has invited you` : 'You have been invited'} to join Syntaxure Labs as a <span style="color: ${roleColor}; font-weight: 600; text-transform: capitalize;">${data.role}</span>.
+      ${data.inviterName ? `<strong>${data.inviterName}</strong> has invited you` : "You have been invited"} to join Syntaxure Labs as a <span style="color: ${roleColor}; font-weight: 600; text-transform: capitalize;">${data.role}</span>.
     </p>
     
-    ${data.projectName ? `
+    ${
+      data.projectName
+        ? `
     <div style="background: rgba(255,255,255,0.05); padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid ${roleColor};">
       <p style="margin: 0; font-size: 14px; color: rgba(255,255,255,0.6);">You'll be working on:</p>
       <p style="margin: 5px 0 0 0; font-size: 16px; font-weight: 600; color: white;">${data.projectName}</p>
     </div>
-    ` : ''}
+    `
+        : ""
+    }
     
     <div style="text-align: center; margin: 30px 0;">
       <a href="${data.inviteLink}" style="display: inline-block; background: ${roleColor}; color: #000; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 16px;">
@@ -323,21 +327,21 @@ export function invoiceEmailTemplate(data: {
   clientName: string;
   refNo: string;
   total: number;
-  currency: 'USD' | 'PHP';
+  currency: "USD" | "PHP";
   dueDate: string;
   paymentLink: string;
   projectTitle?: string;
   items: { description: string; amount: number }[];
 }) {
-  const currencySymbol = data.currency === 'PHP' ? '₱' : '$';
-  const formattedTotal = `${currencySymbol}${data.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-  const formattedDueDate = new Date(data.dueDate).toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  const currencySymbol = data.currency === "PHP" ? "₱" : "$";
+  const formattedTotal = `${currencySymbol}${data.total.toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
+  const formattedDueDate = new Date(data.dueDate).toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
-  const accentColor = '#06b6d4'; // cyan-500
+  const accentColor = "#06b6d4"; // cyan-500
 
   return `
 <!DOCTYPE html>
@@ -360,7 +364,7 @@ export function invoiceEmailTemplate(data: {
     </p>
     
     <p style="margin: 0 0 25px 0; font-size: 15px; color: rgba(255,255,255,0.7);">
-      Please find attached your invoice for ${data.projectTitle ? `<strong>${data.projectTitle}</strong>` : 'services rendered'}.
+      Please find attached your invoice for ${data.projectTitle ? `<strong>${data.projectTitle}</strong>` : "services rendered"}.
     </p>
     
     <!-- Invoice Summary Box -->
@@ -379,17 +383,26 @@ export function invoiceEmailTemplate(data: {
     <!-- Line Items Preview -->
     <div style="margin-bottom: 25px;">
       <p style="margin: 0 0 12px 0; font-size: 12px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 1px;">Services</p>
-      ${data.items.slice(0, 3).map(item => `
+      ${data.items
+        .slice(0, 3)
+        .map(
+          (item) => `
         <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
           <span style="color: rgba(255,255,255,0.8); font-size: 14px;">${item.description}</span>
           <span style="color: rgba(255,255,255,0.6); font-size: 14px;">${currencySymbol}${item.amount.toLocaleString()}</span>
         </div>
-      `).join('')}
-      ${data.items.length > 3 ? `
+      `,
+        )
+        .join("")}
+      ${
+        data.items.length > 3
+          ? `
         <p style="margin: 10px 0 0 0; font-size: 12px; color: rgba(255,255,255,0.4);">
           + ${data.items.length - 3} more items (see PDF attachment)
         </p>
-      ` : ''}
+      `
+          : ""
+      }
     </div>
     
     <!-- Pay Now Button -->
@@ -427,4 +440,3 @@ export function invoiceEmailTemplate(data: {
 </html>
   `;
 }
-

@@ -4,7 +4,7 @@
  * Creates short, unique reference numbers for quotes/invoices.
  */
 
-import { nanoid } from 'nanoid';
+import { nanoid } from "nanoid";
 
 /**
  * Generate a quote reference number
@@ -53,4 +53,3 @@ export function generateSubscriptionRef(): string {
 export function generatePaymentRef(): string {
   return `PAY-${nanoid(6).toUpperCase()}`;
 }
-

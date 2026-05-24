@@ -25,7 +25,10 @@ export function SectionHeader({
   ...props
 }: SectionHeaderProps) {
   return (
-    <div className={cn("flex items-end justify-between mb-6", className)} {...props}>
+    <div
+      className={cn("flex items-end justify-between mb-6", className)}
+      {...props}
+    >
       <div>
         {kicker && (
           <div className="flex items-center gap-2 mb-2">
@@ -39,9 +42,7 @@ export function SectionHeader({
           {title}
         </h2>
         {description && (
-          <p className="text-sm text-white/50 mt-1 max-w-2xl">
-            {description}
-          </p>
+          <p className="text-sm text-white/50 mt-1 max-w-2xl">{description}</p>
         )}
       </div>
 

@@ -8,29 +8,29 @@
 
 ## Current State
 
-| Layer | Status | Technology |
-|-------|--------|------------|
-| Framework | ✅ Ready | Next.js 16.1.1 (App Router) |
-| Styling | ✅ Ready | Tailwind v4 + CSS tokens |
-| Scroll | ✅ Ready | Lenis smooth scroll |
-| Utils | ✅ Ready | `cn()` utility |
+| Layer      | Status     | Technology                   |
+| ---------- | ---------- | ---------------------------- |
+| Framework  | ✅ Ready   | Next.js 16.1.1 (App Router)  |
+| Styling    | ✅ Ready   | Tailwind v4 + CSS tokens     |
+| Scroll     | ✅ Ready   | Lenis smooth scroll          |
+| Utils      | ✅ Ready   | `cn()` utility               |
 | Components | 🔲 Pending | Header, Hero, Services, etc. |
-| Backend | 🔲 Pending | Firebase, Resend, Admin |
+| Backend    | 🔲 Pending | Firebase, Resend, Admin      |
 
 ---
 
 ## Phase 1: Core Components (Landing Page)
 
-| # | Component | File | Priority |
-|---|-----------|------|----------|
-| 1 | Header | `src/components/layout/header.tsx` | 🔴 Critical |
-| 2 | Footer | `src/components/layout/footer.tsx` | 🔴 Critical |
-| 3 | Hero | `src/components/sections/hero.tsx` | 🔴 Critical |
-| 4 | Services Grid | `src/components/sections/services.tsx` | 🔴 Critical |
-| 5 | Case Studies | `src/components/sections/case-studies.tsx` | 🟡 High |
-| 6 | Testimonials | `src/components/sections/testimonials.tsx` | 🟡 High |
-| 7 | About/Founder | `src/components/sections/about.tsx` | 🟡 High |
-| 8 | CTA Banner | `src/components/sections/cta.tsx` | 🟢 Medium |
+| #   | Component     | File                                       | Priority    |
+| --- | ------------- | ------------------------------------------ | ----------- |
+| 1   | Header        | `src/components/layout/header.tsx`         | 🔴 Critical |
+| 2   | Footer        | `src/components/layout/footer.tsx`         | 🔴 Critical |
+| 3   | Hero          | `src/components/sections/hero.tsx`         | 🔴 Critical |
+| 4   | Services Grid | `src/components/sections/services.tsx`     | 🔴 Critical |
+| 5   | Case Studies  | `src/components/sections/case-studies.tsx` | 🟡 High     |
+| 6   | Testimonials  | `src/components/sections/testimonials.tsx` | 🟡 High     |
+| 7   | About/Founder | `src/components/sections/about.tsx`        | 🟡 High     |
+| 8   | CTA Banner    | `src/components/sections/cta.tsx`          | 🟢 Medium   |
 
 ---
 
@@ -66,48 +66,51 @@ src/app/
 
 ## Phase 3: Backend Integration
 
-| Feature | Implementation |
-|---------|----------------|
-| Firebase | **Separate project** (not shared with portfolio) |
-| Admin Auth | Firebase Auth + session cookies |
-| Route Protection | Next.js Middleware (like SineAI Hub) |
-| Email | Resend API |
-| Storage | Cloudflare R2 |
+| Feature          | Implementation                                   |
+| ---------------- | ------------------------------------------------ |
+| Firebase         | **Separate project** (not shared with portfolio) |
+| Admin Auth       | Firebase Auth + session cookies                  |
+| Route Protection | Next.js Middleware (like SineAI Hub)             |
+| Email            | Resend API                                       |
+| Storage          | Cloudflare R2                                    |
 
 ### Firestore Collections
 
-| Collection | Purpose |
-|------------|---------|
-| `quotes` | Multi-step quote submissions |
-| `messages` | Contact form submissions |
-| `projects` | Case studies / portfolio |
-| `services` | Service offerings |
-| `posts` | Blog articles |
-| `bookings` | Calendar bookings |
+| Collection | Purpose                      |
+| ---------- | ---------------------------- |
+| `quotes`   | Multi-step quote submissions |
+| `messages` | Contact form submissions     |
+| `projects` | Case studies / portfolio     |
+| `services` | Service offerings            |
+| `posts`    | Blog articles                |
+| `bookings` | Calendar bookings            |
 
 ---
 
 ## Multi-Step Quote Form
 
 ### Flow
+
 ```
 Step 1: Project Type → Step 2: Budget & Timeline → Step 3: Contact Info → Submit
 ```
 
 ### Schema
+
 ```ts
 const quoteSchema = z.object({
-  projectType: z.enum(['web', 'mobile', 'saas', 'ai', 'other']),
-  budget: z.enum(['50k-100k', '100k-250k', '250k-500k', '500k+']),
-  timeline: z.enum(['1-2-weeks', '1-month', '2-3-months', 'flexible']),
+  projectType: z.enum(["web", "mobile", "saas", "ai", "other"]),
+  budget: z.enum(["50k-100k", "100k-250k", "250k-500k", "500k+"]),
+  timeline: z.enum(["1-2-weeks", "1-month", "2-3-months", "flexible"]),
   name: z.string().min(2),
   email: z.string().email(),
   company: z.string().optional(),
   details: z.string().min(20),
-})
+});
 ```
 
 ### Firestore Document
+
 ```ts
 {
   id: string
@@ -129,28 +132,32 @@ const quoteSchema = z.object({
 ## Admin Panel
 
 ### Auth Strategy
+
 - Firebase Auth with session cookies
 - Middleware-based route protection
 - `await cookies()` pattern (Next.js 15+)
 
 ### Middleware Example
+
 ```ts
 // middleware.ts
 export function middleware(request: NextRequest) {
-  const session = request.cookies.get('session')
-  
-  if (request.nextUrl.pathname.startsWith('/admin') && 
-      !request.nextUrl.pathname.startsWith('/admin/login')) {
+  const session = request.cookies.get("session");
+
+  if (
+    request.nextUrl.pathname.startsWith("/admin") &&
+    !request.nextUrl.pathname.startsWith("/admin/login")
+  ) {
     if (!session) {
-      return NextResponse.redirect(new URL('/admin/login', request.url))
+      return NextResponse.redirect(new URL("/admin/login", request.url));
     }
   }
-  return NextResponse.next()
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: '/admin/:path*'
-}
+  matcher: "/admin/:path*",
+};
 ```
 
 ---
@@ -181,14 +188,14 @@ R2_ACCOUNT_ID=xxx
 
 ## Design Constraints
 
-| Constraint | Value |
-|------------|-------|
-| Background | `#050505` (`--color-void`) |
-| Border radius | `rounded-sm` or `rounded-md` only |
-| Language | B2B ("We partner..." not "I freelance...") |
-| Forms | Zod validation mandatory |
-| TypeScript | Strict mode, no `any` |
-| Cookies API | Use `await cookies()` |
+| Constraint    | Value                                      |
+| ------------- | ------------------------------------------ |
+| Background    | `#050505` (`--color-void`)                 |
+| Border radius | `rounded-sm` or `rounded-md` only          |
+| Language      | B2B ("We partner..." not "I freelance...") |
+| Forms         | Zod validation mandatory                   |
+| TypeScript    | Strict mode, no `any`                      |
+| Cookies API   | Use `await cookies()`                      |
 
 ---
 

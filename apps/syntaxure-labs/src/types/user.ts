@@ -4,7 +4,7 @@
  * Type definitions for user profiles and authentication.
  */
 
-import type { UserRole } from './rbac';
+import type { UserRole } from "./rbac";
 
 // =============================================================================
 // USER PROFILE
@@ -26,9 +26,9 @@ export interface UserProfile {
     website?: string;
   };
   role: UserRole;
-  status: 'active' | 'inactive' | 'pending';
+  status: "active" | "inactive" | "pending";
   assignedProjects?: string[]; // Project slugs for partners
-  permissions?: string[];      // Granular permission overrides
+  permissions?: string[]; // Granular permission overrides
   created_at: string;
   updated_at: string;
   lastLoginAt?: string;
@@ -79,11 +79,10 @@ export interface UserInvite {
   email: string;
   role: UserRole;
   invitedBy: string; // UID of inviter
-  status: 'pending' | 'accepted' | 'expired';
+  status: "pending" | "accepted" | "expired";
   token: string; // Unique invite token
   expiresAt: string;
   createdAt: string;
-  projectId?: string;   // Optional: assign to specific project
+  projectId?: string; // Optional: assign to specific project
   projectName?: string; // Optional: display in invite email
 }
-

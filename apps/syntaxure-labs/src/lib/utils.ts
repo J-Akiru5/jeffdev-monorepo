@@ -1,5 +1,5 @@
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 /**
  * cn - ClassName Utility
@@ -25,12 +25,14 @@ export function sanitizeFirestoreData<T>(data: unknown): T {
 
   // Handle Firestore Timestamp (duck typing)
   if (
-    typeof data === 'object' &&
+    typeof data === "object" &&
     data !== null &&
-    'toDate' in data &&
-    typeof (data as { toDate: unknown }).toDate === 'function'
+    "toDate" in data &&
+    typeof (data as { toDate: unknown }).toDate === "function"
   ) {
-    return (data as { toDate: () => Date }).toDate().toISOString() as unknown as T;
+    return (data as { toDate: () => Date })
+      .toDate()
+      .toISOString() as unknown as T;
   }
 
   // Handle Arrays
@@ -39,7 +41,7 @@ export function sanitizeFirestoreData<T>(data: unknown): T {
   }
 
   // Handle Objects
-  if (typeof data === 'object') {
+  if (typeof data === "object") {
     const obj = data as Record<string, unknown>;
     const result: Record<string, unknown> = {};
     for (const key in obj) {

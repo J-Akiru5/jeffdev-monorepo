@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 /**
  * PayPal Server Actions
@@ -7,13 +7,14 @@
  * Uses Supabase `invoices` table — queries by `invoice_number` (refNo).
  */
 
-import { getAdminClient } from '@/lib/supabase/admin';
-import { recordPayment } from './invoice';
+import { getAdminClient } from "@/lib/supabase/admin";
+import { recordPayment } from "./invoice";
 
 // PayPal API URLs
-const PAYPAL_API_URL = process.env.PAYPAL_MODE === 'live'
-  ? 'https://api-m.paypal.com'
-  : 'https://api-m.sandbox.paypal.com';
+const PAYPAL_API_URL =
+  process.env.PAYPAL_MODE === "live"
+    ? "https://api-m.paypal.com"
+    : "https://api-m.sandbox.paypal.com";
 
 /**
  * Get PayPal access token
@@ -24,25 +25,25 @@ async function getPayPalAccessToken(): Promise<string | null> {
     const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
 
     if (!clientId || !clientSecret) {
-      console.error('[PAYPAL] Missing credentials');
+      console.error("[PAYPAL] Missing credentials");
       return null;
     }
 
-    const auth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+    const auth = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
 
     const response = await fetch(`${PAYPAL_API_URL}/v1/oauth2/token`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Basic ${auth}`,
       },
-      body: 'grant_type=client_credentials',
+      body: "grant_type=client_credentials",
     });
 
     const data = await response.json();
     return data.access_token;
   } catch (error) {
-    console.error('[PAYPAL ACCESS TOKEN ERROR]', error);
+    console.error("[PAYPAL ACCESS TOKEN ERROR]", error);
     return null;
   }
 }
@@ -56,51 +57,54 @@ export async function createPayPalOrder(invoiceRefNo: string, amount?: number) {
 
     // Get invoice by invoice_number (refNo)
     const { data: invoice, error: fetchError } = await supabase
-      .from('invoices')
-      .select('*')
-      .eq('invoice_number', invoiceRefNo)
+      .from("invoices")
+      .select("*")
+      .eq("invoice_number", invoiceRefNo)
       .maybeSingle();
 
     if (fetchError || !invoice) {
-      return { success: false, error: 'Invoice not found' };
+      return { success: false, error: "Invoice not found" };
     }
 
     const metadata = (invoice.metadata || {}) as Record<string, unknown>;
-    const paymentAmount = amount || (parseFloat(invoice.total_amount as string) - ((metadata.paidAmount as number) || 0));
+    const paymentAmount =
+      amount ||
+      parseFloat(invoice.total_amount as string) -
+        ((metadata.paidAmount as number) || 0);
 
     if (paymentAmount <= 0) {
-      return { success: false, error: 'Invalid payment amount' };
+      return { success: false, error: "Invalid payment amount" };
     }
 
     // Get access token
     const accessToken = await getPayPalAccessToken();
     if (!accessToken) {
-      return { success: false, error: 'PayPal authentication failed' };
+      return { success: false, error: "PayPal authentication failed" };
     }
 
     // Create order
     const response = await fetch(`${PAYPAL_API_URL}/v2/checkout/orders`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
-        intent: 'CAPTURE',
+        intent: "CAPTURE",
         purchase_units: [
           {
             reference_id: invoice.invoice_number,
-            description: `Invoice ${invoice.invoice_number} - ${metadata.clientName as string || ''}`,
+            description: `Invoice ${invoice.invoice_number} - ${(metadata.clientName as string) || ""}`,
             amount: {
-              currency_code: (metadata.currency as string) || 'USD',
+              currency_code: (metadata.currency as string) || "USD",
               value: paymentAmount.toFixed(2),
             },
           },
         ],
         application_context: {
-          brand_name: 'Syntaxure Labs',
-          landing_page: 'BILLING',
-          user_action: 'PAY_NOW',
+          brand_name: "Syntaxure Labs",
+          landing_page: "BILLING",
+          user_action: "PAY_NOW",
           return_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pay/${invoice.invoice_number}/success`,
           cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/pay/${invoice.invoice_number}`,
         },
@@ -113,62 +117,72 @@ export async function createPayPalOrder(invoiceRefNo: string, amount?: number) {
       return {
         success: true,
         orderId: order.id,
-        approvalUrl: order.links?.find((l: { rel: string }) => l.rel === 'approve')?.href,
+        approvalUrl: order.links?.find(
+          (l: { rel: string }) => l.rel === "approve",
+        )?.href,
       };
     }
 
-    console.error('[PAYPAL CREATE ORDER ERROR]', order);
-    return { success: false, error: 'Failed to create PayPal order' };
+    console.error("[PAYPAL CREATE ORDER ERROR]", order);
+    return { success: false, error: "Failed to create PayPal order" };
   } catch (error) {
-    console.error('[PAYPAL CREATE ORDER ERROR]', error);
-    return { success: false, error: 'Failed to create PayPal order' };
+    console.error("[PAYPAL CREATE ORDER ERROR]", error);
+    return { success: false, error: "Failed to create PayPal order" };
   }
 }
 
 /**
  * Capture PayPal order after approval
  */
-export async function capturePayPalOrder(orderId: string, invoiceRefNo: string) {
+export async function capturePayPalOrder(
+  orderId: string,
+  invoiceRefNo: string,
+) {
   try {
     const accessToken = await getPayPalAccessToken();
     if (!accessToken) {
-      return { success: false, error: 'PayPal authentication failed' };
+      return { success: false, error: "PayPal authentication failed" };
     }
 
     // Capture the order
-    const response = await fetch(`${PAYPAL_API_URL}/v2/checkout/orders/${orderId}/capture`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
+    const response = await fetch(
+      `${PAYPAL_API_URL}/v2/checkout/orders/${orderId}/capture`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
       },
-    });
+    );
 
     const capture = await response.json();
 
-    if (capture.status === 'COMPLETED') {
+    if (capture.status === "COMPLETED") {
       // Get the captured amount
       const capturedAmount = parseFloat(
-        capture.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value || '0'
+        capture.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value ||
+          "0",
       );
-      const transactionId = capture.purchase_units?.[0]?.payments?.captures?.[0]?.id;
+      const transactionId =
+        capture.purchase_units?.[0]?.payments?.captures?.[0]?.id;
 
       // Get invoice ID by invoice_number
       const supabase = getAdminClient() as any;
       const { data: invoice, error: fetchError } = await supabase
-        .from('invoices')
-        .select('id')
-        .eq('invoice_number', invoiceRefNo)
+        .from("invoices")
+        .select("id")
+        .eq("invoice_number", invoiceRefNo)
         .maybeSingle();
 
       if (fetchError || !invoice) {
-        return { success: false, error: 'Invoice not found' };
+        return { success: false, error: "Invoice not found" };
       }
 
       // Record the payment using the invoice UUID
       const result = await recordPayment(invoice.id, {
         amount: capturedAmount,
-        method: 'paypal',
+        method: "paypal",
         transactionId,
       });
 
@@ -180,14 +194,14 @@ export async function capturePayPalOrder(orderId: string, invoiceRefNo: string) 
         };
       }
 
-      return { success: false, error: 'Failed to record payment' };
+      return { success: false, error: "Failed to record payment" };
     }
 
-    console.error('[PAYPAL CAPTURE ERROR]', capture);
-    return { success: false, error: 'Payment capture failed' };
+    console.error("[PAYPAL CAPTURE ERROR]", capture);
+    return { success: false, error: "Payment capture failed" };
   } catch (error) {
-    console.error('[PAYPAL CAPTURE ERROR]', error);
-    return { success: false, error: 'Failed to capture payment' };
+    console.error("[PAYPAL CAPTURE ERROR]", error);
+    return { success: false, error: "Failed to capture payment" };
   }
 }
 
@@ -197,38 +211,41 @@ export async function capturePayPalOrder(orderId: string, invoiceRefNo: string) 
 export async function verifyPayPalWebhook(
   webhookId: string,
   headers: Record<string, string>,
-  body: string
+  body: string,
 ) {
   try {
     const accessToken = await getPayPalAccessToken();
     if (!accessToken) {
-      return { success: false, error: 'PayPal authentication failed' };
+      return { success: false, error: "PayPal authentication failed" };
     }
 
-    const response = await fetch(`${PAYPAL_API_URL}/v1/notifications/verify-webhook-signature`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
+    const response = await fetch(
+      `${PAYPAL_API_URL}/v1/notifications/verify-webhook-signature`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          webhook_id: webhookId,
+          transmission_id: headers["paypal-transmission-id"],
+          transmission_time: headers["paypal-transmission-time"],
+          cert_url: headers["paypal-cert-url"],
+          auth_algo: headers["paypal-auth-algo"],
+          transmission_sig: headers["paypal-transmission-sig"],
+          webhook_event: JSON.parse(body),
+        }),
       },
-      body: JSON.stringify({
-        webhook_id: webhookId,
-        transmission_id: headers['paypal-transmission-id'],
-        transmission_time: headers['paypal-transmission-time'],
-        cert_url: headers['paypal-cert-url'],
-        auth_algo: headers['paypal-auth-algo'],
-        transmission_sig: headers['paypal-transmission-sig'],
-        webhook_event: JSON.parse(body),
-      }),
-    });
+    );
 
     const result = await response.json();
     return {
       success: true,
-      verified: result.verification_status === 'SUCCESS',
+      verified: result.verification_status === "SUCCESS",
     };
   } catch (error) {
-    console.error('[PAYPAL WEBHOOK VERIFY ERROR]', error);
-    return { success: false, error: 'Webhook verification failed' };
+    console.error("[PAYPAL WEBHOOK VERIFY ERROR]", error);
+    return { success: false, error: "Webhook verification failed" };
   }
 }

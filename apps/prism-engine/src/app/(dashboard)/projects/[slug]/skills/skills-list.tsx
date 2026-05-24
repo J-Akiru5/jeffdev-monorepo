@@ -60,10 +60,13 @@ function SkillCard({
   };
 
   const handleDelete = async () => {
-    if (!confirm(`Delete skill "${skill.name}"? This cannot be undone.`)) return;
+    if (!confirm(`Delete skill "${skill.name}"? This cannot be undone.`))
+      return;
     setDeleting(true);
     try {
-      const res = await fetch(`/api/v1/skills/${skill.id}`, { method: "DELETE" });
+      const res = await fetch(`/api/v1/skills/${skill.id}`, {
+        method: "DELETE",
+      });
       if (res.ok) {
         onDelete(skill.id);
       }
@@ -87,7 +90,7 @@ function SkillCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <BookOpen className="h-4 w-4 text-cyan-400" />
-            <Link 
+            <Link
               href={`/projects/${projectSlug}/skills/${skill.id}`}
               className="text-sm font-medium text-white hover:text-cyan-400 transition-colors truncate"
             >
@@ -102,7 +105,8 @@ function SkillCard({
           </p>
           {skill.description && (
             <p className="text-xs text-white/25 mt-1.5 line-clamp-2 leading-relaxed">
-              {skill.description.slice(0, 120)}{skill.description.length > 120 ? "…" : ""}
+              {skill.description.slice(0, 120)}
+              {skill.description.length > 120 ? "…" : ""}
             </p>
           )}
         </div>
@@ -161,7 +165,9 @@ export function SkillsList({
   };
 
   const handleToggle = (id: string, next: boolean) => {
-    setSkills((prev) => prev.map((r) => (r.id === id ? { ...r, isActive: next } : r)));
+    setSkills((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, isActive: next } : r)),
+    );
   };
 
   const activeCount = skills.filter((r) => r.isActive).length;

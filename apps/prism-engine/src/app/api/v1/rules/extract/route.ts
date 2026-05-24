@@ -5,7 +5,8 @@ import { AzureOpenAI } from "openai";
 
 const AZURE_OPENAI_ENDPOINT = process.env.AZURE_OPENAI_ENDPOINT;
 const AZURE_OPENAI_API_KEY = process.env.AZURE_OPENAI_API_KEY;
-const AZURE_OPENAI_DEPLOYMENT = process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "gpt-4o-mini";
+const AZURE_OPENAI_DEPLOYMENT =
+  process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "gpt-4o-mini";
 
 interface RepoScanData {
   root?: string;
@@ -37,7 +38,10 @@ export async function POST(request: NextRequest) {
   }
 
   if (!AZURE_OPENAI_ENDPOINT || !AZURE_OPENAI_API_KEY) {
-    return errorResponse("AI rule generation not configured (missing AZURE_OPENAI_* env vars)", 500);
+    return errorResponse(
+      "AI rule generation not configured (missing AZURE_OPENAI_* env vars)",
+      500,
+    );
   }
 
   try {
@@ -52,20 +56,29 @@ export async function POST(request: NextRequest) {
     const imports = scan.imports || {};
     const structure = scan.structure || {};
     const dirsSample = (structure.directories || []).slice(0, 30).join("\n");
-    const topExt = Object.entries((imports.external as Record<string, number>) || {}).sort((a, b) => b[1] - a[1]).slice(0, 15);
-    const configSummary = Object.entries(scan.configs || {}).map(([k, v]) => {
-      if (k === "package.json" && typeof v === "object" && v !== null) {
-        const pkg = v as Record<string, unknown>;
-        return `${k}: name=${pkg.name || "?"}, deps=${Object.keys((pkg.dependencies as Record<string, string>) || {}).length + Object.keys((pkg.devDependencies as Record<string, string>) || {}).length}`;
-      }
-      return k;
-    }).join("\n");
+    const topExt = Object.entries(
+      (imports.external as Record<string, number>) || {},
+    )
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 15);
+    const configSummary = Object.entries(scan.configs || {})
+      .map(([k, v]) => {
+        if (k === "package.json" && typeof v === "object" && v !== null) {
+          const pkg = v as Record<string, unknown>;
+          return `${k}: name=${pkg.name || "?"}, deps=${Object.keys((pkg.dependencies as Record<string, string>) || {}).length + Object.keys((pkg.devDependencies as Record<string, string>) || {}).length}`;
+        }
+        return k;
+      })
+      .join("\n");
 
     const formatMap = (m: Record<string, number> | undefined): string => {
       if (!m) return "none detected";
       const total = Object.values(m).reduce((a, b) => a + b, 0);
       if (total === 0) return "none detected";
-      return Object.entries(m).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v} (${Math.round((v / total) * 100)}%)`).join(", ");
+      return Object.entries(m)
+        .sort((a, b) => b[1] - a[1])
+        .map(([k, v]) => `${k} ${v} (${Math.round((v / total) * 100)}%)`)
+        .join(", ");
     };
 
     const prompt = `You are a senior front-end architect. Analyze this repository scan report and generate 5-15 architectural governance rules as a JSON array.
@@ -80,7 +93,13 @@ export async function POST(request: NextRequest) {
 - Relative imports: ${(imports.relative as number) || 0}
 - Absolute imports: ${(imports.absolute as number) || 0}
 - Top external: ${topExt.map(([p, c]) => `${p} (${c})`).join(", ")}
-- Internal packages: ${Object.entries((imports.internal as Record<string, number>) || {}).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([p, c]) => `${p} (${c})`).join(", ")}
+- Internal packages: ${Object.entries(
+      (imports.internal as Record<string, number>) || {},
+    )
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([p, c]) => `${p} (${c})`)
+      .join(", ")}
 
 ## Structure (${structure.fileCount || 0} files, ${structure.dirCount || 0} dirs)
 ${dirsSample || "(flat)"}
@@ -94,7 +113,11 @@ Return ONLY the JSON array.`;
     const response = await client.chat.completions.create({
       model: AZURE_OPENAI_DEPLOYMENT,
       messages: [
-        { role: "system", content: "Generate concise governance rules from repo scan data. Return only valid JSON." },
+        {
+          role: "system",
+          content:
+            "Generate concise governance rules from repo scan data. Return only valid JSON.",
+        },
         { role: "user", content: prompt },
       ],
       temperature: 0.3,
@@ -102,7 +125,10 @@ Return ONLY the JSON array.`;
     });
 
     const raw = response.choices[0]?.message?.content || "[]";
-    const cleaned = raw.replace(/^```(?:json)?\s*/, "").replace(/\s*```$/, "").trim();
+    const cleaned = raw
+      .replace(/^```(?:json)?\s*/, "")
+      .replace(/\s*```$/, "")
+      .trim();
 
     let rules: Array<{
       name: string;
@@ -131,12 +157,27 @@ Return ONLY the JSON array.`;
       if (!r.content) continue;
       const doc = {
         name: r.name || `Repo Rule ${created + 1}`,
-        category: ["architecture", "styling", "security", "performance", "testing", "documentation", "custom"].includes(r.category) ? r.category : "custom",
+        category: [
+          "architecture",
+          "styling",
+          "security",
+          "performance",
+          "testing",
+          "documentation",
+          "custom",
+        ].includes(r.category)
+          ? r.category
+          : "custom",
         content: r.content,
-        priority: typeof r.priority === "number" && r.priority >= 1 && r.priority <= 100 ? r.priority : 50,
+        priority:
+          typeof r.priority === "number" && r.priority >= 1 && r.priority <= 100
+            ? r.priority
+            : 50,
         tags: Array.isArray(r.tags) ? r.tags : [],
         pattern: typeof r.pattern === "string" ? r.pattern : undefined,
-        severity: ["error", "warning", "info"].includes(r.severity || "") ? r.severity : "warning",
+        severity: ["error", "warning", "info"].includes(r.severity || "")
+          ? r.severity
+          : "warning",
         source: "repo",
         createdBy: auth.userId,
         isActive: true,
@@ -152,6 +193,9 @@ Return ONLY the JSON array.`;
       modelUsed: AZURE_OPENAI_DEPLOYMENT,
     });
   } catch (error) {
-    return errorResponse(`Rule extraction failed: ${error instanceof Error ? error.message : "Unknown error"}`, 500);
+    return errorResponse(
+      `Rule extraction failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+      500,
+    );
   }
 }

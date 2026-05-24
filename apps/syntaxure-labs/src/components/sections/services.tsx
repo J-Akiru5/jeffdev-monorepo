@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useRef, useEffect } from 'react';
-import Link from 'next/link';
-import { Globe, Cloud, Cpu, Sparkles, ArrowUpRight } from 'lucide-react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { cn } from '@/lib/utils';
+import { useRef, useEffect } from "react";
+import Link from "next/link";
+import { Globe, Cloud, Cpu, Sparkles, ArrowUpRight } from "lucide-react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { cn } from "@/lib/utils";
 
 // Register GSAP plugin
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
@@ -24,40 +24,40 @@ if (typeof window !== 'undefined') {
 
 const services = [
   {
-    id: 'web-development',
+    id: "web-development",
     icon: Globe,
-    title: 'Web Development',
+    title: "Web Development",
     description:
-      'High-performance web applications built with Next.js, React, and modern tooling. Optimized for speed, SEO, and conversions.',
-    features: ['Next.js 14+', 'TypeScript', 'Edge Functions'],
-    href: '/services/web-development',
+      "High-performance web applications built with Next.js, React, and modern tooling. Optimized for speed, SEO, and conversions.",
+    features: ["Next.js 14+", "TypeScript", "Edge Functions"],
+    href: "/services/web-development",
   },
   {
-    id: 'saas-platforms',
+    id: "saas-platforms",
     icon: Cloud,
-    title: 'SaaS Platforms',
+    title: "SaaS Platforms",
     description:
-      'Full-stack SaaS solutions with multi-tenancy, billing integration, and scalable infrastructure from day one.',
-    features: ['Multi-tenant', 'Stripe/Paddle', 'Analytics'],
-    href: '/services/saas-platforms',
+      "Full-stack SaaS solutions with multi-tenancy, billing integration, and scalable infrastructure from day one.",
+    features: ["Multi-tenant", "Stripe/Paddle", "Analytics"],
+    href: "/services/saas-platforms",
   },
   {
-    id: 'cloud-architecture',
+    id: "cloud-architecture",
     icon: Cpu,
-    title: 'Cloud Architecture',
+    title: "Cloud Architecture",
     description:
-      'Enterprise-grade infrastructure on Vercel, AWS, or Google Cloud. Built for 99.9% uptime and infinite scale.',
-    features: ['Vercel/AWS', 'CI/CD', '99.9% SLA'],
-    href: '/services/cloud-architecture',
+      "Enterprise-grade infrastructure on Vercel, AWS, or Google Cloud. Built for 99.9% uptime and infinite scale.",
+    features: ["Vercel/AWS", "CI/CD", "99.9% SLA"],
+    href: "/services/cloud-architecture",
   },
   {
-    id: 'ai-integration',
+    id: "ai-integration",
     icon: Sparkles,
-    title: 'AI Integration',
+    title: "AI Integration",
     description:
-      'Embed AI capabilities into your product — chatbots, content generation, recommendation engines, and more.',
-    features: ['OpenAI/Claude', 'RAG Systems', 'Fine-tuning'],
-    href: '/services/ai-integration',
+      "Embed AI capabilities into your product — chatbots, content generation, recommendation engines, and more.",
+    features: ["OpenAI/Claude", "RAG Systems", "Fine-tuning"],
+    href: "/services/ai-integration",
   },
 ];
 
@@ -78,9 +78,9 @@ export function Services() {
           duration: 0.6,
           scrollTrigger: {
             trigger: headerRef.current,
-            start: 'top 85%',
+            start: "top 85%",
           },
-        }
+        },
       );
 
       // Cards stagger animation
@@ -94,9 +94,9 @@ export function Services() {
           stagger: 0.15,
           scrollTrigger: {
             trigger: cardsRef.current,
-            start: 'top 80%',
+            start: "top 80%",
           },
-        }
+        },
       );
     }, sectionRef);
 
@@ -104,11 +104,7 @@ export function Services() {
   }, []);
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative py-24 md:py-32"
-      id="services"
-    >
+    <section ref={sectionRef} className="relative py-24 md:py-32" id="services">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Section Header */}
         <div ref={headerRef} className="mx-auto max-w-2xl text-center">
@@ -127,17 +123,14 @@ export function Services() {
         </div>
 
         {/* Services Grid */}
-        <div
-          ref={cardsRef}
-          className="mt-16 grid gap-6 md:grid-cols-2"
-        >
+        <div ref={cardsRef} className="mt-16 grid gap-6 md:grid-cols-2">
           {services.map((service) => (
             <Link
               key={service.id}
               href={service.href}
               className={cn(
-                'group relative overflow-hidden glass-neon p-8 transition-all duration-300',
-                'hover:border-cyan-500/30 hover:bg-white/[0.04]',
+                "group relative overflow-hidden glass-neon p-8 transition-all duration-300",
+                "hover:border-cyan-500/30 hover:bg-white/[0.04]",
               )}
             >
               {/* Icon */}
@@ -146,7 +139,9 @@ export function Services() {
               </div>
 
               {/* Content */}
-              <h3 className="text-xl font-semibold text-white">{service.title}</h3>
+              <h3 className="text-xl font-semibold text-white">
+                {service.title}
+              </h3>
               <p className="mt-2 text-sm leading-relaxed text-white/50">
                 {service.description}
               </p>

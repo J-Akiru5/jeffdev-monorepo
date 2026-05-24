@@ -16,7 +16,9 @@ const {
   auth: { PlainTextSaslAuthenticator },
 } = driver;
 
-type GraphTraversalSource = ReturnType<ReturnType<typeof AnonymousTraversalSource.traversal>["withRemote"]>;
+type GraphTraversalSource = ReturnType<
+  ReturnType<typeof AnonymousTraversalSource.traversal>["withRemote"]
+>;
 
 let _g: GraphTraversalSource | null = null;
 
@@ -145,9 +147,7 @@ export async function getRulesByTags(
 /**
  * Normalize Gremlin valueMap results into flat dicts.
  */
-function normalizeVertices(
-  vertices: unknown[],
-): Record<string, unknown>[] {
+function normalizeVertices(vertices: unknown[]): Record<string, unknown>[] {
   const normalized: Record<string, unknown>[] = [];
   for (const vertex of vertices) {
     const flat: Record<string, unknown> = {};

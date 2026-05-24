@@ -3,7 +3,7 @@
  * @description Shared Zod schemas for type-safe data validation.
  * These schemas are the "single source of truth" for data structures
  * used across Agency and Prism apps.
- * 
+ *
  * @example
  * import { UserSchema, RuleSchema } from "@jeffdev/db/schema";
  * const user = UserSchema.parse(rawData);
@@ -21,9 +21,9 @@ import { z } from "zod";
  */
 export const UserRoleSchema = z.enum([
   "founder",
-  "admin", 
+  "admin",
   "partner",
-  "employee"
+  "employee",
 ]);
 
 export type UserRole = z.infer<typeof UserRoleSchema>;
@@ -58,7 +58,7 @@ export const RuleCategorySchema = z.enum([
   "performance",
   "testing",
   "documentation",
-  "custom"
+  "custom",
 ]);
 
 export type RuleCategory = z.infer<typeof RuleCategorySchema>;
@@ -73,7 +73,13 @@ export const RuleSchema = z.object({
   category: RuleCategorySchema.describe("Rule category for organization"),
   content: z.string().describe("The actual rule content/instructions"),
   isActive: z.boolean().default(true).describe("Whether rule is enabled"),
-  priority: z.number().int().min(1).max(100).default(50).describe("Execution priority (1 = highest)"),
+  priority: z
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .default(50)
+    .describe("Execution priority (1 = highest)"),
   createdBy: z.string().describe("User ID who created the rule"),
   createdAt: z.string().datetime().describe("ISO 8601 timestamp"),
   updatedAt: z.string().datetime().optional().describe("Last update timestamp"),
@@ -110,7 +116,7 @@ export const ProjectStatusSchema = z.enum([
   "review",
   "completed",
   "on_hold",
-  "cancelled"
+  "cancelled",
 ]);
 
 export type ProjectStatus = z.infer<typeof ProjectStatusSchema>;
@@ -128,7 +134,10 @@ export const ProjectSchema = z.object({
   startDate: z.string().datetime().optional().describe("Project start date"),
   endDate: z.string().datetime().optional().describe("Expected end date"),
   budget: z.number().positive().optional().describe("Project budget in USD"),
-  assignedTo: z.array(z.string()).default([]).describe("Assigned team member UIDs"),
+  assignedTo: z
+    .array(z.string())
+    .default([])
+    .describe("Assigned team member UIDs"),
   createdAt: z.string().datetime().describe("ISO 8601 timestamp"),
   updatedAt: z.string().datetime().optional().describe("Last update timestamp"),
 });
@@ -147,7 +156,7 @@ export const InvoiceStatusSchema = z.enum([
   "sent",
   "paid",
   "overdue",
-  "cancelled"
+  "cancelled",
 ]);
 
 export type InvoiceStatus = z.infer<typeof InvoiceStatusSchema>;
@@ -196,7 +205,7 @@ export const DesignSystemSchema = z.enum([
   "jdstudio",
   "bare-minimum",
   "glassmorphic",
-  "8bit-nostalgia"
+  "8bit-nostalgia",
 ]);
 
 export type DesignSystem = z.infer<typeof DesignSystemSchema>;
@@ -204,11 +213,7 @@ export type DesignSystem = z.infer<typeof DesignSystemSchema>;
 /**
  * Stack options for component generation.
  */
-export const StackSchema = z.enum([
-  "react",
-  "nextjs",
-  "react-native"
-]);
+export const StackSchema = z.enum(["react", "nextjs", "react-native"]);
 
 export type Stack = z.infer<typeof StackSchema>;
 
@@ -239,11 +244,17 @@ export const ComponentSchema = z.object({
   name: z.string().min(1).max(100).describe("Component name"),
   description: z.string().max(500).optional(),
   code: z.string().describe("Generated component code"),
-  props: z.record(z.string(), z.unknown()).optional().describe("Component props schema"),
+  props: z
+    .record(z.string(), z.unknown())
+    .optional()
+    .describe("Component props schema"),
   designSystem: DesignSystemSchema.describe("Design system used"),
   stack: StackSchema.describe("Stack used"),
   generatedBy: z.enum(["ai", "manual", "figma"]).describe("How it was created"),
-  linkedRuleIds: z.array(z.string()).default([]).describe("Associated rule IDs"),
+  linkedRuleIds: z
+    .array(z.string())
+    .default([])
+    .describe("Associated rule IDs"),
   createdAt: z.string().datetime().describe("ISO 8601 timestamp"),
   updatedAt: z.string().datetime().optional(),
 });
@@ -257,7 +268,7 @@ export const SubscriptionTierSchema = z.enum([
   "free",
   "pro",
   "team",
-  "enterprise"
+  "enterprise",
 ]);
 
 export type SubscriptionTier = z.infer<typeof SubscriptionTierSchema>;
@@ -269,7 +280,7 @@ export const SubscriptionStatusSchema = z.enum([
   "active",
   "cancelled",
   "past_due",
-  "trialing"
+  "trialing",
 ]);
 
 export type SubscriptionStatus = z.infer<typeof SubscriptionStatusSchema>;
@@ -282,7 +293,10 @@ export const SubscriptionSchema = z.object({
   userId: z.string().describe("Clerk user ID"),
   tier: SubscriptionTierSchema.describe("Current subscription tier"),
   status: SubscriptionStatusSchema.describe("Subscription status"),
-  paypalSubscriptionId: z.string().nullable().describe("PayPal subscription ID"),
+  paypalSubscriptionId: z
+    .string()
+    .nullable()
+    .describe("PayPal subscription ID"),
   currentPeriodStart: z.string().datetime().describe("Billing period start"),
   currentPeriodEnd: z.string().datetime().describe("Billing period end"),
   createdAt: z.string().datetime().describe("ISO 8601 timestamp"),
@@ -300,7 +314,10 @@ export const UsageSchema = z.object({
   month: z.string().describe("YYYY-MM format"),
   aiGenerations: z.number().default(0).describe("AI generations this month"),
   rulesCreated: z.number().default(0).describe("Rules created this month"),
-  componentsCreated: z.number().default(0).describe("Components created this month"),
+  componentsCreated: z
+    .number()
+    .default(0)
+    .describe("Components created this month"),
 });
 
 export type Usage = z.infer<typeof UsageSchema>;
@@ -317,18 +334,36 @@ export const VideoTranscriptSchema = z.object({
   videoTitle: z.string().max(200).describe("Video title"),
   duration: z.number().positive().describe("Duration in seconds"),
   transcriptText: z.string().describe("Full transcript text"),
-  segments: z.array(
-    z.object({
-      start: z.number().describe("Segment start time in seconds"),
-      end: z.number().describe("Segment end time in seconds"),
-      text: z.string().describe("Segment text"),
-    })
-  ).describe("Timestamped transcript segments"),
-  embedding: z.array(z.number()).optional().describe("Vector embedding for semantic search (1536 dimensions)"),
-  extractedRules: z.array(z.string()).default([]).describe("Rule IDs extracted from video"),
-  language: z.string().optional().default("en").describe("Transcript language code"),
-  processingTime: z.number().optional().describe("AI processing time in milliseconds"),
-  confidence: z.enum(["high", "medium", "low"]).optional().describe("AI confidence in rule extraction"),
+  segments: z
+    .array(
+      z.object({
+        start: z.number().describe("Segment start time in seconds"),
+        end: z.number().describe("Segment end time in seconds"),
+        text: z.string().describe("Segment text"),
+      }),
+    )
+    .describe("Timestamped transcript segments"),
+  embedding: z
+    .array(z.number())
+    .optional()
+    .describe("Vector embedding for semantic search (1536 dimensions)"),
+  extractedRules: z
+    .array(z.string())
+    .default([])
+    .describe("Rule IDs extracted from video"),
+  language: z
+    .string()
+    .optional()
+    .default("en")
+    .describe("Transcript language code"),
+  processingTime: z
+    .number()
+    .optional()
+    .describe("AI processing time in milliseconds"),
+  confidence: z
+    .enum(["high", "medium", "low"])
+    .optional()
+    .describe("AI confidence in rule extraction"),
   createdAt: z.string().datetime().describe("ISO 8601 timestamp"),
   updatedAt: z.string().datetime().optional(),
 });
@@ -347,11 +382,41 @@ export const ApiKeySchema = z.object({
   id: z.string().describe("Unique key identifier"),
   userId: z.string().describe("Owner's Clerk user ID"),
   keyHash: z.string().describe("SHA-256 hash of the key (never store raw)"),
-  keyPrefix: z.string().describe("First 12 chars for identification (pk_live_xxxx)"),
+  keyPrefix: z
+    .string()
+    .describe("First 12 chars for identification (pk_live_xxxx)"),
   name: z.string().max(50).describe("User-given name (e.g., 'MacBook Pro')"),
-  lastUsedAt: z.string().datetime().optional().describe("Last API call timestamp"),
+  lastUsedAt: z
+    .string()
+    .datetime()
+    .optional()
+    .describe("Last API call timestamp"),
   createdAt: z.string().datetime().describe("Creation timestamp"),
   revokedAt: z.string().datetime().optional().describe("Revocation timestamp"),
 });
 
 export type ApiKey = z.infer<typeof ApiKeySchema>;
+
+// =============================================================================
+// Availability Slot (agency quarter-based slot tracking)
+// =============================================================================
+
+export const AvailabilitySlotSchema = z
+  .object({
+    id: z.string().describe("Unique slot identifier"),
+    quarterLabel: z.string().min(1).describe("Quarter label (e.g. 'Q2 2026')"),
+    totalSlots: z.number().int().min(0).describe("Total slots for the quarter"),
+    filledSlots: z.number().int().min(0).describe("Currently filled slots"),
+    isActive: z
+      .boolean()
+      .default(false)
+      .describe("Only one quarter is active at a time"),
+    createdAt: z.string().datetime().describe("Creation timestamp"),
+    updatedAt: z.string().datetime().describe("Last update timestamp"),
+  })
+  .refine((data) => data.filledSlots <= data.totalSlots, {
+    message: "Filled slots cannot exceed total slots",
+    path: ["filledSlots"],
+  });
+
+export type AvailabilitySlot = z.infer<typeof AvailabilitySlotSchema>;

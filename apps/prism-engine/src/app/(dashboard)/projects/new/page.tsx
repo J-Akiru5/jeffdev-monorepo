@@ -10,10 +10,10 @@ import { createProject, type CreateProjectState } from "../actions";
  * Core feature for creating Prism contexts.
  */
 export default function NewProjectPage() {
-  const [state, formAction, pending] = useActionState<CreateProjectState, FormData>(
-    createProject,
-    null
-  );
+  const [state, formAction, pending] = useActionState<
+    CreateProjectState,
+    FormData
+  >(createProject, null);
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
@@ -28,7 +28,9 @@ export default function NewProjectPage() {
 
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold text-white">Create New Project</h1>
+        <h1 className="text-2xl font-semibold text-white">
+          Create New Project
+        </h1>
         <p className="text-sm text-white/50 mt-1">
           Set up your context environment for AI-assisted development.
         </p>
@@ -38,7 +40,10 @@ export default function NewProjectPage() {
       <form action={formAction} className="space-y-6">
         {/* Project Name */}
         <div className="space-y-2">
-          <label htmlFor="name" className="block text-sm font-medium text-white">
+          <label
+            htmlFor="name"
+            className="block text-sm font-medium text-white"
+          >
             Project Name
           </label>
           <input
@@ -59,7 +64,10 @@ export default function NewProjectPage() {
 
         {/* Tech Stack */}
         <div className="space-y-2">
-          <label htmlFor="stack" className="block text-sm font-medium text-white">
+          <label
+            htmlFor="stack"
+            className="block text-sm font-medium text-white"
+          >
             Tech Stack
           </label>
           <select
@@ -80,39 +88,42 @@ export default function NewProjectPage() {
 
         {/* Design System / Vibe */}
         <div className="space-y-2">
-          <label htmlFor="designSystem" className="block text-sm font-medium text-white">
+          <label
+            htmlFor="designSystem"
+            className="block text-sm font-medium text-white"
+          >
             Design System (Vibe)
           </label>
           <div className="grid grid-cols-2 gap-3">
-            <VibeOption 
-              value="jdstudio" 
-              label="JDStudio" 
+            <VibeOption
+              value="jdstudio"
+              label="JDStudio"
               description="Dark void, cyan/purple accents"
               defaultChecked
             />
-            <VibeOption 
-              value="glassmorphic" 
-              label="Glassmorphic" 
+            <VibeOption
+              value="glassmorphic"
+              label="Glassmorphic"
               description="Heavy blur, gradient borders"
             />
-            <VibeOption 
-              value="bare-minimum" 
-              label="Bare Minimum" 
+            <VibeOption
+              value="bare-minimum"
+              label="Bare Minimum"
               description="Pure black/white, no effects"
             />
-            <VibeOption 
-              value="8bit-nostalgia" 
-              label="8-Bit Nostalgia" 
+            <VibeOption
+              value="8bit-nostalgia"
+              label="8-Bit Nostalgia"
               description="Pixel fonts, retro colors"
             />
-            <VibeOption 
-              value="keandrew" 
-              label="Keandrew" 
+            <VibeOption
+              value="keandrew"
+              label="Keandrew"
               description="Black/beige, sophisticated"
             />
-            <VibeOption 
-              value="custom" 
-              label="Custom Brand" 
+            <VibeOption
+              value="custom"
+              label="Custom Brand"
               description="Define your own brand"
             />
           </div>
@@ -133,14 +144,14 @@ export default function NewProjectPage() {
   );
 }
 
-function VibeOption({ 
-  value, 
-  label, 
+function VibeOption({
+  value,
+  label,
   description,
-  defaultChecked = false
-}: { 
-  value: string; 
-  label: string; 
+  defaultChecked = false,
+}: {
+  value: string;
+  label: string;
   description: string;
   defaultChecked?: boolean;
 }) {

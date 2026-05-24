@@ -1,10 +1,10 @@
-import Link from 'next/link';
-import { ArrowLeft, Plus } from 'lucide-react';
-import { getInvoices } from '@/app/actions/invoice';
-import type { Invoice, InvoiceStatus } from '@/types/invoice';
-import { PriceDisplay } from '@/components/ui/price-display';
+import Link from "next/link";
+import { ArrowLeft, Plus } from "lucide-react";
+import { getInvoices } from "@/app/actions/invoice";
+import type { Invoice, InvoiceStatus } from "@/types/invoice";
+import { PriceDisplay } from "@/components/ui/price-display";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 /**
  * Admin Invoices Page
@@ -13,26 +13,36 @@ export const dynamic = 'force-dynamic';
  */
 
 const statusColors: Record<InvoiceStatus, string> = {
-  draft: 'bg-white/10 text-white/60',
-  sent: 'bg-blue-500/20 text-blue-400',
-  partial: 'bg-yellow-500/20 text-yellow-400',
-  paid: 'bg-emerald-500/20 text-emerald-400',
-  overdue: 'bg-red-500/20 text-red-400',
-  cancelled: 'bg-white/5 text-white/30',
+  draft: "bg-white/10 text-white/60",
+  sent: "bg-blue-500/20 text-blue-400",
+  partial: "bg-yellow-500/20 text-yellow-400",
+  paid: "bg-emerald-500/20 text-emerald-400",
+  overdue: "bg-red-500/20 text-red-400",
+  cancelled: "bg-white/5 text-white/30",
 };
 
 export default async function AdminInvoicesPage() {
   const invoices = await getInvoices();
 
   // Group by status
-  const grouped = invoices.reduce((acc, inv) => {
-    const status = inv.status;
-    if (!acc[status]) acc[status] = [];
-    acc[status].push(inv);
-    return acc;
-  }, {} as Record<InvoiceStatus, Invoice[]>);
+  const grouped = invoices.reduce(
+    (acc, inv) => {
+      const status = inv.status;
+      if (!acc[status]) acc[status] = [];
+      acc[status].push(inv);
+      return acc;
+    },
+    {} as Record<InvoiceStatus, Invoice[]>,
+  );
 
-  const statusOrder: InvoiceStatus[] = ['sent', 'partial', 'overdue', 'draft', 'paid', 'cancelled'];
+  const statusOrder: InvoiceStatus[] = [
+    "sent",
+    "partial",
+    "overdue",
+    "draft",
+    "paid",
+    "cancelled",
+  ];
 
   return (
     <div>
@@ -48,9 +58,7 @@ export default async function AdminInvoicesPage() {
       <div className="mt-8 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white">Invoices</h1>
-          <p className="mt-2 text-white/50">
-            {invoices.length} total invoices
-          </p>
+          <p className="mt-2 text-white/50">{invoices.length} total invoices</p>
         </div>
 
         <Link
@@ -66,34 +74,34 @@ export default async function AdminInvoicesPage() {
       <div className="mt-8 grid grid-cols-4 gap-4">
         {[
           {
-            label: 'Outstanding',
+            label: "Outstanding",
             value: invoices
-              .filter((i) => ['sent', 'partial', 'overdue'].includes(i.status))
+              .filter((i) => ["sent", "partial", "overdue"].includes(i.status))
               .reduce((sum, i) => sum + i.balanceDue, 0),
-            currency: 'USD',
+            currency: "USD",
           },
           {
-            label: 'Paid This Month',
+            label: "Paid This Month",
             value: invoices
               .filter(
                 (i) =>
-                  i.status === 'paid' &&
+                  i.status === "paid" &&
                   i.paidAt &&
-                  new Date(i.paidAt).getMonth() === new Date().getMonth()
+                  new Date(i.paidAt).getMonth() === new Date().getMonth(),
               )
               .reduce((sum, i) => sum + i.total, 0),
-            currency: 'USD',
+            currency: "USD",
           },
           {
-            label: 'Pending Verification',
+            label: "Pending Verification",
             value: invoices.filter((i) =>
-              i.payments.some((p) => p.status === 'pending')
+              i.payments.some((p) => p.status === "pending"),
             ).length,
             isCount: true,
           },
           {
-            label: 'Overdue',
-            value: invoices.filter((i) => i.status === 'overdue').length,
+            label: "Overdue",
+            value: invoices.filter((i) => i.status === "overdue").length,
             isCount: true,
           },
         ].map((stat) => (
@@ -106,9 +114,7 @@ export default async function AdminInvoicesPage() {
               {stat.isCount ? (
                 stat.value
               ) : (
-                <>
-                  ${(stat.value as number).toLocaleString()}
-                </>
+                <>${(stat.value as number).toLocaleString()}</>
               )}
             </p>
           </div>
@@ -156,17 +162,21 @@ export default async function AdminInvoicesPage() {
                     <div className="flex items-center gap-6">
                       <div className="text-right">
                         <p className="text-lg font-semibold text-white">
-                          <PriceDisplay amount={invoice.total} sourceCurrency={invoice.currency} />
+                          <PriceDisplay
+                            amount={invoice.total}
+                            sourceCurrency={invoice.currency}
+                          />
                         </p>
-                        {invoice.balanceDue > 0 && invoice.balanceDue < invoice.total && (
-                          <div className="flex items-center justify-end text-sm text-yellow-400">
-                            <PriceDisplay
-                              amount={invoice.balanceDue}
-                              sourceCurrency={invoice.currency}
-                            />
-                            <span className="ml-1">due</span>
-                          </div>
-                        )}
+                        {invoice.balanceDue > 0 &&
+                          invoice.balanceDue < invoice.total && (
+                            <div className="flex items-center justify-end text-sm text-yellow-400">
+                              <PriceDisplay
+                                amount={invoice.balanceDue}
+                                sourceCurrency={invoice.currency}
+                              />
+                              <span className="ml-1">due</span>
+                            </div>
+                          )}
                       </div>
 
                       <div className="text-sm text-white/40">

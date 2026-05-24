@@ -12,7 +12,9 @@ import type { CalendarEvent } from "@/lib/schemas";
 
 export async function fetchEvents(): Promise<CalendarEvent[]> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
   const { data: events } = await supabase
@@ -33,7 +35,9 @@ export async function createEvent(event: {
   linkedTaskId?: string;
 }) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
   const { data, error } = await supabase
@@ -55,10 +59,14 @@ export async function createEvent(event: {
   return normalizeEvent(data);
 }
 
-
-export async function updateEvent(eventId: string, data: Record<string, unknown>) {
+export async function updateEvent(
+  eventId: string,
+  data: Record<string, unknown>,
+) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
   const { data: updated, error } = await supabase
@@ -76,7 +84,9 @@ export async function updateEvent(eventId: string, data: Record<string, unknown>
 
 export async function deleteEvent(eventId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
   const { error } = await supabase
@@ -91,7 +101,9 @@ export async function deleteEvent(eventId: string) {
 
 export async function syncCalendar(): Promise<CalendarEvent[]> {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) {
     throw new Error("Not authenticated. Connect Google Calendar first.");
   }

@@ -1,5 +1,5 @@
-import { ChildProcess, spawn } from 'child_process';
-import * as vscode from 'vscode';
+import { ChildProcess, spawn } from "child_process";
+import * as vscode from "vscode";
 
 export interface Rule {
   name: string;
@@ -14,7 +14,7 @@ export interface McpToolResult {
 
 export class McpClient {
   private process: ChildProcess | null = null;
-  private buffer = '';
+  private buffer = "";
   private pendingRequests: Map<string, (result: unknown) => void> = new Map();
   private requestId = 0;
   public onRulesChanged?: () => void;
@@ -27,32 +27,32 @@ export class McpClient {
     if (this.isConnected) return;
 
     const env: Record<string, string> = {
-      ...process.env as Record<string, string>,
+      ...(process.env as Record<string, string>),
       PRISM_TOKEN: token,
       PRISM_API_URL: apiUrl,
     };
 
-    this.process = spawn('npx', ['prism-context-engine', 'serve'], {
+    this.process = spawn("npx", ["prism-context-engine", "serve"], {
       env,
-      stdio: ['pipe', 'pipe', 'pipe'],
+      stdio: ["pipe", "pipe", "pipe"],
     });
 
-    this.process.stdout?.on('data', (data: Buffer) => {
+    this.process.stdout?.on("data", (data: Buffer) => {
       this.buffer += data.toString();
       this.processBuffer();
     });
 
-    this.process.stderr?.on('data', (data: Buffer) => {
+    this.process.stderr?.on("data", (data: Buffer) => {
       console.error(`[prism-mcp] ${data.toString().trim()}`);
     });
 
-    this.process.on('exit', (code) => {
+    this.process.on("exit", (code) => {
       console.error(`[prism-mcp] Process exited with code ${code}`);
       this.process = null;
       this.onRulesChanged?.();
     });
 
-    await this.sendRequest('initialize', { protocolVersion: '2024-11-05' });
+    await this.sendRequest("initialize", { protocolVersion: "2024-11-05" });
   }
 
   disconnect(): void {
@@ -62,17 +62,34 @@ export class McpClient {
     }
   }
 
-  async getArchitecturalRules(category?: string, tag?: string): Promise<Rule[]> {
-    const result = await this.callTool('get_architectural_rules', { category, tag }) as McpToolResult;
-    return this.parseRulesFromText(result.content[0]?.text || '');
+  async getArchitecturalRules(
+    category?: string,
+    tag?: string,
+  ): Promise<Rule[]> {
+    const result = (await this.callTool("get_architectural_rules", {
+      category,
+      tag,
+    })) as McpToolResult;
+    return this.parseRulesFromText(result.content[0]?.text || "");
   }
 
-  async validateCode(code: string, context?: string, category?: string): Promise<string> {
-    const result = await this.callTool('validate_code_pattern', { code, context, category }) as McpToolResult;
-    return result.content[0]?.text || '';
+  async validateCode(
+    code: string,
+    context?: string,
+    category?: string,
+  ): Promise<string> {
+    const result = (await this.callTool("validate_code_pattern", {
+      code,
+      context,
+      category,
+    })) as McpToolResult;
+    return result.content[0]?.text || "";
   }
 
-  async checkCode(code: string, filePath?: string): Promise<{
+  async checkCode(
+    code: string,
+    filePath?: string,
+  ): Promise<{
     status: string;
     violations: Array<{
       ruleId: string;
@@ -88,79 +105,119 @@ export class McpClient {
     }>;
     checkedRules: number;
   }> {
-    const result = await this.callTool('prism_check', { code, filePath }) as McpToolResult;
+    const result = (await this.callTool("prism_check", {
+      code,
+      filePath,
+    })) as McpToolResult;
     try {
-      return JSON.parse(result.content[0]?.text || '{}');
+      return JSON.parse(result.content[0]?.text || "{}");
     } catch {
-      return { status: 'error', violations: [], checkedRules: 0 };
+      return { status: "error", violations: [], checkedRules: 0 };
     }
   }
 
-  async fixCode(violation: Record<string, unknown>, code: string): Promise<{
+  async fixCode(
+    violation: Record<string, unknown>,
+    code: string,
+  ): Promise<{
     correctedCode: string;
     appliedRule: string;
     confidence: number;
   } | null> {
-    const result = await this.callTool('prism_fix', { violation, code }) as McpToolResult;
+    const result = (await this.callTool("prism_fix", {
+      violation,
+      code,
+    })) as McpToolResult;
     try {
-      return JSON.parse(result.content[0]?.text || '{}');
+      return JSON.parse(result.content[0]?.text || "{}");
     } catch {
       return null;
     }
   }
 
   async listProjects(): Promise<string> {
-    const result = await this.callTool('list_projects', {}) as McpToolResult;
-    return result.content[0]?.text || '';
+    const result = (await this.callTool("list_projects", {})) as McpToolResult;
+    return result.content[0]?.text || "";
   }
 
   async getBrandProfile(brandId?: string): Promise<string> {
-    const result = await this.callTool('get_brand_profile', { brandId }) as McpToolResult;
-    return result.content[0]?.text || '';
+    const result = (await this.callTool("get_brand_profile", {
+      brandId,
+    })) as McpToolResult;
+    return result.content[0]?.text || "";
   }
 
   async searchMarketplace(query?: string): Promise<string> {
-    const result = await this.callTool('search_marketplace', { query }) as McpToolResult;
-    return result.content[0]?.text || '';
+    const result = (await this.callTool("search_marketplace", {
+      query,
+    })) as McpToolResult;
+    return result.content[0]?.text || "";
   }
 
   async getUsageStats(): Promise<string> {
-    const result = await this.callTool('get_usage_stats', {}) as McpToolResult;
-    return result.content[0]?.text || '';
+    const result = (await this.callTool(
+      "get_usage_stats",
+      {},
+    )) as McpToolResult;
+    return result.content[0]?.text || "";
   }
 
-  async createRule(name: string, category: string, content: string, projectId?: string): Promise<string> {
-    const result = await this.callTool('create_rule', { name, category, content, projectId }) as McpToolResult;
-    return result.content[0]?.text || '';
+  async createRule(
+    name: string,
+    category: string,
+    content: string,
+    projectId?: string,
+  ): Promise<string> {
+    const result = (await this.callTool("create_rule", {
+      name,
+      category,
+      content,
+      projectId,
+    })) as McpToolResult;
+    return result.content[0]?.text || "";
   }
 
-  async updateRule(ruleId: string, updates: Record<string, unknown>): Promise<string> {
-    const result = await this.callTool('update_rule', { ruleId, ...updates }) as McpToolResult;
-    return result.content[0]?.text || '';
+  async updateRule(
+    ruleId: string,
+    updates: Record<string, unknown>,
+  ): Promise<string> {
+    const result = (await this.callTool("update_rule", {
+      ruleId,
+      ...updates,
+    })) as McpToolResult;
+    return result.content[0]?.text || "";
   }
 
   async deleteRule(ruleId: string): Promise<string> {
-    const result = await this.callTool('delete_rule', { ruleId }) as McpToolResult;
-    return result.content[0]?.text || '';
+    const result = (await this.callTool("delete_rule", {
+      ruleId,
+    })) as McpToolResult;
+    return result.content[0]?.text || "";
   }
 
-  private async callTool(name: string, args: Record<string, unknown>): Promise<unknown> {
-    return this.sendRequest('tools/call', { name, arguments: args });
+  private async callTool(
+    name: string,
+    args: Record<string, unknown>,
+  ): Promise<unknown> {
+    return this.sendRequest("tools/call", { name, arguments: args });
   }
 
-  private async sendRequest(method: string, params: Record<string, unknown>): Promise<unknown> {
+  private async sendRequest(
+    method: string,
+    params: Record<string, unknown>,
+  ): Promise<unknown> {
     return new Promise((resolve, reject) => {
       const id = ++this.requestId;
       this.pendingRequests.set(id.toString(), resolve);
 
       const request = JSON.stringify({
-        jsonrpc: '2.0',
+        jsonrpc: "2.0",
         id,
         method,
         params,
       });
 
-      this.process?.stdin?.write(request + '\n');
+      this.process?.stdin?.write(request + "\n");
 
       setTimeout(() => {
         this.pendingRequests.delete(id.toString());
@@ -170,8 +227,8 @@ export class McpClient {
   }
 
   private processBuffer(): void {
-    const lines = this.buffer.split('\n');
-    this.buffer = lines.pop() || '';
+    const lines = this.buffer.split("\n");
+    this.buffer = lines.pop() || "";
 
     for (const line of lines) {
       if (!line.trim()) continue;
@@ -196,10 +253,10 @@ export class McpClient {
     const sections = text.split(/^## /m);
     for (const section of sections) {
       if (!section.trim()) continue;
-      const lines = section.split('\n');
-      const name = lines[0]?.trim() || 'Unknown';
+      const lines = section.split("\n");
+      const name = lines[0]?.trim() || "Unknown";
       const categoryMatch = section.match(/\*\*Category:\*\*\s*(\w+)/);
-      const category = categoryMatch?.[1] || 'general';
+      const category = categoryMatch?.[1] || "general";
       const content = section.trim();
       rules.push({ name, category, content });
     }

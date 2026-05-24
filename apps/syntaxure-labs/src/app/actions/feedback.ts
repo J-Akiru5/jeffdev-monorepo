@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 /**
  * Feedback Server Actions
@@ -6,11 +6,11 @@
  * CRUD operations for client testimonials/reviews.
  */
 
-import { getAdminClient } from '@/lib/supabase/admin';
-import type { FirestoreFeedback, FeedbackStatus } from '@/types/supabase';
-import { logAuditEvent } from '@/lib/audit';
+import { getAdminClient } from "@/lib/supabase/admin";
+import type { FirestoreFeedback, FeedbackStatus } from "@/types/supabase";
+import { logAuditEvent } from "@/lib/audit";
 
-const COLLECTION = 'feedback';
+const COLLECTION = "feedback";
 
 /**
  * Get all feedback entries
@@ -20,8 +20,8 @@ export async function getFeedback(): Promise<FirestoreFeedback[]> {
     const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(COLLECTION)
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error || !data) return [];
 
@@ -30,7 +30,7 @@ export async function getFeedback(): Promise<FirestoreFeedback[]> {
       ...doc,
     })) as FirestoreFeedback[];
   } catch (error) {
-    console.error('[GET FEEDBACK ERROR]', error);
+    console.error("[GET FEEDBACK ERROR]", error);
     return [];
   }
 }
@@ -43,9 +43,9 @@ export async function getPublicFeedback(): Promise<FirestoreFeedback[]> {
     const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(COLLECTION)
-      .select('*')
-      .in('status', ['approved', 'featured'])
-      .order('created_at', { ascending: false });
+      .select("*")
+      .in("status", ["approved", "featured"])
+      .order("created_at", { ascending: false });
 
     if (error || !data) return [];
 
@@ -54,7 +54,7 @@ export async function getPublicFeedback(): Promise<FirestoreFeedback[]> {
       ...doc,
     })) as FirestoreFeedback[];
   } catch (error) {
-    console.error('[GET PUBLIC FEEDBACK ERROR]', error);
+    console.error("[GET PUBLIC FEEDBACK ERROR]", error);
     return [];
   }
 }
@@ -63,12 +63,15 @@ export async function getPublicFeedback(): Promise<FirestoreFeedback[]> {
  * Create a new feedback entry
  */
 export async function createFeedback(
-  data: Omit<FirestoreFeedback, 'id' | 'created_at' | 'updated_at' | 'status' | 'featured'>
+  data: Omit<
+    FirestoreFeedback,
+    "id" | "created_at" | "updated_at" | "status" | "featured"
+  >,
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
-    const feedback: Omit<FirestoreFeedback, 'id'> = {
+    const feedback: Omit<FirestoreFeedback, "id"> = {
       ...data,
-      status: 'pending',
+      status: "pending",
       featured: false,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -84,16 +87,16 @@ export async function createFeedback(
     if (error) throw error;
 
     await logAuditEvent({
-      action: 'CREATE',
-      resource: 'feedback',
+      action: "CREATE",
+      resource: "feedback",
       resourceId: result.id,
       details: { clientName: data.clientName },
     });
 
     return { success: true, id: result.id };
   } catch (error) {
-    console.error('[CREATE FEEDBACK ERROR]', error);
-    return { success: false, error: 'Failed to create feedback' };
+    console.error("[CREATE FEEDBACK ERROR]", error);
+    return { success: false, error: "Failed to create feedback" };
   }
 }
 
@@ -102,7 +105,7 @@ export async function createFeedback(
  */
 export async function updateFeedbackStatus(
   id: string,
-  status: FeedbackStatus
+  status: FeedbackStatus,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = getAdminClient() as any;
@@ -110,24 +113,24 @@ export async function updateFeedbackStatus(
       .from(COLLECTION)
       .update({
         status,
-        featured: status === 'featured',
+        featured: status === "featured",
         updated_at: new Date().toISOString(),
       })
-      .eq('id', id);
+      .eq("id", id);
 
     if (error) throw error;
 
     await logAuditEvent({
-      action: 'STATUS_CHANGE',
-      resource: 'feedback',
+      action: "STATUS_CHANGE",
+      resource: "feedback",
       resourceId: id,
       details: { status },
     });
 
     return { success: true };
   } catch (error) {
-    console.error('[UPDATE FEEDBACK STATUS ERROR]', error);
-    return { success: false, error: 'Failed to update status' };
+    console.error("[UPDATE FEEDBACK STATUS ERROR]", error);
+    return { success: false, error: "Failed to update status" };
   }
 }
 
@@ -135,26 +138,23 @@ export async function updateFeedbackStatus(
  * Delete feedback
  */
 export async function deleteFeedback(
-  id: string
+  id: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = getAdminClient() as any;
-    const { error } = await supabase
-      .from(COLLECTION)
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from(COLLECTION).delete().eq("id", id);
 
     if (error) throw error;
 
     await logAuditEvent({
-      action: 'DELETE',
-      resource: 'feedback',
+      action: "DELETE",
+      resource: "feedback",
       resourceId: id,
     });
 
     return { success: true };
   } catch (error) {
-    console.error('[DELETE FEEDBACK ERROR]', error);
-    return { success: false, error: 'Failed to delete feedback' };
+    console.error("[DELETE FEEDBACK ERROR]", error);
+    return { success: false, error: "Failed to delete feedback" };
   }
 }

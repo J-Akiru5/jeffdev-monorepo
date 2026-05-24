@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, Suspense } from 'react';
-import { createClient } from '@/lib/supabase/browser';
-import { useSearchParams } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { useState, Suspense } from "react";
+import { createClient } from "@/lib/supabase/browser";
+import { useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 /**
  * Admin Login Page
@@ -16,20 +16,20 @@ function AdminLoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const searchParams = useSearchParams();
-  const inviteToken = searchParams.get('invite');
-  const queryError = searchParams.get('error');
+  const inviteToken = searchParams.get("invite");
+  const queryError = searchParams.get("error");
 
   // Set initial error if callback redirected back with error
   useState(() => {
-    if (queryError === 'auth_failed') {
-      setError('Google authentication failed. Please try again.');
+    if (queryError === "auth_failed") {
+      setError("Google authentication failed. Please try again.");
     }
   });
 
-  const title = inviteToken ? 'Join Team' : 'Admin Login';
+  const title = inviteToken ? "Join Team" : "Admin Login";
   const subtitle = inviteToken
-    ? 'Sign in with your invited Google account to complete setup'
-    : 'Sign in with your authorized Google account';
+    ? "Sign in with your invited Google account to complete setup"
+    : "Sign in with your authorized Google account";
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
@@ -38,9 +38,9 @@ function AdminLoginForm() {
     try {
       const supabase = createClient();
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?invite=${inviteToken || ''}`,
+          redirectTo: `${window.location.origin}/auth/callback?invite=${inviteToken || ""}`,
         },
       });
 
@@ -48,8 +48,8 @@ function AdminLoginForm() {
         throw oauthError;
       }
     } catch (err: any) {
-      console.error('[LOGIN ERROR]', err);
-      setError(err.message || 'Failed to initialize Google login');
+      console.error("[LOGIN ERROR]", err);
+      setError(err.message || "Failed to initialize Google login");
       setIsLoading(false);
     }
   };
@@ -65,7 +65,15 @@ function AdminLoginForm() {
           <div className="mb-8 text-center">
             {/* Logo icon */}
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-cyan-500/10 border border-cyan-500/30 animate-neon-pulse">
-              <svg className="h-8 w-8 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg
+                className="h-8 w-8 text-cyan-400"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <circle cx="12" cy="12" r="10" />
                 <path d="M12 6v6l4 2" />
               </svg>
@@ -89,7 +97,7 @@ function AdminLoginForm() {
             {isLoading ? (
               <>
                 <Loader2 className="h-5 w-5 animate-spin text-cyan-400" />
-                {inviteToken ? 'Setting up...' : 'Signing in...'}
+                {inviteToken ? "Setting up..." : "Signing in..."}
               </>
             ) : (
               <>
@@ -131,11 +139,13 @@ function AdminLoginForm() {
 
 export default function AdminLoginPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-void flex items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-cyan-400" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-void flex items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-cyan-400" />
+        </div>
+      }
+    >
       <AdminLoginForm />
     </Suspense>
   );

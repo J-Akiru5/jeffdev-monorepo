@@ -10,29 +10,40 @@ Less is more, taken to the extreme. No shadows, no gradients, no blur effects. J
 ## Color Palette
 
 ### Canvas
+
 - `bg-page`: #ffffff (Light mode) / #0a0a0a (Dark mode)
 - `bg-surface`: #f5f5f5 (Light) / #141414 (Dark)
 
 ### Text
+
 - `text-primary`: #0a0a0a (Light) / #ffffff (Dark)
 - `text-secondary`: #666666 (Light) / #a0a0a0 (Dark)
 
 ### Accents
+
 - `accent`: #0a0a0a (Light) / #ffffff (Dark)
 - No color gradients - monochrome only
 
 ### Borders
+
 - `border`: #e5e5e5 (Light) / #252525 (Dark)
 - 1px solid only - never thicker
 
 ## Typography
 
 ### Font Stack
+
 ```css
-font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+font-family:
+  system-ui,
+  -apple-system,
+  BlinkMacSystemFont,
+  "Segoe UI",
+  sans-serif;
 ```
 
 ### Scale
+
 - Display: 48px / 1.1 line-height
 - H1: 32px / 1.2
 - H2: 24px / 1.3
@@ -41,6 +52,7 @@ font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-seri
 - Small: 14px / 1.5
 
 ### Weights
+
 - Regular (400) for body
 - Medium (500) for emphasis
 - Semibold (600) for headings only
@@ -54,6 +66,7 @@ font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-seri
 ## Component Patterns
 
 ### Buttons
+
 ```jsx
 // Primary
 <button className="bg-black text-white px-4 py-2 text-sm font-medium hover:bg-gray-800 transition-colors">
@@ -67,6 +80,7 @@ font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-seri
 ```
 
 ### Cards
+
 ```jsx
 <div className="border border-gray-200 p-6">
   <h3 className="font-semibold">Title</h3>
@@ -75,8 +89,9 @@ font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-seri
 ```
 
 ### Inputs
+
 ```jsx
-<input 
+<input
   className="w-full border-b border-gray-300 py-2 focus:border-black outline-none transition-colors"
   placeholder="Enter text..."
 />

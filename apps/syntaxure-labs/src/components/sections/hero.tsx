@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Hero Section — Maximum Neon Aesthetic
@@ -11,8 +11,8 @@
  * - Clip-path diagonal image with neon geometric frame
  */
 
-import { useRef, useEffect } from 'react';
-import Link from 'next/link';
+import { useRef, useEffect } from "react";
+import Link from "next/link";
 import {
   ArrowUpRight,
   ArrowDown,
@@ -23,19 +23,19 @@ import {
   Cloud,
   LineChart,
   Zap,
-} from 'lucide-react';
-import { gsap } from 'gsap';
+} from "lucide-react";
+import { gsap } from "gsap";
 
 /* ────────────────────────────────────────
    DATA
    ──────────────────────────────────────── */
 const serviceShortcuts = [
-  { icon: Code, label: 'Software Dev' },
-  { icon: Smartphone, label: 'Mobile Apps' },
-  { icon: Globe, label: 'Web Dev' },
-  { icon: PenTool, label: 'UI/UX Design' },
-  { icon: Cloud, label: 'Cloud Solutions' },
-  { icon: LineChart, label: 'IT Consulting' },
+  { icon: Code, label: "Software Dev" },
+  { icon: Smartphone, label: "Mobile Apps" },
+  { icon: Globe, label: "Web Dev" },
+  { icon: PenTool, label: "UI/UX Design" },
+  { icon: Cloud, label: "Cloud Solutions" },
+  { icon: LineChart, label: "IT Consulting" },
 ];
 
 /* ────────────────────────────────────────
@@ -87,20 +87,62 @@ function NeonGeometryOverlay() {
 
       {/* ── Top-Left Corner Bracket ── */}
       <g className="neon-line" filter="url(#neon-glow-line)">
-        <line x1="30" y1="30" x2="160" y2="30" stroke="url(#neon-grad-primary)" strokeWidth="1.5" />
-        <line x1="30" y1="30" x2="30" y2="140" stroke="url(#neon-grad-primary)" strokeWidth="1.5" />
+        <line
+          x1="30"
+          y1="30"
+          x2="160"
+          y2="30"
+          stroke="url(#neon-grad-primary)"
+          strokeWidth="1.5"
+        />
+        <line
+          x1="30"
+          y1="30"
+          x2="30"
+          y2="140"
+          stroke="url(#neon-grad-primary)"
+          strokeWidth="1.5"
+        />
       </g>
 
       {/* ── Top-Right Corner Bracket ── */}
       <g className="neon-line" filter="url(#neon-glow-line)">
-        <line x1="1280" y1="30" x2="1410" y2="30" stroke="url(#neon-grad-primary)" strokeWidth="1.5" />
-        <line x1="1410" y1="30" x2="1410" y2="140" stroke="url(#neon-grad-primary)" strokeWidth="1.5" />
+        <line
+          x1="1280"
+          y1="30"
+          x2="1410"
+          y2="30"
+          stroke="url(#neon-grad-primary)"
+          strokeWidth="1.5"
+        />
+        <line
+          x1="1410"
+          y1="30"
+          x2="1410"
+          y2="140"
+          stroke="url(#neon-grad-primary)"
+          strokeWidth="1.5"
+        />
       </g>
 
       {/* ── Bottom-Left Corner Tick ── */}
       <g className="neon-line" filter="url(#neon-glow-line)">
-        <line x1="30" y1="760" x2="30" y2="870" stroke="url(#neon-grad-primary)" strokeWidth="1.5" />
-        <line x1="30" y1="870" x2="120" y2="870" stroke="url(#neon-grad-primary)" strokeWidth="1.5" />
+        <line
+          x1="30"
+          y1="760"
+          x2="30"
+          y2="870"
+          stroke="url(#neon-grad-primary)"
+          strokeWidth="1.5"
+        />
+        <line
+          x1="30"
+          y1="870"
+          x2="120"
+          y2="870"
+          stroke="url(#neon-grad-primary)"
+          strokeWidth="1.5"
+        />
       </g>
 
       {/* ── The Main Diagonal Divider (Image Clip Tracer) ── */}
@@ -128,7 +170,10 @@ function NeonGeometryOverlay() {
       {/* ── Bottom Horizontal Accent ── */}
       <line
         className="neon-line"
-        x1="0" y1="830" x2="1440" y2="830"
+        x1="0"
+        y1="830"
+        x2="1440"
+        y2="830"
         stroke="url(#neon-grad-cyan)"
         strokeWidth="1"
         filter="url(#neon-glow-line)"
@@ -137,21 +182,74 @@ function NeonGeometryOverlay() {
       {/* ── Small Accent Tick Marks (decorative) ── */}
       <g className="neon-line" filter="url(#neon-glow-line)" opacity="0.5">
         {/* Left side tick */}
-        <line x1="200" y1="800" x2="200" y2="830" stroke="#06b6d4" strokeWidth="1" />
+        <line
+          x1="200"
+          y1="800"
+          x2="200"
+          y2="830"
+          stroke="#06b6d4"
+          strokeWidth="1"
+        />
         {/* Center-left tick */}
-        <line x1="500" y1="815" x2="500" y2="830" stroke="#06b6d4" strokeWidth="1" />
+        <line
+          x1="500"
+          y1="815"
+          x2="500"
+          y2="830"
+          stroke="#06b6d4"
+          strokeWidth="1"
+        />
         {/* Right side tick */}
-        <line x1="1200" y1="800" x2="1200" y2="830" stroke="#8b5cf6" strokeWidth="1" />
+        <line
+          x1="1200"
+          y1="800"
+          x2="1200"
+          y2="830"
+          stroke="#8b5cf6"
+          strokeWidth="1"
+        />
       </g>
 
       {/* ── Image Frame Bracket (right side) ── */}
       <g className="neon-line" filter="url(#neon-glow-line)">
         {/* Top of frame */}
-        <line x1="1050" y1="80" x2="1400" y2="80" stroke="#06b6d4" strokeWidth="1" strokeOpacity="0.6" />
-        <line x1="1400" y1="80" x2="1400" y2="200" stroke="#06b6d4" strokeWidth="1" strokeOpacity="0.6" />
+        <line
+          x1="1050"
+          y1="80"
+          x2="1400"
+          y2="80"
+          stroke="#06b6d4"
+          strokeWidth="1"
+          strokeOpacity="0.6"
+        />
+        <line
+          x1="1400"
+          y1="80"
+          x2="1400"
+          y2="200"
+          stroke="#06b6d4"
+          strokeWidth="1"
+          strokeOpacity="0.6"
+        />
         {/* Bottom of frame */}
-        <line x1="700" y1="780" x2="900" y2="780" stroke="#8b5cf6" strokeWidth="1" strokeOpacity="0.6" />
-        <line x1="700" y1="680" x2="700" y2="780" stroke="#8b5cf6" strokeWidth="1" strokeOpacity="0.6" />
+        <line
+          x1="700"
+          y1="780"
+          x2="900"
+          y2="780"
+          stroke="#8b5cf6"
+          strokeWidth="1"
+          strokeOpacity="0.6"
+        />
+        <line
+          x1="700"
+          y1="680"
+          x2="700"
+          y2="780"
+          stroke="#8b5cf6"
+          strokeWidth="1"
+          strokeOpacity="0.6"
+        />
       </g>
     </svg>
   );
@@ -160,7 +258,11 @@ function NeonGeometryOverlay() {
 /* ────────────────────────────────────────
    HERO COMPONENT
    ──────────────────────────────────────── */
-export function Hero() {
+export function Hero({
+  availabilityText,
+}: {
+  availabilityText?: string | null;
+}) {
   const heroRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const subtextRef = useRef<HTMLParagraphElement>(null);
@@ -171,17 +273,19 @@ export function Hero() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
       /* ── Neon SVG Line Draw-On ── */
-      const neonLines = heroRef.current?.querySelectorAll('.neon-line line, .neon-line-main, .neon-line-secondary');
+      const neonLines = heroRef.current?.querySelectorAll(
+        ".neon-line line, .neon-line-main, .neon-line-secondary",
+      );
       if (neonLines?.length) {
         gsap.set(neonLines, { strokeDasharray: 1, strokeDashoffset: 1 });
         tl.to(neonLines, {
           strokeDashoffset: 0,
           duration: 1.8,
           stagger: 0.08,
-          ease: 'power2.inOut',
+          ease: "power2.inOut",
         });
       }
 
@@ -190,7 +294,7 @@ export function Hero() {
         taglineRef.current,
         { opacity: 0, y: -15 },
         { opacity: 1, y: 0, duration: 0.5 },
-        '-=1.2'
+        "-=1.2",
       );
 
       /* ── Headline ── */
@@ -198,7 +302,7 @@ export function Hero() {
         headlineRef.current,
         { opacity: 0, x: -40 },
         { opacity: 1, x: 0, duration: 0.8 },
-        '-=0.8'
+        "-=0.8",
       );
 
       /* ── Subtext ── */
@@ -206,7 +310,7 @@ export function Hero() {
         subtextRef.current,
         { opacity: 0, x: -30 },
         { opacity: 1, x: 0, duration: 0.6 },
-        '-=0.4'
+        "-=0.4",
       );
 
       /* ── CTAs ── */
@@ -214,7 +318,7 @@ export function Hero() {
         ctaRef.current,
         { opacity: 0, y: 20 },
         { opacity: 1, y: 0, duration: 0.5 },
-        '-=0.3'
+        "-=0.3",
       );
 
       /* ── Service Shortcuts ── */
@@ -222,7 +326,7 @@ export function Hero() {
         servicesRef.current?.children || [],
         { opacity: 0, y: 20 },
         { opacity: 1, y: 0, duration: 0.4, stagger: 0.08 },
-        '-=0.2'
+        "-=0.2",
       );
 
       /* ── Floating Badge ── */
@@ -231,7 +335,7 @@ export function Hero() {
           badgeRef.current,
           { opacity: 0, scale: 0.9 },
           { opacity: 1, scale: 1, duration: 0.5 },
-          '-=0.6'
+          "-=0.6",
         );
       }
     }, heroRef);
@@ -242,7 +346,7 @@ export function Hero() {
   const scrollToContent = () => {
     window.scrollTo({
       top: window.innerHeight,
-      behavior: 'smooth',
+      behavior: "smooth",
     });
   };
 
@@ -266,7 +370,9 @@ export function Hero() {
           {/* Clipped Image */}
           <div
             className="absolute inset-0 z-0 bg-[url('/hero-office.png')] bg-cover bg-center transition-transform duration-1000 hover:scale-105"
-            style={{ clipPath: 'polygon(15% 0, 100% 0, 100% 100%, 0 100%, 25% 55%)' }}
+            style={{
+              clipPath: "polygon(15% 0, 100% 0, 100% 100%, 0 100%, 25% 55%)",
+            }}
           >
             {/* Dark overlay to blend */}
             <div className="absolute inset-0 bg-void/30 mix-blend-multiply" />
@@ -338,7 +444,6 @@ export function Hero() {
             ═══════════════════════════════════════ */}
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 flex items-center mt-12 lg:mt-0">
           <div className="w-full lg:w-[55%] lg:pr-12 py-24 lg:py-32">
-
             {/* ── Motto Tagline ── */}
             <div ref={taglineRef} className="mb-6 opacity-0">
               <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-cyan-400/80">
@@ -347,15 +452,17 @@ export function Hero() {
             </div>
 
             {/* ── Status Badge ── */}
-            <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-sm">
-              <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-              </span>
-              <span className="font-mono text-xs text-white/70">
-                Available for Q3 2026 Projects
-              </span>
-            </div>
+            {availabilityText && (
+              <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 backdrop-blur-sm">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                </span>
+                <span className="font-mono text-xs text-white/70">
+                  {availabilityText}
+                </span>
+              </div>
+            )}
 
             {/* ── Headline ── */}
             <h1
@@ -363,7 +470,10 @@ export function Hero() {
               className="text-4xl font-bold leading-[1.1] tracking-tight text-white opacity-0 sm:text-5xl md:text-6xl lg:text-7xl text-left"
             >
               Innovating Digital Solutions <br className="hidden sm:block" />
-              for a <span className="text-gradient-holographic">Smarter Tomorrow</span>
+              for a{" "}
+              <span className="text-gradient-holographic">
+                Smarter Tomorrow
+              </span>
             </h1>
 
             {/* ── Subtext ── */}
@@ -371,8 +481,8 @@ export function Hero() {
               ref={subtextRef}
               className="mt-6 max-w-2xl text-lg leading-relaxed text-white/60 opacity-0 md:text-xl text-left"
             >
-              We transform ideas into powerful digital experiences.
-              Building modern solutions that help businesses
+              We transform ideas into powerful digital experiences. Building
+              modern solutions that help businesses
               <span className="text-cyan-400"> grow</span>,
               <span className="text-purple-400"> scale</span>, and
               <span className="text-emerald-400"> succeed</span>.
@@ -414,13 +524,14 @@ export function Hero() {
               <p className="mb-4 text-xs font-mono text-cyan-400 tracking-wider uppercase text-center sm:text-left">
                 Our Services
               </p>
-              <div
-                className="relative rounded-md border border-white/[0.06] bg-white/[0.02] p-4 backdrop-blur-sm"
-              >
+              <div className="relative rounded-md border border-white/[0.06] bg-white/[0.02] p-4 backdrop-blur-sm">
                 {/* Top neon accent line on the services strip */}
                 <div className="absolute top-0 left-4 right-4 h-px animate-border-beam" />
 
-                <div ref={servicesRef} className="grid grid-cols-3 gap-4 sm:flex sm:flex-wrap sm:justify-between">
+                <div
+                  ref={servicesRef}
+                  className="grid grid-cols-3 gap-4 sm:flex sm:flex-wrap sm:justify-between"
+                >
                   {serviceShortcuts.map((service, idx) => {
                     const Icon = service.icon;
                     return (
@@ -429,7 +540,10 @@ export function Hero() {
                         className="flex flex-col items-center gap-2 group cursor-default opacity-0"
                       >
                         <div className="flex h-12 w-12 items-center justify-center rounded-md border border-white/10 bg-white/5 transition-all duration-300 group-hover:border-neon-cyan group-hover:bg-cyan-500/10 group-hover:shadow-glow-cyan">
-                          <Icon className="h-5 w-5 text-white/70 group-hover:text-cyan-400 transition-colors duration-300" strokeWidth={1.5} />
+                          <Icon
+                            className="h-5 w-5 text-white/70 group-hover:text-cyan-400 transition-colors duration-300"
+                            strokeWidth={1.5}
+                          />
                         </div>
                         <span className="text-[9px] sm:text-[10px] uppercase font-mono text-white/50 group-hover:text-white/80 transition-colors duration-300 max-w-[80px] text-center leading-tight">
                           {service.label}
@@ -443,7 +557,6 @@ export function Hero() {
                 <div className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
               </div>
             </div>
-
           </div>
         </div>
 

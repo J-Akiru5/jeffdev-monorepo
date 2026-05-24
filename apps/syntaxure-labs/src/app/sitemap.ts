@@ -1,4 +1,4 @@
-import { MetadataRoute } from 'next';
+import { MetadataRoute } from "next";
 
 /**
  * SITEMAP GENERATOR
@@ -7,19 +7,19 @@ import { MetadataRoute } from 'next';
  * Access at: https://jeffdev.studio/sitemap.xml
  */
 
-const BASE_URL = 'https://jeffdev.studio';
+const BASE_URL = "https://jeffdev.studio";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static pages
   const staticRoutes = [
-    { path: '/', priority: 1.0, changeFrequency: 'weekly' as const },
-    { path: '/services', priority: 0.9, changeFrequency: 'monthly' as const },
-    { path: '/work', priority: 0.9, changeFrequency: 'weekly' as const },
-    { path: '/about', priority: 0.8, changeFrequency: 'monthly' as const },
-    { path: '/contact', priority: 0.8, changeFrequency: 'monthly' as const },
-    { path: '/quote', priority: 0.9, changeFrequency: 'monthly' as const },
-    { path: '/terms', priority: 0.3, changeFrequency: 'yearly' as const },
-    { path: '/privacy', priority: 0.3, changeFrequency: 'yearly' as const },
+    { path: "/", priority: 1.0, changeFrequency: "weekly" as const },
+    { path: "/services", priority: 0.9, changeFrequency: "monthly" as const },
+    { path: "/work", priority: 0.9, changeFrequency: "weekly" as const },
+    { path: "/about", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/contact", priority: 0.8, changeFrequency: "monthly" as const },
+    { path: "/quote", priority: 0.9, changeFrequency: "monthly" as const },
+    { path: "/terms", priority: 0.3, changeFrequency: "yearly" as const },
+    { path: "/privacy", priority: 0.3, changeFrequency: "yearly" as const },
   ];
 
   const staticPages = staticRoutes.map((route) => ({

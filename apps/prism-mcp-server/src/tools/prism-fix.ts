@@ -14,15 +14,20 @@ export interface FixResult {
 
 const KNOWN_FIXES: Array<{
   test: (v: Violation) => boolean;
-  apply: (v: Violation, code: string) => { result: string; confidence: number; description: string };
+  apply: (
+    v: Violation,
+    code: string,
+  ) => { result: string; confidence: number; description: string };
 }> = [
   // Cross-app imports → @repo/ prefix
   {
-    test: (v) => v.pattern.includes("../../apps/") || v.pattern.includes("../apps/"),
+    test: (v) =>
+      v.pattern.includes("../../apps/") || v.pattern.includes("../apps/"),
     apply: (v, code) => {
       const match = v.matchedText;
       const parts = match.split("../../apps/");
-      if (parts.length < 2) return { result: code, confidence: 0, description: "" };
+      if (parts.length < 2)
+        return { result: code, confidence: 0, description: "" };
       const appName = parts[1]?.split("/")[0] || "";
       if (!appName) return { result: code, confidence: 0, description: "" };
       const fixed = match.replace(`../../apps/${appName}`, `@repo/${appName}`);
@@ -35,7 +40,10 @@ const KNOWN_FIXES: Array<{
   },
   // Inline styles → Tailwind placeholder comment
   {
-    test: (v) => v.pattern.includes("style={") || v.pattern.includes("style:") || v.message.toLowerCase().includes("inline style"),
+    test: (v) =>
+      v.pattern.includes("style={") ||
+      v.pattern.includes("style:") ||
+      v.message.toLowerCase().includes("inline style"),
     apply: (v, code) => {
       const match = v.matchedText;
       const replacement = ` {/* TODO: Replace with Tailwind classes */}`;
@@ -43,13 +51,16 @@ const KNOWN_FIXES: Array<{
       return {
         result: code.replace(match, fixed),
         confidence: 0.6,
-        description: "Replaced inline style with Tailwind placeholder — manual review recommended",
+        description:
+          "Replaced inline style with Tailwind placeholder — manual review recommended",
       };
     },
   },
   // Removes console.log (matching common patterns)
   {
-    test: (v) => v.pattern.includes("console\\.log") || v.message.toLowerCase().includes("console.log"),
+    test: (v) =>
+      v.pattern.includes("console\\.log") ||
+      v.message.toLowerCase().includes("console.log"),
     apply: (v, code) => {
       let result = code;
       let count = 0;
@@ -61,7 +72,10 @@ const KNOWN_FIXES: Array<{
       return {
         result,
         confidence: count > 0 ? 0.9 : 0,
-        description: count > 0 ? `Commented out ${count} console.log statement(s)` : "No console.log found",
+        description:
+          count > 0
+            ? `Commented out ${count} console.log statement(s)`
+            : "No console.log found",
       };
     },
   },
@@ -74,7 +88,12 @@ export async function handlePrismFix(input: PrismFixInput): Promise<{
   const { violation, code } = input;
 
   if (!violation || !code) {
-    return { content: [{ type: "text", text: "Error: violation and code are required." }], isError: true };
+    return {
+      content: [
+        { type: "text", text: "Error: violation and code are required." },
+      ],
+      isError: true,
+    };
   }
 
   const matched = KNOWN_FIXES.find((f) => f.test(violation));
@@ -94,11 +113,13 @@ export async function handlePrismFix(input: PrismFixInput): Promise<{
               correctedCode: codeLines.join("\n"),
               appliedRule: violation.ruleName,
               confidence: 0.3,
-              changes: [{
-                line: violation.line,
-                from: original,
-                to: codeLines[targetLine],
-              }],
+              changes: [
+                {
+                  line: violation.line,
+                  from: original,
+                  to: codeLines[targetLine],
+                },
+              ],
             }),
           },
         ],
@@ -131,11 +152,13 @@ export async function handlePrismFix(input: PrismFixInput): Promise<{
           correctedCode: result,
           appliedRule: violation.ruleName,
           confidence,
-          changes: [{
-            line: violation.line,
-            from: violation.matchedText,
-            to: description,
-          }],
+          changes: [
+            {
+              line: violation.line,
+              from: violation.matchedText,
+              to: description,
+            },
+          ],
           description,
         }),
       },

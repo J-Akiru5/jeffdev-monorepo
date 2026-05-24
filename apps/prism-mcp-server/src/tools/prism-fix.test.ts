@@ -2,19 +2,39 @@ import { describe, it, expect } from "vitest";
 import { handlePrismFix } from "./prism-fix.js";
 import type { Violation } from "./prism-check.js";
 
-function getText(result: { content: Array<{ type: string; text: string }> }): string {
+function getText(result: {
+  content: Array<{ type: string; text: string }>;
+}): string {
   return result.content[0]?.text || "";
 }
 
 describe("handlePrismFix", () => {
   it("returns error when violation missing", async () => {
-    const result = await handlePrismFix({ violation: undefined as unknown as Violation, code: "test" });
+    const result = await handlePrismFix({
+      violation: undefined as unknown as Violation,
+      code: "test",
+    });
     expect(result.isError).toBe(true);
     expect(getText(result)).toContain("violation and code are required");
   });
 
   it("returns error when code missing", async () => {
-    const result = await handlePrismFix({ violation: { ruleId: "r1", ruleName: "test", pattern: "", line: 1, column: 1, endLine: 1, endColumn: 1, matchedText: "", message: "", severity: "warning", suggestion: "" }, code: "" });
+    const result = await handlePrismFix({
+      violation: {
+        ruleId: "r1",
+        ruleName: "test",
+        pattern: "",
+        line: 1,
+        column: 1,
+        endLine: 1,
+        endColumn: 1,
+        matchedText: "",
+        message: "",
+        severity: "warning",
+        suggestion: "",
+      },
+      code: "",
+    });
     expect(result.isError).toBe(true);
   });
 

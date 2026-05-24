@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Sidebar Navigation
@@ -7,9 +7,9 @@
  * Mobile: Hidden (uses bottom sheet drawer instead).
  */
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   CheckSquare,
   Star,
@@ -20,8 +20,8 @@ import {
   ChevronLeft,
   ChevronRight,
   FolderKanban,
-} from 'lucide-react';
-import { useProjects } from '@/contexts/project-context';
+} from "lucide-react";
+import { useProjects } from "@/contexts/project-context";
 
 interface NavItem {
   label: string;
@@ -30,14 +30,14 @@ interface NavItem {
 }
 
 const quickFilters: NavItem[] = [
-  { label: 'All Tasks', href: '/tasks', icon: CheckSquare },
-  { label: 'Starred', href: '/tasks?filter=starred', icon: Star },
+  { label: "All Tasks", href: "/tasks", icon: CheckSquare },
+  { label: "Starred", href: "/tasks?filter=starred", icon: Star },
 ];
 
 const views: NavItem[] = [
-  { label: 'Tasks', href: '/tasks', icon: CheckSquare },
-  { label: 'Calendar', href: '/calendar', icon: Calendar },
-  { label: 'Kanban', href: '/kanban', icon: LayoutGrid },
+  { label: "Tasks", href: "/tasks", icon: CheckSquare },
+  { label: "Calendar", href: "/calendar", icon: Calendar },
+  { label: "Kanban", href: "/kanban", icon: LayoutGrid },
 ];
 
 export function Sidebar() {
@@ -46,8 +46,12 @@ export function Sidebar() {
   const { projects, setActiveProjectId } = useProjects();
 
   const isActive = (href: string) => {
-    if (href.includes('?')) {
-      return pathname + (typeof window !== 'undefined' ? window.location.search : '') === href;
+    if (href.includes("?")) {
+      return (
+        pathname +
+          (typeof window !== "undefined" ? window.location.search : "") ===
+        href
+      );
     }
     return pathname === href;
   };
@@ -55,7 +59,7 @@ export function Sidebar() {
   return (
     <aside
       className={`fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-white/6 bg-void transition-all duration-300 lg:flex ${
-        collapsed ? 'w-16' : 'w-64'
+        collapsed ? "w-16" : "w-64"
       }`}
     >
       {/* Header */}
@@ -98,9 +102,9 @@ export function Sidebar() {
                     href={item.href}
                     className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all ${
                       active
-                        ? 'bg-white/10 text-white'
-                        : 'text-white/50 hover:bg-white/5 hover:text-white'
-                    } ${collapsed ? 'justify-center' : ''}`}
+                        ? "bg-white/10 text-white"
+                        : "text-white/50 hover:bg-white/5 hover:text-white"
+                    } ${collapsed ? "justify-center" : ""}`}
                     title={collapsed ? item.label : undefined}
                   >
                     <Icon className="h-4 w-4 flex-shrink-0" />
@@ -130,9 +134,9 @@ export function Sidebar() {
                     href={item.href}
                     className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all ${
                       active
-                        ? 'bg-white/10 text-white'
-                        : 'text-white/50 hover:bg-white/5 hover:text-white'
-                    } ${collapsed ? 'justify-center' : ''}`}
+                        ? "bg-white/10 text-white"
+                        : "text-white/50 hover:bg-white/5 hover:text-white"
+                    } ${collapsed ? "justify-center" : ""}`}
                     title={collapsed ? item.label : undefined}
                   >
                     <Icon className="h-4 w-4 flex-shrink-0" />
@@ -166,14 +170,14 @@ export function Sidebar() {
                     onClick={() => setActiveProjectId(project.id)}
                     className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-all ${
                       active
-                        ? 'bg-white/10 text-white'
-                        : 'text-white/50 hover:bg-white/5 hover:text-white'
-                    } ${collapsed ? 'justify-center' : ''}`}
+                        ? "bg-white/10 text-white"
+                        : "text-white/50 hover:bg-white/5 hover:text-white"
+                    } ${collapsed ? "justify-center" : ""}`}
                     title={collapsed ? project.name : undefined}
                   >
                     <span
                       className="h-2 w-2 flex-shrink-0 rounded-full"
-                      style={{ backgroundColor: project.color || '#06b6d4' }}
+                      style={{ backgroundColor: project.color || "#06b6d4" }}
                     />
                     {!collapsed && (
                       <span className="truncate">{project.name}</span>
@@ -191,9 +195,9 @@ export function Sidebar() {
         <Link
           href="/settings"
           className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm text-white/50 transition-all hover:bg-white/5 hover:text-white ${
-            collapsed ? 'justify-center' : ''
+            collapsed ? "justify-center" : ""
           }`}
-          title={collapsed ? 'Settings' : undefined}
+          title={collapsed ? "Settings" : undefined}
         >
           <Settings className="h-4 w-4 flex-shrink-0" />
           {!collapsed && <span>Settings</span>}

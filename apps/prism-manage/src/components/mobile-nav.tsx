@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Mobile Bottom Navigation
@@ -7,9 +7,9 @@
  * Shows primary views + "Lists" drawer.
  */
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   CheckSquare,
   Calendar,
@@ -19,9 +19,9 @@ import {
   Plus,
   Star,
   Settings,
-} from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useProjects } from '@/contexts/project-context';
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useProjects } from "@/contexts/project-context";
 
 export function MobileNav() {
   const pathname = usePathname();
@@ -29,9 +29,9 @@ export function MobileNav() {
   const { projects, setActiveProjectId, activeProjectId } = useProjects();
 
   const tabs = [
-    { label: 'Tasks', href: '/tasks', icon: CheckSquare },
-    { label: 'Calendar', href: '/calendar', icon: Calendar },
-    { label: 'Kanban', href: '/kanban', icon: LayoutGrid },
+    { label: "Tasks", href: "/tasks", icon: CheckSquare },
+    { label: "Calendar", href: "/calendar", icon: Calendar },
+    { label: "Kanban", href: "/kanban", icon: LayoutGrid },
   ];
 
   const handleProjectClick = (projectId: string) => {
@@ -53,7 +53,7 @@ export function MobileNav() {
               href={tab.href}
               onClick={() => setIsDrawerOpen(false)}
               className={`flex flex-col items-center justify-center gap-1 rounded-md p-2 transition-all ${
-                isActive ? 'text-cyan-400' : 'text-white/40 hover:text-white'
+                isActive ? "text-cyan-400" : "text-white/40 hover:text-white"
               }`}
             >
               <Icon className="h-5 w-5" />
@@ -66,7 +66,7 @@ export function MobileNav() {
         <button
           onClick={() => setIsDrawerOpen(!isDrawerOpen)}
           className={`flex flex-col items-center justify-center gap-1 rounded-md p-2 transition-all ${
-            isDrawerOpen ? 'text-cyan-400' : 'text-white/40 hover:text-white'
+            isDrawerOpen ? "text-cyan-400" : "text-white/40 hover:text-white"
           }`}
         >
           {isDrawerOpen ? (
@@ -93,10 +93,10 @@ export function MobileNav() {
 
             {/* Drawer Content */}
             <motion.div
-              initial={{ y: '100%' }}
+              initial={{ y: "100%" }}
               animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="fixed bottom-16 left-0 right-0 z-40 max-h-[70vh] overflow-y-auto rounded-t-2xl border-t border-white/10 bg-[#0A0A0A] p-6 shadow-2xl lg:hidden"
             >
               {/* Drag Handle */}
@@ -151,15 +151,19 @@ export function MobileNav() {
                         onClick={() => handleProjectClick(project.id)}
                         className={`flex w-full items-center gap-3 rounded-xl border p-3 transition-all active:scale-95 ${
                           activeProjectId === project.id
-                            ? 'border-white/10 bg-white/10 text-white'
-                            : 'border-white/5 bg-white/[0.02] text-white/60 hover:bg-white/5 hover:text-white'
+                            ? "border-white/10 bg-white/10 text-white"
+                            : "border-white/5 bg-white/[0.02] text-white/60 hover:bg-white/5 hover:text-white"
                         }`}
                       >
                         <span
                           className="h-3 w-3 rounded-full"
-                          style={{ backgroundColor: project.color || '#06b6d4' }}
+                          style={{
+                            backgroundColor: project.color || "#06b6d4",
+                          }}
                         />
-                        <span className="text-sm font-medium">{project.name}</span>
+                        <span className="text-sm font-medium">
+                          {project.name}
+                        </span>
                       </button>
                     ))
                   )}

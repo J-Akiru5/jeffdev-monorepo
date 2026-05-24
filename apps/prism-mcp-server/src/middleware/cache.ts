@@ -1,4 +1,11 @@
-import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, unlinkSync } from "fs";
+import {
+  readFileSync,
+  writeFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  unlinkSync,
+} from "fs";
 import { join } from "path";
 import { homedir } from "os";
 
@@ -36,7 +43,7 @@ function hashKey(key: string): string {
   let hash = 0;
   for (let i = 0; i < key.length; i++) {
     const char = key.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash;
   }
   return Math.abs(hash).toString(16).padStart(8, "0");
@@ -60,7 +67,11 @@ function evictIfNeeded(): void {
     memoryCache.delete(key);
     const idx = accessOrder.indexOf(key);
     if (idx >= 0) accessOrder.splice(idx, 1);
-    try { unlinkSync(diskPath(key)); } catch { /* ignore */ }
+    try {
+      unlinkSync(diskPath(key));
+    } catch {
+      /* ignore */
+    }
   }
 }
 
@@ -89,12 +100,19 @@ function enforceSizeLimit(): void {
       memoryCache.delete(victim.key);
       const idx = accessOrder.indexOf(victim.key);
       if (idx >= 0) accessOrder.splice(idx, 1);
-      try { unlinkSync(diskPath(victim.key)); } catch { /* ignore */ }
+      try {
+        unlinkSync(diskPath(victim.key));
+      } catch {
+        /* ignore */
+      }
     }
   }
 }
 
-export function getCacheKey(projectId: string | undefined, ruleIds: string[]): string {
+export function getCacheKey(
+  projectId: string | undefined,
+  ruleIds: string[],
+): string {
   const sorted = [...ruleIds].sort().join(",");
   return `${projectId || "global"}_${sorted}`;
 }
@@ -129,13 +147,19 @@ export function getCached<T>(key: string): T | null {
       }
       unlinkSync(file);
     }
-  } catch { /* stale or corrupt file */ }
+  } catch {
+    /* stale or corrupt file */
+  }
 
   cacheMisses++;
   return null;
 }
 
-export function setCached<T>(key: string, data: T, ttlMs: number = DEFAULT_TTL_MS): void {
+export function setCached<T>(
+  key: string,
+  data: T,
+  ttlMs: number = DEFAULT_TTL_MS,
+): void {
   const serialized = JSON.stringify(data);
   const sizeBytes = Buffer.byteLength(serialized, "utf-8");
 
@@ -154,7 +178,9 @@ export function setCached<T>(key: string, data: T, ttlMs: number = DEFAULT_TTL_M
   ensureCacheDir();
   try {
     writeFileSync(diskPath(key), JSON.stringify(entry));
-  } catch { /* disk write failure — serve from memory */ }
+  } catch {
+    /* disk write failure — serve from memory */
+  }
 
   evictIfNeeded();
   enforceSizeLimit();
@@ -169,7 +195,11 @@ export function invalidateCache(projectId?: string): void {
       memoryCache.delete(key);
       const idx = accessOrder.indexOf(key);
       if (idx >= 0) accessOrder.splice(idx, 1);
-      try { unlinkSync(diskPath(key)); } catch { /* ignore */ }
+      try {
+        unlinkSync(diskPath(key));
+      } catch {
+        /* ignore */
+      }
     }
   }
 }
@@ -185,7 +215,12 @@ export function hasInMemory(key: string): boolean {
   return memoryCache.has(key);
 }
 
-export function getCacheStats(): { hits: number; misses: number; size: number; entries: number } {
+export function getCacheStats(): {
+  hits: number;
+  misses: number;
+  size: number;
+  entries: number;
+} {
   return {
     hits: cacheHits,
     misses: cacheMisses,
@@ -215,8 +250,12 @@ export function loadDiskCacheIntoMemory(): number {
         } else if (Date.now() >= entry.expiresAt) {
           unlinkSync(join(CACHE_DIR, file));
         }
-      } catch { /* skip corrupt file */ }
+      } catch {
+        /* skip corrupt file */
+      }
     }
-  } catch { /* dir not accessible */ }
+  } catch {
+    /* dir not accessible */
+  }
   return loaded;
 }

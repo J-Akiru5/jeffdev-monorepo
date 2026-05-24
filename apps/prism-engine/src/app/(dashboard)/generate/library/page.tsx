@@ -1,24 +1,24 @@
-'use client';
+"use client";
 
 /**
  * Component Library Page
- * 
+ *
  * View and manage saved components
  */
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { 
-  ArrowLeft, 
-  Trash2, 
-  Download, 
-  Eye, 
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  Trash2,
+  Download,
+  Eye,
   Loader2,
   Code2,
-  AlertCircle
-} from 'lucide-react';
-import { GlassPanel, Button, Badge } from '@syntaxure/ui';
-import { ComponentTabs } from '@/components/ui/component-tabs';
+  AlertCircle,
+} from "lucide-react";
+import { GlassPanel, Button, Badge } from "@syntaxure/ui";
+import { ComponentTabs } from "@/components/ui/component-tabs";
 
 interface SavedComponent {
   id: string;
@@ -36,7 +36,8 @@ export default function ComponentLibraryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [selectedComponent, setSelectedComponent] = useState<SavedComponent | null>(null);
+  const [selectedComponent, setSelectedComponent] =
+    useState<SavedComponent | null>(null);
   const [loadingComponent, setLoadingComponent] = useState(false);
 
   useEffect(() => {
@@ -45,12 +46,14 @@ export default function ComponentLibraryPage() {
 
   const fetchComponents = async () => {
     try {
-      const response = await fetch('/api/components');
-      if (!response.ok) throw new Error('Failed to fetch components');
+      const response = await fetch("/api/components");
+      if (!response.ok) throw new Error("Failed to fetch components");
       const data = await response.json();
       setComponents(data.components);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load components');
+      setError(
+        err instanceof Error ? err.message : "Failed to load components",
+      );
     } finally {
       setLoading(false);
     }
@@ -68,39 +71,41 @@ export default function ComponentLibraryPage() {
 
     try {
       const response = await fetch(`/api/components/${id}`);
-      if (!response.ok) throw new Error('Failed to fetch component');
+      if (!response.ok) throw new Error("Failed to fetch component");
       const data = await response.json();
       setSelectedComponent(data);
     } catch {
-      setError('Failed to load component details');
+      setError("Failed to load component details");
     } finally {
       setLoadingComponent(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this component?')) return;
+    if (!confirm("Are you sure you want to delete this component?")) return;
 
     try {
-      const response = await fetch(`/api/components/${id}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete');
-      
-      setComponents(prev => prev.filter(c => c.id !== id));
+      const response = await fetch(`/api/components/${id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete");
+
+      setComponents((prev) => prev.filter((c) => c.id !== id));
       if (selectedId === id) {
         setSelectedId(null);
         setSelectedComponent(null);
       }
     } catch {
-      setError('Failed to delete component');
+      setError("Failed to delete component");
     }
   };
 
   const handleExport = (component: SavedComponent) => {
     if (!component.code) return;
-    
-    const blob = new Blob([component.code], { type: 'text/plain' });
+
+    const blob = new Blob([component.code], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `${component.name}.tsx`;
     document.body.appendChild(a);
@@ -122,16 +127,19 @@ export default function ComponentLibraryPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <Link 
+          <Link
             href="/generate"
             className="flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors mb-2"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to AI Kitchen
           </Link>
-          <h1 className="text-2xl font-semibold text-white">Component Library</h1>
+          <h1 className="text-2xl font-semibold text-white">
+            Component Library
+          </h1>
           <p className="text-sm text-white/50 mt-1">
-            {components.length} component{components.length !== 1 ? 's' : ''} saved
+            {components.length} component{components.length !== 1 ? "s" : ""}{" "}
+            saved
           </p>
         </div>
       </div>
@@ -148,7 +156,9 @@ export default function ComponentLibraryPage() {
       {components.length === 0 ? (
         <GlassPanel className="p-12 text-center">
           <Code2 className="h-12 w-12 text-white/20 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-white mb-2">No components yet</h3>
+          <h3 className="text-lg font-medium text-white mb-2">
+            No components yet
+          </h3>
           <p className="text-sm text-white/50 mb-6">
             Generate a component in AI Kitchen and save it to your library.
           </p>
@@ -164,7 +174,9 @@ export default function ComponentLibraryPage() {
               <div className="flex items-center justify-between">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3">
-                    <h3 className="font-medium text-white truncate">{component.name}</h3>
+                    <h3 className="font-medium text-white truncate">
+                      {component.name}
+                    </h3>
                     <Badge variant="default" className="text-xs">
                       {component.stack}
                     </Badge>
@@ -189,7 +201,7 @@ export default function ComponentLibraryPage() {
                     className="flex items-center gap-2"
                   >
                     <Eye className="h-4 w-4" />
-                    {selectedId === component.id ? 'Hide' : 'View'}
+                    {selectedId === component.id ? "Hide" : "View"}
                   </Button>
                   <Button
                     variant="secondary"
@@ -217,7 +229,7 @@ export default function ComponentLibraryPage() {
                     </div>
                   ) : selectedComponent ? (
                     <ComponentTabs
-                      code={selectedComponent.code || '// No code available'}
+                      code={selectedComponent.code || "// No code available"}
                       rules={selectedComponent.rules}
                       defaultTab="code"
                       collapsible={false}

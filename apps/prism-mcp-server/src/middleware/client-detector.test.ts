@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { detectPlatform, setCurrentClient, getCurrentClient, getClientPlatform } from "./client-detector.js";
+import {
+  detectPlatform,
+  setCurrentClient,
+  getCurrentClient,
+  getClientPlatform,
+} from "./client-detector.js";
 
 describe("detectPlatform", () => {
   it("detects Cursor", () => {

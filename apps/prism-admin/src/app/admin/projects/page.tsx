@@ -45,9 +45,7 @@ export default async function ProjectsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">Projects</h1>
-          <p className="text-sm text-white/50">
-            Agency projects from Supabase
-          </p>
+          <p className="text-sm text-white/50">Agency projects from Supabase</p>
         </div>
         <div className="flex items-center gap-2 text-xs">
           <span className="px-2 py-1 rounded bg-white/5 text-white/40 flex items-center gap-1.5">

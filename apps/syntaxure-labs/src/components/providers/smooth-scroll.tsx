@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { ReactNode, useEffect, useRef } from 'react';
-import Lenis from 'lenis';
-import { usePathname } from 'next/navigation';
+import { ReactNode, useEffect, useRef } from "react";
+import Lenis from "lenis";
+import { usePathname } from "next/navigation";
 
 /**
  * SmoothScroll Provider
  * ---------------------
  * Wraps the application in a Lenis smooth scroll context.
  * Handles scroll normalization and provides buttery-smooth scrolling.
- * 
+ *
  * @see https://github.com/studio-freight/lenis
  */
 interface SmoothScrollProps {
@@ -23,10 +23,10 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
   useEffect(() => {
     // Initialize Lenis with optimized settings
     const lenis = new Lenis({
-      duration: 1.2,           // Scroll duration (seconds)
+      duration: 1.2, // Scroll duration (seconds)
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Exponential easing
-      orientation: 'vertical', // Scroll direction
-      gestureOrientation: 'vertical',
+      orientation: "vertical", // Scroll direction
+      gestureOrientation: "vertical",
       smoothWheel: true,
       wheelMultiplier: 1,
       touchMultiplier: 2,

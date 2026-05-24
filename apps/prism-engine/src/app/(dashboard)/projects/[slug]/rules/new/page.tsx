@@ -23,10 +23,10 @@ export default function NewRulePage({ params }: Props) {
 }
 
 function NewRuleForm({ slug }: { slug: string }) {
-  const [state, formAction, pending] = useActionState<CreateRuleState, FormData>(
-    createRule,
-    null
-  );
+  const [state, formAction, pending] = useActionState<
+    CreateRuleState,
+    FormData
+  >(createRule, null);
 
   return (
     <div className="space-y-8 max-w-2xl">
@@ -60,7 +60,10 @@ function NewRuleForm({ slug }: { slug: string }) {
 
           {/* Rule Name */}
           <div className="space-y-2">
-            <label htmlFor="name" className="block text-sm font-medium text-white">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-white"
+            >
               Rule Name
             </label>
             <input
@@ -78,7 +81,10 @@ function NewRuleForm({ slug }: { slug: string }) {
 
           {/* Category */}
           <div className="space-y-2">
-            <label htmlFor="category" className="block text-sm font-medium text-white">
+            <label
+              htmlFor="category"
+              className="block text-sm font-medium text-white"
+            >
               Category
             </label>
             <select
@@ -104,7 +110,10 @@ function NewRuleForm({ slug }: { slug: string }) {
 
           {/* Priority */}
           <div className="space-y-2">
-            <label htmlFor="priority" className="block text-sm font-medium text-white">
+            <label
+              htmlFor="priority"
+              className="block text-sm font-medium text-white"
+            >
               Priority (1–100)
             </label>
             <input
@@ -117,7 +126,8 @@ function NewRuleForm({ slug }: { slug: string }) {
               className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none transition-colors"
             />
             <p className="text-xs text-white/40">
-              1–3 = high priority (always included). 4–7 = medium. 8+ = low (summary only).
+              1–3 = high priority (always included). 4–7 = medium. 8+ = low
+              (summary only).
             </p>
             {state?.error?.priority && (
               <p className="text-xs text-red-400">{state.error.priority[0]}</p>
@@ -126,7 +136,10 @@ function NewRuleForm({ slug }: { slug: string }) {
 
           {/* Content */}
           <div className="space-y-2">
-            <label htmlFor="content" className="block text-sm font-medium text-white">
+            <label
+              htmlFor="content"
+              className="block text-sm font-medium text-white"
+            >
               Rule Content
             </label>
             <textarea
@@ -161,13 +174,23 @@ function NewRuleForm({ slug }: { slug: string }) {
 
       {/* Tips */}
       <GlassPanel className="p-6 border-cyan-500/10">
-        <h3 className="text-sm font-medium text-white mb-3">💡 Tips for Writing Good Rules</h3>
+        <h3 className="text-sm font-medium text-white mb-3">
+          💡 Tips for Writing Good Rules
+        </h3>
         <ul className="space-y-2 text-sm text-white/60">
           <li>• Be specific and actionable — avoid vague instructions</li>
           <li>• Include code examples when possible</li>
-          <li>• Reference file patterns (e.g., &ldquo;For files in /components/*&rdquo;)</li>
-          <li>• Explain the &ldquo;why&rdquo; behind the rule, not just the what</li>
-          <li>• Shorter rules (priority 1–3) are always included — save length for higher-priority ones</li>
+          <li>
+            • Reference file patterns (e.g., &ldquo;For files in
+            /components/*&rdquo;)
+          </li>
+          <li>
+            • Explain the &ldquo;why&rdquo; behind the rule, not just the what
+          </li>
+          <li>
+            • Shorter rules (priority 1–3) are always included — save length for
+            higher-priority ones
+          </li>
         </ul>
       </GlassPanel>
     </div>

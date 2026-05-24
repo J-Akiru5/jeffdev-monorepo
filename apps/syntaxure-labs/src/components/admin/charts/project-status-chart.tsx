@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Project Status Chart Component
@@ -6,7 +6,14 @@
  * Donut chart showing project status distribution.
  */
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Legend,
+  Tooltip,
+} from "recharts";
 
 interface ProjectStatusChartProps {
   data: {
@@ -36,10 +43,10 @@ export function ProjectStatusChart({ data }: ProjectStatusChartProps) {
           </Pie>
           <Tooltip
             contentStyle={{
-              backgroundColor: '#0a0a0a',
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '6px',
-              color: '#fff',
+              backgroundColor: "#0a0a0a",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: "6px",
+              color: "#fff",
             }}
           />
           <Legend

@@ -1,11 +1,11 @@
-import Link from 'next/link';
-import { ArrowUpRight, ArrowLeft } from 'lucide-react';
-import { Header } from '@/components/layout/header';
-import { Footer } from '@/components/layout/footer';
-import { CTA } from '@/components/sections/cta';
-import { getServices } from '@/lib/data';
-import { getIcon } from '@/lib/icons';
-import type { Metadata } from 'next';
+import Link from "next/link";
+import { ArrowUpRight, ArrowLeft } from "lucide-react";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { CTASection } from "@/components/sections/cta-section";
+import { getServices } from "@/lib/data";
+import { getIcon } from "@/lib/icons";
+import type { Metadata } from "next";
 
 /**
  * Services Page
@@ -15,9 +15,9 @@ import type { Metadata } from 'next';
  */
 
 export const metadata: Metadata = {
-  title: 'Services',
+  title: "Services",
   description:
-    'Productized web development solutions for startups and enterprises. Web apps, SaaS platforms, cloud architecture, and AI integration — fixed investment, clear deliverables.',
+    "Productized web development solutions for startups and enterprises. Web apps, SaaS platforms, cloud architecture, and AI integration — fixed investment, clear deliverables.",
 };
 
 export default async function ServicesPage() {
@@ -114,7 +114,7 @@ export default async function ServicesPage() {
           </div>
         </section>
 
-        <CTA />
+        <CTASection />
       </main>
       <Footer />
     </>

@@ -67,10 +67,10 @@ src/
 ## Subscription Tiers
 
 | Tier | Rules | Projects | IDE Sync |
-|------|-------|----------|----------|
-| Free | 5 | 1 | ❌ |
-| Pro | ∞ | 10 | ✅ |
-| Team | ∞ | ∞ | ✅ |
+| ---- | ----- | -------- | -------- |
+| Free | 5     | 1        | ❌       |
+| Pro  | ∞     | 10       | ✅       |
+| Team | ∞     | ∞        | ✅       |
 
 ## License
 

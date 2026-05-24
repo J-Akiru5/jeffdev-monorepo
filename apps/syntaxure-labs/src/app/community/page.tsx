@@ -1,11 +1,17 @@
-import Link from 'next/link';
-import { ArrowLeft, ArrowUpRight, Users, GitCommit, Sparkles } from 'lucide-react';
-import { Header } from '@/components/layout/header';
-import { Footer } from '@/components/layout/footer';
-import { ReleaseTimeline } from '@/components/sections/release-timeline';
-import { createClient } from '@/lib/supabase/server';
-import type { Metadata } from 'next';
-import type { Release } from '@/types/database';
+import Link from "next/link";
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  Users,
+  GitCommit,
+  Sparkles,
+} from "lucide-react";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { ReleaseTimeline } from "@/components/sections/release-timeline";
+import { createClient } from "@/lib/supabase/server";
+import type { Metadata } from "next";
+import type { Release } from "@/types/database";
 
 /**
  * Community Page
@@ -16,12 +22,12 @@ import type { Release } from '@/types/database';
  */
 
 export const metadata: Metadata = {
-  title: 'Community',
+  title: "Community",
   description:
-    'Stay up to date with the latest Syntaxure Labs releases, tools, and platform updates. Follow our changelog and see what we are building.',
+    "Stay up to date with the latest Syntaxure Labs releases, tools, and platform updates. Follow our changelog and see what we are building.",
 };
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default async function CommunityPage() {
   let featuredReleases: Release[] = [];
@@ -29,27 +35,27 @@ export default async function CommunityPage() {
 
   try {
     const supabase = await createClient();
-    
+
     // Fetch featured releases
     const { data: featured } = await supabase
-      .from('releases')
-      .select('*')
-      .eq('is_featured', true)
-      .order('date', { ascending: false })
+      .from("releases")
+      .select("*")
+      .eq("is_featured", true)
+      .order("date", { ascending: false })
       .limit(6);
 
     // Fetch non-featured releases
     const { data: timeline } = await supabase
-      .from('releases')
-      .select('*')
-      .eq('is_featured', false)
-      .order('date', { ascending: false })
+      .from("releases")
+      .select("*")
+      .eq("is_featured", false)
+      .order("date", { ascending: false })
       .limit(50);
 
     featuredReleases = (featured ?? []) as Release[];
     recentReleases = (timeline ?? []) as Release[];
   } catch (error) {
-    console.error('[community] Failed to fetch releases:', error);
+    console.error("[community] Failed to fetch releases:", error);
   }
 
   return (
@@ -69,10 +75,10 @@ export default async function CommunityPage() {
 
             <div className="mt-8 max-w-3xl">
               <span className="font-mono text-xs uppercase tracking-wider text-cyan-400">
-                {'// Community'}
+                {"// Community"}
               </span>
               <h1 className="mt-4 text-4xl font-bold tracking-tight text-white md:text-5xl">
-                What We&apos;re{' '}
+                What We&apos;re{" "}
                 <span className="text-gradient-holographic">Building</span>
               </h1>
               <p className="mt-4 text-lg text-white/60">
@@ -105,7 +111,7 @@ export default async function CommunityPage() {
               <div className="rounded-md border border-white/[0.06] bg-white/[0.02] p-4">
                 <GitCommit className="h-5 w-5 text-emerald-400" />
                 <div className="mt-3 text-2xl font-bold text-white">
-                  {recentReleases.filter((r) => r.type === 'patch').length}
+                  {recentReleases.filter((r) => r.type === "patch").length}
                 </div>
                 <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-white/40">
                   Patches
@@ -114,7 +120,7 @@ export default async function CommunityPage() {
               <div className="rounded-md border border-white/[0.06] bg-white/[0.02] p-4">
                 <ArrowUpRight className="h-5 w-5 text-amber-400" />
                 <div className="mt-3 text-2xl font-bold text-white">
-                  {recentReleases.filter((r) => r.type === 'tool').length}
+                  {recentReleases.filter((r) => r.type === "tool").length}
                 </div>
                 <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-white/40">
                   Tools
@@ -133,7 +139,7 @@ export default async function CommunityPage() {
                 title: r.title,
                 version: r.version,
                 date: r.date,
-                type: r.type as 'tool' | 'update' | 'patch',
+                type: r.type as "tool" | "update" | "patch",
                 description: r.description,
                 link: r.link,
                 tags: r.tags,
@@ -144,7 +150,7 @@ export default async function CommunityPage() {
                 title: r.title,
                 version: r.version,
                 date: r.date,
-                type: r.type as 'tool' | 'update' | 'patch',
+                type: r.type as "tool" | "update" | "patch",
                 description: r.description,
                 link: r.link,
                 tags: r.tags,

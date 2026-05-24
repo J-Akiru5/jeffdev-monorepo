@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * GCash Proof Upload Component
@@ -6,12 +6,12 @@
  * Shows QR code and allows proof of payment upload.
  */
 
-import { useState, useTransition } from 'react';
-import Image from 'next/image';
-import { Upload, Copy, Check, Loader2 } from 'lucide-react';
-import { recordPayment } from '@/app/actions/invoice';
-import { getSignedUploadUrl } from '@/app/actions/upload';
-import type { Invoice } from '@/types/invoice';
+import { useState, useTransition } from "react";
+import Image from "next/image";
+import { Upload, Copy, Check, Loader2 } from "lucide-react";
+import { recordPayment } from "@/app/actions/invoice";
+import { getSignedUploadUrl } from "@/app/actions/upload";
+import type { Invoice } from "@/types/invoice";
 
 interface GcashProofUploadProps {
   invoice: Invoice;
@@ -19,14 +19,18 @@ interface GcashProofUploadProps {
   onSuccess: () => void;
 }
 
-export function GcashProofUpload({ invoice, amount, onSuccess }: GcashProofUploadProps) {
+export function GcashProofUpload({
+  invoice,
+  amount,
+  onSuccess,
+}: GcashProofUploadProps) {
   const [isPending, startTransition] = useTransition();
   const [copied, setCopied] = useState(false);
   const [proofUrl, setProofUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const gcashNumber = process.env.NEXT_PUBLIC_GCASH_NUMBER || '09XXXXXXXXX';
+  const gcashNumber = process.env.NEXT_PUBLIC_GCASH_NUMBER || "09XXXXXXXXX";
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(amount.toFixed(2));
@@ -40,7 +44,7 @@ export function GcashProofUpload({ invoice, amount, onSuccess }: GcashProofUploa
 
     // Validate size (e.g., max 5MB)
     if (file.size > 5 * 1024 * 1024) {
-      setError('File size too large (max 5MB)');
+      setError("File size too large (max 5MB)");
       return;
     }
 
@@ -49,54 +53,51 @@ export function GcashProofUpload({ invoice, amount, onSuccess }: GcashProofUploa
 
     try {
       // 1. Get Presigned URL
-      const result = await getSignedUploadUrl(
-        file.name,
-        file.type
-      );
+      const result = await getSignedUploadUrl(file.name, file.type);
 
-      if ('error' in result) {
+      if ("error" in result) {
         throw new Error(result.error);
       }
 
       const { url, fileUrl } = result;
 
       if (!url) {
-        throw new Error('Failed to get upload URL');
+        throw new Error("Failed to get upload URL");
       }
 
       // 2. Upload to R2 directly
       const uploadResponse = await fetch(url, {
-        method: 'PUT',
+        method: "PUT",
         body: file,
         headers: {
-          'Content-Type': file.type,
+          "Content-Type": file.type,
         },
       });
 
       if (!uploadResponse.ok) {
-        throw new Error('Upload failed');
+        throw new Error("Upload failed");
       }
 
       // 3. Success
       setProofUrl(fileUrl!);
       setUploading(false);
     } catch (err) {
-      console.error('Upload Error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to upload file');
+      console.error("Upload Error:", err);
+      setError(err instanceof Error ? err.message : "Failed to upload file");
       setUploading(false);
     }
   };
 
   const handleSubmit = () => {
     if (!proofUrl) {
-      setError('Please upload proof of payment');
+      setError("Please upload proof of payment");
       return;
     }
 
     startTransition(async () => {
       const result = await recordPayment(invoice.id!, {
         amount,
-        method: 'gcash',
+        method: "gcash",
         proofUrl,
         notes: `GCash payment - Pending verification`,
       });
@@ -104,7 +105,7 @@ export function GcashProofUpload({ invoice, amount, onSuccess }: GcashProofUploa
       if (result.success) {
         onSuccess();
       } else {
-        setError(result.error || 'Failed to submit payment');
+        setError(result.error || "Failed to submit payment");
       }
     });
   };
@@ -133,7 +134,7 @@ export function GcashProofUpload({ invoice, amount, onSuccess }: GcashProofUploa
           <div>
             <p className="text-sm text-white/50">Amount to pay</p>
             <p className="text-2xl font-bold text-emerald-400">
-              ₱{amount.toLocaleString('en-PH', { minimumFractionDigits: 2 })}
+              ₱{amount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}
             </p>
           </div>
           <button
@@ -174,8 +175,8 @@ export function GcashProofUpload({ invoice, amount, onSuccess }: GcashProofUploa
           <div
             className={`flex flex-col items-center justify-center gap-2 rounded-md border-2 border-dashed p-6 transition-colors ${
               proofUrl
-                ? 'border-emerald-500/50 bg-emerald-500/10'
-                : 'border-white/20 hover:border-white/40'
+                ? "border-emerald-500/50 bg-emerald-500/10"
+                : "border-white/20 hover:border-white/40"
             }`}
           >
             {uploading ? (
@@ -215,7 +216,7 @@ export function GcashProofUpload({ invoice, amount, onSuccess }: GcashProofUploa
             Submitting...
           </span>
         ) : (
-          'Submit Payment'
+          "Submit Payment"
         )}
       </button>
 

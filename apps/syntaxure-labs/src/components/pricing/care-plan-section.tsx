@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * CarePlanSection Component
@@ -6,19 +6,26 @@
  * Highlight section for the mandatory Care Plan retainer.
  */
 
-import { Shield, Cloud, Clock, Headphones, FileCheck, Wrench } from 'lucide-react';
-import type { CarePlan } from '@/data/pricing';
+import {
+  Shield,
+  Cloud,
+  Clock,
+  Headphones,
+  FileCheck,
+  Wrench,
+} from "lucide-react";
+import type { CarePlan } from "@/data/pricing";
 
 interface CarePlanSectionProps {
   plan: CarePlan;
-  currency: 'php' | 'usd';
+  currency: "php" | "usd";
 }
 
 const featureIcons = [Shield, Cloud, Clock, FileCheck, Headphones, Wrench];
 
 export function CarePlanSection({ plan, currency }: CarePlanSectionProps) {
   const price = plan.monthlyPrice[currency];
-  const currencySymbol = currency === 'php' ? '₱' : '$';
+  const currencySymbol = currency === "php" ? "₱" : "$";
 
   return (
     <div className="relative overflow-hidden rounded-lg border border-purple-500/30 bg-gradient-to-br from-purple-500/10 to-cyan-500/5 p-8">
@@ -39,13 +46,19 @@ export function CarePlanSection({ plan, currency }: CarePlanSectionProps) {
           <h3 className="text-2xl font-bold text-white">{plan.name}</h3>
           <p className="mt-1 text-lg text-white/50">{plan.tagline}</p>
 
-          <p className="mt-4 text-white/60 leading-relaxed">{plan.description}</p>
+          <p className="mt-4 text-white/60 leading-relaxed">
+            {plan.description}
+          </p>
 
           <div className="mt-6">
-            <div className="text-sm text-white/40">Monthly rate after included period</div>
+            <div className="text-sm text-white/40">
+              Monthly rate after included period
+            </div>
             <div className="mt-1 flex items-baseline gap-1">
               <span className="text-2xl font-bold text-white">
-                {currencySymbol}{price.min.toLocaleString()} - {currencySymbol}{price.max.toLocaleString()}
+                {currencySymbol}
+                {price.min.toLocaleString()} - {currencySymbol}
+                {price.max.toLocaleString()}
               </span>
               <span className="text-white/50">/month</span>
             </div>

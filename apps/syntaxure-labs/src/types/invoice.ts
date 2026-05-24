@@ -7,9 +7,15 @@
 // =============================================================================
 // INVOICE STATUS
 // =============================================================================
-export type InvoiceStatus = 'draft' | 'sent' | 'partial' | 'paid' | 'overdue' | 'cancelled';
-export type PaymentMethod = 'paypal' | 'gcash' | 'bank_transfer' | 'cash';
-export type Currency = 'USD' | 'PHP';
+export type InvoiceStatus =
+  | "draft"
+  | "sent"
+  | "partial"
+  | "paid"
+  | "overdue"
+  | "cancelled";
+export type PaymentMethod = "paypal" | "gcash" | "bank_transfer" | "cash";
+export type Currency = "USD" | "PHP";
 
 // =============================================================================
 // LINE ITEM
@@ -32,7 +38,7 @@ export interface PaymentRecord {
   transactionId?: string; // PayPal transaction ID
   proofUrl?: string; // GCash proof image URL
   notes?: string;
-  status: 'pending' | 'verified' | 'rejected';
+  status: "pending" | "verified" | "rejected";
   paidAt: string;
   verifiedAt?: string;
   verifiedBy?: string;
@@ -44,20 +50,20 @@ export interface PaymentRecord {
 export interface Invoice {
   id?: string;
   refNo: string; // INV-XXXXXX
-  
+
   // Client Info
   clientName: string;
   clientEmail: string;
   clientCompany?: string;
   clientAddress?: string;
-  
+
   // Project Link
   projectSlug?: string;
   projectTitle?: string;
-  
+
   // Line Items
   items: InvoiceLineItem[];
-  
+
   // Amounts
   currency: Currency;
   subtotal: number;
@@ -67,23 +73,23 @@ export interface Invoice {
   total: number;
   paidAmount: number;
   balanceDue: number;
-  
+
   // Status
   status: InvoiceStatus;
-  
+
   // Dates
   issueDate: string;
   dueDate: string;
   sentAt?: string;
   paidAt?: string;
-  
+
   // Payment History
   payments: PaymentRecord[];
-  
+
   // Notes
   notes?: string;
   termsAndConditions?: string;
-  
+
   // Meta
   createdBy?: string;
   createdAt: string;
@@ -93,8 +99,8 @@ export interface Invoice {
 // =============================================================================
 // SUBSCRIPTION (For SaaS)
 // =============================================================================
-export type SubscriptionStatus = 'active' | 'paused' | 'cancelled' | 'past_due';
-export type BillingCycle = 'monthly' | 'quarterly' | 'yearly';
+export type SubscriptionStatus = "active" | "paused" | "cancelled" | "past_due";
+export type BillingCycle = "monthly" | "quarterly" | "yearly";
 
 export interface SubscriptionPlan {
   id: string;
@@ -109,29 +115,29 @@ export interface SubscriptionPlan {
 export interface Subscription {
   id?: string;
   refNo: string; // SUB-XXXXXX
-  
+
   // Client
   clientName: string;
   clientEmail: string;
-  
+
   // Plan
   planId: string;
   planName: string;
   price: number;
   currency: Currency;
   billingCycle: BillingCycle;
-  
+
   // Status
   status: SubscriptionStatus;
-  
+
   // Dates
   startDate: string;
   nextBillingDate: string;
   cancelledAt?: string;
-  
+
   // PayPal
   paypalSubscriptionId?: string;
-  
+
   // Meta
   createdAt: string;
   updatedAt: string;

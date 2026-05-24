@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Admin Calendar Component
@@ -6,23 +6,27 @@
  * FullCalendar wrapper with dark theme styling.
  */
 
-import { useState, useCallback } from 'react';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin from '@fullcalendar/interaction';
-import type { EventClickArg, DateSelectArg, EventInput } from '@fullcalendar/core';
-import type { CalendarEvent, EventType } from '@/types/supabase';
-import { getCalendarEvents } from '@/app/actions/calendar';
-import { EventModal } from './event-modal';
+import { useState, useCallback } from "react";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import type {
+  EventClickArg,
+  DateSelectArg,
+  EventInput,
+} from "@fullcalendar/core";
+import type { CalendarEvent, EventType } from "@/types/supabase";
+import { getCalendarEvents } from "@/app/actions/calendar";
+import { EventModal } from "./event-modal";
 
 // Event type color mapping
 const eventColors: Record<EventType, string> = {
-  deadline: '#ef4444', // red
-  meeting: '#06b6d4', // cyan
-  milestone: '#8b5cf6', // purple
-  reminder: '#f59e0b', // amber
-  holiday: '#10b981', // emerald
+  deadline: "#ef4444", // red
+  meeting: "#06b6d4", // cyan
+  milestone: "#8b5cf6", // purple
+  reminder: "#f59e0b", // amber
+  holiday: "#10b981", // emerald
 };
 
 interface AdminCalendarProps {
@@ -32,7 +36,9 @@ interface AdminCalendarProps {
 export function AdminCalendar({ initialEvents = [] }: AdminCalendarProps) {
   const [events, setEvents] = useState<CalendarEvent[]>(initialEvents);
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
+    null,
+  );
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   // Refresh events
@@ -80,9 +86,9 @@ export function AdminCalendar({ initialEvents = [] }: AdminCalendarProps) {
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         headerToolbar={{
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay',
+          left: "prev,next today",
+          center: "title",
+          right: "dayGridMonth,timeGridWeek,timeGridDay",
         }}
         events={calendarEvents}
         editable={true}
@@ -162,13 +168,13 @@ export function AdminCalendar({ initialEvents = [] }: AdminCalendarProps) {
             flex-direction: column;
             gap: 1rem;
           }
-          
+
           .admin-calendar .fc-toolbar-chunk {
             display: flex;
             justify-content: center;
             width: 100%;
           }
-          
+
           .admin-calendar .fc-toolbar-title {
             font-size: 1.1rem;
           }

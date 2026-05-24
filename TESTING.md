@@ -5,16 +5,19 @@
 ### 1. Database Configuration
 
 Create your Cosmos DB database:
+
 - **Database Name:** `prism`
 - **Collection:** `videoTranscripts`
 
 Set environment variables:
+
 ```bash
 export MONGODB_URI="your-cosmos-connection-string"
 export COSMOS_DATABASE_NAME="prism"
 ```
 
 Or using Doppler:
+
 ```bash
 doppler run -- npm test
 ```
@@ -47,8 +50,9 @@ npm test
 ```
 
 **Tests included:**
+
 - ✅ MCP server path resolution
-- ✅ Environment variable handling  
+- ✅ Environment variable handling
 - ✅ Process lifecycle management
 - ⏭️ End-to-end CLI launch (requires built MCP server)
 
@@ -60,6 +64,7 @@ npm test
 ```
 
 **Tests included:**
+
 - ✅ VideoTranscript schema validation
 - ⏭️ Database connection (requires MONGODB_URI)
 - ⏭️ Insert sample transcript
@@ -77,12 +82,14 @@ npm run test:watch
 ## Test Data
 
 The tests use a sample transcript based on your video:
+
 - **YouTube:** https://youtu.be/1NTKwpAVcHg
 - **Topic:** Authentication flow walkthrough
 - **Duration:** 3 minutes
 - **Content:** Firebase auth, Zod validation, Server Actions
 
 The transcript is automatically:
+
 - ✅ Inserted before tests
 - ✅ Cleaned up after tests
 
@@ -134,24 +141,29 @@ Test Files  2 passed (2)
 ## Troubleshooting
 
 ### "MCP server not built"
+
 ```bash
 cd apps/prism-mcp-server
 npm run build
 ```
 
 ### "MONGODB_URI not set"
+
 ```bash
 export MONGODB_URI="mongodb+srv://YOUR_USERNAME:YOUR_PASSWORD@YOUR_CLUSTER.mongodb.net/"
 export COSMOS_DATABASE_NAME="prism"
 ```
 
 ### "Collection not found"
+
 Create the collection in Azure Portal:
+
 1. Go to your Cosmos DB account
 2. Create database: `prism`
 3. Create collection: `videoTranscripts`
 
 ### TypeScript errors in tests
+
 ```bash
 # Ensure db package is available
 cd packages/db
@@ -164,6 +176,7 @@ npm install --save-dev @types/node
 ## Next Steps
 
 Once tests pass:
+
 1. ✅ Verify `prism connect` launches without errors
 2. ✅ Test MCP tools in Cursor/Windsurf
 3. ➡️ Implement Phase 3 (Azure OpenAI + Mux)

@@ -10,27 +10,32 @@ The JDStudio design system embodies the "Void" aesthetic - a universe of #050505
 ## Color Palette
 
 ### Canvas (Backgrounds)
+
 - `bg-void`: #050505 - Base application background
 - `bg-glass`: rgba(10, 10, 10, 0.6) - Card/Panel layer with backdrop-blur-xl
 - `bg-surface`: #0a0a0a - Solid alternative when blur is too heavy
 
 ### Accents (Holographic Gradients)
+
 - `primary-cyan`: #06b6d4 (Cyan-500) - Information/Tech elements
 - `primary-purple`: #8b5cf6 (Violet-500) - Creative/Vibe elements
 - `success-emerald`: #10b981 (Emerald-500) - Status: Online/Paid
 
 ### Borders
+
 - `border-subtle`: rgba(255, 255, 255, 0.08) - Default dividers
 - `border-active`: rgba(255, 255, 255, 0.15) - Hover states
 
 ## Typography
 
 ### Headings
+
 - **Font**: Inter (Variable)
 - **Tracking**: -0.02em (Tight)
 - **Weights**: 600 (SemiBold) to 900 (Black)
 
 ### Technical Data
+
 - **Font**: JetBrains Mono
 - **Usage**: Tags, Pricing, Dates, IDs, Code Snippets
 - **Tracking**: -0.01em
@@ -47,6 +52,7 @@ The JDStudio design system embodies the "Void" aesthetic - a universe of #050505
 ## Component Patterns
 
 ### Buttons ("Ghost Glow")
+
 ```jsx
 <button className="group relative overflow-hidden rounded-md border border-white/10 bg-black/20 px-6 py-2 transition-all hover:border-white/20 active:scale-95">
   <div className="absolute inset-0 -z-10 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 opacity-0 transition-opacity group-hover:opacity-100" />
@@ -57,11 +63,13 @@ The JDStudio design system embodies the "Void" aesthetic - a universe of #050505
 ```
 
 ### Cards ("Glass Panels")
+
 - Surface: `bg-white/[0.02]`
 - Border: `border border-white/[0.05]`
 - Highlight: Subtle radial-gradient from top-center
 
 ### Inputs
+
 - Background: `bg-transparent`
 - Border: Bottom border only, or minimal full border
 - Focus: Border turns White or Cyan (no blue ring)
@@ -81,12 +89,14 @@ The JDStudio design system embodies the "Void" aesthetic - a universe of #050505
 ## Mobile Adaptation
 
 ### Navigation
+
 - Desktop: Sidebar (Left) or Minimal Top Bar
 - Mobile: Bottom Navigation Bar (h-16, fixed)
   - Glassmorphism: `bg-black/80 backdrop-blur-lg border-t border-white/10`
   - Z-Index: z-50
 
 ### Reachability
+
 - Primary actions: Fixed at bottom right
 - Search: Top on mobile, filter controls in bottom drawer
 

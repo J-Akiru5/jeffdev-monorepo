@@ -1,12 +1,12 @@
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
-import { Header } from '@/components/layout/header';
-import { Footer } from '@/components/layout/footer';
-import type { Metadata } from 'next';
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'Terms of Service',
-  description: 'Terms of service for Syntaxure Labs.',
+  title: "Terms of Service",
+  description: "Terms of service for Syntaxure Labs.",
 };
 
 export default function TermsPage() {
@@ -34,11 +34,11 @@ export default function TermsPage() {
             <div className="prose prose-invert mt-12 max-w-none prose-headings:font-semibold prose-headings:text-white prose-p:text-white/60 prose-strong:text-white prose-li:text-white/60">
               <h2>1. Services</h2>
               <p>
-                Syntaxure Labs (&ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;)
-                provides web development, software engineering, and related
-                consulting services. All projects are governed by individual
-                project agreements that specify scope, deliverables, timelines,
-                and payment terms.
+                Syntaxure Labs (&ldquo;we,&rdquo; &ldquo;us,&rdquo; or
+                &ldquo;our&rdquo;) provides web development, software
+                engineering, and related consulting services. All projects are
+                governed by individual project agreements that specify scope,
+                deliverables, timelines, and payment terms.
               </p>
 
               <h2>2. Project Agreements</h2>
@@ -54,9 +54,7 @@ export default function TermsPage() {
               </ul>
 
               <h2>3. Payment Terms</h2>
-              <p>
-                Unless otherwise specified in the project agreement:
-              </p>
+              <p>Unless otherwise specified in the project agreement:</p>
               <ul>
                 <li>50% deposit required before project commencement</li>
                 <li>Remaining balance due upon project completion</li>
@@ -101,7 +99,7 @@ export default function TermsPage() {
 
               <h2>Contact</h2>
               <p>
-                For questions about these terms, contact us at{' '}
+                For questions about these terms, contact us at{" "}
                 <a href="mailto:legal@jeffdev.studio" className="text-cyan-400">
                   legal@jeffdev.studio
                 </a>

@@ -57,13 +57,16 @@ function getGremlinClient(): gremlin.process.GraphTraversalSource {
   if (_g) return _g;
 
   if (!GREMLIN_ENDPOINT || !GREMLIN_KEY) {
-    throw new Error("COSMOS_GREMLIN_ENDPOINT and COSMOS_GREMLIN_KEY must be set");
+    throw new Error(
+      "COSMOS_GREMLIN_ENDPOINT and COSMOS_GREMLIN_KEY must be set",
+    );
   }
 
-  const { AnonymousTraversalSource, DriverRemoteConnection, Client, auth } = gremlin.driver || gremlin.process;
+  const { AnonymousTraversalSource, DriverRemoteConnection, Client, auth } =
+    gremlin.driver || gremlin.process;
   const authenticator = new auth.PlainTextSaslAuthenticator(
     `/dbs/prism-graph/colls/rules`,
-    GREMLIN_KEY
+    GREMLIN_KEY,
   );
   const client = Client.create(GREMLIN_ENDPOINT, { authenticator });
   const connection = new DriverRemoteConnection(client);
@@ -94,7 +97,7 @@ interface RelationshipResult {
 
 async function detectRelationship(
   ruleA: Document,
-  ruleB: Document
+  ruleB: Document,
 ): Promise<RelationshipResult> {
   // Default: no relationship detected
   // In production, this would call Gemini to analyze semantic relationships
@@ -170,7 +173,14 @@ async function main() {
   const g = getGremlinClient();
   const { P, __ } = gremlin.process;
 
-  const counts: Counts = { rules: 0, tags: 0, taggedWith: 0, relatesTo: 0, conflictsWith: 0, requires: 0 };
+  const counts: Counts = {
+    rules: 0,
+    tags: 0,
+    taggedWith: 0,
+    relatesTo: 0,
+    conflictsWith: 0,
+    requires: 0,
+  };
 
   // 3. Create vertices for each rule
   log("Creating rule vertices...");
@@ -226,7 +236,9 @@ async function main() {
       }
     }
   }
-  log(`Created ${counts.tags} tag vertices and ${counts.taggedWith} tagged_with edges`);
+  log(
+    `Created ${counts.tags} tag vertices and ${counts.taggedWith} tagged_with edges`,
+  );
 
   // 5. Generate relationships between rules
   log("Analyzing rule relationships...");
@@ -274,20 +286,21 @@ async function main() {
             break;
 
           case "requires":
-            await g
-              .V(idA)
-              .addE("requires")
-              .to(g.V(idB))
-              .iterate();
+            await g.V(idA).addE("requires").to(g.V(idB)).iterate();
             counts.requires++;
             break;
         }
       } catch (e) {
-        error(`Failed to create edge ${relationship.type} between ${idA} and ${idB}:`, e);
+        error(
+          `Failed to create edge ${relationship.type} between ${idA} and ${idB}:`,
+          e,
+        );
       }
     }
   }
-  log(`Created ${counts.relatesTo} relates_to, ${counts.conflictsWith} conflicts_with, ${counts.requires} requires edges`);
+  log(
+    `Created ${counts.relatesTo} relates_to, ${counts.conflictsWith} conflicts_with, ${counts.requires} requires edges`,
+  );
 
   // 6. Verify
   log("Verifying migration...");

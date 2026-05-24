@@ -42,9 +42,12 @@ export default function GenerateSkillPage({ params }: Props) {
         <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-purple-500/10 border border-purple-500/20 shadow-[0_0_40px_-10px_rgba(168,85,247,0.3)]">
           <Sparkles className="h-8 w-8 text-purple-400" />
         </div>
-        <h1 className="text-3xl font-bold text-white tracking-tight">Generate Skill</h1>
+        <h1 className="text-3xl font-bold text-white tracking-tight">
+          Generate Skill
+        </h1>
         <p className="text-white/50 max-w-md mx-auto">
-          Describe a workflow and our AI will document it into a step-by-step procedural guide for your agents.
+          Describe a workflow and our AI will document it into a step-by-step
+          procedural guide for your agents.
         </p>
       </div>
 
@@ -52,7 +55,10 @@ export default function GenerateSkillPage({ params }: Props) {
         <div className="rounded-xl bg-[#0a0a0a] border border-white/5 p-6">
           <form onSubmit={handleGenerate} className="space-y-6">
             <div className="space-y-2">
-              <label htmlFor="prompt" className="block text-sm font-medium text-white/70">
+              <label
+                htmlFor="prompt"
+                className="block text-sm font-medium text-white/70"
+              >
                 What workflow do you want to document?
               </label>
               <textarea
@@ -67,7 +73,9 @@ export default function GenerateSkillPage({ params }: Props) {
             </div>
 
             <div className="rounded-lg bg-purple-500/5 border border-purple-500/10 p-4">
-              <h3 className="text-xs font-medium text-purple-400 mb-2 uppercase tracking-wider">Context Included</h3>
+              <h3 className="text-xs font-medium text-purple-400 mb-2 uppercase tracking-wider">
+                Context Included
+              </h3>
               <ul className="text-sm text-white/60 space-y-1">
                 <li>✓ Project stack and design system</li>
                 <li>✓ Existing architectural rules</li>
@@ -75,8 +83,8 @@ export default function GenerateSkillPage({ params }: Props) {
               </ul>
             </div>
 
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 border-none shadow-[0_0_20px_-5px_rgba(168,85,247,0.4)]"
               disabled={generating || !prompt.trim()}
             >

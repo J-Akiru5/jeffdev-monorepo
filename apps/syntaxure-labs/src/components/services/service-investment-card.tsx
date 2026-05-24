@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { Check } from 'lucide-react';
-import { PriceDisplay } from '@/components/ui/price-display';
+import { Check } from "lucide-react";
+import { PriceDisplay } from "@/components/ui/price-display";
 
 /**
  * Service Investment Card (Client Component)

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Pricing Page (Client Component)
@@ -11,20 +11,25 @@
  * - FAQ accordion
  */
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, ArrowUpRight, Sparkles } from 'lucide-react';
-import { Header } from '@/components/layout/header';
-import { Footer } from '@/components/layout/footer';
-import { PricingCard } from '@/components/pricing/pricing-card';
-import { PricingComparison } from '@/components/pricing/pricing-comparison';
-import { PricingFAQ } from '@/components/pricing/pricing-faq';
-import { CarePlanSection } from '@/components/pricing/care-plan-section';
-import { CurrencyToggle } from '@/components/pricing/currency-toggle';
-import { pricingTiers, carePlan, comparisonTable, pricingFAQ } from '@/data/pricing';
+import { useState } from "react";
+import Link from "next/link";
+import { ArrowLeft, ArrowUpRight, Sparkles } from "lucide-react";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { PricingCard } from "@/components/pricing/pricing-card";
+import { PricingComparison } from "@/components/pricing/pricing-comparison";
+import { PricingFAQ } from "@/components/pricing/pricing-faq";
+import { CarePlanSection } from "@/components/pricing/care-plan-section";
+import { CurrencyToggle } from "@/components/pricing/currency-toggle";
+import {
+  pricingTiers,
+  carePlan,
+  comparisonTable,
+  pricingFAQ,
+} from "@/data/pricing";
 
 export default function PricingPage() {
-  const [currency, setCurrency] = useState<'php' | 'usd'>('php');
+  const [currency, setCurrency] = useState<"php" | "usd">("php");
 
   return (
     <>
@@ -50,15 +55,15 @@ export default function PricingPage() {
               </div>
 
               <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
-                Transparent Pricing for{' '}
+                Transparent Pricing for{" "}
                 <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
                   Serious Growth
                 </span>
               </h1>
 
               <p className="mt-6 max-w-2xl text-lg text-white/50">
-                No hidden fees. No surprises. Choose the plan that fits your ambition,
-                and let&apos;s build something extraordinary together.
+                No hidden fees. No surprises. Choose the plan that fits your
+                ambition, and let&apos;s build something extraordinary together.
               </p>
 
               {/* Currency Toggle */}
@@ -134,8 +139,8 @@ export default function PricingPage() {
                   Ready to Scale?
                 </h2>
                 <p className="mx-auto mt-4 max-w-xl text-white/60">
-                  Not sure which plan is right for you? Let&apos;s discuss your project
-                  and find the perfect solution together.
+                  Not sure which plan is right for you? Let&apos;s discuss your
+                  project and find the perfect solution together.
                 </p>
                 <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
                   <Link

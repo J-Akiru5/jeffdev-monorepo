@@ -1,7 +1,7 @@
-import { notFound } from 'next/navigation';
-import { Metadata } from 'next';
-import { getPublicNamecard } from '@/app/actions/users';
-import { NamecardDisplay } from '@/components/namecard-display';
+import { notFound } from "next/navigation";
+import { Metadata } from "next";
+import { getPublicNamecard } from "@/app/actions/users";
+import { NamecardDisplay } from "@/components/namecard-display";
 
 interface PageProps {
   params: Promise<{ username: string }>;
@@ -10,13 +10,15 @@ interface PageProps {
 /**
  * Generate metadata for the namecard page
  */
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { username } = await params;
   const namecard = await getPublicNamecard(username);
 
   if (!namecard) {
     return {
-      title: 'Namecard Not Found',
+      title: "Namecard Not Found",
     };
   }
 
@@ -25,8 +27,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: namecard.tagline || `Connect with ${namecard.displayName}`,
     openGraph: {
       title: namecard.displayName,
-      description: namecard.tagline || namecard.bio || `Digital namecard for ${namecard.displayName}`,
-      type: 'profile',
+      description:
+        namecard.tagline ||
+        namecard.bio ||
+        `Digital namecard for ${namecard.displayName}`,
+      type: "profile",
     },
   };
 }

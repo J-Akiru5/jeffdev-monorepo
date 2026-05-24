@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Feedback Table Component
@@ -6,13 +6,13 @@
  * DataTable for client testimonials with status management.
  */
 
-import { type ColumnDef } from '@tanstack/react-table';
-import { Star, Trash2 } from 'lucide-react';
-import { DataTable } from '@/components/admin/data-table';
-import { FeedbackStatusSelector } from '@/components/admin/feedback-status-selector';
-import { deleteFeedback } from '@/app/actions/feedback';
-import { useRouter } from 'next/navigation';
-import type { FeedbackStatus } from '@/types/supabase';
+import { type ColumnDef } from "@tanstack/react-table";
+import { Star, Trash2 } from "lucide-react";
+import { DataTable } from "@/components/admin/data-table";
+import { FeedbackStatusSelector } from "@/components/admin/feedback-status-selector";
+import { deleteFeedback } from "@/app/actions/feedback";
+import { useRouter } from "next/navigation";
+import type { FeedbackStatus } from "@/types/supabase";
 
 interface Feedback {
   id: string;
@@ -35,18 +35,20 @@ export function FeedbackTable({ feedback }: FeedbackTableProps) {
   const router = useRouter();
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this feedback?')) return;
+    if (!confirm("Are you sure you want to delete this feedback?")) return;
     await deleteFeedback(id);
     router.refresh();
   };
 
   const columns: ColumnDef<Feedback>[] = [
     {
-      accessorKey: 'clientName',
-      header: 'Client',
+      accessorKey: "clientName",
+      header: "Client",
       cell: ({ row }) => (
         <div>
-          <div className="font-medium text-white">{row.original.clientName}</div>
+          <div className="font-medium text-white">
+            {row.original.clientName}
+          </div>
           <div className="text-xs text-white/40">
             {row.original.company || row.original.clientEmail}
           </div>
@@ -54,8 +56,8 @@ export function FeedbackTable({ feedback }: FeedbackTableProps) {
       ),
     },
     {
-      accessorKey: 'rating',
-      header: 'Rating',
+      accessorKey: "rating",
+      header: "Rating",
       cell: ({ row }) => (
         <div className="flex items-center gap-0.5">
           {[1, 2, 3, 4, 5].map((star) => (
@@ -63,8 +65,8 @@ export function FeedbackTable({ feedback }: FeedbackTableProps) {
               key={star}
               className={`h-4 w-4 ${
                 star <= row.original.rating
-                  ? 'fill-yellow-400 text-yellow-400'
-                  : 'text-white/20'
+                  ? "fill-yellow-400 text-yellow-400"
+                  : "text-white/20"
               }`}
             />
           ))}
@@ -72,8 +74,8 @@ export function FeedbackTable({ feedback }: FeedbackTableProps) {
       ),
     },
     {
-      accessorKey: 'testimonial',
-      header: 'Testimonial',
+      accessorKey: "testimonial",
+      header: "Testimonial",
       cell: ({ row }) => (
         <p className="max-w-md truncate text-sm text-white/60">
           {row.original.testimonial}
@@ -81,8 +83,8 @@ export function FeedbackTable({ feedback }: FeedbackTableProps) {
       ),
     },
     {
-      accessorKey: 'status',
-      header: 'Status',
+      accessorKey: "status",
+      header: "Status",
       cell: ({ row }) => (
         <FeedbackStatusSelector
           feedbackId={row.original.id}
@@ -91,8 +93,8 @@ export function FeedbackTable({ feedback }: FeedbackTableProps) {
       ),
     },
     {
-      accessorKey: 'created_at',
-      header: 'Date',
+      accessorKey: "created_at",
+      header: "Date",
       cell: ({ row }) => (
         <span className="font-mono text-xs text-white/40">
           {new Date(row.original.created_at).toLocaleDateString()}
@@ -100,8 +102,8 @@ export function FeedbackTable({ feedback }: FeedbackTableProps) {
       ),
     },
     {
-      id: 'actions',
-      header: '',
+      id: "actions",
+      header: "",
       cell: ({ row }) => (
         <button
           onClick={() => handleDelete(row.original.id)}

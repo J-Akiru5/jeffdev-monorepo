@@ -61,7 +61,7 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
   const router = useRouter();
   const [state, formAction, pending] = useActionState<BrandFormState, FormData>(
     updateBrand,
-    null
+    null,
   );
   const [deleting, setDeleting] = useState(false);
 
@@ -74,8 +74,8 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
     typography: { ...brand.typography },
     voice: {
       ...brand.voice,
-      keywords: Array.isArray(brand.voice.keywords) 
-        ? brand.voice.keywords.join(", ") 
+      keywords: Array.isArray(brand.voice.keywords)
+        ? brand.voice.keywords.join(", ")
         : brand.voice.keywords || "",
     },
     imagery: { ...brand.imagery },
@@ -83,7 +83,7 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
   });
 
   const updateFormData = (key: string, value: unknown) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const keys = key.split(".");
       if (keys.length === 1) {
         return { ...prev, [key]: value };
@@ -100,7 +100,11 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
   };
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this brand? This cannot be undone.")) {
+    if (
+      !confirm(
+        "Are you sure you want to delete this brand? This cannot be undone.",
+      )
+    ) {
       return;
     }
     setDeleting(true);
@@ -136,7 +140,11 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
           disabled={deleting}
           className="inline-flex items-center gap-2 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400 hover:bg-red-500/20 transition-colors disabled:opacity-50"
         >
-          {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+          {deleting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Trash2 className="h-4 w-4" />
+          )}
           Delete Brand
         </button>
       </div>
@@ -145,37 +153,107 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
       <form action={formAction} className="space-y-8">
         {/* Hidden slug field */}
         <input type="hidden" name="slug" value={brand.slug} />
-        
+
         {/* Hidden fields for all form data */}
         <input type="hidden" name="companyName" value={formData.companyName} />
         <input type="hidden" name="tagline" value={formData.tagline} />
         <input type="hidden" name="industry" value={formData.industry} />
-        <input type="hidden" name="colors.primary" value={formData.colors.primary} />
-        <input type="hidden" name="colors.secondary" value={formData.colors.secondary} />
-        <input type="hidden" name="colors.accent" value={formData.colors.accent} />
-        <input type="hidden" name="colors.background" value={formData.colors.background} />
-        <input type="hidden" name="colors.surface" value={formData.colors.surface} />
+        <input
+          type="hidden"
+          name="colors.primary"
+          value={formData.colors.primary}
+        />
+        <input
+          type="hidden"
+          name="colors.secondary"
+          value={formData.colors.secondary}
+        />
+        <input
+          type="hidden"
+          name="colors.accent"
+          value={formData.colors.accent}
+        />
+        <input
+          type="hidden"
+          name="colors.background"
+          value={formData.colors.background}
+        />
+        <input
+          type="hidden"
+          name="colors.surface"
+          value={formData.colors.surface}
+        />
         <input type="hidden" name="colors.text" value={formData.colors.text} />
-        <input type="hidden" name="colors.textMuted" value={formData.colors.textMuted} />
-        <input type="hidden" name="typography.headingFont" value={formData.typography.headingFont} />
-        <input type="hidden" name="typography.bodyFont" value={formData.typography.bodyFont} />
-        <input type="hidden" name="typography.monoFont" value={formData.typography.monoFont || ""} />
-        <input type="hidden" name="typography.scale" value={formData.typography.scale} />
-        <input type="hidden" name="voice.personality" value={formData.voice.personality} />
-        <input type="hidden" name="voice.formality" value={formData.voice.formality} />
-        <input type="hidden" name="voice.keywords" value={formData.voice.keywords} />
-        <input type="hidden" name="imagery.style" value={formData.imagery.style} />
-        <input type="hidden" name="imagery.mood" value={formData.imagery.mood} />
-        <input type="hidden" name="spacing.unit" value={formData.spacing.unit} />
-        <input type="hidden" name="spacing.borderRadius" value={formData.spacing.borderRadius} />
+        <input
+          type="hidden"
+          name="colors.textMuted"
+          value={formData.colors.textMuted}
+        />
+        <input
+          type="hidden"
+          name="typography.headingFont"
+          value={formData.typography.headingFont}
+        />
+        <input
+          type="hidden"
+          name="typography.bodyFont"
+          value={formData.typography.bodyFont}
+        />
+        <input
+          type="hidden"
+          name="typography.monoFont"
+          value={formData.typography.monoFont || ""}
+        />
+        <input
+          type="hidden"
+          name="typography.scale"
+          value={formData.typography.scale}
+        />
+        <input
+          type="hidden"
+          name="voice.personality"
+          value={formData.voice.personality}
+        />
+        <input
+          type="hidden"
+          name="voice.formality"
+          value={formData.voice.formality}
+        />
+        <input
+          type="hidden"
+          name="voice.keywords"
+          value={formData.voice.keywords}
+        />
+        <input
+          type="hidden"
+          name="imagery.style"
+          value={formData.imagery.style}
+        />
+        <input
+          type="hidden"
+          name="imagery.mood"
+          value={formData.imagery.mood}
+        />
+        <input
+          type="hidden"
+          name="spacing.unit"
+          value={formData.spacing.unit}
+        />
+        <input
+          type="hidden"
+          name="spacing.borderRadius"
+          value={formData.spacing.borderRadius}
+        />
 
         {/* Identity Section */}
         <section className="rounded-md border border-white/5 bg-white/2 p-6 space-y-4">
           <h2 className="text-sm font-medium text-white">Identity</h2>
-          
+
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="block text-xs text-white/50">Company Name</label>
+              <label className="block text-xs text-white/50">
+                Company Name
+              </label>
               <input
                 type="text"
                 value={formData.companyName}
@@ -193,7 +271,7 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
               />
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <label className="block text-xs text-white/50">Industry</label>
             <select
@@ -220,18 +298,24 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {Object.entries(formData.colors).map(([key, value]) => (
               <div key={key} className="space-y-1">
-                <label className="block text-xs text-white/50 capitalize">{key.replace(/([A-Z])/g, ' $1')}</label>
+                <label className="block text-xs text-white/50 capitalize">
+                  {key.replace(/([A-Z])/g, " $1")}
+                </label>
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
                     value={value}
-                    onChange={(e) => updateFormData(`colors.${key}`, e.target.value)}
+                    onChange={(e) =>
+                      updateFormData(`colors.${key}`, e.target.value)
+                    }
                     className="h-8 w-8 cursor-pointer rounded border border-white/10 bg-transparent"
                   />
                   <input
                     type="text"
                     value={value}
-                    onChange={(e) => updateFormData(`colors.${key}`, e.target.value)}
+                    onChange={(e) =>
+                      updateFormData(`colors.${key}`, e.target.value)
+                    }
                     className="flex-1 rounded border border-white/10 bg-transparent px-2 py-1 text-xs font-mono text-white/70 focus:outline-none"
                   />
                 </div>
@@ -245,14 +329,20 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
           <h2 className="text-sm font-medium text-white">Typography</h2>
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
-              <label className="block text-xs text-white/50">Heading Font</label>
+              <label className="block text-xs text-white/50">
+                Heading Font
+              </label>
               <select
                 value={formData.typography.headingFont}
-                onChange={(e) => updateFormData("typography.headingFont", e.target.value)}
+                onChange={(e) =>
+                  updateFormData("typography.headingFont", e.target.value)
+                }
                 className="w-full rounded-md border border-white/10 bg-[#0a0a0a] px-3 py-2 text-sm text-white focus:border-cyan-500/50 focus:outline-none"
               >
-                {FONT_OPTIONS.map(f => (
-                  <option key={f.value} value={f.value}>{f.label}</option>
+                {FONT_OPTIONS.map((f) => (
+                  <option key={f.value} value={f.value}>
+                    {f.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -260,11 +350,15 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
               <label className="block text-xs text-white/50">Body Font</label>
               <select
                 value={formData.typography.bodyFont}
-                onChange={(e) => updateFormData("typography.bodyFont", e.target.value)}
+                onChange={(e) =>
+                  updateFormData("typography.bodyFont", e.target.value)
+                }
                 className="w-full rounded-md border border-white/10 bg-[#0a0a0a] px-3 py-2 text-sm text-white focus:border-cyan-500/50 focus:outline-none"
               >
-                {FONT_OPTIONS.map(f => (
-                  <option key={f.value} value={f.value}>{f.label}</option>
+                {FONT_OPTIONS.map((f) => (
+                  <option key={f.value} value={f.value}>
+                    {f.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -272,7 +366,9 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
               <label className="block text-xs text-white/50">Scale</label>
               <select
                 value={formData.typography.scale}
-                onChange={(e) => updateFormData("typography.scale", e.target.value)}
+                onChange={(e) =>
+                  updateFormData("typography.scale", e.target.value)
+                }
                 className="w-full rounded-md border border-white/10 bg-[#0a0a0a] px-3 py-2 text-sm text-white focus:border-cyan-500/50 focus:outline-none"
               >
                 <option value="compact">Compact</option>
@@ -291,7 +387,9 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
               <label className="block text-xs text-white/50">Personality</label>
               <select
                 value={formData.voice.personality}
-                onChange={(e) => updateFormData("voice.personality", e.target.value)}
+                onChange={(e) =>
+                  updateFormData("voice.personality", e.target.value)
+                }
                 className="w-full rounded-md border border-white/10 bg-[#0a0a0a] px-3 py-2 text-sm text-white focus:border-cyan-500/50 focus:outline-none"
               >
                 <option value="minimal">Minimal</option>
@@ -305,7 +403,9 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
               <label className="block text-xs text-white/50">Formality</label>
               <select
                 value={formData.voice.formality}
-                onChange={(e) => updateFormData("voice.formality", e.target.value)}
+                onChange={(e) =>
+                  updateFormData("voice.formality", e.target.value)
+                }
                 className="w-full rounded-md border border-white/10 bg-[#0a0a0a] px-3 py-2 text-sm text-white focus:border-cyan-500/50 focus:outline-none"
               >
                 <option value="casual">Casual</option>
@@ -315,7 +415,9 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
             </div>
           </div>
           <div className="space-y-2">
-            <label className="block text-xs text-white/50">Keywords (comma-separated)</label>
+            <label className="block text-xs text-white/50">
+              Keywords (comma-separated)
+            </label>
             <input
               type="text"
               value={formData.voice.keywords}
@@ -328,10 +430,14 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
         {/* Error Display */}
         {state?.error && (
           <div className="rounded-md bg-red-500/10 border border-red-500/30 p-4">
-            <p className="text-sm text-red-400">Please fix the following errors:</p>
+            <p className="text-sm text-red-400">
+              Please fix the following errors:
+            </p>
             <ul className="mt-2 text-xs text-red-300">
               {Object.entries(state.error).map(([key, errors]) => (
-                <li key={key}>{key}: {(errors as string[]).join(", ")}</li>
+                <li key={key}>
+                  {key}: {(errors as string[]).join(", ")}
+                </li>
               ))}
             </ul>
           </div>

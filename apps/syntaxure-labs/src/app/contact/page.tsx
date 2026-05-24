@@ -1,11 +1,18 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, ArrowUpRight, Mail, MapPin, Send, Loader2 } from 'lucide-react';
-import { Header } from '@/components/layout/header';
-import { Footer } from '@/components/layout/footer';
-import { cn } from '@/lib/utils';
+import { useState } from "react";
+import Link from "next/link";
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  Mail,
+  MapPin,
+  Send,
+  Loader2,
+} from "lucide-react";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { cn } from "@/lib/utils";
 
 /**
  * Contact Page
@@ -26,14 +33,14 @@ export default function ContactPage() {
 
     const formData = new FormData(e.currentTarget);
     const data = {
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
-      subject: formData.get('subject') as string,
-      message: formData.get('message') as string,
+      name: formData.get("name") as string,
+      email: formData.get("email") as string,
+      subject: formData.get("subject") as string,
+      message: formData.get("message") as string,
     };
 
     // Import the Server Action dynamically to avoid client-side bundle
-    const { submitContactForm } = await import('@/app/actions/contact');
+    const { submitContactForm } = await import("@/app/actions/contact");
     const result = await submitContactForm(data);
 
     setIsSubmitting(false);
@@ -140,111 +147,111 @@ export default function ContactPage() {
                     </button>
                   </div>
                 ) : (
-                    <>
-                      {error && (
-                        <div className="mb-6 rounded-md border border-red-500/20 bg-red-500/10 p-4">
-                          <p className="text-sm text-red-400">{error}</p>
-                        </div>
-                      )}
-                      <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Name */}
-                    <div>
-                      <label
-                        htmlFor="name"
-                        className="block font-mono text-xs uppercase tracking-wider text-white/40"
-                      >
-                        Name
-                      </label>
-                      <input
-                        type="text"
-                        id="name"
-                        name="name"
-                        required
-                        className="mt-2 w-full rounded-md border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
-                        placeholder="Your name"
-                      />
-                    </div>
+                  <>
+                    {error && (
+                      <div className="mb-6 rounded-md border border-red-500/20 bg-red-500/10 p-4">
+                        <p className="text-sm text-red-400">{error}</p>
+                      </div>
+                    )}
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                      {/* Name */}
+                      <div>
+                        <label
+                          htmlFor="name"
+                          className="block font-mono text-xs uppercase tracking-wider text-white/40"
+                        >
+                          Name
+                        </label>
+                        <input
+                          type="text"
+                          id="name"
+                          name="name"
+                          required
+                          className="mt-2 w-full rounded-md border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+                          placeholder="Your name"
+                        />
+                      </div>
 
-                    {/* Email */}
-                    <div>
-                      <label
-                        htmlFor="email"
-                        className="block font-mono text-xs uppercase tracking-wider text-white/40"
-                      >
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        required
-                        className="mt-2 w-full rounded-md border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
-                        placeholder="you@company.com"
-                      />
-                    </div>
+                      {/* Email */}
+                      <div>
+                        <label
+                          htmlFor="email"
+                          className="block font-mono text-xs uppercase tracking-wider text-white/40"
+                        >
+                          Email
+                        </label>
+                        <input
+                          type="email"
+                          id="email"
+                          name="email"
+                          required
+                          className="mt-2 w-full rounded-md border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+                          placeholder="you@company.com"
+                        />
+                      </div>
 
-                    {/* Subject */}
-                    <div>
-                      <label
-                        htmlFor="subject"
-                        className="block font-mono text-xs uppercase tracking-wider text-white/40"
-                      >
-                        Subject
-                      </label>
-                      <input
-                        type="text"
-                        id="subject"
-                        name="subject"
-                        required
-                        className="mt-2 w-full rounded-md border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
-                        placeholder="Project inquiry"
-                      />
-                    </div>
+                      {/* Subject */}
+                      <div>
+                        <label
+                          htmlFor="subject"
+                          className="block font-mono text-xs uppercase tracking-wider text-white/40"
+                        >
+                          Subject
+                        </label>
+                        <input
+                          type="text"
+                          id="subject"
+                          name="subject"
+                          required
+                          className="mt-2 w-full rounded-md border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+                          placeholder="Project inquiry"
+                        />
+                      </div>
 
-                    {/* Message */}
-                    <div>
-                      <label
-                        htmlFor="message"
-                        className="block font-mono text-xs uppercase tracking-wider text-white/40"
-                      >
-                        Message
-                      </label>
-                      <textarea
-                        id="message"
-                        name="message"
-                        required
-                        rows={5}
-                        className="mt-2 w-full resize-none rounded-md border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
-                        placeholder="Tell us about your project..."
-                      />
-                    </div>
+                      {/* Message */}
+                      <div>
+                        <label
+                          htmlFor="message"
+                          className="block font-mono text-xs uppercase tracking-wider text-white/40"
+                        >
+                          Message
+                        </label>
+                        <textarea
+                          id="message"
+                          name="message"
+                          required
+                          rows={5}
+                          className="mt-2 w-full resize-none rounded-md border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+                          placeholder="Tell us about your project..."
+                        />
+                      </div>
 
-                    {/* Submit */}
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className={cn(
-                        'group relative w-full overflow-hidden rounded-md border border-cyan-500/50 bg-cyan-500/10 px-6 py-3.5 backdrop-blur-md transition-all',
-                        'hover:border-cyan-400 hover:bg-cyan-500/20 hover:shadow-[0_0_30px_rgba(6,182,212,0.25)]',
-                        'disabled:cursor-not-allowed disabled:opacity-50'
-                      )}
-                    >
-                      <span className="relative z-10 flex items-center justify-center gap-2 font-mono text-sm uppercase tracking-wider text-white">
-                        {isSubmitting ? (
-                          <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            Sending...
-                          </>
-                        ) : (
-                          <>
-                            Send_Message
-                            <Send className="h-4 w-4" />
-                          </>
+                      {/* Submit */}
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className={cn(
+                          "group relative w-full overflow-hidden rounded-md border border-cyan-500/50 bg-cyan-500/10 px-6 py-3.5 backdrop-blur-md transition-all",
+                          "hover:border-cyan-400 hover:bg-cyan-500/20 hover:shadow-[0_0_30px_rgba(6,182,212,0.25)]",
+                          "disabled:cursor-not-allowed disabled:opacity-50",
                         )}
-                      </span>
-                    </button>
-                      </form>
-                    </>
+                      >
+                        <span className="relative z-10 flex items-center justify-center gap-2 font-mono text-sm uppercase tracking-wider text-white">
+                          {isSubmitting ? (
+                            <>
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              Sending...
+                            </>
+                          ) : (
+                            <>
+                              Send_Message
+                              <Send className="h-4 w-4" />
+                            </>
+                          )}
+                        </span>
+                      </button>
+                    </form>
+                  </>
                 )}
               </div>
             </div>

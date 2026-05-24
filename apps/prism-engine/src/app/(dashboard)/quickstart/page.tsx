@@ -16,11 +16,36 @@ import { GlassPanel, Button, Badge } from "@syntaxure/ui";
 
 type IdeId = "cursor" | "vscode" | "windsurf" | "claude";
 
-const IDES: { id: IdeId; label: string; description: string; configFile: string }[] = [
-  { id: "cursor", label: "Cursor", description: "AI-first code editor", configFile: ".cursor/mcp.json" },
-  { id: "vscode", label: "VS Code", description: "settings.json → mcp.servers", configFile: "settings.json" },
-  { id: "windsurf", label: "Windsurf", description: "Codeium's AI editor", configFile: "Windsurf Settings" },
-  { id: "claude", label: "Claude Desktop", description: "claude_desktop_config.json", configFile: "claude_desktop_config.json" },
+const IDES: {
+  id: IdeId;
+  label: string;
+  description: string;
+  configFile: string;
+}[] = [
+  {
+    id: "cursor",
+    label: "Cursor",
+    description: "AI-first code editor",
+    configFile: ".cursor/mcp.json",
+  },
+  {
+    id: "vscode",
+    label: "VS Code",
+    description: "settings.json → mcp.servers",
+    configFile: "settings.json",
+  },
+  {
+    id: "windsurf",
+    label: "Windsurf",
+    description: "Codeium's AI editor",
+    configFile: "Windsurf Settings",
+  },
+  {
+    id: "claude",
+    label: "Claude Desktop",
+    description: "claude_desktop_config.json",
+    configFile: "claude_desktop_config.json",
+  },
 ];
 
 function getIdeConfig(ide: IdeId, apiKey: string): string {
@@ -28,15 +53,34 @@ function getIdeConfig(ide: IdeId, apiKey: string): string {
   switch (ide) {
     case "cursor":
       return JSON.stringify(
-        { mcpServers: { prism: { command: "prism", args: ["serve"], env: { PRISM_API_KEY: key } } } },
+        {
+          mcpServers: {
+            prism: {
+              command: "prism",
+              args: ["serve"],
+              env: { PRISM_API_KEY: key },
+            },
+          },
+        },
         null,
-        2
+        2,
       );
     case "vscode":
       return JSON.stringify(
-        { mcp: { servers: { prism: { type: "stdio", command: "prism", args: ["serve"], env: { PRISM_API_KEY: key } } } } },
+        {
+          mcp: {
+            servers: {
+              prism: {
+                type: "stdio",
+                command: "prism",
+                args: ["serve"],
+                env: { PRISM_API_KEY: key },
+              },
+            },
+          },
+        },
         null,
-        2
+        2,
       );
     case "windsurf":
       return `Name:    prism
@@ -45,9 +89,17 @@ Args:    serve
 Env:     PRISM_API_KEY=${key}`;
     case "claude":
       return JSON.stringify(
-        { mcpServers: { prism: { command: "prism", args: ["serve"], env: { PRISM_API_KEY: key } } } },
+        {
+          mcpServers: {
+            prism: {
+              command: "prism",
+              args: ["serve"],
+              env: { PRISM_API_KEY: key },
+            },
+          },
+        },
         null,
-        2
+        2,
       );
   }
 }
@@ -111,9 +163,12 @@ export default function QuickConnectPage() {
           <Plug className="h-6 w-6 text-cyan-400" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Quick Connect</h1>
+          <h1 className="text-3xl font-bold text-white tracking-tight">
+            Quick Connect
+          </h1>
           <p className="text-white/50 mt-1">
-            Configure your IDE to use Prism as an MCP context server — once, and it just works.
+            Configure your IDE to use Prism as an MCP context server — once, and
+            it just works.
           </p>
         </div>
       </div>
@@ -121,28 +176,45 @@ export default function QuickConnectPage() {
       {/* Step 1: Install CLI */}
       <GlassPanel className="p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="h-6 w-6 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs font-bold">1</div>
-          <h2 className="text-base font-semibold text-white">Install the CLI</h2>
+          <div className="h-6 w-6 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xs font-bold">
+            1
+          </div>
+          <h2 className="text-base font-semibold text-white">
+            Install the CLI
+          </h2>
         </div>
         <div className="bg-black/40 border border-white/10 rounded-md p-4 flex items-center justify-between gap-4">
-          <code className="text-sm font-mono text-emerald-300">npm install -g prism-context-engine</code>
+          <code className="text-sm font-mono text-emerald-300">
+            npm install -g prism-context-engine
+          </code>
           <button
-            onClick={() => handleCopy("npm install -g prism-context-engine", "install")}
+            onClick={() =>
+              handleCopy("npm install -g prism-context-engine", "install")
+            }
             className="text-white/30 hover:text-white transition-colors flex-shrink-0"
           >
-            {copied === "install" ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+            {copied === "install" ? (
+              <Check className="h-4 w-4 text-emerald-400" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
           </button>
         </div>
         <p className="text-xs text-white/30 mt-2">
-          Verify: <code className="text-white/50 font-mono">prism --version</code>
+          Verify:{" "}
+          <code className="text-white/50 font-mono">prism --version</code>
         </p>
       </GlassPanel>
 
       {/* Step 2: Sync rules */}
       <GlassPanel className="p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="h-6 w-6 rounded-full bg-violet-500/20 text-violet-400 flex items-center justify-center text-xs font-bold">2</div>
-          <h2 className="text-base font-semibold text-white">Sync your rules</h2>
+          <div className="h-6 w-6 rounded-full bg-violet-500/20 text-violet-400 flex items-center justify-center text-xs font-bold">
+            2
+          </div>
+          <h2 className="text-base font-semibold text-white">
+            Sync your rules
+          </h2>
         </div>
         <div className="bg-black/40 border border-white/10 rounded-md p-4 flex items-center justify-between gap-4">
           <code className="text-sm font-mono text-cyan-300">prism sync</code>
@@ -150,20 +222,29 @@ export default function QuickConnectPage() {
             onClick={() => handleCopy("prism sync", "sync")}
             className="text-white/30 hover:text-white transition-colors flex-shrink-0"
           >
-            {copied === "sync" ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+            {copied === "sync" ? (
+              <Check className="h-4 w-4 text-emerald-400" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
           </button>
         </div>
         <p className="text-xs text-white/30 mt-2">
-          Downloads your rules to <code className="text-white/50 font-mono">~/.prism/rules.json</code>
+          Downloads your rules to{" "}
+          <code className="text-white/50 font-mono">~/.prism/rules.json</code>
         </p>
       </GlassPanel>
 
       {/* Step 3: Auto-init */}
       <GlassPanel className="p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="h-6 w-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">3</div>
+          <div className="h-6 w-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold">
+            3
+          </div>
           <div className="flex items-center gap-2">
-            <h2 className="text-base font-semibold text-white">Auto-configure your IDE</h2>
+            <h2 className="text-base font-semibold text-white">
+              Auto-configure your IDE
+            </h2>
             <Badge variant="success">Recommended</Badge>
           </div>
         </div>
@@ -173,30 +254,44 @@ export default function QuickConnectPage() {
             onClick={() => handleCopy("prism init", "init")}
             className="text-white/30 hover:text-white transition-colors flex-shrink-0"
           >
-            {copied === "init" ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+            {copied === "init" ? (
+              <Check className="h-4 w-4 text-emerald-400" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
           </button>
         </div>
         <p className="text-xs text-white/30 mt-2">
-          Auto-detects Cursor, VS Code, Windsurf, Claude Desktop and writes the correct config for each. Then restart your editor.
+          Auto-detects Cursor, VS Code, Windsurf, Claude Desktop and writes the
+          correct config for each. Then restart your editor.
         </p>
       </GlassPanel>
 
       {/* Divider */}
       <div className="flex items-center gap-4">
         <div className="flex-1 border-t border-white/5" />
-        <span className="text-xs text-white/30 font-mono">OR configure manually</span>
+        <span className="text-xs text-white/30 font-mono">
+          OR configure manually
+        </span>
         <div className="flex-1 border-t border-white/5" />
       </div>
 
       {/* Step 3 Alt: Manual config */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-white">Manual IDE Config</h2>
+          <h2 className="text-base font-semibold text-white">
+            Manual IDE Config
+          </h2>
           {!hasPro && !loading && (
             <div className="flex items-center gap-2 text-xs text-amber-400/80 bg-amber-500/10 border border-amber-500/20 rounded-md px-3 py-1.5">
               <Info className="h-3 w-3" />
               <span>API keys require Pro plan</span>
-              <Link href="/subscription" className="underline hover:text-amber-300">Upgrade</Link>
+              <Link
+                href="/subscription"
+                className="underline hover:text-amber-300"
+              >
+                Upgrade
+              </Link>
             </div>
           )}
         </div>
@@ -206,14 +301,19 @@ export default function QuickConnectPage() {
           <GlassPanel className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-white/40 font-mono uppercase tracking-wider mb-1">Your API Key</p>
+                <p className="text-xs text-white/40 font-mono uppercase tracking-wider mb-1">
+                  Your API Key
+                </p>
                 <p className="text-sm font-mono text-white">
                   {apiKeyPrefix}
                   <span className="text-white/30">••••••••</span>
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <Link href="/settings" className="text-xs text-white/40 hover:text-white transition-colors flex items-center gap-1">
+                <Link
+                  href="/settings"
+                  className="text-xs text-white/40 hover:text-white transition-colors flex items-center gap-1"
+                >
                   <RefreshCw className="h-3 w-3" />
                   Manage keys
                 </Link>
@@ -288,21 +388,33 @@ export default function QuickConnectPage() {
 
         <p className="text-xs text-white/30">
           After pasting the config, restart your IDE. Then ask your AI:{" "}
-          <em className="text-white/50">&quot;What are my architectural rules?&quot;</em>
+          <em className="text-white/50">
+            &quot;What are my architectural rules?&quot;
+          </em>
         </p>
       </div>
 
       {/* Footer links */}
       <div className="flex flex-wrap gap-3 pt-4 border-t border-white/5">
         <Button variant="secondary" size="sm" asChild>
-          <a href="https://docs.prism.jeffdev.studio/ide-setup" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+          <a
+            href="https://docs.prism.jeffdev.studio/ide-setup"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2"
+          >
             <Terminal className="h-4 w-4" />
             Full IDE Setup Guide
             <ExternalLink className="h-3 w-3" />
           </a>
         </Button>
         <Button variant="secondary" size="sm" asChild>
-          <a href="https://docs.prism.jeffdev.studio/troubleshooting" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+          <a
+            href="https://docs.prism.jeffdev.studio/troubleshooting"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2"
+          >
             Troubleshooting
             <ExternalLink className="h-3 w-3" />
           </a>

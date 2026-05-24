@@ -10,37 +10,44 @@ Everything floats. Glass panels hover over gradient backgrounds. Blur is your be
 ## Color Palette
 
 ### Background Layers
+
 - `bg-gradient`: Linear gradient mesh (multiple overlapping gradients)
 - Example: `from-purple-900 via-blue-900 to-teal-900`
 - The background should feel alive, not static
 
 ### Glass Surfaces
+
 - `glass-light`: rgba(255, 255, 255, 0.1)
 - `glass-medium`: rgba(255, 255, 255, 0.15)
 - `glass-heavy`: rgba(255, 255, 255, 0.25)
 
 ### Text
+
 - `text-primary`: #ffffff
 - `text-secondary`: rgba(255, 255, 255, 0.7)
 - `text-muted`: rgba(255, 255, 255, 0.5)
 
 ### Accents
+
 - Preferred: Gradient text/borders
 - From: #60a5fa (Blue-400)
 - Via: #a78bfa (Violet-400)
 - To: #f472b6 (Pink-400)
 
 ### Borders
+
 - `border-glass`: rgba(255, 255, 255, 0.18)
 - Gradient borders are encouraged
 
 ## Typography
 
 ### Font
+
 - **Primary**: Plus Jakarta Sans or Inter
 - **Monospace**: SF Mono or JetBrains Mono
 
 ### Weights
+
 - Light (300) for large display text
 - Regular (400) for body
 - Semibold (600) for headings
@@ -49,24 +56,25 @@ Everything floats. Glass panels hover over gradient backgrounds. Blur is your be
 ## Effects
 
 ### Blur (Critical)
+
 ```css
 backdrop-filter: blur(16px);
 -webkit-backdrop-filter: blur(16px);
 ```
 
 ### Border Glow
+
 ```css
-box-shadow: 
+box-shadow:
   0 0 0 1px rgba(255, 255, 255, 0.1),
   0 8px 32px rgba(0, 0, 0, 0.3);
 ```
 
 ### Gradient Border Trick
+
 ```jsx
 <div className="relative p-[1px] rounded-xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
-  <div className="bg-black/80 backdrop-blur-xl rounded-xl p-6">
-    Content
-  </div>
+  <div className="bg-black/80 backdrop-blur-xl rounded-xl p-6">Content</div>
 </div>
 ```
 
@@ -79,12 +87,13 @@ box-shadow:
 ## Component Patterns
 
 ### Glass Card
+
 ```jsx
 <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl">
   {/* Gradient orb decoration */}
   <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-purple-500/30 blur-3xl" />
   <div className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-blue-500/30 blur-3xl" />
-  
+
   <div className="relative p-6">
     <h3 className="text-xl font-semibold text-white">Card Title</h3>
     <p className="mt-2 text-white/70">Card description</p>
@@ -93,6 +102,7 @@ box-shadow:
 ```
 
 ### Glass Button
+
 ```jsx
 <button className="rounded-xl border border-white/20 bg-white/10 px-6 py-3 font-medium text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:border-white/30">
   Click me
@@ -100,6 +110,7 @@ box-shadow:
 ```
 
 ### Gradient Text
+
 ```jsx
 <h1 className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
   Gradient Heading

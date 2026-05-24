@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Quotes Table Client Component
@@ -7,12 +7,12 @@
  * Clicking a row opens the QuoteModal with full details.
  */
 
-import { useState } from 'react';
-import { type ColumnDef } from '@tanstack/react-table';
-import { Eye } from 'lucide-react';
-import { DataTable } from '@/components/admin/data-table';
-import { QuoteStatusSelector } from '@/components/admin/quote-status-selector';
-import { QuoteModal } from '@/components/admin/quote-modal';
+import { useState } from "react";
+import { type ColumnDef } from "@tanstack/react-table";
+import { Eye } from "lucide-react";
+import { DataTable } from "@/components/admin/data-table";
+import { QuoteStatusSelector } from "@/components/admin/quote-status-selector";
+import { QuoteModal } from "@/components/admin/quote-modal";
 
 interface Quote {
   id: string;
@@ -24,16 +24,16 @@ interface Quote {
   budget: string;
   timeline: string;
   details: string;
-  status: 'new' | 'contacted' | 'in-progress' | 'closed';
+  status: "new" | "contacted" | "in-progress" | "closed";
   created_at: string;
 }
 
 const projectTypeLabels: Record<string, string> = {
-  web: 'Web App',
-  saas: 'SaaS',
-  mobile: 'Mobile',
-  ai: 'AI Integration',
-  other: 'Other',
+  web: "Web App",
+  saas: "SaaS",
+  mobile: "Mobile",
+  ai: "AI Integration",
+  other: "Other",
 };
 
 interface QuotesTableProps {
@@ -45,17 +45,17 @@ export function QuotesTable({ quotes }: QuotesTableProps) {
 
   const columns: ColumnDef<Quote>[] = [
     {
-      accessorKey: 'refNo',
-      header: 'Ref No.',
+      accessorKey: "refNo",
+      header: "Ref No.",
       cell: ({ row }) => (
         <span className="font-mono text-xs text-white/60">
-          {row.original.refNo || '—'}
+          {row.original.refNo || "—"}
         </span>
       ),
     },
     {
-      accessorKey: 'name',
-      header: 'Client',
+      accessorKey: "name",
+      header: "Client",
       cell: ({ row }) => (
         <div>
           <div className="font-medium text-white">{row.original.name}</div>
@@ -64,24 +64,27 @@ export function QuotesTable({ quotes }: QuotesTableProps) {
       ),
     },
     {
-      accessorKey: 'projectType',
-      header: 'Project',
+      accessorKey: "projectType",
+      header: "Project",
       cell: ({ row }) => (
         <span className="text-white/70">
-          {projectTypeLabels[row.original.projectType] || row.original.projectType}
+          {projectTypeLabels[row.original.projectType] ||
+            row.original.projectType}
         </span>
       ),
     },
     {
-      accessorKey: 'budget',
-      header: 'Budget',
+      accessorKey: "budget",
+      header: "Budget",
       cell: ({ row }) => (
-        <span className="font-mono text-xs text-white/50">{row.original.budget}</span>
+        <span className="font-mono text-xs text-white/50">
+          {row.original.budget}
+        </span>
       ),
     },
     {
-      accessorKey: 'status',
-      header: 'Status',
+      accessorKey: "status",
+      header: "Status",
       cell: ({ row }) => (
         <QuoteStatusSelector
           quoteId={row.original.id}
@@ -90,8 +93,8 @@ export function QuotesTable({ quotes }: QuotesTableProps) {
       ),
     },
     {
-      accessorKey: 'created_at',
-      header: 'Date',
+      accessorKey: "created_at",
+      header: "Date",
       cell: ({ row }) => (
         <span className="font-mono text-xs text-white/40">
           {new Date(row.original.created_at).toLocaleDateString()}
@@ -99,8 +102,8 @@ export function QuotesTable({ quotes }: QuotesTableProps) {
       ),
     },
     {
-      id: 'actions',
-      header: '',
+      id: "actions",
+      header: "",
       cell: ({ row }) => (
         <button
           onClick={() => setSelectedQuote(row.original)}

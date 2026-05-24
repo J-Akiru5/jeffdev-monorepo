@@ -1,8 +1,8 @@
-import Link from 'next/link';
-import { XCircle } from 'lucide-react';
+import Link from "next/link";
+import { XCircle } from "lucide-react";
 
 export const metadata = {
-  title: 'Subscription Cancelled | Prism Context Engine',
+  title: "Subscription Cancelled | Prism Context Engine",
 };
 
 export default function SubscriptionCancelledPage() {
@@ -12,12 +12,11 @@ export default function SubscriptionCancelledPage() {
         <XCircle className="h-12 w-12 text-red-400" />
       </div>
 
-      <h1 className="text-3xl font-bold text-white">
-        Subscription Cancelled
-      </h1>
+      <h1 className="text-3xl font-bold text-white">Subscription Cancelled</h1>
 
       <p className="mt-4 max-w-md text-white/60">
-        Your subscription process was cancelled. No charges were made to your account.
+        Your subscription process was cancelled. No charges were made to your
+        account.
       </p>
 
       <div className="mt-8 flex gap-4">
@@ -36,7 +35,7 @@ export default function SubscriptionCancelledPage() {
       </div>
 
       <p className="mt-8 text-sm text-white/40">
-        Have questions?{' '}
+        Have questions?{" "}
         <Link href="/contact" className="text-cyan-400 hover:underline">
           Contact support
         </Link>

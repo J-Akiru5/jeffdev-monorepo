@@ -40,11 +40,12 @@ const badgeVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  }
+  },
 );
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLSpanElement>,
+  extends
+    React.HTMLAttributes<HTMLSpanElement>,
     VariantProps<typeof badgeVariants> {}
 
 const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
@@ -54,7 +55,7 @@ const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
       className={cn(badgeVariants({ variant, className }))}
       {...props}
     />
-  )
+  ),
 );
 
 Badge.displayName = "Badge";

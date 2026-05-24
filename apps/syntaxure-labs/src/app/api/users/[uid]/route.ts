@@ -4,30 +4,27 @@
  * Fetch user profile from Supabase.
  */
 
-import { NextResponse } from 'next/server';
-import { getAdminClient } from '@/lib/supabase/admin';
+import { NextResponse } from "next/server";
+import { getAdminClient } from "@/lib/supabase/admin";
 
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ uid: string }> }
+  { params }: { params: Promise<{ uid: string }> },
 ) {
   try {
     const { uid } = await params;
 
     const supabase = (await getAdminClient()) as any;
     const { data: profile, error } = await supabase
-      .from('user_profiles')
-      .select('*')
-      .eq('id', uid)
+      .from("user_profiles")
+      .select("*")
+      .eq("id", uid)
       .maybeSingle();
 
     if (error) throw error;
 
     if (!profile) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -35,10 +32,10 @@ export async function GET(
       ...profile,
     });
   } catch (error) {
-    console.error('[GET USER ERROR]', error);
+    console.error("[GET USER ERROR]", error);
     return NextResponse.json(
-      { error: 'Failed to fetch user' },
-      { status: 500 }
+      { error: "Failed to fetch user" },
+      { status: 500 },
     );
   }
 }

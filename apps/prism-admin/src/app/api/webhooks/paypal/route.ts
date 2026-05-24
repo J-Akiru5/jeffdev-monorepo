@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.text();
     const params = new URLSearchParams(body);
-    
+
     // Verify webhook with PayPal
     const verifyResponse = await fetch(
       `${process.env.PAYPAL_API_URL || "https://ipnpb.paypal.com/cgi-bin/webscr"}`,
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `cmd=_notify-validate&${body}`,
-      }
+      },
     );
 
     const verification = await verifyResponse.text();
@@ -28,7 +28,8 @@ export async function POST(request: Request) {
 
     // Parse event
     const eventType = params.get("txn_type") || params.get("event_type");
-    const subscriptionId = params.get("subscr_id") || params.get("recurring_payment_id");
+    const subscriptionId =
+      params.get("subscr_id") || params.get("recurring_payment_id");
     const payerEmail = params.get("payer_email");
     const amount = params.get("mc_gross") || params.get("amount");
     const currency = params.get("mc_currency") || "USD";
@@ -95,16 +96,16 @@ export async function POST(request: Request) {
     console.error("[PayPal Webhook] Error:", error);
     return NextResponse.json(
       { error: "Webhook handler failed" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 // PayPal webhooks don't use GET, but we'll return a health check
 export async function GET() {
-  return NextResponse.json({ 
-    status: "ok", 
+  return NextResponse.json({
+    status: "ok",
     webhook: "paypal",
-    timestamp: new Date().toISOString() 
+    timestamp: new Date().toISOString(),
   });
 }

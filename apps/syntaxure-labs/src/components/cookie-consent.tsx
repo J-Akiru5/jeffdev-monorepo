@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
+import * as React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 
 export function CookieConsent() {
   const [isVisible, setIsVisible] = React.useState(false);
 
   // Check localStorage on mount
   React.useEffect(() => {
-    const consent = localStorage.getItem('cookie-consent');
+    const consent = localStorage.getItem("cookie-consent");
     if (!consent) {
       // Delay slightly for smoother entrance
       const timer = setTimeout(() => setIsVisible(true), 1500);
@@ -18,7 +18,7 @@ export function CookieConsent() {
   }, []);
 
   const handleAccept = () => {
-    localStorage.setItem('cookie-consent', 'accepted');
+    localStorage.setItem("cookie-consent", "accepted");
     setIsVisible(false);
     // Reload page to activate scripts? Or just trigger event.
     // A reload is the cleanest way to ensure all scripts fire correctly without complex state management.
@@ -26,7 +26,7 @@ export function CookieConsent() {
   };
 
   const handleReject = () => {
-    localStorage.setItem('cookie-consent', 'rejected');
+    localStorage.setItem("cookie-consent", "rejected");
     setIsVisible(false);
   };
 
@@ -37,7 +37,7 @@ export function CookieConsent() {
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          transition={{ type: "spring", damping: 25, stiffness: 200 }}
           className="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6"
         >
           <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl border border-white/10 bg-void/80 p-6 shadow-2xl backdrop-blur-xl transition-all md:flex md:items-center md:justify-between md:gap-8">
@@ -47,15 +47,23 @@ export function CookieConsent() {
                 We value your privacy
               </h3>
               <p className="text-sm leading-relaxed text-zinc-400">
-                We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic. By clicking &quot;Accept All&quot;, you consent to our use of cookies.
+                We use cookies to enhance your browsing experience, serve
+                personalized content, and analyze our traffic. By clicking
+                &quot;Accept All&quot;, you consent to our use of cookies.
                 <br className="hidden md:block" />
                 <span className="mt-2 block">
-                  Read our{' '}
-                  <Link href="/privacy" className="text-cyan-400 hover:text-cyan-300 hover:underline">
+                  Read our{" "}
+                  <Link
+                    href="/privacy"
+                    className="text-cyan-400 hover:text-cyan-300 hover:underline"
+                  >
                     Privacy Policy
-                  </Link>
-                  {' '}and{' '}
-                  <Link href="/cookies" className="text-cyan-400 hover:text-cyan-300 hover:underline">
+                  </Link>{" "}
+                  and{" "}
+                  <Link
+                    href="/cookies"
+                    className="text-cyan-400 hover:text-cyan-300 hover:underline"
+                  >
                     Cookie Policy
                   </Link>
                   .
@@ -79,7 +87,7 @@ export function CookieConsent() {
                 <span className="relative">Accept All</span>
               </button>
             </div>
-            
+
             {/* Close (X) - Optional, acts as reject or just dismiss? Better to force choice or default to reject if closed. Let's force choice for now (no X). */}
           </div>
         </motion.div>

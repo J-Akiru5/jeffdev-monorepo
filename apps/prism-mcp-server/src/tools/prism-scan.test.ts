@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { formatExtractionAsMarkdown, type ExtractedDesignTokens } from "../lib/extractor.js";
+import {
+  formatExtractionAsMarkdown,
+  type ExtractedDesignTokens,
+} from "../lib/extractor.js";
 import type { PrismScanInput } from "./prism-scan.js";
 
 const SAMPLE_TOKENS: ExtractedDesignTokens = {
@@ -17,13 +20,30 @@ const SAMPLE_TOKENS: ExtractedDesignTokens = {
     fontFamily: "Inter, sans-serif",
     fontSizes: ["16px", "14px", "24px"],
     headings: {
-      h1: { fontSize: "48px", fontWeight: "700", fontFamily: "Inter, sans-serif" },
-      h2: { fontSize: "32px", fontWeight: "600", fontFamily: "Inter, sans-serif" },
-      h3: { fontSize: "24px", fontWeight: "600", fontFamily: "Inter, sans-serif" },
+      h1: {
+        fontSize: "48px",
+        fontWeight: "700",
+        fontFamily: "Inter, sans-serif",
+      },
+      h2: {
+        fontSize: "32px",
+        fontWeight: "600",
+        fontFamily: "Inter, sans-serif",
+      },
+      h3: {
+        fontSize: "24px",
+        fontWeight: "600",
+        fontFamily: "Inter, sans-serif",
+      },
     },
   },
   spacing: ["16px", "8px", "24px", "32px"],
-  componentPatterns: ["Button", "Card__header", "Nav--primary", "Modal__content"],
+  componentPatterns: [
+    "Button",
+    "Card__header",
+    "Nav--primary",
+    "Modal__content",
+  ],
 };
 
 describe("formatExtractionAsMarkdown", () => {

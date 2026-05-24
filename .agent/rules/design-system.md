@@ -3,16 +3,17 @@ trigger: always_on
 ---
 
 💎 JEFFDEV MONOREPO - VISUAL CONSTITUTION
+
 1. CORE PHILOSOPHY ("THE ENDGAME")
-Vibe: Precision Engineering, Stealth Luxury, "Operating System" feel.
+   Vibe: Precision Engineering, Stealth Luxury, "Operating System" feel.
 
 The "Void" Law: The universe is #050505. There is no light mode.
 
 The "Anti-Template" Rule: If it looks like a standard Bootstrap/Material template, reject it. We build custom interfaces that feel like specialized tools.
 
 2. PRIMITIVES (THE ATOMS)
-A. Color Palette
-Canvas (Backgrounds):
+   A. Color Palette
+   Canvas (Backgrounds):
 
 bg-void: #050505 (Base Layer - application background).
 
@@ -55,7 +56,7 @@ Radius: rounded-md (6px) or rounded-sm (4px).
 Constraint: NEVER use rounded-xl or rounded-2xl unless building a massive modal overlay. We are sharp, industrial, and fast. Not bubbly or "friendly."
 
 3. MOBILE ADAPTATION PROTOCOL ("THE THUMB ZONE")
-Goal: Native App Feel on the Web.
+   Goal: Native App Feel on the Web.
 
 A. Navigation Transformation
 Desktop Strategy: Sidebar (Left) or Minimal Top Bar.
@@ -80,8 +81,8 @@ Action Buttons (FABs): Primary actions (e.g., "New Project", "Save") on mobile m
 Search Bars: On mobile, search bars move to the top, but filter controls move to a bottom drawer/sheet.
 
 4. COMPONENT ARCHITECTURE (packages/ui)
-A. Buttons ("Ghost Glow")
-The primary action is NOT a solid block of color. It is a void that glows.
+   A. Buttons ("Ghost Glow")
+   The primary action is NOT a solid block of color. It is a void that glows.
 
 Base: bg-black/50 backdrop-blur-md border border-white/10.
 
@@ -112,7 +113,7 @@ Focus: No blue ring. The border turns White or Cyan (border-cyan-500).
 Font: Always JetBrains Mono for user input fields.
 
 5. TECHNICAL IMPLEMENTATION (AGENCY & PRISM)
-Library: All components in packages/ui must implement these styles using Headless UI logic + Tailwind classes.
+   Library: All components in packages/ui must implement these styles using Headless UI logic + Tailwind classes.
 
 Animation:
 

@@ -1,6 +1,6 @@
 /**
  * Vector Search Utilities
- * 
+ *
  * Semantic search using cosine similarity for video transcripts
  */
 
@@ -9,7 +9,7 @@
  */
 export function cosineSimilarity(vecA: number[], vecB: number[]): number {
   if (vecA.length !== vecB.length) {
-    throw new Error('Vectors must have the same length');
+    throw new Error("Vectors must have the same length");
   }
 
   let dotProduct = 0;
@@ -23,9 +23,9 @@ export function cosineSimilarity(vecA: number[], vecB: number[]): number {
   }
 
   const magnitude = Math.sqrt(magnitudeA) * Math.sqrt(magnitudeB);
-  
+
   if (magnitude === 0) return 0;
-  
+
   return dotProduct / magnitude;
 }
 
@@ -35,7 +35,7 @@ export function cosineSimilarity(vecA: number[], vecB: number[]): number {
 export function findTopKSimilar<T extends { embedding?: number[] }>(
   queryEmbedding: number[],
   items: T[],
-  k: number = 5
+  k: number = 5,
 ): Array<T & { similarity: number }> {
   const itemsWithScores = items
     .filter((item) => item.embedding && item.embedding.length > 0)
@@ -55,26 +55,26 @@ export function findTopKSimilar<T extends { embedding?: number[] }>(
  */
 export function extractRelevantSnippet(
   text: string,
-  maxLength: number = 200
+  maxLength: number = 200,
 ): string {
   // Simple snippet extraction - take first maxLength chars
   // In a more advanced implementation, we could chunk the text and
   // find the most relevant chunk using embeddings
-  
+
   if (text.length <= maxLength) {
     return text;
   }
 
   // Try to break at sentence boundary
   const snippet = text.substring(0, maxLength);
-  const lastPeriod = snippet.lastIndexOf('.');
-  const lastSpace = snippet.lastIndexOf(' ');
+  const lastPeriod = snippet.lastIndexOf(".");
+  const lastSpace = snippet.lastIndexOf(" ");
 
   if (lastPeriod > maxLength * 0.7) {
     return snippet.substring(0, lastPeriod + 1);
   } else if (lastSpace > maxLength * 0.7) {
-    return snippet.substring(0, lastSpace) + '...';
+    return snippet.substring(0, lastSpace) + "...";
   }
 
-  return snippet + '...';
+  return snippet + "...";
 }

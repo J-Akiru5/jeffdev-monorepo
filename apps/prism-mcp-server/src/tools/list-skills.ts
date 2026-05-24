@@ -7,7 +7,9 @@ export interface ListSkillsOutput {
   isError?: boolean;
 }
 
-export async function handleListSkills(input: ListSkillsInput): Promise<ListSkillsOutput> {
+export async function handleListSkills(
+  input: ListSkillsInput,
+): Promise<ListSkillsOutput> {
   const { projectId } = input;
 
   if (!projectId) {
@@ -38,10 +40,10 @@ export async function handleListSkills(input: ListSkillsInput): Promise<ListSkil
 
     // Get legacy skills from rules collection
     const legacySkills = (await rules
-      .find({ 
-        projectId, 
-        isActive: true, 
-        skillsContent: { $exists: true, $ne: null } 
+      .find({
+        projectId,
+        isActive: true,
+        skillsContent: { $exists: true, $ne: null },
       })
       .toArray()) as unknown as SkillDoc[];
 
@@ -70,14 +72,20 @@ export async function handleListSkills(input: ListSkillsInput): Promise<ListSkil
       });
     }
 
-    outputText += "---\n*Use the `get_skill` tool to read the full content of any skill by its ID or Name.*";
+    outputText +=
+      "---\n*Use the `get_skill` tool to read the full content of any skill by its ID or Name.*";
 
     return {
       content: [{ type: "text", text: outputText }],
     };
   } catch (error) {
     return {
-      content: [{ type: "text", text: `Error listing skills: ${error instanceof Error ? error.message : "Unknown error"}` }],
+      content: [
+        {
+          type: "text",
+          text: `Error listing skills: ${error instanceof Error ? error.message : "Unknown error"}`,
+        },
+      ],
       isError: true,
     };
   }

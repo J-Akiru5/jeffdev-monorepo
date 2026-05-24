@@ -13,13 +13,22 @@ for (const line of content.split("\n")) {
   if (idx === -1) continue;
   const key = trimmed.slice(0, idx).trim();
   let val = trimmed.slice(idx + 1).trim();
-  if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'")))
+  if (
+    (val.startsWith('"') && val.endsWith('"')) ||
+    (val.startsWith("'") && val.endsWith("'"))
+  )
     val = val.slice(1, -1);
   env[key] = val;
 }
 
-console.log("GEMINI_API_KEY:", env.GEMINI_API_KEY ? `SET (${env.GEMINI_API_KEY.length} chars)` : "MISSING");
-console.log("GEMINI_EMBEDDING_MODEL:", env.GEMINI_EMBEDDING_MODEL || "embedding-001 (default)");
+console.log(
+  "GEMINI_API_KEY:",
+  env.GEMINI_API_KEY ? `SET (${env.GEMINI_API_KEY.length} chars)` : "MISSING",
+);
+console.log(
+  "GEMINI_EMBEDDING_MODEL:",
+  env.GEMINI_EMBEDDING_MODEL || "embedding-001 (default)",
+);
 console.log("GEMINI_MODEL:", env.GEMINI_MODEL || "gemini-3-flash (default)");
 
 const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY!);
@@ -27,7 +36,9 @@ const genAI = new GoogleGenerativeAI(env.GEMINI_API_KEY!);
 // Test embedding
 console.log("\n--- Testing embedding ---");
 try {
-  const embModel = genAI.getGenerativeModel({ model: env.GEMINI_EMBEDDING_MODEL || "embedding-001" });
+  const embModel = genAI.getGenerativeModel({
+    model: env.GEMINI_EMBEDDING_MODEL || "embedding-001",
+  });
   const embResult = await embModel.embedContent("test embedding text");
   console.log("EMBED OK:", embResult.embedding.values.length, "dimensions");
 } catch (e: unknown) {
@@ -37,7 +48,9 @@ try {
 // Test chat
 console.log("\n--- Testing chat ---");
 try {
-  const chatModel = genAI.getGenerativeModel({ model: env.GEMINI_MODEL || "gemini-3-flash" });
+  const chatModel = genAI.getGenerativeModel({
+    model: env.GEMINI_MODEL || "gemini-3-flash",
+  });
   const chatResult = await chatModel.generateContent("Say 'hello world'");
   console.log("CHAT OK:", chatResult.response.text().slice(0, 80));
 } catch (e: unknown) {

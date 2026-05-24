@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### ✨ Added
+
 - **Skill Studio**: Create, manage, and auto-generate procedural step-by-step guides for AI workflows.
   - Skill Management UI (`/projects/[slug]/skills`) with dynamic toggles and deletion.
   - AI Skill Generator (`/skills/generate`) using existing rules as context.
@@ -15,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Rule Templates**: One-click starter rule sets to jumpstart projects.
   - Pre-built templates for Next.js 16, React 19, Tailwind v4, and Node API Security.
   - Template Gallery UI (`/projects/[slug]/rules/templates`).
-- **MCP Server Updates**: 
+- **MCP Server Updates**:
   - Added `list_skills` tool for agents to discover project workflows.
   - Upgraded `get_skill` tool to query the new `skills` collection and format procedural steps.
 
@@ -24,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.3] - 2026-01-03
 
 ### ✨ Added
+
 - **Animated Landing Page**: GSAP ScrollTrigger-powered hero section with parallax effects
 - **Authentication System**: Complete Clerk integration with session management
 - **Subscription Management**: PayPal integration for Pro tier subscriptions with success/cancelled flows
@@ -33,8 +35,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Global Navigation**: Links to docs.jeffdev.studio and jeffdev.studio
 
 ### 🎨 Design & Branding
+
 - **Unified Branding**: Complete rebrand to "Prism Context Engine" across all UI
-- **JD Studio Endgame Theme**: 
+- **JD Studio Endgame Theme**:
   - Void black (#050505) background
   - Cyan (#06b6d4) primary, purple (#8b5cf6) accent
   - Glass morphism with advanced backdrop-blur
@@ -43,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CSS Refinements**: Webkit vendor prefix fixes for cross-browser compatibility
 
 ### 🔧 Technical Improvements
+
 - **SEO Optimization**: OpenGraph and Twitter card meta tags
 - **Version Management**: Package version updated to 1.0.3
 - **TypeScript Strict Mode**: Enhanced type safety
@@ -55,6 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### Brand Management System
+
 - Brand profile creation and management interface
 - Enterprise branding capture (colors, typography, voice, imagery)
 - Multi-IDE export functionality:
@@ -67,26 +72,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Brand list and detail pages with visual color previews
 
 #### Video Context Pipeline
+
 - Mux video upload integration for context capture
 - Video transcript processing workflow
 - Azure OpenAI integration for rule extraction from video transcripts
 - Webhook handlers for Mux video processing events
 
 #### AI Component Generator
+
 - AI Kitchen interface for component generation
 - Gemini AI integration for design system-aware component creation
 - Component generation API endpoint
 
 #### Documentation
+
 - CHANGELOG.md in `apps/prism-dashboard` per documentation standards
 - Documentation structure following JEFFDEV Monorepo Documentation Standards
 - Build log entries for tracking changes
 
 ### Changed
+
 - Documentation organization aligned with `.agent/rules/documentation-standards.md`
 - Version bumped to 0.1.3 across all packages
 
 ### Infrastructure
+
 - Enhanced project management with brand associations
 - Improved dashboard layout and navigation
 - Subscription handling improvements
@@ -98,12 +108,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### Initial Setup
+
 - Scaffolded with Next.js 16 (App Router)
 - Clerk authentication configured
 - Landing page with JeffDev aesthetic
 - Protected dashboard route
 
 #### Core Features
+
 - User authentication and authorization
 - Dashboard layout and navigation
 - Project management interface
@@ -112,6 +124,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Video context uploader with Mux integration
 
 #### Infrastructure
+
 - TypeScript configuration
 - Tailwind CSS v4 styling
 - ESLint configuration
@@ -119,4 +132,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Database integration via `@jeffdev/db`
 
 ---
-

@@ -11,7 +11,9 @@ import { revalidatePath } from "next/cache";
 
 export async function getTasks() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return [];
 
   const { data: tasks } = await supabase
@@ -23,9 +25,17 @@ export async function getTasks() {
   return tasks || [];
 }
 
-export async function createTask(task: { title: string; projectId: string | number; completed?: boolean; starred?: boolean; order?: number }) {
+export async function createTask(task: {
+  title: string;
+  projectId: string | number;
+  completed?: boolean;
+  starred?: boolean;
+  order?: number;
+}) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
   const { error } = await supabase.from("tasks").insert({
@@ -42,7 +52,9 @@ export async function createTask(task: { title: string; projectId: string | numb
 
 export async function toggleTaskComplete(taskId: string, completed: boolean) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
   const { error } = await supabase
@@ -57,7 +69,9 @@ export async function toggleTaskComplete(taskId: string, completed: boolean) {
 
 export async function toggleTaskStar(taskId: string, starred: boolean) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
   const { error } = await supabase
@@ -72,7 +86,9 @@ export async function toggleTaskStar(taskId: string, starred: boolean) {
 
 export async function updateTaskStatus(taskId: string, status: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
   const { error } = await supabase
@@ -85,9 +101,14 @@ export async function updateTaskStatus(taskId: string, status: string) {
   revalidatePath("/tasks");
 }
 
-export async function updateTask(taskId: string, data: Record<string, unknown>) {
+export async function updateTask(
+  taskId: string,
+  data: Record<string, unknown>,
+) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
   const { error } = await supabase
@@ -102,7 +123,9 @@ export async function updateTask(taskId: string, data: Record<string, unknown>) 
 
 export async function deleteTask(taskId: string) {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
   const { error } = await supabase

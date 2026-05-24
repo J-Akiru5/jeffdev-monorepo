@@ -17,31 +17,39 @@ function highlightSyntax(code: string): string {
     // Comments (must be first)
     { pattern: /(\/\/[^\n]*)/g, className: "comment" },
     { pattern: /(\/\*[\s\S]*?\*\/)/g, className: "comment" },
-    
+
     // Strings (before other patterns)
     { pattern: /("(?:[^"\\]|\\.)*")/g, className: "string" },
     { pattern: /('(?:[^'\\]|\\.)*')/g, className: "string" },
     { pattern: /(`(?:[^`\\]|\\.)*`)/g, className: "string" },
-    
+
     // JSX tags
     { pattern: /(&lt;\/?[A-Z][a-zA-Z0-9]*)/g, className: "tag" },
     { pattern: /(<\/?[A-Z][a-zA-Z0-9]*)/g, className: "tag" },
-    
+
     // Keywords
-    { 
-      pattern: /\b(import|export|from|const|let|var|function|return|if|else|for|while|class|interface|type|extends|implements|async|await|try|catch|throw|new|this|super|default|null|undefined|true|false)\b/g, 
-      className: "keyword" 
+    {
+      pattern:
+        /\b(import|export|from|const|let|var|function|return|if|else|for|while|class|interface|type|extends|implements|async|await|try|catch|throw|new|this|super|default|null|undefined|true|false)\b/g,
+      className: "keyword",
     },
-    
+
     // Types
-    { pattern: /\b(string|number|boolean|void|any|never|unknown|React|ReactNode|JSX|FC|Component)\b/g, className: "type" },
-    
+    {
+      pattern:
+        /\b(string|number|boolean|void|any|never|unknown|React|ReactNode|JSX|FC|Component)\b/g,
+      className: "type",
+    },
+
     // Functions
-    { pattern: /\b([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(?=\()/g, className: "function" },
-    
+    {
+      pattern: /\b([a-zA-Z_$][a-zA-Z0-9_$]*)\s*(?=\()/g,
+      className: "function",
+    },
+
     // Numbers
     { pattern: /\b(\d+\.?\d*)\b/g, className: "number" },
-    
+
     // Properties
     { pattern: /\.([a-zA-Z_$][a-zA-Z0-9_$]*)/g, className: "property" },
   ];
@@ -62,11 +70,7 @@ function highlightSyntax(code: string): string {
   return highlighted;
 }
 
-export function CodeBlock({ 
-  code, 
-  filename,
-  showCopy = true 
-}: CodeBlockProps) {
+export function CodeBlock({ code, filename, showCopy = true }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
 
   const highlightedCode = (() => {
@@ -101,7 +105,7 @@ export function CodeBlock({
         .token.property { color: #06b6d4; }
         .token.tag { color: #8b5cf6; }
       `}</style>
-      
+
       {/* Header */}
       {(filename || showCopy) && (
         <div className="flex items-center justify-between px-4 py-2 border-b border-white/10 bg-white/5">
@@ -129,11 +133,11 @@ export function CodeBlock({
           )}
         </div>
       )}
-      
+
       {/* Code */}
       <div className="overflow-x-auto p-4">
         <pre className="!bg-transparent !p-0 !m-0 text-sm font-mono leading-relaxed">
-          <code 
+          <code
             className="text-[#c5c8c6]"
             dangerouslySetInnerHTML={{ __html: highlightedCode }}
           />

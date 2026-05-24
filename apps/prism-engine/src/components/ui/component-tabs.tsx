@@ -41,16 +41,17 @@ export function ComponentTabs({
           {availableTabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
-            
+
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`
                   flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors
-                  ${isActive 
-                    ? "text-cyan-400 border-b-2 border-cyan-400 -mb-px" 
-                    : "text-white/50 hover:text-white/80"
+                  ${
+                    isActive
+                      ? "text-cyan-400 border-b-2 border-cyan-400 -mb-px"
+                      : "text-white/50 hover:text-white/80"
                   }
                 `}
               >
@@ -60,7 +61,7 @@ export function ComponentTabs({
             );
           })}
         </div>
-        
+
         {/* Collapse Toggle */}
         {collapsible && (
           <button
@@ -82,9 +83,13 @@ export function ComponentTabs({
           {activeTab === "code" && (
             <CodeBlock code={code} language="tsx" filename="component.tsx" />
           )}
-          
+
           {activeTab === "rules" && rules && (
-            <CodeBlock code={rules} language="markdown" filename="usage-rules.md" />
+            <CodeBlock
+              code={rules}
+              language="markdown"
+              filename="usage-rules.md"
+            />
           )}
         </div>
       )}

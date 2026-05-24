@@ -26,8 +26,8 @@ export interface FirestoreService {
 // =============================================================================
 // PROJECT
 // =============================================================================
-export type ProjectStatus = 'pending' | 'active' | 'paused' | 'completed';
-export type MilestoneStatus = 'pending' | 'in-progress' | 'completed';
+export type ProjectStatus = "pending" | "active" | "paused" | "completed";
+export type MilestoneStatus = "pending" | "in-progress" | "completed";
 
 export interface ProjectMilestone {
   id: string;
@@ -88,7 +88,7 @@ export interface FirestoreQuote {
   email: string;
   company?: string;
   details: string;
-  status: 'new' | 'contacted' | 'in-progress' | 'closed';
+  status: "new" | "contacted" | "in-progress" | "closed";
   created_at: string;
   updated_at: string;
 }
@@ -102,7 +102,7 @@ export interface FirestoreMessage {
   email: string;
   subject: string;
   message: string;
-  status: 'new' | 'read' | 'responded';
+  status: "new" | "read" | "responded";
   created_at: string;
   updated_at: string;
 }
@@ -110,7 +110,12 @@ export interface FirestoreMessage {
 // =============================================================================
 // CALENDAR EVENT
 // =============================================================================
-export type EventType = 'deadline' | 'meeting' | 'milestone' | 'reminder' | 'holiday';
+export type EventType =
+  | "deadline"
+  | "meeting"
+  | "milestone"
+  | "reminder"
+  | "holiday";
 
 export interface CalendarEvent {
   id?: string;
@@ -130,7 +135,7 @@ export interface CalendarEvent {
 // =============================================================================
 // FEEDBACK (Client Testimonials/Reviews)
 // =============================================================================
-export type FeedbackStatus = 'pending' | 'approved' | 'featured' | 'rejected';
+export type FeedbackStatus = "pending" | "approved" | "featured" | "rejected";
 
 export interface FirestoreFeedback {
   id?: string;

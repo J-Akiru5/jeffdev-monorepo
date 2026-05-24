@@ -3,14 +3,18 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { useParams } from "next/navigation";
-import { 
-  ArrowLeft, 
+import {
+  ArrowLeft,
   Settings as SettingsIcon,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
 } from "lucide-react";
 import { GlassPanel, Button } from "@syntaxure/ui";
-import { updateProject, deleteProject, type ProjectActionState } from "../../actions";
+import {
+  updateProject,
+  deleteProject,
+  type ProjectActionState,
+} from "../../actions";
 
 /**
  * Project Settings Page
@@ -20,14 +24,14 @@ export default function ProjectSettingsPage() {
   const params = useParams();
   const slug = params.slug as string;
 
-  const [updateState, updateAction, updatePending] = useActionState<ProjectActionState, FormData>(
-    updateProject,
-    null
-  );
-  const [deleteState, deleteAction, deletePending] = useActionState<ProjectActionState, FormData>(
-    deleteProject,
-    null
-  );
+  const [updateState, updateAction, updatePending] = useActionState<
+    ProjectActionState,
+    FormData
+  >(updateProject, null);
+  const [deleteState, deleteAction, deletePending] = useActionState<
+    ProjectActionState,
+    FormData
+  >(deleteProject, null);
 
   return (
     <div className="space-y-8 max-w-2xl">
@@ -46,7 +50,9 @@ export default function ProjectSettingsPage() {
           <SettingsIcon className="h-5 w-5 text-white/40" />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold text-white">Project Settings</h1>
+          <h1 className="text-2xl font-semibold text-white">
+            Project Settings
+          </h1>
           <p className="text-sm text-white/50">
             Manage your project configuration.
           </p>
@@ -56,13 +62,16 @@ export default function ProjectSettingsPage() {
       {/* Update Form */}
       <GlassPanel className="p-6">
         <h2 className="text-lg font-medium text-white mb-4">General</h2>
-        
+
         <form action={updateAction} className="space-y-4">
           {/* Hidden slug field */}
           <input type="hidden" name="slug" value={slug} />
-          
+
           <div className="space-y-2">
-            <label htmlFor="name" className="block text-sm font-medium text-white">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-white"
+            >
               Project Name
             </label>
             <input
@@ -73,12 +82,17 @@ export default function ProjectSettingsPage() {
               className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none transition-colors"
             />
             {updateState?.error?.name && (
-              <p className="text-xs text-red-400">{updateState.error.name[0]}</p>
+              <p className="text-xs text-red-400">
+                {updateState.error.name[0]}
+              </p>
             )}
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="stack" className="block text-sm font-medium text-white">
+            <label
+              htmlFor="stack"
+              className="block text-sm font-medium text-white"
+            >
               Tech Stack
             </label>
             <select
@@ -93,7 +107,10 @@ export default function ProjectSettingsPage() {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="designSystem" className="block text-sm font-medium text-white">
+            <label
+              htmlFor="designSystem"
+              className="block text-sm font-medium text-white"
+            >
               Design System
             </label>
             <select
@@ -111,12 +128,14 @@ export default function ProjectSettingsPage() {
           </div>
 
           {updateState?.success && (
-            <p className="text-sm text-emerald-400">Project updated successfully!</p>
+            <p className="text-sm text-emerald-400">
+              Project updated successfully!
+            </p>
           )}
 
-          <Button 
-            type="submit" 
-            variant="primary" 
+          <Button
+            type="submit"
+            variant="primary"
             disabled={updatePending}
             className="mt-4"
           >
@@ -131,16 +150,17 @@ export default function ProjectSettingsPage() {
           <AlertTriangle className="h-5 w-5 text-red-400" />
           <h2 className="text-lg font-medium text-red-400">Danger Zone</h2>
         </div>
-        
+
         <p className="text-sm text-white/50 mb-4">
-          Once you delete a project, there is no going back. All rules, components, and context data will be permanently removed.
+          Once you delete a project, there is no going back. All rules,
+          components, and context data will be permanently removed.
         </p>
 
         <form action={deleteAction}>
           {/* Hidden slug field */}
           <input type="hidden" name="slug" value={slug} />
-          
-          <Button 
+
+          <Button
             type="submit"
             variant="secondary"
             disabled={deletePending}
@@ -152,7 +172,9 @@ export default function ProjectSettingsPage() {
         </form>
 
         {deleteState?.error?.general && (
-          <p className="text-sm text-red-400 mt-2">{deleteState.error.general}</p>
+          <p className="text-sm text-red-400 mt-2">
+            {deleteState.error.general}
+          </p>
         )}
       </GlassPanel>
     </div>

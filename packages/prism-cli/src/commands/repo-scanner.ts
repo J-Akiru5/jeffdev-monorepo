@@ -25,13 +25,52 @@ export interface RepoScanReport {
   summary: string;
 }
 
-const SCAN_DIRS = ["src", "components", "lib", "utils", "styles", "app", "pages"];
-const CONFIG_FILES = ["package.json", "tsconfig.json", ".eslintrc", ".eslintrc.json", ".eslintrc.js", "tailwind.config.ts", "tailwind.config.js", ".prettierrc", ".prettierrc.json", "next.config.ts", "next.config.js"];
-const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".vue", ".svelte"]);
+const SCAN_DIRS = [
+  "src",
+  "components",
+  "lib",
+  "utils",
+  "styles",
+  "app",
+  "pages",
+];
+const CONFIG_FILES = [
+  "package.json",
+  "tsconfig.json",
+  ".eslintrc",
+  ".eslintrc.json",
+  ".eslintrc.js",
+  "tailwind.config.ts",
+  "tailwind.config.js",
+  ".prettierrc",
+  ".prettierrc.json",
+  "next.config.ts",
+  "next.config.js",
+];
+const SOURCE_EXTENSIONS = new Set([
+  ".ts",
+  ".tsx",
+  ".js",
+  ".jsx",
+  ".mjs",
+  ".cjs",
+  ".vue",
+  ".svelte",
+]);
 
 export async function scanRepo(repoPath: string): Promise<RepoScanReport> {
-  const naming: RepoScanReport["namingConventions"] = { files: {}, functions: {}, components: {}, variables: {} };
-  const imports: RepoScanReport["imports"] = { relative: 0, absolute: 0, external: {}, internal: {} };
+  const naming: RepoScanReport["namingConventions"] = {
+    files: {},
+    functions: {},
+    components: {},
+    variables: {},
+  };
+  const imports: RepoScanReport["imports"] = {
+    relative: 0,
+    absolute: 0,
+    external: {},
+    internal: {},
+  };
   const dirs: string[] = [];
   let fileCount = 0;
   let dirCount = 0;
@@ -49,7 +88,9 @@ export async function scanRepo(repoPath: string): Promise<RepoScanReport> {
         } else {
           configs[cfg] = raw.slice(0, 500);
         }
-      } catch { configs[cfg] = "<unreadable>"; }
+      } catch {
+        configs[cfg] = "<unreadable>";
+      }
     }
   }
 
@@ -59,15 +100,27 @@ export async function scanRepo(repoPath: string): Promise<RepoScanReport> {
     let entries: string[];
     try {
       entries = readdirSync(dir);
-    } catch { return; }
+    } catch {
+      return;
+    }
 
     for (const entry of entries) {
       const full = join(dir, entry);
       let stats;
-      try { stats = statSync(full); } catch { continue; }
+      try {
+        stats = statSync(full);
+      } catch {
+        continue;
+      }
 
       if (stats.isDirectory()) {
-        if (!entry.startsWith(".") && entry !== "node_modules" && entry !== ".next" && entry !== "dist" && entry !== "build") {
+        if (
+          !entry.startsWith(".") &&
+          entry !== "node_modules" &&
+          entry !== ".next" &&
+          entry !== "dist" &&
+          entry !== "build"
+        ) {
           dirCount++;
           dirs.push(relative(repoPath, full));
           walk(full, depth + 1);
@@ -87,7 +140,9 @@ export async function scanRepo(repoPath: string): Promise<RepoScanReport> {
           try {
             const content = readFileSync(full, "utf-8");
             analyzeContent(content, naming, imports);
-          } catch { /* skip unreadable */ }
+          } catch {
+            /* skip unreadable */
+          }
         }
       }
     }
@@ -105,16 +160,32 @@ export async function scanRepo(repoPath: string): Promise<RepoScanReport> {
 
   // Build summary
   const totalNaming = Object.values(naming.files).reduce((a, b) => a + b, 0);
-  const dominantFileConvention = Object.entries(naming.files).sort((a, b) => b[1] - a[1])[0]?.[0] || "unknown";
-  const topExternal = Object.entries(imports.external).sort((a, b) => b[1] - a[1]).slice(0, 10);
+  const dominantFileConvention =
+    Object.entries(naming.files).sort((a, b) => b[1] - a[1])[0]?.[0] ||
+    "unknown";
+  const topExternal = Object.entries(imports.external)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10);
 
   const summary = [
     `Scanned ${fileCount} files in ${dirCount} directories`,
-    `Languages: ${Object.entries(languages).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([e, c]) => `${e}: ${c}`).join(", ")}`,
-    totalNaming > 0 ? `File naming convention: ${dominantFileConvention} (${Math.round(((naming.files[dominantFileConvention] ?? 0) / totalNaming) * 100)}%)` : "No source files found",
-    imports.relative > 0 ? `Imports: ${imports.relative} relative, ${imports.absolute} absolute` : "",
-    topExternal.length > 0 ? `Top deps: ${topExternal.map(([d]) => d).join(", ")}` : "",
-  ].filter(Boolean).join("\n");
+    `Languages: ${Object.entries(languages)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([e, c]) => `${e}: ${c}`)
+      .join(", ")}`,
+    totalNaming > 0
+      ? `File naming convention: ${dominantFileConvention} (${Math.round(((naming.files[dominantFileConvention] ?? 0) / totalNaming) * 100)}%)`
+      : "No source files found",
+    imports.relative > 0
+      ? `Imports: ${imports.relative} relative, ${imports.absolute} absolute`
+      : "",
+    topExternal.length > 0
+      ? `Top deps: ${topExternal.map(([d]) => d).join(", ")}`
+      : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   return {
     root: repoPath,
@@ -146,10 +217,11 @@ function detectVarConvention(name: string): string {
 function analyzeContent(
   content: string,
   naming: RepoScanReport["namingConventions"],
-  imports: RepoScanReport["imports"]
+  imports: RepoScanReport["imports"],
 ): void {
   // Extract function declarations
-  const funcRegex = /(?:export\s+)?(?:function|const)\s+(\w+)\s*(?:=\s*(?:\(|async\s*\())?/g;
+  const funcRegex =
+    /(?:export\s+)?(?:function|const)\s+(\w+)\s*(?:=\s*(?:\(|async\s*\())?/g;
   let m: RegExpExecArray | null;
   while ((m = funcRegex.exec(content)) !== null) {
     const convention = detectVarConvention(m[1]!);
@@ -157,7 +229,8 @@ function analyzeContent(
   }
 
   // Extract component declarations (PascalCase functions returning JSX or with React.FC)
-  const compRegex = /(?:export\s+)?(?:function|const)\s+([A-Z]\w*)\s*(?::\s*(?:React\.)?FC|=(?:\s*React\.)?\s*(?:memo\s*)?\s*(?:\(|async\s*\())?/g;
+  const compRegex =
+    /(?:export\s+)?(?:function|const)\s+([A-Z]\w*)\s*(?::\s*(?:React\.)?FC|=(?:\s*React\.)?\s*(?:memo\s*)?\s*(?:\(|async\s*\())?/g;
   while ((m = compRegex.exec(content)) !== null) {
     const convention = detectVarConvention(m[1]!);
     naming.components[convention] = (naming.components[convention] || 0) + 1;
@@ -171,7 +244,8 @@ function analyzeContent(
   }
 
   // Extract import patterns
-  const importRegex = /(?:import\s+(?:\w+\s*,?\s*)?(?:\{[^}]*\})?\s*from\s+["']([^"']+)["']|import\s+["']([^"']+)["'])/g;
+  const importRegex =
+    /(?:import\s+(?:\w+\s*,?\s*)?(?:\{[^}]*\})?\s*from\s+["']([^"']+)["']|import\s+["']([^"']+)["'])/g;
   while ((m = importRegex.exec(content)) !== null) {
     const spec = m[1] || m[2];
     if (!spec) continue;
@@ -184,21 +258,29 @@ function analyzeContent(
       imports.internal[pkg] = (imports.internal[pkg] || 0) + 1;
     } else {
       imports.absolute++;
-      const pkg = spec!.startsWith("@") ? spec!.split("/").slice(0, 2).join("/") : spec!.split("/")[0]!;
+      const pkg = spec!.startsWith("@")
+        ? spec!.split("/").slice(0, 2).join("/")
+        : spec!.split("/")[0]!;
       imports.external[pkg] = (imports.external[pkg] || 0) + 1;
     }
   }
 }
 
 export function formatScanReport(report: RepoScanReport): string {
-  const topExt = Object.entries(report.imports.external).sort((a, b) => b[1] - a[1]).slice(0, 10);
-  const topInt = Object.entries(report.imports.internal).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const topExt = Object.entries(report.imports.external)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10);
+  const topInt = Object.entries(report.imports.internal)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5);
 
   return [
     `# Repo Scan Report\n`,
     `**Root:** ${report.root}`,
     `**Files:** ${report.structure.fileCount} | **Dirs:** ${report.structure.dirCount}`,
-    `**Languages:** ${Object.entries(report.structure.languages).map(([e, c]) => `${e}: ${c}`).join(", ")}`,
+    `**Languages:** ${Object.entries(report.structure.languages)
+      .map(([e, c]) => `${e}: ${c}`)
+      .join(", ")}`,
     ``,
     `## Naming Conventions`,
     `**Files:** ${formatConvention(report.namingConventions.files)}`,
@@ -209,14 +291,22 @@ export function formatScanReport(report: RepoScanReport): string {
     `## Import Patterns`,
     `Relative imports: ${report.imports.relative}`,
     `Absolute imports: ${report.imports.absolute}`,
-    topExt.length > 0 ? `\n**Top external packages:**\n${topExt.map(([p, c]) => `- ${p} (${c})`).join("\n")}` : "",
-    topInt.length > 0 ? `\n**Internal packages:**\n${topInt.map(([p, c]) => `- ${p} (${c})`).join("\n")}` : "",
+    topExt.length > 0
+      ? `\n**Top external packages:**\n${topExt.map(([p, c]) => `- ${p} (${c})`).join("\n")}`
+      : "",
+    topInt.length > 0
+      ? `\n**Internal packages:**\n${topInt.map(([p, c]) => `- ${p} (${c})`).join("\n")}`
+      : "",
     ``,
     `## Config Files`,
     Object.keys(report.configs).length > 0
-      ? Object.entries(report.configs).map(([k]) => `- ${k}`).join("\n")
+      ? Object.entries(report.configs)
+          .map(([k]) => `- ${k}`)
+          .join("\n")
       : "None found",
-  ].filter(Boolean).join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function formatConvention(map: Record<string, number>): string {

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Prism Context Engine - Coming Soon Page
@@ -7,35 +7,35 @@
  * "Something is forming..."
  */
 
-import { useState, useTransition } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, Check, Loader2 } from 'lucide-react';
-import { Header } from '@/components/layout/header';
-import { Footer } from '@/components/layout/footer';
-import { joinWaitlist } from '@/app/actions/waitlist';
-import { cn } from '@/lib/utils';
-import { Prism3D } from '@/components/prism/prism-3d';
+import { useState, useTransition } from "react";
+import Link from "next/link";
+import { ArrowLeft, Check, Loader2 } from "lucide-react";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { joinWaitlist } from "@/app/actions/waitlist";
+import { cn } from "@/lib/utils";
+import { Prism3D } from "@/components/prism/prism-3d";
 
 export default function PrismPage() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [isPending, startTransition] = useTransition();
-  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setStatus('idle');
-    setErrorMessage('');
+    setStatus("idle");
+    setErrorMessage("");
 
     startTransition(async () => {
       // Role is optional/omitted for mystery
       const result = await joinWaitlist({ email });
       if (result.success) {
-        setStatus('success');
-        setEmail('');
+        setStatus("success");
+        setEmail("");
       } else {
-        setStatus('error');
-        setErrorMessage(result.error || 'Something went wrong');
+        setStatus("error");
+        setErrorMessage(result.error || "Something went wrong");
       }
     });
   };
@@ -54,7 +54,7 @@ export default function PrismPage() {
 
           <div className="relative z-10 mx-auto max-w-4xl text-center w-full">
             <div className="mb-12">
-               <Prism3D className="mx-auto scale-125 hover:scale-150 transition-transform duration-1000" />
+              <Prism3D className="mx-auto scale-125 hover:scale-150 transition-transform duration-1000" />
             </div>
 
             {/* Cryptic Title */}
@@ -69,7 +69,7 @@ export default function PrismPage() {
 
             {/* Waitlist Form - Minimalist */}
             <div className="mx-auto mt-16 max-w-sm">
-              {status === 'success' ? (
+              {status === "success" ? (
                 <div className="animate-in fade-in zoom-in duration-500 rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-6 text-center backdrop-blur-sm">
                   <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10">
                     <Check className="h-5 w-5 text-emerald-400" />
@@ -80,7 +80,7 @@ export default function PrismPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  {status === 'error' && (
+                  {status === "error" && (
                     <p className="text-xs text-rose-400 font-mono text-center">
                       {errorMessage}
                     </p>
@@ -101,8 +101,8 @@ export default function PrismPage() {
                     type="submit"
                     disabled={isPending}
                     className={cn(
-                      'w-full rounded-full border border-white/10 bg-white/5 px-6 py-3 font-mono text-xs uppercase tracking-widest text-white/60 transition-all hover:bg-white/10 hover:text-white hover:border-white/20',
-                      isPending && 'cursor-not-allowed opacity-50'
+                      "w-full rounded-full border border-white/10 bg-white/5 px-6 py-3 font-mono text-xs uppercase tracking-widest text-white/60 transition-all hover:bg-white/10 hover:text-white hover:border-white/20",
+                      isPending && "cursor-not-allowed opacity-50",
                     )}
                   >
                     {isPending ? (
@@ -111,14 +111,14 @@ export default function PrismPage() {
                         Establishing Link...
                       </span>
                     ) : (
-                      'Request Access'
+                      "Request Access"
                     )}
                   </button>
                 </form>
               )}
-              
+
               <div className="mt-12">
-                 <Link
+                <Link
                   href="/"
                   className="inline-flex items-center gap-2 text-xs text-white/20 transition-colors hover:text-white/40 font-mono uppercase tracking-widest"
                 >

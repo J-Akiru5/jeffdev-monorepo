@@ -47,10 +47,7 @@ const buttonVariants = cva(
           "hover:border-white/15 hover:bg-white/8 hover:text-white",
         ],
         // Ghost: No border, just hover effect
-        ghost: [
-          "text-white/60",
-          "hover:bg-white/5 hover:text-white",
-        ],
+        ghost: ["text-white/60", "hover:bg-white/5 hover:text-white"],
         // Danger: Red accent
         danger: [
           "border border-red-500/30 bg-red-500/10",
@@ -75,12 +72,13 @@ const buttonVariants = cva(
       variant: "primary",
       size: "md",
     },
-  }
+  },
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-  VariantProps<typeof buttonVariants> {
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
   /** Render as child element (for Link components) */
   asChild?: boolean;
   /** Show loading spinner */
@@ -88,7 +86,19 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, isLoading, children, disabled, ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      size,
+      asChild = false,
+      isLoading,
+      children,
+      disabled,
+      ...props
+    },
+    ref,
+  ) => {
     const Comp = asChild ? Slot : "button";
 
     return (
@@ -127,7 +137,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )}
       </Comp>
     );
-  }
+  },
 );
 
 Button.displayName = "Button";

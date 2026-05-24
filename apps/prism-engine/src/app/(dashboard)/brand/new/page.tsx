@@ -16,7 +16,11 @@ const STEPS = [
 
 // Font options (curated, non-generic)
 const FONT_OPTIONS = [
-  { value: "Plus Jakarta Sans", label: "Plus Jakarta Sans", category: "Modern" },
+  {
+    value: "Plus Jakarta Sans",
+    label: "Plus Jakarta Sans",
+    category: "Modern",
+  },
   { value: "Outfit", label: "Outfit", category: "Geometric" },
   { value: "Satoshi", label: "Satoshi", category: "Neo-Grotesque" },
   { value: "Manrope", label: "Manrope", category: "Modern" },
@@ -33,7 +37,7 @@ export default function NewBrandPage() {
   const [step, setStep] = useState(1);
   const [state, formAction, pending] = useActionState<BrandFormState, FormData>(
     createBrand,
-    null
+    null,
   );
 
   // Form data stored in state for multi-step
@@ -78,7 +82,7 @@ export default function NewBrandPage() {
   });
 
   const updateFormData = (key: string, value: unknown) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const keys = key.split(".");
       if (keys.length === 1) {
         return { ...prev, [key]: value };
@@ -95,8 +99,8 @@ export default function NewBrandPage() {
     });
   };
 
-  const nextStep = () => setStep(s => Math.min(s + 1, 5));
-  const prevStep = () => setStep(s => Math.max(s - 1, 1));
+  const nextStep = () => setStep((s) => Math.min(s + 1, 5));
+  const prevStep = () => setStep((s) => Math.max(s - 1, 1));
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
@@ -111,7 +115,9 @@ export default function NewBrandPage() {
 
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold text-white">Create Brand Profile</h1>
+        <h1 className="text-2xl font-semibold text-white">
+          Create Brand Profile
+        </h1>
         <p className="text-sm text-white/50 mt-1">
           Define your brand identity to generate consistent Prism Rules.
         </p>
@@ -126,14 +132,16 @@ export default function NewBrandPage() {
                 step > s.id
                   ? "bg-cyan-500 text-white"
                   : step === s.id
-                  ? "bg-cyan-500/20 border border-cyan-500/50 text-cyan-400"
-                  : "bg-white/5 text-white/40"
+                    ? "bg-cyan-500/20 border border-cyan-500/50 text-cyan-400"
+                    : "bg-white/5 text-white/40"
               }`}
             >
               {step > s.id ? <Check className="h-4 w-4" /> : s.id}
             </div>
             {i < STEPS.length - 1 && (
-              <div className={`h-0.5 w-12 mx-2 ${step > s.id ? "bg-cyan-500" : "bg-white/10"}`} />
+              <div
+                className={`h-0.5 w-12 mx-2 ${step > s.id ? "bg-cyan-500" : "bg-white/10"}`}
+              />
             )}
           </div>
         ))}
@@ -141,7 +149,9 @@ export default function NewBrandPage() {
 
       {/* Step Title */}
       <div className="text-center">
-        <h2 className="text-lg font-medium text-white">{STEPS[step - 1].name}</h2>
+        <h2 className="text-lg font-medium text-white">
+          {STEPS[step - 1].name}
+        </h2>
         <p className="text-sm text-white/50">{STEPS[step - 1].description}</p>
       </div>
 
@@ -151,24 +161,92 @@ export default function NewBrandPage() {
         <input type="hidden" name="companyName" value={formData.companyName} />
         <input type="hidden" name="tagline" value={formData.tagline} />
         <input type="hidden" name="industry" value={formData.industry} />
-        <input type="hidden" name="colors.primary" value={formData.colors.primary} />
-        <input type="hidden" name="colors.secondary" value={formData.colors.secondary} />
-        <input type="hidden" name="colors.accent" value={formData.colors.accent} />
-        <input type="hidden" name="colors.background" value={formData.colors.background} />
-        <input type="hidden" name="colors.surface" value={formData.colors.surface} />
+        <input
+          type="hidden"
+          name="colors.primary"
+          value={formData.colors.primary}
+        />
+        <input
+          type="hidden"
+          name="colors.secondary"
+          value={formData.colors.secondary}
+        />
+        <input
+          type="hidden"
+          name="colors.accent"
+          value={formData.colors.accent}
+        />
+        <input
+          type="hidden"
+          name="colors.background"
+          value={formData.colors.background}
+        />
+        <input
+          type="hidden"
+          name="colors.surface"
+          value={formData.colors.surface}
+        />
         <input type="hidden" name="colors.text" value={formData.colors.text} />
-        <input type="hidden" name="colors.textMuted" value={formData.colors.textMuted} />
-        <input type="hidden" name="typography.headingFont" value={formData.typography.headingFont} />
-        <input type="hidden" name="typography.bodyFont" value={formData.typography.bodyFont} />
-        <input type="hidden" name="typography.monoFont" value={formData.typography.monoFont} />
-        <input type="hidden" name="typography.scale" value={formData.typography.scale} />
-        <input type="hidden" name="voice.personality" value={formData.voice.personality} />
-        <input type="hidden" name="voice.formality" value={formData.voice.formality} />
-        <input type="hidden" name="voice.keywords" value={formData.voice.keywords} />
-        <input type="hidden" name="imagery.style" value={formData.imagery.style} />
-        <input type="hidden" name="imagery.mood" value={formData.imagery.mood} />
-        <input type="hidden" name="spacing.unit" value={formData.spacing.unit} />
-        <input type="hidden" name="spacing.borderRadius" value={formData.spacing.borderRadius} />
+        <input
+          type="hidden"
+          name="colors.textMuted"
+          value={formData.colors.textMuted}
+        />
+        <input
+          type="hidden"
+          name="typography.headingFont"
+          value={formData.typography.headingFont}
+        />
+        <input
+          type="hidden"
+          name="typography.bodyFont"
+          value={formData.typography.bodyFont}
+        />
+        <input
+          type="hidden"
+          name="typography.monoFont"
+          value={formData.typography.monoFont}
+        />
+        <input
+          type="hidden"
+          name="typography.scale"
+          value={formData.typography.scale}
+        />
+        <input
+          type="hidden"
+          name="voice.personality"
+          value={formData.voice.personality}
+        />
+        <input
+          type="hidden"
+          name="voice.formality"
+          value={formData.voice.formality}
+        />
+        <input
+          type="hidden"
+          name="voice.keywords"
+          value={formData.voice.keywords}
+        />
+        <input
+          type="hidden"
+          name="imagery.style"
+          value={formData.imagery.style}
+        />
+        <input
+          type="hidden"
+          name="imagery.mood"
+          value={formData.imagery.mood}
+        />
+        <input
+          type="hidden"
+          name="spacing.unit"
+          value={formData.spacing.unit}
+        />
+        <input
+          type="hidden"
+          name="spacing.borderRadius"
+          value={formData.spacing.borderRadius}
+        />
 
         {/* Step Content */}
         <div className="min-h-[300px]">
@@ -179,23 +257,29 @@ export default function NewBrandPage() {
             <StepColors formData={formData} updateFormData={updateFormData} />
           )}
           {step === 3 && (
-            <StepTypography formData={formData} updateFormData={updateFormData} fontOptions={FONT_OPTIONS} />
+            <StepTypography
+              formData={formData}
+              updateFormData={updateFormData}
+              fontOptions={FONT_OPTIONS}
+            />
           )}
           {step === 4 && (
             <StepVoice formData={formData} updateFormData={updateFormData} />
           )}
-          {step === 5 && (
-            <StepReview formData={formData} />
-          )}
+          {step === 5 && <StepReview formData={formData} />}
         </div>
 
         {/* Error Display */}
         {state?.error && (
           <div className="rounded-md bg-red-500/10 border border-red-500/30 p-4 mb-4">
-            <p className="text-sm text-red-400">Please fix the following errors:</p>
+            <p className="text-sm text-red-400">
+              Please fix the following errors:
+            </p>
             <ul className="mt-2 text-xs text-red-300">
               {Object.entries(state.error).map(([key, errors]) => (
-                <li key={key}>{key}: {(errors as string[]).join(", ")}</li>
+                <li key={key}>
+                  {key}: {(errors as string[]).join(", ")}
+                </li>
               ))}
             </ul>
           </div>
@@ -239,17 +323,19 @@ export default function NewBrandPage() {
 }
 
 // Step Components
-function StepIdentity({ 
-  formData, 
-  updateFormData 
-}: { 
-  formData: Record<string, unknown>; 
+function StepIdentity({
+  formData,
+  updateFormData,
+}: {
+  formData: Record<string, unknown>;
   updateFormData: (key: string, value: unknown) => void;
 }) {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-white">Company Name *</label>
+        <label className="block text-sm font-medium text-white">
+          Company Name *
+        </label>
         <input
           type="text"
           value={formData.companyName as string}
@@ -271,7 +357,9 @@ function StepIdentity({
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-white">Industry *</label>
+        <label className="block text-sm font-medium text-white">
+          Industry *
+        </label>
         <select
           aria-label="Select industry"
           value={formData.industry as string}
@@ -293,44 +381,88 @@ function StepIdentity({
   );
 }
 
-function StepColors({ 
-  formData, 
-  updateFormData 
-}: { 
-  formData: Record<string, unknown>; 
+function StepColors({
+  formData,
+  updateFormData,
+}: {
+  formData: Record<string, unknown>;
   updateFormData: (key: string, value: unknown) => void;
 }) {
   const colors = formData.colors as Record<string, string>;
-  
+
   return (
     <div className="space-y-4">
-      <p className="text-sm text-white/50 mb-4">Define your brand&apos;s color palette</p>
-      
+      <p className="text-sm text-white/50 mb-4">
+        Define your brand&apos;s color palette
+      </p>
+
       <div className="grid grid-cols-2 gap-4">
-        <ColorPicker label="Primary" value={colors.primary} onChange={(v) => updateFormData("colors.primary", v)} />
-        <ColorPicker label="Secondary" value={colors.secondary} onChange={(v) => updateFormData("colors.secondary", v)} />
-        <ColorPicker label="Accent" value={colors.accent} onChange={(v) => updateFormData("colors.accent", v)} />
-        <ColorPicker label="Background" value={colors.background} onChange={(v) => updateFormData("colors.background", v)} />
-        <ColorPicker label="Surface" value={colors.surface} onChange={(v) => updateFormData("colors.surface", v)} />
-        <ColorPicker label="Text" value={colors.text} onChange={(v) => updateFormData("colors.text", v)} />
-        <ColorPicker label="Text Muted" value={colors.textMuted} onChange={(v) => updateFormData("colors.textMuted", v)} />
+        <ColorPicker
+          label="Primary"
+          value={colors.primary}
+          onChange={(v) => updateFormData("colors.primary", v)}
+        />
+        <ColorPicker
+          label="Secondary"
+          value={colors.secondary}
+          onChange={(v) => updateFormData("colors.secondary", v)}
+        />
+        <ColorPicker
+          label="Accent"
+          value={colors.accent}
+          onChange={(v) => updateFormData("colors.accent", v)}
+        />
+        <ColorPicker
+          label="Background"
+          value={colors.background}
+          onChange={(v) => updateFormData("colors.background", v)}
+        />
+        <ColorPicker
+          label="Surface"
+          value={colors.surface}
+          onChange={(v) => updateFormData("colors.surface", v)}
+        />
+        <ColorPicker
+          label="Text"
+          value={colors.text}
+          onChange={(v) => updateFormData("colors.text", v)}
+        />
+        <ColorPicker
+          label="Text Muted"
+          value={colors.textMuted}
+          onChange={(v) => updateFormData("colors.textMuted", v)}
+        />
       </div>
 
       {/* Preview */}
-      <div 
+      <div
         className="mt-6 rounded-md border border-white/10 p-6"
         style={{ backgroundColor: colors.background }}
       >
-        <div className="rounded-md p-4" style={{ backgroundColor: colors.surface }}>
-          <h3 style={{ color: colors.text }} className="font-semibold">Preview</h3>
+        <div
+          className="rounded-md p-4"
+          style={{ backgroundColor: colors.surface }}
+        >
+          <h3 style={{ color: colors.text }} className="font-semibold">
+            Preview
+          </h3>
           <p style={{ color: colors.textMuted }} className="text-sm mt-1">
             This is how your colors look together.
           </p>
           <div className="flex gap-2 mt-4">
-            <div className="px-4 py-2 rounded text-sm" style={{ backgroundColor: colors.primary, color: colors.text }}>
+            <div
+              className="px-4 py-2 rounded text-sm"
+              style={{ backgroundColor: colors.primary, color: colors.text }}
+            >
               Primary
             </div>
-            <div className="px-4 py-2 rounded text-sm" style={{ backgroundColor: colors.accent, color: colors.background }}>
+            <div
+              className="px-4 py-2 rounded text-sm"
+              style={{
+                backgroundColor: colors.accent,
+                color: colors.background,
+              }}
+            >
               Accent
             </div>
           </div>
@@ -340,13 +472,13 @@ function StepColors({
   );
 }
 
-function ColorPicker({ 
-  label, 
-  value, 
-  onChange 
-}: { 
-  label: string; 
-  value: string; 
+function ColorPicker({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
   onChange: (v: string) => void;
 }) {
   return (
@@ -372,51 +504,65 @@ function ColorPicker({
   );
 }
 
-function StepTypography({ 
-  formData, 
+function StepTypography({
+  formData,
   updateFormData,
-  fontOptions
-}: { 
-  formData: Record<string, unknown>; 
+  fontOptions,
+}: {
+  formData: Record<string, unknown>;
   updateFormData: (key: string, value: unknown) => void;
   fontOptions: { value: string; label: string; category: string }[];
 }) {
   const typography = formData.typography as Record<string, string>;
-  
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-white">Heading Font</label>
+        <label className="block text-sm font-medium text-white">
+          Heading Font
+        </label>
         <select
           aria-label="Heading font"
           value={typography.headingFont}
-          onChange={(e) => updateFormData("typography.headingFont", e.target.value)}
+          onChange={(e) =>
+            updateFormData("typography.headingFont", e.target.value)
+          }
           className="w-full rounded-md border border-white/10 bg-[#0a0a0a] px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none"
         >
-          {fontOptions.map(f => (
-            <option key={f.value} value={f.value}>{f.label} ({f.category})</option>
+          {fontOptions.map((f) => (
+            <option key={f.value} value={f.value}>
+              {f.label} ({f.category})
+            </option>
           ))}
         </select>
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-white">Body Font</label>
+        <label className="block text-sm font-medium text-white">
+          Body Font
+        </label>
         <select
           aria-label="Body font"
           value={typography.bodyFont}
-          onChange={(e) => updateFormData("typography.bodyFont", e.target.value)}
+          onChange={(e) =>
+            updateFormData("typography.bodyFont", e.target.value)
+          }
           className="w-full rounded-md border border-white/10 bg-[#0a0a0a] px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none"
         >
-          {fontOptions.map(f => (
-            <option key={f.value} value={f.value}>{f.label} ({f.category})</option>
+          {fontOptions.map((f) => (
+            <option key={f.value} value={f.value}>
+              {f.label} ({f.category})
+            </option>
           ))}
         </select>
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-white">Typography Scale</label>
+        <label className="block text-sm font-medium text-white">
+          Typography Scale
+        </label>
         <div className="grid grid-cols-3 gap-3">
-          {["compact", "default", "spacious"].map(scale => (
+          {["compact", "default", "spacious"].map((scale) => (
             <button
               key={scale}
               type="button"
@@ -436,27 +582,33 @@ function StepTypography({
   );
 }
 
-function StepVoice({ 
-  formData, 
-  updateFormData 
-}: { 
-  formData: Record<string, unknown>; 
+function StepVoice({
+  formData,
+  updateFormData,
+}: {
+  formData: Record<string, unknown>;
   updateFormData: (key: string, value: unknown) => void;
 }) {
   const voice = formData.voice as Record<string, string>;
-  
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-white">Brand Personality</label>
+        <label className="block text-sm font-medium text-white">
+          Brand Personality
+        </label>
         <div className="grid grid-cols-3 gap-3">
           {[
             { value: "minimal", label: "Minimal", desc: "Clean & understated" },
             { value: "warm", label: "Warm", desc: "Friendly & approachable" },
             { value: "bold", label: "Bold", desc: "Confident & impactful" },
             { value: "playful", label: "Playful", desc: "Fun & creative" },
-            { value: "corporate", label: "Corporate", desc: "Professional & formal" },
-          ].map(p => (
+            {
+              value: "corporate",
+              label: "Corporate",
+              desc: "Professional & formal",
+            },
+          ].map((p) => (
             <button
               key={p.value}
               type="button"
@@ -475,9 +627,11 @@ function StepVoice({
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-white">Formality Level</label>
+        <label className="block text-sm font-medium text-white">
+          Formality Level
+        </label>
         <div className="grid grid-cols-3 gap-3">
-          {["casual", "balanced", "formal"].map(f => (
+          {["casual", "balanced", "formal"].map((f) => (
             <button
               key={f}
               type="button"
@@ -495,7 +649,9 @@ function StepVoice({
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-white">Brand Keywords</label>
+        <label className="block text-sm font-medium text-white">
+          Brand Keywords
+        </label>
         <input
           type="text"
           value={voice.keywords}
@@ -503,7 +659,9 @@ function StepVoice({
           placeholder="authentic, timeless, elegant (comma-separated)"
           className="w-full rounded-md border border-white/10 bg-white/2 px-4 py-3 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
         />
-        <p className="text-xs text-white/40">Up to 10 keywords that define your brand</p>
+        <p className="text-xs text-white/40">
+          Up to 10 keywords that define your brand
+        </p>
       </div>
     </div>
   );
@@ -513,32 +671,42 @@ function StepReview({ formData }: { formData: Record<string, unknown> }) {
   const colors = formData.colors as Record<string, string>;
   const typography = formData.typography as Record<string, string>;
   const voice = formData.voice as Record<string, string>;
-  
+
   return (
     <div className="space-y-6">
-      <p className="text-sm text-white/50">Review your brand profile before creating</p>
-      
+      <p className="text-sm text-white/50">
+        Review your brand profile before creating
+      </p>
+
       {/* Identity */}
       <div className="rounded-md border border-white/5 bg-white/2 p-4">
         <h3 className="text-sm font-medium text-white mb-2">Identity</h3>
-        <p className="text-lg font-semibold text-white">{formData.companyName as string}</p>
-        {typeof formData.tagline === "string" && formData.tagline && <p className="text-sm text-white/50">{formData.tagline}</p>}
-        <span className="inline-block mt-2 text-xs text-cyan-400 capitalize">{formData.industry as string}</span>
+        <p className="text-lg font-semibold text-white">
+          {formData.companyName as string}
+        </p>
+        {typeof formData.tagline === "string" && formData.tagline && (
+          <p className="text-sm text-white/50">{formData.tagline}</p>
+        )}
+        <span className="inline-block mt-2 text-xs text-cyan-400 capitalize">
+          {formData.industry as string}
+        </span>
       </div>
 
       {/* Colors Preview */}
       <div className="rounded-md border border-white/5 bg-white/2 p-4">
         <h3 className="text-sm font-medium text-white mb-3">Colors</h3>
         <div className="flex gap-2">
-          {Object.entries(colors).slice(0, 4).map(([key, value]) => (
-            <div key={key} className="text-center">
-              <div 
-                className="h-8 w-8 rounded-full border border-white/10"
-                style={{ backgroundColor: value }}
-              />
-              <p className="text-xs text-white/40 mt-1 capitalize">{key}</p>
-            </div>
-          ))}
+          {Object.entries(colors)
+            .slice(0, 4)
+            .map(([key, value]) => (
+              <div key={key} className="text-center">
+                <div
+                  className="h-8 w-8 rounded-full border border-white/10"
+                  style={{ backgroundColor: value }}
+                />
+                <p className="text-xs text-white/40 mt-1 capitalize">{key}</p>
+              </div>
+            ))}
         </div>
       </div>
 
@@ -546,9 +714,12 @@ function StepReview({ formData }: { formData: Record<string, unknown> }) {
       <div className="rounded-md border border-white/5 bg-white/2 p-4">
         <h3 className="text-sm font-medium text-white mb-2">Typography</h3>
         <p className="text-sm text-white/70">
-          <span className="text-white">{typography.headingFont}</span> / {typography.bodyFont}
+          <span className="text-white">{typography.headingFont}</span> /{" "}
+          {typography.bodyFont}
         </p>
-        <p className="text-xs text-white/40 capitalize">Scale: {typography.scale}</p>
+        <p className="text-xs text-white/40 capitalize">
+          Scale: {typography.scale}
+        </p>
       </div>
 
       {/* Voice */}
@@ -560,7 +731,10 @@ function StepReview({ formData }: { formData: Record<string, unknown> }) {
         {voice.keywords && (
           <div className="flex flex-wrap gap-1 mt-2">
             {(voice.keywords as string).split(",").map((k, i) => (
-              <span key={i} className="text-xs bg-white/5 px-2 py-0.5 rounded text-white/50">
+              <span
+                key={i}
+                className="text-xs bg-white/5 px-2 py-0.5 rounded text-white/50"
+              >
                 {k.trim()}
               </span>
             ))}

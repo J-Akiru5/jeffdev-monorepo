@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Calendar Page
@@ -6,16 +6,16 @@
  * FullCalendar view showing tasks with due dates and synced events.
  */
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin from '@fullcalendar/interaction';
-import { useProjects } from '@/contexts/project-context';
-import { createEvent, updateEvent, syncCalendar } from '@/app/actions/calendar';
-import { fetchEvents } from '@/app/actions/calendar';
-import type { CalendarEvent } from '@/lib/schemas';
-import { toast } from 'sonner';
+import { useState, useEffect, useMemo, useCallback } from "react";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import { useProjects } from "@/contexts/project-context";
+import { createEvent, updateEvent, syncCalendar } from "@/app/actions/calendar";
+import { fetchEvents } from "@/app/actions/calendar";
+import type { CalendarEvent } from "@/lib/schemas";
+import { toast } from "sonner";
 
 export default function CalendarPage() {
   useProjects();
@@ -30,7 +30,7 @@ export default function CalendarPage() {
         const data = await fetchEvents();
         setEvents(data);
       } catch (_err) {
-        console.error('Failed to load events:', _err);
+        console.error("Failed to load events:", _err);
       } finally {
         setLoading(false);
       }
@@ -46,8 +46,8 @@ export default function CalendarPage() {
       start: event.start,
       end: event.end,
       allDay: event.allDay,
-      backgroundColor: event.linkedTaskId ? '#06b6d4' : '#8b5cf6',
-      borderColor: event.linkedTaskId ? '#06b6d4' : '#8b5cf6',
+      backgroundColor: event.linkedTaskId ? "#06b6d4" : "#8b5cf6",
+      borderColor: event.linkedTaskId ? "#06b6d4" : "#8b5cf6",
       extendedProps: {
         linkedTaskId: event.linkedTaskId,
         googleCalendarId: event.googleCalendarId,
@@ -55,51 +55,70 @@ export default function CalendarPage() {
     }));
   }, [events]);
 
-  const handleDateSelect = useCallback(async (selectInfo: { startStr: string; endStr: string; allDay: boolean }) => {
-    const title = prompt('Event title:');
-    if (!title) return;
+  const handleDateSelect = useCallback(
+    async (selectInfo: {
+      startStr: string;
+      endStr: string;
+      allDay: boolean;
+    }) => {
+      const title = prompt("Event title:");
+      if (!title) return;
 
-    const newEvent: CalendarEvent = {
-      id: Date.now().toString(),
-      title,
-      start: selectInfo.startStr,
-      end: selectInfo.endStr,
-      allDay: selectInfo.allDay,
-      googleCalendarId: '',
-      syncedAt: new Date().toISOString(),
-    };
+      const newEvent: CalendarEvent = {
+        id: Date.now().toString(),
+        title,
+        start: selectInfo.startStr,
+        end: selectInfo.endStr,
+        allDay: selectInfo.allDay,
+        googleCalendarId: "",
+        syncedAt: new Date().toISOString(),
+      };
 
-    try {
-      const created = await createEvent(newEvent);
-      setEvents((prev) => [...prev, created]);
-      toast.success('Event created');
-    } catch {
-      toast.error('Failed to create event');
-    }
-  }, []);
+      try {
+        const created = await createEvent(newEvent);
+        setEvents((prev) => [...prev, created]);
+        toast.success("Event created");
+      } catch {
+        toast.error("Failed to create event");
+      }
+    },
+    [],
+  );
 
-  const handleEventClick = useCallback(async (info: { event: { id: string; title: string; start: Date | null; end: Date | null } }) => {
-    const newTitle = prompt('Edit title:', info.event.title);
-    if (!newTitle || newTitle === info.event.title) return;
+  const handleEventClick = useCallback(
+    async (info: {
+      event: {
+        id: string;
+        title: string;
+        start: Date | null;
+        end: Date | null;
+      };
+    }) => {
+      const newTitle = prompt("Edit title:", info.event.title);
+      if (!newTitle || newTitle === info.event.title) return;
 
-    try {
-      const updated = await updateEvent(info.event.id, { title: newTitle });
-      setEvents((prev) => prev.map((e) => (e.id === info.event.id ? updated : e)));
-      toast.success('Event updated');
-    } catch {
-      toast.error('Failed to update event');
-    }
-  }, []);
+      try {
+        const updated = await updateEvent(info.event.id, { title: newTitle });
+        setEvents((prev) =>
+          prev.map((e) => (e.id === info.event.id ? updated : e)),
+        );
+        toast.success("Event updated");
+      } catch {
+        toast.error("Failed to update event");
+      }
+    },
+    [],
+  );
 
   const handleSync = useCallback(async () => {
     setSyncing(true);
     try {
       const syncedEvents = await syncCalendar();
       setEvents(syncedEvents);
-      toast.success('Calendar synced');
+      toast.success("Calendar synced");
     } catch (err) {
-      console.error('Sync error:', err);
-      toast.error('Sync failed. Connect Google Calendar first.');
+      console.error("Sync error:", err);
+      toast.error("Sync failed. Connect Google Calendar first.");
     } finally {
       setSyncing(false);
     }
@@ -131,9 +150,9 @@ export default function CalendarPage() {
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
           headerToolbar={{
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay',
+            left: "prev,next today",
+            center: "title",
+            right: "dayGridMonth,timeGridWeek,timeGridDay",
           }}
           events={calendarEvents}
           editable={true}
@@ -150,9 +169,11 @@ export default function CalendarPage() {
       {/* Sync Status */}
       <div className="mt-6 flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.02] p-4">
         <div>
-          <h3 className="text-sm font-medium text-white">Google Calendar Sync</h3>
+          <h3 className="text-sm font-medium text-white">
+            Google Calendar Sync
+          </h3>
           <p className="text-xs text-white/40">
-            {syncing ? 'Syncing...' : 'Connect to sync your events'}
+            {syncing ? "Syncing..." : "Connect to sync your events"}
           </p>
         </div>
         <div className="flex gap-3">
@@ -167,7 +188,7 @@ export default function CalendarPage() {
             disabled={syncing}
             className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/60 transition-colors hover:bg-white/[0.08] disabled:opacity-50"
           >
-            {syncing ? 'Syncing...' : 'Sync Now'}
+            {syncing ? "Syncing..." : "Sync Now"}
           </button>
         </div>
       </div>

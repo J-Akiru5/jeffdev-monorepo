@@ -5,18 +5,18 @@
  * Used to restore icons from Firestore data.
  */
 
-import { 
-  Globe, 
-  Cloud, 
-  Cpu, 
-  Sparkles, 
-  Code, 
+import {
+  Globe,
+  Cloud,
+  Cpu,
+  Sparkles,
+  Code,
   Palette,
   Database,
   Shield,
   Zap,
-  type LucideIcon 
-} from 'lucide-react';
+  type LucideIcon,
+} from "lucide-react";
 
 const iconMap: Record<string, LucideIcon> = {
   Globe,

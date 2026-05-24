@@ -191,12 +191,12 @@ gh project item-add <project-number> --owner J-Akiru5 --url <issue-url>
 
 ### Recommended GitHub Project Fields
 
-| Field | Type | Values |
-|-------|------|--------|
-| Status | Select | Backlog, Ready, In Progress, In Review, Done |
-| Priority | Select | High, Medium, Low |
-| Phase | Select | Phase-1, Phase-2, Phase-3, Ongoing |
-| Owner | Select | Mark, Jeff, Lou, Karl, Hazel |
-| Effort | Select | S (1-2h), M (half day), L (1-2 days), XL (week) |
+| Field    | Type   | Values                                                     |
+| -------- | ------ | ---------------------------------------------------------- |
+| Status   | Select | Backlog, Ready, In Progress, In Review, Done               |
+| Priority | Select | High, Medium, Low                                          |
+| Phase    | Select | Phase-1, Phase-2, Phase-3, Ongoing                         |
+| Owner    | Select | Mark, Jeff, Lou, Karl, Hazel                               |
+| Effort   | Select | S (1-2h), M (half day), L (1-2 days), XL (week)            |
 | Platform | Select | LinkedIn, Twitter, YouTube, Blog, Website, Discord, GitHub |
-| Type | Select | Content, Design, Development, Outreach, Analytics, Ops |
+| Type     | Select | Content, Design, Development, Outreach, Analytics, Ops     |

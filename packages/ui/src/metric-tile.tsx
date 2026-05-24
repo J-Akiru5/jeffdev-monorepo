@@ -16,14 +16,15 @@ const metricTileVariants = cva(
     defaultVariants: {
       intent: "default",
     },
-  }
+  },
 );
 
 type IconType = React.ComponentType<{ className?: string }>;
 
 export interface MetricTileProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-  VariantProps<typeof metricTileVariants> {
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof metricTileVariants> {
   label: string;
   value: string | number;
   icon?: IconType;
@@ -57,21 +58,25 @@ export function MetricTile({
           </div>
         )}
       </div>
-      
+
       <div className="flex items-end justify-between">
         <div className="text-2xl font-semibold text-white tracking-tight font-mono">
           {value}
         </div>
-        
+
         {trend && (
-          <div className={cn(
-            "flex items-center gap-1 text-xs font-mono",
-            trend.direction === "up" && "text-emerald-400",
-            trend.direction === "down" && "text-red-400",
-            trend.direction === "neutral" && "text-white/40"
-          )}>
+          <div
+            className={cn(
+              "flex items-center gap-1 text-xs font-mono",
+              trend.direction === "up" && "text-emerald-400",
+              trend.direction === "down" && "text-red-400",
+              trend.direction === "neutral" && "text-white/40",
+            )}
+          >
             {trend.direction === "up" && <ArrowUpRight className="h-3 w-3" />}
-            {trend.direction === "down" && <ArrowDownRight className="h-3 w-3" />}
+            {trend.direction === "down" && (
+              <ArrowDownRight className="h-3 w-3" />
+            )}
             {trend.direction === "neutral" && <Minus className="h-3 w-3" />}
             <span>{Math.abs(trend.value)}%</span>
           </div>
@@ -85,10 +90,7 @@ export function MetricTile({
 
   if (href) {
     return (
-      <a
-        href={href}
-        className={cn(metricTileVariants({ intent, className }))}
-      >
+      <a href={href} className={cn(metricTileVariants({ intent, className }))}>
         {Content}
       </a>
     );

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Profile Settings Form
@@ -6,14 +6,24 @@
  * Form for editing user profile, bio, photo, and namecard settings.
  */
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Camera, Loader2, Save, ExternalLink, Linkedin, Github, Globe, Twitter, Smartphone } from 'lucide-react';
-import { updateUserProfile, checkUsernameAvailable } from '@/app/actions/users';
-import type { UserProfile } from '@/types/user';
-import { toast } from 'sonner';
-import { NamecardPreview } from './namecard-preview';
-import { SetupGuide } from './setup-guide';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Camera,
+  Loader2,
+  Save,
+  ExternalLink,
+  Linkedin,
+  Github,
+  Globe,
+  Twitter,
+  Smartphone,
+} from "lucide-react";
+import { updateUserProfile, checkUsernameAvailable } from "@/app/actions/users";
+import type { UserProfile } from "@/types/user";
+import { toast } from "sonner";
+import { NamecardPreview } from "./namecard-preview";
+import { SetupGuide } from "./setup-guide";
 
 interface ProfileFormProps {
   profile: UserProfile;
@@ -22,28 +32,28 @@ interface ProfileFormProps {
 export function ProfileForm({ profile }: ProfileFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [usernameError, setUsernameError] = useState('');
+  const [usernameError, setUsernameError] = useState("");
 
   const [formData, setFormData] = useState({
-    displayName: profile.displayName || '',
-    photoURL: profile.photoURL || '',
-    title: profile.title || '',
-    bio: profile.bio || '',
-    phone: profile.phone || '',
-    location: profile.location || '',
+    displayName: profile.displayName || "",
+    photoURL: profile.photoURL || "",
+    title: profile.title || "",
+    bio: profile.bio || "",
+    phone: profile.phone || "",
+    location: profile.location || "",
     social: {
-      linkedin: profile.social?.linkedin || '',
-      github: profile.social?.github || '',
-      twitter: profile.social?.twitter || '',
-      website: profile.social?.website || '',
+      linkedin: profile.social?.linkedin || "",
+      github: profile.social?.github || "",
+      twitter: profile.social?.twitter || "",
+      website: profile.social?.website || "",
     },
     namecard: {
-      username: profile.namecard?.username || '',
-      tagline: profile.namecard?.tagline || '',
+      username: profile.namecard?.username || "",
+      tagline: profile.namecard?.tagline || "",
       showEmail: profile.namecard?.showEmail ?? true,
       showPhone: profile.namecard?.showPhone ?? false,
-      accentColor: profile.namecard?.accentColor || '#06b6d4',
-      background: profile.namecard?.background || 'gradient-dark',
+      accentColor: profile.namecard?.accentColor || "#06b6d4",
+      background: profile.namecard?.background || "gradient-dark",
       socials: {
         linkedin: profile.namecard?.socials?.linkedin ?? true,
         github: profile.namecard?.socials?.github ?? true,
@@ -54,8 +64,8 @@ export function ProfileForm({ profile }: ProfileFormProps) {
   });
 
   const handleChange = (field: string, value: string | boolean) => {
-    if (field.includes('.')) {
-      const parts = field.split('.');
+    if (field.includes(".")) {
+      const parts = field.split(".");
       if (parts.length === 2) {
         const [parent, child] = parts;
         setFormData((prev) => ({
@@ -73,9 +83,14 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             ...(prev[root as keyof typeof prev] as Record<string, unknown>),
             [parent]: {
               // @ts-expect-error - dynamic nesting is hard to type perfectly
-              ...((prev[root as keyof typeof prev] as Record<string, Record<string, unknown>>)?.[parent] || {}),
+              ...((
+                prev[root as keyof typeof prev] as Record<
+                  string,
+                  Record<string, unknown>
+                >
+              )?.[parent] || {}),
               [child]: value,
-            }
+            },
           },
         }));
       }
@@ -86,19 +101,19 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
   const handleUsernameBlur = async () => {
     if (!formData.namecard.username) return;
-    
+
     // Skip check if unchanged
     if (formData.namecard.username === profile.namecard?.username) return;
 
     const isAvailable = await checkUsernameAvailable(
       formData.namecard.username,
-      profile.uid
+      profile.uid,
     );
-    
+
     if (!isAvailable) {
-      setUsernameError('This username is already taken');
+      setUsernameError("This username is already taken");
     } else {
-      setUsernameError('');
+      setUsernameError("");
     }
   };
 
@@ -106,28 +121,27 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const toastId = toast.loading('Uploading image...');
+    const toastId = toast.loading("Uploading image...");
 
     try {
       // Create FormData
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append("file", file);
 
       // Upload via Server Action (Proxy to bypass CORS)
-      const { uploadFile } = await import('@/app/actions/upload');
+      const { uploadFile } = await import("@/app/actions/upload");
       const result = await uploadFile(formData);
 
       if (!result.success || !result.url) {
-        throw new Error(result.error || 'Upload failed');
+        throw new Error(result.error || "Upload failed");
       }
 
       // Update State
       setFormData((prev) => ({ ...prev, photoURL: result.url! }));
-      toast.success('Image uploaded successfully', { id: toastId });
-
+      toast.success("Image uploaded successfully", { id: toastId });
     } catch (error) {
       console.error(error);
-      toast.error('Failed to upload image', { id: toastId });
+      toast.error("Failed to upload image", { id: toastId });
     }
   };
 
@@ -140,10 +154,10 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     const result = await updateUserProfile(profile.uid, formData);
 
     if (result.success) {
-      toast.success('Profile updated successfully');
+      toast.success("Profile updated successfully");
       router.refresh();
     } else {
-      toast.error('Failed to update profile');
+      toast.error("Failed to update profile");
     }
 
     setIsLoading(false);
@@ -168,7 +182,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                   />
                 ) : (
                   <div className="h-full w-full flex items-center justify-center text-3xl font-bold text-white/40">
-                    {formData.displayName?.charAt(0) || '?'}
+                    {formData.displayName?.charAt(0) || "?"}
                   </div>
                 )}
               </div>
@@ -186,53 +200,62 @@ export function ProfileForm({ profile }: ProfileFormProps) {
               </label>
             </div>
             <div>
-              <h3 className="font-medium text-white">{formData.displayName || 'Your Name'}</h3>
+              <h3 className="font-medium text-white">
+                {formData.displayName || "Your Name"}
+              </h3>
               <p className="text-sm text-white/40">{profile.email}</p>
-              <p className="text-xs text-white/30 mt-1 capitalize">{profile.role}</p>
+              <p className="text-xs text-white/30 mt-1 capitalize">
+                {profile.role}
+              </p>
             </div>
           </div>
 
           {/* Basic Info */}
           <section className="space-y-6 rounded-lg border border-white/8 bg-white/2 p-6">
-            <h3 className="text-lg font-semibold text-white">Basic Information</h3>
+            <h3 className="text-lg font-semibold text-white">
+              Basic Information
+            </h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <InputField
                 id="input-display-name"
                 label="Display Name"
                 value={formData.displayName}
-                onChange={(v) => handleChange('displayName', v)}
+                onChange={(v) => handleChange("displayName", v)}
                 required
               />
               <InputField
                 id="input-title"
                 label="Title / Role"
                 value={formData.title}
-                onChange={(v) => handleChange('title', v)}
+                onChange={(v) => handleChange("title", v)}
                 placeholder="e.g., Lead Developer"
               />
               <InputField
                 id="input-phone"
                 label="Phone"
                 value={formData.phone}
-                onChange={(v) => handleChange('phone', v)}
+                onChange={(v) => handleChange("phone", v)}
                 placeholder="+63 XXX XXX XXXX"
               />
               <InputField
                 id="input-location"
                 label="Location"
                 value={formData.location}
-                onChange={(v) => handleChange('location', v)}
+                onChange={(v) => handleChange("location", v)}
                 placeholder="e.g., Iloilo, PH"
               />
             </div>
             <div>
-              <label htmlFor="input-bio" className="block text-xs text-white/40 uppercase tracking-wider mb-2">
+              <label
+                htmlFor="input-bio"
+                className="block text-xs text-white/40 uppercase tracking-wider mb-2"
+              >
                 Bio
               </label>
               <textarea
                 id="input-bio"
                 value={formData.bio}
-                onChange={(e) => handleChange('bio', e.target.value)}
+                onChange={(e) => handleChange("bio", e.target.value)}
                 rows={3}
                 className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm text-white placeholder-white/30 outline-none transition-colors focus:border-white/20 resize-none"
                 placeholder="A short bio regarding your expertise..."
@@ -247,28 +270,28 @@ export function ProfileForm({ profile }: ProfileFormProps) {
               <InputField
                 label="LinkedIn"
                 value={formData.social.linkedin}
-                onChange={(v) => handleChange('social.linkedin', v)}
+                onChange={(v) => handleChange("social.linkedin", v)}
                 placeholder="https://linkedin.com/in/..."
                 icon={Linkedin}
               />
               <InputField
                 label="GitHub"
                 value={formData.social.github}
-                onChange={(v) => handleChange('social.github', v)}
+                onChange={(v) => handleChange("social.github", v)}
                 placeholder="https://github.com/..."
                 icon={Github}
               />
               <InputField
                 label="Twitter / X"
                 value={formData.social.twitter}
-                onChange={(v) => handleChange('social.twitter', v)}
+                onChange={(v) => handleChange("social.twitter", v)}
                 placeholder="https://x.com/..."
                 icon={Twitter}
               />
               <InputField
                 label="Website"
                 value={formData.social.website}
-                onChange={(v) => handleChange('social.website', v)}
+                onChange={(v) => handleChange("social.website", v)}
                 placeholder="https://..."
                 icon={Globe}
               />
@@ -278,7 +301,9 @@ export function ProfileForm({ profile }: ProfileFormProps) {
           {/* Namecard Settings */}
           <section className="space-y-6 rounded-lg border border-white/8 bg-white/2 p-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">Digital Namecard</h3>
+              <h3 className="text-lg font-semibold text-white">
+                Digital Namecard
+              </h3>
               {formData.namecard.username && (
                 <a
                   href={`/card/${formData.namecard.username}`}
@@ -297,7 +322,12 @@ export function ProfileForm({ profile }: ProfileFormProps) {
                   id="input-username"
                   label="Username"
                   value={formData.namecard.username}
-                  onChange={(v) => handleChange('namecard.username', v.toLowerCase().replace(/\s/g, '-'))}
+                  onChange={(v) =>
+                    handleChange(
+                      "namecard.username",
+                      v.toLowerCase().replace(/\s/g, "-"),
+                    )
+                  }
                   placeholder="yourname"
                   onBlur={handleUsernameBlur}
                 />
@@ -308,41 +338,53 @@ export function ProfileForm({ profile }: ProfileFormProps) {
               <InputField
                 label="Tagline"
                 value={formData.namecard.tagline}
-                onChange={(v) => handleChange('namecard.tagline', v)}
+                onChange={(v) => handleChange("namecard.tagline", v)}
                 placeholder="Short catchy tagline"
               />
             </div>
 
             {/* Visual Customization */}
             <div className="space-y-4 pt-2">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-white/60">Appearance</h4>
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-white/60">
+                Appearance
+              </h4>
 
               {/* Background Selection */}
               <div>
-                <label className="block text-xs text-white/40 uppercase tracking-wider mb-2">Background Style</label>
+                <label className="block text-xs text-white/40 uppercase tracking-wider mb-2">
+                  Background Style
+                </label>
                 <div className="grid grid-cols-4 gap-2">
                   <BgOption
                     id="gradient-dark"
-                    active={formData.namecard.background === 'gradient-dark'}
-                    onClick={() => handleChange('namecard.background', 'gradient-dark')}
+                    active={formData.namecard.background === "gradient-dark"}
+                    onClick={() =>
+                      handleChange("namecard.background", "gradient-dark")
+                    }
                     className="bg-gradient-to-br from-gray-900 to-black"
                   />
                   <BgOption
                     id="gradient-light"
-                    active={formData.namecard.background === 'gradient-light'}
-                    onClick={() => handleChange('namecard.background', 'gradient-light')}
+                    active={formData.namecard.background === "gradient-light"}
+                    onClick={() =>
+                      handleChange("namecard.background", "gradient-light")
+                    }
                     className="bg-gradient-to-br from-gray-100 to-white"
                   />
                   <BgOption
                     id="glass-1"
-                    active={formData.namecard.background === 'glass-1'}
-                    onClick={() => handleChange('namecard.background', 'glass-1')}
+                    active={formData.namecard.background === "glass-1"}
+                    onClick={() =>
+                      handleChange("namecard.background", "glass-1")
+                    }
                     className="bg-white/10 backdrop-blur-md"
                   />
                   <BgOption
                     id="glass-2"
-                    active={formData.namecard.background === 'glass-2'}
-                    onClick={() => handleChange('namecard.background', 'glass-2')}
+                    active={formData.namecard.background === "glass-2"}
+                    onClick={() =>
+                      handleChange("namecard.background", "glass-2")
+                    }
                     className="bg-black/40 backdrop-blur-xl"
                   />
                 </div>
@@ -350,58 +392,74 @@ export function ProfileForm({ profile }: ProfileFormProps) {
 
               {/* Accent Color */}
               <div>
-                <label className="block text-xs text-white/40 uppercase tracking-wider mb-2">Accent Color</label>
+                <label className="block text-xs text-white/40 uppercase tracking-wider mb-2">
+                  Accent Color
+                </label>
                 <div className="flex items-center gap-3">
                   <input
                     type="color"
                     value={formData.namecard.accentColor}
-                    onChange={(e) => handleChange('namecard.accentColor', e.target.value)}
+                    onChange={(e) =>
+                      handleChange("namecard.accentColor", e.target.value)
+                    }
                     className="h-8 w-16 rounded border border-white/10 bg-transparent cursor-pointer"
                   />
-                  <span className="text-xs font-mono text-white/50">{formData.namecard.accentColor}</span>
+                  <span className="text-xs font-mono text-white/50">
+                    {formData.namecard.accentColor}
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* Visibility Settings */}
             <div className="space-y-4 pt-2">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-white/60">Visibility</h4>
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-white/60">
+                Visibility
+              </h4>
 
               <div className="grid grid-cols-2 gap-4">
                 <Checkbox
                   label="Show Email"
                   checked={formData.namecard.showEmail}
-                  onChange={(c) => handleChange('namecard.showEmail', c)}
+                  onChange={(c) => handleChange("namecard.showEmail", c)}
                 />
                 <Checkbox
                   label="Show Phone"
                   checked={formData.namecard.showPhone}
-                  onChange={(c) => handleChange('namecard.showPhone', c)}
+                  onChange={(c) => handleChange("namecard.showPhone", c)}
                 />
               </div>
 
               <div className="border-t border-white/5 pt-3 mt-1">
-                <h5 className="text-[10px] text-white/40 mb-2">SOCIAL ICONS VISIBILITY</h5>
+                <h5 className="text-[10px] text-white/40 mb-2">
+                  SOCIAL ICONS VISIBILITY
+                </h5>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                   <Checkbox
                     label="LinkedIn"
                     checked={formData.namecard.socials.linkedin}
-                    onChange={(c) => handleChange('namecard.socials.linkedin', c)}
+                    onChange={(c) =>
+                      handleChange("namecard.socials.linkedin", c)
+                    }
                   />
                   <Checkbox
                     label="GitHub"
                     checked={formData.namecard.socials.github}
-                    onChange={(c) => handleChange('namecard.socials.github', c)}
+                    onChange={(c) => handleChange("namecard.socials.github", c)}
                   />
                   <Checkbox
                     label="Twitter"
                     checked={formData.namecard.socials.twitter}
-                    onChange={(c) => handleChange('namecard.socials.twitter', c)}
+                    onChange={(c) =>
+                      handleChange("namecard.socials.twitter", c)
+                    }
                   />
                   <Checkbox
                     label="Website"
                     checked={formData.namecard.socials.website}
-                    onChange={(c) => handleChange('namecard.socials.website', c)}
+                    onChange={(c) =>
+                      handleChange("namecard.socials.website", c)
+                    }
                   />
                 </div>
               </div>
@@ -441,14 +499,15 @@ export function ProfileForm({ profile }: ProfileFormProps) {
             {...formData}
             email={profile.email}
             namecard={formData.namecard}
-            photoURL={formData.photoURL || ''}
+            photoURL={formData.photoURL || ""}
           />
 
           <div className="mt-6 rounded-lg border border-yellow-500/20 bg-yellow-500/5 p-4">
-            <div className='flex gap-2 items-start'>
-              <Smartphone className='w-4 h-4 text-yellow-500 mt-0.5' />
+            <div className="flex gap-2 items-start">
+              <Smartphone className="w-4 h-4 text-yellow-500 mt-0.5" />
               <p className="text-xs text-yellow-200/80">
-                This preview simulates how your namecard looks on mobile devices. Background styles may vary slightly across browsers.
+                This preview simulates how your namecard looks on mobile
+                devices. Background styles may vary slightly across browsers.
               </p>
             </div>
           </div>
@@ -475,13 +534,16 @@ function InputField({
   onChange: (value: string) => void;
   placeholder?: string;
   required?: boolean;
-    icon?: React.ComponentType<{ className?: string }>;
+  icon?: React.ComponentType<{ className?: string }>;
   onBlur?: () => void;
-    id?: string;
+  id?: string;
 }) {
   return (
     <div>
-      <label htmlFor={id} className="block text-xs text-white/40 uppercase tracking-wider mb-2">
+      <label
+        htmlFor={id}
+        className="block text-xs text-white/40 uppercase tracking-wider mb-2"
+      >
         {label}
       </label>
       <div className="relative">
@@ -497,7 +559,7 @@ function InputField({
           placeholder={placeholder}
           required={required}
           className={`w-full rounded-sm border border-white/10 bg-black/20 px-4 py-2 text-sm text-white placeholder-white/20 outline-none transition-all focus:border-white/30 focus:bg-black/40 ${
-            Icon ? 'pl-10' : ''
+            Icon ? "pl-10" : ""
           }`}
         />
       </div>
@@ -516,8 +578,13 @@ function Checkbox({
 }) {
   return (
     <label className="flex items-center gap-2 cursor-pointer group">
-      <div className={`h-4 w-4 rounded border transition-colors flex items-center justify-center ${checked ? 'bg-cyan-500 border-cyan-500' : 'border-white/20 bg-transparent group-hover:border-white/40'
-        }`}>
+      <div
+        className={`h-4 w-4 rounded border transition-colors flex items-center justify-center ${
+          checked
+            ? "bg-cyan-500 border-cyan-500"
+            : "border-white/20 bg-transparent group-hover:border-white/40"
+        }`}
+      >
         {checked && <div className="h-2 w-2 rounded-full bg-black" />}
       </div>
       <input
@@ -526,20 +593,34 @@ function Checkbox({
         onChange={(e) => onChange(e.target.checked)}
         className="hidden"
       />
-      <span className={`text-sm transition-colors ${checked ? 'text-white' : 'text-white/60 group-hover:text-white/80'}`}>
+      <span
+        className={`text-sm transition-colors ${checked ? "text-white" : "text-white/60 group-hover:text-white/80"}`}
+      >
         {label}
       </span>
     </label>
   );
 }
 
-function BgOption({ active, onClick, className }: { id?: string, active: boolean, onClick: () => void, className: string }) {
+function BgOption({
+  active,
+  onClick,
+  className,
+}: {
+  id?: string;
+  active: boolean;
+  onClick: () => void;
+  className: string;
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`h-12 w-full rounded-md border transition-all ${className} ${active ? 'border-cyan-500 ring-2 ring-cyan-500/20' : 'border-white/10 hover:border-white/30'
-        }`}
+      className={`h-12 w-full rounded-md border transition-all ${className} ${
+        active
+          ? "border-cyan-500 ring-2 ring-cyan-500/20"
+          : "border-white/10 hover:border-white/30"
+      }`}
     />
   );
 }

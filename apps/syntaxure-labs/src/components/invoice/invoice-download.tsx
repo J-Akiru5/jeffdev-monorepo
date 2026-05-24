@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Invoice PDF Download Button
@@ -7,16 +7,16 @@
  * Uses dynamic import to avoid SSR issues with @react-pdf/renderer.
  */
 
-import dynamic from 'next/dynamic';
-import { Download, Loader2 } from 'lucide-react';
-import { InvoicePDF } from './invoice-pdf';
-import type { Invoice } from '@/types/invoice';
+import dynamic from "next/dynamic";
+import { Download, Loader2 } from "lucide-react";
+import { InvoicePDF } from "./invoice-pdf";
+import type { Invoice } from "@/types/invoice";
 
 // Dynamic import PDFDownloadLink to avoid SSR issues
 const PDFDownloadLink = dynamic(
-  () => import('@react-pdf/renderer').then((mod) => mod.PDFDownloadLink),
-  { 
-    ssr: false, 
+  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
+  {
+    ssr: false,
     loading: () => (
       <button
         disabled
@@ -25,8 +25,8 @@ const PDFDownloadLink = dynamic(
         <Loader2 className="h-4 w-4 animate-spin" />
         Loading PDF...
       </button>
-    )
-  }
+    ),
+  },
 );
 
 interface InvoiceDownloadProps {
@@ -54,9 +54,7 @@ export function InvoiceDownload({ invoice, className }: InvoiceDownloadProps) {
         }
 
         if (error) {
-          return (
-            <span className="text-red-400">Error generating PDF</span>
-          );
+          return <span className="text-red-400">Error generating PDF</span>;
         }
 
         return (

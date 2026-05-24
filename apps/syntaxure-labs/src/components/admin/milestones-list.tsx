@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Milestones List Component
@@ -6,10 +6,14 @@
  * Interactive list of project milestones with status toggles.
  */
 
-import { useState, useTransition } from 'react';
-import { Circle, CheckCircle2, Clock, Trash2, Plus } from 'lucide-react';
-import { updateMilestoneStatus, deleteMilestone, addMilestone } from '@/app/actions/project-management';
-import type { ProjectMilestone, MilestoneStatus } from '@/types/supabase';
+import { useState, useTransition } from "react";
+import { Circle, CheckCircle2, Clock, Trash2, Plus } from "lucide-react";
+import {
+  updateMilestoneStatus,
+  deleteMilestone,
+  addMilestone,
+} from "@/app/actions/project-management";
+import type { ProjectMilestone, MilestoneStatus } from "@/types/supabase";
 
 interface MilestonesListProps {
   slug: string;
@@ -19,30 +23,41 @@ interface MilestonesListProps {
 
 const statusIcons = {
   pending: Circle,
-  'in-progress': Clock,
+  "in-progress": Clock,
   completed: CheckCircle2,
 };
 
 const statusColors = {
-  pending: 'text-white/30',
-  'in-progress': 'text-yellow-400',
-  completed: 'text-emerald-400',
+  pending: "text-white/30",
+  "in-progress": "text-yellow-400",
+  completed: "text-emerald-400",
 };
 
-export function MilestonesList({ slug, milestones, onProgressUpdate }: MilestonesListProps) {
+export function MilestonesList({
+  slug,
+  milestones,
+  onProgressUpdate,
+}: MilestonesListProps) {
   const [isPending, startTransition] = useTransition();
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newTitle, setNewTitle] = useState('');
+  const [newTitle, setNewTitle] = useState("");
 
-  const handleStatusChange = (milestoneId: string, currentStatus: MilestoneStatus) => {
+  const handleStatusChange = (
+    milestoneId: string,
+    currentStatus: MilestoneStatus,
+  ) => {
     const nextStatus: Record<MilestoneStatus, MilestoneStatus> = {
-      pending: 'in-progress',
-      'in-progress': 'completed',
-      completed: 'pending',
+      pending: "in-progress",
+      "in-progress": "completed",
+      completed: "pending",
     };
 
     startTransition(async () => {
-      const result = await updateMilestoneStatus(slug, milestoneId, nextStatus[currentStatus]);
+      const result = await updateMilestoneStatus(
+        slug,
+        milestoneId,
+        nextStatus[currentStatus],
+      );
       if (result.success && result.progress !== undefined && onProgressUpdate) {
         onProgressUpdate(result.progress);
       }
@@ -50,7 +65,7 @@ export function MilestonesList({ slug, milestones, onProgressUpdate }: Milestone
   };
 
   const handleDelete = (milestoneId: string) => {
-    if (!confirm('Delete this milestone?')) return;
+    if (!confirm("Delete this milestone?")) return;
     startTransition(async () => {
       await deleteMilestone(slug, milestoneId);
     });
@@ -61,10 +76,10 @@ export function MilestonesList({ slug, milestones, onProgressUpdate }: Milestone
     startTransition(async () => {
       await addMilestone(slug, {
         title: newTitle.trim(),
-        status: 'pending',
+        status: "pending",
         order: milestones.length,
       } as any);
-      setNewTitle('');
+      setNewTitle("");
       setShowAddForm(false);
     });
   };
@@ -86,11 +101,13 @@ export function MilestonesList({ slug, milestones, onProgressUpdate }: Milestone
             <div
               key={milestone.id}
               className={`flex items-center gap-3 rounded-md border border-white/[0.06] bg-white/[0.02] px-4 py-3 ${
-                isPending ? 'opacity-50' : ''
+                isPending ? "opacity-50" : ""
               }`}
             >
               <button
-                onClick={() => handleStatusChange(milestone.id, milestone.status)}
+                onClick={() =>
+                  handleStatusChange(milestone.id, milestone.status)
+                }
                 disabled={isPending}
                 className={`${statusColors[milestone.status]} transition-colors hover:text-white`}
               >
@@ -100,9 +117,9 @@ export function MilestonesList({ slug, milestones, onProgressUpdate }: Milestone
               <div className="flex-1">
                 <span
                   className={`text-sm ${
-                    milestone.status === 'completed'
-                      ? 'text-white/40 line-through'
-                      : 'text-white'
+                    milestone.status === "completed"
+                      ? "text-white/40 line-through"
+                      : "text-white"
                   }`}
                 >
                   {milestone.title}
@@ -132,7 +149,7 @@ export function MilestonesList({ slug, milestones, onProgressUpdate }: Milestone
             placeholder="Milestone title..."
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
             className="flex-1 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/30 outline-none focus:border-white/20"
             autoFocus
           />

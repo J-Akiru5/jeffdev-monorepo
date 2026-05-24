@@ -1,4 +1,4 @@
-'use server';
+"use server";
 
 /**
  * Waitlist Actions
@@ -6,18 +6,21 @@
  * Server actions for Prism Context Engine waitlist management.
  */
 
-import { z } from 'zod';
-import { getAdminClient } from '@/lib/supabase/admin';
-import { sendEmail } from '@/lib/email';
-import { prismWaitlistConfirmation, prismWaitlistNotification } from '@/lib/emails/prism-emails';
+import { z } from "zod";
+import { getAdminClient } from "@/lib/supabase/admin";
+import { sendEmail } from "@/lib/email";
+import {
+  prismWaitlistConfirmation,
+  prismWaitlistNotification,
+} from "@/lib/emails/prism-emails";
 
 // Updated schema: Role is completely optional now, email is required.
 const waitlistSchema = z.object({
-  email: z.string().email('Please enter a valid email'),
-  role: z.string().optional().default('unknown'),
+  email: z.string().email("Please enter a valid email"),
+  role: z.string().optional().default("unknown"),
 });
 
-export type WaitlistRole = z.infer<typeof waitlistSchema>['role'];
+export type WaitlistRole = z.infer<typeof waitlistSchema>["role"];
 
 export interface WaitlistEntry {
   id: string;
@@ -41,25 +44,25 @@ export async function joinWaitlist(data: {
 
     // Check if email already exists
     const { data: existing, error: checkError } = await supabase
-      .from('prism_waitlist')
-      .select('id')
-      .eq('email', validated.email)
+      .from("prism_waitlist")
+      .select("id")
+      .eq("email", validated.email)
       .limit(1);
 
     if (checkError) throw checkError;
     if (existing && existing.length > 0) {
-      return { success: false, error: 'You\'re already on the waitlist!' };
+      return { success: false, error: "You're already on the waitlist!" };
     }
 
     // Add to waitlist
     const { error: insertError } = await supabase
-      .from('prism_waitlist')
+      .from("prism_waitlist")
       .insert({
         email: validated.email,
         role: validated.role,
         created_at: new Date().toISOString(),
-        source: 'website',
-        status: 'approved', // Auto-approve
+        source: "website",
+        status: "approved", // Auto-approve
         email_sent: true,
       });
 
@@ -68,18 +71,18 @@ export async function joinWaitlist(data: {
     // Send confirmation to user
     await sendEmail({
       to: validated.email,
-      subject: 'Transmission Received: Prism Context Engine',
+      subject: "Transmission Received: Prism Context Engine",
       html: prismWaitlistConfirmation,
     });
 
     // Send notification to admin (Jeff)
     await sendEmail({
-      to: 'jeffmartinez@jeffdev.studio',
+      to: "jeffmartinez@jeffdev.studio",
       subject: `[Prism] New Waitlist: ${validated.email}`,
-      html: prismWaitlistNotification({ 
-        email: validated.email, 
+      html: prismWaitlistNotification({
+        email: validated.email,
         role: validated.role,
-        source: 'website' 
+        source: "website",
       }),
     });
 
@@ -87,11 +90,11 @@ export async function joinWaitlist(data: {
   } catch (error) {
     if (error instanceof z.ZodError) {
       // ZodError.issues is the standard property
-      const message = error.issues?.[0]?.message || 'Invalid input';
+      const message = error.issues?.[0]?.message || "Invalid input";
       return { success: false, error: message };
     }
-    console.error('[JOIN WAITLIST ERROR]', error);
-    return { success: false, error: 'Something went wrong. Please try again.' };
+    console.error("[JOIN WAITLIST ERROR]", error);
+    return { success: false, error: "Something went wrong. Please try again." };
   }
 }
 
@@ -102,9 +105,9 @@ export async function getWaitlistEntries(): Promise<WaitlistEntry[]> {
   try {
     const supabase = getAdminClient() as any;
     const { data, error } = await supabase
-      .from('prism_waitlist')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .from("prism_waitlist")
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error || !data) return [];
 
@@ -113,7 +116,7 @@ export async function getWaitlistEntries(): Promise<WaitlistEntry[]> {
       ...doc,
     })) as WaitlistEntry[];
   } catch (error) {
-    console.error('[GET WAITLIST ERROR]', error);
+    console.error("[GET WAITLIST ERROR]", error);
     return [];
   }
 }

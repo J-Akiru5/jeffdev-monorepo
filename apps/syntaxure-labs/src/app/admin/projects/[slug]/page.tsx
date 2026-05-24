@@ -1,14 +1,21 @@
-import Link from 'next/link';
-import { ArrowLeft, Calendar, DollarSign, User, Users, Edit } from 'lucide-react';
-import { notFound } from 'next/navigation';
-import { getProjects } from '@/lib/data';
-import { ProgressBar } from '@/components/admin/progress-bar';
-import { ProjectStatusSelector } from '@/components/admin/project-status-selector';
-import { MilestonesList } from '@/components/admin/milestones-list';
-import { DeleteProjectButton } from '@/components/admin/delete-project-button';
-import type { FirestoreProject, ProjectMilestone } from '@/types/supabase';
+import Link from "next/link";
+import {
+  ArrowLeft,
+  Calendar,
+  DollarSign,
+  User,
+  Users,
+  Edit,
+} from "lucide-react";
+import { notFound } from "next/navigation";
+import { getProjects } from "@/lib/data";
+import { ProgressBar } from "@/components/admin/progress-bar";
+import { ProjectStatusSelector } from "@/components/admin/project-status-selector";
+import { MilestonesList } from "@/components/admin/milestones-list";
+import { DeleteProjectButton } from "@/components/admin/delete-project-button";
+import type { FirestoreProject, ProjectMilestone } from "@/types/supabase";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 /**
  * Project Detail Page
@@ -23,14 +30,16 @@ interface Props {
 export default async function ProjectDetailPage({ params }: Props) {
   const { slug } = await params;
   const projects = await getProjects();
-  const project = projects.find((p) => p.slug === slug) as FirestoreProject | undefined;
+  const project = projects.find((p) => p.slug === slug) as
+    | FirestoreProject
+    | undefined;
 
   if (!project) {
     notFound();
   }
 
   // Default values for new management fields
-  const status = project.status || 'pending';
+  const status = project.status || "pending";
   const progress = project.progress || 0;
   const milestones = (project.milestones || []) as ProjectMilestone[];
   const deadline = project.deadline;
@@ -55,9 +64,13 @@ export default async function ProjectDetailPage({ params }: Props) {
             <h1 className="text-3xl font-bold text-white">{project.title}</h1>
             <ProjectStatusSelector slug={slug} currentStatus={status} />
           </div>
-          <p className="mt-2 text-white/50">{project.client} • {project.category}</p>
+          <p className="mt-2 text-white/50">
+            {project.client} • {project.category}
+          </p>
           {project.refNo && (
-            <p className="mt-1 font-mono text-xs text-white/30">{project.refNo}</p>
+            <p className="mt-1 font-mono text-xs text-white/30">
+              {project.refNo}
+            </p>
           )}
         </div>
 
@@ -116,7 +129,7 @@ export default async function ProjectDetailPage({ params }: Props) {
           {/* Assignment */}
           <div className="rounded-md border border-white/[0.08] bg-white/[0.02] p-6">
             <h2 className="mb-4 font-semibold text-white">Team</h2>
-            
+
             {project.assignedPartner ? (
               <div className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-500/20">
@@ -124,26 +137,29 @@ export default async function ProjectDetailPage({ params }: Props) {
                 </div>
                 <div>
                   <div className="text-sm text-white">Partner</div>
-                  <div className="text-xs text-white/40">{project.assignedPartner}</div>
+                  <div className="text-xs text-white/40">
+                    {project.assignedPartner}
+                  </div>
                 </div>
               </div>
             ) : (
               <p className="text-sm text-white/30">No partner assigned</p>
             )}
 
-            {project.assignedEmployees && project.assignedEmployees.length > 0 && (
-              <div className="mt-4 flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500/20">
-                  <Users className="h-4 w-4 text-cyan-400" />
-                </div>
-                <div>
-                  <div className="text-sm text-white">Employees</div>
-                  <div className="text-xs text-white/40">
-                    {project.assignedEmployees.length} assigned
+            {project.assignedEmployees &&
+              project.assignedEmployees.length > 0 && (
+                <div className="mt-4 flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-cyan-500/20">
+                    <Users className="h-4 w-4 text-cyan-400" />
+                  </div>
+                  <div>
+                    <div className="text-sm text-white">Employees</div>
+                    <div className="text-xs text-white/40">
+                      {project.assignedEmployees.length} assigned
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
 
           {/* Details */}
@@ -156,11 +172,15 @@ export default async function ProjectDetailPage({ params }: Props) {
               </div>
               <div className="flex justify-between">
                 <dt className="text-white/40">Technologies</dt>
-                <dd className="text-white">{project.technologies.length} tech</dd>
+                <dd className="text-white">
+                  {project.technologies.length} tech
+                </dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-white/40">Featured</dt>
-                <dd className="text-white">{project.featured ? 'Yes' : 'No'}</dd>
+                <dd className="text-white">
+                  {project.featured ? "Yes" : "No"}
+                </dd>
               </div>
             </dl>
           </div>

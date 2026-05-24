@@ -1,10 +1,10 @@
-import Link from 'next/link';
-import { ArrowUpRight, ArrowLeft } from 'lucide-react';
-import { Header } from '@/components/layout/header';
-import { Footer } from '@/components/layout/footer';
-import { CTA } from '@/components/sections/cta';
-import { getProjects, getFeaturedProjects } from '@/lib/data';
-import type { Metadata } from 'next';
+import Link from "next/link";
+import { ArrowUpRight, ArrowLeft } from "lucide-react";
+import { Header } from "@/components/layout/header";
+import { Footer } from "@/components/layout/footer";
+import { CTASection } from "@/components/sections/cta-section";
+import { getProjects, getFeaturedProjects } from "@/lib/data";
+import type { Metadata } from "next";
 
 /**
  * Work Page
@@ -14,9 +14,9 @@ import type { Metadata } from 'next';
  */
 
 export const metadata: Metadata = {
-  title: 'Work',
+  title: "Work",
   description:
-    'Case studies and success stories. See how we help startups and enterprises build high-performance web systems that drive growth.',
+    "Case studies and success stories. See how we help startups and enterprises build high-performance web systems that drive growth.",
 };
 
 export default async function WorkPage() {
@@ -156,7 +156,7 @@ export default async function WorkPage() {
           </section>
         )}
 
-        <CTA />
+        <CTASection />
       </main>
       <Footer />
     </>

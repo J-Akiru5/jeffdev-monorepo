@@ -4,7 +4,7 @@
  * App settings and Google Calendar configuration.
  */
 
-import { Calendar, RefreshCw, User, Bell } from 'lucide-react';
+import { Calendar, RefreshCw, User, Bell } from "lucide-react";
 
 export default function SettingsPage() {
   return (
@@ -26,14 +26,17 @@ export default function SettingsPage() {
               <Calendar className="h-6 w-6 text-cyan-400" />
             </div>
             <div className="flex-1">
-              <h2 className="text-lg font-semibold text-white">Google Calendar</h2>
+              <h2 className="text-lg font-semibold text-white">
+                Google Calendar
+              </h2>
               <p className="mt-1 text-sm text-white/40">
                 Connect your Google Calendar to sync events and tasks.
               </p>
 
               <div className="mt-4 rounded-lg border border-amber-500/20 bg-amber-500/10 p-4">
                 <p className="text-sm text-amber-400">
-                  <strong>Not connected.</strong> Configure Google Cloud Console to enable sync.
+                  <strong>Not connected.</strong> Configure Google Cloud Console
+                  to enable sync.
                 </p>
               </div>
 
@@ -58,7 +61,9 @@ export default function SettingsPage() {
 
               <div className="mt-4 space-y-4">
                 <label className="flex items-center justify-between">
-                  <span className="text-sm text-white/70">Auto-sync tasks with due dates</span>
+                  <span className="text-sm text-white/70">
+                    Auto-sync tasks with due dates
+                  </span>
                   <input
                     type="checkbox"
                     defaultChecked
@@ -66,7 +71,9 @@ export default function SettingsPage() {
                   />
                 </label>
                 <label className="flex items-center justify-between">
-                  <span className="text-sm text-white/70">Create calendar events for new tasks</span>
+                  <span className="text-sm text-white/70">
+                    Create calendar events for new tasks
+                  </span>
                   <input
                     type="checkbox"
                     defaultChecked
@@ -74,7 +81,9 @@ export default function SettingsPage() {
                   />
                 </label>
                 <label className="flex items-center justify-between">
-                  <span className="text-sm text-white/70">Import calendar events as tasks</span>
+                  <span className="text-sm text-white/70">
+                    Import calendar events as tasks
+                  </span>
                   <input
                     type="checkbox"
                     className="h-5 w-5 rounded border-white/20 bg-transparent text-cyan-500 focus:ring-cyan-500"
@@ -92,14 +101,18 @@ export default function SettingsPage() {
               <Bell className="h-6 w-6 text-emerald-400" />
             </div>
             <div className="flex-1">
-              <h2 className="text-lg font-semibold text-white">Notifications</h2>
+              <h2 className="text-lg font-semibold text-white">
+                Notifications
+              </h2>
               <p className="mt-1 text-sm text-white/40">
                 Configure task reminders and alerts.
               </p>
 
               <div className="mt-4 space-y-4">
                 <label className="flex items-center justify-between">
-                  <span className="text-sm text-white/70">Due date reminders</span>
+                  <span className="text-sm text-white/70">
+                    Due date reminders
+                  </span>
                   <input
                     type="checkbox"
                     defaultChecked
@@ -107,7 +120,9 @@ export default function SettingsPage() {
                   />
                 </label>
                 <label className="flex items-center justify-between">
-                  <span className="text-sm text-white/70">Daily task summary</span>
+                  <span className="text-sm text-white/70">
+                    Daily task summary
+                  </span>
                   <input
                     type="checkbox"
                     className="h-5 w-5 rounded border-white/20 bg-transparent text-cyan-500 focus:ring-cyan-500"

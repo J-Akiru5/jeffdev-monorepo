@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Task List Component
@@ -6,9 +6,9 @@
  * Container for displaying tasks grouped by project.
  */
 
-import { TaskItem } from './task-item';
-import { AddTaskInput } from './add-task-input';
-import type { Task, Project } from '@/lib/schemas';
+import { TaskItem } from "./task-item";
+import { AddTaskInput } from "./add-task-input";
+import type { Task, Project } from "@/lib/schemas";
 
 interface TaskListProps {
   tasks: Task[];
@@ -36,7 +36,7 @@ export function TaskList({
       <div className="flex items-center gap-3">
         <span
           className="h-3 w-3 rounded-full"
-          style={{ backgroundColor: project.color || '#06b6d4' }}
+          style={{ backgroundColor: project.color || "#06b6d4" }}
         />
         <h2 className="text-lg font-semibold text-white">{project.name}</h2>
         <span className="font-mono text-xs text-white/30">

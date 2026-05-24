@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Activity Chart Component
@@ -16,7 +16,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-} from 'recharts';
+} from "recharts";
 
 interface ActivityChartProps {
   data: {
@@ -34,35 +34,36 @@ export function ActivityChart({ data }: ActivityChartProps) {
           data={data}
           margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="rgba(255,255,255,0.06)"
+          />
           <XAxis
             dataKey="date"
-            tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 12 }}
-            tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
-            axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+            tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 12 }}
+            tickLine={{ stroke: "rgba(255,255,255,0.1)" }}
+            axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
           />
           <YAxis
-            tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 12 }}
-            tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
-            axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+            tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 12 }}
+            tickLine={{ stroke: "rgba(255,255,255,0.1)" }}
+            axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: '#0a0a0a',
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '6px',
-              color: '#fff',
+              backgroundColor: "#0a0a0a",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: "6px",
+              color: "#fff",
             }}
           />
-          <Legend
-            wrapperStyle={{ color: 'rgba(255,255,255,0.6)' }}
-          />
+          <Legend wrapperStyle={{ color: "rgba(255,255,255,0.6)" }} />
           <Line
             type="monotone"
             dataKey="quotes"
             stroke="#8b5cf6"
             strokeWidth={2}
-            dot={{ fill: '#8b5cf6', strokeWidth: 0, r: 3 }}
+            dot={{ fill: "#8b5cf6", strokeWidth: 0, r: 3 }}
             activeDot={{ r: 5 }}
           />
           <Line
@@ -70,7 +71,7 @@ export function ActivityChart({ data }: ActivityChartProps) {
             dataKey="messages"
             stroke="#06b6d4"
             strokeWidth={2}
-            dot={{ fill: '#06b6d4', strokeWidth: 0, r: 3 }}
+            dot={{ fill: "#06b6d4", strokeWidth: 0, r: 3 }}
             activeDot={{ r: 5 }}
           />
         </LineChart>

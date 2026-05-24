@@ -6,30 +6,31 @@
  */
 
 // Get version from package.json at build time
-const packageVersion = process.env.npm_package_version || '2.0.0';
+const packageVersion = process.env.npm_package_version || "2.0.0";
 
 // Git info - populated at build time via next.config.ts
-const gitCommitHash = process.env.NEXT_PUBLIC_GIT_COMMIT_SHA?.slice(0, 7) || 'dev';
-const gitBranch = process.env.NEXT_PUBLIC_GIT_BRANCH || 'local';
+const gitCommitHash =
+  process.env.NEXT_PUBLIC_GIT_COMMIT_SHA?.slice(0, 7) || "dev";
+const gitBranch = process.env.NEXT_PUBLIC_GIT_BRANCH || "local";
 
-type ReleaseStage = 'alpha' | 'beta' | 'stable';
+type ReleaseStage = "alpha" | "beta" | "stable";
 
 /**
  * Determine release stage based on environment and branch
  */
 function getReleaseStage(): ReleaseStage {
   // Production deployment (Vercel, etc.)
-  if (process.env.VERCEL_ENV === 'production' || gitBranch === 'main') {
-    return 'stable';
+  if (process.env.VERCEL_ENV === "production" || gitBranch === "main") {
+    return "stable";
   }
-  
+
   // Preview deployment or develop branch
-  if (process.env.VERCEL_ENV === 'preview' || gitBranch === 'develop') {
-    return 'beta';
+  if (process.env.VERCEL_ENV === "preview" || gitBranch === "develop") {
+    return "beta";
   }
-  
+
   // Local development or feature branches
-  return 'alpha';
+  return "alpha";
 }
 
 /**
@@ -42,11 +43,11 @@ function getReleaseStage(): ReleaseStage {
  */
 export function getVersion(): string {
   const stage = getReleaseStage();
-  
-  if (stage === 'stable') {
+
+  if (stage === "stable") {
     return `v${packageVersion}`;
   }
-  
+
   return `v${packageVersion}-${stage}.${gitCommitHash}`;
 }
 
@@ -61,8 +62,8 @@ export function getVersionInfo() {
     gitBranch,
     stage: getReleaseStage(),
     environment: process.env.NODE_ENV,
-    isProduction: process.env.NODE_ENV === 'production',
-    isDevelopment: process.env.NODE_ENV === 'development',
+    isProduction: process.env.NODE_ENV === "production",
+    isDevelopment: process.env.NODE_ENV === "development",
   };
 }
 
@@ -71,13 +72,16 @@ export function getVersionInfo() {
  */
 export function getVersionDisplay() {
   const info = getVersionInfo();
-  
+
   return {
     version: info.version,
     stageBadge: {
-      alpha: { label: 'ALPHA', className: 'bg-yellow-500/10 text-yellow-400' },
-      beta: { label: 'BETA', className: 'bg-purple-500/10 text-purple-400' },
-      stable: { label: 'STABLE', className: 'bg-emerald-500/10 text-emerald-400' },
+      alpha: { label: "ALPHA", className: "bg-yellow-500/10 text-yellow-400" },
+      beta: { label: "BETA", className: "bg-purple-500/10 text-purple-400" },
+      stable: {
+        label: "STABLE",
+        className: "bg-emerald-500/10 text-emerald-400",
+      },
     }[info.stage],
   };
 }

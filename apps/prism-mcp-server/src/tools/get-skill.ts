@@ -11,7 +11,9 @@ export interface GetSkillOutput {
   isError?: boolean;
 }
 
-export async function handleGetSkill(input: GetSkillInput): Promise<GetSkillOutput> {
+export async function handleGetSkill(
+  input: GetSkillInput,
+): Promise<GetSkillOutput> {
   const { skillId } = input;
 
   if (!skillId) {
@@ -49,7 +51,10 @@ export async function handleGetSkill(input: GetSkillInput): Promise<GetSkillOutp
       }
 
       if (!doc) {
-        doc = await rules.findOne({ skillsContent: { $exists: true, $ne: null }, name: { $regex: skillId, $options: "i" } });
+        doc = await rules.findOne({
+          skillsContent: { $exists: true, $ne: null },
+          name: { $regex: skillId, $options: "i" },
+        });
       }
     }
 
@@ -63,7 +68,9 @@ export async function handleGetSkill(input: GetSkillInput): Promise<GetSkillOutp
     let formatted = "";
 
     if (isSkillDoc) {
-      const stepsText = ((doc.steps as Array<{ title: string; content: string }>) || [])
+      const stepsText = (
+        (doc.steps as Array<{ title: string; content: string }>) || []
+      )
         .map((step, i) => `### Step ${i + 1}: ${step.title}\n\n${step.content}`)
         .join("\n\n");
       const desc = doc.description ? `${doc.description}\n\n` : "";
@@ -71,7 +78,8 @@ export async function handleGetSkill(input: GetSkillInput): Promise<GetSkillOutp
       const tokenCount = countTokensInText(fullText);
       formatted = `# ${doc.name}\n\n${fullText}\n\n---\n**Tokens:** ${tokenCount}`;
     } else {
-      const skillContent = (doc.skillsContent as string) || (doc.content as string);
+      const skillContent =
+        (doc.skillsContent as string) || (doc.content as string);
       const tokenCount = countTokensInText(skillContent);
       formatted = `# ${doc.name}\n\n${skillContent}\n\n---\n**Tokens:** ${tokenCount}`;
     }
@@ -81,7 +89,12 @@ export async function handleGetSkill(input: GetSkillInput): Promise<GetSkillOutp
     };
   } catch (error) {
     return {
-      content: [{ type: "text", text: `Error fetching skill: ${error instanceof Error ? error.message : "Unknown error"}` }],
+      content: [
+        {
+          type: "text",
+          text: `Error fetching skill: ${error instanceof Error ? error.message : "Unknown error"}`,
+        },
+      ],
       isError: true,
     };
   }

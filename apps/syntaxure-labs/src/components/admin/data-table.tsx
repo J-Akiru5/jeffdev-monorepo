@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Data Table Component
@@ -17,9 +17,15 @@ import {
   type ColumnDef,
   type SortingState,
   type ColumnFiltersState,
-} from '@tanstack/react-table';
-import { useState } from 'react';
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ArrowUpDown } from 'lucide-react';
+} from "@tanstack/react-table";
+import { useState } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  ArrowUpDown,
+} from "lucide-react";
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData, unknown>[];
@@ -33,12 +39,12 @@ export function DataTable<TData>({
   columns,
   data,
   searchKey,
-  searchPlaceholder = 'Search...',
+  searchPlaceholder = "Search...",
   onRowClick,
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilter] = useState('');
+  const [globalFilter, setGlobalFilter] = useState("");
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
@@ -71,7 +77,7 @@ export function DataTable<TData>({
           <input
             type="text"
             placeholder={searchPlaceholder}
-            value={globalFilter ?? ''}
+            value={globalFilter ?? ""}
             onChange={(e) => setGlobalFilter(e.target.value)}
             className="w-full max-w-sm rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm text-white placeholder-white/30 outline-none transition-colors focus:border-white/20"
           />
@@ -94,14 +100,14 @@ export function DataTable<TData>({
                         <div
                           className={
                             header.column.getCanSort()
-                              ? 'flex cursor-pointer select-none items-center gap-2 hover:text-white/60'
-                              : ''
+                              ? "flex cursor-pointer select-none items-center gap-2 hover:text-white/60"
+                              : ""
                           }
                           onClick={header.column.getToggleSortingHandler()}
                         >
                           {flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                           {header.column.getCanSort() && (
                             <ArrowUpDown className="h-3 w-3" />
@@ -127,12 +133,18 @@ export function DataTable<TData>({
                 table.getRowModel().rows.map((row) => (
                   <tr
                     key={row.id}
-                    className={`border-b border-white/4 transition-colors hover:bg-white/2 ${onRowClick ? 'cursor-pointer' : ''}`}
+                    className={`border-b border-white/4 transition-colors hover:bg-white/2 ${onRowClick ? "cursor-pointer" : ""}`}
                     onClick={() => onRowClick?.(row.original)}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="px-4 py-3 text-sm text-white/70">
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      <td
+                        key={cell.id}
+                        className="px-4 py-3 text-sm text-white/70"
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
                       </td>
                     ))}
                   </tr>
@@ -146,7 +158,7 @@ export function DataTable<TData>({
       {/* Pagination */}
       <div className="flex items-center justify-between">
         <div className="text-sm text-white/40">
-          Page {table.getState().pagination.pageIndex + 1} of{' '}
+          Page {table.getState().pagination.pageIndex + 1} of{" "}
           {table.getPageCount()}
         </div>
         <div className="flex items-center gap-2">

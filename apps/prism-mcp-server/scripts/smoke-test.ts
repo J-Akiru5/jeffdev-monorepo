@@ -40,12 +40,17 @@ try {
     const key = trimmed.slice(0, eqIdx).trim();
     let val = trimmed.slice(eqIdx + 1).trim();
     // Strip surrounding quotes if present
-    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+    if (
+      (val.startsWith('"') && val.endsWith('"')) ||
+      (val.startsWith("'") && val.endsWith("'"))
+    ) {
       val = val.slice(1, -1);
     }
     if (!process.env[key]) process.env[key] = val;
   }
-} catch { /* .env not found — rely on existing env */ }
+} catch {
+  /* .env not found — rely on existing env */
+}
 
 // ─── Config ────────────────────────────────────────────────────────────────
 const SERVER_SCRIPT = resolve(import.meta.dirname, "..", "src", "index.ts");
@@ -55,7 +60,9 @@ const TEST_PREFIX = `e2e-test-${randomUUID().slice(0, 8)}`;
 
 const MONGODB_URI = process.env.MONGODB_URI;
 const DATABASE_NAME = process.env.COSMOS_DATABASE_NAME || "prism";
-const AZURE_ENABLED = !!(process.env.AZURE_OPENAI_ENDPOINT && process.env.AZURE_OPENAI_API_KEY);
+const AZURE_ENABLED = !!(
+  process.env.AZURE_OPENAI_ENDPOINT && process.env.AZURE_OPENAI_API_KEY
+);
 
 let passed = 0;
 let failed = 0;
@@ -77,11 +84,12 @@ function skip(msg: string) {
 
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
-
-
 /** Connect to Cosmos DB and return the rules collection */
 async function connectDB(): Promise<Collection<Document>> {
-  const client = new MongoClient(MONGODB_URI!, { retryWrites: false, maxPoolSize: 5 });
+  const client = new MongoClient(MONGODB_URI!, {
+    retryWrites: false,
+    maxPoolSize: 5,
+  });
   await client.connect();
   const db = client.db(DATABASE_NAME);
   return db.collection("rules");
@@ -93,31 +101,35 @@ async function seedData(col: Collection<Document>) {
     {
       _id: `${TEST_PREFIX}-rule-1`,
       name: `${TEST_PREFIX}: Use @repo imports (no cross-app)`,
-      content: "Never import directly from other apps. Use `@repo/` or `@jdstudio/` packages.",
+      content:
+        "Never import directly from other apps. Use `@repo/` or `@jdstudio/` packages.",
       category: "architecture",
       priority: 1,
       tags: ["monorepo", "imports"],
       isActive: true,
       pattern: "from ['\"`]\\.\\./(\\.\\./)?apps/",
       severity: "error",
-      suggestion: 'Use `@repo/ui` or `@jdstudio/*` packages instead.',
+      suggestion: "Use `@repo/ui` or `@jdstudio/*` packages instead.",
     },
     {
       _id: `${TEST_PREFIX}-rule-2`,
       name: `${TEST_PREFIX}: Use Tailwind CSS (no inline styles)`,
-      content: "Use Tailwind utility classes instead of inline `style={{}}` props.",
+      content:
+        "Use Tailwind utility classes instead of inline `style={{}}` props.",
       category: "styling",
       priority: 10,
       tags: ["css", "tailwind"],
       isActive: true,
       pattern: "style\\s*=\\s*\\{\\{",
       severity: "warning",
-      suggestion: "Replace inline style with Tailwind classes like `className=\"flex gap-4\"`.",
+      suggestion:
+        'Replace inline style with Tailwind classes like `className="flex gap-4"`.',
     },
     {
       _id: `${TEST_PREFIX}-rule-3`,
       name: `${TEST_PREFIX}: No console.log in production`,
-      content: "Remove console.log/warn/error before committing. Use a proper logger.",
+      content:
+        "Remove console.log/warn/error before committing. Use a proper logger.",
       category: "security",
       priority: 20,
       tags: ["logging", "cleanup"],
@@ -198,7 +210,10 @@ interface JsonRpcResponse {
 class McpClient {
   private proc: ChildProcess;
   private nextId = 1;
-  private pending = new Map<number, { resolve: (v: JsonRpcResponse) => void; timer: NodeJS.Timeout }>();
+  private pending = new Map<
+    number,
+    { resolve: (v: JsonRpcResponse) => void; timer: NodeJS.Timeout }
+  >();
   private lineReader: ReturnType<typeof createInterface>;
 
   constructor(proc: ChildProcess) {
@@ -221,13 +236,19 @@ class McpClient {
     });
   }
 
-  async request(method: string, params?: Record<string, unknown>, timeoutMs = TOOL_TIMEOUT_MS): Promise<JsonRpcResponse> {
+  async request(
+    method: string,
+    params?: Record<string, unknown>,
+    timeoutMs = TOOL_TIMEOUT_MS,
+  ): Promise<JsonRpcResponse> {
     const id = this.nextId++;
     const msg: JsonRpcRequest = { jsonrpc: "2.0", id, method, params };
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         this.pending.delete(id);
-        reject(new Error(`Request ${id} (${method}) timed out after ${timeoutMs}ms`));
+        reject(
+          new Error(`Request ${id} (${method}) timed out after ${timeoutMs}ms`),
+        );
       }, timeoutMs);
       this.pending.set(id, { resolve, timer });
       this.proc.stdin!.write(JSON.stringify(msg) + "\n");
@@ -242,10 +263,19 @@ class McpClient {
     });
     if (resp.error) throw new Error(`Initialize failed: ${resp.error.message}`);
     // Send initialized notification (no response expected)
-    this.proc.stdin!.write(JSON.stringify({ jsonrpc: "2.0", method: "notifications/initialized", params: {} }) + "\n");
+    this.proc.stdin!.write(
+      JSON.stringify({
+        jsonrpc: "2.0",
+        method: "notifications/initialized",
+        params: {},
+      }) + "\n",
+    );
   }
 
-  async callTool(name: string, args: Record<string, unknown>): Promise<JsonRpcResponse> {
+  async callTool(
+    name: string,
+    args: Record<string, unknown>,
+  ): Promise<JsonRpcResponse> {
     return this.request("tools/call", { name, arguments: args });
   }
 
@@ -266,7 +296,9 @@ async function runTests() {
   if (!hasMongo) {
     skip("MONGODB_URI not set — cannot run E2E tests");
     console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-    console.log(`  ✅ ${passed} passed  ❌ ${failed} failed  ⏭️  ${skipped} skipped`);
+    console.log(
+      `  ✅ ${passed} passed  ❌ ${failed} failed  ⏭️  ${skipped} skipped`,
+    );
     console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
     process.exit(0);
   }
@@ -295,8 +327,17 @@ async function runTests() {
 
   // On Windows, spawn needs the .cmd extension for npm/pnpm bins
   const tsxBin = resolve(
-    import.meta.dirname, "..", "..", "..",
-    "node_modules", ".pnpm", "tsx@4.21.0", "node_modules", "tsx", "dist", "cli.mjs",
+    import.meta.dirname,
+    "..",
+    "..",
+    "..",
+    "node_modules",
+    ".pnpm",
+    "tsx@4.21.0",
+    "node_modules",
+    "tsx",
+    "dist",
+    "cli.mjs",
   );
   try {
     server = spawn(process.execPath, [tsxBin, SERVER_SCRIPT, "--standalone"], {
@@ -316,7 +357,11 @@ async function runTests() {
     // Wait for "Server connected and ready." on stderr
     const serverReady = new Promise<void>((resolve, reject) => {
       const timeout = setTimeout(() => {
-        reject(new Error(`Server did not start within ${STARTUP_TIMEOUT_MS}ms. stderr:\n${stderrChunks.join("")}`));
+        reject(
+          new Error(
+            `Server did not start within ${STARTUP_TIMEOUT_MS}ms. stderr:\n${stderrChunks.join("")}`,
+          ),
+        );
       }, STARTUP_TIMEOUT_MS);
 
       const stderrReader = createInterface({ input: server.stderr! });
@@ -357,7 +402,9 @@ async function runTests() {
   }
 
   // ── Phase 3: get_architectural_rules ──────────────────────────────────
-  console.log("\n📐 Phase 3: get_architectural_rules (Smart Context Selection)");
+  console.log(
+    "\n📐 Phase 3: get_architectural_rules (Smart Context Selection)",
+  );
   try {
     const resp = await mcp!.callTool("get_architectural_rules", {
       task: "build a React component with Tailwind styling",
@@ -367,7 +414,10 @@ async function runTests() {
     if (resp.error) {
       fail("get_architectural_rules returned error", resp.error);
     } else {
-      const result = resp.result as { content?: Array<{ text: string }>; _meta?: Record<string, unknown> };
+      const result = resp.result as {
+        content?: Array<{ text: string }>;
+        _meta?: Record<string, unknown>;
+      };
       const hasContent = result.content?.[0]?.text?.length > 0;
       if (hasContent) {
         ok("get_architectural_rules returned content");
@@ -378,7 +428,9 @@ async function runTests() {
       // Verify our test rules are findable — they may not appear in top-5 fallback if
       // other low-priority rules exist in the DB, but they ARE in the DB (confirmed below
       // via prism_check). Check the DB directly to be sure.
-      const count = await col!.countDocuments({ _id: { $regex: `^${TEST_PREFIX}` } });
+      const count = await col!.countDocuments({
+        _id: { $regex: `^${TEST_PREFIX}` },
+      });
       if (count === 5) {
         ok(`${count} seeded test rules exist in DB`);
       } else {
@@ -388,9 +440,13 @@ async function runTests() {
       // Check if smart selection used embeddings or fell back
       const meta = result._meta || {};
       if (meta.taskResult) {
-        ok(`Smart selection returned ${(meta.taskResult as Record<string,unknown>).returnedRules} rules (${(meta.taskResult as Record<string,unknown>).tokenCount} tokens)`);
+        ok(
+          `Smart selection returned ${(meta.taskResult as Record<string, unknown>).returnedRules} rules (${(meta.taskResult as Record<string, unknown>).tokenCount} tokens)`,
+        );
       } else if (meta.fallback) {
-        ok("Smart selection fell back to priority sort (embedding unavailable)");
+        ok(
+          "Smart selection fell back to priority sort (embedding unavailable)",
+        );
       } else {
         ok("get_architectural_rules responded");
       }
@@ -460,21 +516,29 @@ export function MyComponent() {
     } else {
       const result = resp.result as { content?: Array<{ text: string }> };
       const text = result.content?.[0]?.text || "";
-      const hasViolations = text.includes("VIOLATION") || text.includes("violation");
+      const hasViolations =
+        text.includes("VIOLATION") || text.includes("violation");
       if (hasViolations) {
         ok("prism_check detected violations in bad code");
       } else {
         fail("prism_check did not flag violations");
       }
 
-      const hasCrossApp = text.includes("../../apps/") || text.includes("cross-app") || text.includes("cross_app") || text.includes("Cross-App");
+      const hasCrossApp =
+        text.includes("../../apps/") ||
+        text.includes("cross-app") ||
+        text.includes("cross_app") ||
+        text.includes("Cross-App");
       if (hasCrossApp) {
         ok("prism_check caught cross-app import");
       } else {
         fail("prism_check missed cross-app import");
       }
 
-      const hasInlineStyle = text.includes("style={{") || text.includes("inline") || text.includes("Inline");
+      const hasInlineStyle =
+        text.includes("style={{") ||
+        text.includes("inline") ||
+        text.includes("Inline");
       if (hasInlineStyle) {
         ok("prism_check caught inline style");
       } else {
@@ -500,7 +564,7 @@ export function MyComponent() {
         endLine: 2,
         endColumn: 58,
         matchedText: `from "../../apps/agency/components/Header"`,
-        suggestion: 'Use `@repo/ui` or `@jdstudio/*` packages instead.',
+        suggestion: "Use `@repo/ui` or `@jdstudio/*` packages instead.",
       },
       code: `import { Something } from "../../apps/agency/components/Header";\nexport function MyComponent() { return <div>Hello</div>; }`,
     });
@@ -509,7 +573,10 @@ export function MyComponent() {
     } else {
       const result = resp.result as { content?: Array<{ text: string }> };
       const text = result.content?.[0]?.text || "";
-      const hasFix = text.includes("@repo") || text.includes("correctedCode") || text.includes("FIXME");
+      const hasFix =
+        text.includes("@repo") ||
+        text.includes("correctedCode") ||
+        text.includes("FIXME");
       if (hasFix) {
         ok("prism_fix applied a fix");
       } else {
@@ -539,13 +606,18 @@ export function MyComponent() {
           },
           structure: {
             dirs: ["src/components", "src/lib", "src/app"],
-            patterns: { "page.tsx": true, "layout.tsx": true, "loading.tsx": true },
+            patterns: {
+              "page.tsx": true,
+              "layout.tsx": true,
+              "loading.tsx": true,
+            },
           },
           configs: {
             tsconfig: { strict: true },
             "tailwind.config": { content: ["./src/**/*.{ts,tsx}"] },
           },
-          summary: "Next.js 16 project with Tailwind CSS, TypeScript strict mode, and @repo/ui package.",
+          summary:
+            "Next.js 16 project with Tailwind CSS, TypeScript strict mode, and @repo/ui package.",
         },
       });
       if (resp.error) {
@@ -553,7 +625,10 @@ export function MyComponent() {
       } else {
         const result = resp.result as { content?: Array<{ text: string }> };
         const text = result.content?.[0]?.text || "";
-        const hasRules = text.includes("rules") || text.includes("Rules") || text.includes("rule");
+        const hasRules =
+          text.includes("rules") ||
+          text.includes("Rules") ||
+          text.includes("rule");
         if (hasRules) {
           ok("repo_extract generated rules from scan data");
         } else {
@@ -578,11 +653,14 @@ export function MyComponent() {
     });
     const result = resp.result as { content?: Array<{ text: string }> };
     const text = result.content?.[0]?.text || "";
-    const isJson = text.startsWith("{") || text.startsWith("[") || text.includes('"rules"');
+    const isJson =
+      text.startsWith("{") || text.startsWith("[") || text.includes('"rules"');
     if (isJson) {
       ok("JSON format works (platform formatting)");
     } else {
-      skip("JSON format: embeddings unavailable → fallback returns markdown regardless of format param");
+      skip(
+        "JSON format: embeddings unavailable → fallback returns markdown regardless of format param",
+      );
     }
   } catch (e) {
     fail("Platform-specific formatting threw", e);
@@ -632,7 +710,9 @@ export function MyComponent() {
 
   // ── Summary ──────────────────────────────────────────────────────────
   console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-  console.log(`  ✅ ${passed} passed  ❌ ${failed} failed  ⏭️  ${skipped} skipped`);
+  console.log(
+    `  ✅ ${passed} passed  ❌ ${failed} failed  ⏭️  ${skipped} skipped`,
+  );
   console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
 
   process.exit(failed > 0 ? 1 : 0);

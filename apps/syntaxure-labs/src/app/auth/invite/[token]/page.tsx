@@ -1,7 +1,7 @@
-import Link from 'next/link';
-import { cookies } from 'next/headers';
-import { ArrowRight, AlertCircle, UserPlus } from 'lucide-react';
-import { getInviteByToken } from '@/app/actions/invites';
+import Link from "next/link";
+import { cookies } from "next/headers";
+import { ArrowRight, AlertCircle, UserPlus } from "lucide-react";
+import { getInviteByToken } from "@/app/actions/invites";
 
 /**
  * Invite Accept Page
@@ -72,7 +72,7 @@ export default async function InviteAcceptPage({ params }: InvitePageProps) {
               You&apos;re Invited!
             </h1>
             <p className="text-white/50">
-              Join Syntaxure Labs as{' '}
+              Join Syntaxure Labs as{" "}
               <span className="text-gradient-holographic font-semibold capitalize">
                 {invite.role}
               </span>
@@ -95,9 +95,9 @@ export default async function InviteAcceptPage({ params }: InvitePageProps) {
           </div>
 
           <p className="text-sm text-white/40 mb-5 text-center leading-relaxed">
-            Click below to sign in with Google using{' '}
-            <strong className="text-white/60">{invite.email}</strong>.
-            Your account will automatically be set up.
+            Click below to sign in with Google using{" "}
+            <strong className="text-white/60">{invite.email}</strong>. Your
+            account will automatically be set up.
           </p>
 
           <InviteSignupButton token={token} />
