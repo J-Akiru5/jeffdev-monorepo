@@ -50,7 +50,7 @@ export {
   publishDeploymentEvent,
   type N8nEvent,
   type N8nEventPayload,
-} from "./webhook-publisher.js";
+} from "./webhook-publisher";
 
 // Schema exports
 export {
