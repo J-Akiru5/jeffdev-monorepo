@@ -1,12 +1,7 @@
 import { NextRequest } from "next/server";
 import { getCollection } from "@syntaxure-labs/db/cosmos";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
-import { AzureOpenAI } from "openai";
-
-const AZURE_OPENAI_ENDPOINT = process.env.AZURE_OPENAI_ENDPOINT;
-const AZURE_OPENAI_API_KEY = process.env.AZURE_OPENAI_API_KEY;
-const AZURE_OPENAI_DEPLOYMENT =
-  process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "gpt-4o-mini";
+import { generateChatCompletion } from "@/lib/ai-router";
 
 interface RepoScanData {
   root?: string;
@@ -37,20 +32,8 @@ export async function POST(request: NextRequest) {
     return errorResponse("Valid scan report with structure is required", 400);
   }
 
-  if (!AZURE_OPENAI_ENDPOINT || !AZURE_OPENAI_API_KEY) {
-    return errorResponse(
-      "AI rule generation not configured (missing AZURE_OPENAI_* env vars)",
-      500,
-    );
-  }
-
   try {
     const scan = body.scan;
-    const client = new AzureOpenAI({
-      endpoint: AZURE_OPENAI_ENDPOINT,
-      apiKey: AZURE_OPENAI_API_KEY,
-      apiVersion: "2024-10-01-preview",
-    });
 
     const naming = scan.namingConventions || {};
     const imports = scan.imports || {};
@@ -112,21 +95,12 @@ ${configSummary || "None"}
 Each rule object: { "name": "Title", "category": "architecture|styling|security|performance|testing|documentation|custom", "content": "Detailed rule...", "priority": 1-100, "tags": ["tag"], "pattern": "optional regex", "severity": "error|warning|info" }
 Return ONLY the JSON array.`;
 
-    const response = await client.chat.completions.create({
-      model: AZURE_OPENAI_DEPLOYMENT,
-      messages: [
-        {
-          role: "system",
-          content:
-            "Generate concise governance rules from repo scan data. Return only valid JSON.",
-        },
-        { role: "user", content: prompt },
-      ],
+    const raw = await generateChatCompletion({
+      systemPrompt: "Generate concise governance rules from repo scan data. Return only valid JSON.",
+      userPrompt: prompt,
       temperature: 0.3,
-      max_tokens: 4000,
+      maxTokens: 4000,
     });
-
-    const raw = response.choices[0]?.message?.content || "[]";
     const cleaned = raw
       .replace(/^```(?:json)?\s*/, "")
       .replace(/\s*```$/, "")
@@ -192,7 +166,7 @@ Return ONLY the JSON array.`;
 
     return successResponse({
       rulesCreated: created,
-      modelUsed: AZURE_OPENAI_DEPLOYMENT,
+      modelUsed: (process.env.AI_PROVIDER || "deepseek"),
     });
   } catch (error) {
     return errorResponse(
