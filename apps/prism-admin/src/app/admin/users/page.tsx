@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getCollection } from "@syntaxure-labs/db/cosmos";
 import {
   Search,
   Filter,
@@ -32,11 +32,16 @@ export default async function UsersPage() {
 
   if (!currentUser) return null;
 
-  const usersCollection = await getCollection("users");
-  const users = await usersCollection
-    .find({})
-    .sort({ createdAt: -1 })
-    .toArray();
+  let users: any[] = [];
+  try {
+    const usersCollection = await getCollection("users");
+    users = await usersCollection
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray();
+  } catch (error) {
+    console.error("[users] Failed to fetch users from MongoDB:", error);
+  }
 
   // Group by tier for stats
   const tierCounts = users.reduce(

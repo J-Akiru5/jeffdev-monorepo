@@ -39,7 +39,7 @@ export default async function SettingsPage() {
   const integrations = {
     supabase: { connected: true, name: "Supabase (Auth + Database)" },
     cosmos: {
-      connected: !!process.env.COSMOS_CONNECTION_STRING,
+      connected: !!process.env.MONGODB_URI,
       name: "Cosmos DB (Prism Rules)",
     },
     paypal: {

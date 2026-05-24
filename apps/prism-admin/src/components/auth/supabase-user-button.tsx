@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { createClient } from "@/lib/supabase/browser";
 import { useRouter } from "next/navigation";
 import { LogOut, Settings } from "lucide-react";
@@ -19,7 +19,7 @@ export function SupabaseUserButton() {
   const [isOpen, setIsOpen] = useState(false);
   const [role, setRole] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
 
   useEffect(() => {
