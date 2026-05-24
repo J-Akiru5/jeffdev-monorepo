@@ -6,8 +6,6 @@ The Context Operating System for developers who ship fast. Deploy a Context Serv
 
 ## Features
 
-- 🎬 **Video to Context** — Record architecture decisions, AI extracts rules
-- 🎨 **Brand Wizard** — 5-step brand identity builder
 - 📤 **Multi-IDE Export** — Cursor, Windsurf, VS Code, Claude
 - 🔌 **MCP Integration** — Model Context Protocol for IDE sync
 - 🏗️ **Project Baker** — Create projects with tech stack & vibe
@@ -29,22 +27,22 @@ Open [http://localhost:3001](http://localhost:3001) to view the dashboard.
 Copy `.env.example` to `.env.local` and configure:
 
 ```bash
-# Clerk Auth
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
-CLERK_SECRET_KEY=
+# Supabase Auth
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 
 # Database
 MONGODB_URI=
 COSMOS_DATABASE_NAME=prism
 
-# Azure OpenAI
+# AI Provider (deepseek | azure | gemini)
+AI_PROVIDER=deepseek
+DEEPSEEK_API_KEY=
 AZURE_OPENAI_ENDPOINT=
 AZURE_OPENAI_API_KEY=
 AZURE_OPENAI_DEPLOYMENT_NAME=
-
-# Mux (Video)
-MUX_TOKEN_ID=
-MUX_TOKEN_SECRET=
+GEMINI_API_KEY=
 ```
 
 ## Architecture

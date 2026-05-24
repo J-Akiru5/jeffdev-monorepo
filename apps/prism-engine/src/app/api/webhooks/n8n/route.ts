@@ -4,14 +4,13 @@
  * POST /api/webhooks/n8n
  *
  * Internal endpoint that receives events forwarded from other services
- * (PayPal, Mux, in-app actions) and relays them to n8n for automation.
+ * (PayPal, in-app actions) and relays them to n8n for automation.
  * This acts as a routing layer so n8n doesn't need direct access to every service.
  *
  * n8n can also poll this endpoint to check for pending events.
  *
  * Events handled:
  * - subscription.* — PayPal subscription lifecycle events
- * - video.* — Mux video processing events
  * - notification.* — In-app notification events
  */
 

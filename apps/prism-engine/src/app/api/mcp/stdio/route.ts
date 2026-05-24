@@ -204,21 +204,6 @@ async function handleMcpMethod(
             },
           },
           {
-            name: "search_video_transcript",
-            description: "Semantic search across video transcripts",
-            inputSchema: {
-              type: "object",
-              properties: {
-                projectId: {
-                  type: "string",
-                  description: "Project ID or slug",
-                },
-                query: { type: "string", description: "Search query" },
-              },
-              required: ["projectId", "query"],
-            },
-          },
-          {
             name: "get_brand_rules",
             description: "Get brand styling rules for a project",
             inputSchema: {
@@ -897,37 +882,6 @@ async function handleToolCall(
           {
             type: "text" as const,
             text: "Project profile detection is available via the CLI: run `prism init` to scan your repository.",
-          },
-        ],
-      };
-    }
-
-    case "search_video_transcript": {
-      const projectId = typeof args?.projectId === "string" ? args.projectId : "";
-      const searchQuery = typeof args?.query === "string" ? args.query : "";
-
-      const transcripts = await getCollection("videoTranscripts");
-      const results = (await transcripts
-        .find({
-          projectId,
-          transcriptText: { $regex: searchQuery, $options: "i" },
-        })
-        .limit(5)
-        .toArray()) as Array<Record<string, unknown>>;
-
-      return {
-        content: [
-          {
-            type: "text",
-            text:
-              results.length > 0
-                ? `Found ${results.length} matches:\n\n${results
-                    .map(
-                      (r) =>
-                        `- ${r.videoTitle || "Video"}: ...${extractSnippet(String(r.transcriptText || ""), searchQuery)}...`,
-                    )
-                    .join("\n")}`
-                : `No matches found for "${searchQuery}"`,
           },
         ],
       };

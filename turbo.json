@@ -2,8 +2,6 @@
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
   "globalEnv": [
-    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
-    "CLERK_SECRET_KEY",
     "NEXT_PUBLIC_APP_URL",
     "NEXT_PUBLIC_PRISM_URL",
     "NEXT_PUBLIC_DOCS_URL",
@@ -16,9 +14,6 @@
     "AZURE_OPENAI_ENDPOINT",
     "AZURE_OPENAI_API_KEY",
     "AZURE_OPENAI_DEPLOYMENT_NAME",
-    "MUX_TOKEN_ID",
-    "MUX_TOKEN_SECRET",
-    "MUX_WEBHOOK_SECRET",
     "PAYPAL_CLIENT_ID",
     "PAYPAL_CLIENT_SECRET",
     "PAYPAL_MODE",

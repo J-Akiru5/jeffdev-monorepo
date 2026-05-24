@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🔌 IDE Connection & Commands Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: #050505; color: #fff; font-family: 'Inter', sans-serif; line-height: 1.6; min-height: 100vh; }
+  code { font-family: 'JetBrains Mono', monospace; }
+
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(5,5,5,0.88); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.07); padding: 0 2rem; display: flex; align-items: center; gap: 1.5rem; height: 56px; overflow-x: auto; white-space: nowrap; }
+  nav .logo { font-weight: 700; font-size: 0.9rem; color: #06b6d4; flex-shrink: 0; }
+  nav a { font-size: 0.8rem; color: rgba(255,255,255,0.45); transition: color 0.2s; flex-shrink: 0; }
+  nav a:hover { color: #fff; text-decoration: none; }
+
+  .hero { text-align: center; padding: 5rem 2rem 4rem; max-width: 800px; margin: 0 auto; }
+  .hero .badge { display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.3); border-radius: 99px; padding: 0.3rem 0.9rem; font-size: 0.75rem; color: #a78bfa; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 1.5rem; }
+  .hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 900; letter-spacing: -0.03em; background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.55) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; }
+  .hero p { font-size: 1.05rem; color: rgba(255,255,255,0.5); max-width: 540px; margin: 0 auto; }
+
+  .container { max-width: 1000px; margin: 0 auto; padding: 0 2rem 6rem; }
+
+  section { margin-bottom: 5rem; scroll-margin-top: 80px; }
+  .section-label { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #8b5cf6; margin-bottom: 0.75rem; }
+  .section-label .num { background: rgba(139,92,246,0.12); border: 1px solid rgba(139,92,246,0.3); border-radius: 4px; padding: 0.1rem 0.4rem; font-family: 'JetBrains Mono', monospace; }
+  h2 { font-size: 1.7rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+  .section-desc { color: rgba(255,255,255,0.45); margin-bottom: 2rem; font-size: 0.92rem; }
+
+  .callout { border-left: 3px solid #8b5cf6; background: rgba(139,92,246,0.06); border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
+  .callout.cyan { border-left-color: #06b6d4; background: rgba(6,182,212,0.06); }
+  .callout.green { border-left-color: #10b981; background: rgba(16,185,129,0.06); }
+  .callout .callout-title { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #8b5cf6; margin-bottom: 0.4rem; }
+  .callout.cyan .callout-title { color: #06b6d4; }
+  .callout.green .callout-title { color: #10b981; }
+  .callout p { font-size: 0.875rem; color: rgba(255,255,255,0.7); }
+  .callout strong { color: #fff; }
+
+  .diagram-wrap { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 2rem 1rem; overflow-x: auto; margin-bottom: 1.5rem; }
+  .mermaid { min-height: 60px; }
+
+  /* STEPS */
+  .steps { display: flex; flex-direction: column; gap: 0; }
+  .step { display: flex; gap: 1.25rem; position: relative; padding-bottom: 1.5rem; }
+  .step:last-child { padding-bottom: 0; }
+  .step-left { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+  .step-num { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; flex-shrink: 0; }
+  .step-num.cyan { background: rgba(6,182,212,0.15); border: 2px solid rgba(6,182,212,0.5); color: #06b6d4; }
+  .step-num.purple { background: rgba(139,92,246,0.15); border: 2px solid rgba(139,92,246,0.5); color: #a78bfa; }
+  .step-num.green { background: rgba(16,185,129,0.15); border: 2px solid rgba(16,185,129,0.5); color: #10b981; }
+  .step-line { width: 2px; flex: 1; background: rgba(255,255,255,0.06); margin-top: 6px; }
+  .step:last-child .step-line { display: none; }
+  .step-content { flex: 1; padding-top: 0.5rem; }
+  .step-title { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 0.2rem; }
+  .step-sub { font-size: 0.82rem; color: rgba(255,255,255,0.45); margin-bottom: 0.4rem; }
+  .step-cmd { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; padding: 0.35rem 0.75rem; color: #06b6d4; cursor: pointer; transition: border-color 0.15s; }
+  .step-cmd:hover { border-color: rgba(6,182,212,0.5); }
+
+  /* COMMAND GROUPS */
+  .cmd-group { margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; overflow: hidden; }
+  .cmd-group-header { display: flex; align-items: center; gap: 0.75rem; padding: 0.9rem 1.25rem; background: rgba(255,255,255,0.025); cursor: pointer; user-select: none; transition: background 0.15s; }
+  .cmd-group-header:hover { background: rgba(255,255,255,0.04); }
+  .cmd-group-icon { font-size: 1.1rem; }
+  .cmd-group-title { font-size: 0.9rem; font-weight: 600; flex: 1; }
+  .cmd-group-badge { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; background: rgba(255,255,255,0.07); border-radius: 99px; padding: 0.15rem 0.5rem; color: rgba(255,255,255,0.4); }
+  .cmd-group-arrow { color: rgba(255,255,255,0.3); font-size: 0.75rem; transition: transform 0.2s; }
+  .cmd-group.open .cmd-group-arrow { transform: rotate(180deg); }
+  .cmd-list { display: none; border-top: 1px solid rgba(255,255,255,0.06); }
+  .cmd-group.open .cmd-list { display: block; }
+  .cmd-item { display: flex; align-items: flex-start; gap: 1rem; padding: 0.85rem 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.12s; }
+  .cmd-item:last-child { border-bottom: none; }
+  .cmd-item:hover { background: rgba(255,255,255,0.02); }
+  .cmd-code { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #06b6d4; background: rgba(6,182,212,0.07); border: 1px solid rgba(6,182,212,0.15); border-radius: 5px; padding: 0.2rem 0.5rem; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all 0.15s; }
+  .cmd-code:hover { background: rgba(6,182,212,0.12); border-color: rgba(6,182,212,0.3); }
+  .cmd-code.copied { color: #10b981; background: rgba(16,185,129,0.07); border-color: rgba(16,185,129,0.3); }
+  .cmd-desc { font-size: 0.82rem; color: rgba(255,255,255,0.5); flex: 1; }
+  .cmd-when { font-size: 0.72rem; color: rgba(255,255,255,0.28); margin-top: 0.15rem; }
+
+  /* CHEAT SHEET */
+  .cheat-wrap { background: #000; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; }
+  .cheat-header { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.25rem; background: rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.07); }
+  .cheat-header span { font-size: 0.75rem; color: rgba(255,255,255,0.4); font-family: 'JetBrains Mono', monospace; }
+  .copy-all-btn { font-size: 0.72rem; font-family: 'Inter', sans-serif; font-weight: 500; background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.3); color: #06b6d4; border-radius: 5px; padding: 0.25rem 0.75rem; cursor: pointer; transition: all 0.15s; }
+  .copy-all-btn:hover { background: rgba(6,182,212,0.2); }
+  .cheat-body { padding: 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; line-height: 2; }
+  .cheat-section { margin-bottom: 1rem; }
+  .cheat-comment { color: rgba(255,255,255,0.25); }
+  .cheat-cmd { color: #06b6d4; }
+  .cheat-flag { color: #a78bfa; }
+
+  /* IDE CONFIG CARDS */
+  .ide-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  @media(max-width:600px){ .ide-grid { grid-template-columns: 1fr; } }
+  .ide-card { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; overflow: hidden; }
+  .ide-card-header { padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.02); }
+  .ide-card-header .ide-name { font-weight: 600; font-size: 0.85rem; flex: 1; }
+  .ide-card-header .ide-file { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: rgba(255,255,255,0.3); }
+  .ide-card pre { padding: 1rem; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: rgba(255,255,255,0.6); overflow-x: auto; line-height: 1.6; }
+  .ide-card pre .key { color: #a78bfa; }
+  .ide-card pre .val { color: #06b6d4; }
+  .ide-card pre .str { color: #10b981; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">◈ IDE Connection</span>
+  <a href="#how">How It Works</a>
+  <a href="#sequence">Step Sequence</a>
+  <a href="#config">IDE Configs</a>
+  <a href="#setup">Setup Steps</a>
+  <a href="#commands">All Commands</a>
+  <a href="#cheatsheet">Cheat Sheet</a>
+</nav>
+
+<div class="hero">
+  <div class="badge">🔌 IDE Connection Guide</div>
+  <h1>How the IDE Connects to Prism</h1>
+  <p>The complete command guide — what to type, when to type it, and why. With every single command explained.</p>
+</div>
+
+<div class="container">
+
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <div class="section-label"><span class="num">01</span> The Big Insight</div>
+    <h2>The IDE Does NOT Connect to the Website</h2>
+    <p class="section-desc">This is the most important thing to understand.</p>
+    <div class="callout">
+      <div class="callout-title">💡 How it actually works</div>
+      <p>The IDE connects to a tiny program called <strong>"prism serve"</strong> running silently in the background on your computer. This program reads rules from the cloud database and feeds them to the AI. <strong>You only run commands ONCE during setup. After that, your IDE handles everything automatically — every time you open it.</strong></p>
+    </div>
+    <div class="callout cyan">
+      <div class="callout-title">🔄 The Simple Loop</div>
+      <p>You create rules on the website → rules save to the database → IDE opens → prism serve starts automatically → AI asks for rules → prism serve reads database → AI gets the rules → AI writes better code ✅</p>
+    </div>
+  </section>
+
+  <!-- SEQUENCE -->
+  <section id="sequence">
+    <div class="section-label"><span class="num">02</span> The Connection Sequence</div>
+    <h2>Exactly What Happens, Step by Step</h2>
+    <p class="section-desc">The green section is the only part where you type commands. Everything else is automatic.</p>
+    <div class="diagram-wrap">
+      <div class="mermaid">
+sequenceDiagram
+    participant YOU as 👤 You (Terminal)
+    participant CLI as prism init
+    participant CFG as IDE Config File
+    participant IDE as Your IDE
+    participant MCP as prism serve
+    participant DB as ☁️ Cosmos DB
+
+    Note over YOU,DB: ── ONE TIME SETUP — you type these commands ──
+
+    YOU->>CLI: npm install -g prism-context-engine
+    Note right of YOU: installs the prism command
+
+    YOU->>CLI: prism login
+    Note right of YOU: connects your account
+
+    YOU->>CLI: prism sync
+    Note right of CLI: downloads rules to<br/>~/.prism/rules.json
+
+    YOU->>CLI: prism init
+    CLI->>CFG: writes mcp.json into IDE settings folder
+    Note right of CFG: auto-detects Cursor,<br/>Windsurf, VS Code, Claude
+
+    Note over YOU,DB: ── EVERY TIME YOU OPEN YOUR IDE — automatic ──
+
+    IDE->>MCP: auto-launches "prism serve" in background
+    Note right of IDE: IDE reads config file<br/>and starts it for you
+    MCP->>DB: connects and loads your rules
+    DB-->>MCP: returns rules
+
+    Note over YOU,DB: ── EVERY TIME THE AI WRITES CODE — automatic ──
+
+    IDE->>MCP: what rules apply to this task?
+    MCP-->>IDE: returns relevant rules
+    IDE->>IDE: AI writes code following your rules ✅
+      </div>
+    </div>
+  </section>
+
+  <!-- IDE CONFIGS -->
+  <section id="config">
+    <div class="section-label"><span class="num">03</span> What prism init Writes</div>
+    <h2>The Config Files</h2>
+    <p class="section-desc">When you run <code>prism init</code>, it detects which IDEs you have installed and writes one of these files automatically. You never have to write these by hand.</p>
+    <div class="ide-grid">
+      <div class="ide-card">
+        <div class="ide-card-header">
+          <span>⚡</span>
+          <span class="ide-name">Cursor</span>
+          <span class="ide-file">~/.cursor/mcp.json</span>
+        </div>
+        <pre>{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"prism"</span>: {
+      <span class="key">"command"</span>: <span class="str">"prism"</span>,
+      <span class="key">"args"</span>: [<span class="str">"serve"</span>],
+      <span class="key">"env"</span>: {
+        <span class="key">"PRISM_API_KEY"</span>: <span class="val">"pk_live_..."</span>
+      }
+    }
+  }
+}</pre>
+      </div>
+      <div class="ide-card">
+        <div class="ide-card-header">
+          <span>🏄</span>
+          <span class="ide-name">Windsurf</span>
+          <span class="ide-file">~/.windsurf/mcp.json</span>
+        </div>
+        <pre>{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"prism"</span>: {
+      <span class="key">"command"</span>: <span class="str">"prism"</span>,
+      <span class="key">"args"</span>: [<span class="str">"serve"</span>],
+      <span class="key">"env"</span>: {
+        <span class="key">"PRISM_API_KEY"</span>: <span class="val">"pk_live_..."</span>
+      }
+    }
+  }
+}</pre>
+      </div>
+      <div class="ide-card">
+        <div class="ide-card-header">
+          <span>🔵</span>
+          <span class="ide-name">VS Code</span>
+          <span class="ide-file">Code/User/settings.json</span>
+        </div>
+        <pre>{
+  <span class="key">"mcp"</span>: {
+    <span class="key">"servers"</span>: {
+      <span class="key">"prism"</span>: {
+        <span class="key">"type"</span>: <span class="str">"stdio"</span>,
+        <span class="key">"command"</span>: <span class="str">"prism"</span>,
+        <span class="key">"args"</span>: [<span class="str">"serve"</span>]
+      }
+    }
+  }
+}</pre>
+      </div>
+      <div class="ide-card">
+        <div class="ide-card-header">
+          <span>🤖</span>
+          <span class="ide-name">Claude Desktop</span>
+          <span class="ide-file">Claude/claude_desktop_config.json</span>
+        </div>
+        <pre>{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"prism"</span>: {
+      <span class="key">"command"</span>: <span class="str">"prism"</span>,
+      <span class="key">"args"</span>: [<span class="str">"serve"</span>],
+      <span class="key">"env"</span>: {
+        <span class="key">"PRISM_API_KEY"</span>: <span class="val">"pk_live_..."</span>
+      }
+    }
+  }
+}</pre>
+      </div>
+    </div>
+    <p style="margin-top:1rem; font-size:0.82rem; color:rgba(255,255,255,0.35);">All configs do the same thing: tell the IDE to run <code style="color:#06b6d4;">prism serve</code> in the background whenever it starts.</p>
+  </section>
+
+  <!-- SETUP STEPS -->
+  <section id="setup">
+    <div class="section-label"><span class="num">04</span> First-Time Setup</div>
+    <h2>The 6 Steps (Do These Once)</h2>
+    <p class="section-desc">Click a command to copy it to your clipboard.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-left"><div class="step-num cyan">1</div><div class="step-line"></div></div>
+        <div class="step-content">
+          <div class="step-title">Install the CLI tool</div>
+          <div class="step-sub">This gives you the <code>prism</code> command globally on your computer</div>
+          <div class="step-cmd" onclick="copyCmd(this)">npm install -g prism-context-engine</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-left"><div class="step-num cyan">2</div><div class="step-line"></div></div>
+        <div class="step-content">
+          <div class="step-title">Log in to your account</div>
+          <div class="step-sub">Connects your terminal session to your Prism account</div>
+          <div class="step-cmd" onclick="copyCmd(this)">prism login</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-left"><div class="step-num cyan">3</div><div class="step-line"></div></div>
+        <div class="step-content">
+          <div class="step-title">Download your rules</div>
+          <div class="step-sub">Copies all your rules from the cloud to your computer so the IDE can use them offline too</div>
+          <div class="step-cmd" onclick="copyCmd(this)">prism sync</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-left"><div class="step-num cyan">4</div><div class="step-line"></div></div>
+        <div class="step-content">
+          <div class="step-title">Configure your IDE</div>
+          <div class="step-sub">Detects which IDEs you have and writes the config files automatically</div>
+          <div class="step-cmd" onclick="copyCmd(this)">prism init</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-left"><div class="step-num purple">5</div><div class="step-line"></div></div>
+        <div class="step-content">
+          <div class="step-title">Restart your IDE</div>
+          <div class="step-sub">Close and reopen your IDE so it reads the new config file that prism init just wrote</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-left"><div class="step-num green">6</div><div class="step-line"></div></div>
+        <div class="step-content">
+          <div class="step-title">Verify everything works</div>
+          <div class="step-sub">Runs 10 health checks and tells you exactly what's working or broken</div>
+          <div class="step-cmd" onclick="copyCmd(this)">prism doctor</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout green" style="margin-top:2rem;">
+      <div class="callout-title">✅ Test it works</div>
+      <p>After setup, open your IDE and ask the AI: <strong>"What are my project rules?"</strong> — if Prism is connected, the AI will list your rules instead of saying it doesn't know.</p>
+    </div>
+  </section>
+
+  <!-- ALL COMMANDS -->
+  <section id="commands">
+    <div class="section-label"><span class="num">05</span> All Commands</div>
+    <h2>Every Command Explained</h2>
+    <p class="section-desc">Click any group to expand it. Click any command to copy it.</p>
+
+    <div class="cmd-group open">
+      <div class="cmd-group-header" onclick="toggleGroup(this.parentElement)">
+        <span class="cmd-group-icon">🚀</span>
+        <span class="cmd-group-title">Setup — Run These Once</span>
+        <span class="cmd-group-badge">4 commands</span>
+        <span class="cmd-group-arrow">▼</span>
+      </div>
+      <div class="cmd-list">
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">npm install -g prism-context-engine</div><div><div class="cmd-desc">Installs the prism command on your computer</div><div class="cmd-when">When: Once, the very first time</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism login</div><div><div class="cmd-desc">Connects your terminal to your Prism account</div><div class="cmd-when">When: Once, after installing</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism sync</div><div><div class="cmd-desc">Downloads all your rules from the cloud to your computer</div><div class="cmd-when">When: Once at setup, then whenever new rules are added</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism init</div><div><div class="cmd-desc">Auto-detects your IDE and writes the config files — no manual editing needed</div><div class="cmd-when">When: Once per computer</div></div></div>
+      </div>
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-group-header" onclick="toggleGroup(this.parentElement)">
+        <span class="cmd-group-icon">🩺</span>
+        <span class="cmd-group-title">Health Checks — Is Everything Working?</span>
+        <span class="cmd-group-badge">2 commands</span>
+        <span class="cmd-group-arrow">▼</span>
+      </div>
+      <div class="cmd-list">
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism doctor</div><div><div class="cmd-desc">Runs 10 checks (Node version, login, rules cached, dashboard reachable, IDE config found) and shows fix instructions for anything broken</div><div class="cmd-when">When: Something isn't working</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism status</div><div><div class="cmd-desc">Quick snapshot — are you logged in? how many rules? is the server reachable?</div><div class="cmd-when">When: You just want a quick health overview</div></div></div>
+      </div>
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-group-header" onclick="toggleGroup(this.parentElement)">
+        <span class="cmd-group-icon">📋</span>
+        <span class="cmd-group-title">Rules — Manage Your Rules</span>
+        <span class="cmd-group-badge">6 commands</span>
+        <span class="cmd-group-arrow">▼</span>
+      </div>
+      <div class="cmd-list">
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism rules list</div><div><div class="cmd-desc">Show all your rules</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism rules list --category styling</div><div><div class="cmd-desc">Show only styling rules (categories: architecture, styling, security, performance, testing, documentation, custom)</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism rules list --project my-app</div><div><div class="cmd-desc">Show rules for one specific project only</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism rules create</div><div><div class="cmd-desc">Create a new rule (interactive)</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism rules edit &lt;id&gt;</div><div><div class="cmd-desc">Edit an existing rule by its ID (get the ID from prism rules list)</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism rules delete &lt;id&gt;</div><div><div class="cmd-desc">Delete a rule permanently</div></div></div>
+      </div>
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-group-header" onclick="toggleGroup(this.parentElement)">
+        <span class="cmd-group-icon">📁</span>
+        <span class="cmd-group-title">Projects — Manage Your Projects</span>
+        <span class="cmd-group-badge">4 commands</span>
+        <span class="cmd-group-arrow">▼</span>
+      </div>
+      <div class="cmd-list">
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism projects list</div><div><div class="cmd-desc">Show all your projects</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism projects view my-app</div><div><div class="cmd-desc">See all details of one specific project</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism projects create</div><div><div class="cmd-desc">Create a new project (interactive)</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism projects delete my-app</div><div><div class="cmd-desc">Delete a project and all its rules</div></div></div>
+      </div>
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-group-header" onclick="toggleGroup(this.parentElement)">
+        <span class="cmd-group-icon">🤖</span>
+        <span class="cmd-group-title">Auto-Generate Rules — The Power Features</span>
+        <span class="cmd-group-badge">3 commands</span>
+        <span class="cmd-group-arrow">▼</span>
+      </div>
+      <div class="cmd-list">
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism connect --url http://localhost:3000</div><div><div class="cmd-desc">Scans a live website using AI — auto-generates 15–25 rules from its design (colors, fonts, spacing, components). Start your dev server first.</div><div class="cmd-when">Best option for new projects</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism sync --repo ./</div><div><div class="cmd-desc">Scans your code files, finds naming patterns, import styles, config files — auto-generates rules from them</div><div class="cmd-when">Good for existing codebases</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism generate --prompt "a card component"</div><div><div class="cmd-desc">AI generates a full React component that matches your design system and rules</div></div></div>
+      </div>
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-group-header" onclick="toggleGroup(this.parentElement)">
+        <span class="cmd-group-icon">🎨</span>
+        <span class="cmd-group-title">Brand Profiles — Export Rules for Different Formats</span>
+        <span class="cmd-group-badge">5 commands</span>
+        <span class="cmd-group-arrow">▼</span>
+      </div>
+      <div class="cmd-list">
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism brands list</div><div><div class="cmd-desc">See all your brand profiles</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism brands create</div><div><div class="cmd-desc">Create a brand profile (colors, fonts, voice — interactive wizard)</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism brands export my-brand --format cursor</div><div><div class="cmd-desc">Export as .cursorrules file for Cursor IDE</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism brands export my-brand --format windsurf</div><div><div class="cmd-desc">Export as .windsurfrules file for Windsurf IDE</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism brands export my-brand --format claude</div><div><div class="cmd-desc">Export as CLAUDE.md for Claude Desktop</div></div></div>
+      </div>
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-group-header" onclick="toggleGroup(this.parentElement)">
+        <span class="cmd-group-icon">🔑</span>
+        <span class="cmd-group-title">API Keys — Manage Authentication Keys</span>
+        <span class="cmd-group-badge">3 commands</span>
+        <span class="cmd-group-arrow">▼</span>
+      </div>
+      <div class="cmd-list">
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism api-keys list</div><div><div class="cmd-desc">Show all your API keys (you can also do this on the dashboard website)</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism api-keys create</div><div><div class="cmd-desc">Generate a new API key (used to authenticate the MCP server)</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism api-keys revoke &lt;id&gt;</div><div><div class="cmd-desc">Delete an API key permanently (if it was leaked or no longer needed)</div></div></div>
+      </div>
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-group-header" onclick="toggleGroup(this.parentElement)">
+        <span class="cmd-group-icon">📊</span>
+        <span class="cmd-group-title">Analytics & Optimization — See How It's Being Used</span>
+        <span class="cmd-group-badge">6 commands</span>
+        <span class="cmd-group-arrow">▼</span>
+      </div>
+      <div class="cmd-list">
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism analytics</div><div><div class="cmd-desc">See how many times AI called Prism, how many tokens were used, which tools were called most</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism telemetry</div><div><div class="cmd-desc">Detailed token usage breakdown per rule and tool</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism kitchen analyze --task "build a button"</div><div><div class="cmd-desc">Preview which rules the AI would receive for a specific task — before the AI even asks</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism kitchen preview</div><div><div class="cmd-desc">See the exact text string that would be sent to the AI assistant</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism kitchen trim --budget 2000</div><div><div class="cmd-desc">Automatically shrink rules to fit within a token budget (useful for cheaper AI models)</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism kitchen optimize</div><div><div class="cmd-desc">Re-rank rules based on which ones actually get used most by the AI</div></div></div>
+      </div>
+    </div>
+
+    <div class="cmd-group">
+      <div class="cmd-group-header" onclick="toggleGroup(this.parentElement)">
+        <span class="cmd-group-icon">⚙️</span>
+        <span class="cmd-group-title">Advanced — Manual & Offline Control</span>
+        <span class="cmd-group-badge">4 commands</span>
+        <span class="cmd-group-arrow">▼</span>
+      </div>
+      <div class="cmd-list">
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism serve</div><div><div class="cmd-desc">Manually start the MCP server (normally auto-started by IDE — only use for debugging)</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism serve --offline</div><div><div class="cmd-desc">Start the MCP server using only local cached rules — works with no internet connection</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism marketplace list</div><div><div class="cmd-desc">Browse community-shared rule sets you can install</div></div></div>
+        <div class="cmd-item"><div class="cmd-code" onclick="copyCmd(this)">prism marketplace install &lt;id&gt;</div><div><div class="cmd-desc">Install a community rule set into your project</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHEAT SHEET -->
+  <section id="cheatsheet">
+    <div class="section-label"><span class="num">06</span> Cheat Sheet</div>
+    <h2>Copy-Paste Reference</h2>
+    <p class="section-desc">Everything in one place. Click "Copy All" to grab the whole thing.</p>
+    <div class="cheat-wrap">
+      <div class="cheat-header">
+        <span>prism-commands.txt</span>
+        <button class="copy-all-btn" onclick="copyAll()">Copy All</button>
+      </div>
+      <div class="cheat-body" id="cheat-content">
+        <div class="cheat-section">
+          <div class="cheat-comment"># SETUP (run once)</div>
+          <div class="cheat-cmd">npm install -g prism-context-engine</div>
+          <div class="cheat-cmd">prism login</div>
+          <div class="cheat-cmd">prism sync</div>
+          <div class="cheat-cmd">prism init</div>
+        </div>
+        <div class="cheat-section">
+          <div class="cheat-comment"># HEALTH</div>
+          <div class="cheat-cmd">prism doctor</div>
+          <div class="cheat-cmd">prism status</div>
+        </div>
+        <div class="cheat-section">
+          <div class="cheat-comment"># RULES</div>
+          <div class="cheat-cmd">prism rules list</div>
+          <div class="cheat-cmd">prism rules create</div>
+          <div class="cheat-cmd">prism rules edit <span class="cheat-flag">&lt;id&gt;</span></div>
+          <div class="cheat-cmd">prism rules delete <span class="cheat-flag">&lt;id&gt;</span></div>
+        </div>
+        <div class="cheat-section">
+          <div class="cheat-comment"># PROJECTS</div>
+          <div class="cheat-cmd">prism projects list</div>
+          <div class="cheat-cmd">prism projects create</div>
+          <div class="cheat-cmd">prism projects view <span class="cheat-flag">&lt;slug&gt;</span></div>
+        </div>
+        <div class="cheat-section">
+          <div class="cheat-comment"># AUTO-GENERATE RULES</div>
+          <div class="cheat-cmd">prism connect --url <span class="cheat-flag">&lt;url&gt;</span></div>
+          <div class="cheat-cmd">prism sync --repo ./</div>
+          <div class="cheat-cmd">prism generate --prompt <span class="cheat-flag">"..."</span></div>
+        </div>
+        <div class="cheat-section">
+          <div class="cheat-comment"># BRAND EXPORT</div>
+          <div class="cheat-cmd">prism brands export <span class="cheat-flag">&lt;slug&gt;</span> --format cursor</div>
+          <div class="cheat-cmd">prism brands export <span class="cheat-flag">&lt;slug&gt;</span> --format windsurf</div>
+          <div class="cheat-cmd">prism brands export <span class="cheat-flag">&lt;slug&gt;</span> --format claude</div>
+        </div>
+        <div class="cheat-section">
+          <div class="cheat-comment"># API KEYS</div>
+          <div class="cheat-cmd">prism api-keys list</div>
+          <div class="cheat-cmd">prism api-keys create</div>
+          <div class="cheat-cmd">prism api-keys revoke <span class="cheat-flag">&lt;id&gt;</span></div>
+        </div>
+        <div class="cheat-section">
+          <div class="cheat-comment"># ANALYTICS</div>
+          <div class="cheat-cmd">prism analytics</div>
+          <div class="cheat-cmd">prism kitchen analyze --task <span class="cheat-flag">"..."</span></div>
+          <div class="cheat-cmd">prism kitchen preview</div>
+        </div>
+        <div class="cheat-section">
+          <div class="cheat-comment"># DEBUG / ADVANCED</div>
+          <div class="cheat-cmd">prism serve</div>
+          <div class="cheat-cmd">prism serve --offline</div>
+          <div class="cheat-cmd">prism marketplace list</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true, theme: 'dark',
+    themeVariables: {
+      primaryColor: '#06b6d4', primaryTextColor: '#ffffff',
+      primaryBorderColor: '#06b6d440', lineColor: '#ffffff40',
+      secondaryColor: '#8b5cf6', tertiaryColor: '#0a0a0a',
+      background: '#050505', mainBkg: '#0a0a0a', nodeBorder: '#06b6d440',
+      clusterBkg: '#111', titleColor: '#ffffff', edgeLabelBackground: '#0a0a0a',
+      actorBkg: '#0a0a0a', actorBorder: '#06b6d4', actorTextColor: '#ffffff',
+      actorLineColor: '#ffffff40', signalColor: '#06b6d4', signalTextColor: '#ffffff',
+      labelBoxBkgColor: '#0a0a0a', labelBoxBorderColor: '#06b6d440',
+      labelTextColor: '#ffffff', loopTextColor: '#ffffff',
+      noteBorderColor: '#8b5cf640', noteBkgColor: '#0a0a0a', noteTextColor: '#ffffff',
+      activationBorderColor: '#06b6d4', activationBkgColor: '#06b6d410',
+    }
+  });
+
+  function toggleGroup(el) { el.classList.toggle('open'); }
+
+  function copyCmd(el) {
+    const text = el.textContent.trim().replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+    navigator.clipboard.writeText(text).then(() => {
+      const orig = el.textContent;
+      el.classList.add('copied');
+      el.textContent = '✓ Copied';
+      setTimeout(() => { el.classList.remove('copied'); el.textContent = orig; }, 1500);
+    });
+  }
+
+  function copyAll() {
+    const lines = [
+      '# SETUP (run once)',
+      'npm install -g prism-context-engine',
+      'prism login','prism sync','prism init','',
+      '# HEALTH','prism doctor','prism status','',
+      '# RULES','prism rules list','prism rules create',
+      'prism rules edit <id>','prism rules delete <id>','',
+      '# PROJECTS','prism projects list','prism projects create',
+      'prism projects view <slug>','',
+      '# AUTO-GENERATE','prism connect --url <url>',
+      'prism sync --repo ./','prism generate --prompt "..."','',
+      '# BRAND EXPORT','prism brands export <slug> --format cursor',
+      'prism brands export <slug> --format windsurf',
+      'prism brands export <slug> --format claude','',
+      '# API KEYS','prism api-keys list','prism api-keys create',
+      'prism api-keys revoke <id>','',
+      '# ANALYTICS','prism analytics',
+      'prism kitchen analyze --task "..."','prism kitchen preview','',
+      '# DEBUG','prism serve','prism serve --offline','prism marketplace list'
+    ];
+    navigator.clipboard.writeText(lines.join('\n')).then(() => {
+      const btn = document.querySelector('.copy-all-btn');
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => btn.textContent = 'Copy All', 2000);
+    });
+  }
+</script>
+</body>
+</html>

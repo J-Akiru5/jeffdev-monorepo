@@ -5,7 +5,6 @@ import {
   FolderKanban,
   FileJson,
   Sparkles,
-  Video,
   ArrowRight,
   Plus,
   Palette,
@@ -48,7 +47,6 @@ export default async function DashboardPage() {
   const projectsCollection = await getCollection("projects");
   const rulesCollection = await getCollection("rules");
   const generationsCollection = await getCollection("generations");
-  const videosCollection = await getCollection("video_contexts");
 
   const [
     projectCount,
@@ -57,14 +55,31 @@ export default async function DashboardPage() {
     rulePrev,
     genCount,
     genPrev,
-    videoCount,
-    videoPrev,
     recentProjects,
   ] = await Promise.all([
-    // Current window (last 30 days)
     projectsCollection.countDocuments({
       userId,
       createdAt: { $gte: thirtyDaysAgo },
+    }),
+    projectsCollection.countDocuments({
+      userId,
+      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo },
+    }),
+    rulesCollection.countDocuments({
+      createdBy: userId,
+      createdAt: { $gte: thirtyDaysAgo },
+    }),
+    rulesCollection.countDocuments({
+      createdBy: userId,
+      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo },
+    }),
+    generationsCollection.countDocuments({
+      userId,
+      createdAt: { $gte: thirtyDaysAgo },
+    }),
+    generationsCollection.countDocuments({
+      userId,
+      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo },
     }),
     // Previous window (30–60 days ago)
     projectsCollection.countDocuments({
@@ -186,13 +201,6 @@ export default async function DashboardPage() {
           icon={Sparkles}
           href="/generate"
           trend={calcTrend(genCount, genPrev)}
-        />
-        <MetricTile
-          label="Video Contexts"
-          value={videoCount}
-          icon={Video}
-          href="/videos"
-          trend={calcTrend(videoCount, videoPrev)}
         />
       </div>
 
