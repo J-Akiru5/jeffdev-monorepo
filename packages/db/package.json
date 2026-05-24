@@ -8,10 +8,6 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
-    "./firebase": {
-      "types": "./dist/firebase.d.ts",
-      "default": "./dist/firebase.js"
-    },
     "./cosmos": {
       "types": "./dist/cosmos.d.ts",
       "default": "./dist/cosmos.js"
