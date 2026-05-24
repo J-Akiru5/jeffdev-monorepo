@@ -9,25 +9,25 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/favicon/icon-48x48.png",
-      "sizes": "48x48",
+      "src": "/favicon/favicon-96x96.png",
+      "sizes": "96x96",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/favicon/icon-192x192.png",
+      "src": "/favicon/web-app-manifest-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "/favicon/icon-512x512.png",
+      "src": "/favicon/web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable any"
     },
     {
-      "src": "/favicon/apple-icon.png",
+      "src": "/favicon/apple-touch-icon.png",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "any"
@@ -41,21 +41,27 @@
       "short_name": "Services",
       "description": "View our web development services",
       "url": "/services",
-      "icons": [{ "src": "/favicon/icon-192x192.png", "sizes": "192x192" }]
+      "icons": [
+        { "src": "/favicon/web-app-manifest-192x192.png", "sizes": "192x192" }
+      ]
     },
     {
       "name": "Contact",
       "short_name": "Contact",
       "description": "Get in touch with us",
       "url": "/contact",
-      "icons": [{ "src": "/favicon/icon-192x192.png", "sizes": "192x192" }]
+      "icons": [
+        { "src": "/favicon/web-app-manifest-192x192.png", "sizes": "192x192" }
+      ]
     },
     {
       "name": "Quote",
       "short_name": "Quote",
       "description": "Request a project quote",
       "url": "/quote",
-      "icons": [{ "src": "/favicon/icon-192x192.png", "sizes": "192x192" }]
+      "icons": [
+        { "src": "/favicon/web-app-manifest-192x192.png", "sizes": "192x192" }
+      ]
     }
   ]
 }

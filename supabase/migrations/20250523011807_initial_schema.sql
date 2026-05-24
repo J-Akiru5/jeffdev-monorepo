@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
 
 -- Services table (agency services offered)
 CREATE TABLE IF NOT EXISTS services (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   description TEXT,
   category TEXT NOT NULL,
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS services (
 
 -- Projects table (client projects)
 CREATE TABLE IF NOT EXISTS projects (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   description TEXT,
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS projects (
 
 -- Milestones table (project milestones)
 CREATE TABLE IF NOT EXISTS milestones (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   description TEXT,
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS milestones (
 
 -- Quotes table (project quotes)
 CREATE TABLE IF NOT EXISTS quotes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
   title TEXT NOT NULL,
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS quotes (
 
 -- Invoices table
 CREATE TABLE IF NOT EXISTS invoices (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   quote_id UUID REFERENCES quotes(id) ON DELETE SET NULL,
   project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS invoices (
 
 -- Calendar events table
 CREATE TABLE IF NOT EXISTS calendar_events (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
   title TEXT NOT NULL,
@@ -124,7 +124,7 @@ CREATE TABLE IF NOT EXISTS calendar_events (
 
 -- Case studies table
 CREATE TABLE IF NOT EXISTS case_studies (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
   title TEXT NOT NULL,
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS case_studies (
 
 -- Feedback table
 CREATE TABLE IF NOT EXISTS feedback (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
   case_study_id UUID REFERENCES case_studies(id) ON DELETE SET NULL,
@@ -159,7 +159,7 @@ CREATE TABLE IF NOT EXISTS feedback (
 
 -- Subscriptions table
 CREATE TABLE IF NOT EXISTS subscriptions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   plan TEXT NOT NULL CHECK (plan IN ('free', 'pro', 'enterprise')),
   status TEXT DEFAULT 'active' CHECK (status IN ('active', 'cancelled', 'suspended')),
@@ -178,7 +178,7 @@ CREATE TABLE IF NOT EXISTS subscriptions (
 
 -- Notifications table
 CREATE TABLE IF NOT EXISTS notifications (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   message TEXT,
@@ -192,7 +192,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 -- Invites table
 CREATE TABLE IF NOT EXISTS invites (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   email TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'employee' CHECK (role IN ('admin', 'manager', 'employee', 'client')),
@@ -206,7 +206,7 @@ CREATE TABLE IF NOT EXISTS invites (
 
 -- Messages table (contact form, support)
 CREATE TABLE IF NOT EXISTS messages (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES user_profiles(id) ON DELETE SET NULL,
   name TEXT,
   email TEXT NOT NULL,
@@ -220,7 +220,7 @@ CREATE TABLE IF NOT EXISTS messages (
 
 -- Waitlist table
 CREATE TABLE IF NOT EXISTS waitlist_entries (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT UNIQUE NOT NULL,
   name TEXT,
   reason TEXT,
@@ -232,7 +232,7 @@ CREATE TABLE IF NOT EXISTS waitlist_entries (
 
 -- Support tickets table
 CREATE TABLE IF NOT EXISTS support_tickets (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES user_profiles(id) ON DELETE SET NULL,
   title TEXT NOT NULL,
   description TEXT,
@@ -246,7 +246,7 @@ CREATE TABLE IF NOT EXISTS support_tickets (
 
 -- Tasks table (for prism-manage)
 CREATE TABLE IF NOT EXISTS tasks (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   project_id UUID REFERENCES projects(id) ON DELETE SET NULL,
   title TEXT NOT NULL,
@@ -269,7 +269,7 @@ CREATE TABLE IF NOT EXISTS tasks (
 
 -- User tokens (for Google Calendar OAuth, etc.)
 CREATE TABLE IF NOT EXISTS user_tokens (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
   provider TEXT NOT NULL CHECK (provider IN ('google', 'microsoft', 'github', 'slack')),
   access_token TEXT NOT NULL,
@@ -284,7 +284,7 @@ CREATE TABLE IF NOT EXISTS user_tokens (
 
 -- Audit logs table
 CREATE TABLE IF NOT EXISTS audit_logs (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES user_profiles(id) ON DELETE SET NULL,
   action TEXT NOT NULL,
   resource_type TEXT,
