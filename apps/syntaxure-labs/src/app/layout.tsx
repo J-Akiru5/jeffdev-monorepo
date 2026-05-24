@@ -59,11 +59,11 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Syntaxure Labs" }],
   creator: "Syntaxure Labs",
-  metadataBase: new URL("https://jeffdev.studio"),
+  metadataBase: new URL("https://www.syntaxure.dev"),
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://jeffdev.studio",
+    url: "https://www.syntaxure.dev",
     siteName: "Syntaxure Labs",
     title: "Syntaxure Labs — Enterprise Web Development & SaaS Solutions",
     description:
@@ -191,8 +191,8 @@ export default async function RootLayout({
                       "@type": "ProfessionalService",
                       name: "Syntaxure Labs",
                       alternateName: ["JeffDev Studio"],
-                      url: "https://jeffdev.studio",
-                      logo: "https://jeffdev.studio/favicon.svg",
+                      url: "https://www.syntaxure.dev",
+                      logo: "https://www.syntaxure.dev/favicon.svg",
                       contactPoint: {
                         "@type": "ContactPoint",
                         telephone: "+63-951-916-7103",

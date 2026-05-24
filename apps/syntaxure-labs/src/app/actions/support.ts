@@ -197,7 +197,7 @@ function supportConfirmationTemplate(data: { name: string; subject: string }) {
 
     <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.3); text-align: center;">
       <strong>Syntaxure Labs</strong> • Enterprise Web Solutions<br>
-      <a href="https://jeffdev.studio" style="color: #10b981; text-decoration: none;">jeffdev.studio</a>
+      <a href="https://www.syntaxure.dev" style="color: #10b981; text-decoration: none;">syntaxure.dev</a>
     </p>
   </div>
 </body>

@@ -17,7 +17,7 @@ import { sendEmail, inviteEmailTemplate, BRANDED_SENDER } from "@/lib/email";
 const FOUNDER_UID = process.env.FOUNDER_UID || "founder-001";
 
 // Base URL for invite links
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://jeffdev.studio";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.syntaxure.dev";
 
 /**
  * Generate a secure invite token
