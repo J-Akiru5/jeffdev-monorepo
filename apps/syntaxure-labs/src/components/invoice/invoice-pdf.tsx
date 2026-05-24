@@ -445,7 +445,7 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
             BIR registration is in process.
           </Text>
           <Text style={styles.footerText}>Thank you for your business!</Text>
-          <Text style={styles.footerUrl}>www.jeffdev.studio</Text>
+          <Text style={styles.footerUrl}>www.syntaxure.dev</Text>
         </View>
       </Page>
     </Document>

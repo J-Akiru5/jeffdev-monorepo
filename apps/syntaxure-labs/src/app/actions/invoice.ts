@@ -388,7 +388,7 @@ export async function sendInvoice(id: string) {
 
     // Prepare payment link
     const baseUrl =
-      process.env.NEXT_PUBLIC_SITE_URL || "https://jeffdev.studio";
+      process.env.NEXT_PUBLIC_SITE_URL || "https://www.syntaxure.dev";
     const paymentLink = `${baseUrl}/pay/${invoice.refNo}`;
 
     // Send email with PDF attachment

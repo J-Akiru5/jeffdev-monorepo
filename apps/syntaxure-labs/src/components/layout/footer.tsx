@@ -21,12 +21,12 @@ const footerLinks = {
   ],
   products: [
     {
-      href: "https://prism.jeffdev.studio",
+      href: "https://www.syntaxure.dev/prism",
       label: "Prism Context Engine",
       external: true,
     },
     {
-      href: "https://prism.jeffdev.studio/guide/getting-started",
+      href: "https://www.syntaxure.dev/prism/guide/getting-started",
       label: "Documentation",
       external: true,
     },

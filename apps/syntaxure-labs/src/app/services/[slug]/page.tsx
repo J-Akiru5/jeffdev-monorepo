@@ -99,8 +99,8 @@ export default async function ServicePage({ params }: ServicePageProps) {
               '@context': 'https://schema.org',
               '@type': 'BreadcrumbList',
               itemListElement: [
-                { '@type': 'ListItem', position: 1, name: 'Services', item: 'https://jeffdev.studio/services' },
-                { '@type': 'ListItem', position: 2, name: activeService.title, item: `https://jeffdev.studio/services/${slug}` },
+                { '@type': 'ListItem', position: 1, name: 'Services', item: 'https://www.syntaxure.dev/services' },
+                { '@type': 'ListItem', position: 2, name: activeService.title, item: `https://www.syntaxure.dev/services/${slug}` },
               ],
             }),
           }}

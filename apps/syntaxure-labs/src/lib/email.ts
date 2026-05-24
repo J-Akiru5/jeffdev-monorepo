@@ -27,7 +27,7 @@ export const EMAIL_ADDRESSES = {
 export const BRANDED_SENDER = `Syntaxure Labs <${EMAIL_ADDRESSES.noreply}>`;
 
 // Base URL for assets in emails
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://jeffdev.studio";
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.syntaxure.dev";
 const LOGO_URL = `${BASE_URL}/favicon/icon1.png`;
 
 interface EmailAttachment {
@@ -311,7 +311,7 @@ export function inviteEmailTemplate(data: {
     
     <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.3); text-align: center;">
       <strong>Syntaxure Labs</strong> • Enterprise Web Solutions<br>
-      <a href="https://jeffdev.studio" style="color: ${roleColor}; text-decoration: none;">jeffdev.studio</a>
+      <a href="https://www.syntaxure.dev" style="color: ${roleColor}; text-decoration: none;">syntaxure.dev</a>
     </p>
   </div>
 </body>
@@ -433,7 +433,7 @@ export function invoiceEmailTemplate(data: {
     <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.3); text-align: center;">
       <strong>Syntaxure Labs</strong> • Enterprise Web Solutions<br>
       DTI No: VLLP979818395984<br>
-      <a href="https://jeffdev.studio" style="color: ${accentColor}; text-decoration: none;">jeffdev.studio</a>
+      <a href="https://www.syntaxure.dev" style="color: ${accentColor}; text-decoration: none;">syntaxure.dev</a>
     </p>
   </div>
 </body>

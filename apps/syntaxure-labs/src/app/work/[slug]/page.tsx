@@ -86,8 +86,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               '@context': 'https://schema.org',
               '@type': 'BreadcrumbList',
               itemListElement: [
-                { '@type': 'ListItem', position: 1, name: 'Work', item: 'https://jeffdev.studio/work' },
-                { '@type': 'ListItem', position: 2, name: activeProject.title, item: `https://jeffdev.studio/work/${slug}` },
+                { '@type': 'ListItem', position: 1, name: 'Work', item: 'https://www.syntaxure.dev/work' },
+                { '@type': 'ListItem', position: 2, name: activeProject.title, item: `https://www.syntaxure.dev/work/${slug}` },
               ],
             }),
           }}
