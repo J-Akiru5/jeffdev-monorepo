@@ -125,7 +125,7 @@ export default async function SubscriptionPage() {
             buttonLabel = "Downgrade";
           } else if (plan.tier_slug === "enterprise") {
             buttonLabel = "Contact Sales";
-            href = "mailto:enterprise@jeffdev.studio";
+            href = "mailto:enterprise@syntaxure.dev";
           } else {
             buttonLabel = "Upgrade";
             href = `/api/subscriptions/checkout?tier=${plan.tier_slug}`;

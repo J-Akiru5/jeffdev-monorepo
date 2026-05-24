@@ -129,7 +129,7 @@ export default function SettingsPage() {
             <div className="mt-6">
               <Button variant="secondary" size="sm" asChild>
                 <a
-                  href="https://accounts.prism.jeffdev.studio/user"
+                  href="https://accounts.prism.syntaxure.dev/user"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2"

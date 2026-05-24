@@ -279,10 +279,10 @@ export default function TermsPage() {
               <p className="text-white/70 leading-relaxed">
                 For questions about these terms, contact us at{" "}
                 <a
-                  href="mailto:legal@jeffdev.studio"
+                  href="mailto:legal@syntaxure.dev"
                   className="text-cyan-400 hover:underline"
                 >
-                  legal@jeffdev.studio
+                  legal@syntaxure.dev
                 </a>
               </p>
             </section>
