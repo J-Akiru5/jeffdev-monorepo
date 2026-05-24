@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JeffDev Monorepo — Revamp Guide</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+    --purple: #bc8cff;
+    --cyan: #39d2c0;
+    --radius: 8px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 24px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  a { color: var(--accent); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+
+  /* Header */
+  .header {
+    text-align:center;
+    padding: 40px 0 32px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+  .header h1 { font-size:1.8rem; font-weight:700; }
+  .header p { color:var(--text-dim); margin-top:8px; font-size:0.9rem; }
+  .header .meta { display:flex; justify-content:center; gap:16px; margin-top:12px; flex-wrap:wrap; }
+
+  /* Progress bar */
+  .progress-wrap {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:20px 24px;
+    margin-bottom:24px;
+  }
+  .progress-stats { display:flex; justify-content:space-between; font-size:0.85rem; color:var(--text-dim); margin-bottom:8px; }
+  .progress-bar { height:8px; background:#21262d; border-radius:4px; overflow:hidden; }
+  .progress-fill { height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--cyan)); border-radius:4px; transition:width .4s; }
+  .progress-label { text-align:center; margin-top:8px; font-size:0.8rem; color:var(--text-dim); }
+
+  /* Section */
+  .section {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    margin-bottom:16px;
+    overflow:hidden;
+  }
+  .section-header {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:16px 20px;
+    cursor:pointer;
+    user-select:none;
+    transition:background .15s;
+  }
+  .section-header:hover { background:rgba(255,255,255,.03); }
+  .section-header .toggle { color:var(--text-dim); font-size:0.8rem; transition:transform .2s; }
+  .section.open .section-header .toggle { transform:rotate(90deg); }
+  .section-header .num {
+    background:var(--accent);
+    color:#000;
+    font-size:0.7rem;
+    font-weight:700;
+    width:22px; height:22px;
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0;
+  }
+  .section-header h2 { font-size:1rem; font-weight:600; flex:1; }
+  .section-header .badge-group { display:flex; gap:6px; flex-shrink:0; }
+
+  .badge {
+    display:inline-block;
+    padding:2px 8px;
+    border-radius:10px;
+    font-size:0.7rem;
+    font-weight:600;
+    text-transform:uppercase;
+  }
+  .badge-done { background:rgba(63,185,80,.15); color:var(--green); }
+  .badge-progress { background:rgba(210,153,34,.15); color:var(--yellow); }
+  .badge-pending { background:rgba(139,148,158,.15); color:var(--text-dim); }
+  .badge-jeff { background:rgba(88,166,255,.15); color:var(--accent); }
+  .badge-lou { background:rgba(188,140,255,.15); color:var(--purple); }
+  .badge-both { background:rgba(57,210,192,.15); color:var(--cyan); }
+
+  .section-body { display:none; padding:0 20px 20px; border-top:1px solid var(--border); }
+  .section.open .section-body { display:block; }
+
+  /* Checklist items */
+  .check-item {
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:8px 0;
+    cursor:pointer;
+  }
+  .check-item input[type=checkbox] {
+    appearance:none;
+    width:18px; height:18px;
+    border:2px solid var(--border);
+    border-radius:4px;
+    flex-shrink:0;
+    margin-top:3px;
+    cursor:pointer;
+    transition:all .15s;
+    background:transparent;
+  }
+  .check-item input[type=checkbox]:checked {
+    background:var(--green);
+    border-color:var(--green);
+    position:relative;
+  }
+  .check-item input[type=checkbox]:checked::after {
+    content:'';
+    position:absolute;
+    left:4px; top:1px;
+    width:5px; height:9px;
+    border:solid #000;
+    border-width:0 2px 2px 0;
+    transform:rotate(45deg);
+  }
+  .check-item.done .check-label { text-decoration:line-through; color:var(--text-dim); }
+
+  .check-label { flex:1; font-size:0.9rem; }
+  .check-who { font-size:0.75rem; font-weight:600; padding:1px 7px; border-radius:8px; flex-shrink:0; }
+  .check-jeff { color:var(--accent); }
+  .check-lou { color:var(--purple); }
+  .check-both { color:var(--cyan); }
+
+  /* Content blocks */
+  .section-body h3 { font-size:0.9rem; font-weight:600; margin:16px 0 8px; color:var(--accent); }
+  .section-body h4 { font-size:0.85rem; font-weight:600; margin:12px 0 6px; }
+  .section-body p { font-size:0.88rem; color:var(--text-dim); margin-bottom:8px; }
+  .section-body ul, .section-body ol { padding-left:20px; font-size:0.88rem; color:var(--text-dim); margin-bottom:8px; }
+  .section-body li { margin-bottom:4px; }
+  .section-body strong { color:var(--text); }
+  .section-body code {
+    background:#21262d;
+    padding:1px 5px;
+    border-radius:4px;
+    font-size:0.82rem;
+    color:var(--cyan);
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+  .section-body pre {
+    background:#0d1117;
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    overflow-x:auto;
+    margin:8px 0;
+    font-size:0.82rem;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    color:var(--text);
+    line-height:1.5;
+  }
+  .section-body pre code { background:none; padding:0; color:inherit; }
+  .section-body table {
+    width:100%;
+    border-collapse:collapse;
+    margin:8px 0;
+    font-size:0.85rem;
+  }
+  .section-body th, .section-body td {
+    border:1px solid var(--border);
+    padding:8px 12px;
+    text-align:left;
+  }
+  .section-body th { background:#21262d; color:var(--text); font-weight:600; }
+  .section-body td { color:var(--text-dim); }
+  .section-body hr { border:none; border-top:1px solid var(--border); margin:16px 0; }
+  .section-body blockquote {
+    border-left:3px solid var(--accent);
+    padding:8px 12px;
+    margin:8px 0;
+    background:rgba(88,166,255,.05);
+    color:var(--text-dim);
+    font-size:0.85rem;
+  }
+
+  .sub-section { margin:8px 0 4px 12px; border-left:2px solid var(--border); padding-left:16px; }
+
+  /* Quick Reference Table */
+  .quick-ref { font-size:0.85rem; }
+
+  .reset-btn {
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--text-dim);
+    padding:6px 14px;
+    border-radius:var(--radius);
+    cursor:pointer;
+    font-size:0.8rem;
+    transition:all .15s;
+  }
+  .reset-btn:hover { border-color:var(--red); color:var(--red); }
+
+  /* Info box */
+  .info-box {
+    background:rgba(57,210,192,.08);
+    border:1px solid rgba(57,210,192,.2);
+    border-radius:var(--radius);
+    padding:12px 16px;
+    margin:8px 0;
+    font-size:0.85rem;
+    color:var(--cyan);
+  }
+  .info-box strong { color:var(--cyan); }
+  .warn-box {
+    background:rgba(210,153,34,.08);
+    border:1px solid rgba(210,153,34,.2);
+    border-radius:var(--radius);
+    padding:12px 16px;
+    margin:8px 0;
+    font-size:0.85rem;
+    color:var(--yellow);
+  }
+  .warn-box strong { color:var(--yellow); }
+  .done-box {
+    background:rgba(63,185,80,.08);
+    border:1px solid rgba(63,185,80,.2);
+    border-radius:var(--radius);
+    padding:12px 16px;
+    margin:8px 0;
+    font-size:0.85rem;
+    color:var(--green);
+  }
+
+  /* Status indicators in lists */
+  .status-done { color:var(--green); }
+  .status-pending { color:var(--text-dim); }
+  .status-progress { color:var(--yellow); }
+  .status-done::before { content:'✅ '; }
+  .status-pending::before { content:'⬜ '; }
+  .status-progress::before { content:'🔄 '; }
+
+  @media (max-width:640px) {
+    body { padding:12px; }
+    .section-header { flex-wrap:wrap; }
+    .badge-group { width:100%; margin-left:34px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>JeffDev Monorepo — Revamp Guide</h1>
+  <p>Interactive checklist for Jeff &amp; Lou — all manual actions for the Supabase migration &amp; deployment</p>
+  <div class="meta">
+    <span class="badge badge-jeff">👤 Jeff</span>
+    <span class="badge badge-lou">👤 Lou</span>
+    <span class="badge badge-both">👥 Both</span>
+    <button class="reset-btn" onclick="resetAll()">Reset All Progress</button>
+  </div>
+</div>
+
+<div class="progress-wrap" id="progressWrap">
+  <div class="progress-stats">
+    <span><span id="doneCount">0</span> / <span id="totalCount">0</span> tasks done</span>
+    <span id="pctDisplay">0%</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-label">Progress saves automatically in your browser</div>
+</div>
+
+<div id="sections"></div>
+
+<script>
+const DATA = [
+  {
+    id:'s1', num:1, title:'Supabase — Initial Setup', phase:'Phase 1 · Week 1', who:'both',
+    items:[
+      {id:'s1a', label:'Create Supabase organization "jeffdev-studio" with Pro plan ($25/mo)', who:'both'},
+      {id:'s1b', label:'Create Supabase project "jeffdev-platform" (Singapore region)', who:'both'},
+      {id:'s1c', label:'Save Project URL, Anon Key, Service Role Key to Doppler', who:'both'},
+      {id:'s1d', label:'Configure Auth: email sign-ups enabled, password min 8 chars', who:'both'},
+      {id:'s1e', label:'Set up Custom SMTP via Resend (noreply@jeffdev.studio)', who:'both'},
+      {id:'s1f', label:'Configure Site URLs and Redirect URLs in Supabase Auth', who:'both'},
+      {id:'s1g', label:'Create "assets" Storage bucket (10MB limit, non-public)', who:'both'},
+      {id:'s1h', label:'Set CORS config for browser uploads', who:'both'},
+      {id:'s1i', label:'Install & init Supabase CLI locally', who:'both'},
+    ]
+  },
+  {
+    id:'s2', num:2, title:'Supabase — Database Schema Migration', phase:'Phase 2 · Week 3-4', who:'both',
+    items:[
+      {id:'s2a', label:'Apply initial schema migration (supabase db push)', who:'both'},
+      {id:'s2b', label:'Verify tables exist after migration', who:'both'},
+      {id:'s2c', label:'Link to remote Supabase project', who:'both'},
+      {id:'s2d', label:'Push migration to production', who:'both'},
+      {id:'s2e', label:'Enable RLS on all tables', who:'both'},
+      {id:'s2f', label:'Apply RLS policies from revamp.md §3', who:'both'},
+      {id:'s2g', label:'Create test admin user (test@syntaxurelabs.com)', who:'both'},
+    ]
+  },
+  {
+    id:'s3', num:3, title:'Clerk — User Export & Account Closure', phase:'Phase 2 · Week 4', who:'jeff',
+    items:[
+      {id:'s3a', label:'Export all Clerk users as JSON', who:'jeff'},
+      {id:'s3b', label:'Verify export contains all required fields', who:'jeff'},
+      {id:'s3c', label:'Run import script (import-clerk-users.ts)', who:'jeff'},
+      {id:'s3d', label:'Verify Supabase user count matches Clerk export', who:'jeff'},
+      {id:'s3e', label:'Send password reset emails to all migrated users', who:'jeff'},
+      {id:'s3f', label:'Monitor email delivery in Supabase Auth logs', who:'jeff'},
+      {id:'s3g', label:'Keep Clerk alive for 30 days post-cutover', who:'jeff'},
+    ]
+  },
+  {
+    id:'s4', num:4, title:'Doppler — Env Var Reorganization', phase:'Phases 1-3', who:'lou',
+    items:[
+      {id:'s4a', label:'Review current environment configs in Doppler', who:'lou'},
+      {id:'s4b', label:'Add Supabase env vars (URL, Anon Key, Service Role, Storage Bucket)', who:'lou'},
+      {id:'s4c', label:'Add Redis env vars (Upstash URL & Token)', who:'lou'},
+      {id:'s4d', label:'Add Google OAuth env vars (for prism-manage)', who:'lou'},
+      {id:'s4e', label:'Remove obsolete Clerk env vars (after migration verified 7+ days)', who:'lou'},
+      {id:'s4f', label:'Remove obsolete R2 / Firebase env vars (after migration)', who:'lou'},
+    ]
+  },
+  {
+    id:'s5', num:5, title:'Vercel — Project Creation & Domain Setup', phase:'Phase 3 · Week 7', who:'both',
+    sub: true,
+    content:`
+<h3>Current App Structure (as of May 2026)</h3>
+<p>The monorepo has been cleaned up — removed <code>agency/</code>, <code>tracker/</code>, <code>prism-dashboard/</code>.</p>
+<table>
+  <tr><th>App</th><th>Root</th><th>Framework</th><th>Port</th><th>vercel.json</th><th>Dockerfile</th></tr>
+  <tr><td><strong>syntaxure-labs</strong></td><td><code>apps/syntaxure-labs</code></td><td>Next.js 16</td><td>3000</td><td>✅</td><td>✅</td></tr>
+  <tr><td><strong>prism-engine</strong></td><td><code>apps/prism-engine</code></td><td>Next.js 16</td><td>3001</td><td>✅</td><td>✅</td></tr>
+  <tr><td><strong>prism-docs</strong></td><td><code>apps/prism-docs</code></td><td>Nextra 4</td><td>3002</td><td>✅</td><td>✅</td></tr>
+  <tr><td><strong>prism-mcp-server</strong></td><td><code>apps/prism-mcp-server</code></td><td>Node.js (MCP SDK)</td><td>— (stdio)</td><td>❌</td><td>✅</td></tr>
+  <tr><td><strong>prism-admin</strong></td><td><code>apps/prism-admin</code></td><td>Next.js 16</td><td>3004</td><td>✅</td><td>❌</td></tr>
+  <tr><td><strong>prism-manage</strong></td><td><code>apps/prism-manage</code></td><td>Next.js 16</td><td>3007</td><td>✅</td><td>❌</td></tr>
+  <tr><td><strong>prism-analytics</strong></td><td><code>apps/prism-analytics</code></td><td>Python / FastAPI</td><td>8000</td><td>❌</td><td>✅</td></tr>
+</table>
+
+<div class="info-box">
+<strong>Note:</strong> Prism-mcp-server is stdio-only (no web server). It does NOT need a Vercel project. Deploy via Docker instead.
+</div>
+
+<h3>Vercel Projects to Create</h3>
+<table>
+  <tr><th>App</th><th>Build Command</th><th>Root Directory</th></tr>
+  <tr><td>syntaxure-labs</td><td><code>pnpm turbo build --filter=syntaxure-labs</code></td><td><code>apps/syntaxure-labs</code></td></tr>
+  <tr><td>prism-engine</td><td><code>pnpm turbo build --filter=prism-engine</code></td><td><code>apps/prism-engine</code></td></tr>
+  <tr><td>prism-docs</td><td><code>pnpm turbo build --filter=prism-docs</code></td><td><code>apps/prism-docs</code></td></tr>
+  <tr><td>prism-admin</td><td><code>pnpm turbo build --filter=prism-admin</code></td><td><code>apps/prism-admin</code></td></tr>
+  <tr><td>prism-manage</td><td><code>pnpm turbo build --filter=prism-manage</code></td><td><code>apps/prism-manage</code></td></tr>
+</table>
+<p>All use <code>pnpm install --frozen-lockfile</code> as install command and <code>.next</code> as output directory.</p>
+
+<div class="warn-box"><strong>Env Vars in Vercel:</strong> Set env vars per project — you can either sync via Doppler or set manually. See §4 for the full list.</div>
+
+<h3>Domain Configuration</h3>
+<table>
+  <tr><th>App</th><th>Suggested Domain</th></tr>
+  <tr><td>syntaxure-labs</td><td><code>syntaxurelabs.com</code> or <code>jeffdev.studio</code></td></tr>
+  <tr><td>prism-engine</td><td><code>prism.jeffdev.studio</code></td></tr>
+  <tr><td>prism-docs</td><td><code>docs.jeffdev.studio</code></td></tr>
+  <tr><td>prism-admin</td><td><code>admin.jeffdev.studio</code></td></tr>
+  <tr><td>prism-manage</td><td><code>manage.jeffdev.studio</code></td></tr>
+  <tr><td>prism-analytics</td><td>Internal-only (or <code>analytics.jeffdev.studio</code>)</td></tr>
+  <tr><td>prism-mcp-server</td><td>No domain (stdio-only)</td></tr>
+</table>
+`,
+    items:[
+      {id:'s5a', label:'Document all existing Vercel projects & domains', who:'both'},
+      {id:'s5b', label:'Create Vercel project for prism-engine', who:'both'},
+      {id:'s5c', label:'Create Vercel project for prism-docs', who:'both'},
+      {id:'s5d', label:'Create Vercel project for prism-admin', who:'both'},
+      {id:'s5e', label:'Create Vercel project for prism-manage', who:'both'},
+      {id:'s5f', label:'Create Vercel project for syntaxure-labs', who:'both'},
+      {id:'s5g', label:'Set environment variables per Vercel project', who:'both'},
+      {id:'s5h', label:'Configure custom domains in Vercel', who:'both'},
+      {id:'s5i', label:'Set up DNS CNAME records (CNAME → cname.vercel-dns.com)', who:'jeff'},
+      {id:'s5j', label:'Verify SSL certs provision on all domains', who:'both'},
+      {id:'s5k', label:'Delete old Vercel projects after 7 days stable', who:'both'},
+    ]
+  },
+  {
+    id:'s6', num:6, title:'Google Cloud Console — Calendar API Setup', phase:'Phase 5 · Week 9', who:'both',
+    items:[
+      {id:'s6a', label:'Create Google Cloud project "jeffdev-prism-manage"', who:'both'},
+      {id:'s6b', label:'Enable Google Calendar API', who:'both'},
+      {id:'s6c', label:'Create OAuth 2.0 credentials (Web app type)', who:'both'},
+      {id:'s6d', label:'Set authorized redirect URIs (production + localhost)', who:'both'},
+      {id:'s6e', label:'Configure OAuth consent screen (External, add test users)', who:'both'},
+      {id:'s6f', label:'Save Client ID & Secret to Doppler', who:'both'},
+    ]
+  },
+  {
+    id:'s7', num:7, title:'npm — Token & Publishing', phase:'Phase 1 · Week 1', who:'jeff',
+    items:[
+      {id:'s7a', label:'Create npm Automation access token "jeffdev-monorepo-ci"', who:'jeff'},
+      {id:'s7b', label:'Add NPM_TOKEN to GitHub secrets', who:'jeff'},
+      {id:'s7c', label:'Login to npm CLI and publish @prism-engine/cli', who:'jeff'},
+      {id:'s7d', label:'Verify publication and test npm install', who:'jeff'},
+    ]
+  },
+  {
+    id:'s8', num:8, title:'Redis — Provisioning', phase:'Phase 1 · Week 1', who:'lou',
+    content:`
+<p><strong>Recommended: Upstash</strong> (HTTP-based, Vercel-compatible — already in deps)</p>
+<p>Alternatively, self-hosted via Docker (not compatible with Vercel serverless).</p>
+`,
+    items:[
+      {id:'s8a', label:'Create Upstash Redis database (closest region to Vercel)', who:'lou'},
+      {id:'s8b', label:'Save UPSTASH_REDIS_REST_URL & TOKEN to Doppler', who:'lou'},
+    ]
+  },
+  {
+    id:'s9', num:9, title:'Firebase — Project Retention & Cleanup', phase:'Phase 2 · Week 6', who:'jeff',
+    items:[
+      {id:'s9a', label:'Keep Firebase project active for 30 days post-migration', who:'jeff'},
+      {id:'s9b', label:'After 30 days: downgrade to Spark (free) plan or delete', who:'jeff'},
+      {id:'s9c', label:'Remove firebase-admin dep from @jeffdev/db', who:'jeff'},
+      {id:'s9d', label:'Remove Firebase env vars from Doppler', who:'jeff'},
+      {id:'s9e', label:'Delete packages/db/src/firebase.ts', who:'jeff'},
+    ]
+  },
+  {
+    id:'s10', num:10, title:'Cloudflare — R2 Bucket Retention', phase:'Phase 2 · Week 2', who:'jeff',
+    items:[
+      {id:'s10a', label:'Export R2 files as backup (optional)', who:'jeff'},
+      {id:'s10b', label:'Verify all images load via Supabase Storage URLs', who:'jeff'},
+      {id:'s10c', label:'Set up redirect from old R2 URLs to Supabase', who:'jeff'},
+      {id:'s10d', label:'Delete R2 bucket after 30 days stable', who:'jeff'},
+    ]
+  },
+  {
+    id:'s11', num:11, title:'Azure — Cosmos DB Gremlin API Provisioning', phase:'Phase 6 · Week 12', who:'lou',
+    items:[
+      {id:'s11a', label:'Create Cosmos DB Gremlin API account "prism-graph"', who:'lou'},
+      {id:'s11b', label:'Create graph database "prism-graph" with partition key /projectId', who:'lou'},
+      {id:'s11c', label:'Save Gremlin Endpoint & Primary Key to Doppler', who:'lou'},
+      {id:'s11d', label:'Test Gremlin connection with test script', who:'lou'},
+    ]
+  },
+  {
+    id:'s12', num:12, title:'GitHub — Secrets & CI Updates', phase:'Phases 1-3', who:'lou',
+    content:`
+<h3>CI Pipeline (from AGENTS.md)</h3>
+<p>Run in order before pushing: <code>check-types</code> → <code>lint</code> → <code>test</code> → <code>build</code></p>
+<pre><code>turbo run check-types && turbo run lint && turbo run test && turbo run build</code></pre>
+`,
+    items:[
+      {id:'s12a', label:'Add SUPABASE_ACCESS_TOKEN to GitHub secrets', who:'lou'},
+      {id:'s12b', label:'Add SUPABASE_DB_PASSWORD to GitHub secrets', who:'lou'},
+      {id:'s12c', label:'Add SUPABASE_PROJECT_ID to GitHub secrets', who:'lou'},
+      {id:'s12d', label:'Update branch protection rules for main branch', who:'lou'},
+    ]
+  },
+  {
+    id:'s13', num:13, title:'DNS — Domain Configuration', phase:'Phase 3 · Week 7', who:'jeff',
+    items:[
+      {id:'s13a', label:'Decide final domain structure (buy domains if needed)', who:'jeff'},
+      {id:'s13b', label:'Add CNAME records at domain registrar for each subdomain', who:'jeff'},
+      {id:'s13c', label:'Update Supabase redirect URLs with final domains', who:'jeff'},
+    ]
+  },
+  {
+    id:'s14', num:14, title:'Email — Password Reset Template', phase:'Phase 2 · Week 4', who:'jeff',
+    items:[
+      {id:'s14a', label:'Update Supabase Reset Password email template', who:'jeff'},
+      {id:'s14b', label:'Test password reset flow with test user', who:'jeff'},
+    ]
+  },
+  {
+    id:'s15', num:15, title:'Pre-Deployment Checklist', phase:'Per Phase', who:'both',
+    sub: true,
+    items:[
+      {id:'s15a', label:'[Auth Migration] Clerk users exported & count matches Supabase', who:'both'},
+      {id:'s15b', label:'[Auth Migration] Password reset emails sent & template tested', who:'both'},
+      {id:'s15c', label:'[Auth Migration] Staging deployment tested (all apps)', who:'both'},
+      {id:'s15d', label:'[Auth Migration] Doppler & Vercel env vars synced for production', who:'both'},
+      {id:'s15e', label:'[Auth Migration] Rollback plan documented', who:'both'},
+      {id:'s15f', label:'[DB Migration] Firestore → Supabase dry-run passed', who:'both'},
+      {id:'s15g', label:'[DB Migration] Row counts verified for all collections', who:'both'},
+      {id:'s15h', label:'[DB Migration] Timestamp serialization verified (no Firestore objects)', who:'both'},
+      {id:'s15i', label:'[DB Migration] Agent/sections pages load from Supabase on staging', who:'both'},
+      {id:'s15j', label:'[App Rename] Each app builds successfully locally', who:'both'},
+      {id:'s15k', label:'[App Rename] Each app builds on Vercel', who:'both'},
+      {id:'s15l', label:'[App Rename] DNS propagated & SSL certs valid on all domains', who:'both'},
+      {id:'s15m', label:'[App Rename] All internal links updated to new domains', who:'both'},
+    ]
+  },
+  {
+    id:'s16', num:16, title:'Post-Cutover Monitoring', phase:'Per Deployment', who:'both',
+    sub: true,
+    items:[
+      {id:'s16a', label:'[Day 1] Auth flow works (sign-up, sign-in, password reset, session persist)', who:'both'},
+      {id:'s16b', label:'[Day 1] DB: server actions return correct data', who:'both'},
+      {id:'s16c', label:'[Day 1] Storage: image upload & access works', who:'both'},
+      {id:'s16d', label:'[Day 1] Vercel: deployment succeeded, no runtime errors', who:'both'},
+      {id:'s16e', label:'[Day 2-7] Supabase auth & DB logs show no errors', who:'both'},
+      {id:'s16f', label:'[Day 2-7] RLS not blocking legitimate requests', who:'both'},
+      {id:'s16g', label:'[Day 2-7] Vercel: no 500 errors in Function Logs', who:'both'},
+      {id:'s16h', label:'[Day 30] Zero user login issues in last 14 days', who:'both'},
+      {id:'s16i', label:'[Day 30] Authorized to remove Clerk account', who:'jeff'},
+      {id:'s16j', label:'[Day 30] Authorized to downgrade/delete Firebase project', who:'jeff'},
+      {id:'s16k', label:'[Day 30] Authorized to delete R2 bucket', who:'jeff'},
+      {id:'s16l', label:'[Day 30] Authorized to delete old Vercel projects', who:'both'},
+    ]
+  }
+];
+
+// Quick reference data
+const QUICK_REF = [
+  { svc:'Supabase Dashboard', url:'https://supabase.com/dashboard', who:'Both (org members)' },
+  { svc:'Doppler Dashboard', url:'https://dashboard.doppler.com', who:'Lou (admin), Jeff (viewer?)' },
+  { svc:'Vercel Dashboard', url:'https://vercel.com/dashboard', who:'Both' },
+  { svc:'Clerk Dashboard', url:'https://dashboard.clerk.com', who:'Jeff' },
+  { svc:'Firebase Console', url:'https://console.firebase.google.com', who:'Jeff' },
+  { svc:'Cloudflare Dashboard', url:'https://dash.cloudflare.com', who:'Jeff' },
+  { svc:'Azure Portal', url:'https://portal.azure.com', who:'Lou' },
+  { svc:'Google Cloud Console', url:'https://console.cloud.google.com', who:'Both' },
+  { svc:'npm', url:'https://www.npmjs.com', who:'Jeff' },
+  { svc:'Upstash Console', url:'https://console.upstash.com', who:'Lou' },
+  { svc:'GitHub (repo)', url:'https://github.com/J-Akiru5/jeffdev-monorepo', who:'Both' },
+  { svc:'Resend Dashboard', url:'https://resend.com/dashboard', who:'Both' },
+];
+
+/* --- Render --- */
+function render() {
+  const container = document.getElementById('sections');
+  let html = '';
+
+  DATA.forEach(s => {
+    const itemCount = (s.items || []).length;
+    const status = sectionStatus(s.id);
+    const badgeClass = status === 'done' ? 'badge-done' : status === 'progress' ? 'badge-progress' : 'badge-pending';
+    const badgeLabel = status === 'done' ? 'Done' : status === 'progress' ? 'In Progress' : 'Pending';
+    const whoBadge = s.who === 'jeff' ? 'badge-jeff' : s.who === 'lou' ? 'badge-lou' : 'badge-both';
+    const whoLabel = s.who === 'jeff' ? '👤 Jeff' : s.who === 'lou' ? '👤 Lou' : '👥 Both';
+
+    html += `<div class="section" id="sec-${s.id}">`;
+    html += `<div class="section-header" onclick="toggleSection('${s.id}')">`;
+    html += `<span class="toggle">&#9654;</span>`;
+    html += `<span class="num">${s.num}</span>`;
+    html += `<h2>${s.title}</h2>`;
+    html += `<div class="badge-group">`;
+    html += `<span class="badge ${whoBadge}">${whoLabel}</span>`;
+    if (itemCount > 0) html += `<span class="badge ${badgeClass}">${badgeLabel}</span>`;
+    html += `</div></div>`;
+
+    html += `<div class="section-body">`;
+
+    if (s.phase) html += `<p style="font-size:0.8rem; color:var(--text-dim); margin-bottom:8px;"><strong>When:</strong> ${s.phase}</p>`;
+    if (s.content) html += s.content;
+
+    if (s.items) {
+      s.items.forEach(item => {
+        const checked = loadCheck(item.id) ? 'checked' : '';
+        const done = loadCheck(item.id) ? 'done' : '';
+        const whoCls = item.who === 'jeff' ? 'check-jeff' : item.who === 'lou' ? 'check-lou' : 'check-both';
+        const whoLbl = item.who === 'jeff' ? '👤 Jeff' : item.who === 'lou' ? '👤 Lou' : '👥 Both';
+        html += `<label class="check-item ${done}" data-id="${item.id}">`;
+        html += `<input type="checkbox" ${checked} onchange="toggleCheck('${item.id}')">`;
+        html += `<span class="check-label">${item.label}</span>`;
+        html += `<span class="check-who ${whoCls}">${whoLbl}</span>`;
+        html += `</label>`;
+      });
+    }
+
+    html += `</div></div>`;
+  });
+
+  // Quick Reference
+  html += `<div class="section" id="sec-quickref"><div class="section-header" onclick="toggleSection('quickref')">`;
+  html += `<span class="toggle">&#9654;</span><span class="num" style="background:var(--purple);">QR</span>`;
+  html += `<h2>Quick Reference — Account Access</h2></div>`;
+  html += `<div class="section-body"><table class="quick-ref"><tr><th>Service</th><th>URL</th><th>Who</th></tr>`;
+  QUICK_REF.forEach(r => {
+    html += `<tr><td><strong>${r.svc}</strong></td><td><a href="${r.url}" target="_blank">${r.url}</a></td><td>${r.who}</td></tr>`;
+  });
+  html += `</table></div></div>`;
+
+  container.innerHTML = html;
+  updateProgress();
+}
+
+/* --- Storage --- */
+function loadCheck(id) { return localStorage.getItem('rg-'+id) === 'true'; }
+function saveCheck(id, val) { localStorage.setItem('rg-'+id, val); }
+
+function toggleCheck(id) {
+  const val = loadCheck(id);
+  saveCheck(id, !val);
+  const label = document.querySelector(`.check-item[data-id="${id}"]`);
+  if (label) { label.classList.toggle('done'); }
+  updateProgress();
+}
+
+function toggleSection(id) {
+  const el = document.getElementById('sec-'+id);
+  if (el) el.classList.toggle('open');
+}
+
+function sectionStatus(sid) {
+  const s = DATA.find(d => d.id === sid);
+  if (!s || !s.items || s.items.length === 0) return 'pending';
+  const done = s.items.filter(i => loadCheck(i.id)).length;
+  if (done === s.items.length) return 'done';
+  if (done > 0) return 'progress';
+  return 'pending';
+}
+
+function updateProgress() {
+  let total = 0, done = 0;
+  DATA.forEach(s => {
+    if (s.items) {
+      s.items.forEach(i => { total++; if (loadCheck(i.id)) done++; });
+    }
+  });
+  document.getElementById('totalCount').textContent = total;
+  document.getElementById('doneCount').textContent = done;
+  const pct = total > 0 ? Math.round(done/total*100) : 0;
+  document.getElementById('pctDisplay').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  // Update section badges
+  DATA.forEach(s => {
+    const badge = document.querySelector(`#sec-${s.id} .badge-group .badge:last-child`);
+    if (!badge) return;
+    const st = sectionStatus(s.id);
+    badge.className = 'badge ' + (st === 'done' ? 'badge-done' : st === 'progress' ? 'badge-progress' : 'badge-pending');
+    badge.textContent = st === 'done' ? 'Done' : st === 'progress' ? 'In Progress' : 'Pending';
+  });
+}
+
+function resetAll() {
+  if (!confirm('Reset ALL progress checkboxes?')) return;
+  DATA.forEach(s => { if (s.items) s.items.forEach(i => localStorage.removeItem('rg-'+i.id)); });
+  // Re-render checkboxes
+  document.querySelectorAll('.check-item').forEach(el => {
+    el.classList.remove('done');
+    el.querySelector('input[type=checkbox]').checked = false;
+  });
+  updateProgress();
+}
+
+render();
+</script>
+</body>
+</html>

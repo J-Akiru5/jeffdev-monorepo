@@ -1,149 +1,149 @@
 # Prism Context Engine
 
-**The Context Operating System for Vibecoders** — Eliminate "Context Pollution" by orchestrating the flow of rules, design systems, and tech stacks between the Cloud and local AI Agents.
+**Операционная система контекста для Vibecoders** — Устраните «загрязнение контекста», оркестрируя поток правил, дизайн-систем и технологических стеков между облаком и локальными AI-агентами.
 
-## What is Prism Context Engine?
+## Что такое Prism Context Engine?
 
-Prism Context Engine is a complete **AI-powered context governance platform** that:
+Prism Context Engine — это полноценная платформа **управления контекстом на базе ИИ**, которая:
 
-1. **Extracts Rules from Video** - Upload screen recordings, automatically extract architectural patterns using Azure OpenAI
-2. **Enforces Standards** - Deploy rules to AI coding assistants via MCP (Model Context Protocol)
-3. **Enables Semantic Search** - Find relevant architectural discussions using vector embeddings
+1. **Извлекает правила из видео** — загружайте записи экрана, автоматически извлекайте архитектурные паттерны с помощью Azure OpenAI
+2. **Применяет стандарты** — развертывайте правила для AI-ассистентов кодирования через MCP (Model Context Protocol)
+3. **Обеспечивает семантический поиск** — находите релевантные архитектурные обсуждения с помощью векторных эмбеддингов
 
-### The Core Metaphor
+### Основная метафора
 
-| Concept | Prism Equivalent | Description |
+| Концепция | Эквивалент Prism | Описание |
 |---------|------------------|-------------|
-| 🍳 **The Kitchen** | SaaS Dashboard | Where the "Chef" (Developer) mixes ingredients (Next.js, Tailwind, Glassmorphism) |
-| 📜 **The Recipe** | Context Rules | The output file (e.g., `.cursorrules`) containing strict instructions |
-| 🍽️ **The Waiter** | MCP Protocol | Delivers the fresh Recipe directly to the IDE's table |
+| 🍳 **Кухня** | SaaS Панель управления | Где «Шеф-повар» (Разработчик) смешивает ингредиенты (Next.js, Tailwind, Glassmorphism) |
+| 📜 **Рецепт** | Правила контекста | Выходной файл (например, `.cursorrules`), содержащий строгие инструкции |
+| 🍽️ **Официант** | Протокол MCP | Доставляет свежий Рецепт прямо к столу IDE |
 
-### Video-to-Context Extraction
+### Извлечение контекста из видео
 
-**Automated Documentation**: Upload a screen recording of your development workflow. Prism analyzes the video transcript using Azure OpenAI to automatically extract architectural rules, coding patterns, and best practices into actionable context that your AI coding assistant can understand.
+**Автоматизированная документация**: Загрузите запись экрана вашего рабочего процесса разработки. Prism анализирует транскрипт видео с помощью Azure OpenAI, чтобы автоматически извлекать архитектурные правила, паттерны кодирования и лучшие практики в действенный контекст, понятный вашему AI-ассистенту кодирования.
 
-Works with:
+Работает с:
 - **Cursor** ✅
 - **Windsurf** ✅
-- **Claude (via MCP)** ✅  
-- **VS Code** (via MCP extension)
-- **GitHub Copilot** (coming soon)
+- **Claude (через MCP)** ✅
+- **VS Code** (через расширение MCP)
+- **GitHub Copilot** (скоро)
 
-Instead of hoping your AI follows best practices, **Prism enforces them**.
+Вместо того чтобы надеяться, что ваш ИИ будет следовать лучшим практикам, **Prism заставляет их соблюдать**.
 
-## Quick Start
+## Быстрый старт
 
-### Option A: Web Dashboard (Recommended)
+### Вариант A: Веб-панель (Рекомендуется)
 
 ```bash
-# 1. Sign up at the web dashboard
+# 1. Зарегистрируйтесь в веб-панели
 https://prism.jeffdev.studio/sign-up
 
-# 2. Create your first project and brand profile
-# 3. Upload a video or manually create rules
-# 4. Export .cursorrules file and paste into your project
+# 2. Создайте свой первый проект и профиль бренда
+# 3. Загрузите видео или создайте правила вручную
+# 4. Экспортируйте файл .cursorrules и вставьте в свой проект
 ```
 
-### Option B: MCP Server (Advanced)
+### Вариант B: MCP Сервер (Для продвинутых)
 
-For real-time sync with your IDE:
+Для синхронизации в реальном времени с вашей IDE:
 
 ```bash
-# 1. Install MCP server globally
+# 1. Установите MCP сервер глобально
 npm install -g @prism/mcp-server
 
-# 2. Configure your IDE (Cursor/Windsurf/VS Code)
-# Add to your MCP settings:
+# 2. Настройте вашу IDE (Cursor/Windsurf/VS Code)
+# Добавьте в настройки MCP:
 {
   "mcpServers": {
     "prism": {
       "command": "prism-mcp",
-      "args": ["--api-key", "YOUR_API_KEY"]
+      "args": ["--api-key", "ВАШ_API_КЛЮЧ"]
     }
   }
 }
 
-# 3. Your AI assistant now has live access to your rules
+# 3. Ваш AI-ассистент теперь имеет прямой доступ к вашим правилам
 ```
 
-## Core Features
+## Основные функции
 
 import { Rocket, Video, FileCode, Plug, Settings, Code } from 'lucide-react'
 
 <Cards>
-  <Card icon={<Rocket size={20} />} title="Quick Start" href="/quick-start">
-    Deploy your first rule in 5 minutes
+  <Card icon={<Rocket size={20} />} title="Быстрый старт" href="/ru/quick-start">
+    Разверните первое правило за 5 минут
   </Card>
-  <Card icon={<Video size={20} />} title="Video Processing" href="/video">
-    Extract rules from screen recordings
+  <Card icon={<Video size={20} />} title="Обработка видео" href="/ru/video">
+    Извлекайте правила из записей экрана
   </Card>
-  <Card icon={<FileCode size={20} />} title="Rule Management" href="/rules">
-    Create, organize, and deploy constraints
+  <Card icon={<FileCode size={20} />} title="Управление правилами" href="/ru/rules">
+    Создавайте, организуйте и развертывайте ограничения
   </Card>
-  <Card icon={<Plug size={20} />} title="IDE Integrations" href="/integrations">
-    Connect to Cursor, Windsurf, and Claude
+  <Card icon={<Plug size={20} />} title="Интеграции с IDE" href="/ru/integrations">
+    Подключайтесь к Cursor, Windsurf и Claude
   </Card>
-  <Card icon={<Settings size={20} />} title="Advanced" href="/advanced">
-    Semantic search and brand profiles
+  <Card icon={<Settings size={20} />} title="Расширенные" href="/ru/advanced">
+    Семантический поиск и профили брендов
   </Card>
-  <Card icon={<Code size={20} />} title="API Reference" href="/advanced/api-reference">
-    Programmatic access to rules and transcripts
+  <Card icon={<Code size={20} />} title="Справочник API" href="/ru/advanced/api-reference">
+    Программный доступ к правилам и транскриптам
   </Card>
 </Cards>
 
-## Architecture
+## Архитектура
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│              Video Upload (Mux)                             │
-│  Screen recordings → Automatic transcription                │
+│              Загрузка видео (Mux)                           │
+│  Записи экрана → Автоматическая транскрипция                │
 └────────────────────────────┬────────────────────────────────┘
                              │ Webhook
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
-│           Azure OpenAI Processing (GPT-4o-mini)             │
-│  Extract rules + Generate embeddings for search             │
+│           Обработка Azure OpenAI (GPT-4o-mini)              │
+│  Извлечение правил + Генерация эмбеддингов для поиска       │
 └────────────────────────────┬────────────────────────────────┘
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
-│            Azure Cosmos DB (MongoDB API)                    │
-│    Rules Collection + Video Transcripts + Embeddings        │
+│            Azure Cosmos DB (API MongoDB)                    │
+│    Коллекция правил + Транскрипты видео + Эмбеддинги        │
 └────────────────────────────┬────────────────────────────────┘
-                             │ MCP Protocol
+                             │ Протокол MCP
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                   Your IDE (Cursor/Windsurf)                │
-│  AI follows your rules automatically during coding          │
+│                   Ваша IDE (Cursor/Windsurf)                │
+│  ИИ автоматически следует вашим правилам при кодировании    │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## What Makes Prism Different?
+## Что отличает Prism?
 
-### 🎥 Video-First Context Capture
-Record your screen while discussing architecture. Prism automatically extracts rules from your explanations.
+### 🎥 Видео-ориентированный захват контекста
+Записывайте экран во время обсуждения архитектуры. Prism автоматически извлекает правила из ваших объяснений.
 
-### 🧠 AI-Powered Rule Extraction
-GPT-4o-mini analyzes transcripts to identify:
-- Architectural patterns
-- Code style conventions
-- Naming rules
-- Testing strategies
-- Security practices
+### 🧠 Извлечение правил на основе ИИ
+GPT-4o-mini анализирует транскрипты для выявления:
+- Архитектурных паттернов
+- Соглашений о стиле кода
+- Правил именования
+- Стратегий тестирования
+- Практик безопасности
 
-### 🔍 Semantic Search
-Vector embeddings enable finding relevant architectural discussions, not just keyword matching.
+### 🔍 Семантический поиск
+Векторные эмбеддинги позволяют находить релевантные архитектурные обсуждения, а не просто соответствие ключевым словам.
 
-### 🚀 Zero-Config MCP Integration
-`npx prism connect` and you're done. Your AI assistant now has context.
+### 🚀 Интеграция MCP без настройки
+`npx prism connect` — и готово. Ваш AI-ассистент теперь имеет контекст.
 
-## Real-World Example
+## Пример из реального мира
 
 ```typescript
-// Before Prism: Generic code
+// До Prism: Общий код
 const data = await fetch('/api/users');
 
-// After Prism: Enforces your standards
+// После Prism: Применение ваших стандартов
 const { data, error } = await api.users.list();
 if (error) {
   toast.error(error.message);
@@ -151,15 +151,15 @@ if (error) {
 }
 ```
 
-Your AI assistant learns from your videos that you:
-- Use custom API wrapper with error handling
-- Show errors via toast notifications
-- Follow early return patterns
+Ваш AI-ассистент учится из ваших видео:
+- Вы используете пользовательскую обертку API с обработкой ошибок
+- Вы показываете ошибки через toast-уведомления
+- Вы следуете паттерну раннего возврата
 
-## Built by Syntaxure Labs
+## Создано Syntaxure Labs
 
-Prism Context Engine is part of the [Syntaxure Labs](https://jeffdev.studio) ecosystem — enterprise-grade tools for developers who want AI that respects their architecture.
+Prism Context Engine — часть экосистемы [Syntaxure Labs](https://jeffdev.studio) — инструменты корпоративного уровня для разработчиков, которые хотят, чтобы ИИ уважал их архитектуру.
 
-**Current Version:** 1.0.3  
-**License:** MIT  
-**Support:** [GitHub Issues](https://github.com/J-Akiru5/jeffdev-monorepo/issues)
+**Текущая версия:** 1.0.3
+**Лицензия:** MIT
+**Поддержка:** [GitHub Issues](https://github.com/J-Akiru5/jeffdev-monorepo/issues)

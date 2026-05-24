@@ -2,48 +2,47 @@
   "index": "Prism Context Engine",
   "---getting-started": {
     "type": "separator",
-    "title": "Getting Started"
+    "title": "Начало работы"
   },
-  "introduction": "Introduction",
-  "changelog-page": "Changelog",
-  "installation": "Installation",
-  "quick-start": "Quick Start",
+  "introduction": "Введение",
+  "changelog-page": "Журнал изменений",
+  "installation": "Установка",
+  "quick-start": "Быстрый старт",
   "---core-concepts": {
     "type": "separator",
-    "title": "Core Concepts"
+    "title": "Основные концепции"
   },
-  "concepts": "Concepts",
+  "concepts": "Концепции",
   "---video-processing": {
     "type": "separator",
-    "title": "Video Processing"
+    "title": "Обработка видео"
   },
-  "video": "Video",
+  "video": "Видео",
   "---rule-management": {
     "type": "separator",
-    "title": "Rule Management"
+    "title": "Управление правилами"
   },
-  "rules": "Rules",
+  "rules": "Правила",
   "---integrations": {
     "type": "separator",
-    "title": "Integrations"
+    "title": "Интеграции"
   },
-  "integrations": "IDE Setup",
+  "integrations": "Настройка IDE",
   "---advanced": {
     "type": "separator",
-    "title": "Advanced"
+    "title": "Расширенные"
   },
-  "advanced": "Advanced",
+  "advanced": "Расширенные",
   "---troubleshooting": {
     "type": "separator",
-    "title": "Troubleshooting"
+    "title": "Устранение проблем"
   },
-  "troubleshooting": "Troubleshooting",
+  "troubleshooting": "Устранение проблем",
   "---resources": {
     "type": "separator",
-    "title": "Resources"
+    "title": "Ресурсы"
   },
-
-  "security-page": "Security & Privacy",
+  "security-page": "Безопасность и конфиденциальность",
   "guide": {
     "display": "hidden"
   },

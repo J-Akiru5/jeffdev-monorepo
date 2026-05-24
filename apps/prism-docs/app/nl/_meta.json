@@ -2,48 +2,47 @@
   "index": "Prism Context Engine",
   "---getting-started": {
     "type": "separator",
-    "title": "Getting Started"
+    "title": "Aan de slag"
   },
-  "introduction": "Introduction",
-  "changelog-page": "Changelog",
-  "installation": "Installation",
-  "quick-start": "Quick Start",
+  "introduction": "Inleiding",
+  "changelog-page": "Wijzigingslog",
+  "installation": "Installatie",
+  "quick-start": "Snel starten",
   "---core-concepts": {
     "type": "separator",
-    "title": "Core Concepts"
+    "title": "Kernconcepten"
   },
-  "concepts": "Concepts",
+  "concepts": "Concepten",
   "---video-processing": {
     "type": "separator",
-    "title": "Video Processing"
+    "title": "Video verwerking"
   },
   "video": "Video",
   "---rule-management": {
     "type": "separator",
-    "title": "Rule Management"
+    "title": "Regelbeheer"
   },
-  "rules": "Rules",
+  "rules": "Regels",
   "---integrations": {
     "type": "separator",
-    "title": "Integrations"
+    "title": "Integraties"
   },
-  "integrations": "IDE Setup",
+  "integrations": "IDE-installatie",
   "---advanced": {
     "type": "separator",
-    "title": "Advanced"
+    "title": "Geavanceerd"
   },
-  "advanced": "Advanced",
+  "advanced": "Geavanceerd",
   "---troubleshooting": {
     "type": "separator",
-    "title": "Troubleshooting"
+    "title": "Problemen oplossen"
   },
-  "troubleshooting": "Troubleshooting",
+  "troubleshooting": "Problemen oplossen",
   "---resources": {
     "type": "separator",
-    "title": "Resources"
+    "title": "Bronnen"
   },
-
-  "security-page": "Security & Privacy",
+  "security-page": "Beveiliging en privacy",
   "guide": {
     "display": "hidden"
   },

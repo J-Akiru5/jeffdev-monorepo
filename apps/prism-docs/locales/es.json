@@ -1,0 +1,65 @@
+{
+  "common": {
+    "search_placeholder": "Buscar en la documentación...",
+    "edit_on_github": "Editar en GitHub",
+    "give_feedback": "¿Preguntas? Danos tu opinión →",
+    "on_this_page": "En esta página",
+    "copy_page": "Copiar página",
+    "scroll_to_top": "Volver arriba"
+  },
+  "nav": {
+    "documentation": "Documentación",
+    "introduction": "Introducción",
+    "quick_start": "Inicio Rápido",
+    "video_processing": "Procesamiento de Video",
+    "integrations": "Integraciones IDE",
+    "product": "Producto",
+    "dashboard": "Panel",
+    "pricing": "Precios",
+    "api_reference": "Referencia de API",
+    "changelog": "Registro de Cambios"
+  },
+  "footer": {
+    "start_project": "Iniciar un Proyecto",
+    "ready_to_start": "¿Listo para eliminar la contaminación de contexto? Comencemos.",
+    "get_started": "COMENZAR",
+    "terms": "Términos de Servicio",
+    "privacy": "Política de Privacidad"
+  },
+  "home": {
+    "title": "Prism Context Engine",
+    "tagline": "El Sistema Operativo de Contexto para Vibecoders",
+    "description": "Elimina la \"Contaminación de Contexto\" orquestando el flujo de reglas, sistemas de diseño y stacks tecnológicos entre la Nube y los Agentes de IA locales.",
+    "what_is_prism": "¿Qué es Prism Context Engine?",
+    "prism_description": "Prism Context Engine es una plataforma completa de gobernanza de contexto impulsada por IA que:",
+    "feature_1": "Extrae Reglas de Video - Sube grabaciones de pantalla, extrae automáticamente patrones arquitectónicos usando Azure OpenAI",
+    "feature_2": "Aplica Estándares - Despliega reglas a asistentes de codificación AI vía MCP (Model Context Protocol)",
+    "feature_3": "Habilita Búsqueda Semántica - Encuentra discusiones arquitectónicas relevantes usando embeddings vectoriales",
+    "core_features": "Características Principales",
+    "architecture": "Arquitectura",
+    "what_makes_different": "¿Qué Hace Diferente a Prism?",
+    "video_first": "Captura de Contexto Video-Primero",
+    "video_first_desc": "Graba tu pantalla mientras discutes arquitectura. Prism extrae automáticamente reglas de tus explicaciones.",
+    "ai_powered": "Extracción de Reglas con IA",
+    "ai_powered_desc": "GPT-4o-mini analiza transcripciones para identificar patrones arquitectónicos, convenciones de estilo, reglas de nomenclatura, estrategias de prueba y prácticas de seguridad.",
+    "semantic_search": "Búsqueda Semántica",
+    "semantic_search_desc": "Los embeddings vectoriales permiten encontrar discusiones arquitectónicas relevantes, no solo coincidencias de palabras clave.",
+    "zero_config": "Integración MCP Sin Configuración",
+    "zero_config_desc": "npx prism connect y listo. Tu asistente de IA ahora tiene contexto.",
+    "built_by": "Creado por Syntaxure Labs"
+  },
+  "cards": {
+    "quick_start": "Inicio Rápido",
+    "quick_start_desc": "Despliega tu primera regla en 5 minutos",
+    "video_processing": "Procesamiento de Video",
+    "video_processing_desc": "Extrae reglas de grabaciones de pantalla",
+    "rule_management": "Gestión de Reglas",
+    "rule_management_desc": "Crea, organiza y despliega restricciones",
+    "ide_integrations": "Integraciones IDE",
+    "ide_integrations_desc": "Conéctate a Cursor, Windsurf y Claude",
+    "advanced": "Avanzado",
+    "advanced_desc": "Búsqueda semántica y perfiles de marca",
+    "api_reference": "Referencia de API",
+    "api_reference_desc": "Acceso programático a reglas y transcripciones"
+  }
+}

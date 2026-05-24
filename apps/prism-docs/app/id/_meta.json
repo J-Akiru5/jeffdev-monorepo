@@ -2,48 +2,47 @@
   "index": "Prism Context Engine",
   "---getting-started": {
     "type": "separator",
-    "title": "Getting Started"
+    "title": "Memulai"
   },
-  "introduction": "Introduction",
-  "changelog-page": "Changelog",
-  "installation": "Installation",
-  "quick-start": "Quick Start",
+  "introduction": "Pendahuluan",
+  "changelog-page": "Catatan Perubahan",
+  "installation": "Instalasi",
+  "quick-start": "Mulai Cepat",
   "---core-concepts": {
     "type": "separator",
-    "title": "Core Concepts"
+    "title": "Konsep Inti"
   },
-  "concepts": "Concepts",
+  "concepts": "Konsep",
   "---video-processing": {
     "type": "separator",
-    "title": "Video Processing"
+    "title": "Pemrosesan Video"
   },
   "video": "Video",
   "---rule-management": {
     "type": "separator",
-    "title": "Rule Management"
+    "title": "Manajemen Aturan"
   },
-  "rules": "Rules",
+  "rules": "Aturan",
   "---integrations": {
     "type": "separator",
-    "title": "Integrations"
+    "title": "Integrasi"
   },
-  "integrations": "IDE Setup",
+  "integrations": "Pengaturan IDE",
   "---advanced": {
     "type": "separator",
-    "title": "Advanced"
+    "title": "Lanjutan"
   },
-  "advanced": "Advanced",
+  "advanced": "Lanjutan",
   "---troubleshooting": {
     "type": "separator",
-    "title": "Troubleshooting"
+    "title": "Pemecahan Masalah"
   },
-  "troubleshooting": "Troubleshooting",
+  "troubleshooting": "Pemecahan Masalah",
   "---resources": {
     "type": "separator",
-    "title": "Resources"
+    "title": "Sumber Daya"
   },
-
-  "security-page": "Security & Privacy",
+  "security-page": "Keamanan & Privasi",
   "guide": {
     "display": "hidden"
   },

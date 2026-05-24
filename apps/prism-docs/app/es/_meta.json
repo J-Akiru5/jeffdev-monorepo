@@ -2,48 +2,47 @@
   "index": "Prism Context Engine",
   "---getting-started": {
     "type": "separator",
-    "title": "Getting Started"
+    "title": "Primeros Pasos"
   },
-  "introduction": "Introduction",
-  "changelog-page": "Changelog",
-  "installation": "Installation",
-  "quick-start": "Quick Start",
+  "introduction": "Introducción",
+  "changelog-page": "Registro de Cambios",
+  "installation": "Instalación",
+  "quick-start": "Inicio Rápido",
   "---core-concepts": {
     "type": "separator",
-    "title": "Core Concepts"
+    "title": "Conceptos Principales"
   },
-  "concepts": "Concepts",
+  "concepts": "Conceptos",
   "---video-processing": {
     "type": "separator",
-    "title": "Video Processing"
+    "title": "Procesamiento de Video"
   },
   "video": "Video",
   "---rule-management": {
     "type": "separator",
-    "title": "Rule Management"
+    "title": "Gestión de Reglas"
   },
-  "rules": "Rules",
+  "rules": "Reglas",
   "---integrations": {
     "type": "separator",
-    "title": "Integrations"
+    "title": "Integraciones"
   },
-  "integrations": "IDE Setup",
+  "integrations": "Configuración del IDE",
   "---advanced": {
     "type": "separator",
-    "title": "Advanced"
+    "title": "Avanzado"
   },
-  "advanced": "Advanced",
+  "advanced": "Avanzado",
   "---troubleshooting": {
     "type": "separator",
-    "title": "Troubleshooting"
+    "title": "Solución de Problemas"
   },
-  "troubleshooting": "Troubleshooting",
+  "troubleshooting": "Solución de Problemas",
   "---resources": {
     "type": "separator",
-    "title": "Resources"
+    "title": "Recursos"
   },
-
-  "security-page": "Security & Privacy",
+  "security-page": "Seguridad y Privacidad",
   "guide": {
     "display": "hidden"
   },
