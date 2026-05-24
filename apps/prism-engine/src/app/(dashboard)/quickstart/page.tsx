@@ -398,7 +398,7 @@ export default function QuickConnectPage() {
       <div className="flex flex-wrap gap-3 pt-4 border-t border-white/5">
         <Button variant="secondary" size="sm" asChild>
           <a
-            href="https://docs.prism.jeffdev.studio/ide-setup"
+            href="https://docs.syntaxure.dev/ide-setup"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2"
@@ -410,7 +410,7 @@ export default function QuickConnectPage() {
         </Button>
         <Button variant="secondary" size="sm" asChild>
           <a
-            href="https://docs.prism.jeffdev.studio/troubleshooting"
+            href="https://docs.syntaxure.dev/troubleshooting"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2"

@@ -148,7 +148,7 @@ export default async function DashboardPage() {
 
           <div className="flex gap-3">
             <Button variant="secondary" className="hidden md:flex" asChild>
-              <Link href="https://docs.prism.jeffdev.studio" target="_blank">
+              <Link href="https://docs.syntaxure.dev" target="_blank">
                 Documentation
               </Link>
             </Button>

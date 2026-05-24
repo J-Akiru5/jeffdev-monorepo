@@ -115,7 +115,7 @@ const FALLBACK_PLANS: PricingPlanData[] = [
     features: ["Everything in Team", "Unlimited team members", "Unlimited AI generations", "SSO/SAML", "Audit logs", "Dedicated support", "Custom integrations"],
     popular: false,
     cta: "Contact Sales",
-    href: "https://jeffdev.studio/contact",
+    href: "https://www.syntaxure.dev/contact",
   },
 ];
 

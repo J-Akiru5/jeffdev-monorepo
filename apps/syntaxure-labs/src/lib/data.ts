@@ -86,6 +86,9 @@ export interface DataMessage {
 // SERVICES
 // =============================================================================
 export async function getServices(): Promise<DataService[]> {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return [];
+  }
   try {
     const supabase = (await getAdminClient()) as any;
     const { data, error } = await supabase
@@ -145,6 +148,9 @@ function mapCategoryToIcon(category: string): string {
 // PROJECTS
 // =============================================================================
 export async function getProjects(): Promise<DataProject[]> {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return [];
+  }
   try {
     const supabase = (await getAdminClient()) as any;
     const { data, error } = await supabase

@@ -204,7 +204,7 @@ async function handlePaymentFailed(userId: string) {
     try {
       const resend = new Resend(process.env.RESEND_API_KEY);
       await resend.emails.send({
-        from: "Prism <billing@prism.jeffdev.studio>",
+        from: "Prism <billing@prism.syntaxure.dev>",
         to: userId, // will be resolved by email lookup
         subject: "Payment Failed — Prism Subscription",
         html: `<p>Your Prism subscription payment failed. Please update your payment method.</p>`,

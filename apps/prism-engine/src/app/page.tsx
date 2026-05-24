@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     title: 'Prism Context Engine - The Context Operating System',
     description: 'Record your architecture. AI learns your rules. Deploy to your IDE via MCP.',
     images: ['/prism-icon.png'],
-    creator: '@jeffdevstudio',
+    creator: '@syntaxure_dev',
   },
   alternates: {
     canonical: '/',
@@ -66,11 +66,11 @@ export default function HomePage() {
             "operatingSystem": "Web, macOS, Windows, Linux",
             "description":
               "Record your architecture. AI learns your rules. Deploy context directly to Cursor, Windsurf, and Claude via MCP. Eliminate context pollution.",
-            "url": "https://prism.jeffdev.studio",
+            "url": "https://prism.syntaxure.dev",
             "author": {
               "@type": "Organization",
               "name": "Syntaxure Labs",
-              "url": "https://jeffdev.studio",
+              "url": "https://www.syntaxure.dev",
             },
             "offers": [
               {
@@ -155,7 +155,7 @@ export default function HomePage() {
                 </li>
                 <li>
                   <Link
-                    href="https://docs.jeffdev.studio"
+                    href="https://docs.syntaxure.dev"
                     target="_blank"
                     className="text-white/60 hover:text-cyan-400 text-sm transition-colors"
                   >
@@ -173,7 +173,7 @@ export default function HomePage() {
               <ul className="space-y-2">
                 <li>
                   <Link
-                    href="https://jeffdev.studio"
+                    href="https://www.syntaxure.dev"
                     target="_blank"
                     className="text-white/60 hover:text-cyan-400 text-sm transition-colors"
                   >
@@ -182,7 +182,7 @@ export default function HomePage() {
                 </li>
                 <li>
                   <Link
-                    href="https://jeffdev.studio/contact"
+                    href="https://www.syntaxure.dev/contact"
                     target="_blank"
                     className="text-white/60 hover:text-cyan-400 text-sm transition-colors"
                   >

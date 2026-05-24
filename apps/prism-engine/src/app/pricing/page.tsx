@@ -223,7 +223,7 @@ export default async function PublicPricingPage() {
               </span>
             </Link>
             <Link
-              href="https://jeffdev.studio/contact"
+              href="https://www.syntaxure.dev/contact"
               className="rounded-md border border-white/10 bg-white/2 px-8 py-4 transition-all hover:bg-white/5 hover:border-white/20 active:scale-95"
             >
               <span className="font-mono text-sm uppercase tracking-wider text-white/80">
@@ -278,7 +278,7 @@ export default async function PublicPricingPage() {
                 </li>
                 <li>
                   <Link
-                    href="https://docs.jeffdev.studio"
+                    href="https://docs.syntaxure.dev"
                     target="_blank"
                     className="text-white/60 hover:text-cyan-400 text-sm transition-colors"
                   >
@@ -295,7 +295,7 @@ export default async function PublicPricingPage() {
               <ul className="space-y-2">
                 <li>
                   <Link
-                    href="https://jeffdev.studio"
+                    href="https://www.syntaxure.dev"
                     target="_blank"
                     className="text-white/60 hover:text-cyan-400 text-sm transition-colors"
                   >
@@ -304,7 +304,7 @@ export default async function PublicPricingPage() {
                 </li>
                 <li>
                   <Link
-                    href="https://jeffdev.studio/contact"
+                    href="https://www.syntaxure.dev/contact"
                     target="_blank"
                     className="text-white/60 hover:text-cyan-400 text-sm transition-colors"
                   >
