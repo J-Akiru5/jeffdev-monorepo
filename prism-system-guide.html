@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>🗺️ Prism System Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: #050505; color: #fff; font-family: 'Inter', sans-serif; line-height: 1.6; min-height: 100vh; }
+  a { color: #06b6d4; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code, .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* NAV */
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(5,5,5,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.07); padding: 0 2rem; display: flex; align-items: center; gap: 2rem; height: 56px; overflow-x: auto; white-space: nowrap; }
+  nav .logo { font-weight: 700; font-size: 0.9rem; color: #06b6d4; letter-spacing: -0.02em; flex-shrink: 0; }
+  nav a { font-size: 0.8rem; color: rgba(255,255,255,0.5); transition: color 0.2s; flex-shrink: 0; }
+  nav a:hover { color: #fff; text-decoration: none; }
+
+  /* HERO */
+  .hero { text-align: center; padding: 5rem 2rem 4rem; max-width: 800px; margin: 0 auto; }
+  .hero .badge { display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.3); border-radius: 99px; padding: 0.3rem 0.9rem; font-size: 0.75rem; color: #06b6d4; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 1.5rem; }
+  .hero h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; letter-spacing: -0.03em; background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.6) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 1rem; }
+  .hero p { font-size: 1.1rem; color: rgba(255,255,255,0.5); max-width: 560px; margin: 0 auto; }
+
+  /* LAYOUT */
+  .container { max-width: 1000px; margin: 0 auto; padding: 0 2rem 6rem; }
+
+  /* SECTIONS */
+  section { margin-bottom: 5rem; scroll-margin-top: 80px; }
+  .section-label { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #06b6d4; margin-bottom: 0.75rem; }
+  .section-label .num { background: rgba(6,182,212,0.15); border: 1px solid rgba(6,182,212,0.3); border-radius: 4px; padding: 0.1rem 0.4rem; font-family: 'JetBrains Mono', monospace; }
+  h2 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; color: #fff; margin-bottom: 0.5rem; }
+  .section-desc { color: rgba(255,255,255,0.5); margin-bottom: 2rem; font-size: 0.95rem; }
+
+  /* CARDS */
+  .card { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 1.5rem; }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+  .app-card { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 1.25rem 1.5rem; transition: border-color 0.2s, background 0.2s; }
+  .app-card:hover { border-color: rgba(6,182,212,0.3); background: rgba(6,182,212,0.04); }
+  .app-card .icon { font-size: 1.5rem; margin-bottom: 0.6rem; }
+  .app-card .app-name { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #06b6d4; margin-bottom: 0.2rem; }
+  .app-card .port { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.3); color: #a78bfa; border-radius: 4px; padding: 0.1rem 0.4rem; margin-bottom: 0.5rem; }
+  .app-card h3 { font-size: 0.95rem; font-weight: 600; color: #fff; margin-bottom: 0.4rem; }
+  .app-card p { font-size: 0.82rem; color: rgba(255,255,255,0.45); }
+  .app-card .analogy { margin-top: 0.5rem; font-size: 0.75rem; color: rgba(255,255,255,0.3); font-style: italic; }
+
+  /* MERMAID */
+  .diagram-wrap { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 2rem 1rem; overflow-x: auto; }
+  .mermaid { min-height: 100px; }
+
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+  thead th { text-align: left; padding: 0.75rem 1rem; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.4); border-bottom: 1px solid rgba(255,255,255,0.07); }
+  tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+  tbody td { padding: 0.75rem 1rem; color: rgba(255,255,255,0.75); vertical-align: top; }
+  tbody td:first-child { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: #fff; }
+  .tag-ok { display: inline-flex; align-items: center; gap: 0.3rem; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #10b981; border-radius: 99px; padding: 0.15rem 0.5rem; font-size: 0.7rem; font-weight: 600; }
+  .tag-warn { display: inline-flex; align-items: center; gap: 0.3rem; background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: #f59e0b; border-radius: 99px; padding: 0.15rem 0.5rem; font-size: 0.7rem; font-weight: 600; }
+
+  /* CHECKLIST */
+  .checklist { display: flex; flex-direction: column; gap: 0.75rem; }
+  .check-item { display: flex; align-items: flex-start; gap: 1rem; background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07); border-radius: 8px; padding: 1rem 1.25rem; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+  .check-item:hover { border-color: rgba(6,182,212,0.3); background: rgba(6,182,212,0.04); }
+  .check-item.done { border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.04); }
+  .check-item.done .check-label { text-decoration: line-through; color: rgba(255,255,255,0.3); }
+  .check-box { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.2); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; transition: all 0.2s; margin-top: 0.1rem; }
+  .check-item.done .check-box { background: #10b981; border-color: #10b981; }
+  .check-content { flex: 1; }
+  .check-label { font-size: 0.9rem; font-weight: 600; color: #fff; margin-bottom: 0.2rem; }
+  .check-sublabel { font-size: 0.8rem; color: rgba(255,255,255,0.4); }
+  .check-cmd { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; padding: 0.15rem 0.5rem; color: #06b6d4; margin-top: 0.3rem; display: inline-block; }
+
+  /* REF TABLE */
+  .ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  @media (max-width: 600px) { .ref-grid { grid-template-columns: 1fr; } }
+  .ref-item { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.07); border-radius: 6px; padding: 0.75rem 1rem; }
+  .ref-item .ref-q { font-size: 0.78rem; color: rgba(255,255,255,0.45); margin-bottom: 0.25rem; }
+  .ref-item .ref-a { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: #8b5cf6; }
+
+  /* CALLOUT */
+  .callout { border-left: 3px solid #06b6d4; background: rgba(6,182,212,0.06); border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
+  .callout .callout-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #06b6d4; margin-bottom: 0.4rem; }
+  .callout p { font-size: 0.875rem; color: rgba(255,255,255,0.7); }
+
+  /* BRAIN CARDS */
+  .brain-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  @media (max-width: 700px) { .brain-grid { grid-template-columns: 1fr; } }
+  .brain-card { border-radius: 10px; padding: 1.5rem; text-align: center; }
+  .brain-card.cyan { background: rgba(6,182,212,0.06); border: 1px solid rgba(6,182,212,0.2); }
+  .brain-card.purple { background: rgba(139,92,246,0.06); border: 1px solid rgba(139,92,246,0.2); }
+  .brain-card.amber { background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.2); }
+  .brain-card .brain-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+  .brain-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .brain-card .brain-where { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: rgba(255,255,255,0.35); margin-bottom: 0.5rem; }
+  .brain-card p { font-size: 0.8rem; color: rgba(255,255,255,0.5); }
+  .brain-arrow { display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: rgba(255,255,255,0.2); padding: 0.5rem; }
+
+  hr { border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 4rem 0; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">◈ Prism Guide</span>
+  <a href="#big-picture">Big Picture</a>
+  <a href="#map">Monorepo Map</a>
+  <a href="#apps">Each App</a>
+  <a href="#journey">User Journey</a>
+  <a href="#flow">Data Flow</a>
+  <a href="#status">Status</a>
+  <a href="#reference">Reference</a>
+  <a href="#next">Next Steps</a>
+</nav>
+
+<div class="hero">
+  <div class="badge">🗺️ System Overview</div>
+  <h1>Prism System Guide</h1>
+  <p>Everything you need to know about how this system works — no code experience required.</p>
+</div>
+
+<div class="container">
+
+  <!-- BIG PICTURE -->
+  <section id="big-picture">
+    <div class="section-label"><span class="num">01</span> The Big Picture</div>
+    <h2>What is Prism?</h2>
+    <p class="section-desc">One sentence, plain English.</p>
+    <div class="callout">
+      <div class="callout-title">💡 The Simple Version</div>
+      <p><strong>Prism</strong> is a product that lets developers store their coding rules in a website, and then feeds those rules directly into AI coding assistants (Cursor, VS Code, Claude, Windsurf) — so the AI always follows the rules instead of guessing.</p>
+    </div>
+    <div class="brain-grid">
+      <div class="brain-card cyan">
+        <div class="brain-icon">🧠</div>
+        <h3>The Website</h3>
+        <div class="brain-where">apps/prism-engine</div>
+        <p>Where users log in, create projects, write rules, see analytics, get API keys.</p>
+      </div>
+      <div class="brain-card purple">
+        <div class="brain-icon">🤖</div>
+        <h3>The AI Connector</h3>
+        <div class="brain-where">apps/prism-mcp-server</div>
+        <p>Talks directly to AI assistants. Reads rules from the database and feeds them to the AI.</p>
+      </div>
+      <div class="brain-card amber">
+        <div class="brain-icon">⌨️</div>
+        <h3>The Installer</h3>
+        <div class="brain-where">packages/prism-cli</div>
+        <p>The <code>prism</code> terminal command. Connects the website to the AI assistant on the user's computer.</p>
+      </div>
+    </div>
+    <div class="brain-arrow" style="margin-top:1rem;">↑ These 3 things all share the same database. That's the whole system.</div>
+  </section>
+
+  <!-- MONOREPO MAP -->
+  <section id="map">
+    <div class="section-label"><span class="num">02</span> Monorepo Map</div>
+    <h2>What Lives Where</h2>
+    <p class="section-desc">This is a <strong>monorepo</strong> — one big folder containing multiple smaller projects, each with its own job.</p>
+    <div class="diagram-wrap">
+      <div class="mermaid">
+graph TB
+    subgraph MONO["📁 jeffdev-monorepo"]
+        subgraph APPS["📂 apps/"]
+            A1["🌐 agency · Port 3000\nMarketing Website\njeffdev.studio"]
+            A2["📊 prism-engine · Port 3001\nThe Main Product\nprism.jeffdev.studio"]
+            A3["📚 prism-docs · Port 3002\nDocumentation Site"]
+            A4["🤖 prism-mcp-server · stdio\nThe AI Brain"]
+            A5["🔧 prism-admin · Port 3004\nInternal Admin"]
+        end
+        subgraph PKGS["📂 packages/"]
+            P1["🎨 ui\nShared Buttons & Cards"]
+            P2["💾 db\nDatabase Connections"]
+            P3["⌨️ prism-cli\nThe 'prism' Command"]
+        end
+    end
+      </div>
+    </div>
+  </section>
+
+  <!-- EACH APP -->
+  <section id="apps">
+    <div class="section-label"><span class="num">03</span> Each App Explained</div>
+    <h2>What Each Folder Does</h2>
+    <p class="section-desc">Click a card to learn more about each part of the system.</p>
+    <div class="card-grid">
+      <div class="app-card">
+        <div class="icon">🌐</div>
+        <div class="app-name">apps/agency</div>
+        <div class="port">Port 3000</div>
+        <h3>Marketing Website</h3>
+        <p>Your company's public-facing website. Shows services, portfolio, lets clients contact you. Lives at jeffdev.studio.</p>
+        <div class="analogy">💡 Like a digital business card or storefront</div>
+      </div>
+      <div class="app-card">
+        <div class="icon">📊</div>
+        <div class="app-name">apps/prism-engine</div>
+        <div class="port">Port 3001 · THE MAIN PRODUCT</div>
+        <h3>Prism Dashboard</h3>
+        <p>Where users sign up, create projects, write rules, see analytics, and get API keys. Lives at prism.jeffdev.studio.</p>
+        <div class="analogy">💡 Like the Stripe Dashboard or GitHub Dashboard</div>
+      </div>
+      <div class="app-card">
+        <div class="icon">📚</div>
+        <div class="app-name">apps/prism-docs</div>
+        <div class="port">Port 3002</div>
+        <h3>Documentation Site</h3>
+        <p>The help pages. "How to install", "How to use", "Troubleshooting". Built with Nextra.</p>
+        <div class="analogy">💡 Like docs.stripe.com</div>
+      </div>
+      <div class="app-card">
+        <div class="icon">🤖</div>
+        <div class="app-name">apps/prism-mcp-server</div>
+        <div class="port">No port — runs via stdio</div>
+        <h3>The AI Brain</h3>
+        <p>The code that actually talks to the AI assistant. Reads rules from the database and feeds them to the AI when it asks.</p>
+        <div class="analogy">💡 Like a translator between your rules and the AI</div>
+      </div>
+      <div class="app-card">
+        <div class="icon">🔧</div>
+        <div class="app-name">apps/prism-admin</div>
+        <div class="port">Port 3004</div>
+        <h3>Internal Admin Panel</h3>
+        <p>Internal tool for managing users, viewing system health, and admin operations. Not for regular users.</p>
+        <div class="analogy">💡 Like a backstage control room</div>
+      </div>
+      <div class="app-card">
+        <div class="icon">⌨️</div>
+        <div class="app-name">packages/prism-cli</div>
+        <div class="port">npm package</div>
+        <h3>The Terminal Command</h3>
+        <p>The <code>prism</code> command users type in their terminal. Installs the MCP server into the user's IDE automatically.</p>
+        <div class="analogy">💡 Like when you type <code>npm install</code> — a helper tool</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- USER JOURNEY -->
+  <section id="journey">
+    <div class="section-label"><span class="num">04</span> User Journey</div>
+    <h2>Step-by-Step: How a User Uses Prism</h2>
+    <p class="section-desc">From discovering Prism to having the AI follow their rules.</p>
+    <div class="diagram-wrap">
+      <div class="mermaid">
+flowchart TD
+    A(["👤 Developer discovers Prism"]) --> B
+
+    subgraph S1["Step 1 · Discovery"]
+        B["Visits jeffdev.studio\nagency app"]
+        B --> C["Clicks 'Try Prism'\ngoes to prism.jeffdev.studio"]
+    end
+
+    C --> D
+
+    subgraph S2["Step 2 · Sign Up"]
+        D["Signs up with email\nSupabase handles authentication"]
+        D --> E["Goes through 4-step\nonboarding wizard"]
+        E --> F["Creates a project\nnames it, picks tech stack"]
+    end
+
+    F --> G
+
+    subgraph S3["Step 3 · Add Rules"]
+        G{"How to add rules?"}
+        G -->|"Option A"| H["prism connect --url localhost:3000\nAI scans site, auto-generates rules"]
+        G -->|"Option B"| I["Types rules in the\ndashboard manually"]
+        G -->|"Option C"| J["prism sync --repo ./\nScans codebase for patterns"]
+    end
+
+    H --> K
+    I --> K
+    J --> K
+
+    subgraph S4["Step 4 · Connect IDE"]
+        K["prism init"]
+        K --> L["CLI detects installed IDEs\nCursor? VS Code? Windsurf?"]
+        L --> M["Writes config file\ninto IDE settings automatically"]
+        M --> N["Restart IDE"]
+    end
+
+    N --> O
+
+    subgraph S5["Step 5 · Daily Use — Automatic!"]
+        O["Opens IDE and starts coding"]
+        O --> P["AI asks Prism for rules"]
+        P --> Q["MCP server reads from Cosmos DB"]
+        Q --> R(["AI writes code that\nfollows your rules ✅"])
+    end
+      </div>
+    </div>
+  </section>
+
+  <!-- DATA FLOW -->
+  <section id="flow">
+    <div class="section-label"><span class="num">05</span> Data Flow</div>
+    <h2>How Everything Connects</h2>
+    <p class="section-desc">The arrows show where data travels between each part of the system.</p>
+    <div class="diagram-wrap">
+      <div class="mermaid">
+flowchart LR
+    subgraph PC["🖥️ Your Computer"]
+        IDE["AI IDE\nCursor / VS Code\nWindsurf / Claude"]
+        CLI["prism CLI\nnpm package"]
+        MCP["prism-mcp-server\nruns locally"]
+    end
+
+    subgraph CLOUD["☁️ Cloud"]
+    DASH["prism-engine\nNext.js on Vercel"]
+    API["API Routes\n/api/v1/rules"]
+    DB[("Azure Cosmos DB\nstores all rules")]
+    SUPABASE["Supabase\nhandles login"]
+    end
+
+    IDE <-->|"MCP Protocol\nJSON messages"| MCP
+    MCP <-->|"reads rules"| DB
+    CLI -->|"configures"| IDE
+    CLI <-->|"syncs rules"| API
+    DASH <-->|"CRUD"| API
+    API <-->|"read/write"| DB
+    DASH <-->|"auth"| SUPABASE
+      </div>
+    </div>
+    <div class="callout" style="margin-top:1.5rem;">
+      <div class="callout-title">🔑 Key Insight</div>
+      <p>The website (dashboard) and the AI connector (MCP server) both read from the <strong>same database</strong>. When you create a rule on the website, the AI assistant can immediately see it. That's the whole magic.</p>
+    </div>
+  </section>
+
+  <!-- STATUS -->
+  <section id="status">
+    <div class="section-label"><span class="num">06</span> Current Status</div>
+    <h2>What's Working vs What's Missing</h2>
+    <p class="section-desc">An honest look at where the system stands right now.</p>
+    <div class="card" style="margin-bottom:1rem;">
+      <table>
+        <thead><tr><th>Component</th><th>Status</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Dashboard website</td><td><span class="tag-ok">✅ Built</span></td><td>Projects, rules, analytics, onboarding, settings</td></tr>
+          <tr><td>MCP Server</td><td><span class="tag-ok">✅ Built</span></td><td>9 tools, Cosmos DB, offline fallback cache</td></tr>
+          <tr><td>CLI commands</td><td><span class="tag-ok">✅ Built</span></td><td>prism init, doctor, status, sync, serve, and 15+ more</td></tr>
+          <tr><td>Documentation</td><td><span class="tag-ok">✅ Built</span></td><td>7 pages covering setup, IDE config, API, troubleshooting</td></tr>
+          <tr><td>Database</td><td><span class="tag-ok">✅ Connected</span></td><td>Rules, projects, users, analytics, telemetry in Cosmos DB</td></tr>
+          <tr><td>Authentication</td><td><span class="tag-ok">✅ Working</span></td><td>Sign up and login via Supabase</td></tr>
+          <tr><td>API Key system</td><td><span class="tag-ok">✅ Working</span></td><td>Users generate keys in Settings to authenticate MCP server</td></tr>
+          <tr><td>Publish CLI to npm</td><td><span class="tag-ok">✅ Ready</span></td><td>Package prism-context-engine, npm token configured. Auto-publish on main push.</td></tr>
+          <tr><td>Deploy to Vercel</td><td><span class="tag-warn">⚠️ Missing</span></td><td>Website needs to be live. Needs Doppler secrets in Vercel.</td></tr>
+          <tr><td>Doppler secrets</td><td><span class="tag-warn">⚠️ Ask CEO</span></td><td>All passwords/API keys. Your CEO likely has this already.</td></tr>
+          <tr><td>Domain DNS</td><td><span class="tag-warn">⚠️ Missing</span></td><td>prism.jeffdev.studio needs to point to Vercel. Easy DNS setup.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- REFERENCE -->
+  <section id="reference">
+    <div class="section-label"><span class="num">07</span> Quick Reference</div>
+    <h2>Where Do I Find...?</h2>
+    <p class="section-desc">A cheat sheet so you always know which folder to open.</p>
+    <div class="ref-grid">
+      <div class="ref-item"><div class="ref-q">Change the website UI</div><div class="ref-a">apps/prism-engine/src/app/</div></div>
+      <div class="ref-item"><div class="ref-q">Change a button or card component</div><div class="ref-a">packages/ui/src/</div></div>
+      <div class="ref-item"><div class="ref-q">Change what the AI assistant can do</div><div class="ref-a">apps/prism-mcp-server/src/index.ts</div></div>
+      <div class="ref-item"><div class="ref-q">Change the prism terminal command</div><div class="ref-a">packages/prism-cli/src/commands/</div></div>
+      <div class="ref-item"><div class="ref-q">Change the help/documentation pages</div><div class="ref-a">apps/prism-docs/content/en-US/</div></div>
+      <div class="ref-item"><div class="ref-q">Change the marketing site</div><div class="ref-a">apps/agency/src/app/</div></div>
+      <div class="ref-item"><div class="ref-q">Change database connection logic</div><div class="ref-a">packages/db/</div></div>
+      <div class="ref-item"><div class="ref-q">See all available CLI commands</div><div class="ref-a">packages/prism-cli/src/index.ts</div></div>
+    </div>
+  </section>
+
+  <!-- NEXT STEPS -->
+  <section id="next">
+    <div class="section-label"><span class="num">08</span> Next Steps</div>
+    <h2>What You Should Do (In Order)</h2>
+    <p class="section-desc">Click each item to mark it done. Start from the top.</p>
+    <div class="checklist">
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box">✓</div>
+        <div class="check-content">
+          <div class="check-label">1. Ask your CEO for Doppler access</div>
+          <div class="check-sublabel">Doppler holds all the secret passwords and API keys. Without it, nothing connects. Your CEO set this up.</div>
+        </div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box">✓</div>
+        <div class="check-content">
+          <div class="check-label">2. Start everything locally</div>
+          <div class="check-sublabel">Run this in the terminal from the project root folder:</div>
+          <div class="check-cmd">doppler run -- turbo dev</div>
+        </div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box">✓</div>
+        <div class="check-content">
+          <div class="check-label">3. Open the dashboard in your browser</div>
+          <div class="check-sublabel">Once running, visit this URL to see the Prism product:</div>
+          <div class="check-cmd">http://localhost:3001</div>
+        </div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box">✓</div>
+        <div class="check-content">
+          <div class="check-label">4. Read the docs site</div>
+          <div class="check-sublabel">See the product from a user's perspective:</div>
+          <div class="check-cmd">http://localhost:3002</div>
+        </div>
+      </div>
+      <div class="check-item" onclick="toggleCheck(this)">
+        <div class="check-box">✓</div>
+        <div class="check-content">
+          <div class="check-label">5. Run a health check</div>
+          <div class="check-sublabel">After setting up the CLI, verify everything is connected:</div>
+          <div class="check-cmd">prism doctor</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:1.5rem; border-left-color:#8b5cf6;">
+      <div class="callout-title" style="color:#8b5cf6;">📌 Remember</div>
+      <p>You do NOT need to understand every file. Focus on understanding the <strong>user flow</strong> first (the diagrams above), and the code will start making sense naturally.</p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      primaryColor: '#06b6d4',
+      primaryTextColor: '#ffffff',
+      primaryBorderColor: '#06b6d440',
+      lineColor: '#ffffff40',
+      secondaryColor: '#8b5cf6',
+      tertiaryColor: '#0a0a0a',
+      background: '#050505',
+      mainBkg: '#0a0a0a',
+      nodeBorder: '#06b6d440',
+      clusterBkg: '#111',
+      titleColor: '#ffffff',
+      edgeLabelBackground: '#0a0a0a',
+      actorBkg: '#0a0a0a',
+      actorBorder: '#06b6d4',
+      actorTextColor: '#ffffff',
+      actorLineColor: '#ffffff40',
+      signalColor: '#06b6d4',
+      signalTextColor: '#ffffff',
+    }
+  });
+
+  function toggleCheck(el) {
+    el.classList.toggle('done');
+  }
+</script>
+</body>
+</html>

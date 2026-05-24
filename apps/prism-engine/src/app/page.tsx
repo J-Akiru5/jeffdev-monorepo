@@ -16,7 +16,6 @@ export const metadata: Metadata = {
     'Claude Code',
     'AI coding assistant',
     'context governance',
-    'video to context',
     'architectural rules',
     'design system documentation',
     'AI hallucination prevention',

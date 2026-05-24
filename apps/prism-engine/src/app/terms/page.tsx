@@ -157,11 +157,11 @@ export default function TermsPage() {
                 5. Data Processing
               </h2>
               <p className="text-white/70 leading-relaxed mb-4">
-                When you upload videos for context extraction:
+                When you use AI-powered features:
               </p>
               <ul className="list-disc list-inside text-white/70 space-y-2">
                 <li>
-                  Videos are processed using third-party AI services (OpenAI,
+                  Content is processed using third-party AI services (OpenAI,
                   Google Gemini)
                 </li>
                 <li>
@@ -215,7 +215,7 @@ export default function TermsPage() {
               </p>
               <ul className="list-disc list-inside text-white/70 mt-4 space-y-2">
                 <li>AI-generated content accuracy or fitness for purpose</li>
-                <li>Third-party service outages (Clerk, Mux, OpenAI, Azure)</li>
+                <li>Third-party service outages (Supabase, OpenAI, Azure)</li>
                 <li>Data loss due to user negligence or account compromise</li>
                 <li>Indirect, incidental, or consequential damages</li>
               </ul>

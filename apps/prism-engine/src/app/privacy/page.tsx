@@ -90,24 +90,6 @@ export default function PrivacyPage() {
 
                 <div>
                   <h3 className="font-semibold text-white mb-2">
-                    c. Video Uploads
-                  </h3>
-                  <p className="text-white/70 leading-relaxed">
-                    When you upload videos for context extraction:
-                  </p>
-                  <ul className="list-disc list-inside text-white/70 mt-2 space-y-1">
-                    <li>Videos are processed through Mux for transcoding</li>
-                    <li>Transcripts are generated using AI models</li>
-                    <li>Extracted rules are stored in your account</li>
-                    <li>
-                      Original video files may be cached temporarily during
-                      processing
-                    </li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold text-white mb-2">
                     d. Usage Data
                   </h3>
                   <p className="text-white/70 leading-relaxed">
@@ -153,12 +135,8 @@ export default function PrivacyPage() {
               </p>
               <ul className="list-disc list-inside text-white/70 space-y-2">
                 <li>
-                  <strong className="text-white">Clerk:</strong> Authentication
+                  <strong className="text-white">Supabase:</strong> Authentication
                   and user management
-                </li>
-                <li>
-                  <strong className="text-white">Mux:</strong> Video processing
-                  and delivery
                 </li>
                 <li>
                   <strong className="text-white">
