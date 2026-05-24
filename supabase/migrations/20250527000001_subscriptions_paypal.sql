@@ -27,5 +27,16 @@ ALTER TABLE subscriptions
 CREATE INDEX IF NOT EXISTS idx_subscriptions_paypal_id ON subscriptions(paypal_subscription_id);
 
 -- RLS policy: service_role can do all operations (for webhook)
-CREATE POLICY IF NOT EXISTS "Service role can manage subscriptions" ON subscriptions
-  FOR ALL USING (auth.role() = 'service_role');
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'subscriptions'
+      AND policyname = 'Service role can manage subscriptions'
+  ) THEN
+    CREATE POLICY "Service role can manage subscriptions" ON subscriptions
+      FOR ALL USING (auth.role() = 'service_role');
+  END IF;
+END;
+$$;

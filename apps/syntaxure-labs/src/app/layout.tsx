@@ -75,6 +75,12 @@ export const metadata: Metadata = {
         height: 630,
         alt: "Syntaxure Labs",
       },
+      {
+        url: "/favicon/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Syntaxure Labs",
+      },
     ],
   },
   alternates: {
@@ -94,10 +100,10 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.svg" },
-      { url: "/favicon/icon-48x48.png", sizes: "48x48", type: "image/png" },
+      { url: "/favicon/favicon-96x96.png", sizes: "96x96", type: "image/png" },
     ],
     shortcut: "/favicon/favicon.ico",
-    apple: "/favicon/apple-icon.png",
+    apple: "/favicon/apple-touch-icon.png",
   },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
