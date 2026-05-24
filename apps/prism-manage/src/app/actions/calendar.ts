@@ -135,13 +135,13 @@ function normalizeEvent(raw: Record<string, unknown>): CalendarEvent {
   const syncedAtAlt = raw.syncedAt as string | undefined;
 
   return {
-    id: raw.id?.toString() || "",
-    title: raw.title || "",
-    start: raw.start_time || raw.start || "",
-    end: raw.end_time || raw.end || "",
-    allDay: raw.all_day || raw.allDay || false,
-    googleCalendarId: raw.google_calendar_id || raw.googleCalendarId || "",
-    linkedTaskId: raw.linked_task_id || raw.linkedTaskId || undefined,
-    syncedAt: raw.synced_at || raw.syncedAt || new Date().toISOString(),
+    id: id || "",
+    title: title || "",
+    start: startTime || start || "",
+    end: endTime || end || "",
+    allDay: allDay || allDayAlt || false,
+    googleCalendarId: googleCalId || googleCalIdAlt || "",
+    linkedTaskId: linkedTaskId || linkedTaskIdAlt || undefined,
+    syncedAt: syncedAt || syncedAtAlt || new Date().toISOString(),
   };
 }

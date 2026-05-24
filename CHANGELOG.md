@@ -1,5 +1,67 @@
 # Changelog
 
+# 2.0.0 (2026-05-24)
+
+### Features
+
+- integrate paypal subscription billing, n8n webhook publisher, and build fixes ([3ccdcfa](https://github.com/J-Akiru5/jeffdev-monorepo/commit/3ccdcfa503afcaa723ae160ae1e9ffb1907b3f17))
+- add availability slots management and format codebase ([9f3732c](https://github.com/J-Akiru5/jeffdev-monorepo/commit/9f3732c926bc2d3567bb73f8a3af01e2f5cef19f))
+- add community page with release management (CMS + front-end) ([533fbb1](https://github.com/J-Akiru5/jeffdev-monorepo/commit/533fbb1653a0bf9eabfbb650c6b314611434b09b))
+- implement full project crud, migrate schemas to supabase, and fix type safety ([66357c8](https://github.com/J-Akiru5/jeffdev-monorepo/commit/66357c85aeca8d15080bba5c880b57affb9f2fc1))
+- Phase 6.4-6.5 Gremlin graph ranking + dual-read safety net ([92cd040](https://github.com/J-Akiru5/jeffdev-monorepo/commit/92cd040208b11be10cf75971db567cd6cf2b28a4))
+- Phase 3.4 agency admin, Phase 5 manage+analytics, Phase 6 gremlin ([df4f699](https://github.com/J-Akiru5/jeffdev-monorepo/commit/df4f69910ecec92690cdcab58e35c0e58d46c579))
+- Phase 3 restructure & Phase 4 design system rename ([674d82d](https://github.com/J-Akiru5/jeffdev-monorepo/commit/674d82d89798223419b4ce42044a4304684315f9))
+- migrate 7 remaining Firebase server actions to Supabase in apps/agency ([0f258a5](https://github.com/J-Akiru5/jeffdev-monorepo/commit/0f258a52507cf0095e4de871996cac741cd7d100))
+- phase 1 completion + structure renames + design system ([2d68176](https://github.com/J-Akiru5/jeffdev-monorepo/commit/2d6817639813c77821748a7f596ad190335ac3df))
+- phase 1 foundation — remove unused apps, add supabase schema ([db8faf2](https://github.com/J-Akiru5/jeffdev-monorepo/commit/db8faf298182c6043a3a0352e168a2a92b16700d))
+- deploy prep - fix bugs, rename package to prism-context-engine, add vercel configs ([058f1c5](https://github.com/J-Akiru5/jeffdev-monorepo/commit/058f1c56786e9b6d71536b484f78ddf8b4b87d30))
+
+### Bug Fixes
+
+- resolve workspace linter warnings and environment validation rules ([8db4d97](https://github.com/J-Akiru5/jeffdev-monorepo/commit/8db4d97b815901b41eefc88a186e0e71f367ce78))
+- add user ownership verification to task/calendar server actions ([2e6c399](https://github.com/J-Akiru5/jeffdev-monorepo/commit/2e6c399882db0e894ffd7ea12e29d8a6198b906a))
+- add force-dynamic to dashboard layout to prevent static prerendering of auth-required Supabase pages ([14b7304](https://github.com/J-Akiru5/jeffdev-monorepo/commit/14b7304d8680a038325655f8a017b33ce715043f))
+- add pull-requests: read permission to Gitleaks workflow to fix 403 API error ([7df0485](https://github.com/J-Akiru5/jeffdev-monorepo/commit/7df0485de049a2ad4af35819b023a32b597b7de0))
+- Gitleaks secret detection - fix hardcoded patterns and add .gitleaks.toml allowlist ([5fe7b35](https://github.com/J-Akiru5/jeffdev-monorepo/commit/5fe7b359b9eb486545ec99ad1be02f9b76a19f09))
+- production readiness - lint/type fixes, Supabase migration cleanup, stale dirs ([186e3e1](https://github.com/J-Akiru5/jeffdev-monorepo/commit/186e3e12e96c270bdb61ce0b9f1ec9ea8a817345))
+
+### Refactors
+
+- rename firestore.ts → supabase.ts, update all imports ([d2b4bd3](https://github.com/J-Akiru5/jeffdev-monorepo/commit/d2b4bd3ea434f3ae8fc9aee731ab62ef8f42bc55))
+- remove Firebase/Firestore, migrate to Supabase auth ([6b0f166](https://github.com/J-Akiru5/jeffdev-monorepo/commit/6b0f166e38edaab614281ee51a5e3a6160ff73a4))
+- code structure for improved readability and maintainability ([9b5c2f5](https://github.com/J-Akiru5/jeffdev-monorepo/commit/9b5c2f59c29b5f6f6256bdb906e9cdd8fe467dcd))
+
+### Documentation
+
+- integrate github issues marketing pipeline into prism-manage ([b475cff](https://github.com/J-Akiru5/jeffdev-monorepo/commit/b475cff40f1361d507656fdccf9f460158c669f4))
+- document T3 Env deferral alignment in PRISM_CONTEXT.md ([9df0fe4](https://github.com/J-Akiru5/jeffdev-monorepo/commit/9df0fe451cfa0ae6c84f482db8011c1750401651))
+- update PRISM_CONTEXT.md with recent ESLint cleanups and monorepo automation configurations ([ecf0e48](https://github.com/J-Akiru5/jeffdev-monorepo/commit/ecf0e48344e9c2a6b42af19748707208e69a52f5))
+
+### Miscellaneous Chores
+
+- batch push all changes - import renames, sonner toasts, new hooks, type fixes, cleanup ([ba08a82](https://github.com/J-Akiru5/jeffdev-monorepo/commit/ba08a8219220b64393b96e58a85e8418a0955b25))
+- restore prism-analytics, remove agency/tracker, add revamp-guide.html ([b6050e8](https://github.com/J-Akiru5/jeffdev-monorepo/commit/b6050e82b18206de67b2d6d0f8ef87df5871b0c7))
+- cleanup stale app dirs, add Vercel configs, update CI matrix ([cb3f567](https://github.com/J-Akiru5/jeffdev-monorepo/commit/cb3f567a30f05eefb11612a74c445ce47dcba676))
+- remove stale apps and update docs ([25875b6](https://github.com/J-Akiru5/jeffdev-monorepo/commit/25875b67687531c12d44370e7a920eab6b6e2d89))
+- expand commitlint allowed types to include wip, temp, merge, and release ([4826f52](https://github.com/J-Akiru5/jeffdev-monorepo/commit/4826f529542be699d50cf72048f48bebd4b3ac37))
+- resolve develop merge conflicts and consolidate database schemas ([73971f4](https://github.com/J-Akiru5/jeffdev-monorepo/commit/73971f49942de915b781f2b11b39278ec65fec56))
+- fix pnpm-lock.yaml after app renames ([50d4b39](https://github.com/J-Akiru5/jeffdev-monorepo/commit/50d4b39c9a6914842c7c5f761c7179d14ba0c2ec))
+- update pnpm-lock.yaml ([050371d](https://github.com/J-Akiru5/jeffdev-monorepo/commit/050371dbe89e46e14f82df7c57a8cc93a9bbd2e5))
+- Task 2.5 - Create Clerk import script; Task 2.6 Phase B - Create Supabase database types ([18c300d](https://github.com/J-Akiru5/jeffdev-monorepo/commit/18c300d786daacd7991132906733ff4fe4959446))
+- phase 1 bulletproof startup pack ([815da8b](https://github.com/J-Akiru5/jeffdev-monorepo/commit/815da8bd307d8f53f49e9bcf1583da80aceced57))
+- configure husky, lint-staged, commitlint, codeowners, editorconfig, and gitleaks ([a2599d5](https://github.com/J-Akiru5/jeffdev-monorepo/commit/a2599d588a64ac6912d49f0062017c8436ae963e))
+
+### Continuous Integration
+
+- implement changesets, renovate, socket firewall, and pr-agent workflows ([21f93cc](https://github.com/J-Akiru5/jeffdev-monorepo/commit/21f93cc887fce801693be7cc1e9afc8517de9dc6))
+- add renovate configuration for automated dependency updates ([17653eb](https://github.com/J-Akiru5/jeffdev-monorepo/commit/17653ebe5b020e442fc7c4eba2176426174ae638))
+
+### Tests
+
+- check lockfile commit ([70b0cf1](https://github.com/J-Akiru5/jeffdev-monorepo/commit/70b0cf168cf745f48102d9869926deee3f54bd95))
+
+---
+
 # 1.0.0 (2026-05-22)
 
 ### Bug Fixes
@@ -178,5 +240,7 @@ Cursor can now query architectural rules directly from the database.
 
 | Version | Date       | Highlight                                    |
 | ------- | ---------- | -------------------------------------------- |
+| 2.0.0   | 2026-05-24 | 🚀 Supabase Migration + Monorepo Restructure |
+| 1.0.0   | 2026-05-22 | 🏢 JeffDev Studio Release                    |
 | 0.1.3   | 2026-01-03 | 🎨 Brand Management + Video Context Pipeline |
 | 0.1.0   | 2026-01-01 | 🌱 Genesis - MCP Server + DB Connected       |
