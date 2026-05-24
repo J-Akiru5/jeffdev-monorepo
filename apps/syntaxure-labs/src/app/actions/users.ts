@@ -85,17 +85,49 @@ export async function updateUserProfile(
   data: Partial<UserProfile>
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // Remove protected fields (prefixed with _ to indicate intentional exclusion)
+    // Remove protected fields (role, created_at, etc.)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { role: _role, status: _status, created_at: _createdAt, ...safeData } = data;
+    const { role: _role, created_at: _createdAt, ...safeData } = data;
 
     const supabase = getAdminClient() as any;
+
+    // Fetch existing user profile to merge preferences
+    const { data: existing, error: fetchError } = await supabase
+      .from(COLLECTION)
+      .select('preferences')
+      .eq('id', uid)
+      .maybeSingle();
+
+    if (fetchError) throw fetchError;
+
+    const existingPrefs = (existing?.preferences || {}) as Record<string, any>;
+
+    // Build standard column updates
+    const updatePayload: any = {
+      updated_at: new Date().toISOString(),
+    };
+
+    if (safeData.displayName !== undefined) updatePayload.full_name = safeData.displayName;
+    if (safeData.photoURL !== undefined) updatePayload.avatar_url = safeData.photoURL;
+    if (safeData.bio !== undefined) updatePayload.bio = safeData.bio;
+    if (safeData.phone !== undefined) updatePayload.phone = safeData.phone;
+    if (safeData.timezone !== undefined) updatePayload.timezone = safeData.timezone;
+    if (safeData.email !== undefined) updatePayload.email = safeData.email;
+
+    // Build preferences json updates
+    const newPrefs = { ...existingPrefs };
+    if (safeData.title !== undefined) newPrefs.title = safeData.title;
+    if (safeData.location !== undefined) newPrefs.location = safeData.location;
+    if (safeData.status !== undefined) newPrefs.status = safeData.status;
+    if (safeData.assignedProjects !== undefined) newPrefs.assigned_projects = safeData.assignedProjects;
+    if (safeData.social !== undefined) newPrefs.socials = safeData.social;
+    if (safeData.namecard !== undefined) newPrefs.namecard = safeData.namecard;
+
+    updatePayload.preferences = newPrefs;
+
     const { error } = await supabase
       .from(COLLECTION)
-      .update({
-        ...safeData,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updatePayload)
       .eq('id', uid);
 
     if (error) throw error;

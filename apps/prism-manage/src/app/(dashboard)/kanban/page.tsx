@@ -19,22 +19,6 @@ interface KanbanTask extends Task {
   column: KanbanColumn;
 }
 
-interface APITask {
-  id?: string | number;
-  project_id?: string;
-  projectId?: string;
-  title: string;
-  status?: string;
-  priority?: number;
-  order?: number;
-  notes?: string;
-  description?: string;
-  created_at?: string;
-  createdAt?: string;
-  updated_at?: string;
-  updatedAt?: string;
-}
-
 const columns: { id: KanbanColumn; title: string; color: string }[] = [
   { id: 'backlog', title: 'Backlog', color: '#6b7280' },
   { id: 'in_progress', title: 'In Progress', color: '#f59e0b' },
@@ -54,9 +38,9 @@ export default function KanbanPage() {
         const res = await fetch('/api/tasks');
         const data = await res.json();
         // Map API tasks to kanban format with column assignment
-        const mapped: KanbanTask[] = (data || []).map((t: APITask) => ({
-          id: t.id?.toString() || String(Math.random()),
-          projectId: t.project_id || t.projectId || '',
+        const mapped: KanbanTask[] = (data || []).map((t: Record<string, unknown>) => ({
+          id: (t.id as string)?.toString() || String(Math.random()),
+          projectId: (t.project_id as string) || (t.projectId as string) || '',
           title: t.title,
           completed: t.status === 'done',
           starred: t.priority ? t.priority > 0 : false,
@@ -66,9 +50,8 @@ export default function KanbanPage() {
           createdAt: t.created_at || t.createdAt || new Date().toISOString(),
           updatedAt: t.updated_at || t.updatedAt || new Date().toISOString(),
         }));
-        setTasks(mapped);
-      } catch (err) {
-        console.error('Failed to load tasks:', err);
+        setTasks(mapped);    } catch {
+      console.error('Failed to load tasks');
       } finally {
         setLoading(false);
       }

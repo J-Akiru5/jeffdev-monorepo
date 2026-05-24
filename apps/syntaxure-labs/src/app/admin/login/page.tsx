@@ -8,7 +8,7 @@ import { Loader2 } from 'lucide-react';
 /**
  * Admin Login Page
  * ----------------
- * Google OAuth authentication for admin access.
+ * Supabase OAuth authentication for admin access.
  * Glassmorphism + neon accent design for brand consistency.
  */
 

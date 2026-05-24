@@ -11,12 +11,14 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import { useProjects } from '@/contexts/project-context';
 import { createEvent, updateEvent, syncCalendar } from '@/app/actions/calendar';
 import { fetchEvents } from '@/app/actions/calendar';
 import type { CalendarEvent } from '@/lib/schemas';
 import { toast } from 'sonner';
 
 export default function CalendarPage() {
+  useProjects();
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
@@ -27,8 +29,8 @@ export default function CalendarPage() {
       try {
         const data = await fetchEvents();
         setEvents(data);
-      } catch (err) {
-        console.error('Failed to load events:', err);
+      } catch (_err) {
+        console.error('Failed to load events:', _err);
       } finally {
         setLoading(false);
       }

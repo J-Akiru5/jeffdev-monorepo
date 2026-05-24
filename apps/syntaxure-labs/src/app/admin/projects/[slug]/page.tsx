@@ -6,7 +6,7 @@ import { ProgressBar } from '@/components/admin/progress-bar';
 import { ProjectStatusSelector } from '@/components/admin/project-status-selector';
 import { MilestonesList } from '@/components/admin/milestones-list';
 import { DeleteProjectButton } from '@/components/admin/delete-project-button';
-import type { FirestoreProject, ProjectMilestone } from '@/types/firestore';
+import type { FirestoreProject, ProjectMilestone } from '@/types/supabase';
 
 export const dynamic = 'force-dynamic';
 

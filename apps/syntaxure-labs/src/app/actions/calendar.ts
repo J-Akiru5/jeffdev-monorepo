@@ -1,7 +1,5 @@
 'use server';
 
- 
-
 /**
  * Calendar Event Server Actions
  * ------------------------------

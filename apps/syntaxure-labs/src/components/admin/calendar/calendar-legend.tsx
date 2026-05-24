@@ -6,7 +6,7 @@
  * Shows event type color legend.
  */
 
-import type { EventType } from '@/types/firestore';
+import type { EventType } from '@/types/supabase';
 
 const eventTypes: { type: EventType; label: string; color: string }[] = [
   { type: 'deadline', label: 'Deadline', color: '#ef4444' },

@@ -12,7 +12,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import type { EventClickArg, DateSelectArg, EventInput } from '@fullcalendar/core';
-import type { CalendarEvent, EventType } from '@/types/firestore';
+import type { CalendarEvent, EventType } from '@/types/supabase';
 import { getCalendarEvents } from '@/app/actions/calendar';
 import { EventModal } from './event-modal';
 

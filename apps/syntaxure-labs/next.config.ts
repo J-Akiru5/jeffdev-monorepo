@@ -24,12 +24,8 @@ const nextConfig: NextConfig = {
    */
   images: {
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "firebasestorage.googleapis.com",
-      },
-      // If we ever use direct R2 URLs (non-proxied), add them here.
-      // { protocol: 'https', hostname: 'pub-*.r2.dev' },
+      // If we ever use direct Supabase Storage URLs, add them here.
+      // { protocol: 'https', hostname: '*.supabase.co' },
     ],
     // Dangerously allow SVG if needed for favicons, but usually unnecessary with Next/Image
     dangerouslyAllowSVG: true,

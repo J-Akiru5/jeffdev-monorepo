@@ -9,7 +9,7 @@
 import { useState, useEffect, useTransition } from 'react';
 import { X, Trash2 } from 'lucide-react';
 import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from '@/app/actions/calendar';
-import type { CalendarEvent, EventType } from '@/types/firestore';
+import type { CalendarEvent, EventType } from '@/types/supabase';
 
 interface EventModalProps {
   isOpen: boolean;

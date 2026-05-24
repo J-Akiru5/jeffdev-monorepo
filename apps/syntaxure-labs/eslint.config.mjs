@@ -5,12 +5,10 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // Disable Tailwind suggestCanonicalClasses warnings
-  // We prefer explicit opacity notation (e.g., [0.08]) for clarity
+  // Relax no-explicit-any to warning for Supabase type flexibility
   {
     rules: {
-      "@stylistic/suggestCanonicalClasses": "off",
-      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-explicit-any": "warn",
     },
   },
   // Override default ignores of eslint-config-next.

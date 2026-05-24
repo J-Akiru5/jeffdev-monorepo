@@ -9,7 +9,7 @@
 import Link from 'next/link';
 import { ProgressBar } from '@/components/admin/progress-bar';
 import { ProjectStatusSelector } from '@/components/admin/project-status-selector';
-import type { FirestoreProject, ProjectMilestone } from '@/types/firestore';
+import type { FirestoreProject, ProjectMilestone } from '@/types/supabase';
 
 interface ProjectCardProps {
   project: FirestoreProject;

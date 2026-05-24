@@ -55,22 +55,6 @@ export async function createEvent(event: {
   return normalizeEvent(data);
 }
 
-interface DatabaseEvent {
-  id: string | number;
-  title?: string;
-  start_time?: string;
-  start?: string;
-  end_time?: string;
-  end?: string;
-  all_day?: boolean;
-  allDay?: boolean;
-  google_calendar_id?: string;
-  googleCalendarId?: string;
-  linked_task_id?: string;
-  linkedTaskId?: string;
-  synced_at?: string;
-  syncedAt?: string;
-}
 
 export async function updateEvent(eventId: string, data: Record<string, unknown>) {
   const supabase = await createClient();
@@ -122,15 +106,30 @@ export async function syncCalendar(): Promise<CalendarEvent[]> {
   return (events || []).map(normalizeEvent);
 }
 
-function normalizeEvent(raw: DatabaseEvent): CalendarEvent {
+function normalizeEvent(raw: Record<string, unknown>): CalendarEvent {
+  const id = raw.id as string | undefined;
+  const title = raw.title as string | undefined;
+  const startTime = raw.start_time as string | undefined;
+  const start = raw.start as string | undefined;
+  const endTime = raw.end_time as string | undefined;
+  const end = raw.end as string | undefined;
+  const allDay = raw.all_day as boolean | undefined;
+  const allDayAlt = raw.allDay as boolean | undefined;
+  const googleCalId = raw.google_calendar_id as string | undefined;
+  const googleCalIdAlt = raw.googleCalendarId as string | undefined;
+  const linkedTaskId = raw.linked_task_id as string | undefined;
+  const linkedTaskIdAlt = raw.linkedTaskId as string | undefined;
+  const syncedAt = raw.synced_at as string | undefined;
+  const syncedAtAlt = raw.syncedAt as string | undefined;
+
   return {
-    id: raw.id || raw.id?.toString() || "",
-    title: raw.title || "",
-    start: raw.start_time || raw.start || "",
-    end: raw.end_time || raw.end || "",
-    allDay: raw.all_day || raw.allDay || false,
-    googleCalendarId: raw.google_calendar_id || raw.googleCalendarId || "",
-    linkedTaskId: raw.linked_task_id || raw.linkedTaskId || undefined,
-    syncedAt: raw.synced_at || raw.syncedAt || new Date().toISOString(),
+    id: (id || "").toString(),
+    title: title || "",
+    start: startTime || start || "",
+    end: endTime || end || "",
+    allDay: allDay ?? allDayAlt ?? false,
+    googleCalendarId: googleCalId || googleCalIdAlt || "",
+    linkedTaskId: linkedTaskId || linkedTaskIdAlt || undefined,
+    syncedAt: syncedAt || syncedAtAlt || new Date().toISOString(),
   };
 }

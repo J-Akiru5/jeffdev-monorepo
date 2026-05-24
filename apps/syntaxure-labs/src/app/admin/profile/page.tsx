@@ -2,6 +2,9 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { ProfileForm } from '@/components/admin/profile-form';
 import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
+import type { UserProfile } from '@/types/user';
 
 /**
  * Admin Profile Page
@@ -9,10 +12,7 @@ import { cookies } from 'next/headers';
  * Edit user profile, bio, photo, and namecard settings.
  */
 
-import { createClient } from '@/lib/supabase/server';
 import { getAdminClient } from '@/lib/supabase/admin';
-import { redirect } from 'next/navigation';
-import { UserProfile } from '@/types/user';
 
 async function getCurrentUser(): Promise<UserProfile> {
   const supabase = await createClient();
@@ -35,28 +35,27 @@ async function getCurrentUser(): Promise<UserProfile> {
       redirect('/admin/login');
     }
 
-    const preferences = (profile.preferences || {}) as Record<string, any>;
-    const namecard = (preferences.namecard || {}) as Record<string, any>;
-    const socials = (preferences.socials || {}) as Record<string, any>;
+    const prefs = (profile.preferences || {}) as Record<string, any>;
+    const namecard = (prefs.namecard || {}) as Record<string, any>;
+    const socials = (prefs.socials || {}) as Record<string, any>;
 
-    // Serializing basic timestamps
     return {
       uid: profile.id,
       email: profile.email || '',
       displayName: profile.full_name || '',
       photoURL: profile.avatar_url || undefined,
       role: profile.role || 'employee',
-      status: (profile.status as any) || 'active',
+      status: (prefs.status as any) || 'active',
       bio: profile.bio || '',
-      title: profile.title || '',
+      title: prefs.title || '',
       phone: profile.phone || '',
-      location: (profile as any).location || '',
-      assignedProjects: (profile as any).assignedProjects || [],
+      location: prefs.location || '',
+      assignedProjects: prefs.assigned_projects || prefs.assignedProjects || [],
       social: {
         linkedin: socials.linkedin || '',
         github: socials.github || '',
         twitter: socials.twitter || '',
-        website: socials.website || '',
+        website: socials.website || prefs.website || '',
       },
       namecard: {
         username: namecard.username || '',
@@ -105,7 +104,7 @@ export default async function AdminProfilePage() {
       </div>
 
       <div className="mt-8 max-w-3xl">
-        <ProfileForm profile={profile} />
+        {profile ? <ProfileForm profile={profile} /> : <p className="text-white/50">Profile not found.</p>}
       </div>
     </div>
   );

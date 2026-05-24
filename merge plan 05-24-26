@@ -1,0 +1,74 @@
+# Implementation Plan: Resolve Merge Conflicts & Merge Branches
+
+This plan details the steps to resolve merge conflicts arising from merging the `lou` branch into the `develop` branch (which already contains the merged `jeff` branch changes). It also addresses a critical runtime bug identified in the user profile updates.
+
+## User Review Required
+
+> [!IMPORTANT]
+> **Duplicate Supabase Migration Conflict**: Both the `jeff` and `lou` branches migrated `syntaxure-labs` from Firebase to Supabase independently. This has introduced multiple conflicts in user profile handling, login redirects, project management views, and audit logging.
+> 
+> **Critical User Profile Database Bug**: We identified that `apps/syntaxure-labs/src/app/actions/users.ts`'s `updateUserProfile` function currently sends raw `UserProfile` fields (e.g. `displayName`, `photoURL`, `title`, `location`) directly to PostgreSQL. However, these are not columns in the `user_profiles` table (the columns are `full_name`, `avatar_url`, and the generic `preferences` JSONB column). Running this update will trigger a runtime SQL error. We have included a robust fix for this as part of this merge.
+
+## Proposed Changes
+
+Here is the strategy to resolve the conflicts in each file:
+
+### Build System & Configuration
+
+---
+
+#### [MODIFY] [turbo.json](file:///c:/dev/Next%20Js/jeffdev-monorepo/turbo.json)
+- **Conflict**: Duplicate `ANALYZE` and trailing comma placement for `USE_GREMLIN_RANKING` under `globalEnv`.
+- **Resolution**: Keep `USE_GREMLIN_RANKING` as the last environment variable without a trailing comma, and ensure `ANALYZE` is listed only once.
+
+---
+
+### Shared Application Views
+
+#### [MODIFY] [calendar/page.tsx](file:///c:/dev/Next%20Js/jeffdev-monorepo/apps/prism-manage/src/app/(dashboard)/calendar/page.tsx)
+- **Conflict**: Import and usage of `useProjects()` added in the `lou` branch.
+- **Resolution**: Keep the `useProjects()` import and hook execution from the `lou` branch to ensure proper project context mapping in the calendar dashboard.
+
+---
+
+### Syntaxure Labs Application
+
+#### [MODIFY] [calendar.ts](file:///c:/dev/Next%20Js/jeffdev-monorepo/apps/syntaxure-labs/src/app/actions/calendar.ts)
+- **Conflict**: Trivial whitespace differences.
+- **Resolution**: Clean up the conflict markers and keep the clean workspace.
+
+#### [MODIFY] [login/page.tsx](file:///c:/dev/Next%20Js/jeffdev-monorepo/apps/syntaxure-labs/src/app/admin/login/page.tsx)
+- **Conflict**: OAuth redirect URI points to `/auth/callback` in HEAD (`jeff`) versus `/api/auth/callback` in `lou`.
+- **Resolution**: Keep the redirect URI pointing to `/auth/callback` (HEAD), as `/auth/callback/route.ts` is the actual callback route implemented in the application. Drop the unused `useRouter` import from `lou`.
+
+#### [MODIFY] [profile/page.tsx](file:///c:/dev/Next%20Js/jeffdev-monorepo/apps/syntaxure-labs/src/app/admin/profile/page.tsx)
+- **Conflict**: Duplicate imports and differences in user profile schema mapping from PostgreSQL.
+- **Resolution**: Map extra metadata fields (such as `title`, `location`, `status`, and `assignedProjects`) from the `preferences` JSONB column instead of trying to read them directly from database columns where they do not exist. Use `getAdminClient` to fetch the profile to ensure proper server-side authentication validation.
+
+#### [MODIFY] [users.ts](file:///c:/dev/Next%20Js/jeffdev-monorepo/apps/syntaxure-labs/src/app/actions/users.ts) *(Pre-emptive bugfix)*
+- **Issue**: Attempting to update `displayName`, `photoURL`, `location`, etc., as direct table columns will crash in PostgreSQL.
+- **Resolution**: Intercept updates in `updateUserProfile`. Map `displayName` -> `full_name`, `photoURL` -> `avatar_url`. Merge `title`, `location`, `status`, `assignedProjects`, `social`, and `namecard` into the `preferences` JSONB object, then execute a safe update.
+
+#### [MODIFY] [projects/[slug]/page.tsx](file:///c:/dev/Next%20Js/jeffdev-monorepo/apps/syntaxure-labs/src/app/admin/projects/[slug]/page.tsx)
+- **Conflict**: Path references for types (`types/firestore` in HEAD vs `types/supabase` in `lou`).
+- **Resolution**: Use the renamed `types/supabase` import for `FirestoreProject` and `ProjectMilestone`, and retain the `DeleteProjectButton` import from HEAD.
+
+#### [MODIFY] [audit.ts](file:///c:/dev/Next%20Js/jeffdev-monorepo/apps/syntaxure-labs/src/lib/audit.ts)
+- **Conflict**: Trivial whitespace differences.
+- **Resolution**: Clean up conflict markers and retain the existing file content.
+
+#### [MODIFY] [feature-flags.ts](file:///c:/dev/Next%20Js/jeffdev-monorepo/apps/syntaxure-labs/src/lib/feature-flags.ts)
+- **Conflict**: Handling of unused `flags` parameter in `updateFeatureFlags`.
+- **Resolution**: Keep HEAD's `console.log(...)` expression which correctly uses the `flags` parameter, avoiding a `Cannot find name '_flags'` TypeScript error present in the `lou` branch version.
+
+---
+
+## Verification Plan
+
+### Automated Checks
+- Run TypeScript compilation checks on syntaxure-labs:
+  `pnpm --filter syntaxure-labs run check-types`
+- Run Turborepo check-types globally:
+  `pnpm run check-types`
+- Verify builds across all apps:
+  `pnpm run build`

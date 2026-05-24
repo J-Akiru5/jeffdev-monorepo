@@ -94,10 +94,10 @@ const INITIAL_RULES: Omit<SeedRule, "createdAt" | "updatedAt">[] = [
 - Package Manager: npm (via Syncpack)
 
 ## Data Layer
-- Agency: Firebase Firestore (firebase-admin)
+- Agency: Supabase (PostgreSQL)
 - Prism: Azure Cosmos DB (MongoDB API)
 - Rate Limiting: Upstash (Redis)
-- Object Storage: Cloudflare R2
+- Object Storage: Supabase Storage
 
 ## AI Stack
 - SDK: Vercel AI SDK
@@ -111,7 +111,7 @@ const INITIAL_RULES: Omit<SeedRule, "createdAt" | "updatedAt">[] = [
 
 ## Auth
 - Prism SaaS: Clerk
-- Agency Admin: Firebase Auth`,
+- Agency Admin: Supabase Auth`,
   },
   {
     name: "Monorepo Geography",
@@ -134,7 +134,7 @@ const INITIAL_RULES: Omit<SeedRule, "createdAt" | "updatedAt">[] = [
 | Package | Purpose |
 |---------|---------|
 | ui | Headless UI + Tailwind components |
-| db | Firebase + Cosmos clients + Zod schemas |
+| db | Supabase + Cosmos clients + Zod schemas |
 | config | Shared TSConfig, ESLint |
 
 ## BOUNDARY LAWS (STRICT)
@@ -163,7 +163,7 @@ const INITIAL_RULES: Omit<SeedRule, "createdAt" | "updatedAt">[] = [
 - Rich text: sanitize with DOMPurify before rendering
 
 ## Database Protection
-- Firebase: Default to allow read, write: if false
+- RLS (Row Level Security) policies on all tables
 - Cosmos: Use singleton client from packages/db
 - Never concat strings into queries (injection risk)
 
@@ -193,7 +193,7 @@ import { auth } from "../../../apps/prism-engine/src/lib/auth";
 \`\`\`typescript
 // ✅ Use shared packages
 import { Button } from "@repo/ui/button";
-import { firestore } from "@jeffdev/db/firebase";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 \`\`\`
 
 ## Why?
