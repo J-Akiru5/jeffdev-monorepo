@@ -1,110 +1,410 @@
-import { NextResponse } from "next/server";
+/**
+ * PayPal Webhook Handler (Prism Admin)
+ *
+ * POST /api/webhooks/paypal
+ * Receives PayPal subscription events and writes to Supabase.
+ *
+ * Uses PayPal REST API webhook signature verification.
+ */
+
+import { NextRequest, NextResponse } from "next/server";
+import { getAdminClient } from "@/lib/supabase/admin";
+import { sendEmail } from "@/lib/resend";
+
+const PAYPAL_WEBHOOK_ID = process.env.PAYPAL_WEBHOOK_ID;
 
 /**
- * PayPal Webhook Handler
- * Receives IPN notifications for subscription events
+ * Verify PayPal webhook signature using REST API verification
  */
-export async function POST(request: Request) {
+async function verifyPayPalWebhook(
+  request: NextRequest,
+  body: string,
+): Promise<boolean> {
+  if (!PAYPAL_WEBHOOK_ID) {
+    console.warn(
+      "[paypal-webhook] PAYPAL_WEBHOOK_ID not set — skipping verification",
+    );
+    return true;
+  }
+
   try {
-    const body = await request.text();
-    const params = new URLSearchParams(body);
-    
-    // Verify webhook with PayPal
-    const verifyResponse = await fetch(
-      `${process.env.PAYPAL_API_URL || "https://ipnpb.paypal.com/cgi-bin/webscr"}`,
+    const transmissionId =
+      request.headers.get("paypal-transmission-id") || "";
+    const transmissionSig =
+      request.headers.get("paypal-transmission-sig") || "";
+    const certUrl = request.headers.get("paypal-cert-url") || "";
+    const authAlgo = request.headers.get("paypal-auth-algo") || "";
+
+    const verificationResponse = await fetch(
+      "https://api-m.paypal.com/v1/notifications/verify-webhook-signature",
       {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `cmd=_notify-validate&${body}`,
-      }
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Basic ${Buffer.from(
+            `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`,
+          ).toString("base64")}`,
+        },
+        body: JSON.stringify({
+          auth_algo: authAlgo,
+          cert_url: certUrl,
+          transmission_id: transmissionId,
+          transmission_sig: transmissionSig,
+          webhook_id: PAYPAL_WEBHOOK_ID,
+          webhook_event: JSON.parse(body),
+        }),
+      },
     );
 
-    const verification = await verifyResponse.text();
+    const result = (await verificationResponse.json()) as {
+      verification_status?: string;
+    };
+    return result.verification_status === "SUCCESS";
+  } catch (error) {
+    console.error("[paypal-webhook] Verification error:", error);
+    return false;
+  }
+}
 
-    if (verification !== "VERIFIED") {
-      console.error("[PayPal Webhook] Verification failed:", verification);
-      return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+/**
+ * Map a PayPal plan ID to a subscription tier
+ */
+function getTierFromPlanId(planId?: string): "pro" | "team" | "enterprise" {
+  if (!planId) return "pro";
+  const teamPlans = [
+    process.env.PAYPAL_PLAN_TEAM_MONTHLY,
+    process.env.PAYPAL_PLAN_TEAM_ANNUAL,
+  ].filter(Boolean);
+  if (teamPlans.includes(planId)) return "team";
+  return "pro";
+}
+
+/**
+ * Map subscription status from billing info
+ */
+function getBillingCycle(planId?: string): "monthly" | "annual" {
+  if (!planId) return "monthly";
+  if (planId.endsWith("_annual") || planId.includes("annual")) return "annual";
+  return "monthly";
+}
+
+type PayPalResource = {
+  id: string;
+  status: string;
+  custom_id?: string;
+  plan_id?: string;
+  subscriber?: {
+    email_address?: string;
+    name?: { given_name?: string; surname?: string };
+  };
+  billing_info?: {
+    next_billing_time?: string;
+    last_payment?: { amount?: { value?: string } };
+  };
+};
+
+type PayPalEvent = {
+  event_type: string;
+  resource: PayPalResource;
+  event_version?: string;
+  create_time?: string;
+};
+
+// Helper to get a typed Supabase table reference
+// Using `any` cast because Supabase client lacks generated DB types
+function table(name: string) {
+  const supabase = getAdminClient();
+  return supabase.from(name) as any;
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const rawBody = await request.text();
+    const body: PayPalEvent = JSON.parse(rawBody);
+
+    // Verify the webhook signature
+    const isValid = await verifyPayPalWebhook(request, rawBody);
+    if (!isValid) {
+      console.error("[paypal-webhook] Signature verification failed");
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
-    // Parse event
-    const eventType = params.get("txn_type") || params.get("event_type");
-    const subscriptionId = params.get("subscr_id") || params.get("recurring_payment_id");
-    const payerEmail = params.get("payer_email");
-    const amount = params.get("mc_gross") || params.get("amount");
-    const currency = params.get("mc_currency") || "USD";
-    const status = params.get("payment_status");
+    const { event_type, resource } = body;
+    const userId = resource.custom_id;
 
-    console.log("[PayPal Webhook] Event received:", {
-      eventType,
-      subscriptionId,
-      payerEmail,
-      status,
-    });
+    if (!userId) {
+      console.log(
+        "[paypal-webhook] No userId in payload — likely not a subscription event",
+      );
+      return NextResponse.json({ received: true });
+    }
 
-    // Handle different event types
-    switch (eventType) {
-      case "subscr_signup":
-      case "recurring_payment_profile_created":
-        // New subscription created
-        // TODO: Create subscription record in Cosmos DB
-        // TODO: Update user tier to "pro" or "team"
-        console.log("[PayPal] New subscription:", subscriptionId);
+    console.log(
+      `[paypal-webhook] Event: ${event_type} for user ${userId}`,
+    );
+
+    switch (event_type) {
+      case "BILLING.SUBSCRIPTION.ACTIVATED":
+        await handleSubscriptionActivated(userId, resource);
         break;
 
-      case "subscr_payment":
-      case "recurring_payment":
-        // Successful recurring payment
-        // TODO: Update subscription status and next billing date
-        console.log("[PayPal] Payment received:", amount, currency);
+      case "BILLING.SUBSCRIPTION.CANCELLED":
+        await handleSubscriptionCancelled(userId);
         break;
 
-      case "subscr_cancel":
-      case "recurring_payment_profile_cancel":
-        // Subscription canceled
-        // TODO: Mark subscription as canceled
-        // TODO: Set user tier back to "free" at period end
-        console.log("[PayPal] Subscription canceled:", subscriptionId);
+      case "BILLING.SUBSCRIPTION.SUSPENDED":
+        await handleSubscriptionSuspended(userId);
         break;
 
-      case "subscr_eot":
-        // Subscription expired/ended
-        // TODO: Update user tier to "free"
-        console.log("[PayPal] Subscription ended:", subscriptionId);
+      case "PAYMENT.SALE.COMPLETED":
+        await handlePaymentCompleted(userId);
         break;
 
-      case "subscr_failed":
-      case "recurring_payment_failed":
-        // Payment failed
-        // TODO: Mark subscription as past_due
-        // TODO: Send notification email via Resend
-        console.log("[PayPal] Payment failed:", subscriptionId);
-        break;
-
-      case "subscr_modify":
-        // Subscription plan changed
-        // TODO: Update subscription plan and amount
-        console.log("[PayPal] Subscription modified:", subscriptionId);
+      case "BILLING.SUBSCRIPTION.PAYMENT.FAILED":
+        await handlePaymentFailed(userId, resource);
         break;
 
       default:
-        console.log("[PayPal] Unhandled event type:", eventType);
+        console.log(
+          `[paypal-webhook] Unhandled event type: ${event_type}`,
+        );
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("[PayPal Webhook] Error:", error);
+    console.error("[paypal-webhook] Error:", error);
     return NextResponse.json(
-      { error: "Webhook handler failed" },
-      { status: 500 }
+      { error: "Webhook processing failed" },
+      { status: 500 },
     );
   }
 }
 
-// PayPal webhooks don't use GET, but we'll return a health check
+/**
+ * Handle BILLING.SUBSCRIPTION.ACTIVATED
+ * - Create/update subscription record in Supabase
+ * - Update user_profiles.tier
+ */
+async function handleSubscriptionActivated(
+  userId: string,
+  resource: PayPalResource,
+) {
+  const tier = getTierFromPlanId(resource.plan_id);
+  const billingCycle = getBillingCycle(resource.plan_id);
+  const subscriberEmail = resource.subscriber?.email_address;
+  const nextBilling = resource.billing_info?.next_billing_time;
+  const lastPayment = resource.billing_info?.last_payment?.amount?.value;
+  const now = new Date();
+  const periodEnd = nextBilling
+    ? new Date(nextBilling)
+    : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+  // Upsert the subscription in Supabase
+  const { error: subError } = await table("subscriptions").upsert({
+    user_id: userId,
+    plan: tier,
+    status: "active",
+    billing_cycle: billingCycle,
+    amount: lastPayment ? parseFloat(lastPayment) : 0,
+    currency: "USD",
+    current_period_start: now.toISOString(),
+    current_period_end: periodEnd.toISOString(),
+    paypal_subscription_id: resource.id,
+    user_email: subscriberEmail || null,
+    updated_at: now.toISOString(),
+  }, {
+    onConflict: "user_id",
+    ignoreDuplicates: false,
+  });
+
+  if (subError) {
+    console.error(
+      "[paypal-webhook] Failed to upsert subscription:",
+      subError,
+    );
+    return;
+  }
+
+  // Update the user's tier in user_profiles
+  const { error: profileError } = await table("user_profiles")
+    .update({ tier, updated_at: now.toISOString() })
+    .eq("id", userId);
+
+  if (profileError) {
+    console.error(
+      "[paypal-webhook] Failed to update user tier:",
+      profileError,
+    );
+  }
+
+  console.log(
+    `[paypal-webhook] Activated ${tier} subscription for ${userId}`,
+  );
+}
+
+/**
+ * Handle BILLING.SUBSCRIPTION.CANCELLED
+ * - Mark subscription as cancelled
+ */
+async function handleSubscriptionCancelled(userId: string) {
+  const now = new Date();
+
+  const { error: subError } = await table("subscriptions")
+    .update({
+      status: "cancelled",
+      cancel_at_period_end: true,
+      cancelled_at: now.toISOString(),
+      updated_at: now.toISOString(),
+    })
+    .eq("user_id", userId);
+
+  if (subError) {
+    console.error(
+      "[paypal-webhook] Failed to cancel subscription:",
+      subError,
+    );
+    return;
+  }
+
+  console.log(`[paypal-webhook] Cancelled subscription for ${userId}`);
+}
+
+/**
+ * Handle BILLING.SUBSCRIPTION.SUSPENDED
+ * - Mark subscription as past_due
+ */
+async function handleSubscriptionSuspended(userId: string) {
+  const now = new Date();
+
+  const { error: subError } = await table("subscriptions")
+    .update({ status: "past_due", updated_at: now.toISOString() })
+    .eq("user_id", userId);
+
+  if (subError) {
+    console.error(
+      "[paypal-webhook] Failed to suspend subscription:",
+      subError,
+    );
+    return;
+  }
+
+  console.log(`[paypal-webhook] Suspended subscription for ${userId}`);
+}
+
+/**
+ * Handle PAYMENT.SALE.COMPLETED
+ * - Update subscription period end
+ */
+async function handlePaymentCompleted(userId: string) {
+  const now = new Date();
+  const nextPeriodEnd = new Date(
+    now.getTime() + 30 * 24 * 60 * 60 * 1000,
+  );
+
+  const { error: subError } = await table("subscriptions")
+    .update({
+      status: "active",
+      current_period_end: nextPeriodEnd.toISOString(),
+      updated_at: now.toISOString(),
+    })
+    .eq("user_id", userId);
+
+  if (subError) {
+    console.error(
+      "[paypal-webhook] Failed to update payment:",
+      subError,
+    );
+    return;
+  }
+
+  console.log(
+    `[paypal-webhook] Payment completed for ${userId}, period extended`,
+  );
+}
+
+/**
+ * Handle BILLING.SUBSCRIPTION.PAYMENT.FAILED
+ * - Mark subscription as past_due
+ * - Send notification email
+ */
+async function handlePaymentFailed(
+  userId: string,
+  resource: PayPalResource,
+) {
+  const now = new Date();
+  const subscriberEmail = resource.subscriber?.email_address;
+
+  const { error: subError } = await table("subscriptions")
+    .update({ status: "past_due", updated_at: now.toISOString() })
+    .eq("user_id", userId);
+
+  if (subError) {
+    console.error(
+      "[paypal-webhook] Failed to mark subscription as past_due:",
+      subError,
+    );
+  }
+
+  // Send notification email — use the subscriber email if available,
+  // otherwise look up the user's email from the database
+  let emailTo = subscriberEmail;
+  if (!emailTo) {
+    const { data: profile } = await table("user_profiles")
+      .select("email")
+      .eq("id", userId)
+      .single();
+    emailTo = profile?.email;
+  }
+
+  if (process.env.RESEND_API_KEY && emailTo) {
+    await sendEmail({
+      to: emailTo,
+      subject: "Payment Failed — Prism Subscription",
+      html: `
+        <!DOCTYPE html>
+        <html>
+          <head><meta charset="utf-8"></head>
+          <body style="margin:0;padding:40px 20px;background:#050505;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+            <div style="max-width:480px;margin:0 auto;">
+              <div style="text-align:center;margin-bottom:32px;">
+                <span style="font-size:18px;font-weight:600;color:#fff;">Prism Context Engine</span>
+              </div>
+              <div style="background:#0a0a0a;border:1px solid #ef444430;border-radius:12px;padding:32px;">
+                <div style="width:48px;height:48px;border-radius:50%;background:#ef444420;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+                  <span style="font-size:24px;">⚠️</span>
+                </div>
+                <h1 style="color:#fff;font-size:18px;margin:0 0 8px;text-align:center;">Payment Failed</h1>
+                <p style="color:#ffffff99;font-size:14px;line-height:1.6;text-align:center;margin:0 0 24px;">
+                  Your Prism subscription payment could not be processed. Please update your payment method to avoid service interruption.
+                </p>
+                <div style="background:#ffffff08;border-radius:8px;padding:16px;margin-bottom:24px;">
+                  <p style="color:#ffffff60;font-size:12px;margin:0 0 4px;">Subscription ID</p>
+                  <p style="color:#fff;font-size:13px;font-family:monospace;margin:0;">${resource.id}</p>
+                </div>
+                <a href="https://prism.jeffdev.studio/subscription" style="display:block;text-align:center;background:linear-gradient(135deg,#f59e0b,#fb923c);color:#000;text-decoration:none;font-size:14px;font-weight:600;padding:12px 24px;border-radius:8px;">
+                  Update Payment Method
+                </a>
+              </div>
+              <p style="color:#ffffff30;font-size:11px;text-align:center;margin-top:24px;">
+                © ${new Date().getFullYear()} Prism Context Engine
+              </p>
+            </div>
+          </body>
+        </html>
+      `,
+    });
+  }
+
+  console.log(
+    `[paypal-webhook] Payment failed for ${userId}, notification sent`,
+  );
+}
+
+// Health check endpoint
 export async function GET() {
-  return NextResponse.json({ 
-    status: "ok", 
+  return NextResponse.json({
+    status: "ok",
     webhook: "paypal",
-    timestamp: new Date().toISOString() 
+    timestamp: new Date().toISOString(),
   });
 }

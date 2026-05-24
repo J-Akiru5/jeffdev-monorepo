@@ -90,6 +90,19 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  alternates: {
+    languages: {
+      'en-US': 'https://docs.jeffdev.studio/en-US',
+      'en-GB': 'https://docs.jeffdev.studio/en-GB',
+      tl: 'https://docs.jeffdev.studio/tl',
+      ja: 'https://docs.jeffdev.studio/ja',
+      es: 'https://docs.jeffdev.studio/es',
+      id: 'https://docs.jeffdev.studio/id',
+      ru: 'https://docs.jeffdev.studio/ru',
+      nl: 'https://docs.jeffdev.studio/nl',
+      'x-default': 'https://docs.jeffdev.studio/en-US',
+    },
+  },
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },
@@ -131,6 +144,28 @@ export default async function RootLayout({
     <html lang={lang} dir="ltr" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
       <Head />
       <body className="bg-void font-sans antialiased">
+        {/* JSON-LD Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "Prism Context Engine Documentation",
+              "description":
+                "AI-powered context governance for LLMs. Extract architectural rules from video transcripts, enforce coding standards, and deploy constraints to AI coding assistants via MCP.",
+              "url": "https://docs.jeffdev.studio",
+              "applicationCategory": "DeveloperApplication",
+              "author": {
+                "@type": "Organization",
+                "name": "Syntaxure Labs",
+                "url": "https://jeffdev.studio",
+              },
+              "inLanguage": ["en-US", "en-GB", "tl", "ja", "es", "id", "ru", "nl"],
+            }),
+          }}
+        />
+
         {/* Global Grid Background - Matching Agency Design */}
         <div className="docs-grid-bg" aria-hidden="true">
           <div className="bg-noise opacity-[0.02]" />

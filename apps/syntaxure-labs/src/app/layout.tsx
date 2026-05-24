@@ -48,6 +48,13 @@ export const metadata: Metadata = {
     'enterprise web solutions',
     'cloud architecture',
     'Syntaxure Labs',
+    'custom web application development Philippines',
+    'SaaS development agency',
+    'Next.js agency for startups',
+    'web development Iloilo',
+    'fixed-price web development',
+    'AI-native development agency',
+    'startup MVP development',
   ],
   authors: [{ name: 'Syntaxure Labs' }],
   creator: 'Syntaxure Labs',
@@ -90,6 +97,9 @@ export const metadata: Metadata = {
     ],
     shortcut: '/favicon/favicon.ico',
     apple: '/favicon/apple-icon.png',
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },
 };
 

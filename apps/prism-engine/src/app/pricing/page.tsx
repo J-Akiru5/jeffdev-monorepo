@@ -1,123 +1,21 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Check, X, Sparkles, ChevronDown } from 'lucide-react';
+import { getPricingPlans, getComparisonTable, getPricingFAQs } from '@/lib/pricing-db';
+import { PublicNav } from '@/components/layout/public-nav';
 
 export const metadata = {
   title: 'Pricing | Prism Context Engine',
   description: 'Choose the right plan for your context governance needs. Start free, upgrade when you need more power.',
 };
 
-const plans = [
-  {
-    name: 'Free',
-    tagline: 'Get started with the basics',
-    price: { monthly: 0, annual: 0 },
-    features: [
-      '5 rules',
-      '3 components',
-      '1 project',
-      '10 AI generations/month',
-      'Export as Markdown',
-    ],
-    cta: 'Get Started',
-    href: '/sign-up',
-  },
-  {
-    name: 'Pro',
-    tagline: 'For serious developers',
-    price: { monthly: 18, annual: 180 },
-    features: [
-      'Unlimited rules',
-      'Unlimited components',
-      '10 projects',
-      '500 AI generations/month',
-      'IDE auto-sync',
-      'All design systems',
-      'All stack templates',
-      'Priority support',
-    ],
-    popular: true,
-    cta: 'Start Free Trial',
-    href: '/sign-up',
-  },
-  {
-    name: 'Team',
-    tagline: 'Collaborate with your team',
-    price: { monthly: 54, annual: 540 },
-    features: [
-      'Everything in Pro',
-      'Unlimited projects',
-      '2,000 AI generations/month',
-      'Up to 10 team members',
-      'Shared component library',
-      'Team rule management',
-      'Admin dashboard',
-    ],
-    cta: 'Start Free Trial',
-    href: '/sign-up',
-  },
-  {
-    name: 'Enterprise',
-    tagline: 'Custom solutions for scale',
-    price: null,
-    features: [
-      'Everything in Team',
-      'Unlimited team members',
-      'Unlimited AI generations',
-      'SSO/SAML',
-      'Audit logs',
-      'Dedicated support',
-      'Custom integrations',
-    ],
-    cta: 'Contact Sales',
-    href: 'https://jeffdev.studio/contact',
-  },
-];
+export default async function PublicPricingPage() {
+  const [plans, comparisonFeatures, faqs] = await Promise.all([
+    getPricingPlans(),
+    getComparisonTable(),
+    getPricingFAQs(),
+  ]);
 
-const comparisonFeatures = [
-  { name: 'Rules', free: '5', pro: 'Unlimited', team: 'Unlimited', enterprise: 'Unlimited' },
-  { name: 'Components', free: '3', pro: 'Unlimited', team: 'Unlimited', enterprise: 'Unlimited' },
-  { name: 'Projects', free: '1', pro: '10', team: 'Unlimited', enterprise: 'Unlimited' },
-  { name: 'AI Generations/mo', free: '10', pro: '500', team: '2,000', enterprise: 'Unlimited' },
-  { name: 'IDE Auto-sync', free: false, pro: true, team: true, enterprise: true },
-  { name: 'Team Members', free: '-', pro: '-', team: '10', enterprise: 'Unlimited' },
-  { name: 'Shared Library', free: false, pro: false, team: true, enterprise: true },
-  { name: 'SSO/SAML', free: false, pro: false, team: false, enterprise: true },
-  { name: 'Audit Logs', free: false, pro: false, team: false, enterprise: true },
-  { name: 'Priority Support', free: false, pro: true, team: true, enterprise: true },
-  { name: 'Dedicated Support', free: false, pro: false, team: false, enterprise: true },
-];
-
-const faqs = [
-  {
-    question: 'Can I cancel anytime?',
-    answer: 'Yes! You can cancel your subscription at any time. You\'ll retain access until the end of your billing period.',
-  },
-  {
-    question: 'What payment methods do you accept?',
-    answer: 'We accept PayPal, which supports credit cards, debit cards, and PayPal balance.',
-  },
-  {
-    question: 'Can I upgrade or downgrade later?',
-    answer: 'Absolutely. You can change your plan at any time. Upgrades take effect immediately, and downgrades apply at the next billing cycle.',
-  },
-  {
-    question: 'What happens to my data if I cancel?',
-    answer: 'Your rules and components remain accessible in read-only mode for 30 days. You can always export them or resubscribe to regain full access.',
-  },
-  {
-    question: 'Do you offer refunds?',
-    answer: 'We offer a 14-day money-back guarantee for annual subscriptions. Monthly subscriptions can be cancelled anytime but are non-refundable for the current period.',
-  },
-  {
-    question: 'Is there a free trial?',
-    answer: 'Yes! Pro and Team plans include a 7-day free trial. No credit card required to start.',
-  },
-];
-
-import { PublicNav } from '@/components/layout/public-nav';
-
-export default function PublicPricingPage() {
   return (
     <main className="min-h-screen flex flex-col">
       {/* Navigation */}
@@ -171,14 +69,14 @@ export default function PublicPricingPage() {
               </div>
 
               <div className="mb-6">
-                {plan.price === null ? (
+                {plan.price.monthly === null ? (
                   <div className="text-3xl font-bold text-white">Custom</div>
                 ) : plan.price.monthly === 0 ? (
                   <div className="text-3xl font-bold text-white">Free</div>
                 ) : (
                   <div className="flex items-baseline gap-1">
                     <span className="text-3xl font-bold text-white">
-                          ${plan.price.monthly}
+                      ${plan.price.monthly}
                     </span>
                     <span className="text-white/60">/month</span>
                   </div>
@@ -199,9 +97,9 @@ export default function PublicPricingPage() {
                 className={`w-full rounded-md py-2.5 font-medium text-center transition-all ${
                   plan.popular
                     ? 'bg-cyan-500 text-black hover:bg-cyan-400'
-                    : plan.price?.monthly === 0
+                    : plan.price.monthly === 0
                     ? 'border border-white/20 text-white hover:bg-white/5'
-                    : plan.price === null
+                    : plan.price.monthly === null
                     ? 'border border-white/20 text-white hover:bg-white/5'
                     : 'bg-white text-black hover:bg-white/90'
                 }`}

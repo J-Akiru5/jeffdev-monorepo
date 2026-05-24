@@ -54,7 +54,9 @@
     "COSMOS_GREMLIN_ENDPOINT",
     "COSMOS_GREMLIN_KEY",
     "USE_GREMLIN_RANKING",
-    "ANALYZE"
+    "ANALYZE",
+    "N8N_WEBHOOK_URL",
+    "PAYPAL_WEBHOOK_ID"
   ],
   "tasks": {
     "build": {

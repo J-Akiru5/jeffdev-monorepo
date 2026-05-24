@@ -53,6 +53,19 @@ export {
   getRulesByTags,
 } from "./cosmos-gremlin.js";
 
+// Webhook Publisher (n8n integration)
+export {
+  publishEvent,
+  publishReleaseCreated,
+  publishWaitlistSignup,
+  publishSubscriptionEvent,
+  publishContactSubmission,
+  publishQuoteRequest,
+  publishDeploymentEvent,
+  type N8nEvent,
+  type N8nEventPayload,
+} from "./webhook-publisher.js";
+
 // Schema exports
 export {
   // User

@@ -1,15 +1,16 @@
 /**
  * Admin Subscription API (Prism Admin)
  *
+ * GET  /api/admin/subscription - List all subscriptions
  * PATCH /api/admin/subscription - Set ANY user's subscription tier
  *
- * This is the admin-level endpoint for managing user subscriptions.
- * Allows admins to manually set subscription tiers for any user.
+ * Uses Supabase as the data store. Admins can manually set subscription
+ * tiers for any user (overrides PayPal-managed subscriptions).
  */
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@jeffdev/db/cosmos";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { z } from "zod";
 
 // Zod validation schema
@@ -32,23 +33,34 @@ export async function GET() {
   }
 
   try {
-    const subscriptions = await getCollection("subscriptions");
-    const allSubs = await subscriptions
-      .find({})
-      .sort({ updatedAt: -1 })
-      .limit(100)
-      .toArray();
+    const admin = getAdminClient();
+    const { data: subscriptions, error } = await (admin
+      .from("subscriptions")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(100) as any);
+
+    if (error) {
+      console.error("[admin/subscription] GET error:", error);
+      return NextResponse.json(
+        { error: "Failed to fetch subscriptions" },
+        { status: 500 },
+      );
+    }
 
     return NextResponse.json({
-      subscriptions: allSubs.map((sub) => ({
-        id: sub._id.toString(),
-        userId: sub.userId,
-        tier: sub.tier,
+      subscriptions: (subscriptions || []).map((sub: any) => ({
+        id: sub.id,
+        userId: sub.user_id,
+        userEmail: sub.user_email,
+        tier: sub.plan,
         status: sub.status,
-        createdAt: sub.createdAt,
-        updatedAt: sub.updatedAt,
+        amount: sub.amount,
+        nextBillingDate: sub.current_period_end,
+        createdAt: sub.created_at,
+        updatedAt: sub.updated_at,
       })),
-      count: allSubs.length,
+      count: subscriptions?.length || 0,
     });
   } catch (error) {
     console.error("[admin/subscription] GET error:", error);
@@ -72,9 +84,6 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // TODO: Add proper admin role check here
-  // For now, we trust any authenticated admin portal user
-
   try {
     const body = await request.json();
     const parsed = UpdateTierSchema.safeParse(body);
@@ -90,28 +99,49 @@ export async function PATCH(request: NextRequest) {
     }
 
     const { userId, tier } = parsed.data;
-    const subscriptions = await getCollection("subscriptions");
+    const now = new Date().toISOString();
+    const admin = getAdminClient();
+    const subs = admin.from("subscriptions") as any;
+    const profiles = admin.from("user_profiles") as any;
 
-    const now = new Date();
-    const result = await subscriptions.updateOne(
-      { userId },
-      {
-        $set: {
-          tier,
-          status: "active",
-          updatedAt: now,
-          modifiedBy: adminUser.id, // Track admin who made the change
-        },
-        $setOnInsert: {
-          userId,
-          createdAt: now,
-          paypalSubscriptionId: null,
-          currentPeriodStart: now,
-          currentPeriodEnd: new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000), // 1 year for manual
-        },
-      },
-      { upsert: true },
-    );
+    // Upsert subscription record
+    const { error: subError } = await subs.upsert({
+      user_id: userId,
+      plan: tier,
+      status: "active",
+      billing_cycle: "monthly",
+      amount: 0,
+      currency: "USD",
+      current_period_start: now,
+      current_period_end: new Date(
+        Date.now() + 365 * 24 * 60 * 60 * 1000,
+      ).toISOString(),
+      metadata: { modified_by: adminUser.id, source: "admin_override" },
+      updated_at: now,
+    }, {
+      onConflict: "user_id",
+      ignoreDuplicates: false,
+    });
+
+    if (subError) {
+      console.error("[admin/subscription] Upsert error:", subError);
+      return NextResponse.json(
+        { error: "Failed to update subscription" },
+        { status: 500 },
+      );
+    }
+
+    // Update user tier in profiles
+    const { error: profileError } = await profiles
+      .update({ tier, updated_at: now })
+      .eq("id", userId);
+
+    if (profileError) {
+      console.error(
+        "[admin/subscription] Profile update error:",
+        profileError,
+      );
+    }
 
     console.log(
       `[admin/subscription] Admin ${adminUser.id} updated ${userId} to tier: ${tier}`,
@@ -122,7 +152,6 @@ export async function PATCH(request: NextRequest) {
       userId,
       tier,
       message: `Subscription updated to ${tier} tier`,
-      upserted: result.upsertedCount > 0,
     });
   } catch (error) {
     console.error("[admin/subscription] PATCH error:", error);

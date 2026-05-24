@@ -1,0 +1,53 @@
+{
+  "name": "Contact Form → Discord Alert",
+  "nodes": [
+    {
+      "id": "webhook-trigger",
+      "name": "Contact Form Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "parameters": {
+        "path": "contact",
+        "responseMode": "lastNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "discord-notify",
+      "name": "Post to Discord #inquiries",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "parameters": {
+        "resource": "message",
+        "channelId": "={{ $env.DISCORD_INQUIRIES_CHANNEL_ID }}",
+        "jsonParameters": false,
+        "content": "=📬 **New Contact Form Submission**\n\n**From:** {{ $json.payload.name }} ({{ $json.payload.email }})\n**Subject:** {{ $json.payload.subject }}\n**Source:** {{ $json.source }}\n**Time:** {{ $json.timestamp }}\n\n> {{ $json.payload.message || 'No message provided' }}\n\n---\n⏰ SLA: Respond within 24 hours"
+      },
+      "credentials": {
+        "discordApi": {
+          "id": "={{ $env.DISCORD_BOT_TOKEN }}"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Contact Form Webhook": {
+      "main": [
+        [
+          {
+            "node": "Post to Discord #inquiries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "versionId": "1.0.0",
+  "active": false,
+  "settings": {},
+  "tags": ["contact", "discord", "notification"]
+}

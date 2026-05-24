@@ -105,13 +105,13 @@ export async function computeGremlinBoosts(
     // 2. For each seed, fetch tags, related, and conflicting
     for (const seed of seeds) {
       // Fetch tags for this seed rule
-      const seedTags: string[] = await g
+      const seedTags = (await g
         .V(seed.id)
         .outE("tagged_with")
         .inV()
-        .values<string>("name")
+        .values("name")
         .toList()
-        .catch(() => [] as string[]);
+        .catch(() => [])) as string[];
 
       if (seedTags.length === 0) continue;
 

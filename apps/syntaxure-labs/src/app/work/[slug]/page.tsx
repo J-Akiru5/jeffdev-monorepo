@@ -38,8 +38,21 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${project.title} — Case Study`,
+    title: `${project.title} — Case Study // Syntaxure Labs`,
     description: project.description,
+    alternates: {
+      canonical: `/work/${slug}`,
+    },
+    openGraph: {
+      title: `${project.title} — Case Study | Syntaxure Labs`,
+      description: project.description,
+      url: `/work/${slug}`,
+      siteName: 'Syntaxure Labs',
+      type: 'article',
+      images: project.image
+        ? [{ url: project.image, width: 1200, height: 630, alt: project.title }]
+        : [],
+    },
   };
 }
 
@@ -65,6 +78,20 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
     <>
       <Header />
       <main className="pt-24">
+        {/* BreadcrumbList JSON-LD */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Work', item: 'https://jeffdev.studio/work' },
+                { '@type': 'ListItem', position: 2, name: activeProject.title, item: `https://jeffdev.studio/work/${slug}` },
+              ],
+            }),
+          }}
+        />
         {/* Hero Section */}
         <section className="px-6 py-16 lg:px-8">
           <div className="mx-auto max-w-7xl">

@@ -124,7 +124,7 @@ export async function syncCalendar(): Promise<CalendarEvent[]> {
 
 function normalizeEvent(raw: DatabaseEvent): CalendarEvent {
   return {
-    id: raw.id || raw.id?.toString() || "",
+    id: raw.id?.toString() || "",
     title: raw.title || "",
     start: raw.start_time || raw.start || "",
     end: raw.end_time || raw.end || "",

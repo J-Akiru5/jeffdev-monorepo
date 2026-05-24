@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@jeffdev/db";
 import {
   Users,
   CreditCard,
@@ -14,6 +13,7 @@ import Link from "next/link";
 
 /**
  * Admin Dashboard - Overview Stats
+ * Reads data from Supabase.
  */
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -23,26 +23,33 @@ export default async function DashboardPage() {
 
   if (!user) return null;
 
-  // Fetch stats from Cosmos DB (Prism data)
-  const usersCollection = await getCollection("users");
-  const subscriptionsCollection = await getCollection("subscriptions");
-  const projectsCollection = await getCollection("projects");
-
-  const [
-    totalUsers,
-    proUsers,
-    teamUsers,
-    activeSubscriptions,
-    totalProjects,
-    recentUsers,
-  ] = await Promise.all([
-    usersCollection.countDocuments({}),
-    usersCollection.countDocuments({ tier: "pro" }),
-    usersCollection.countDocuments({ tier: "team" }),
-    subscriptionsCollection.countDocuments({ status: "active" }),
-    projectsCollection.countDocuments({}),
-    usersCollection.find({}).sort({ createdAt: -1 }).limit(5).toArray(),
+  // Fetch stats from Supabase
+  const [profilesResult, subscriptionsResult] = await Promise.all([
+    supabase.from("user_profiles").select("*", { count: "exact", head: false }),
+    supabase.from("subscriptions").select("*"),
   ]);
+
+  const profiles = profilesResult.data || [];
+  const subscriptions = subscriptionsResult.data || [];
+
+  const totalUsers = profiles.length;
+  const activeSubscriptions = subscriptions.filter(
+    (s) => s.status === "active",
+  ).length;
+  const proUsers = subscriptions.filter(
+    (s) => s.plan === "pro" && s.status === "active",
+  ).length;
+  const teamUsers = subscriptions.filter(
+    (s) => s.plan === "team" && s.status === "active",
+  ).length;
+
+  // Recent users
+  const recentUsers = profiles
+    .sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    )
+    .slice(0, 5);
 
   const stats = [
     {
@@ -75,9 +82,9 @@ export default async function DashboardPage() {
     },
     {
       label: "Total Projects",
-      value: totalProjects,
+      value: 0,
       icon: FolderKanban,
-      trend: { value: 15, direction: "up" as const },
+      trend: { value: 0, direction: "neutral" as const },
       href: "/admin/projects",
     },
     {
@@ -156,32 +163,32 @@ export default async function DashboardPage() {
         </div>
         <div className="divide-y divide-white/5">
           {recentUsers.length > 0 ? (
-            recentUsers.map((user) => (
+            recentUsers.map((profile) => (
               <div
-                key={user._id.toString()}
+                key={profile.id}
                 className="flex items-center justify-between p-4"
               >
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center text-xs font-medium text-white">
-                    {(user.email as string)?.charAt(0).toUpperCase() || "?"}
+                    {profile.email?.charAt(0).toUpperCase() || "?"}
                   </div>
                   <div>
-                    <p className="text-sm text-white">{user.email as string}</p>
+                    <p className="text-sm text-white">{profile.email}</p>
                     <p className="text-[10px] text-white/40 font-mono">
-                      {new Date(user.createdAt as string).toLocaleDateString()}
+                      {new Date(profile.created_at).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
                 <span
                   className={`text-[10px] font-mono uppercase px-2 py-1 rounded ${
-                    user.tier === "pro"
+                    profile.tier === "pro"
                       ? "bg-amber-500/20 text-amber-400"
-                      : user.tier === "team"
+                      : profile.tier === "team"
                         ? "bg-purple-500/20 text-purple-400"
                         : "bg-white/10 text-white/50"
                   }`}
                 >
-                  {(user.tier as string) || "free"}
+                  {profile.tier || "free"}
                 </span>
               </div>
             ))

@@ -40,8 +40,18 @@ export async function generateMetadata({
   }
 
   return {
-    title: service.title,
+    title: `${service.title} // Syntaxure Labs`,
     description: service.description,
+    alternates: {
+      canonical: `/services/${slug}`,
+    },
+    openGraph: {
+      title: `${service.title} | Syntaxure Labs`,
+      description: service.description,
+      url: `/services/${slug}`,
+      siteName: 'Syntaxure Labs',
+      type: 'website',
+    },
   };
 }
 
@@ -81,6 +91,20 @@ export default async function ServicePage({ params }: ServicePageProps) {
     <>
       <Header />
       <main className="pt-24">
+        {/* BreadcrumbList JSON-LD */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Services', item: 'https://jeffdev.studio/services' },
+                { '@type': 'ListItem', position: 2, name: activeService.title, item: `https://jeffdev.studio/services/${slug}` },
+              ],
+            }),
+          }}
+        />
         {/* Hero Section */}
         <section className="px-6 py-16 lg:px-8">
           <div className="mx-auto max-w-7xl">

@@ -1,0 +1,145 @@
+{
+  "name": "Weekly Analytics Digest → Discord",
+  "nodes": [
+    {
+      "id": "cron-trigger",
+      "name": "Weekly Cron (Monday 10 AM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 10 * * 1"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "waitlist-count",
+      "name": "Get Waitlist Count",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [450, 200],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(*) as total FROM prism_waitlist"
+      },
+      "credentials": {
+        "postgres": {
+          "id": "={{ $env.SUPABASE_DB_URL }}"
+        }
+      }
+    },
+    {
+      "id": "recent-signups",
+      "name": "Get This Week's Signups",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [450, 400],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT COUNT(*) as this_week FROM prism_waitlist WHERE created_at >= NOW() - INTERVAL '7 days'"
+      },
+      "credentials": {
+        "postgres": {
+          "id": "={{ $env.SUPABASE_DB_URL }}"
+        }
+      }
+    },
+    {
+      "id": "set-operations",
+      "name": "Set Analytics Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [650, 300],
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "report",
+              "value": "=📊 **Weekly Analytics Report**\n\n**Waitlist**\n- Total signups: {{ $json.total }}\n- This week: {{ $json.this_week }}\n\n_Generated: {{ new Date().toLocaleString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) }}_"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "discord-report",
+      "name": "Post Report to Discord",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "parameters": {
+        "resource": "message",
+        "channelId": "={{ $env.DISCORD_ADMIN_CHANNEL_ID }}",
+        "jsonParameters": false,
+        "content": "={{ $json.report }}"
+      },
+      "credentials": {
+        "discordApi": {
+          "id": "={{ $env.DISCORD_BOT_TOKEN }}"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Weekly Cron (Monday 10 AM)": {
+      "main": [
+        [
+          {
+            "node": "Get Waitlist Count",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get This Week's Signups",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Waitlist Count": {
+      "main": [
+        [
+          {
+            "node": "Set Analytics Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get This Week's Signups": {
+      "main": [
+        [
+          {
+            "node": "Set Analytics Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Analytics Data": {
+      "main": [
+        [
+          {
+            "node": "Post Report to Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "versionId": "1.0.0",
+  "active": false,
+  "settings": {},
+  "tags": ["analytics", "discord", "cron", "report"]
+}

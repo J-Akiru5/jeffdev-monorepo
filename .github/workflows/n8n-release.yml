@@ -1,0 +1,98 @@
+name: Notify n8n on Release
+
+on:
+  release:
+    types: [published, edited]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version number to announce"
+        required: true
+      changelog:
+        description: "Changelog summary"
+        required: false
+
+concurrency:
+  group: n8n-release-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  N8N_RELEASE_WEBHOOK_URL: ${{ secrets.N8N_RELEASE_WEBHOOK_URL }}
+  N8N_WEBHOOK_URL: ${{ secrets.N8N_WEBHOOK_URL }}
+
+jobs:
+  notify-n8n:
+    name: Send Release Event to n8n
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version and changelog
+        id: info
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            VERSION="${{ github.event.release.tag_name }}"
+            CHANGELOG="${{ github.event.release.body }}"
+            URL="${{ github.event.release.html_url }}"
+          else
+            VERSION="${{ github.event.inputs.version }}"
+            CHANGELOG="${{ github.event.inputs.changelog }}"
+            URL="${{ github.server_url }}/${{ github.repository }}/releases/tag/$VERSION"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          # jq will safely encode the changelog for JSON later
+
+      - name: Fire n8n Webhook
+        if: ${{ env.N8N_RELEASE_WEBHOOK_URL != '' }}
+        shell: bash
+        run: |
+          jq -n \
+            --arg event "release.published" \
+            --arg version "${{ steps.info.outputs.version }}" \
+            --arg changelog "${{ github.event.release.body || github.event.inputs.changelog }}" \
+            --arg url "${{ steps.info.outputs.url }}" \
+            --arg repo "${{ github.repository }}" \
+            --arg author "${{ github.actor }}" \
+            '{
+              event: $event,
+              payload: {
+                version: $version,
+                changelog: $changelog,
+                url: $url,
+                repository: $repo,
+                author: $author
+              },
+              timestamp: (now | strftime("%Y-%m-%dT%H:%M:%SZ")),
+              source: "github-actions"
+            }' | curl -s -X POST "${{ env.N8N_RELEASE_WEBHOOK_URL }}" \
+              -H "Content-Type: application/json" \
+              -H "X-Event-Source: github-actions" \
+              -d @-
+          echo "::notice::n8n webhook fired for release ${{ steps.info.outputs.version }}"
+
+      - name: Legacy n8n Webhook (backward compat)
+        if: ${{ env.N8N_WEBHOOK_URL != '' && env.N8N_RELEASE_WEBHOOK_URL == '' }}
+        shell: bash
+        run: |
+          jq -n \
+            --arg event "release.published" \
+            --arg version "${{ steps.info.outputs.version }}" \
+            --arg changelog "${{ github.event.release.body || github.event.inputs.changelog }}" \
+            --arg url "${{ steps.info.outputs.url }}" \
+            '{
+              event: $event,
+              payload: {
+                version: $version,
+                changelog: $changelog,
+                url: $url
+              },
+              timestamp: (now | strftime("%Y-%m-%dT%H:%M:%SZ")),
+              source: "github-actions"
+            }' | curl -s -X POST "${{ env.N8N_WEBHOOK_URL }}" \
+              -H "Content-Type: application/json" \
+              -d @-
+          echo "::notice::Legacy n8n webhook fired for ${{ steps.info.outputs.version }}"
