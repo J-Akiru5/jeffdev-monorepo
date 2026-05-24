@@ -1,149 +1,149 @@
 # Prism Context Engine
 
-**The Context Operating System for Vibecoders** — Eliminate "Context Pollution" by orchestrating the flow of rules, design systems, and tech stacks between the Cloud and local AI Agents.
+**El Sistema Operativo de Contexto para Vibecoders** — Elimina la "Contaminación de Contexto" orquestando el flujo de reglas, sistemas de diseño y stacks tecnológicos entre la Nube y los Agentes de IA locales.
 
-## What is Prism Context Engine?
+## ¿Qué es Prism Context Engine?
 
-Prism Context Engine is a complete **AI-powered context governance platform** that:
+Prism Context Engine es una plataforma completa de **gobernanza de contexto impulsada por IA** que:
 
-1. **Extracts Rules from Video** - Upload screen recordings, automatically extract architectural patterns using Azure OpenAI
-2. **Enforces Standards** - Deploy rules to AI coding assistants via MCP (Model Context Protocol)
-3. **Enables Semantic Search** - Find relevant architectural discussions using vector embeddings
+1. **Extrae Reglas de Video** - Sube grabaciones de pantalla, extrae automáticamente patrones arquitectónicos usando Azure OpenAI
+2. **Aplica Estándares** - Despliega reglas a asistentes de codificación AI vía MCP (Model Context Protocol)
+3. **Habilita Búsqueda Semántica** - Encuentra discusiones arquitectónicas relevantes usando embeddings vectoriales
 
-### The Core Metaphor
+### La Metáfora Principal
 
-| Concept | Prism Equivalent | Description |
+| Concepto | Equivalente Prism | Descripción |
 |---------|------------------|-------------|
-| 🍳 **The Kitchen** | SaaS Dashboard | Where the "Chef" (Developer) mixes ingredients (Next.js, Tailwind, Glassmorphism) |
-| 📜 **The Recipe** | Context Rules | The output file (e.g., `.cursorrules`) containing strict instructions |
-| 🍽️ **The Waiter** | MCP Protocol | Delivers the fresh Recipe directly to the IDE's table |
+| 🍳 **La Cocina** | SaaS Dashboard | Donde el "Chef" (Desarrollador) mezcla ingredientes (Next.js, Tailwind, Glassmorphism) |
+| 📜 **La Receta** | Reglas de Contexto | El archivo de salida (ej., `.cursorrules`) con instrucciones estrictas |
+| 🍽️ **El Mesero** | Protocolo MCP | Entrega la Receta fresca directamente a la mesa del IDE |
 
-### Video-to-Context Extraction
+### Extracción de Video a Contexto
 
-**Automated Documentation**: Upload a screen recording of your development workflow. Prism analyzes the video transcript using Azure OpenAI to automatically extract architectural rules, coding patterns, and best practices into actionable context that your AI coding assistant can understand.
+**Documentación Automatizada**: Sube una grabación de pantalla de tu flujo de trabajo de desarrollo. Prism analiza la transcripción del video usando Azure OpenAI para extraer automáticamente reglas arquitectónicas, patrones de codificación y mejores prácticas en contexto accionable que tu asistente de codificación AI pueda entender.
 
-Works with:
+Funciona con:
 - **Cursor** ✅
 - **Windsurf** ✅
-- **Claude (via MCP)** ✅  
-- **VS Code** (via MCP extension)
-- **GitHub Copilot** (coming soon)
+- **Claude (vía MCP)** ✅
+- **VS Code** (vía extensión MCP)
+- **GitHub Copilot** (próximamente)
 
-Instead of hoping your AI follows best practices, **Prism enforces them**.
+En lugar de esperar que tu AI siga las mejores prácticas, **Prism las aplica**.
 
-## Quick Start
+## Inicio Rápido
 
-### Option A: Web Dashboard (Recommended)
+### Opción A: Web Dashboard (Recomendado)
 
 ```bash
-# 1. Sign up at the web dashboard
+# 1. Regístrate en el web dashboard
 https://prism.jeffdev.studio/sign-up
 
-# 2. Create your first project and brand profile
-# 3. Upload a video or manually create rules
-# 4. Export .cursorrules file and paste into your project
+# 2. Crea tu primer proyecto y perfil de marca
+# 3. Sube un video o crea reglas manualmente
+# 4. Exporta el archivo .cursorrules y pégalo en tu proyecto
 ```
 
-### Option B: MCP Server (Advanced)
+### Opción B: Servidor MCP (Avanzado)
 
-For real-time sync with your IDE:
+Para sincronización en tiempo real con tu IDE:
 
 ```bash
-# 1. Install MCP server globally
+# 1. Instala el servidor MCP globalmente
 npm install -g @prism/mcp-server
 
-# 2. Configure your IDE (Cursor/Windsurf/VS Code)
-# Add to your MCP settings:
+# 2. Configura tu IDE (Cursor/Windsurf/VS Code)
+# Añade a tu configuración MCP:
 {
   "mcpServers": {
     "prism": {
       "command": "prism-mcp",
-      "args": ["--api-key", "YOUR_API_KEY"]
+      "args": ["--api-key", "TU_API_KEY"]
     }
   }
 }
 
-# 3. Your AI assistant now has live access to your rules
+# 3. Tu asistente AI ahora tiene acceso en vivo a tus reglas
 ```
 
-## Core Features
+## Características Principales
 
 import { Rocket, Video, FileCode, Plug, Settings, Code } from 'lucide-react'
 
 <Cards>
-  <Card icon={<Rocket size={20} />} title="Quick Start" href="/quick-start">
-    Deploy your first rule in 5 minutes
+  <Card icon={<Rocket size={20} />} title="Inicio Rápido" href="/es/quick-start">
+    Despliega tu primera regla en 5 minutos
   </Card>
-  <Card icon={<Video size={20} />} title="Video Processing" href="/video">
-    Extract rules from screen recordings
+  <Card icon={<Video size={20} />} title="Procesamiento de Video" href="/es/video">
+    Extrae reglas de grabaciones de pantalla
   </Card>
-  <Card icon={<FileCode size={20} />} title="Rule Management" href="/rules">
-    Create, organize, and deploy constraints
+  <Card icon={<FileCode size={20} />} title="Gestión de Reglas" href="/es/rules">
+    Crea, organiza y despliega restricciones
   </Card>
-  <Card icon={<Plug size={20} />} title="IDE Integrations" href="/integrations">
-    Connect to Cursor, Windsurf, and Claude
+  <Card icon={<Plug size={20} />} title="Integraciones IDE" href="/es/integrations">
+    Conéctate a Cursor, Windsurf y Claude
   </Card>
-  <Card icon={<Settings size={20} />} title="Advanced" href="/advanced">
-    Semantic search and brand profiles
+  <Card icon={<Settings size={20} />} title="Avanzado" href="/es/advanced">
+    Búsqueda semántica y perfiles de marca
   </Card>
-  <Card icon={<Code size={20} />} title="API Reference" href="/advanced/api-reference">
-    Programmatic access to rules and transcripts
+  <Card icon={<Code size={20} />} title="Referencia de API" href="/es/advanced/api-reference">
+    Acceso programático a reglas y transcripciones
   </Card>
 </Cards>
 
-## Architecture
+## Arquitectura
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│              Video Upload (Mux)                             │
-│  Screen recordings → Automatic transcription                │
+│              Subida de Video (Mux)                          │
+│  Grabaciones de pantalla → Transcripción automática         │
 └────────────────────────────┬────────────────────────────────┘
                              │ Webhook
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
-│           Azure OpenAI Processing (GPT-4o-mini)             │
-│  Extract rules + Generate embeddings for search             │
+│           Procesamiento Azure OpenAI (GPT-4o-mini)          │
+│  Extraer reglas + Generar embeddings para búsqueda          │
 └────────────────────────────┬────────────────────────────────┘
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
-│            Azure Cosmos DB (MongoDB API)                    │
-│    Rules Collection + Video Transcripts + Embeddings        │
+│            Azure Cosmos DB (API MongoDB)                    │
+│    Colección de Reglas + Transcripciones + Embeddings       │
 └────────────────────────────┬────────────────────────────────┘
-                             │ MCP Protocol
+                             │ Protocolo MCP
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                   Your IDE (Cursor/Windsurf)                │
-│  AI follows your rules automatically during coding          │
+│                   Tu IDE (Cursor/Windsurf)                  │
+│  La IA sigue tus reglas automáticamente al codificar        │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## What Makes Prism Different?
+## ¿Qué Hace Diferente a Prism?
 
-### 🎥 Video-First Context Capture
-Record your screen while discussing architecture. Prism automatically extracts rules from your explanations.
+### 🎥 Captura de Contexto Video-Primero
+Graba tu pantalla mientras discutes arquitectura. Prism extrae automáticamente reglas de tus explicaciones.
 
-### 🧠 AI-Powered Rule Extraction
-GPT-4o-mini analyzes transcripts to identify:
-- Architectural patterns
-- Code style conventions
-- Naming rules
-- Testing strategies
-- Security practices
+### 🧠 Extracción de Reglas con IA
+GPT-4o-mini analiza transcripciones para identificar:
+- Patrones arquitectónicos
+- Convenciones de estilo de código
+- Reglas de nomenclatura
+- Estrategias de prueba
+- Prácticas de seguridad
 
-### 🔍 Semantic Search
-Vector embeddings enable finding relevant architectural discussions, not just keyword matching.
+### 🔍 Búsqueda Semántica
+Los embeddings vectoriales permiten encontrar discusiones arquitectónicas relevantes, no solo coincidencias de palabras clave.
 
-### 🚀 Zero-Config MCP Integration
-`npx prism connect` and you're done. Your AI assistant now has context.
+### 🚀 Integración MCP Sin Configuración
+`npx prism connect` y listo. Tu asistente de IA ahora tiene contexto.
 
-## Real-World Example
+## Ejemplo del Mundo Real
 
 ```typescript
-// Before Prism: Generic code
+// Antes de Prism: Código genérico
 const data = await fetch('/api/users');
 
-// After Prism: Enforces your standards
+// Después de Prism: Aplica tus estándares
 const { data, error } = await api.users.list();
 if (error) {
   toast.error(error.message);
@@ -151,15 +151,15 @@ if (error) {
 }
 ```
 
-Your AI assistant learns from your videos that you:
-- Use custom API wrapper with error handling
-- Show errors via toast notifications
-- Follow early return patterns
+Tu asistente de IA aprende de tus videos que:
+- Usas un wrapper de API personalizado con manejo de errores
+- Muestras errores mediante notificaciones toast
+- Sigues patrones de retorno temprano
 
-## Built by Syntaxure Labs
+## Creado por Syntaxure Labs
 
-Prism Context Engine is part of the [Syntaxure Labs](https://jeffdev.studio) ecosystem — enterprise-grade tools for developers who want AI that respects their architecture.
+Prism Context Engine es parte del ecosistema [Syntaxure Labs](https://jeffdev.studio) — herramientas de nivel empresarial para desarrolladores que quieren una IA que respete su arquitectura.
 
-**Current Version:** 1.0.3  
-**License:** MIT  
-**Support:** [GitHub Issues](https://github.com/J-Akiru5/jeffdev-monorepo/issues)
+**Versión Actual:** 1.0.3
+**Licencia:** MIT
+**Soporte:** [GitHub Issues](https://github.com/J-Akiru5/jeffdev-monorepo/issues)

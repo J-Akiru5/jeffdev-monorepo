@@ -1,0 +1,65 @@
+{
+  "common": {
+    "search_placeholder": "Zoek in documentatie...",
+    "edit_on_github": "Bewerk op GitHub",
+    "give_feedback": "Vragen? Geef ons feedback →",
+    "on_this_page": "Op deze pagina",
+    "copy_page": "Kopieer pagina",
+    "scroll_to_top": "Naar boven"
+  },
+  "nav": {
+    "documentation": "Documentatie",
+    "introduction": "Inleiding",
+    "quick_start": "Snel starten",
+    "video_processing": "Video verwerking",
+    "integrations": "IDE-integraties",
+    "product": "Product",
+    "dashboard": "Dashboard",
+    "pricing": "Prijzen",
+    "api_reference": "API-referentie",
+    "changelog": "Wijzigingslog"
+  },
+  "footer": {
+    "start_project": "Start een project",
+    "ready_to_start": "Klaar om contextvervuiling te elimineren? Laten we beginnen.",
+    "get_started": "BEGIN",
+    "terms": "Servicevoorwaarden",
+    "privacy": "Privacybeleid"
+  },
+  "home": {
+    "title": "Prism Context Engine",
+    "tagline": "Het Context Besturingssysteem voor Vibecoders",
+    "description": "Elimineer \"Contextvervuiling\" door de stroom van regels, designsystemen en technische stacks tussen de Cloud en lokale AI-agenten te orkestreren.",
+    "what_is_prism": "Wat is Prism Context Engine?",
+    "prism_description": "Prism Context Engine is een compleet AI-aangedreven contextbeheerplatform dat:",
+    "feature_1": "Regels uit Video Haalt - Upload schermopnames, haal automatisch architectuurpatronen eruit met Azure OpenAI",
+    "feature_2": "Standaarden Afdwingt - Implementeer regels naar AI-codeerassistenten via MCP (Model Context Protocol)",
+    "feature_3": "Semantisch Zoeken Mogelijk Maakt - Vind relevante architectuurdiscussies met behulp van vector-embeddings",
+    "core_features": "Kernfuncties",
+    "architecture": "Architectuur",
+    "what_makes_different": "Wat Maakt Prism Anders?",
+    "video_first": "Video-Eerste Contextvastlegging",
+    "video_first_desc": "Neem je scherm op terwijl je architectuur bespreekt. Prism haalt automatisch regels uit je uitleg.",
+    "ai_powered": "AI-aangedreven Regels Extractie",
+    "ai_powered_desc": "GPT-4o-mini analyseert transcripties om architectuurpatronen, codestijlconventies, naamgevingsregels, teststrategieën en beveiligingspraktijken te identificeren.",
+    "semantic_search": "Semantisch Zoeken",
+    "semantic_search_desc": "Vector-embeddings maken het mogelijk om relevante architectuurdiscussies te vinden, niet alleen trefwoordovereenkomsten.",
+    "zero_config": "Zero-Config MCP-integratie",
+    "zero_config_desc": "npx prism connect en je bent klaar. Je AI-assistent heeft nu context.",
+    "built_by": "Gebouwd door Syntaxure Labs"
+  },
+  "cards": {
+    "quick_start": "Snel starten",
+    "quick_start_desc": "Implementeer je eerste regel in 5 minuten",
+    "video_processing": "Video verwerking",
+    "video_processing_desc": "Haal regels uit schermopnames",
+    "rule_management": "Regelbeheer",
+    "rule_management_desc": "Maak, organiseer en implementeer beperkingen",
+    "ide_integrations": "IDE-integraties",
+    "ide_integrations_desc": "Verbind met Cursor, Windsurf en Claude",
+    "advanced": "Geavanceerd",
+    "advanced_desc": "Semantisch zoeken en merkprofielen",
+    "api_reference": "API-referentie",
+    "api_reference_desc": "Programmatische toegang tot regels en transcripties"
+  }
+}

@@ -1,149 +1,149 @@
 # Prism Context Engine
 
-**The Context Operating System for Vibecoders** — Eliminate "Context Pollution" by orchestrating the flow of rules, design systems, and tech stacks between the Cloud and local AI Agents.
+**Het Context Besturingssysteem voor Vibecoders** — Elimineer "Contextvervuiling" door de stroom van regels, designsystemen en technische stacks tussen de Cloud en lokale AI-agenten te orkestreren.
 
-## What is Prism Context Engine?
+## Wat is Prism Context Engine?
 
-Prism Context Engine is a complete **AI-powered context governance platform** that:
+Prism Context Engine is een compleet **AI-aangedreven contextbeheerplatform** dat:
 
-1. **Extracts Rules from Video** - Upload screen recordings, automatically extract architectural patterns using Azure OpenAI
-2. **Enforces Standards** - Deploy rules to AI coding assistants via MCP (Model Context Protocol)
-3. **Enables Semantic Search** - Find relevant architectural discussions using vector embeddings
+1. **Regels uit Video Haalt** - Upload schermopnames, haal automatisch architectuurpatronen eruit met Azure OpenAI
+2. **Standaarden Afdwingt** - Implementeer regels naar AI-codeerassistenten via MCP (Model Context Protocol)
+3. **Semantisch Zoeken Mogelijk Maakt** - Vind relevante architectuurdiscussies met behulp van vector-embeddings
 
-### The Core Metaphor
+### De Kernmetafoor
 
-| Concept | Prism Equivalent | Description |
+| Concept | Prism Equivalent | Beschrijving |
 |---------|------------------|-------------|
-| 🍳 **The Kitchen** | SaaS Dashboard | Where the "Chef" (Developer) mixes ingredients (Next.js, Tailwind, Glassmorphism) |
-| 📜 **The Recipe** | Context Rules | The output file (e.g., `.cursorrules`) containing strict instructions |
-| 🍽️ **The Waiter** | MCP Protocol | Delivers the fresh Recipe directly to the IDE's table |
+| 🍳 **De Keuken** | SaaS Dashboard | Waar de "Chef" (Ontwikkelaar) ingrediënten mixt (Next.js, Tailwind, Glassmorphism) |
+| 📜 **Het Recept** | Contextregels | Het uitvoerbestand (bijv. `.cursorrules`) met strikte instructies |
+| 🍽️ **De Ober** | MCP Protocol | Levert het verse Recept direct aan de IDE-tafel |
 
-### Video-to-Context Extraction
+### Video-naar-Context Extractie
 
-**Automated Documentation**: Upload a screen recording of your development workflow. Prism analyzes the video transcript using Azure OpenAI to automatically extract architectural rules, coding patterns, and best practices into actionable context that your AI coding assistant can understand.
+**Geautomatiseerde Documentatie**: Upload een schermopname van je ontwikkelworkflow. Prism analyseert het videotranscript met Azure OpenAI om automatisch architectuurregels, codeerpatronen en best practices te extraheren naar bruikbare context die je AI-codeerassistent kan begrijpen.
 
-Works with:
+Werkt met:
 - **Cursor** ✅
 - **Windsurf** ✅
-- **Claude (via MCP)** ✅  
-- **VS Code** (via MCP extension)
-- **GitHub Copilot** (coming soon)
+- **Claude (via MCP)** ✅
+- **VS Code** (via MCP-extensie)
+- **GitHub Copilot** (binnenkort)
 
-Instead of hoping your AI follows best practices, **Prism enforces them**.
+In plaats van te hopen dat je AI best practices volgt, **dwingt Prism ze af**.
 
-## Quick Start
+## Snel starten
 
-### Option A: Web Dashboard (Recommended)
+### Optie A: Web Dashboard (Aanbevolen)
 
 ```bash
-# 1. Sign up at the web dashboard
+# 1. Meld je aan via het web dashboard
 https://prism.jeffdev.studio/sign-up
 
-# 2. Create your first project and brand profile
-# 3. Upload a video or manually create rules
-# 4. Export .cursorrules file and paste into your project
+# 2. Maak je eerste project en merkprofiel
+# 3. Upload een video of maak handmatig regels aan
+# 4. Exporteer het .cursorrules-bestand en plak het in je project
 ```
 
-### Option B: MCP Server (Advanced)
+### Optie B: MCP Server (Geavanceerd)
 
-For real-time sync with your IDE:
+Voor real-time synchronisatie met je IDE:
 
 ```bash
-# 1. Install MCP server globally
+# 1. Installeer de MCP-server globaal
 npm install -g @prism/mcp-server
 
-# 2. Configure your IDE (Cursor/Windsurf/VS Code)
-# Add to your MCP settings:
+# 2. Configureer je IDE (Cursor/Windsurf/VS Code)
+# Voeg toe aan je MCP-instellingen:
 {
   "mcpServers": {
     "prism": {
       "command": "prism-mcp",
-      "args": ["--api-key", "YOUR_API_KEY"]
+      "args": ["--api-key", "JOUW_API_SLEUTEL"]
     }
   }
 }
 
-# 3. Your AI assistant now has live access to your rules
+# 3. Je AI-assistent heeft nu live toegang tot je regels
 ```
 
-## Core Features
+## Kernfuncties
 
 import { Rocket, Video, FileCode, Plug, Settings, Code } from 'lucide-react'
 
 <Cards>
-  <Card icon={<Rocket size={20} />} title="Quick Start" href="/quick-start">
-    Deploy your first rule in 5 minutes
+  <Card icon={<Rocket size={20} />} title="Snel starten" href="/nl/quick-start">
+    Implementeer je eerste regel in 5 minuten
   </Card>
-  <Card icon={<Video size={20} />} title="Video Processing" href="/video">
-    Extract rules from screen recordings
+  <Card icon={<Video size={20} />} title="Video verwerking" href="/nl/video">
+    Haal regels uit schermopnames
   </Card>
-  <Card icon={<FileCode size={20} />} title="Rule Management" href="/rules">
-    Create, organize, and deploy constraints
+  <Card icon={<FileCode size={20} />} title="Regelbeheer" href="/nl/rules">
+    Maak, organiseer en implementeer beperkingen
   </Card>
-  <Card icon={<Plug size={20} />} title="IDE Integrations" href="/integrations">
-    Connect to Cursor, Windsurf, and Claude
+  <Card icon={<Plug size={20} />} title="IDE-integraties" href="/nl/integrations">
+    Verbind met Cursor, Windsurf en Claude
   </Card>
-  <Card icon={<Settings size={20} />} title="Advanced" href="/advanced">
-    Semantic search and brand profiles
+  <Card icon={<Settings size={20} />} title="Geavanceerd" href="/nl/advanced">
+    Semantisch zoeken en merkprofielen
   </Card>
-  <Card icon={<Code size={20} />} title="API Reference" href="/advanced/api-reference">
-    Programmatic access to rules and transcripts
+  <Card icon={<Code size={20} />} title="API-referentie" href="/nl/advanced/api-reference">
+    Programmatische toegang tot regels en transcripties
   </Card>
 </Cards>
 
-## Architecture
+## Architectuur
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │              Video Upload (Mux)                             │
-│  Screen recordings → Automatic transcription                │
+│  Schermopnames → Automatische transcriptie                  │
 └────────────────────────────┬────────────────────────────────┘
                              │ Webhook
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
-│           Azure OpenAI Processing (GPT-4o-mini)             │
-│  Extract rules + Generate embeddings for search             │
+│           Azure OpenAI Verwerking (GPT-4o-mini)             │
+│  Regels extraheren + Embeddings genereren voor zoeken       │
 └────────────────────────────┬────────────────────────────────┘
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
 │            Azure Cosmos DB (MongoDB API)                    │
-│    Rules Collection + Video Transcripts + Embeddings        │
+│    Regelsverzameling + Videotranscripties + Embeddings      │
 └────────────────────────────┬────────────────────────────────┘
                              │ MCP Protocol
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                   Your IDE (Cursor/Windsurf)                │
-│  AI follows your rules automatically during coding          │
+│                   Jouw IDE (Cursor/Windsurf)                │
+│  AI volgt automatisch jouw regels tijdens het coderen       │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## What Makes Prism Different?
+## Wat Maakt Prism Anders?
 
-### 🎥 Video-First Context Capture
-Record your screen while discussing architecture. Prism automatically extracts rules from your explanations.
+### 🎥 Video-Eerste Contextvastlegging
+Neem je scherm op terwijl je architectuur bespreekt. Prism haalt automatisch regels uit je uitleg.
 
-### 🧠 AI-Powered Rule Extraction
-GPT-4o-mini analyzes transcripts to identify:
-- Architectural patterns
-- Code style conventions
-- Naming rules
-- Testing strategies
-- Security practices
+### 🧠 AI-aangedreven Regels Extractie
+GPT-4o-mini analyseert transcripties om te identificeren:
+- Architectuurpatronen
+- Codestijlconventies
+- Naamgevingsregels
+- Teststrategieën
+- Beveiligingspraktijken
 
-### 🔍 Semantic Search
-Vector embeddings enable finding relevant architectural discussions, not just keyword matching.
+### 🔍 Semantisch Zoeken
+Vector-embeddings maken het mogelijk om relevante architectuurdiscussies te vinden, niet alleen trefwoordovereenkomsten.
 
-### 🚀 Zero-Config MCP Integration
-`npx prism connect` and you're done. Your AI assistant now has context.
+### 🚀 Zero-Config MCP-integratie
+`npx prism connect` en je bent klaar. Je AI-assistent heeft nu context.
 
-## Real-World Example
+## Voorbeeld uit de Praktijk
 
 ```typescript
-// Before Prism: Generic code
+// Vóór Prism: Generieke code
 const data = await fetch('/api/users');
 
-// After Prism: Enforces your standards
+// Na Prism: Dwingt jouw standaarden af
 const { data, error } = await api.users.list();
 if (error) {
   toast.error(error.message);
@@ -151,15 +151,15 @@ if (error) {
 }
 ```
 
-Your AI assistant learns from your videos that you:
-- Use custom API wrapper with error handling
-- Show errors via toast notifications
-- Follow early return patterns
+Je AI-assistent leert van je video's dat jij:
+- Een custom API-wrapper gebruikt met foutafhandeling
+- Fouten laat zien via toast-meldingen
+- Early return-patronen volgt
 
-## Built by Syntaxure Labs
+## Gebouwd door Syntaxure Labs
 
-Prism Context Engine is part of the [Syntaxure Labs](https://jeffdev.studio) ecosystem — enterprise-grade tools for developers who want AI that respects their architecture.
+Prism Context Engine maakt deel uit van het [Syntaxure Labs](https://jeffdev.studio) ecosysteem — enterprise-grade tools voor ontwikkelaars die AI willen die hun architectuur respecteert.
 
-**Current Version:** 1.0.3  
-**License:** MIT  
-**Support:** [GitHub Issues](https://github.com/J-Akiru5/jeffdev-monorepo/issues)
+**Huidige Versie:** 1.0.3
+**Licentie:** MIT
+**Ondersteuning:** [GitHub Issues](https://github.com/J-Akiru5/jeffdev-monorepo/issues)

@@ -1,149 +1,149 @@
 # Prism Context Engine
 
-**The Context Operating System for Vibecoders** — Eliminate "Context Pollution" by orchestrating the flow of rules, design systems, and tech stacks between the Cloud and local AI Agents.
+**Sistem Operasi Konteks untuk Vibecoder** — Hilangkan "Polusi Konteks" dengan mengatur aliran aturan, sistem desain, dan tumpukan teknologi antara Cloud dan Agen AI lokal.
 
-## What is Prism Context Engine?
+## Apa itu Prism Context Engine?
 
-Prism Context Engine is a complete **AI-powered context governance platform** that:
+Prism Context Engine adalah platform **tata kelola konteks bertenaga AI** lengkap yang:
 
-1. **Extracts Rules from Video** - Upload screen recordings, automatically extract architectural patterns using Azure OpenAI
-2. **Enforces Standards** - Deploy rules to AI coding assistants via MCP (Model Context Protocol)
-3. **Enables Semantic Search** - Find relevant architectural discussions using vector embeddings
+1. **Mengekstrak Aturan dari Video** - Unggah rekaman layar, ekstrak pola arsitektur secara otomatis menggunakan Azure OpenAI
+2. **Menerapkan Standar** - Terapkan aturan ke asisten coding AI melalui MCP (Model Context Protocol)
+3. **Memungkinkan Pencarian Semantik** - Temukan diskusi arsitektur yang relevan menggunakan vector embeddings
 
-### The Core Metaphor
+### Metafora Inti
 
-| Concept | Prism Equivalent | Description |
+| Konsep | Padanan Prism | Deskripsi |
 |---------|------------------|-------------|
-| 🍳 **The Kitchen** | SaaS Dashboard | Where the "Chef" (Developer) mixes ingredients (Next.js, Tailwind, Glassmorphism) |
-| 📜 **The Recipe** | Context Rules | The output file (e.g., `.cursorrules`) containing strict instructions |
-| 🍽️ **The Waiter** | MCP Protocol | Delivers the fresh Recipe directly to the IDE's table |
+| 🍳 **Dapur** | Dasbor SaaS | Tempat "Koki" (Pengembang) mencampur bahan (Next.js, Tailwind, Glassmorphism) |
+| 📜 **Resep** | Aturan Konteks | File keluaran (mis., `.cursorrules`) berisi instruksi ketat |
+| 🍽️ **Pelayan** | Protokol MCP | Mengirimkan Resep segar langsung ke meja IDE |
 
-### Video-to-Context Extraction
+### Ekstraksi Video-ke-Konteks
 
-**Automated Documentation**: Upload a screen recording of your development workflow. Prism analyzes the video transcript using Azure OpenAI to automatically extract architectural rules, coding patterns, and best practices into actionable context that your AI coding assistant can understand.
+**Dokumentasi Otomatis**: Unggah rekaman layar dari alur kerja pengembangan Anda. Prism menganalisis transkrip video menggunakan Azure OpenAI untuk secara otomatis mengekstrak aturan arsitektur, pola pengkodean, dan praktik terbaik menjadi konteks yang dapat ditindaklanjuti oleh asisten coding AI Anda.
 
-Works with:
+Bekerja dengan:
 - **Cursor** ✅
 - **Windsurf** ✅
-- **Claude (via MCP)** ✅  
-- **VS Code** (via MCP extension)
-- **GitHub Copilot** (coming soon)
+- **Claude (via MCP)** ✅
+- **VS Code** (via ekstensi MCP)
+- **GitHub Copilot** (segera hadir)
 
-Instead of hoping your AI follows best practices, **Prism enforces them**.
+Alih-alih berharap AI Anda mengikuti praktik terbaik, **Prism menerapkannya**.
 
-## Quick Start
+## Mulai Cepat
 
-### Option A: Web Dashboard (Recommended)
+### Opsi A: Dasbor Web (Direkomendasikan)
 
 ```bash
-# 1. Sign up at the web dashboard
+# 1. Daftar di dasbor web
 https://prism.jeffdev.studio/sign-up
 
-# 2. Create your first project and brand profile
-# 3. Upload a video or manually create rules
-# 4. Export .cursorrules file and paste into your project
+# 2. Buat proyek pertama dan profil merek Anda
+# 3. Unggah video atau buat aturan secara manual
+# 4. Ekspor file .cursorrules dan tempel ke proyek Anda
 ```
 
-### Option B: MCP Server (Advanced)
+### Opsi B: Server MCP (Lanjutan)
 
-For real-time sync with your IDE:
+Untuk sinkronisasi real-time dengan IDE Anda:
 
 ```bash
-# 1. Install MCP server globally
+# 1. Instal server MCP secara global
 npm install -g @prism/mcp-server
 
-# 2. Configure your IDE (Cursor/Windsurf/VS Code)
-# Add to your MCP settings:
+# 2. Konfigurasi IDE Anda (Cursor/Windsurf/VS Code)
+# Tambahkan ke pengaturan MCP Anda:
 {
   "mcpServers": {
     "prism": {
       "command": "prism-mcp",
-      "args": ["--api-key", "YOUR_API_KEY"]
+      "args": ["--api-key", "KUNCI_API_ANDA"]
     }
   }
 }
 
-# 3. Your AI assistant now has live access to your rules
+# 3. Asisten AI Anda sekarang memiliki akses langsung ke aturan Anda
 ```
 
-## Core Features
+## Fitur Utama
 
 import { Rocket, Video, FileCode, Plug, Settings, Code } from 'lucide-react'
 
 <Cards>
-  <Card icon={<Rocket size={20} />} title="Quick Start" href="/quick-start">
-    Deploy your first rule in 5 minutes
+  <Card icon={<Rocket size={20} />} title="Mulai Cepat" href="/id/quick-start">
+    Terapkan aturan pertama Anda dalam 5 menit
   </Card>
-  <Card icon={<Video size={20} />} title="Video Processing" href="/video">
-    Extract rules from screen recordings
+  <Card icon={<Video size={20} />} title="Pemrosesan Video" href="/id/video">
+    Ekstrak aturan dari rekaman layar
   </Card>
-  <Card icon={<FileCode size={20} />} title="Rule Management" href="/rules">
-    Create, organize, and deploy constraints
+  <Card icon={<FileCode size={20} />} title="Manajemen Aturan" href="/id/rules">
+    Buat, atur, dan terapkan batasan
   </Card>
-  <Card icon={<Plug size={20} />} title="IDE Integrations" href="/integrations">
-    Connect to Cursor, Windsurf, and Claude
+  <Card icon={<Plug size={20} />} title="Integrasi IDE" href="/id/integrations">
+    Terhubung ke Cursor, Windsurf, dan Claude
   </Card>
-  <Card icon={<Settings size={20} />} title="Advanced" href="/advanced">
-    Semantic search and brand profiles
+  <Card icon={<Settings size={20} />} title="Lanjutan" href="/id/advanced">
+    Pencarian semantik dan profil merek
   </Card>
-  <Card icon={<Code size={20} />} title="API Reference" href="/advanced/api-reference">
-    Programmatic access to rules and transcripts
+  <Card icon={<Code size={20} />} title="Referensi API" href="/id/advanced/api-reference">
+    Akses terprogram ke aturan dan transkrip
   </Card>
 </Cards>
 
-## Architecture
+## Arsitektur
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│              Video Upload (Mux)                             │
-│  Screen recordings → Automatic transcription                │
+│              Unggah Video (Mux)                             │
+│  Rekaman layar → Transkripsi otomatis                       │
 └────────────────────────────┬────────────────────────────────┘
                              │ Webhook
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
-│           Azure OpenAI Processing (GPT-4o-mini)             │
-│  Extract rules + Generate embeddings for search             │
+│           Pemrosesan Azure OpenAI (GPT-4o-mini)             │
+│  Ekstrak aturan + Hasilkan embeddings untuk pencarian       │
 └────────────────────────────┬────────────────────────────────┘
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
-│            Azure Cosmos DB (MongoDB API)                    │
-│    Rules Collection + Video Transcripts + Embeddings        │
+│            Azure Cosmos DB (API MongoDB)                    │
+│    Koleksi Aturan + Transkrip Video + Embeddings            │
 └────────────────────────────┬────────────────────────────────┘
-                             │ MCP Protocol
+                             │ Protokol MCP
                              ▼
 ┌─────────────────────────────────────────────────────────────┐
-│                   Your IDE (Cursor/Windsurf)                │
-│  AI follows your rules automatically during coding          │
+│                   IDE Anda (Cursor/Windsurf)                │
+│  AI mengikuti aturan Anda secara otomatis saat coding       │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## What Makes Prism Different?
+## Apa yang Membuat Prism Berbeda?
 
-### 🎥 Video-First Context Capture
-Record your screen while discussing architecture. Prism automatically extracts rules from your explanations.
+### 🎥 Penangkapan Konteks Video-Pertama
+Rekam layar Anda sambil mendiskusikan arsitektur. Prism secara otomatis mengekstrak aturan dari penjelasan Anda.
 
-### 🧠 AI-Powered Rule Extraction
-GPT-4o-mini analyzes transcripts to identify:
-- Architectural patterns
-- Code style conventions
-- Naming rules
-- Testing strategies
-- Security practices
+### 🧠 Ekstraksi Aturan Berbasis AI
+GPT-4o-mini menganalisis transkrip untuk mengidentifikasi:
+- Pola arsitektur
+- Konvensi gaya kode
+- Aturan penamaan
+- Strategi pengujian
+- Praktik keamanan
 
-### 🔍 Semantic Search
-Vector embeddings enable finding relevant architectural discussions, not just keyword matching.
+### 🔍 Pencarian Semantik
+Embedding vektor memungkinkan menemukan diskusi arsitektur yang relevan, bukan hanya pencocokan kata kunci.
 
-### 🚀 Zero-Config MCP Integration
-`npx prism connect` and you're done. Your AI assistant now has context.
+### 🚀 Integrasi MCP Tanpa Konfigurasi
+`npx prism connect` dan selesai. Asisten AI Anda sekarang memiliki konteks.
 
-## Real-World Example
+## Contoh Dunia Nyata
 
 ```typescript
-// Before Prism: Generic code
+// Sebelum Prism: Kode generik
 const data = await fetch('/api/users');
 
-// After Prism: Enforces your standards
+// Setelah Prism: Menerapkan standar Anda
 const { data, error } = await api.users.list();
 if (error) {
   toast.error(error.message);
@@ -151,15 +151,15 @@ if (error) {
 }
 ```
 
-Your AI assistant learns from your videos that you:
-- Use custom API wrapper with error handling
-- Show errors via toast notifications
-- Follow early return patterns
+Asisten AI Anda belajar dari video Anda bahwa Anda:
+- Menggunakan wrapper API kustom dengan penanganan error
+- Menampilkan error melalui notifikasi toast
+- Mengikuti pola pengembalian awal
 
-## Built by Syntaxure Labs
+## Dibuat oleh Syntaxure Labs
 
-Prism Context Engine is part of the [Syntaxure Labs](https://jeffdev.studio) ecosystem — enterprise-grade tools for developers who want AI that respects their architecture.
+Prism Context Engine adalah bagian dari ekosistem [Syntaxure Labs](https://jeffdev.studio) — alat kelas enterprise untuk pengembang yang menginginkan AI yang menghormati arsitektur mereka.
 
-**Current Version:** 1.0.3  
-**License:** MIT  
-**Support:** [GitHub Issues](https://github.com/J-Akiru5/jeffdev-monorepo/issues)
+**Versi Saat Ini:** 1.0.3
+**Lisensi:** MIT
+**Dukungan:** [GitHub Issues](https://github.com/J-Akiru5/jeffdev-monorepo/issues)

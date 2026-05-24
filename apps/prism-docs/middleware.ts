@@ -62,13 +62,21 @@ export function middleware(request: NextRequest) {
   if (pathnameIsMissingLocale) {
     const locale = getLocale(request);
 
-    // Redirect to locale path
-    return NextResponse.redirect(
-      new URL(
-        `/${locale}${pathname.startsWith("/") ? "" : "/"}${pathname}`,
-        request.url,
-      ),
+    // Redirect to locale path and persist the locale in a cookie
+    const url = new URL(
+      `/${locale}${pathname.startsWith("/") ? "" : "/"}${pathname}`,
+      request.url,
     );
+    const response = NextResponse.redirect(url);
+
+    // Set cookie so subsequent requests remember the user's choice
+    response.cookies.set(LOCALE_COOKIE, locale, {
+      path: "/",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 365, // 1 year
+    });
+
+    return response;
   }
 }
 

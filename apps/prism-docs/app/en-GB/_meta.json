@@ -42,7 +42,6 @@
     "type": "separator",
     "title": "Resources"
   },
-
   "security-page": "Security & Privacy",
   "guide": {
     "display": "hidden"

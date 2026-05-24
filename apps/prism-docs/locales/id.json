@@ -1,0 +1,65 @@
+{
+  "common": {
+    "search_placeholder": "Cari dokumentasi...",
+    "edit_on_github": "Edit di GitHub",
+    "give_feedback": "Ada pertanyaan? Beri kami masukan →",
+    "on_this_page": "Di Halaman Ini",
+    "copy_page": "Salin halaman",
+    "scroll_to_top": "Gulir ke atas"
+  },
+  "nav": {
+    "documentation": "Dokumentasi",
+    "introduction": "Pendahuluan",
+    "quick_start": "Mulai Cepat",
+    "video_processing": "Pemrosesan Video",
+    "integrations": "Integrasi IDE",
+    "product": "Produk",
+    "dashboard": "Dasbor",
+    "pricing": "Harga",
+    "api_reference": "Referensi API",
+    "changelog": "Catatan Perubahan"
+  },
+  "footer": {
+    "start_project": "Mulai Proyek",
+    "ready_to_start": "Siap menghilangkan polusi konteks? Mari kita mulai.",
+    "get_started": "MULAI",
+    "terms": "Ketentuan Layanan",
+    "privacy": "Kebijakan Privasi"
+  },
+  "home": {
+    "title": "Prism Context Engine",
+    "tagline": "Sistem Operasi Konteks untuk Vibecoder",
+    "description": "Hilangkan \"Polusi Konteks\" dengan mengatur aliran aturan, sistem desain, dan tumpukan teknologi antara Cloud dan Agen AI lokal.",
+    "what_is_prism": "Apa itu Prism Context Engine?",
+    "prism_description": "Prism Context Engine adalah platform tata kelola konteks bertenaga AI lengkap yang:",
+    "feature_1": "Mengekstrak Aturan dari Video - Unggah rekaman layar, ekstrak pola arsitektur secara otomatis menggunakan Azure OpenAI",
+    "feature_2": "Menerapkan Standar - Terapkan aturan ke asisten coding AI melalui MCP (Model Context Protocol)",
+    "feature_3": "Memungkinkan Pencarian Semantik - Temukan diskusi arsitektur yang relevan menggunakan vector embeddings",
+    "core_features": "Fitur Utama",
+    "architecture": "Arsitektur",
+    "what_makes_different": "Apa yang Membuat Prism Berbeda?",
+    "video_first": "Penangkapan Konteks Video-Pertama",
+    "video_first_desc": "Rekam layar Anda sambil mendiskusikan arsitektur. Prism secara otomatis mengekstrak aturan dari penjelasan Anda.",
+    "ai_powered": "Ekstraksi Aturan Berbasis AI",
+    "ai_powered_desc": "GPT-4o-mini menganalisis transkrip untuk mengidentifikasi pola arsitektur, konvensi gaya kode, aturan penamaan, strategi pengujian, dan praktik keamanan.",
+    "semantic_search": "Pencarian Semantik",
+    "semantic_search_desc": "Embedding vektor memungkinkan menemukan diskusi arsitektur yang relevan, bukan hanya pencocokan kata kunci.",
+    "zero_config": "Integrasi MCP Tanpa Konfigurasi",
+    "zero_config_desc": "npx prism connect dan selesai. Asisten AI Anda sekarang memiliki konteks.",
+    "built_by": "Dibuat oleh Syntaxure Labs"
+  },
+  "cards": {
+    "quick_start": "Mulai Cepat",
+    "quick_start_desc": "Terapkan aturan pertama Anda dalam 5 menit",
+    "video_processing": "Pemrosesan Video",
+    "video_processing_desc": "Ekstrak aturan dari rekaman layar",
+    "rule_management": "Manajemen Aturan",
+    "rule_management_desc": "Buat, atur, dan terapkan batasan",
+    "ide_integrations": "Integrasi IDE",
+    "ide_integrations_desc": "Terhubung ke Cursor, Windsurf, dan Claude",
+    "advanced": "Lanjutan",
+    "advanced_desc": "Pencarian semantik dan profil merek",
+    "api_reference": "Referensi API",
+    "api_reference_desc": "Akses terprogram ke aturan dan transkrip"
+  }
+}

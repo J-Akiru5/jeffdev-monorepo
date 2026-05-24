@@ -1,0 +1,65 @@
+{
+  "common": {
+    "search_placeholder": "Search documentation...",
+    "edit_on_github": "Edit on GitHub",
+    "give_feedback": "Questions? Give us feedback →",
+    "on_this_page": "On This Page",
+    "copy_page": "Copy page",
+    "scroll_to_top": "Scroll to top"
+  },
+  "nav": {
+    "documentation": "Documentation",
+    "introduction": "Introduction",
+    "quick_start": "Quick Start",
+    "video_processing": "Video Processing",
+    "integrations": "IDE Integrations",
+    "product": "Product",
+    "dashboard": "Dashboard",
+    "pricing": "Pricing",
+    "api_reference": "API Reference",
+    "changelog": "Changelog"
+  },
+  "footer": {
+    "start_project": "Start a Project",
+    "ready_to_start": "Ready to eliminate context pollution? Let's get you started.",
+    "get_started": "GET_STARTED",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy"
+  },
+  "home": {
+    "title": "Prism Context Engine",
+    "tagline": "The Context Operating System for Vibecoders",
+    "description": "Eliminate \"Context Pollution\" by orchestrating the flow of rules, design systems, and tech stacks between the Cloud and local AI Agents.",
+    "what_is_prism": "What is Prism Context Engine?",
+    "prism_description": "Prism Context Engine is a complete AI-powered context governance platform that:",
+    "feature_1": "Extracts Rules from Video - Upload screen recordings, automatically extract architectural patterns using Azure OpenAI",
+    "feature_2": "Enforces Standards - Deploy rules to AI coding assistants via MCP (Model Context Protocol)",
+    "feature_3": "Enables Semantic Search - Find relevant architectural discussions using vector embeddings",
+    "core_features": "Core Features",
+    "architecture": "Architecture",
+    "what_makes_different": "What Makes Prism Different?",
+    "video_first": "Video-First Context Capture",
+    "video_first_desc": "Record your screen while discussing architecture. Prism automatically extracts rules from your explanations.",
+    "ai_powered": "AI-Powered Rule Extraction",
+    "ai_powered_desc": "GPT-4o-mini analyses transcripts to identify architectural patterns, code style conventions, naming rules, testing strategies, and security practices.",
+    "semantic_search": "Semantic Search",
+    "semantic_search_desc": "Vector embeddings enable finding relevant architectural discussions, not just keyword matching.",
+    "zero_config": "Zero-Config MCP Integration",
+    "zero_config_desc": "npx prism connect and you're done. Your AI assistant now has context.",
+    "built_by": "Built by Syntaxure Labs"
+  },
+  "cards": {
+    "quick_start": "Quick Start",
+    "quick_start_desc": "Deploy your first rule in 5 minutes",
+    "video_processing": "Video Processing",
+    "video_processing_desc": "Extract rules from screen recordings",
+    "rule_management": "Rule Management",
+    "rule_management_desc": "Create, organise, and deploy constraints",
+    "ide_integrations": "IDE Integrations",
+    "ide_integrations_desc": "Connect to Cursor, Windsurf, and Claude",
+    "advanced": "Advanced",
+    "advanced_desc": "Semantic search and brand profiles",
+    "api_reference": "API Reference",
+    "api_reference_desc": "Programmatic access to rules and transcripts"
+  }
+}
