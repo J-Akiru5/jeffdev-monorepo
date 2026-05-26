@@ -619,13 +619,13 @@ function StepDone({
         {[
           {
             label: "Docs",
-            href: "https://docs.prism.jeffdev.studio",
+            href: "https://docs.syntaxure.dev",
             icon: "📚",
           },
           { label: "Quick Connect", href: "/quickstart", icon: "⚡" },
           {
             label: "CLI Reference",
-            href: "https://docs.prism.jeffdev.studio/cli-reference",
+            href: "https://docs.syntaxure.dev/cli-reference",
             icon: "🖥️",
           },
         ].map((link) => (

@@ -22,10 +22,10 @@ export const metadata: Metadata = {
     "architectural rules",
     "design system",
   ],
-  authors: [{ name: "Syntaxure Labs", url: "https://jeffdev.studio" }],
+  authors: [{ name: "Syntaxure Labs", url: "https://www.syntaxure.dev" }],
   creator: "Syntaxure Labs",
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_PRISM_URL || "https://prism.jeffdev.studio",
+    process.env.NEXT_PUBLIC_PRISM_URL || "https://prism.syntaxure.dev",
   ),
   openGraph: {
     title: "Prism Context Engine - The Context Operating System for Vibecoders",
@@ -49,7 +49,7 @@ export const metadata: Metadata = {
     title: "Prism Context Engine - The Context Operating System",
     description: "Record your architecture. AI learns your rules.",
     images: ["/prism-icon.png"],
-    creator: "@jeffdevstudio",
+    creator: "@syntaxure_dev",
   },
   robots: {
     index: true,

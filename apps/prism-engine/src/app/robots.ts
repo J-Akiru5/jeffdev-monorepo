@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_PRISM_URL || 'https://prism.jeffdev.studio';
+  process.env.NEXT_PUBLIC_PRISM_URL || 'https://prism.syntaxure.dev';
 
 export default function robots(): MetadataRoute.Robots {
   return {

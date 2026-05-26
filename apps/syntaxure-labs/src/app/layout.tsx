@@ -226,10 +226,10 @@ export default async function RootLayout({
         />
         <ChatAssistant
           apiEndpoint="/api/assistant"
-          title="JeffDev System Assistant"
-          welcomeMessage="How can I help you understand the JeffDev ecosystem today?"
+          title="Syntaxure Labs System Assistant"
+          welcomeMessage="How can I help you understand the Syntaxure Labs ecosystem today?"
           suggestions={[
-            "What is the difference between Agency and Prism?",
+            "What is the difference between Syntaxure Labs and Prism?",
             "What is the turborepo structure?",
             "What is the Doppler Law?",
           ]}

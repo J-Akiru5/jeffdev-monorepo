@@ -40,7 +40,7 @@ export default function PrivacyPage() {
                 (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;), is
                 committed to protecting your privacy. This Privacy Policy
                 explains how we collect, use, and safeguard your information
-                when you use our platform at prism.jeffdev.studio (the
+                when you use our platform at prism.syntaxure.dev (the
                 &quot;Service&quot;).
               </p>
               <p className="text-white/70 leading-relaxed mt-4">
@@ -261,10 +261,10 @@ export default function PrivacyPage() {
               <p className="text-white/70 leading-relaxed mt-4">
                 To exercise these rights, contact us at{" "}
                 <a
-                  href="mailto:privacy@jeffdev.studio"
+                  href="mailto:privacy@syntaxure.dev"
                   className="text-cyan-400 hover:underline"
                 >
-                  privacy@jeffdev.studio
+                  privacy@syntaxure.dev
                 </a>
                 .
               </p>
@@ -306,19 +306,19 @@ export default function PrivacyPage() {
                 <li>
                   Email:{" "}
                   <a
-                    href="mailto:privacy@jeffdev.studio"
+                    href="mailto:privacy@syntaxure.dev"
                     className="text-cyan-400 hover:underline"
                   >
-                    privacy@jeffdev.studio
+                    privacy@syntaxure.dev
                   </a>
                 </li>
                 <li>
                   General inquiries:{" "}
                   <a
-                    href="mailto:hello@jeffdev.studio"
+                    href="mailto:hello@syntaxure.dev"
                     className="text-cyan-400 hover:underline"
                   >
-                    hello@jeffdev.studio
+                    hello@syntaxure.dev
                   </a>
                 </li>
               </ul>
