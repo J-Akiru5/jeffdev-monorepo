@@ -154,12 +154,12 @@ export function TaskBoard({
             <div key={status}>
               <div className="flex items-center gap-2 mb-3">
                 <div
-                  className={`h-2 w-2 rounded-full ${statusConfig[status].dotColor}`}
+                  className={`h-2 w-2 rounded-full ${statusConfig[status]!.dotColor}`}
                 />
                 <h2
                   className={`text-sm font-mono uppercase tracking-wider ${columnTitleColor(status)}`}
                 >
-                  {statusConfig[status].label}
+                  {statusConfig[status]!.label}
                 </h2>
                 <span className="text-xs text-white/30 ml-auto">
                   {columnTasks.length}

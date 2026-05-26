@@ -701,7 +701,7 @@ async function handleToolCall(
         const lines = before.split("\n");
         return {
           line: lines.length,
-          column: lines[lines.length - 1].length + 1,
+          column: (lines[lines.length - 1] ?? "").length + 1,
         };
       }
 
@@ -799,7 +799,7 @@ async function handleToolCall(
       if (pattern.includes("../../apps/") || pattern.includes("../apps/")) {
         const parts = matchedText.split("../../apps/");
         if (parts.length >= 2) {
-          const appName = parts[1].split("/")[0];
+          const appName = parts[1]!.split("/")[0]!;
           const fixed = matchedText.replace(
             `../../apps/${appName}`,
             `@repo/${appName}`,
@@ -849,14 +849,14 @@ async function handleToolCall(
         const codeLines = fixCode.split("\n");
         const targetLine = violationLine - 1;
         if (targetLine >= 0 && targetLine < codeLines.length) {
-          const original = codeLines[targetLine];
+          const original = codeLines[targetLine]!;
           codeLines[targetLine] = `${original} // FIXME: ${ruleName}`;
           correctedCode = codeLines.join("\n");
           confidence = 0.3;
           changes.push({
             line: violationLine,
             from: original,
-            to: codeLines[targetLine],
+            to: codeLines[targetLine] ?? original,
           });
         }
       }

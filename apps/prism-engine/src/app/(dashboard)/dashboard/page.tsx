@@ -47,6 +47,7 @@ export default async function DashboardPage() {
   const projectsCollection = await getCollection("projects");
   const rulesCollection = await getCollection("rules");
   const generationsCollection = await getCollection("generations");
+  const videosCollection = await getCollection("videos");
 
   const [
     projectCount,
@@ -55,7 +56,6 @@ export default async function DashboardPage() {
     rulePrev,
     genCount,
     genPrev,
-    recentProjects,
   ] = await Promise.all([
     projectsCollection.countDocuments({
       userId,
@@ -81,41 +81,13 @@ export default async function DashboardPage() {
       userId,
       createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo },
     }),
-    // Previous window (30–60 days ago)
-    projectsCollection.countDocuments({
-      userId,
-      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo },
-    }),
-    rulesCollection.countDocuments({
-      createdBy: userId,
-      createdAt: { $gte: thirtyDaysAgo },
-    }),
-    rulesCollection.countDocuments({
-      createdBy: userId,
-      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo },
-    }),
-    generationsCollection.countDocuments({
-      userId,
-      createdAt: { $gte: thirtyDaysAgo },
-    }),
-    generationsCollection.countDocuments({
-      userId,
-      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo },
-    }),
-    videosCollection.countDocuments({
-      userId,
-      createdAt: { $gte: thirtyDaysAgo },
-    }),
-    videosCollection.countDocuments({
-      userId,
-      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo },
-    }),
-    projectsCollection
-      .find({ userId })
-      .sort({ updatedAt: -1 })
-      .limit(3)
-      .toArray(),
   ]);
+
+  const recentProjects = await projectsCollection
+    .find({ userId })
+    .sort({ updatedAt: -1 })
+    .limit(3)
+    .toArray();
 
   // Also fetch totals for card display
   const [totalProjects, totalRules] = await Promise.all([
@@ -262,7 +234,7 @@ export default async function DashboardPage() {
 
         {recentProjects.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-3">
-            {recentProjects.map((project) => (
+            {recentProjects.map((project: any) => (
               <Link
                 key={project._id.toString()}
                 href={`/projects/${project.slug}`}

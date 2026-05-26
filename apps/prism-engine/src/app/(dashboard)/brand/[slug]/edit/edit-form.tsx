@@ -91,7 +91,8 @@ export default function EditBrandForm({ brand }: EditBrandFormProps) {
       if (keys.length === 1) {
         return { ...prev, [key]: value };
       }
-      const [parent, child] = keys;
+      const parent = keys[0]!;
+      const child = keys[1]!;
       return {
         ...prev,
         [parent]: {

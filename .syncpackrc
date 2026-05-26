@@ -1,9 +1,24 @@
 {
   "dependencyTypes": ["dev", "prod"],
-  "filter": ".",
-  "indent": "  ",
-  "semverRange": "^",
-  "sortAz": ["dependencies", "devDependencies", "peerDependencies", "scripts"],
-  "sortFirst": ["name", "description", "version", "author"],
-  "versionGroups": []
+  "lintFormatting": false,
+  "semverGroups": [],
+  "versionGroups": [
+    {
+      "label": "React packages should match",
+      "packages": ["**"],
+      "dependencies": ["react", "react-dom", "@types/react", "@types/react-dom"],
+      "isBanned": false
+    },
+    {
+      "label": "Next.js should be exact version across all apps",
+      "packages": ["**"],
+      "dependencies": ["next"],
+      "isBanned": false
+    }
+  ],
+  "sortAz": [
+    "scripts",
+    "dependencies",
+    "devDependencies"
+  ]
 }

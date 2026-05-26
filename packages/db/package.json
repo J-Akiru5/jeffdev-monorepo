@@ -2,10 +2,20 @@
   "name": "@syntaxure-labs/db",
   "version": "0.1.3",
   "private": true,
+  "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./cosmos": "./src/cosmos.ts",
-    "./schema": "./src/schema.ts"
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./cosmos": {
+      "types": "./src/cosmos.ts",
+      "default": "./src/cosmos.ts"
+    },
+    "./schema": {
+      "types": "./src/schema.ts",
+      "default": "./src/schema.ts"
+    }
   },
   "scripts": {
     "build": "tsc",

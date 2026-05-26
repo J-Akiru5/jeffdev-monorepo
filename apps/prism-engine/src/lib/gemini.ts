@@ -148,7 +148,7 @@ function getDesignSystemPrompt(system: string): string {
 `,
   };
 
-  return prompts[system] || prompts["jdstudio"];
+  return prompts[system] || prompts["jdstudio"]!;
 }
 
 function getStackPrompt(stack: string): string {
@@ -176,7 +176,7 @@ function getStackPrompt(stack: string): string {
 `,
   };
 
-  return prompts[stack] || prompts["nextjs"];
+  return prompts[stack] || prompts["nextjs"]!;
 }
 
 /**

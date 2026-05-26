@@ -37,7 +37,7 @@ export function TaskForm({ team }: { team: MarketingTeamMember[] }) {
   const [priority, setPriority] = useState("high");
   const [platform, setPlatform] = useState("");
   const [selectedOwners, setSelectedOwners] = useState<string[]>(
-    team.length > 0 ? [team[0].id] : []
+    team.length > 0 ? [team[0]!.id] : []
   );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");

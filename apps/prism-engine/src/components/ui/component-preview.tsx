@@ -95,7 +95,7 @@ function extractComponentName(code: string): string {
 
   for (const pattern of patterns) {
     const match = code.match(pattern);
-    if (match) return match[1];
+    if (match) return match[1]!;
   }
 
   return "Component";
