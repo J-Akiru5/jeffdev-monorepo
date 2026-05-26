@@ -16,7 +16,7 @@ export function checkRateLimit(
   tier: string = "free",
 ): { allowed: boolean; remaining: number; resetAt: number } {
   const now = Date.now();
-  const config = LIMITS[tier] || LIMITS.free;
+  const config = (LIMITS[tier] || LIMITS.free)!;
   const entry = requestCounts.get(key);
 
   if (!entry || now > entry.resetAt) {
@@ -47,7 +47,7 @@ export function getRateLimitHeaders(
   const result = checkRateLimit(key, tier);
   return {
     "X-RateLimit-Limit": String(
-      LIMITS[tier]?.maxRequests || LIMITS.free.maxRequests,
+      LIMITS[tier]?.maxRequests || LIMITS.free!.maxRequests,
     ),
     "X-RateLimit-Remaining": String(result.remaining),
     "X-RateLimit-Reset": String(Math.ceil(result.resetAt / 1000)),

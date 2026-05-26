@@ -194,5 +194,5 @@ export async function POST(request: NextRequest) {
 function extractComponentName(code: string): string | null {
   // Match: export function ComponentName or export const ComponentName
   const match = code.match(/export\s+(?:function|const)\s+(\w+)/);
-  return match ? match[1] : null;
+  return match ? match[1]! : null;
 }

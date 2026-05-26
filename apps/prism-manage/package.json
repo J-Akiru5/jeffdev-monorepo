@@ -6,7 +6,10 @@
     "dev": "next dev --port 3007",
     "build": "next build",
     "start": "next start --port 3007",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@fullcalendar/core": "^6.1.20",
@@ -14,7 +17,7 @@
     "@fullcalendar/interaction": "^6.1.20",
     "@fullcalendar/react": "^6.1.20",
     "@fullcalendar/timegrid": "^6.1.20",
-    "@supabase/ssr": "^0.4.0",
+    "@supabase/ssr": "^0.4.1",
     "@supabase/supabase-js": "^2.47.0",
     "@syntaxure/ui": "workspace:*",
     "@octokit/rest": "^21.0.0",
@@ -38,6 +41,7 @@
     "eslint": "^9.39.1",
     "eslint-config-next": "16.1.4",
     "tailwindcss": "^4.1.18",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vitest": "^4.0.16"
   }
 }

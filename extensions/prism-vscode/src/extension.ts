@@ -874,9 +874,17 @@ function getBrandWizardHtml(token: string, apiUrl: string): string {
         if (n===4) updateSummary();
       }
       function updateSummary() {
-        document.getElementById('summary').innerHTML =
-          '<p><strong>'+document.getElementById('companyName').value+'</strong> - '+document.getElementById('industry').value+'</p>'+
-          '<p>Fonts: '+document.getElementById('headingFont').value+' / '+document.getElementById('bodyFont').value+'</p>';
+        const summary = document.getElementById('summary');
+        summary.innerHTML = '';
+        const p1 = document.createElement('p');
+        const strong = document.createElement('strong');
+        strong.textContent = document.getElementById('companyName').value;
+        p1.appendChild(strong);
+        p1.append(' - ' + document.getElementById('industry').value);
+        summary.appendChild(p1);
+        const p2 = document.createElement('p');
+        p2.textContent = 'Fonts: ' + document.getElementById('headingFont').value + ' / ' + document.getElementById('bodyFont').value;
+        summary.appendChild(p2);
       }
       function submitBrand() {
         const colors = ['primary','secondary','accent','background','surface','text','textMuted'];
@@ -903,7 +911,13 @@ function getBrandWizardHtml(token: string, apiUrl: string): string {
       }
       window.addEventListener('message', e => {
         if (e.data.command === 'success') { document.body.innerHTML = '<h2>Brand created!</h2>'; }
-        if (e.data.command === 'error') { document.body.innerHTML = '<h2 style="color:red">Error: '+e.data.message+'</h2>'; }
+        if (e.data.command === 'error') {
+          document.body.innerHTML = '';
+          var h2 = document.createElement('h2');
+          h2.style.color = 'red';
+          h2.textContent = 'Error: ' + (e.data.message || 'Unknown error');
+          document.body.appendChild(h2);
+        }
       });
     </script></body></html>`;
 }
@@ -971,9 +985,33 @@ function getMarketplaceHtml(token: string, apiUrl: string): string {
         });
         const json = await res.json();
         const items = json.data || [];
-        document.getElementById('results').innerHTML = items.length === 0
-          ? '<p>No results.</p>'
-          : items.map(rs => '<div class="card"><h3>'+rs.name+' <span class="badge">'+rs.ruleCount+' rules</span></h3><p>'+ (rs.description||'') +'</p><button onclick=\\'install("'+rs.id+'")\\'>Install</button></div>').join('');
+        var results = document.getElementById('results');
+        results.innerHTML = '';
+        if (items.length === 0) {
+          results.textContent = 'No results.';
+        } else {
+          items.forEach(function(rs) {
+            var card = document.createElement('div');
+            card.className = 'card';
+            var h3 = document.createElement('h3');
+            h3.textContent = rs.name || '';
+            var badge = document.createElement('span');
+            badge.className = 'badge';
+            badge.textContent = (rs.ruleCount || 0) + ' rules';
+            h3.appendChild(badge);
+            card.appendChild(h3);
+            if (rs.description) {
+              var p = document.createElement('p');
+              p.textContent = rs.description;
+              card.appendChild(p);
+            }
+            var btn = document.createElement('button');
+            btn.textContent = 'Install';
+            btn.onclick = (function(id) { return function() { install(id); }; })(rs.id);
+            card.appendChild(btn);
+            results.appendChild(card);
+          });
+        }
       }
       function install(id) {
         vscode.postMessage({ command: 'install', id });

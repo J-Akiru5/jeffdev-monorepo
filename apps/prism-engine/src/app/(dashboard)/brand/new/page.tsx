@@ -90,7 +90,8 @@ export default function NewBrandPage() {
         return { ...prev, [key]: value };
       }
       // Nested update
-      const [parent, child] = keys;
+      const parent = keys[0]!;
+      const child = keys[1]!;
       return {
         ...prev,
         [parent]: {
@@ -152,9 +153,9 @@ export default function NewBrandPage() {
       {/* Step Title */}
       <div className="text-center">
         <h2 className="text-lg font-medium text-white">
-          {STEPS[step - 1].name}
+          {STEPS[step - 1]!.name}
         </h2>
-        <p className="text-sm text-white/50">{STEPS[step - 1].description}</p>
+        <p className="text-sm text-white/50">{STEPS[step - 1]!.description}</p>
       </div>
 
       {/* Form */}
@@ -391,6 +392,7 @@ function StepColors({
   updateFormData: (key: string, value: unknown) => void;
 }) {
   const colors = formData.colors as Record<string, string>;
+  const c = (k: keyof typeof colors) => colors[k]!;
 
   return (
     <div className="space-y-4">
@@ -401,37 +403,37 @@ function StepColors({
       <div className="grid grid-cols-2 gap-4">
         <ColorPicker
           label="Primary"
-          value={colors.primary}
+          value={c("primary")}
           onChange={(v) => updateFormData("colors.primary", v)}
         />
         <ColorPicker
           label="Secondary"
-          value={colors.secondary}
+          value={c("secondary")}
           onChange={(v) => updateFormData("colors.secondary", v)}
         />
         <ColorPicker
           label="Accent"
-          value={colors.accent}
+          value={c("accent")}
           onChange={(v) => updateFormData("colors.accent", v)}
         />
         <ColorPicker
           label="Background"
-          value={colors.background}
+          value={c("background")}
           onChange={(v) => updateFormData("colors.background", v)}
         />
         <ColorPicker
           label="Surface"
-          value={colors.surface}
+          value={c("surface")}
           onChange={(v) => updateFormData("colors.surface", v)}
         />
         <ColorPicker
           label="Text"
-          value={colors.text}
+          value={c("text")}
           onChange={(v) => updateFormData("colors.text", v)}
         />
         <ColorPicker
           label="Text Muted"
-          value={colors.textMuted}
+          value={c("textMuted")}
           onChange={(v) => updateFormData("colors.textMuted", v)}
         />
       </div>
@@ -671,6 +673,7 @@ function StepVoice({
 
 function StepReview({ formData }: { formData: Record<string, unknown> }) {
   const colors = formData.colors as Record<string, string>;
+  const c = (k: keyof typeof colors) => colors[k]!;
   const typography = formData.typography as Record<string, string>;
   const voice = formData.voice as Record<string, string>;
 

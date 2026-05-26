@@ -165,9 +165,9 @@ export async function getMarketingTaskStats(): Promise<{
     if (!byPhase[t.phaseId]) {
       byPhase[t.phaseId] = { total: 0, done: 0 };
     }
-    byPhase[t.phaseId].total++;
+    byPhase[t.phaseId]!.total++;
     if (t.status === "done") {
-      byPhase[t.phaseId].done++;
+      byPhase[t.phaseId]!.done++;
     }
   }
 

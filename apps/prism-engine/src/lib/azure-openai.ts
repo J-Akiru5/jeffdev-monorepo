@@ -28,7 +28,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
       model: process.env.AZURE_OPENAI_EMBEDDING_DEPLOYMENT || "text-embedding-3-small",
       input: text.substring(0, 8000),
     });
-    return response.data[0].embedding;
+    return response.data[0]!.embedding;
   }
   throw new Error(`Embeddings not supported by provider: ${provider}. Use AI_PROVIDER=azure for embeddings.`);
 }

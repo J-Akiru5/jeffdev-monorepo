@@ -56,8 +56,9 @@ CI order: `check-types` → `lint` → `test` → `build`. Run in that sequence 
 
 ## Release
 
-- Semantic release on push to `main` (via `.releaserc.json`).
+- **Versioning & changelog:** Changesets (`@changesets/cli`) — run `pnpm changeset` to create, `pnpm changeset version` to bump.
 - Changelog auto-generated in `CHANGELOG.md`; commit messages follow conventional commits.
+- Release workflow (`.github/workflows/release.yml`) handles PR automation on push to `main`.
 
 ## Existing Docs (worth reading)
 
