@@ -6,6 +6,9 @@ import type { MarketingKpi, MarketingPhase, MarketingTask, MarketingTeamMember }
 
 export async function getMarketingPhases(): Promise<MarketingPhase[]> {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
   const { data } = await supabase
     .from("marketing_phases")
     .select("*")
@@ -15,12 +18,18 @@ export async function getMarketingPhases(): Promise<MarketingPhase[]> {
 
 export async function getMarketingTeam(): Promise<MarketingTeamMember[]> {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
   const { data } = await supabase.from("marketing_team").select("*");
   return data || [];
 }
 
 export async function getKpis(): Promise<MarketingKpi[]> {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
   const { data } = await supabase
     .from("marketing_kpis")
     .select("*");
@@ -69,6 +78,9 @@ export async function updateKpi(
 
 export async function getMarketingTasks(): Promise<MarketingTask[]> {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
   const { data } = await supabase
     .from("marketing_tasks")
     .select("*")
