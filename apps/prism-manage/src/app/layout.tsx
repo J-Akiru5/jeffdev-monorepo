@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { SupabaseProvider } from "@/components/providers/supabase-provider";
 import "./globals.css";
+
+export const dynamic = "force-dynamic";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -21,7 +24,7 @@ export const metadata: Metadata = {
     template: "%s | Prism Manage",
   },
   description: "Personal project tracker with Google Calendar integration",
-  robots: "noindex, nofollow", // Personal app, no indexing
+  robots: "noindex, nofollow",
 };
 
 export default function RootLayout({
@@ -32,8 +35,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body className="min-h-screen bg-void antialiased">
-        <Toaster position="bottom-right" theme="dark" />
-        {children}
+        <SupabaseProvider>
+          <Toaster position="bottom-right" theme="dark" />
+          {children}
+        </SupabaseProvider>
       </body>
     </html>
   );
