@@ -7,9 +7,9 @@
  * Shows primary views + "Lists" drawer.
  */
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   CheckSquare,
   Calendar,
@@ -19,9 +19,32 @@ import {
   Plus,
   Star,
   Settings,
+  LogOut,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useProjects } from "@/contexts/project-context";
+import { createClient } from "@/lib/supabase/browser";
+
+function SignOutButton() {
+  const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    router.push("/sign-in");
+    router.refresh();
+  }
+
+  return (
+    <button
+      onClick={handleSignOut}
+      className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-white/50 transition-colors hover:bg-white/5 hover:text-red-400"
+    >
+      <LogOut className="h-5 w-5" />
+      <span>Sign Out</span>
+    </button>
+  );
+}
 
 export function MobileNav() {
   const pathname = usePathname();
@@ -171,8 +194,8 @@ export function MobileNav() {
                 </div>
               </div>
 
-              {/* Settings */}
-              <div className="border-t border-white/10 pt-4">
+              {/* Settings & Sign Out */}
+              <div className="border-t border-white/10 pt-4 space-y-1">
                 <Link
                   href="/settings"
                   onClick={() => setIsDrawerOpen(false)}
@@ -181,6 +204,7 @@ export function MobileNav() {
                   <Settings className="h-5 w-5" />
                   <span>Settings</span>
                 </Link>
+                <SignOutButton />
               </div>
             </motion.div>
           </>
