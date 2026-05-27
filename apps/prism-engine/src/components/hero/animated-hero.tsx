@@ -33,6 +33,26 @@ export function AnimatedHero() {
   const orbRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReducedMotion) {
+      // Show all content immediately
+      gsap.set(
+        [
+          headlineRef.current,
+          subheadlineRef.current,
+          taglineRef.current,
+          ctaRef.current,
+          pillsRef.current,
+          pillsRef.current?.children || [],
+        ],
+        { opacity: 1, y: 0, height: "auto", scale: 1, clearProps: "all" },
+      );
+      gsap.set(badgeRef.current, { marginTop: 32, marginBottom: 32 });
+      gsap.set(prismContainerRef.current, { scale: 0.5 });
+      return;
+    }
+
     const ctx = gsap.context(() => {
       // Initial state - hidden elements start with 0 height to not affect centering
       gsap.set(

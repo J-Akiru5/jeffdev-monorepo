@@ -169,6 +169,20 @@ export function AgenticProtocol() {
   const sequenceRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReducedMotion) {
+      gsap.set(
+        [
+          headerRef.current,
+          pillarsRef.current?.children || [],
+          sequenceRef.current,
+        ],
+        { opacity: 1, y: 0, scale: 1, rotationX: 0, clearProps: "all" },
+      );
+      return;
+    }
+
     const ctx = gsap.context(() => {
       // 3D Scale/Fade for header
       gsap.fromTo(
@@ -230,7 +244,7 @@ export function AgenticProtocol() {
     <section
       ref={sectionRef}
       id="agentic-protocol"
-      className="relative overflow-hidden py-24 md:py-32 bg-void"
+      className="relative overflow-hidden py-24 md:py-32 bg-void lazy-section"
       style={{ perspective: "1000px" }}
     >
       {/* Background Ambient Glows */}
