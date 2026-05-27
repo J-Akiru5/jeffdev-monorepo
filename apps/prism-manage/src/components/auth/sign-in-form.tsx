@@ -17,6 +17,8 @@ import {
   Chrome,
   Github,
   ArrowRight,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 // ─── Schemas ────────────────────────────────────────────────────────────────
@@ -75,6 +77,7 @@ export function SignInForm() {
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState("");
   const [position, setPosition] = useState("");
   const [loading, setLoading] = useState(false);
@@ -606,19 +609,30 @@ export function SignInForm() {
                 </div>
 
                 {/* Password */}
-                <div className="relative">
+                 <div className="relative">
                   <Lock className="absolute left-3 top-[34px] h-4 w-4 text-white/30 pointer-events-none" />
                   <Input
                     label="Password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     error={validationErrors.password}
-                    className="pl-10"
+                    className="pl-10 pr-10"
                     variant="glass"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-[34px] text-white/30 hover:text-white/60 transition-colors"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
 
                   {/* Password strength (Sign Up only) */}
                   {mode === "signup" && password && (

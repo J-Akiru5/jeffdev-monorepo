@@ -11,9 +11,9 @@ export const metadata: Metadata = {
 
 export default function SignInPage() {
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-void">
+    <div className="min-h-screen lg:h-screen grid grid-cols-1 lg:grid-cols-2 bg-void lg:overflow-hidden">
       {/* ── Left: Syntaxure Labs Branding ── */}
-      <div className="relative hidden lg:flex flex-col justify-center items-center p-12 lg:p-16 border-r border-white/[0.04] overflow-hidden">
+      <div className="relative hidden lg:flex flex-col justify-center items-center p-12 lg:p-16 border-r border-white/[0.04] overflow-hidden h-full">
         {/* Grid + Glow Background */}
         <GridBackground variant="neon" />
 
@@ -84,7 +84,7 @@ export default function SignInPage() {
       </div>
 
       {/* ── Right: Auth Form ── */}
-      <div className="relative flex items-center justify-center min-h-screen p-6 lg:p-12">
+      <div className="relative flex items-center justify-center min-h-screen lg:min-h-0 lg:h-full lg:overflow-y-auto p-6 lg:p-12">
         {/* Mobile branding (visible on small screens) */}
         <div className="lg:hidden absolute top-8 left-0 right-0 flex flex-col items-center gap-2">
           <SyntaxureLogo className="w-12 h-12 animate-neon-pulse" />
@@ -102,7 +102,7 @@ export default function SignInPage() {
         {/* Dark overlay gradient for visual separation */}
         <div className="fixed inset-0 -z-10 bg-gradient-to-br from-transparent via-surface/80 to-surface lg:hidden" />
 
-        <div className="w-full pt-20 lg:pt-0">
+        <div className="w-full pt-20 lg:pt-0 pb-10 lg:pb-0">
           <SignInForm />
         </div>
       </div>
