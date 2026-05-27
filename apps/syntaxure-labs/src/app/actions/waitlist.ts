@@ -40,7 +40,7 @@ export async function joinWaitlist(data: {
   try {
     const validated = waitlistSchema.parse(data);
 
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     // Check if email already exists
     const { data: existing, error: checkError } = await supabase
@@ -103,7 +103,7 @@ export async function joinWaitlist(data: {
  */
 export async function getWaitlistEntries(): Promise<WaitlistEntry[]> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data, error } = await supabase
       .from("prism_waitlist")
       .select("*")
@@ -111,6 +111,7 @@ export async function getWaitlistEntries(): Promise<WaitlistEntry[]> {
 
     if (error || !data) return [];
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return data.map((doc: any) => ({
       id: doc.id,
       ...doc,

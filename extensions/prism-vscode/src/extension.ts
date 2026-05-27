@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { McpClient, Rule } from "./mcpClient";
 import { PrismStatusBar } from "./statusBar";
-import { DashboardTreeProvider, DashboardTreeItem } from "./treeProvider";
+import { DashboardTreeProvider } from "./treeProvider";
 import { registerDiagnostics, clearDiagnostics } from "./diagnostics";
 
 let client: McpClient;
@@ -128,9 +128,7 @@ async function apiDelete(path: string): Promise<boolean> {
   } catch {
     return false;
   }
-}
-
-// === Connection ===
+}    // === Connection ===
 
 async function connect(): Promise<void> {
   const config = vscode.workspace.getConfiguration("prism");
@@ -440,8 +438,7 @@ async function createBrand(): Promise<void> {
     vscode.ViewColumn.One,
     { enableScripts: true },
   );
-  const { token, apiUrl } = getConfig();
-  panel.webview.html = getBrandWizardHtml(token, apiUrl);
+  panel.webview.html = getBrandWizardHtml();
   panel.webview.onDidReceiveMessage(async (message) => {
     if (message.command === "createBrand") {
       const result = await apiPost("/api/v1/brands", message.data);
@@ -532,8 +529,7 @@ async function generate(): Promise<void> {
     vscode.ViewColumn.Two,
     { enableScripts: true },
   );
-  const { token, apiUrl } = getConfig();
-  panel.webview.html = getKitchenHtml(token, apiUrl);
+  panel.webview.html = getKitchenHtml();
   panel.webview.onDidReceiveMessage(async (message) => {
     if (message.command === "generate") {
       const result = await apiPost("/api/generate", message.data);
@@ -624,7 +620,7 @@ async function manageApiKeys(): Promise<void> {
     if (keysData.keys.length === 0) {
       vscode.window.showInformationMessage("No API keys.");
     } else {
-      const pick = await vscode.window.showQuickPick(
+      await vscode.window.showQuickPick(
         keysData.keys.map((k) => ({
           label: k.name,
           description: `${k.keyPrefix}...`,
@@ -817,7 +813,7 @@ function getBrandHtml(brand: Record<string, unknown>): string {
   </body></html>`;
 }
 
-function getBrandWizardHtml(token: string, apiUrl: string): string {
+function getBrandWizardHtml(): string {
   return `<!DOCTYPE html><html><head><style>
     body { font-family: system-ui; padding: 1rem; background: var(--vscode-editor-background); color: var(--vscode-editor-foreground); }
     input, select { margin: 0.25rem 0; padding: 0.5rem; width: 100%; box-sizing: border-box; background: var(--vscode-input-background); color: var(--vscode-input-foreground); border: 1px solid var(--vscode-input-border); border-radius: 4px; }
@@ -922,7 +918,7 @@ function getBrandWizardHtml(token: string, apiUrl: string): string {
     </script></body></html>`;
 }
 
-function getKitchenHtml(token: string, apiUrl: string): string {
+function getKitchenHtml(): string {
   return `<!DOCTYPE html><html><head><style>
     body { font-family: system-ui; padding: 1rem; background: var(--vscode-editor-background); color: var(--vscode-editor-foreground); }
     textarea, select, input { margin: 0.25rem 0; padding: 0.5rem; width: 100%; box-sizing: border-box; background: var(--vscode-input-background); color: var(--vscode-input-foreground); border: 1px solid var(--vscode-input-border); border-radius: 4px; }

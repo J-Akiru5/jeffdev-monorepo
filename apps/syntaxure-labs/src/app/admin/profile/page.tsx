@@ -26,7 +26,7 @@ async function getCurrentUser(): Promise<UserProfile> {
   }
 
   try {
-    const adminSupabase = getAdminClient() as any;
+    const adminSupabase = getAdminClient();
     const { data: profile, error: dbError } = await adminSupabase
       .from("user_profiles")
       .select("*")
@@ -38,9 +38,9 @@ async function getCurrentUser(): Promise<UserProfile> {
       redirect("/admin/login");
     }
 
-    const prefs = (profile.preferences || {}) as Record<string, any>;
-    const namecard = (prefs.namecard || {}) as Record<string, any>;
-    const socials = (prefs.socials || {}) as Record<string, any>;
+    const prefs = (profile.preferences || {}) as Record<string, unknown>;
+    const namecard = (prefs.namecard || {}) as Record<string, unknown>;
+    const socials = (prefs.socials || {}) as Record<string, unknown>;
 
     return {
       uid: profile.id,
@@ -48,6 +48,7 @@ async function getCurrentUser(): Promise<UserProfile> {
       displayName: profile.full_name || "",
       photoURL: profile.avatar_url || undefined,
       role: profile.role || "employee",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       status: (prefs.status as any) || "active",
       bio: profile.bio || "",
       title: prefs.title || "",

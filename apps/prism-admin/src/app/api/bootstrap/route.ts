@@ -24,7 +24,6 @@ export async function GET() {
   }
 
   // Check if in development mode
-  // eslint-disable-next-line turbo/no-undeclared-env-vars
   const isDev = process.env.NODE_ENV === "development";
   if (!isDev) {
     return NextResponse.json(

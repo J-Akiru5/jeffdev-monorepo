@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import { cn } from "@syntaxure/ui";
 import { deleteRelease } from "@/app/actions/releases";
-import type { ReleaseFormData } from "@/app/actions/releases";
 
 interface Release {
   id: string;

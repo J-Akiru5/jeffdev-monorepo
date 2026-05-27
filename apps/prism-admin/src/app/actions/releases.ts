@@ -17,13 +17,13 @@ const releaseSchema = z.object({
 
 export type ReleaseFormData = z.infer<typeof releaseSchema>;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const sb = () => getAdminClient() as any;
+const sb = () => getAdminClient();
 
 export async function getReleases() {
   try {
-    const { data, error } = await sb()
-      .from("releases")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const releasesQuery = sb().from("releases") as any;
+    const { data, error } = await releasesQuery
       .select("*")
       .order("date", { ascending: false });
 
@@ -42,8 +42,9 @@ export async function getReleases() {
 
 export async function getRelease(id: string) {
   try {
-    const { data, error } = await sb()
-      .from("releases")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const releasesQuery = sb().from("releases") as any;
+    const { data, error } = await releasesQuery
       .select("*")
       .eq("id", id)
       .single();
@@ -75,7 +76,8 @@ export async function createRelease(
       };
     }
 
-    const { error } = await sb().from("releases").insert({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (sb().from("releases") as any).insert({
       title: parsed.data.title,
       version: parsed.data.version,
       date: parsed.data.date,
@@ -113,8 +115,9 @@ export async function updateRelease(
       };
     }
 
-    const { error } = await sb()
-      .from("releases")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const releasesQuery = sb().from("releases") as any;
+    const { error } = await releasesQuery
       .update({
         title: parsed.data.title,
         version: parsed.data.version,
@@ -145,7 +148,8 @@ export async function deleteRelease(
   id: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const { error } = await sb().from("releases").delete().eq("id", id);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (sb().from("releases") as any).delete().eq("id", id);
 
     if (error) throw error;
 

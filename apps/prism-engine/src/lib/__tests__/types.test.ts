@@ -4,7 +4,6 @@ import {
   RuleDocSchema,
   BrandDocSchema,
   SkillDocSchema,
-  ComponentDocSchema,
   SubscriptionDocSchema,
   ApiKeyDocSchema,
   UsageDocSchema,

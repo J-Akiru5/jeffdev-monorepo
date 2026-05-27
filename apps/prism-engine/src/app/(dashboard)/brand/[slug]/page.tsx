@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getCollection } from "@syntaxure-labs/db";
 import { ArrowLeft, Download, Settings } from "lucide-react";
-import type { BrandDoc, BrandColorsSchema, BrandTypographySchema, BrandVoiceSchema } from "@/lib/types";
+import type { BrandDoc } from "@/lib/types";
 
 interface Props {
   params: Promise<{ slug: string }>;

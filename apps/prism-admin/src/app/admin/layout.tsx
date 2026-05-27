@@ -10,7 +10,6 @@ import {
   DollarSign,
   Mail,
   FolderKanban,
-  Building2,
   Settings,
   Shield,
   ChevronRight,

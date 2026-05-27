@@ -47,7 +47,7 @@ function AdminLoginForm() {
       if (oauthError) {
         throw oauthError;
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("[LOGIN ERROR]", err);
       setError(err.message || "Failed to initialize Google login");
       setIsLoading(false);

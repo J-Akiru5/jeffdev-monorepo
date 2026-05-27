@@ -15,7 +15,7 @@ import { revalidatePath } from "next/cache";
 const TABLE = "pricing_faqs";
 
 function table() {
-  return (getAdminClient().from(TABLE) as any);
+  return getAdminClient().from(TABLE);
 }
 
 // GET — List FAQs
@@ -33,7 +33,8 @@ export async function GET(request: NextRequest) {
     let query = table().select("*").order("sort_order", { ascending: true });
 
     if (app) {
-      query = query.eq("app", app);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      query = (query as any).eq("app", app);
     }
 
     const { data, error } = await query;
@@ -61,7 +62,8 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    const { data, error } = await table()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (table() as any)
       .insert({
         app: body.app,
         question: body.question,
@@ -114,7 +116,8 @@ export async function PATCH(request: NextRequest) {
 
     updateFields.updated_at = new Date().toISOString();
 
-    const { data, error } = await table()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (table() as any)
       .update(updateFields)
       .eq("id", id)
       .select()

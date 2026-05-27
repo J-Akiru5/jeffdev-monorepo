@@ -63,7 +63,21 @@
     "COSMOS_GREMLIN_KEY",
     "USE_GREMLIN_RANKING",
     "N8N_WEBHOOK_URL",
-    "PAYPAL_WEBHOOK_ID"
+    "PAYPAL_WEBHOOK_ID",
+    "NODE_ENV",
+    "NEXT_RUNTIME",
+    "CI",
+    "GITHUB_PAT",
+    "GITHUB_MARKETING_REPO_OWNER",
+    "GITHUB_MARKETING_REPO_NAME",
+    "PRISM_TOKEN",
+    "FOUNDER_UID",
+    "FEATURE_PRISM_ENGINE_ENABLED",
+    "FEATURE_PRISM_ENGINE_TEASER",
+    "SUPPORT_EMAIL",
+    "VERCEL_ENV",
+    "BASE_URL",
+    "npm_package_version"
   ],
   "tasks": {
     "build": {

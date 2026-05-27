@@ -1,3 +1,4 @@
+/* global process */
 import nextra from 'nextra'
 import withBundleAnalyzer from '@next/bundle-analyzer'
 

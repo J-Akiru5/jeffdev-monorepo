@@ -44,7 +44,7 @@ export async function sendSupportRequest(
     // Support email address
     const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || "support@jeffdev.studio";
 
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     // Create support ticket in database
     const { error: ticketError } = await supabase
@@ -65,6 +65,7 @@ export async function sendSupportRequest(
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ] as any);
 
     if (ticketError) {

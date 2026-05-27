@@ -19,7 +19,7 @@ export async function bootstrapCurrentUserAsFounder(
   displayName: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     // Check if user document already exists
     const { data: existingUser } = await supabase
@@ -32,11 +32,12 @@ export async function bootstrapCurrentUserAsFounder(
       // Update existing document to founder role
       const { error: updateError } = await supabase
         .from("user_profiles")
-        .update({
-          role: "admin",
-          updated_at: new Date().toISOString(),
-        } as any)
-        .eq("id", uid);
+      .update({
+        role: "admin",
+        updated_at: new Date().toISOString(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any)
+      .eq("id", uid);
 
       if (updateError) throw updateError;
 
@@ -62,6 +63,7 @@ export async function bootstrapCurrentUserAsFounder(
       },
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     if (insertError) throw insertError;
@@ -100,7 +102,7 @@ export async function upsertUserProfile(
   },
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     // Check if user exists
     const { data: existingUser } = await supabase
@@ -134,6 +136,7 @@ export async function upsertUserProfile(
 
       const { error } = await supabase
         .from("user_profiles")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .update(updates as any)
         .eq("id", uid);
 
@@ -153,6 +156,7 @@ export async function upsertUserProfile(
         },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
 
       if (error) throw error;

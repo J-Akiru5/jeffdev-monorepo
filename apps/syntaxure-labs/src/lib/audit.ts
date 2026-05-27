@@ -37,7 +37,7 @@ export interface AuditLog extends AuditEvent {
  */
 export async function logAuditEvent(event: AuditEvent): Promise<void> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     const payload: Record<string, unknown> = {
       action: event.action,
@@ -52,6 +52,7 @@ export async function logAuditEvent(event: AuditEvent): Promise<void> {
 
     const { error } = await supabase
       .from("audit_logs")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .insert([payload] as any);
 
     if (error) {
@@ -73,7 +74,7 @@ export async function logAuditEvent(event: AuditEvent): Promise<void> {
  */
 export async function getAuditLogs(limit = 50): Promise<AuditLog[]> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     const { data, error } = await supabase
       .from("audit_logs")

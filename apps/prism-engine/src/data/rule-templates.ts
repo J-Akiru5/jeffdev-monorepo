@@ -118,7 +118,7 @@ export const ruleTemplates: RuleTemplate[] = [
         category: "styling",
         priority: 25,
         content:
-          "When composing dynamic Tailwind classes, always wrap them in a utility function that uses `clsx` and `tailwind-merge` (typically named `cn`). Do not use template literals directly `\${cond ? 'p-4' : 'p-2'}`.",
+          "When composing dynamic Tailwind classes, always wrap them in a utility function that uses `clsx` and `tailwind-merge` (typically named `cn`). Do not use template literals directly `${cond ? 'p-4' : 'p-2'}`.",
       },
       {
         name: "Semantic Color Tokens",

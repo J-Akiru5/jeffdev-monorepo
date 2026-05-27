@@ -5,6 +5,7 @@
  * ------------------------------
  * CRUD operations for calendar events.
  *
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
  * NOTE: Type casting with 'as any' is used due to Supabase's limitation with
  * dynamically determined table schemas. The actual runtime behavior is correct;
  * TypeScript just cannot infer the response types from `.from('table_name')`.
@@ -35,10 +36,11 @@ const eventSchema = z.object({
  */
 export async function getCalendarEvents(): Promise<CalendarEvent[]> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data, error } = (await supabase
       .from("calendar_events")
       .select("*")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .order("start_time", { ascending: true })) as any;
 
     if (error || !data) return [];
@@ -69,11 +71,13 @@ export async function createCalendarEvent(data: z.infer<typeof eventSchema>) {
       updated_at: new Date().toISOString(),
     };
 
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data: result, error } = (await supabase
       .from("calendar_events")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .insert(event as any)
       .select()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .single()) as any;
 
     if (error) throw error;
@@ -104,7 +108,7 @@ export async function updateCalendarEvent(
   try {
     const validated = eventSchema.partial().parse(data);
 
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
     };
 
@@ -115,8 +119,9 @@ export async function updateCalendarEvent(
     if (validated.end) updateData.end_time = validated.end;
     if (validated.color !== undefined) updateData.color = validated.color;
 
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase as any)
       .from("calendar_events")
       .update(updateData)
@@ -145,7 +150,7 @@ export async function updateCalendarEvent(
  */
 export async function deleteCalendarEvent(id: string) {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { error } = await supabase
       .from("calendar_events")
       .delete()
