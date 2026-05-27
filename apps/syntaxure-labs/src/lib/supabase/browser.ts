@@ -5,9 +5,8 @@ export function createClient() {
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !anonKey) {
-    return createBrowserClient(
-      "https://placeholder-url.supabase.co",
-      "placeholder-anon-key",
+    throw new Error(
+      "Missing Supabase environment variables. Ensure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set.",
     );
   }
 

@@ -59,6 +59,7 @@ export function Prism3D({ className }: Prism3DProps) {
           position: relative;
           transform-style: preserve-3d;
           animation: float-rotate 20s linear infinite;
+          will-change: transform;
         }
 
         .prism-face {
@@ -183,6 +184,7 @@ export function Prism3D({ className }: Prism3DProps) {
           );
           filter: blur(20px);
           animation: pulse 4s ease-in-out infinite;
+          will-change: transform, opacity;
         }
 
         @keyframes float-rotate {
@@ -218,6 +220,22 @@ export function Prism3D({ className }: Prism3DProps) {
           50% {
             transform: translate(-50%, -50%) scale(1.2);
             opacity: 0.8;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .prism-pivot {
+            animation: none;
+            transform: rotateX(15deg) rotateY(180deg);
+          }
+          .prism-shine {
+            animation: none;
+            opacity: 0.5;
+            transform: translateY(50%) rotate(45deg);
+          }
+          .prism-core {
+            animation: none;
+            opacity: 0.6;
           }
         }
       `}</style>

@@ -57,6 +57,34 @@ body {
   line-height: 1.5;
 }
 
+/* ----------------------------------------
+   PERFORMANCE: GPU Acceleration & Layout Containment
+   ---------------------------------------- */
+.gpu {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.lazy-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 3000px;
+}
+
+/* ----------------------------------------
+   REDUCED MOTION: Respect OS accessibility setting
+   ---------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 ::selection {
   background: rgba(245, 158, 11, 0.3);
   color: white;

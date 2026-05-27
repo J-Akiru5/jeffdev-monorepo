@@ -30,6 +30,13 @@ export function CTA({
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReducedMotion) {
+      gsap.set(contentRef.current, { opacity: 1, y: 0, clearProps: "all" });
+      return;
+    }
+
     const ctx = gsap.context(() => {
       gsap.fromTo(
         contentRef.current,
@@ -50,7 +57,7 @@ export function CTA({
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative py-24 md:py-32">
+    <section ref={sectionRef} className="relative py-24 md:py-32 lazy-section">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div
           ref={contentRef}
