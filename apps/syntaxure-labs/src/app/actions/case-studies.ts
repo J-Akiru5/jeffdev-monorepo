@@ -216,6 +216,7 @@ export async function createCaseStudy(
       },
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
+     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
@@ -307,10 +308,10 @@ export async function updateCaseStudy(
       ...(data.tagline && { tagline: data.tagline }),
     };
 
-    const { error } = await supabase
-      .from("case_studies")
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .update(updates as any)
+    const { error } = await (supabase as any)
+      .from("case_studies")
+      .update(updates)
       .eq("slug", slug);
 
     if (error) throw error;
@@ -409,13 +410,13 @@ export async function toggleFeatured(
 
     metadata.featured = newFeatured;
 
-    const { error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
       .from("case_studies")
       .update({
         metadata,
         updated_at: new Date().toISOString(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .eq("slug", slug);
 
     if (error) throw error;
@@ -465,13 +466,13 @@ export async function reorderCaseStudies(
       const metadata = (existing.metadata || {}) as Record<string, unknown>;
       metadata.order = index;
 
-      const { error } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (supabase as any)
         .from("case_studies")
         .update({
           metadata,
           updated_at: new Date().toISOString(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any)
+        })
         .eq("slug", slug);
 
       if (error) throw error;
@@ -586,7 +587,8 @@ export async function linkFeedbackToCaseStudy(
     const supabase = getAdminClient();
 
     // Get feedback
-    const { data: feedback, error: feedbackError } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: feedback, error: feedbackError } = await (supabase as any)
       .from("feedback")
       .select("*")
       .eq("id", feedbackId)
@@ -623,24 +625,24 @@ export async function linkFeedbackToCaseStudy(
       role: "Client",
     };
 
-    const { error: updateError } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: updateError } = await (supabase as any)
       .from("case_studies")
       .update({
         metadata,
         updated_at: new Date().toISOString(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .eq("slug", slug);
 
     if (updateError) throw updateError;
 
     // Link feedback back to case study
-    await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any)
       .from("feedback")
       .update({
         case_study_id: caseStudy.id,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .eq("id", feedbackId);
 
     // Audit log

@@ -43,7 +43,8 @@ export async function createInvite(data: {
   error?: string;
 }> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     // Validate role (prevent creating Founder invites)
     if (data.role === "founder") {
@@ -111,8 +112,7 @@ export async function createInvite(data: {
         },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .select("id")
       .single();
 
@@ -175,7 +175,8 @@ export async function getInviteByToken(token: string): Promise<{
   projectName?: string;
 } | null> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     const { data, error } = await supabase
       .from("invites")
@@ -192,8 +193,7 @@ export async function getInviteByToken(token: string): Promise<{
     if (new Date(data.expires_at) < new Date()) {
       await supabase
         .from("invites")
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .update({ status: "expired" } as any)
+        .update({ status: "expired" })
         .eq("id", data.id);
 
       return null;
@@ -225,7 +225,8 @@ export async function completeInvite(
   displayName: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     const invite = await getInviteByToken(token);
     if (!invite) {
@@ -247,8 +248,7 @@ export async function completeInvite(
         preferences: {},
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      });
 
     if (profileError) throw profileError;
 
@@ -263,8 +263,7 @@ export async function completeInvite(
       .update({
         status: "accepted",
         accepted_at: new Date().toISOString(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .eq("id", invite.id);
 
     if (updateError) throw updateError;
@@ -300,7 +299,8 @@ export async function getInvites(): Promise<
   }[]
 > {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     const { data, error } = await supabase
       .from("invites")
@@ -337,12 +337,12 @@ export async function revokeInvite(
   inviteId: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     const { error } = await supabase
       .from("invites")
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .update({ status: "expired" } as any)
+      .update({ status: "expired" })
       .eq("id", inviteId);
 
     if (error) throw error;
@@ -368,7 +368,8 @@ export async function resendInvite(
   inviteId: string,
 ): Promise<{ success: boolean; token?: string; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     const { data: invite, error: fetchError } = await supabase
       .from("invites")
@@ -395,8 +396,7 @@ export async function resendInvite(
       .update({
         token: newToken,
         expires_at: newExpiresAt.toISOString(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .eq("id", inviteId);
 
     if (updateError) throw updateError;
@@ -445,7 +445,8 @@ export async function updateUserRole(
   updatedBy: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     // Founder protection: Cannot change Founder's role
     if (uid === FOUNDER_UID) {
@@ -464,8 +465,7 @@ export async function updateUserRole(
       .update({
         role: supabaseRole,
         updated_at: new Date().toISOString(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .eq("id", uid);
 
     if (error) throw error;
@@ -497,7 +497,8 @@ export async function assignProjects(
   projectSlugs: string[],
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     // Founder protection
     if (uid === FOUNDER_UID) {
@@ -521,8 +522,7 @@ export async function assignProjects(
       .update({
         preferences: { ...existingPrefs, assigned_projects: projectSlugs },
         updated_at: new Date().toISOString(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .eq("id", uid);
 
     if (error) throw error;
@@ -548,7 +548,8 @@ export async function deactivateUser(
   uid: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     // Founder protection
     if (uid === FOUNDER_UID) {
@@ -572,8 +573,7 @@ export async function deactivateUser(
       .update({
         preferences: { ...existingPrefs, status: "inactive" },
         updated_at: new Date().toISOString(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .eq("id", uid);
 
     if (error) throw error;

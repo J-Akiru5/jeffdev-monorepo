@@ -78,12 +78,11 @@ export async function markAsRead(
   notificationId: string,
 ): Promise<{ success: boolean }> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
     const { error } = (await supabase
       .from(NOTIFICATIONS_COLLECTION)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .update({ read: true } as any)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .update({ read: true })
       .eq("id", notificationId)) as any;
 
     if (error) throw error;
@@ -101,13 +100,12 @@ export async function markAllAsRead(
   userId: string,
 ): Promise<{ success: boolean }> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
     const { error } = (await supabase
       .from(NOTIFICATIONS_COLLECTION)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .update({ read: true } as any)
+      .update({ read: true })
       .eq("user_id", userId)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .eq("read", false)) as any;
 
     if (error) throw error;
@@ -148,7 +146,8 @@ export async function createNotification(
   input: NotificationCreateInput,
 ): Promise<{ success: boolean; id?: string }> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
     const { data, error } = (await supabase
       .from(NOTIFICATIONS_COLLECTION)
       .insert({
@@ -156,10 +155,8 @@ export async function createNotification(
         read: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .select()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .single()) as any;
 
     if (error) throw error;

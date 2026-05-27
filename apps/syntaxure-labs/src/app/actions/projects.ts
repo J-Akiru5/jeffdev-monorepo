@@ -103,7 +103,8 @@ export async function createProject(
 ): Promise<ActionResult> {
   try {
     const validated = projectSchema.parse(data);
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     // Check if slug already exists
     const { data: existing } = await supabase
@@ -155,8 +156,7 @@ export async function createProject(
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ] as any);
+    ]);
 
     if (error) throw error;
 
@@ -189,7 +189,8 @@ export async function updateProject(
 ): Promise<ActionResult> {
   try {
     const validated = projectSchema.parse(data);
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     // Check if current slug exists
     const { data: existing } = await supabase
@@ -253,8 +254,7 @@ export async function updateProject(
           assignedEmployees: validated.assignedEmployees || [],
         },
         updated_at: new Date().toISOString(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .eq("slug", slug);
 
     if (updateError) throw updateError;
@@ -291,7 +291,8 @@ export async function updateProject(
  */
 export async function deleteProject(slug: string): Promise<ActionResult> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     const { data: existing, error: fetchError } = await supabase
       .from("projects")

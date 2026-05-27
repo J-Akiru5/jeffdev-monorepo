@@ -40,7 +40,8 @@ export async function joinWaitlist(data: {
   try {
     const validated = waitlistSchema.parse(data);
 
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     // Check if email already exists
     const { data: existing, error: checkError } = await supabase

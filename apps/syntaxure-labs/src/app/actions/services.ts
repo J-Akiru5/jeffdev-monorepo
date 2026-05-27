@@ -65,7 +65,8 @@ export async function getPublishedServices(): Promise<Service[]> {
  */
 export async function getServiceBySlug(slug: string): Promise<Service | null> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(COLLECTION)
       .select("*")
@@ -104,7 +105,8 @@ export async function createService(
       updated_at: new Date().toISOString(),
     };
 
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
     const { data: result, error } = await supabase
       .from(COLLECTION)
       .insert(service)
@@ -139,7 +141,8 @@ export async function updateService(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id: _id, created_at: _createdAt, ...updateData } = data;
 
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
     const { error } = await supabase
       .from(COLLECTION)
       .update({
@@ -196,7 +199,8 @@ export async function reorderServices(
   orderedIds: string[],
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     // Update each service with its new order
     for (let index = 0; index < orderedIds.length; index++) {
