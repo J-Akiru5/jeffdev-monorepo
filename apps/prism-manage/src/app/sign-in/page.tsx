@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function SignInPage() {
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-surface">
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-void">
       {/* ── Left: Syntaxure Labs Branding ── */}
       <div className="relative hidden lg:flex flex-col justify-center items-center p-12 lg:p-16 border-r border-white/[0.04] overflow-hidden">
         {/* Grid + Glow Background */}
@@ -21,7 +21,7 @@ export default function SignInPage() {
         <div className="relative z-10 max-w-lg text-center">
           {/* Logo */}
           <div className="mb-8 inline-flex">
-            <SyntaxureLogo className="w-28 h-28 drop-shadow-[0_0_30px_rgba(0,229,255,0.15)]" />
+            <SyntaxureLogo className="w-28 h-28 drop-shadow-[0_0_30px_rgba(0,229,255,0.15)] animate-neon-pulse" />
           </div>
 
           {/* Title */}
@@ -87,7 +87,7 @@ export default function SignInPage() {
       <div className="relative flex items-center justify-center min-h-screen p-6 lg:p-12">
         {/* Mobile branding (visible on small screens) */}
         <div className="lg:hidden absolute top-8 left-0 right-0 flex flex-col items-center gap-2">
-          <SyntaxureLogo className="w-12 h-12" />
+          <SyntaxureLogo className="w-12 h-12 animate-neon-pulse" />
           <h1 className="text-lg font-bold text-white font-mono uppercase tracking-wider">
             Syntaxure Labs
           </h1>

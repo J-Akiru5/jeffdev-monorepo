@@ -12,11 +12,13 @@ function mapTask(raw: Record<string, unknown>): Task {
   return {
     id: String(raw.id || ""),
     projectId: String(raw.project_id || raw.projectId || ""),
+    workspaceId: raw.workspace_id ? String(raw.workspace_id) : undefined,
+    departmentId: raw.department_id ? String(raw.department_id) : undefined,
     title: String(raw.title || ""),
 
     // Classification
-    taskType: (raw.task_type as Task["taskType"]) || "feature",
-    status: (raw.status as Task["status"]) || "todo",
+    taskType: (raw.task_type as Task["taskType"]) || "uncategorized",
+    status: (raw.status as Task["status"]) || "backlog",
     priority: (raw.priority as Task["priority"]) || "medium",
 
     // Content
@@ -35,6 +37,7 @@ function mapTask(raw: Record<string, unknown>): Task {
 
     // Ordering
     order: Number(raw.order || 0),
+    pathIndex: Number(raw.path_index || 0),
 
     // Timestamps
     createdAt: String(raw.created_at || raw.createdAt || new Date().toISOString()),
@@ -50,12 +53,14 @@ function toDbInsert(task: Partial<Task> & { user_id: string; project_id: string 
     user_id: task.user_id,
     project_id: task.project_id,
     title: task.title,
-    task_type: task.taskType || "feature",
-    status: task.status || "todo",
+    task_type: task.taskType || "uncategorized",
+    status: task.status || "backlog",
     priority: task.priority || "medium",
     is_starred: task.isStarred || false,
   };
 
+  if (task.workspaceId !== undefined) db.workspace_id = task.workspaceId;
+  if (task.departmentId !== undefined) db.department_id = task.departmentId;
   if (task.description !== undefined) db.description = task.description;
   if (task.notes !== undefined) db.notes = task.notes;
   if (task.assignedTo !== undefined) db.assigned_to = task.assignedTo;
@@ -63,22 +68,41 @@ function toDbInsert(task: Partial<Task> & { user_id: string; project_id: string 
   if (task.dueDate !== undefined) db.due_date = task.dueDate;
   if (task.dueTime !== undefined) db.due_time = task.dueTime;
   if (task.order !== undefined) db.order = task.order;
+  if (task.pathIndex !== undefined) db.path_index = task.pathIndex;
 
   return db;
 }
 
-export async function getTasks(): Promise<Task[]> {
+export async function getTasks(workspaceId?: string): Promise<Task[]> {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
 
-    const { data: tasks } = await supabase
+    let query = supabase
       .from("tasks")
       .select("*")
-      .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
+    // Filter by workspace if specified
+    if (workspaceId) {
+      query = query.eq("workspace_id", workspaceId);
+    } else {
+      // Default: tasks owned by user or in their workspaces
+      const { data: memberships } = await supabase
+        .from("workspace_members")
+        .select("workspace_id")
+        .eq("user_id", user.id);
+
+      const wsIds = (memberships || []).map((m: Record<string, unknown>) => m.workspace_id);
+      if (wsIds.length > 0) {
+        query = query.or(`workspace_id.in.(${wsIds.join(",")}),user_id.eq.${user.id}`);
+      } else {
+        query = query.eq("user_id", user.id);
+      }
+    }
+
+    const { data: tasks } = await query;
     return (tasks || []).map((t: Record<string, unknown>) => mapTask(t));
   } catch {
     return [];
@@ -88,6 +112,8 @@ export async function getTasks(): Promise<Task[]> {
 export async function createTask(input: {
   title: string;
   projectId: string | number;
+  workspaceId?: string;
+  departmentId?: string;
   taskType?: Task["taskType"];
   status?: Task["status"];
   priority?: Task["priority"];
@@ -104,9 +130,16 @@ export async function createTask(input: {
   });
   if (!parsed.success) throw new Error(parsed.error!.issues[0]!.message);
 
-  // Validate taskType against the enum if provided (catches invalid values before DB CHECK)
-  if (input.taskType && !["feature", "nice-to-have", "bug", "error"].includes(input.taskType)) {
+  // Validate taskType against the enum if provided
+  const validTypes = ["feature", "nice-to-have", "bug", "error", "uncategorized"];
+  if (input.taskType && !validTypes.includes(input.taskType)) {
     throw new Error("Invalid task type");
+  }
+
+  // Validate status against the new workflow enum
+  const validStatuses = ["backlog", "todo", "in_progress", "in_review", "approved"];
+  if (input.status && !validStatuses.includes(input.status)) {
+    throw new Error("Invalid status");
   }
 
   const supabase = await createClient();
@@ -117,8 +150,10 @@ export async function createTask(input: {
     user_id: user.id,
     project_id: String(input.projectId),
     title: parsed.data.title,
-    taskType: input.taskType || "feature",
-    status: input.status || "todo",
+    workspaceId: input.workspaceId,
+    departmentId: input.departmentId,
+    taskType: input.taskType || "uncategorized",
+    status: input.status || "backlog",
     priority: input.priority || "medium",
     isStarred: input.isStarred || false,
     description: input.description,
@@ -141,9 +176,11 @@ export async function toggleTaskComplete(taskId: string, completed: boolean) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
+  const newStatus = completed ? "approved" : "backlog";
+
   const { error } = await supabase
     .from("tasks")
-    .update({ status: completed ? "done" : "todo" })
+    .update({ status: newStatus })
     .eq("id", taskId)
     .eq("user_id", user.id);
 
@@ -170,7 +207,9 @@ export async function toggleTaskStar(taskId: string, isStarred: boolean) {
 
 export async function updateTaskStatus(taskId: string, status: string) {
   if (!taskId) throw new Error("Task ID is required");
-  if (!["todo", "in_progress", "review", "done"].includes(status)) {
+
+  const validStatuses = ["backlog", "todo", "in_progress", "in_review", "approved"];
+  if (!validStatuses.includes(status)) {
     throw new Error("Invalid status");
   }
 
@@ -214,6 +253,9 @@ export async function updateTask(
   if (parsed.data.dueDate !== undefined) updateData.due_date = parsed.data.dueDate;
   if (parsed.data.dueTime !== undefined) updateData.due_time = parsed.data.dueTime;
   if (parsed.data.order !== undefined) updateData.order = parsed.data.order;
+  if (parsed.data.pathIndex !== undefined) updateData.path_index = parsed.data.pathIndex;
+  if (parsed.data.workspaceId !== undefined) updateData.workspace_id = parsed.data.workspaceId;
+  if (parsed.data.departmentId !== undefined) updateData.department_id = parsed.data.departmentId;
 
   const { error } = await supabase
     .from("tasks")

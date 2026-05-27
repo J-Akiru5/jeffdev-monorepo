@@ -3,14 +3,49 @@ import { z } from "zod";
 // ──────────────────────────────────────────────
 // Task Type Enum
 // ──────────────────────────────────────────────
-export const TaskTypeEnum = z.enum(["feature", "nice-to-have", "bug", "error"]);
+export const TaskTypeEnum = z.enum(["feature", "nice-to-have", "bug", "error", "uncategorized"]);
 export type TaskType = z.infer<typeof TaskTypeEnum>;
 
-export const TaskStatusEnum = z.enum(["todo", "in_progress", "review", "done"]);
+export const TaskStatusEnum = z.enum(["backlog", "todo", "in_progress", "in_review", "approved"]);
 export type TaskStatus = z.infer<typeof TaskStatusEnum>;
 
 export const TaskPriorityEnum = z.enum(["low", "medium", "high"]);
 export type TaskPriority = z.infer<typeof TaskPriorityEnum>;
+
+// ──────────────────────────────────────────────
+// Workspace Schema
+// ──────────────────────────────────────────────
+export const WorkspaceSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1).max(100),
+  createdAt: z.string(),
+});
+export type Workspace = z.infer<typeof WorkspaceSchema>;
+
+// ──────────────────────────────────────────────
+// Workspace Member Schema (RBAC)
+// ──────────────────────────────────────────────
+export const WorkspaceRoleEnum = z.enum(["founder", "employee"]);
+export type WorkspaceRole = z.infer<typeof WorkspaceRoleEnum>;
+
+export const WorkspaceMemberSchema = z.object({
+  workspaceId: z.string(),
+  userId: z.string(),
+  role: WorkspaceRoleEnum,
+  createdAt: z.string(),
+});
+export type WorkspaceMember = z.infer<typeof WorkspaceMemberSchema>;
+
+// ──────────────────────────────────────────────
+// Department Schema
+// ──────────────────────────────────────────────
+export const DepartmentSchema = z.object({
+  id: z.string(),
+  workspaceId: z.string(),
+  name: z.string().min(1).max(100),
+  createdAt: z.string(),
+});
+export type Department = z.infer<typeof DepartmentSchema>;
 
 /**
  * Project/List Schema
@@ -38,11 +73,13 @@ export type Project = z.infer<typeof ProjectSchema>;
 export const TaskSchema = z.object({
   id: z.string(),
   projectId: z.string(),
+  workspaceId: z.string().optional(),
+  departmentId: z.string().optional(),
   title: z.string().min(1).max(500),
 
   // Classification
-  taskType: TaskTypeEnum.default("feature"),
-  status: TaskStatusEnum.default("todo"),
+  taskType: TaskTypeEnum.default("uncategorized"),
+  status: TaskStatusEnum.default("backlog"),
   priority: TaskPriorityEnum.default("medium"),
 
   // Content
@@ -61,6 +98,7 @@ export const TaskSchema = z.object({
 
   // Ordering
   order: z.number().default(0),
+  pathIndex: z.number().default(0),
 
   // Timestamps
   createdAt: z.string(),
@@ -96,9 +134,31 @@ export const UpdateTaskSchema = z.object({
   dueDate: z.string().optional(),
   dueTime: z.string().optional(),
   order: z.number().optional(),
+  pathIndex: z.number().optional(),
+  workspaceId: z.string().optional(),
+  departmentId: z.string().optional(),
 });
 
 export type UpdateTaskInput = z.infer<typeof UpdateTaskSchema>;
+
+// ──────────────────────────────────────────────
+// Workspace + Department Helpers
+// ──────────────────────────────────────────────
+export const PERSONAL_LISTS = [
+  { name: "My Tasks", color: "var(--color-cyan)", icon: "CheckSquare" },
+  { name: "Academics", color: "var(--color-purple)", icon: "BookOpen" },
+  { name: "Student Council", color: "var(--color-emerald)", icon: "Users" },
+  { name: "USC", color: "var(--color-amber)", icon: "GraduationCap" },
+  { name: "SineAI Guild", color: "#ef4444", icon: "Bot" },
+] as const;
+
+export const SYNTAXURE_DEPARTMENTS = [
+  "Executive",
+  "Engineering",
+  "Operations",
+  "Marketing",
+  "Product",
+] as const;
 
 /**
  * Calendar Event Schema

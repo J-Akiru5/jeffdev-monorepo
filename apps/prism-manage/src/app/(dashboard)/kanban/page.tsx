@@ -14,7 +14,7 @@ import type { Task } from "@/lib/schemas";
 import { getTaskTypeConfig } from "@/lib/task-types";
 import { toast } from "sonner";
 
-type KanbanColumn = "backlog" | "in_progress" | "review" | "done";
+type KanbanColumn = "backlog" | "todo" | "in_progress" | "in_review" | "approved";
 
 interface KanbanTask extends Task {
   column: KanbanColumn;
@@ -22,9 +22,10 @@ interface KanbanTask extends Task {
 
 const columns: { id: KanbanColumn; title: string; color: string }[] = [
   { id: "backlog", title: "Backlog", color: "#6b7280" },
-  { id: "in_progress", title: "In Progress", color: "#3b82f6" },
-  { id: "review", title: "In Review", color: "var(--color-purple)" },
-  { id: "done", title: "Done", color: "var(--color-emerald)" },
+  { id: "todo", title: "To Do", color: "#3b82f6" },
+  { id: "in_progress", title: "In Progress", color: "#f59e0b" },
+  { id: "in_review", title: "In Review", color: "#8b5cf6" },
+  { id: "approved", title: "Approved", color: "#10b981" },
 ];
 
 export default function KanbanPage() {
@@ -60,6 +61,7 @@ export default function KanbanPage() {
             assignedTo: t.assignedTo ? String(t.assignedTo) : t.assigned_to ? String(t.assigned_to) : undefined,
             tags: Array.isArray(t.tags) ? (t.tags as string[]) : undefined,
             dueDate: t.dueDate ? String(t.dueDate) : t.due_date ? String(t.due_date) : undefined,
+            pathIndex: Number(t.pathIndex || t.path_index || 0),
             createdAt:
               String(t.createdAt || t.created_at || new Date().toISOString()),
             updatedAt:
@@ -96,8 +98,7 @@ export default function KanbanPage() {
     if (!task) return;
 
     try {
-      const dbStatus =
-        column === "done" ? "done" : column === "in_progress" ? "in_progress" : column === "review" ? "review" : "todo";
+      const dbStatus = column;
       await updateTaskStatus(draggedTask, dbStatus);
       setTasks((prev) =>
         prev.map((t) =>
@@ -132,6 +133,7 @@ export default function KanbanPage() {
         status: "todo",
         priority: "medium",
         isStarred: false,
+        pathIndex: 0,
         order: tasks.filter((t) => t.projectId === projectId).length,
         column,
         createdAt: new Date().toISOString(),
@@ -162,18 +164,18 @@ export default function KanbanPage() {
     <div className="mx-auto max-w-7xl">
       {/* Page Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Kanban Board</h1>
-        <p className="mt-1 text-sm text-white/40">
+        <h1 className="text-2xl font-bold text-text-primary">Kanban Board</h1>
+        <p className="mt-1 text-sm text-text-muted">
           Drag and drop tasks between columns
         </p>
       </div>
 
       {/* Kanban Columns */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
         {columns.map((column) => (
           <div
             key={column.id}
-            className="min-h-[400px] rounded-xl border border-white/10 glass-subtle p-4"
+            className="min-h-[400px] rounded-xl border border-border glass-subtle p-4"
             onDragOver={handleDragOver}
             onDrop={() => handleDrop(column.id)}
           >
@@ -183,10 +185,10 @@ export default function KanbanPage() {
                 className="h-2 w-2 rounded-full"
                 style={{ backgroundColor: column.color }}
               />
-              <h2 className="text-sm font-semibold text-white">
+              <h2 className="text-sm font-semibold text-text-primary">
                 {column.title}
               </h2>
-              <span className="ml-auto font-mono text-xs text-white/30">
+              <span className="ml-auto font-mono text-xs text-text-quiet">
                 {getTasksByColumn(column.id).length}
               </span>
             </div>
@@ -202,19 +204,19 @@ export default function KanbanPage() {
                     key={task.id}
                     draggable
                     onDragStart={() => handleDragStart(task.id)}
-                    className={`cursor-grab rounded-lg border border-white/5 bg-glass-04 p-3 transition-all hover:border-white/10 active:cursor-grabbing ${
+                    className={`cursor-grab rounded-lg border border-glass-05 bg-glass-04 p-3 transition-all hover:border-glass-10 active:cursor-grabbing ${
                       draggedTask === task.id ? "opacity-50" : ""
                     }`}
                   >
                     <div className="flex items-start gap-2">
-                      <GripVertical className="mt-0.5 h-4 w-4 flex-shrink-0 text-white/20" />
+                      <GripVertical className="mt-0.5 h-4 w-4 flex-shrink-0 text-text-faint" />
                       <div className="min-w-0 flex-1">
                         {/* Type icon + Title */}
                         <div className="flex items-center gap-2">
                           <span className="flex-shrink-0 text-xs">
                             {typeConfig.icon}
                           </span>
-                          <p className="text-sm text-white">{task.title}</p>
+                          <p className="text-sm text-text-primary">{task.title}</p>
                         </div>
                         <div className="mt-2 flex items-center gap-2">
                           {project && (
@@ -225,7 +227,7 @@ export default function KanbanPage() {
                                   backgroundColor: project.color || "var(--color-cyan)",
                                 }}
                               />
-                              <span className="text-[11px] text-white/40">
+                              <span className="text-[11px] text-text-muted">
                                 {project.name}
                               </span>
                             </>
@@ -246,7 +248,7 @@ export default function KanbanPage() {
               {/* Add Task Button */}
               <button
                 onClick={() => handleAddTask(column.id)}
-                className="flex w-full items-center gap-2 rounded-lg border border-dashed border-white/10 p-3 text-sm text-white/30 transition-colors hover:border-white/20 hover:text-white/50"
+                className="flex w-full items-center gap-2 rounded-lg border border-dashed border-border p-3 text-sm text-text-quiet transition-colors hover:border-border-active hover:text-text-tertiary"
               >
                 <Plus className="h-4 w-4" />
                 Add task
@@ -261,12 +263,14 @@ export default function KanbanPage() {
 
 function mapStatusToColumn(status: string): KanbanColumn {
   switch (status) {
+    case "todo":
+      return "todo";
     case "in_progress":
       return "in_progress";
-    case "review":
-      return "review";
-    case "done":
-      return "done";
+    case "in_review":
+      return "in_review";
+    case "approved":
+      return "approved";
     default:
       return "backlog";
   }

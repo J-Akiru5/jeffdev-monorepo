@@ -65,11 +65,11 @@ export function AddTaskInput({
     return (
       <button
         onClick={handleExpand}
-        className="flex w-full items-center gap-3 rounded-lg border border-dashed border-white/10 p-3 text-sm text-white/40 transition-all hover:border-cyan-500/30 hover:text-cyan-400"
+        className="flex w-full items-center gap-3 rounded-lg border border-dashed border-border p-3 text-sm text-text-muted transition-all hover:border-cyan-500/30 hover:text-cyan-400"
       >
         <Plus className="h-4 w-4" />
         <span className="flex-1 text-left">Add a task</span>
-        <span className="flex items-center gap-1 text-[10px] text-white/20">
+        <span className="flex items-center gap-1 text-[10px] text-text-faint">
           {typeConfig.icon}
         </span>
       </button>
@@ -92,7 +92,7 @@ export function AddTaskInput({
             if (!value.trim()) setIsExpanded(false);
           }}
           placeholder='Task title... (press Enter for quick-add)'
-          className="flex-1 bg-transparent py-3 text-sm text-white placeholder:text-white/30 focus:outline-none"
+          className="flex-1 bg-transparent py-3 text-sm text-text-primary placeholder:text-text-quiet focus:outline-none"
         />
 
         {/* Expand to sheet button */}
@@ -100,26 +100,26 @@ export function AddTaskInput({
           onClick={handleOpenSheet}
           disabled={!value.trim()}
           title="Open full task form"
-          className="flex-shrink-0 rounded-md p-1.5 text-white/30 transition-colors hover:bg-glass-05 hover:text-cyan-400 disabled:cursor-not-allowed disabled:opacity-30"
+          className="flex-shrink-0 rounded-md p-1.5 text-text-quiet transition-colors hover:bg-glass-05 hover:text-cyan-400 disabled:cursor-not-allowed disabled:opacity-30"
         >
           <Maximize2 className="h-4 w-4" />
         </button>
       </div>
 
-      <div className="flex items-center justify-end gap-2 border-t border-white/5 glass-subtle px-3 py-2">
+      <div className="flex items-center justify-end gap-2 border-t border-glass-05 glass-subtle px-3 py-2">
         <button
           onClick={() => {
             setValue("");
             setIsExpanded(false);
           }}
-          className="rounded-md px-3 py-1.5 text-xs text-white/50 hover:bg-glass-05 hover:text-white"
+          className="rounded-md px-3 py-1.5 text-xs text-text-tertiary hover:bg-glass-05 hover:text-text-primary"
         >
           Cancel
         </button>
         <button
           onClick={handleSubmit}
           disabled={!value.trim()}
-          className="rounded-md bg-cyan-500 px-3 py-1.5 text-xs font-medium text-void transition-colors hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-md bg-cyan-500 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Add
         </button>

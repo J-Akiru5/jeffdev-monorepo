@@ -36,12 +36,12 @@ export function TaskItem({
 }: TaskItemProps) {
   const [showMenu, setShowMenu] = useState(false);
   const typeConfig = getTaskTypeConfig(task.taskType);
-  const isCompleted = task.status === "done";
+  const isCompleted = task.status === "approved";
   const isInProgress = task.status === "in_progress";
 
   return (
     <div
-      className={`group flex items-start gap-3 rounded-lg border border-white/5 glass-subtle p-3 transition-all hover:border-white/10 hover:bg-glass-04 ${
+      className={`group flex items-start gap-3 rounded-lg border border-glass-05 glass-subtle p-3 transition-all hover:border-glass-10 hover:bg-glass-04 ${
         isCompleted ? "opacity-50" : ""
       } ${isInProgress ? "border-l-2 border-l-blue-500/40" : ""}`}
     >
@@ -60,12 +60,12 @@ export function TaskItem({
         className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all ${
           isCompleted
             ? "border-cyan-500 bg-cyan-500"
-            : "border-white/20 hover:border-cyan-500"
+            : "border-glass-20 hover:border-cyan-500"
         }`}
       >
         {isCompleted && (
           <svg
-            className="h-3 w-3 text-void"
+            className="h-3 w-3 text-[#050505]"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -89,7 +89,7 @@ export function TaskItem({
         >
           <p
             className={`text-sm ${
-              isCompleted ? "text-white/30 line-through" : "text-white"
+              isCompleted ? "text-text-tertiary line-through" : "text-text-primary"
             }`}
           >
             {task.title}
@@ -97,7 +97,7 @@ export function TaskItem({
         </button>
 
         {/* Meta Info Row */}
-        <div className="mt-1 flex items-center gap-2 text-[11px] text-white/40">
+        <div className="mt-1 flex items-center gap-2 text-[11px] text-text-muted">
           {/* Task type label (visible on hover / when space allows) */}
           <span
             className="hidden items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium sm:inline-flex"
@@ -135,7 +135,7 @@ export function TaskItem({
 
           {/* Description preview */}
           {task.description && !task.dueDate && (
-            <span className="max-w-[150px] truncate text-white/30">
+            <span className="max-w-[150px] truncate text-text-quiet">
               {task.description}
             </span>
           )}
@@ -150,7 +150,7 @@ export function TaskItem({
           className={`rounded p-1 transition-colors ${
             task.isStarred
               ? "text-yellow-400 hover:text-yellow-300"
-              : "text-white/30 hover:text-yellow-400"
+              : "text-text-quiet hover:text-yellow-400"
           }`}
         >
           <Star
@@ -166,7 +166,7 @@ export function TaskItem({
               e.stopPropagation();
               setShowMenu(!showMenu);
             }}
-            className="rounded p-1 text-white/30 transition-colors hover:text-white"
+            className="rounded p-1 text-text-quiet transition-colors hover:text-text-primary"
           >
             <MoreVertical className="h-4 w-4" />
           </button>
@@ -178,13 +178,13 @@ export function TaskItem({
                 className="fixed inset-0 z-10"
                 onClick={() => setShowMenu(false)}
               />
-              <div className="absolute right-0 top-full z-20 mt-1 w-32 rounded-lg border border-white/10 bg-elevated py-1 shadow-xl">
+              <div className="absolute right-0 top-full z-20 mt-1 w-32 rounded-lg border border-glass-10 bg-elevated py-1 shadow-xl">
                 <button
                   onClick={() => {
                     onClick?.(task.id);
                     setShowMenu(false);
                   }}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-white/60 hover:bg-glass-05 hover:text-white"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-text-tertiary hover:bg-glass-05 hover:text-text-primary"
                 >
                   Edit
                 </button>
