@@ -1,15 +1,8 @@
 "use client";
 
-import { useRef, useEffect } from "react";
 import Link from "next/link";
 import { ArrowUpRight, Zap } from "lucide-react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-// Register GSAP plugin
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
+import { useInView } from "@/lib/use-in-view";
 
 /**
  * CTA Section
@@ -26,42 +19,16 @@ export function CTA({
 }: {
   availabilityText?: string | null;
 }) {
-  const sectionRef = useRef<HTMLElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (prefersReducedMotion) {
-      gsap.set(contentRef.current, { opacity: 1, y: 0, clearProps: "all" });
-      return;
-    }
-
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        contentRef.current,
-        { opacity: 0, y: 30 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.7,
-          scrollTrigger: {
-            trigger: contentRef.current,
-            start: "top 85%",
-          },
-        },
-      );
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
+  const { ref: contentRef, isInView } = useInView<HTMLDivElement>({ threshold: 0.2 });
 
   return (
-    <section ref={sectionRef} className="relative py-24 md:py-32 lazy-section">
+    <section className="relative section-padding lazy-section">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div
           ref={contentRef}
-          className="relative overflow-hidden rounded-md glass-neon p-12 md:p-16"
+          className={`relative overflow-hidden rounded-md glass-neon p-12 md:p-16 transition-all duration-700 ${
+            isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          }`}
         >
           {/* Background Accents */}
           <div className="pointer-events-none absolute inset-0">

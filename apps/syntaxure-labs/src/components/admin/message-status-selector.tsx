@@ -51,7 +51,7 @@ export function MessageStatusSelector({
   };
 
   const currentStatusConfig =
-    statuses.find((s) => s.value === status) || statuses[0];
+    statuses.find((s) => s.value === status) || statuses[0]!;
 
   return (
     <div className="relative">

@@ -835,15 +835,6 @@ body {
     filter: drop-shadow(0 0 30px rgba(6, 182, 212, 1));
   }
 }
-  0%, 100% {
-    opacity: 0.6;
-    filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.6));
-  }
-  50% {
-    opacity: 1;
-    filter: drop-shadow(0 0 30px rgba(6, 182, 212, 1));
-  }
-}
 
 .animate-neon-pulse {
   animation: neon-pulse 3s ease-in-out infinite;
@@ -864,9 +855,6 @@ body {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
 }
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
 
 .animate-float-subtle {
   animation: float-subtle 4s ease-in-out infinite;
@@ -874,19 +862,6 @@ body {
 
 /* Neon breathe — slow, ambient cyan glow pulse for glass-neon panels */
 @keyframes neon-breathe {
-  0%, 100% {
-    box-shadow:
-      0 0 20px var(--glass-blend-cyan),
-      0 0 40px var(--glass-blend-purple),
-      inset 0 0 20px var(--glass-blend-cyan);
-  }
-  50% {
-    box-shadow:
-      0 0 40px rgba(6, 182, 212, 0.15),
-      0 0 80px var(--glass-blend-purple),
-      inset 0 0 40px rgba(6, 182, 212, 0.08);
-  }
-}
   0%, 100% {
     box-shadow:
       0 0 20px var(--glass-blend-cyan),

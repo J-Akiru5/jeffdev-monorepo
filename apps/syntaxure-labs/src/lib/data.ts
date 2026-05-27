@@ -142,7 +142,7 @@ function mapCategoryToIcon(category: string): string {
     saas: "Cloud",
     default: "Globe",
   };
-  return map[category?.toLowerCase()] || map.default;
+  return map[category?.toLowerCase()] || map.default!;
 }
 
 // =============================================================================
