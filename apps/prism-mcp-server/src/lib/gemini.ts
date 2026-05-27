@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const API_KEY = process.env.GEMINI_API_KEY;
+const API_KEY = process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
 const CHAT_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";
 const EMBEDDING_MODEL =
   process.env.GEMINI_EMBEDDING_MODEL || "gemini-embedding-2";
@@ -9,7 +9,7 @@ let _genAI: GoogleGenerativeAI | null = null;
 
 function getClient(): GoogleGenerativeAI {
   if (_genAI) return _genAI;
-  if (!API_KEY) throw new Error("Gemini not configured. Set GEMINI_API_KEY.");
+  if (!API_KEY) throw new Error("Gemini not configured. Set GOOGLE_GEMINI_API_KEY or GEMINI_API_KEY.");
   _genAI = new GoogleGenerativeAI(API_KEY);
   return _genAI;
 }

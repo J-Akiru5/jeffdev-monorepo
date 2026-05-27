@@ -11,10 +11,10 @@ let _gemini: ReturnType<GoogleGenerativeAI["getGenerativeModel"]> | null = null;
 function getGeminiModel() {
   if (_gemini) return _gemini;
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error(
-      "GEMINI_API_KEY is not configured. Add it to your environment variables.",
+      "GOOGLE_GEMINI_API_KEY or GEMINI_API_KEY is not configured. Add it to your environment variables.",
     );
   }
 
