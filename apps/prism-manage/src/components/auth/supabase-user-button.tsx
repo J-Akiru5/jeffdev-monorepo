@@ -57,19 +57,19 @@ export function SupabaseUserButton() {
         <div className="flex h-7 w-7 items-center justify-center rounded-full bg-cyan-500/20 border border-cyan-500/30 text-xs font-medium text-cyan-400">
           {avatar}
         </div>
-        <span className="text-xs text-white/70 truncate">{displayName}</span>
+        <span className="text-xs text-text-secondary truncate">{displayName}</span>
       </button>
 
       {isOpen && (
-        <div className="absolute bottom-full left-0 right-0 mb-2 rounded-lg border border-white/10 bg-elevated shadow-lg">
-          <div className="px-4 py-3 border-b border-white/5">
-            <p className="text-xs font-medium text-white truncate">
+        <div className="absolute bottom-full left-0 right-0 mb-2 rounded-lg border border-border bg-elevated shadow-lg">
+          <div className="px-4 py-3 border-b border-glass-05">
+            <p className="text-xs font-medium text-text-primary truncate">
               {user.email || "User"}
             </p>
           </div>
           <button
             onClick={handleSignOut}
-            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-white/70 hover:text-red-400 hover:bg-red-500/5 transition-colors"
+            className="w-full flex items-center gap-2 px-4 py-2 text-sm text-text-secondary hover:text-red-400 hover:bg-red-500/5 transition-colors"
           >
             <LogOut className="h-4 w-4" />
             Sign Out

@@ -17,9 +17,8 @@ import {
   Tag,
   Calendar,
   Clock,
-  Building2,
 } from "lucide-react";
-import { TASK_TYPES, PRIORITY_CONFIG, STATUS_CONFIG, STATUS_TRANSITIONS, STAFF_LOCKED_STATUSES } from "@/lib/task-types";
+import { TASK_TYPES, PRIORITY_CONFIG, STATUS_CONFIG, STAFF_LOCKED_STATUSES } from "@/lib/task-types";
 import type { TaskTypeKey, StatusKey } from "@/lib/task-types";
 import type { Task, Project, Department } from "@/lib/schemas";
 import { useWorkspaceStore } from "@/stores/workspace-store";
@@ -212,13 +211,13 @@ export function TaskSheet({
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
             className={`${
               isIntercepted
-                ? "fixed inset-y-0 right-0 z-50 w-full max-w-[640px] border-l border-white/10 bg-elevated shadow-2xl"
-                : "relative w-full max-w-2xl rounded-xl border border-white/10 bg-elevated shadow-2xl"
+                ? "fixed inset-y-0 right-0 z-50 w-full max-w-[640px] border-l border-border bg-elevated shadow-2xl"
+                : "relative w-full max-w-2xl rounded-xl border border-border bg-elevated shadow-2xl"
             } max-h-screen overflow-hidden sm:max-h-none`}
           >
             <div className="flex h-full flex-col">
               {/* ── Header ── */}
-              <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
+              <div className="flex items-center justify-between border-b border-border px-6 py-4">
                 <div className="flex items-center gap-3">
                   {/* Department Selector (when departments exist) */}
                   {departments.length > 0 && data.departmentId !== undefined && (
@@ -231,7 +230,7 @@ export function TaskSheet({
                             departmentId: e.target.value,
                           }))
                         }
-                        className="appearance-none rounded-lg border border-white/10 bg-glass-04 px-3 py-2 pr-8 text-sm text-white/80 outline-none transition-colors hover:border-white/20 focus:border-cyan-500/50"
+                        className="appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2 pr-8 text-sm text-text-secondary outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
                       >
                         {departments.map((dept) => (
                           <option key={dept.id} value={dept.id}>
@@ -239,7 +238,7 @@ export function TaskSheet({
                           </option>
                         ))}
                       </select>
-                      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+                      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
                     </div>
                   )}
 
@@ -253,7 +252,7 @@ export function TaskSheet({
                           projectId: e.target.value,
                         }))
                       }
-                      className="appearance-none rounded-lg border border-white/10 bg-glass-04 px-3 py-2 pr-8 text-sm text-white/80 outline-none transition-colors hover:border-white/20 focus:border-cyan-500/50"
+                      className="appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2 pr-8 text-sm text-text-secondary outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
                     >
                       {projects.map((p) => (
                         <option key={p.id} value={p.id}>
@@ -261,7 +260,7 @@ export function TaskSheet({
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+                    <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
                   </div>
                 </div>
 
@@ -269,7 +268,7 @@ export function TaskSheet({
                   <button
                     onClick={handleSubmit}
                     disabled={!data.title.trim() || submitting}
-                    className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-void transition-all hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {submitting
                       ? "Creating..."
@@ -279,7 +278,7 @@ export function TaskSheet({
                   </button>
                   <button
                     onClick={onClose}
-                    className="rounded-lg p-2 text-white/40 transition-colors hover:bg-glass-05 hover:text-white"
+                    className="rounded-lg p-2 text-text-muted transition-colors hover:bg-glass-05 hover:text-text-primary"
                   >
                     <X className="h-5 w-5" />
                   </button>
@@ -302,13 +301,13 @@ export function TaskSheet({
                       onFocus={(e) => autoExpand(e.target)}
                       placeholder="Task title..."
                       rows={1}
-                      className="w-full resize-none bg-transparent text-2xl font-bold text-white placeholder:text-white/20 focus:outline-none"
+                      className="w-full resize-none bg-transparent text-2xl font-bold text-text-primary placeholder:text-text-faint focus:outline-none"
                     />
                   </div>
 
                   {/* Type Selector */}
                   <div>
-                    <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/40">
+                    <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-text-muted">
                       Type
                     </label>
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -326,7 +325,7 @@ export function TaskSheet({
                             className={`flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 text-xs transition-all ${
                               isActive
                                 ? "border-transparent shadow-sm"
-                                : "border-white/10 glass-subtle text-white/50 hover:border-white/20 hover:text-white/70"
+                                : "border-border glass-subtle text-text-tertiary hover:border-border-active hover:text-text-secondary"
                             }`}
                             style={
                               isActive
@@ -350,7 +349,7 @@ export function TaskSheet({
 
                   {/* Description */}
                   <div>
-                    <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/40">
+                    <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-text-muted">
                       Description
                     </label>
                     <textarea
@@ -364,19 +363,19 @@ export function TaskSheet({
                       }}
                       placeholder="Add reproduction steps, acceptance criteria, or error logs..."
                       rows={4}
-                      className="w-full resize-none rounded-xl border border-white/10 glass-subtle px-4 py-3 text-sm text-white/80 placeholder:text-white/20 focus:border-cyan-500/30 focus:outline-none"
+                      className="w-full resize-none rounded-xl border border-border glass-subtle px-4 py-3 text-sm text-text-secondary placeholder:text-text-faint focus:border-cyan-500/30 focus:outline-none"
                     />
                   </div>
 
                   {/* ── Metadata Grid ── */}
                   <div>
-                    <label className="mb-3 block text-xs font-medium uppercase tracking-wider text-white/40">
+                    <label className="mb-3 block text-xs font-medium uppercase tracking-wider text-text-muted">
                       Details
                     </label>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       {/* Status (RBAC-aware) */}
                       <div>
-                        <label className="mb-1.5 block text-[11px] text-white/40">
+                        <label className="mb-1.5 block text-[11px] text-text-muted">
                           Status
                           {isEmployee && (
                             <span className="ml-1.5 text-[10px] text-amber-400/60">
@@ -392,7 +391,7 @@ export function TaskSheet({
                               status: e.target.value as Task["status"],
                             }))
                           }
-                          className="w-full appearance-none rounded-lg border border-white/10 bg-glass-04 px-3 py-2.5 text-sm text-white/80 outline-none transition-colors hover:border-white/20 focus:border-cyan-500/50"
+                          className="w-full appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2.5 text-sm text-text-secondary outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
                         >
                           {availableStatuses.map(([key, config]) => {
                             const isLocked = STAFF_LOCKED_STATUSES.includes(key as StatusKey);
@@ -412,7 +411,7 @@ export function TaskSheet({
 
                       {/* Priority */}
                       <div>
-                        <label className="mb-1.5 block text-[11px] text-white/40">
+                        <label className="mb-1.5 block text-[11px] text-text-muted">
                           Priority
                         </label>
                         <select
@@ -423,7 +422,7 @@ export function TaskSheet({
                               priority: e.target.value as Task["priority"],
                             }))
                           }
-                          className="w-full appearance-none rounded-lg border border-white/10 bg-glass-04 px-3 py-2.5 text-sm text-white/80 outline-none transition-colors hover:border-white/20 focus:border-cyan-500/50"
+                          className="w-full appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2.5 text-sm text-text-secondary outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
                         >
                           {Object.entries(PRIORITY_CONFIG).map(
                             ([key, config]) => (
@@ -437,11 +436,11 @@ export function TaskSheet({
 
                       {/* Due Date */}
                       <div>
-                        <label className="mb-1.5 block text-[11px] text-white/40">
+                        <label className="mb-1.5 block text-[11px] text-text-muted">
                           Due Date
                         </label>
                         <div className="relative">
-                          <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+                          <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-quiet" />
                           <input
                             type="date"
                             value={data.dueDate}
@@ -451,18 +450,18 @@ export function TaskSheet({
                                 dueDate: e.target.value,
                               }))
                             }
-                            className="w-full appearance-none rounded-lg border border-white/10 bg-glass-04 px-3 py-2.5 pl-10 text-sm text-white/80 outline-none transition-colors hover:border-white/20 focus:border-cyan-500/50"
+                            className="w-full appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2.5 pl-10 text-sm text-text-secondary outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
                           />
                         </div>
                       </div>
 
                       {/* Due Time */}
                       <div>
-                        <label className="mb-1.5 block text-[11px] text-white/40">
+                        <label className="mb-1.5 block text-[11px] text-text-muted">
                           Due Time
                         </label>
                         <div className="relative">
-                          <Clock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+                          <Clock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-quiet" />
                           <input
                             type="time"
                             value={data.dueTime}
@@ -472,18 +471,18 @@ export function TaskSheet({
                                 dueTime: e.target.value,
                               }))
                             }
-                            className="w-full appearance-none rounded-lg border border-white/10 bg-glass-04 px-3 py-2.5 pl-10 text-sm text-white/80 outline-none transition-colors hover:border-white/20 focus:border-cyan-500/50"
+                            className="w-full appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2.5 pl-10 text-sm text-text-secondary outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
                           />
                         </div>
                       </div>
 
                       {/* Assignee */}
                       <div>
-                        <label className="mb-1.5 block text-[11px] text-white/40">
+                        <label className="mb-1.5 block text-[11px] text-text-muted">
                           Assignee
                         </label>
                         <div className="relative">
-                          <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+                          <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-quiet" />
                           <input
                             type="text"
                             value={data.assignedTo}
@@ -494,18 +493,18 @@ export function TaskSheet({
                               }))
                             }
                             placeholder="User ID"
-                            className="w-full rounded-lg border border-white/10 bg-glass-04 px-3 py-2.5 pl-10 text-sm text-white/80 outline-none transition-colors placeholder:text-white/20 hover:border-white/20 focus:border-cyan-500/50"
+                            className="w-full rounded-lg border border-border bg-glass-04 px-3 py-2.5 pl-10 text-sm text-text-secondary outline-none transition-colors placeholder:text-text-faint hover:border-border-active focus:border-cyan-500/50"
                           />
                         </div>
                       </div>
 
                       {/* Tags */}
                       <div>
-                        <label className="mb-1.5 block text-[11px] text-white/40">
+                        <label className="mb-1.5 block text-[11px] text-text-muted">
                           Tags
                         </label>
                         <div className="relative">
-                          <Tag className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+                          <Tag className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-quiet" />
                           <input
                             type="text"
                             value={tagInput}
@@ -518,7 +517,7 @@ export function TaskSheet({
                             }}
                             onBlur={addTag}
                             placeholder="Add tag..."
-                            className="w-full rounded-lg border border-white/10 bg-glass-04 px-3 py-2.5 pl-10 text-sm text-white/80 outline-none transition-colors placeholder:text-white/20 hover:border-white/20 focus:border-cyan-500/50"
+                            className="w-full rounded-lg border border-border bg-glass-04 px-3 py-2.5 pl-10 text-sm text-text-secondary outline-none transition-colors placeholder:text-text-faint hover:border-border-active focus:border-cyan-500/50"
                           />
                         </div>
                         {data.tags.length > 0 && (
@@ -526,12 +525,12 @@ export function TaskSheet({
                             {data.tags.map((tag) => (
                               <span
                                 key={tag}
-                                className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-glass-04 px-2.5 py-1 text-[11px] text-white/60"
+                                className="inline-flex items-center gap-1 rounded-full border border-border bg-glass-04 px-2.5 py-1 text-[11px] text-text-tertiary"
                               >
                                 {tag}
                                 <button
                                   onClick={() => removeTag(tag)}
-                                  className="ml-0.5 text-white/30 hover:text-white/60"
+                                  className="ml-0.5 text-text-quiet hover:text-text-tertiary"
                                 >
                                   <X className="h-3 w-3" />
                                 </button>
@@ -545,7 +544,7 @@ export function TaskSheet({
 
                   {/* Notes */}
                   <div>
-                    <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/40">
+                    <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-text-muted">
                       Internal Notes
                     </label>
                     <textarea
@@ -556,20 +555,20 @@ export function TaskSheet({
                       }}
                       placeholder="Add internal notes..."
                       rows={2}
-                      className="w-full resize-none rounded-xl border border-white/10 glass-subtle px-4 py-3 text-sm text-white/60 placeholder:text-white/20 focus:border-cyan-500/30 focus:outline-none"
+                      className="w-full resize-none rounded-xl border border-border glass-subtle px-4 py-3 text-sm text-text-tertiary placeholder:text-text-faint focus:border-cyan-500/30 focus:outline-none"
                     />
                   </div>
                 </div>
               </div>
 
               {/* ── Footer ── */}
-              <div className="border-t border-white/10 px-6 py-3">
-                <p className="text-xs text-white/30">
-                  <kbd className="rounded border border-white/10 bg-glass-04 px-1.5 py-0.5 font-mono text-[11px]">
+              <div className="border-t border-border px-6 py-3">
+                <p className="text-xs text-text-quiet">
+                  <kbd className="rounded border border-border bg-glass-04 px-1.5 py-0.5 font-mono text-[11px]">
                     ⌘⏎
                   </kbd>{" "}
                   to save &middot;{" "}
-                  <kbd className="rounded border border-white/10 bg-glass-04 px-1.5 py-0.5 font-mono text-[11px]">
+                  <kbd className="rounded border border-border bg-glass-04 px-1.5 py-0.5 font-mono text-[11px]">
                     Esc
                   </kbd>{" "}
                   to close

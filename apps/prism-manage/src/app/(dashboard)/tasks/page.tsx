@@ -186,7 +186,7 @@ function TasksContent() {
       {/* Page Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold text-white">
+          <h1 className="flex items-center gap-2 text-2xl font-bold text-text-primary">
             {isStarredFilter ? (
               <>
                 <Star className="h-6 w-6 text-yellow-400" fill="currentColor" />
@@ -198,7 +198,7 @@ function TasksContent() {
               "All Tasks"
             )}
           </h1>
-          <p className="mt-1 text-sm text-white/40">
+          <p className="mt-1 text-sm text-text-muted">
             {filteredTasks.filter((t) => t.status !== "approved").length} tasks
             remaining
           </p>
@@ -206,7 +206,7 @@ function TasksContent() {
 
         <button
           onClick={handleCreateTask}
-          className="flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-void transition-all hover:bg-cyan-400"
+          className="flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-cyan-400"
         >
           <Plus className="h-4 w-4" />
           New Task
@@ -236,7 +236,7 @@ function TasksContent() {
 
         {Object.keys(tasksByProject).length === 0 && (
           <div className="py-12 text-center">
-            <p className="text-white/40">
+            <p className="text-text-muted">
               No tasks yet. Create a task to get started.
             </p>
           </div>
@@ -250,7 +250,7 @@ export default function TasksPage() {
   return (
     <Suspense
       fallback={
-        <div className="py-12 text-center text-white/40">
+        <div className="py-12 text-center text-text-muted">
           Loading tasks...
         </div>
       }

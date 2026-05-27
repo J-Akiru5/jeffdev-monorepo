@@ -48,18 +48,17 @@ export function WorkspaceSwitcher({ collapsed }: WorkspaceSwitcherProps) {
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setOpen(!open)}
-          className="flex w-full items-center justify-center rounded-md p-2 text-white/50 transition-colors hover:bg-glass-05 hover:text-white"
+          className="flex w-full items-center justify-center rounded-md p-2 text-text-tertiary transition-colors hover:bg-glass-05 hover:text-text-primary"
           title={activeWorkspace?.name || "Switch workspace"}
         >
           <Building2 className="h-4 w-4" />
         </button>
-        {open && (
-          <div className="absolute left-0 top-full z-50 mt-1 w-48 rounded-lg border border-white/10 bg-elevated py-1 shadow-xl">
+        {open && (            <div className="absolute left-0 top-full z-50 mt-1 w-48 rounded-lg border border-border bg-elevated py-1 shadow-xl">
             {workspaces.map((ws) => (
               <button
                 key={ws.id}
                 onClick={() => handleSelect(ws)}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-white/70 transition-colors hover:bg-glass-05 hover:text-white"
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-glass-05 hover:text-text-primary"
               >
                 <Building2 className="h-3.5 w-3.5 flex-shrink-0" />
                 <span className="truncate">{ws.name}</span>
@@ -78,24 +77,24 @@ export function WorkspaceSwitcher({ collapsed }: WorkspaceSwitcherProps) {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/70 transition-colors hover:bg-glass-05 hover:text-white"
+        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-glass-05 hover:text-text-primary"
       >
         <Building2 className="h-4 w-4 flex-shrink-0 text-cyan-400" />
         <span className="flex-1 truncate text-left font-medium">
           {activeWorkspace?.name || "Select workspace"}
         </span>
         <ChevronDown
-          className={`h-3.5 w-3.5 text-white/30 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`h-3.5 w-3.5 text-text-quiet transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-1 w-full rounded-lg border border-white/10 bg-elevated py-1 shadow-xl">
+        <div className="absolute left-0 top-full z-50 mt-1 w-full rounded-lg border border-border bg-elevated py-1 shadow-xl">
           {workspaces.map((ws) => (
             <button
               key={ws.id}
               onClick={() => handleSelect(ws)}
-              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-white/70 transition-colors hover:bg-glass-05 hover:text-white"
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-glass-05 hover:text-text-primary"
             >
               {ws.name === "Personal" ? (
                 <User className="h-3.5 w-3.5 flex-shrink-0" />
