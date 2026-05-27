@@ -46,7 +46,7 @@ export async function createTask(input: {
     ...(input.completed !== undefined ? { completed: input.completed } : {}),
     ...(input.starred !== undefined ? { starred: input.starred } : {}),
   });
-  if (!parsed.success) throw new Error(parsed.error.errors[0].message);
+  if (!parsed.success) throw new Error(parsed.error!.issues[0]!.message);
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -125,7 +125,7 @@ export async function updateTask(
   if (!taskId) throw new Error("Task ID is required");
 
   const parsed = UpdateTaskSchema.safeParse(data);
-  if (!parsed.success) throw new Error(parsed.error.errors[0].message);
+  if (!parsed.success) throw new Error(parsed.error!.issues[0]!.message);
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

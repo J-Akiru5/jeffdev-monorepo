@@ -82,7 +82,7 @@ export async function updateKpi(
   updates: { current?: number; target?: number }
 ): Promise<void> {
   const parsed = UpdateMarketingKpiSchema.safeParse(updates);
-  if (!parsed.success) throw new Error(parsed.error.errors[0].message);
+  if (!parsed.success) throw new Error(parsed.error!.issues[0]!.message);
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -145,7 +145,7 @@ export async function createMarketingTask(input: {
     platform: input.platform,
     description: input.description,
   });
-  if (!parsed.success) throw new Error(parsed.error.errors[0].message);
+  if (!parsed.success) throw new Error(parsed.error!.issues[0]!.message);
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -195,7 +195,7 @@ export async function updateMarketingTask(
   if (!taskId) throw new Error("Task ID is required");
 
   const parsed = UpdateMarketingTaskSchema.safeParse(data);
-  if (!parsed.success) throw new Error(parsed.error.errors[0].message);
+  if (!parsed.success) throw new Error(parsed.error!.issues[0]!.message);
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -248,14 +248,12 @@ export async function getMarketingTaskStats(): Promise<{
 
     for (const t of tasks) {
       if (t.status in byStatus) {
-        byStatus[t.status]++;
+        byStatus[t.status]!++;
       }
-      if (!byPhase[t.phaseId]) {
-        byPhase[t.phaseId] = { total: 0, done: 0 };
-      }
-      byPhase[t.phaseId]!.total++;
+      const entry = byPhase[t.phaseId] ?? (byPhase[t.phaseId] = { total: 0, done: 0 });
+      entry.total++;
       if (t.status === "done") {
-        byPhase[t.phaseId]!.done++;
+        entry.done++;
       }
     }
 

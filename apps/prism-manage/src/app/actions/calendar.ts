@@ -44,7 +44,7 @@ export async function createEvent(event: {
     allDay: event.allDay ?? false,
     ...(event.linkedTaskId ? { linkedTaskId: event.linkedTaskId } : {}),
   });
-  if (!parsed.success) throw new Error(parsed.error.errors[0].message);
+  if (!parsed.success) throw new Error(parsed.error!.issues[0]!.message);
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -76,7 +76,7 @@ export async function updateEvent(
   if (!eventId) throw new Error("Event ID is required");
 
   const parsed = UpdateCalendarEventSchema.safeParse(data);
-  if (!parsed.success) throw new Error(parsed.error.errors[0].message);
+  if (!parsed.success) throw new Error(parsed.error!.issues[0]!.message);
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
