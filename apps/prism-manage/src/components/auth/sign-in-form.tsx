@@ -255,6 +255,18 @@ export function SignInForm() {
         });
 
         if (signUpError) {
+          const isDuplicate =
+            signUpError.message?.toLowerCase().includes("already registered") ||
+            signUpError.message?.toLowerCase().includes("already exists") ||
+            signUpError.message?.toLowerCase().includes("duplicate");
+
+          if (isDuplicate) {
+            toast.error("This email is already registered. Switching to sign in.");
+            setMode("signin");
+            setLoading(false);
+            return;
+          }
+
           toast.error(signUpError.message);
           setLoading(false);
           return;

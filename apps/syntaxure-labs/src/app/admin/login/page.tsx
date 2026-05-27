@@ -37,10 +37,15 @@ function AdminLoginForm() {
 
     try {
       const supabase = createClient();
+      const nextParam = searchParams.get("next");
+      const redirectTo = `${window.location.origin}/auth/callback?invite=${inviteToken || ""}${
+        nextParam ? `&next=${encodeURIComponent(nextParam)}` : ""
+      }`;
+
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?invite=${inviteToken || ""}`,
+          redirectTo,
         },
       });
 
