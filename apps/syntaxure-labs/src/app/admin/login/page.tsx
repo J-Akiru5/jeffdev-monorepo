@@ -54,7 +54,7 @@ function AdminLoginForm() {
       }
     } catch (err: unknown) {
       console.error("[LOGIN ERROR]", err);
-      setError(err.message || "Failed to initialize Google login");
+      setError(err instanceof Error ? err.message : "Failed to initialize Google login");
       setIsLoading(false);
     }
   };

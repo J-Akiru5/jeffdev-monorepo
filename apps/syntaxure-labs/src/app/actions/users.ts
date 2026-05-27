@@ -16,7 +16,8 @@ const COLLECTION = "user_profiles";
  */
 export async function getUserProfile(uid: string): Promise<UserProfile | null> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(COLLECTION)
       .select("*")
@@ -38,7 +39,8 @@ export async function getPublicNamecard(
   username: string,
 ): Promise<PublicNamecard | null> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(COLLECTION)
       .select("*")
@@ -99,7 +101,8 @@ export async function updateUserProfile(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { role: _role, created_at: _createdAt, ...safeData } = data;
 
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     // Fetch existing user profile to merge preferences
     const { data: existing, error: fetchError } = await supabase
@@ -168,7 +171,8 @@ export async function checkUsernameAvailable(
   excludeUid?: string,
 ): Promise<boolean> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(COLLECTION)
       .select("id")

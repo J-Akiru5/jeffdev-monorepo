@@ -38,7 +38,8 @@ const milestoneSchema = z.object({
  * Get project by slug and return its ID
  */
 async function getProjectId(slug: string): Promise<string | null> {
-  const supabase = getAdminClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase = getAdminClient() as any;
   const { data } = await supabase
     .from("projects")
     .select("id")
@@ -52,7 +53,8 @@ async function getProjectId(slug: string): Promise<string | null> {
  */
 export async function updateProjectStatus(slug: string, status: string) {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     const { data: project } = await supabase
       .from("projects")
@@ -80,8 +82,7 @@ export async function updateProjectStatus(slug: string, status: string) {
         status: status as "active" | "paused" | "completed" | "archived",
         metadata,
         updated_at: new Date().toISOString(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .eq("slug", slug);
 
     if (error) throw error;
@@ -110,7 +111,8 @@ export async function updateProjectProgress(slug: string, progress: number) {
   try {
     const validProgress = Math.max(0, Math.min(100, progress));
 
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     const { data: project } = await supabase
       .from("projects")
@@ -130,8 +132,7 @@ export async function updateProjectProgress(slug: string, progress: number) {
       .update({
         metadata,
         updated_at: new Date().toISOString(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .eq("slug", slug);
 
     if (error) throw error;
@@ -163,7 +164,8 @@ export async function updateProjectDetails(
   try {
     const validated = projectUpdateSchema.parse(data);
 
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     const { data: project } = await supabase
       .from("projects")
@@ -212,8 +214,7 @@ export async function updateProjectDetails(
 
     const { error } = await supabase
       .from("projects")
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .update(updates as any)
+      .update(updates)
       .eq("slug", slug);
 
     if (error) throw error;
@@ -232,7 +233,7 @@ export async function updateProjectDetails(
   } catch (error) {
     console.error("[UPDATE PROJECT DETAILS ERROR]", error);
     if (error instanceof z.ZodError) {
-      return { success: false, error: error.issues[0].message };
+      return { success: false, error: error.issues[0]!.message };
     }
     return { success: false, error: "Failed to update project" };
   }
@@ -247,7 +248,8 @@ export async function addMilestone(
 ) {
   try {
     const validated = milestoneSchema.parse(milestone);
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     const projectId = await getProjectId(slug);
     if (!projectId) {
@@ -265,8 +267,7 @@ export async function addMilestone(
         deliverables: validated.deliverables || null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .select("*")
       .single();
 
@@ -297,7 +298,8 @@ export async function updateMilestoneStatus(
   status: string,
 ) {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     const projectId = await getProjectId(slug);
     if (!projectId) {
@@ -309,8 +311,7 @@ export async function updateMilestoneStatus(
       .update({
         status: status as "pending" | "in_progress" | "completed" | "blocked",
         updated_at: new Date().toISOString(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .eq("id", milestoneId)
       .eq("project_id", projectId);
 
@@ -343,8 +344,7 @@ export async function updateMilestoneStatus(
       .update({
         metadata,
         updated_at: new Date().toISOString(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .eq("slug", slug);
 
     await logAuditEvent({

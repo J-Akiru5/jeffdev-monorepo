@@ -105,7 +105,8 @@ export async function createSubscription(input: {
       endDate.setFullYear(endDate.getFullYear() + 1);
     }
 
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     const { data: result, error } = await supabase
       .from(SUBSCRIPTIONS_TABLE)
@@ -126,8 +127,7 @@ export async function createSubscription(input: {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ] as any)
+      ])
       .select("id");
 
     if (error) throw error;
@@ -148,7 +148,8 @@ export async function updateSubscription(
   input: Partial<Omit<SubscriptionRow, "id" | "created_at">>,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
     const updateData: Record<string, unknown> = {};
 
     // Only add fields that are actually being updated
@@ -191,8 +192,7 @@ export async function updateSubscription(
 
     const { error } = await supabase
       .from(SUBSCRIPTIONS_TABLE)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .update(updateData as any)
+      .update(updateData)
       .eq("id", id);
 
     if (error) throw error;

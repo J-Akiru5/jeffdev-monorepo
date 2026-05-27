@@ -211,7 +211,7 @@ export async function getProjectBySlug(
   slug: string,
 ): Promise<DataProject | null> {
   try {
-    const supabase = await getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from("projects")
       .select("*, milestones(*)")

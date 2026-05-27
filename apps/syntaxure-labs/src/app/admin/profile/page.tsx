@@ -26,7 +26,7 @@ async function getCurrentUser(): Promise<UserProfile> {
   }
 
   try {
-    const adminSupabase = getAdminClient();
+    const adminSupabase = getAdminClient() as any;
     const { data: profile, error: dbError } = await adminSupabase
       .from("user_profiles")
       .select("*")
@@ -41,6 +41,8 @@ async function getCurrentUser(): Promise<UserProfile> {
     const prefs = (profile.preferences || {}) as Record<string, unknown>;
     const namecard = (prefs.namecard || {}) as Record<string, unknown>;
     const socials = (prefs.socials || {}) as Record<string, unknown>;
+
+    const namecardSocials = (namecard.socials || {}) as Record<string, boolean>;
 
     return {
       uid: profile.id,
@@ -69,10 +71,10 @@ async function getCurrentUser(): Promise<UserProfile> {
         accentColor: namecard.accentColor || "#06b6d4",
         background: namecard.background || "gradient-dark",
         socials: {
-          linkedin: namecard.socials?.linkedin ?? true,
-          github: namecard.socials?.github ?? true,
-          twitter: namecard.socials?.twitter ?? true,
-          website: namecard.socials?.website ?? true,
+          linkedin: namecardSocials.linkedin ?? true,
+          github: namecardSocials.github ?? true,
+          twitter: namecardSocials.twitter ?? true,
+          website: namecardSocials.website ?? true,
         },
       },
       created_at: profile.created_at || new Date().toISOString(),
