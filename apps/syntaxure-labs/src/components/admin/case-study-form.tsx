@@ -72,7 +72,7 @@ export function CaseStudyForm({ mode, initialData }: Props) {
   const [formData, setFormData] = useState<FormData>({
     title: initialData?.title || "",
     client: initialData?.client || "",
-    category: initialData?.category || CATEGORIES[0],
+    category: initialData?.category || CATEGORIES[0]!,
     tagline: initialData?.tagline || "",
     description: initialData?.description || "",
     challenge: initialData?.challenge || "",

@@ -55,7 +55,7 @@ export function EventModal({
         setTitle(event.title);
         setDescription(event.description || "");
         setType(event.type);
-        setStart(event.start.split("T")[0]);
+        setStart(event.start.split("T")[0]!);
         setEnd(event.end?.split("T")[0] || "");
         setAllDay(event.allDay ?? true);
       } else {
@@ -63,7 +63,7 @@ export function EventModal({
         setDescription("");
         setType("meeting");
         setStart(
-          defaultDate?.split("T")[0] || new Date().toISOString().split("T")[0],
+          defaultDate?.split("T")[0] || new Date().toISOString().split("T")[0]!,
         );
         setEnd("");
         setAllDay(true);

@@ -67,7 +67,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     if (field.includes(".")) {
       const parts = field.split(".");
       if (parts.length === 2) {
-        const [parent, child] = parts;
+        const [parent, child] = [parts[0]!, parts[1]!];
         setFormData((prev) => ({
           ...prev,
           [parent]: {
@@ -76,7 +76,7 @@ export function ProfileForm({ profile }: ProfileFormProps) {
           },
         }));
       } else if (parts.length === 3) {
-        const [root, parent, child] = parts;
+        const [root, parent, child] = [parts[0]!, parts[1]!, parts[2]!];
         setFormData((prev) => ({
           ...prev,
           [root]: {

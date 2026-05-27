@@ -14,7 +14,7 @@ import type { Task } from "@/lib/schemas";
 import { getTaskTypeConfig } from "@/lib/task-types";
 import { toast } from "sonner";
 
-type KanbanColumn = "backlog" | "in_progress" | "review" | "done";
+type KanbanColumn = "backlog" | "todo" | "in_progress" | "in_review" | "approved";
 
 interface KanbanTask extends Task {
   column: KanbanColumn;
@@ -22,9 +22,10 @@ interface KanbanTask extends Task {
 
 const columns: { id: KanbanColumn; title: string; color: string }[] = [
   { id: "backlog", title: "Backlog", color: "#6b7280" },
-  { id: "in_progress", title: "In Progress", color: "#3b82f6" },
-  { id: "review", title: "In Review", color: "var(--color-purple)" },
-  { id: "done", title: "Done", color: "var(--color-emerald)" },
+  { id: "todo", title: "To Do", color: "#3b82f6" },
+  { id: "in_progress", title: "In Progress", color: "#f59e0b" },
+  { id: "in_review", title: "In Review", color: "#8b5cf6" },
+  { id: "approved", title: "Approved", color: "#10b981" },
 ];
 
 export default function KanbanPage() {
@@ -60,6 +61,7 @@ export default function KanbanPage() {
             assignedTo: t.assignedTo ? String(t.assignedTo) : t.assigned_to ? String(t.assigned_to) : undefined,
             tags: Array.isArray(t.tags) ? (t.tags as string[]) : undefined,
             dueDate: t.dueDate ? String(t.dueDate) : t.due_date ? String(t.due_date) : undefined,
+            pathIndex: Number(t.pathIndex || t.path_index || 0),
             createdAt:
               String(t.createdAt || t.created_at || new Date().toISOString()),
             updatedAt:
@@ -96,8 +98,7 @@ export default function KanbanPage() {
     if (!task) return;
 
     try {
-      const dbStatus =
-        column === "done" ? "done" : column === "in_progress" ? "in_progress" : column === "review" ? "review" : "todo";
+      const dbStatus = column;
       await updateTaskStatus(draggedTask, dbStatus);
       setTasks((prev) =>
         prev.map((t) =>
@@ -132,6 +133,7 @@ export default function KanbanPage() {
         status: "todo",
         priority: "medium",
         isStarred: false,
+        pathIndex: 0,
         order: tasks.filter((t) => t.projectId === projectId).length,
         column,
         createdAt: new Date().toISOString(),
@@ -169,7 +171,7 @@ export default function KanbanPage() {
       </div>
 
       {/* Kanban Columns */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
         {columns.map((column) => (
           <div
             key={column.id}
@@ -261,12 +263,14 @@ export default function KanbanPage() {
 
 function mapStatusToColumn(status: string): KanbanColumn {
   switch (status) {
+    case "todo":
+      return "todo";
     case "in_progress":
       return "in_progress";
-    case "review":
-      return "review";
-    case "done":
-      return "done";
+    case "in_review":
+      return "in_review";
+    case "approved":
+      return "approved";
     default:
       return "backlog";
   }

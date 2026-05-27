@@ -16,12 +16,12 @@ try {
     envConfig.split("\n").forEach((line) => {
       const match = line.match(/^([^=]+)=(.*)$/);
       if (match) {
-        let value = match[2].trim();
+        let value = match[2]!.trim();
         if (value.startsWith('"') && value.endsWith('"')) {
           value = value.slice(1, -1);
         }
         value = value.replace(/\\n/g, "\n");
-        process.env[match[1].trim()] = value;
+        process.env[match[1]!.trim()] = value;
       }
     });
   }

@@ -42,6 +42,15 @@ export const TASK_TYPES = {
     borderColor: "rgba(239, 68, 68, 0.3)",
     textColor: "#f87171",
   },
+  uncategorized: {
+    icon: "📋",
+    label: "Uncategorized",
+    description: "Default type when no specific category is set.",
+    color: "#6b7280", // Gray
+    bgColor: "rgba(107, 114, 128, 0.12)",
+    borderColor: "rgba(107, 114, 128, 0.3)",
+    textColor: "#9ca3af",
+  },
 } as const;
 
 export type TaskTypeKey = keyof typeof TASK_TYPES;
@@ -74,25 +83,44 @@ export const PRIORITY_CONFIG = {
 export type PriorityKey = keyof typeof PRIORITY_CONFIG;
 
 /**
- * Status Configuration
+ * Status Configuration (new workflow)
  */
 export const STATUS_CONFIG = {
+  backlog: {
+    label: "Backlog",
+    color: "#6b7280",
+  },
   todo: {
     label: "To Do",
-    color: "#6b7280",
+    color: "#3b82f6",
   },
   in_progress: {
     label: "In Progress",
-    color: "#3b82f6",
+    color: "#f59e0b",
   },
-  review: {
+  in_review: {
     label: "In Review",
     color: "#8b5cf6",
   },
-  done: {
-    label: "Done",
+  approved: {
+    label: "Approved",
     color: "#10b981",
   },
 } as const;
 
 export type StatusKey = keyof typeof STATUS_CONFIG;
+
+/**
+ * RBAC-aware status transitions:
+ * - founder/CPO: can move to any status including 'approved'
+ * - employee: can only move up to 'in_review'
+ */
+export const STATUS_TRANSITIONS: Record<StatusKey, StatusKey[]> = {
+  backlog: ["todo"],
+  todo: ["in_progress"],
+  in_progress: ["in_review"],
+  in_review: ["backlog", "approved"],
+  approved: ["in_review", "backlog"],
+};
+
+export const STAFF_LOCKED_STATUSES: StatusKey[] = ["approved"];

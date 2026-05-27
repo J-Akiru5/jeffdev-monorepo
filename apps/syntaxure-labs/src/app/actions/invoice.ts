@@ -201,7 +201,7 @@ export async function createInvoice(data: z.infer<typeof createInvoiceSchema>) {
         tax_amount: tax.toString(),
         total_amount: total.toString(),
         status: "draft",
-        issued_date: new Date().toISOString().split("T")[0],
+        issued_date: new Date().toISOString().split("T")[0]!,
         due_date: validated.dueDate,
         line_items: validated.items as unknown as Record<string, unknown>[],
         notes: validated.notes || null,
@@ -508,7 +508,7 @@ export async function recordPayment(
     };
 
     if (newStatus === "paid") {
-      updates.paid_date = new Date().toISOString().split("T")[0];
+      updates.paid_date = new Date().toISOString().split("T")[0]!;
     }
 
     const { error } = await supabase
@@ -572,7 +572,7 @@ export async function verifyGcashPayment(
 
     const updatedPayments = [...payments];
     updatedPayments[paymentIndex] = {
-      ...updatedPayments[paymentIndex],
+      ...updatedPayments[paymentIndex]!,
       status: verified ? "verified" : "rejected",
       verifiedAt: new Date().toISOString(),
     };
@@ -580,7 +580,7 @@ export async function verifyGcashPayment(
     const total = parseFloat(existing.total_amount as string) || 0;
     let paidAmount = (metadata.paidAmount as number) || 0;
     if (!verified) {
-      paidAmount -= payments[paymentIndex].amount;
+      paidAmount -= payments[paymentIndex]!.amount;
     }
 
     const status = determineInvoiceStatus(
@@ -600,7 +600,7 @@ export async function verifyGcashPayment(
     };
 
     if (status === "paid") {
-      updates.paid_date = new Date().toISOString().split("T")[0];
+      updates.paid_date = new Date().toISOString().split("T")[0]!;
     }
 
     const { error } = await supabase

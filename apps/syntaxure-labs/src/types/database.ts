@@ -893,6 +893,63 @@ export type Database = {
           updated_at?: string;
         };
       };
+      workspaces: {
+        Row: {
+          id: string;
+          name: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          created_at?: string;
+        };
+      };
+      workspace_members: {
+        Row: {
+          workspace_id: string;
+          user_id: string;
+          role: "founder" | "employee";
+          created_at: string;
+        };
+        Insert: {
+          workspace_id: string;
+          user_id: string;
+          role?: "founder" | "employee";
+          created_at?: string;
+        };
+        Update: {
+          workspace_id?: string;
+          user_id?: string;
+          role?: "founder" | "employee";
+          created_at?: string;
+        };
+      };
+      departments: {
+        Row: {
+          id: string;
+          workspace_id: string;
+          name: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          workspace_id: string;
+          name: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          workspace_id?: string;
+          name?: string;
+          created_at?: string;
+        };
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -900,6 +957,12 @@ export type Database = {
     CompositeTypes: Record<string, never>;
   };
 };
+
+// New tables
+export type Workspace = Database["public"]["Tables"]["workspaces"]["Row"];
+export type WorkspaceMember =
+  Database["public"]["Tables"]["workspace_members"]["Row"];
+export type Department = Database["public"]["Tables"]["departments"]["Row"];
 
 // Convenience type aliases
 export type UserProfile = Database["public"]["Tables"]["user_profiles"]["Row"];

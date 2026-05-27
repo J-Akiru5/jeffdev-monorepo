@@ -7,8 +7,8 @@ interface UseInViewOptions {
   threshold?: number;
 }
 
-export function useInView(options?: UseInViewOptions) {
-  const ref = useRef<HTMLElement>(null);
+export function useInView<T extends HTMLElement = HTMLElement>(options?: UseInViewOptions) {
+  const ref = useRef<T>(null);
   const [isInView, setIsInView] = useState(false);
 
   useEffect(() => {
@@ -17,6 +17,7 @@ export function useInView(options?: UseInViewOptions) {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
+        if (!entry) return;
         if (entry.isIntersecting) {
           setIsInView(true);
           observer.disconnect();

@@ -32,8 +32,8 @@ export function TaskList({
   onExpand,
   onTaskClick,
 }: TaskListProps) {
-  const incompleteTasks = tasks.filter((t) => t.status !== "done");
-  const completedTasks = tasks.filter((t) => t.status === "done");
+  const incompleteTasks = tasks.filter((t) => t.status !== "approved");
+  const completedTasks = tasks.filter((t) => t.status === "approved");
 
   return (
     <div className="space-y-4">

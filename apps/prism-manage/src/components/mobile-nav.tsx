@@ -4,7 +4,7 @@
  * Mobile Bottom Navigation
  * ------------------------
  * Fixed bottom tab bar for mobile devices.
- * Shows primary views + "Lists" drawer.
+ * Shows primary views + "Lists" drawer with workspace-aware content.
  */
 
 import { useState, useMemo } from "react";
@@ -23,7 +23,9 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useProjects } from "@/contexts/project-context";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 import { createClient } from "@/lib/supabase/browser";
+import { PERSONAL_LISTS } from "@/lib/schemas";
 
 function SignOutButton() {
   const router = useRouter();
@@ -51,12 +53,30 @@ export function MobileNav() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { projects, setActiveProjectId, activeProjectId } = useProjects();
 
+  // Workspace state
+  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
+  const workspaces = useWorkspaceStore((s) => s.workspaces);
+  const departments = useWorkspaceStore((s) => s.departments);
+  const userRole = useWorkspaceStore((s) => s.userRole);
+  const userDepartmentId = useWorkspaceStore((s) => s.userDepartmentId);
+  const setActiveWorkspace = useWorkspaceStore((s) => s.setActiveWorkspace);
+
+  const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId);
+  const isSyntaxureLabs = activeWorkspace?.name === "Syntaxure Labs" || activeWorkspace?.name === "Syntaxure Labs, Inc.";
+  const isPersonal = activeWorkspace?.name === "Personal";
+  const isFounder = userRole === "founder";
+
   const tabs = [
     { label: "Tasks", href: "/tasks", icon: CheckSquare },
     { label: "Calendar", href: "/calendar", icon: Calendar },
     { label: "Kanban", href: "/kanban", icon: LayoutGrid },
-    { label: "Mktg", href: "/marketing", icon: CheckSquare },
   ];
+
+  const marketingTab = { label: "Mktg", href: "/marketing", icon: CheckSquare };
+
+  // Determine if Marketing tab should be shown
+  const marketingDept = departments.find((d) => d.name === "Marketing");
+  const isMarketingMember = !!marketingDept && (isFounder || userDepartmentId === marketingDept.id);
 
   const handleProjectClick = (projectId: string) => {
     setActiveProjectId(projectId);
@@ -85,6 +105,21 @@ export function MobileNav() {
             </Link>
           );
         })}
+
+        {/* Marketing Tab — only for founders or Marketing dept members */}
+        {isMarketingMember && (
+          <Link
+            key={marketingTab.href}
+            href={marketingTab.href}
+            onClick={() => setIsDrawerOpen(false)}
+            className={`flex flex-col items-center justify-center gap-1 rounded-md p-2 transition-all ${
+              pathname === marketingTab.href ? "text-cyan-400" : "text-white/40 hover:text-white"
+            }`}
+          >
+            <marketingTab.icon className="h-5 w-5" />
+            <span className="text-[10px] font-medium">{marketingTab.label}</span>
+          </Link>
+        )}
 
         {/* Lists Button */}
         <button
@@ -153,23 +188,95 @@ export function MobileNav() {
                 </div>
               </div>
 
-              {/* Project Lists */}
-              <div className="mb-6">
-                <div className="mb-3 flex items-center justify-between px-2">
-                  <h3 className="font-mono text-xs uppercase tracking-wider text-white/30">
-                    Your Lists
-                  </h3>
-                  <button className="rounded-lg p-2 text-cyan-400 hover:bg-cyan-400/10">
-                    <Plus className="h-4 w-4" />
-                  </button>
+              {/* Workspace Sections */}
+              {/* ── Personal Lists ── */}
+              {(isPersonal || !activeWorkspace) && (
+                <div className="mb-6">
+                  <div className="mb-3 flex items-center justify-between px-2">
+                    <h3 className="font-mono text-xs uppercase tracking-wider text-white/30">
+                      {isPersonal ? "Your Lists" : "Lists"}
+                    </h3>
+                    <button className="rounded-lg p-2 text-cyan-400 hover:bg-cyan-400/10">
+                      <Plus className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {projects.length === 0 ? (
+                      PERSONAL_LISTS.map((list) => (
+                        <button
+                          key={list.name}
+                          disabled
+                          className="flex w-full items-center gap-3 rounded-xl border border-white/5 glass-subtle p-3 text-white/40"
+                        >
+                          <span className="text-sm font-medium">{list.name}</span>
+                        </button>
+                      ))
+                    ) : (
+                      projects.map((project) => (
+                        <button
+                          key={project.id}
+                          onClick={() => handleProjectClick(project.id)}
+                          className={`flex w-full items-center gap-3 rounded-xl border p-3 transition-all active:scale-95 ${
+                            activeProjectId === project.id
+                              ? "border-white/10 bg-glass-10 text-white"
+                              : "border-white/5 glass-subtle text-white/60 hover:bg-glass-05 hover:text-white"
+                          }`}
+                        >
+                          <span
+                            className="h-3 w-3 rounded-full"
+                            style={{
+                              backgroundColor: project.color || "var(--color-cyan)",
+                            }}
+                          />
+                          <span className="text-sm font-medium">
+                            {project.name}
+                          </span>
+                        </button>
+                      ))
+                    )}
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  {projects.length === 0 ? (
-                    <p className="px-2 text-sm text-white/30">
-                      No lists yet. Create one to get started.
-                    </p>
-                  ) : (
-                    projects.map((project) => (
+              )}
+
+              {/* ── Syntaxure Labs Departments ── */}
+              {isSyntaxureLabs && departments.length > 0 && (
+                <div className="mb-6">
+                  <div className="mb-3 flex items-center justify-between px-2">
+                    <h3 className="font-mono text-xs uppercase tracking-wider text-white/30">
+                      Departments
+                    </h3>
+                  </div>
+                  <div className="space-y-2">
+                    {(isFounder ? departments : departments.slice(0, 1)).map((dept) => (
+                      <Link
+                        key={dept.id}
+                        href={`/tasks?department=${dept.id}`}
+                        onClick={() => setIsDrawerOpen(false)}
+                        className="flex w-full items-center gap-3 rounded-xl border border-white/5 glass-subtle p-3 text-white/60 transition-all active:scale-95 hover:bg-glass-05 hover:text-white"
+                      >
+                        <span
+                          className="h-3 w-3 rounded-full"
+                          style={{
+                            backgroundColor: getDepartmentColor(dept.name),
+                          }}
+                        />
+                        <span className="text-sm font-medium">{dept.name}</span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Legacy: Show projects if no workspace match */}
+              {!isPersonal && !isSyntaxureLabs && projects.length > 0 && (
+                <div className="mb-6">
+                  <div className="mb-3 flex items-center justify-between px-2">
+                    <h3 className="font-mono text-xs uppercase tracking-wider text-white/30">
+                      Your Lists
+                    </h3>
+                  </div>
+                  <div className="space-y-2">
+                    {projects.map((project) => (
                       <button
                         key={project.id}
                         onClick={() => handleProjectClick(project.id)}
@@ -189,10 +296,10 @@ export function MobileNav() {
                           {project.name}
                         </span>
                       </button>
-                    ))
-                  )}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Settings & Sign Out */}
               <div className="border-t border-white/10 pt-4 space-y-1">
@@ -212,4 +319,15 @@ export function MobileNav() {
       </AnimatePresence>
     </>
   );
+}
+
+function getDepartmentColor(name: string): string {
+  const colorMap: Record<string, string> = {
+    Executive: "#8b5cf6",
+    Engineering: "#06b6d4",
+    Operations: "#f59e0b",
+    Marketing: "#10b981",
+    Product: "#3b82f6",
+  };
+  return colorMap[name] || "var(--color-cyan)";
 }

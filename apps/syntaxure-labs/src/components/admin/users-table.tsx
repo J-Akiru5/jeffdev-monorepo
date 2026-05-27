@@ -94,8 +94,7 @@ export function UsersTable({ users, currentUserUid }: UsersTableProps) {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => {
-        const config =
-          statusLabels[row.original.status] || statusLabels.pending;
+        const config = (statusLabels[row.original.status] ?? statusLabels.pending)!;
         return (
           <span
             className={`rounded-sm px-2 py-0.5 text-[10px] uppercase tracking-wider ${config.className}`}

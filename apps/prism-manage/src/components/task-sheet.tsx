@@ -4,7 +4,8 @@
  * TaskSheet Component (Slide-Over)
  * ---------------------------------
  * Right-side slide-over panel for creating and editing tasks.
- * Opens with a smooth animation and provides the full task creation UI.
+ * Supports workspace-aware department selection and RBAC status restrictions.
+ * On mobile (small viewports), renders as a full-screen sheet.
  */
 
 import { useState, useRef, useEffect, KeyboardEvent } from "react";
@@ -16,10 +17,12 @@ import {
   Tag,
   Calendar,
   Clock,
+  Building2,
 } from "lucide-react";
-import { TASK_TYPES, PRIORITY_CONFIG, STATUS_CONFIG } from "@/lib/task-types";
-import type { TaskTypeKey } from "@/lib/task-types";
-import type { Task, Project } from "@/lib/schemas";
+import { TASK_TYPES, PRIORITY_CONFIG, STATUS_CONFIG, STATUS_TRANSITIONS, STAFF_LOCKED_STATUSES } from "@/lib/task-types";
+import type { TaskTypeKey, StatusKey } from "@/lib/task-types";
+import type { Task, Project, Department } from "@/lib/schemas";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 
 // ──────────────────────────────────────────────
 // Types
@@ -37,6 +40,7 @@ export interface TaskSheetData {
   dueDate: string;
   dueTime: string;
   projectId: string;
+  departmentId?: string;
 }
 
 interface TaskSheetProps {
@@ -45,7 +49,10 @@ interface TaskSheetProps {
   onSubmit: (data: TaskSheetData) => Promise<void>;
   initialData?: Partial<TaskSheetData>;
   projects: Project[];
+  departments?: Department[];
   mode?: "create" | "edit";
+  /** Whether the sheet is rendering inside an intercepting route modal (no layout wrapper) */
+  isIntercepted?: boolean;
 }
 
 // ──────────────────────────────────────────────
@@ -64,6 +71,7 @@ const DEFAULT_DATA: TaskSheetData = {
   dueDate: "",
   dueTime: "",
   projectId: "",
+  departmentId: undefined,
 };
 
 // ──────────────────────────────────────────────
@@ -76,7 +84,9 @@ export function TaskSheet({
   onSubmit,
   initialData,
   projects,
+  departments = [],
   mode = "create",
+  isIntercepted = true,
 }: TaskSheetProps) {
   const [data, setData] = useState<TaskSheetData>({
     ...DEFAULT_DATA,
@@ -88,6 +98,17 @@ export function TaskSheet({
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
 
+  /** Is the current user a founder? Reads from workspace store (hydrated from DB) */
+  const userRole = useWorkspaceStore((s) => s.userRole);
+  const isFounder = userRole === "founder";
+  const isEmployee = userRole === "employee";
+
+  // Determine which statuses are available for selection based on RBAC
+  const availableStatuses = Object.entries(STATUS_CONFIG).filter(([key]) => {
+    if (isFounder) return true;
+    return !STAFF_LOCKED_STATUSES.includes(key as StatusKey);
+  });
+
   // Reset form when opening
   useEffect(() => {
     if (isOpen) {
@@ -95,12 +116,13 @@ export function TaskSheet({
         ...DEFAULT_DATA,
         ...initialData,
         projectId: initialData?.projectId || projects[0]?.id || "",
+        departmentId: initialData?.departmentId || departments[0]?.id || undefined,
       });
       setTagInput("");
       // Focus title after animation
       setTimeout(() => titleRef.current?.focus(), 150);
     }
-  }, [isOpen, initialData, projects]);
+  }, [isOpen, initialData, projects, departments]);
 
   // Handle escape key
   useEffect(() => {
@@ -170,28 +192,57 @@ export function TaskSheet({
       {isOpen && (
         <>
           {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={onClose}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
-          />
+          {isIntercepted && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={onClose}
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+            />
+          )}
 
           {/* Sheet */}
           <motion.div
             ref={sheetRef}
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
+            initial={{ x: isIntercepted ? "100%" : 0, opacity: isIntercepted ? 1 : 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: isIntercepted ? "100%" : 0, opacity: isIntercepted ? 1 : 0 }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed inset-y-0 right-0 z-50 w-full max-w-[640px] border-l border-white/10 bg-elevated shadow-2xl"
+            className={`${
+              isIntercepted
+                ? "fixed inset-y-0 right-0 z-50 w-full max-w-[640px] border-l border-white/10 bg-elevated shadow-2xl"
+                : "relative w-full max-w-2xl rounded-xl border border-white/10 bg-elevated shadow-2xl"
+            } max-h-screen overflow-hidden sm:max-h-none`}
           >
             <div className="flex h-full flex-col">
               {/* ── Header ── */}
               <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
                 <div className="flex items-center gap-3">
+                  {/* Department Selector (when departments exist) */}
+                  {departments.length > 0 && data.departmentId !== undefined && (
+                    <div className="relative">
+                      <select
+                        value={data.departmentId}
+                        onChange={(e) =>
+                          setData((prev) => ({
+                            ...prev,
+                            departmentId: e.target.value,
+                          }))
+                        }
+                        className="appearance-none rounded-lg border border-white/10 bg-glass-04 px-3 py-2 pr-8 text-sm text-white/80 outline-none transition-colors hover:border-white/20 focus:border-cyan-500/50"
+                      >
+                        {departments.map((dept) => (
+                          <option key={dept.id} value={dept.id}>
+                            {dept.name}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+                    </div>
+                  )}
+
                   {/* Project Selector */}
                   <div className="relative">
                     <select
@@ -260,7 +311,7 @@ export function TaskSheet({
                     <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/40">
                       Type
                     </label>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                       {typeOptions.map((opt) => {
                         const isActive = data.taskType === opt.key;
                         return (
@@ -322,11 +373,16 @@ export function TaskSheet({
                     <label className="mb-3 block text-xs font-medium uppercase tracking-wider text-white/40">
                       Details
                     </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {/* Status */}
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      {/* Status (RBAC-aware) */}
                       <div>
                         <label className="mb-1.5 block text-[11px] text-white/40">
                           Status
+                          {isEmployee && (
+                            <span className="ml-1.5 text-[10px] text-amber-400/60">
+                              (employee)
+                            </span>
+                          )}
                         </label>
                         <select
                           value={data.status}
@@ -338,14 +394,20 @@ export function TaskSheet({
                           }
                           className="w-full appearance-none rounded-lg border border-white/10 bg-glass-04 px-3 py-2.5 text-sm text-white/80 outline-none transition-colors hover:border-white/20 focus:border-cyan-500/50"
                         >
-                          {Object.entries(STATUS_CONFIG).map(
-                            ([key, config]) => (
-                              <option key={key} value={key}>
-                                {config.label}
+                          {availableStatuses.map(([key, config]) => {
+                            const isLocked = STAFF_LOCKED_STATUSES.includes(key as StatusKey);
+                            return (
+                              <option key={key} value={key} disabled={isLocked && isEmployee}>
+                                {config.label}{isLocked && isEmployee ? " (founder only)" : ""}
                               </option>
-                            ),
-                          )}
+                            );
+                          })}
                         </select>
+                        {isEmployee && data.status === "approved" && (
+                          <p className="mt-1 text-[10px] text-amber-400/60">
+                            Only founders can set &quot;Approved&quot;
+                          </p>
+                        )}
                       </div>
 
                       {/* Priority */}

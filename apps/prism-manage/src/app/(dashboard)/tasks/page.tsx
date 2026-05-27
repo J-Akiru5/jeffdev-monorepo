@@ -4,22 +4,19 @@
  * Tasks Page
  * ----------
  * Main task list view showing all tasks organized by project.
- * Integrates the TaskSheet slide-over for full task creation/editing.
+ * Uses Next.js Intercepting Routes for task creation/editing via slide-over.
  */
 
 import { useState, useEffect, Suspense, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { TaskList } from "@/components/task-list";
-import { TaskSheet } from "@/components/task-sheet";
-import type { TaskSheetData } from "@/components/task-sheet";
 import { useProjects } from "@/contexts/project-context";
-import { Star } from "lucide-react";
+import { Star, Plus } from "lucide-react";
 import {
   createTask,
   deleteTask,
   toggleTaskComplete,
   toggleTaskStar,
-  updateTask,
 } from "@/app/actions/tasks";
 import type { Task } from "@/lib/schemas";
 import { toast } from "sonner";
@@ -28,21 +25,17 @@ async function fetchTasks(): Promise<Task[]> {
   const res = await fetch("/api/tasks");
   if (!res.ok) return [];
   const data = await res.json();
-  // API already returns camelCase Task[] from getTasks() server action
   return (data || []) as Task[];
 }
 
 function TasksContent() {
+  const router = useRouter();
   const { projects, activeProjectId } = useProjects();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const filter = searchParams.get("filter");
   const isStarredFilter = filter === "starred";
-
-  // Sheet state
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [editTask, setEditTask] = useState<Task | null>(null);
 
   // Load tasks from Supabase
   useEffect(() => {
@@ -86,54 +79,17 @@ function TasksContent() {
     {} as Record<string, Task[]>,
   );
 
-  // ── Sheet Handlers ──
+  // ── Navigation Handlers (Intercepting Routes) ──
+
+  const handleCreateTask = useCallback(() => {
+    router.push("/tasks/new");
+  }, [router]);
 
   const handleTaskClick = useCallback(
     (taskId: string) => {
-      const task = tasks.find((t) => t.id === taskId);
-      if (task) {
-        setEditTask(task);
-        setSheetOpen(true);
-      }
+      router.push(`/tasks/${taskId}/edit`);
     },
-    [tasks],
-  );
-
-  const handleSheetSubmit = useCallback(
-    async (data: TaskSheetData) => {
-      try {
-        if (editTask) {
-          // Update existing task
-          await updateTask(editTask.id, data as unknown as Record<string, unknown>);
-          const fresh = await fetchTasks();
-          setTasks(fresh);
-          toast.success("Task updated");
-        } else {
-          // Create new task
-          await createTask({
-            title: data.title,
-            projectId: data.projectId,
-            taskType: data.taskType,
-            status: data.status,
-            priority: data.priority,
-            description: data.description || undefined,
-            notes: data.notes || undefined,
-            assignedTo: data.assignedTo || undefined,
-            tags: data.tags.length > 0 ? data.tags : undefined,
-            dueDate: data.dueDate || undefined,
-            dueTime: data.dueTime || undefined,
-          });
-          const fresh = await fetchTasks();
-          setTasks(fresh);
-          toast.success("Task created");
-        }
-        setSheetOpen(false);
-        setEditTask(null);
-      } catch {
-        toast.error(editTask ? "Failed to update task" : "Failed to create task");
-      }
-    },
-    [editTask],
+    [router],
   );
 
   // ── Task Action Handlers ──
@@ -143,14 +99,14 @@ function TasksContent() {
       try {
         const task = tasks.find((t) => t.id === taskId);
         if (!task) return;
-        const completed = task.status !== "done";
+        const completed = task.status !== "approved";
         await toggleTaskComplete(taskId, completed);
         setTasks((prev) =>
           prev.map((t) =>
             t.id === taskId
               ? {
                   ...t,
-                  status: completed ? ("done" as const) : ("todo" as const),
+                  status: completed ? "approved" as const : "backlog" as const,
                   updatedAt: new Date().toISOString(),
                 }
               : t,
@@ -209,55 +165,11 @@ function TasksContent() {
   }, []);
 
   const handleExpand = useCallback(
-    (title: string, projectId: string) => {
-      setEditTask(null);
-      setSheetOpen(true);
-      // Use sessionStorage to pass prefill data
-      window.sessionStorage.setItem(
-        "task-sheet-prefill",
-        JSON.stringify({
-          title,
-          projectId: projectId || projects[0]?.id || "",
-        }),
-      );
+    (_title: string, _projectId: string) => {
+      router.push("/tasks/new");
     },
-    [projects],
+    [router],
   );
-
-  // Build initial data for the sheet
-  const sheetInitialData = (() => {
-    if (editTask) {
-      return {
-        title: editTask.title,
-        taskType: editTask.taskType as TaskSheetData["taskType"],
-        description: editTask.description || "",
-        notes: editTask.notes || "",
-        status: editTask.status,
-        priority: editTask.priority,
-        assignedTo: editTask.assignedTo || "",
-        tags: editTask.tags || [],
-        dueDate: editTask.dueDate || "",
-        dueTime: editTask.dueTime || "",
-        projectId: editTask.projectId,
-      };
-    }
-
-    // Check sessionStorage for prefill data
-    try {
-      const stored = window.sessionStorage.getItem("task-sheet-prefill");
-      if (stored) {
-        window.sessionStorage.removeItem("task-sheet-prefill");
-        const parsed = JSON.parse(stored);
-        return {
-          title: parsed.title || "",
-          projectId: parsed.projectId || projects[0]?.id || "",
-        };
-      }
-    } catch {
-      // Ignore parse errors
-    }
-    return undefined;
-  })();
 
   if (loading) {
     return (
@@ -272,23 +184,33 @@ function TasksContent() {
   return (
     <div className="mx-auto max-w-4xl">
       {/* Page Header */}
-      <div className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-white">
-          {isStarredFilter ? (
-            <>
-              <Star className="h-6 w-6 text-yellow-400" fill="currentColor" />
-              Starred
-            </>
-          ) : activeProjectId ? (
-            projects.find((p) => p.id === activeProjectId)?.name || "Tasks"
-          ) : (
-            "All Tasks"
-          )}
-        </h1>
-        <p className="mt-1 text-sm text-white/40">
-          {filteredTasks.filter((t) => t.status !== "done").length} tasks
-          remaining
-        </p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="flex items-center gap-2 text-2xl font-bold text-white">
+            {isStarredFilter ? (
+              <>
+                <Star className="h-6 w-6 text-yellow-400" fill="currentColor" />
+                Starred
+              </>
+            ) : activeProjectId ? (
+              projects.find((p) => p.id === activeProjectId)?.name || "Tasks"
+            ) : (
+              "All Tasks"
+            )}
+          </h1>
+          <p className="mt-1 text-sm text-white/40">
+            {filteredTasks.filter((t) => t.status !== "approved").length} tasks
+            remaining
+          </p>
+        </div>
+
+        <button
+          onClick={handleCreateTask}
+          className="flex items-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-void transition-all hover:bg-cyan-400"
+        >
+          <Plus className="h-4 w-4" />
+          New Task
+        </button>
       </div>
 
       {/* Task Lists by Project */}
@@ -320,19 +242,6 @@ function TasksContent() {
           </div>
         )}
       </div>
-
-      {/* Task Sheet */}
-      <TaskSheet
-        isOpen={sheetOpen}
-        onClose={() => {
-          setSheetOpen(false);
-          setEditTask(null);
-        }}
-        onSubmit={handleSheetSubmit}
-        initialData={sheetInitialData}
-        projects={projects}
-        mode={editTask ? "edit" : "create"}
-      />
     </div>
   );
 }
