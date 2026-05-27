@@ -55,12 +55,12 @@ export default async function MarketingDashboardPage() {
                     style={{
                       backgroundColor:
                         phase.color === "cyan"
-                          ? "#06b6d4"
+                          ? "var(--color-cyan)"
                           : phase.color === "purple"
-                            ? "#8b5cf6"
+                            ? "var(--color-purple)"
                             : phase.color === "emerald"
-                              ? "#10b981"
-                              : "#f59e0b",
+                              ? "var(--color-emerald)"
+                              : "var(--color-amber)",
                     }}
                   />
                   <h3 className="text-sm font-semibold text-white">

@@ -209,7 +209,7 @@ export function ReleaseTimeline({ featured, releases }: ReleaseTimelineProps) {
             <div className="absolute left-[19px] top-0 bottom-0 w-px bg-gradient-to-b from-cyan-500/30 via-purple-500/20 to-transparent" />
 
             <div className="space-y-6">
-              {releases.map((release, index) => (
+              {releases.map((release) => (
                 <div key={release.id} className="relative flex gap-6">
                   {/* Timeline dot */}
                   <div className="relative flex shrink-0 items-start pt-6">

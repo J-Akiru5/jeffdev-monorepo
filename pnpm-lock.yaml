@@ -365,6 +365,9 @@ importers:
       next:
         specifier: 16.1.4
         version: 16.1.4(@babel/core@7.28.6)(@opentelemetry/api@1.9.1)(@playwright/test@1.57.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      next-themes:
+        specifier: ^0.4.6
+        version: 0.4.6(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       react:
         specifier: ^19.2.3
         version: 19.2.3
@@ -612,12 +615,18 @@ importers:
         specifier: ^1.0.0
         version: 1.25.2(hono@4.11.4)(zod@4.3.5)
     devDependencies:
+      "@repo/eslint-config":
+        specifier: workspace:*
+        version: link:../../packages/eslint-config
       "@types/node":
         specifier: ^22.15.3
         version: 22.19.7
       "@types/vscode":
         specifier: ^1.96.0
         version: 1.120.0
+      eslint:
+        specifier: ^9.39.1
+        version: 9.39.2(jiti@2.6.1)
       typescript:
         specifier: ^5.9.2
         version: 5.9.3

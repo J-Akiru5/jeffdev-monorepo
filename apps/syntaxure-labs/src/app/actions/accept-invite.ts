@@ -22,7 +22,7 @@ export async function acceptInvite(
   email: string,
 ): Promise<AcceptInviteResult> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     // 1. Get and validate invite
     const invite = await getInviteByToken(token);
@@ -67,6 +67,7 @@ export async function acceptInvite(
 
     if (existingUser) {
       // Update existing
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error: updateError } = await (supabase as any)
         .from("user_profiles")
         .update({
@@ -78,6 +79,7 @@ export async function acceptInvite(
       if (updateError) throw updateError;
     } else {
       // Insert new
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error: insertError } = await (supabase as any)
         .from("user_profiles")
         .insert(userData);
@@ -95,6 +97,7 @@ export async function acceptInvite(
     }
 
     // 5. Mark invite as accepted
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error: inviteUpdateError } = await (supabase as any)
       .from("invites")
       .update({

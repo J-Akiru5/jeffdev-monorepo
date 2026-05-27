@@ -21,7 +21,7 @@ export async function getAvailabilitySlots() {
     const adminClient = getAdminClient();
 
     const { data, error } = await (
-      adminClient.from("availability_slots") as any
+      adminClient.from("availability_slots")
     )
       .select("*")
       .order("quarter_label", { ascending: false });
@@ -64,15 +64,16 @@ export async function saveAvailabilitySlot(
     const { id, ...row } = parsed.data;
 
     if (id) {
-      const { error } = await (adminClient.from("availability_slots") as any)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (adminClient.from("availability_slots") as any)
         .update({ ...row, updated_at: new Date().toISOString() })
         .eq("id", id);
 
       if (error) throw error;
     } else {
-      const { error } = await (
-        adminClient.from("availability_slots") as any
-      ).insert({ ...row, updated_at: new Date().toISOString() });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (adminClient.from("availability_slots") as any)
+        .insert({ ...row, updated_at: new Date().toISOString() });
 
       if (error) throw error;
     }
@@ -97,14 +98,14 @@ export async function setActiveQuarter(
   try {
     const adminClient = getAdminClient();
 
-    const { error: resetError } = await (
-      adminClient.from("availability_slots") as any
-    )
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: resetError } = await (adminClient.from("availability_slots") as any)
       .update({ is_active: false, updated_at: new Date().toISOString() })
       .neq("id", id);
 
     if (resetError) throw resetError;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (adminClient.from("availability_slots") as any)
       .update({ is_active: true, updated_at: new Date().toISOString() })
       .eq("id", id);
@@ -129,7 +130,7 @@ export async function deleteAvailabilitySlot(
   try {
     const adminClient = getAdminClient();
 
-    const { error } = await (adminClient.from("availability_slots") as any)
+    const { error } = await adminClient.from("availability_slots")
       .delete()
       .eq("id", id);
 

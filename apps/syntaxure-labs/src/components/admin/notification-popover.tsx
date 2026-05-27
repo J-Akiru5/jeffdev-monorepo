@@ -75,6 +75,7 @@ export function NotificationPopover({ userId }: NotificationPopoverProps) {
     if (!isOpen) {
       setIsLoading(true);
       const data = await getNotifications(userId);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setNotifications(data as any);
       setIsLoading(false);
     }

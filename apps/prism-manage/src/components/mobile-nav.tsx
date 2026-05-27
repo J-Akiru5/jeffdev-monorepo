@@ -38,7 +38,7 @@ function SignOutButton() {
   return (
     <button
       onClick={handleSignOut}
-      className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-white/50 transition-colors hover:bg-white/5 hover:text-red-400"
+      className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-white/50 transition-colors hover:bg-glass-05 hover:text-red-400"
     >
       <LogOut className="h-5 w-5" />
       <span>Sign Out</span>
@@ -66,7 +66,7 @@ export function MobileNav() {
   return (
     <>
       {/* Bottom Tab Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 flex h-16 items-center justify-around border-t border-white/6 bg-void/80 px-2 backdrop-blur-xl lg:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-50 flex h-16 items-center justify-around border-t border-white/6 bg-surface/80 px-2 backdrop-blur-xl lg:hidden">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = pathname === tab.href;
@@ -121,11 +121,11 @@ export function MobileNav() {
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed bottom-16 left-0 right-0 z-40 max-h-[70vh] overflow-y-auto rounded-t-2xl border-t border-white/10 bg-[#0A0A0A] p-6 shadow-2xl lg:hidden"
+              className="fixed bottom-16 left-0 right-0 z-40 max-h-[70vh] overflow-y-auto rounded-t-2xl border-t border-white/10 bg-elevated p-6 shadow-2xl lg:hidden"
             >
               {/* Drag Handle */}
               <div className="mb-6 flex items-center justify-center">
-                <div className="h-1 w-12 rounded-full bg-white/20" />
+                <div className="h-1 w-12 rounded-full bg-glass-20" />
               </div>
 
               {/* Quick Filters */}
@@ -137,7 +137,7 @@ export function MobileNav() {
                   <Link
                     href="/tasks"
                     onClick={() => setIsDrawerOpen(false)}
-                    className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3 text-white/60 transition-all active:scale-95 hover:bg-white/5 hover:text-white"
+                    className="flex items-center gap-3 rounded-xl border border-white/5 glass-subtle p-3 text-white/60 transition-all active:scale-95 hover:bg-glass-05 hover:text-white"
                   >
                     <CheckSquare className="h-5 w-5 text-cyan-500/80" />
                     <span className="text-sm font-medium">All Tasks</span>
@@ -145,7 +145,7 @@ export function MobileNav() {
                   <Link
                     href="/tasks?filter=starred"
                     onClick={() => setIsDrawerOpen(false)}
-                    className="flex items-center gap-3 rounded-xl border border-white/5 bg-white/[0.02] p-3 text-white/60 transition-all active:scale-95 hover:bg-white/5 hover:text-white"
+                    className="flex items-center gap-3 rounded-xl border border-white/5 glass-subtle p-3 text-white/60 transition-all active:scale-95 hover:bg-glass-05 hover:text-white"
                   >
                     <Star className="h-5 w-5 text-yellow-500/80" />
                     <span className="text-sm font-medium">Starred</span>
@@ -175,14 +175,14 @@ export function MobileNav() {
                         onClick={() => handleProjectClick(project.id)}
                         className={`flex w-full items-center gap-3 rounded-xl border p-3 transition-all active:scale-95 ${
                           activeProjectId === project.id
-                            ? "border-white/10 bg-white/10 text-white"
-                            : "border-white/5 bg-white/[0.02] text-white/60 hover:bg-white/5 hover:text-white"
+                            ? "border-white/10 bg-glass-10 text-white"
+                            : "border-white/5 glass-subtle text-white/60 hover:bg-glass-05 hover:text-white"
                         }`}
                       >
                         <span
                           className="h-3 w-3 rounded-full"
                           style={{
-                            backgroundColor: project.color || "#06b6d4",
+                            backgroundColor: project.color || "var(--color-cyan)",
                           }}
                         />
                         <span className="text-sm font-medium">
@@ -199,7 +199,7 @@ export function MobileNav() {
                 <Link
                   href="/settings"
                   onClick={() => setIsDrawerOpen(false)}
-                  className="flex items-center gap-3 rounded-lg px-3 py-3 text-white/50 transition-colors hover:bg-white/5 hover:text-white"
+                  className="flex items-center gap-3 rounded-lg px-3 py-3 text-white/50 transition-colors hover:bg-glass-05 hover:text-white"
                 >
                   <Settings className="h-5 w-5" />
                   <span>Settings</span>

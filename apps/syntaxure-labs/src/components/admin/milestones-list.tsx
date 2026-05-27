@@ -78,6 +78,7 @@ export function MilestonesList({
         title: newTitle.trim(),
         status: "pending",
         order: milestones.length,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
       setNewTitle("");
       setShowAddForm(false);

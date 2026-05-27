@@ -52,7 +52,7 @@ export function SupabaseUserButton() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-white/5 transition-colors w-full"
+        className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-glass-05 transition-colors w-full"
       >
         <div className="flex h-7 w-7 items-center justify-center rounded-full bg-cyan-500/20 border border-cyan-500/30 text-xs font-medium text-cyan-400">
           {avatar}
@@ -61,7 +61,7 @@ export function SupabaseUserButton() {
       </button>
 
       {isOpen && (
-        <div className="absolute bottom-full left-0 right-0 mb-2 rounded-lg border border-white/10 bg-[#050505] shadow-lg">
+        <div className="absolute bottom-full left-0 right-0 mb-2 rounded-lg border border-white/10 bg-elevated shadow-lg">
           <div className="px-4 py-3 border-b border-white/5">
             <p className="text-xs font-medium text-white truncate">
               {user.email || "User"}

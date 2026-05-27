@@ -63,7 +63,7 @@ interface DBFAQ {
 
 async function fetchPlansFromDB(): Promise<DBPricingPlan[]> {
   try {
-    const supabase = (await getAdminClient()) as any;
+    const supabase = await getAdminClient();
     const { data, error } = await supabase
       .from('pricing_plans')
       .select('*')
@@ -80,7 +80,7 @@ async function fetchPlansFromDB(): Promise<DBPricingPlan[]> {
 
 async function fetchFAQsFromDB(): Promise<DBFAQ[]> {
   try {
-    const supabase = (await getAdminClient()) as any;
+    const supabase = await getAdminClient();
     const { data, error } = await supabase
       .from('pricing_faqs')
       .select('*')

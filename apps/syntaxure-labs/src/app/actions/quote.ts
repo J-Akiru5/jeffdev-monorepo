@@ -46,7 +46,7 @@ export async function submitQuoteForm(data: QuoteFormData) {
     // Generate unique reference number
     const refNo = generateQuoteRef();
 
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     // Save to Supabase
     const { data: result, error } = await supabase
@@ -71,6 +71,7 @@ export async function submitQuoteForm(data: QuoteFormData) {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ] as any)
       .select("id");
 
@@ -118,7 +119,7 @@ export async function updateQuoteStatus(
 ) {
   try {
     const { logAuditEvent } = await import("@/lib/audit");
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     // Fetch current quote
     const { data: quotes, error: fetchError } = await supabase
@@ -130,6 +131,7 @@ export async function updateQuoteStatus(
       return { success: false, error: "Quote not found" };
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const quote = quotes[0] as any;
     const oldStatus = quote.status;
 
@@ -139,6 +141,7 @@ export async function updateQuoteStatus(
       .update({
         status,
         updated_at: new Date().toISOString(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       .eq("id", quoteId);
 

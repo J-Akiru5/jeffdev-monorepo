@@ -90,7 +90,7 @@ export async function getServices(): Promise<DataService[]> {
     return [];
   }
   try {
-    const supabase = (await getAdminClient()) as any;
+    const supabase = await getAdminClient();
     const { data, error } = await supabase
       .from("services")
       .select("*")
@@ -100,6 +100,7 @@ export async function getServices(): Promise<DataService[]> {
     if (!data) return [];
 
     // Map Supabase columns to DataService shape
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return data.map((svc: any, idx: number) => ({
       slug: svc.name?.toLowerCase().replace(/\s+/g, "-") || `service-${idx}`,
       icon: mapCategoryToIcon(svc.category),
@@ -152,7 +153,7 @@ export async function getProjects(): Promise<DataProject[]> {
     return [];
   }
   try {
-    const supabase = (await getAdminClient()) as any;
+    const supabase = await getAdminClient();
     const { data, error } = await supabase
       .from("projects")
       .select("*")
@@ -162,6 +163,7 @@ export async function getProjects(): Promise<DataProject[]> {
     if (!data) return [];
 
     return data.map(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (p: any) =>
         ({
           slug: p.slug || p.id,
@@ -191,6 +193,7 @@ export async function getProjects(): Promise<DataProject[]> {
           client_email: p.client_email,
           created_at: p.created_at,
           updated_at: p.updated_at,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         }) as any,
     );
   } catch (error) {
@@ -208,7 +211,7 @@ export async function getProjectBySlug(
   slug: string,
 ): Promise<DataProject | null> {
   try {
-    const supabase = (await getAdminClient()) as any;
+    const supabase = await getAdminClient();
     const { data, error } = await supabase
       .from("projects")
       .select("*, milestones(*)")
@@ -242,6 +245,7 @@ export async function getProjectBySlug(
       paidAmount: data.budget_spent ? Number(data.budget_spent) : undefined,
       assignedPartner: data.metadata?.assignedPartner || undefined,
       assignedEmployees: data.metadata?.assignedEmployees || [],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       milestones: (data.milestones || []).map((m: any) => ({
         id: m.id,
         title: m.title,
@@ -255,6 +259,7 @@ export async function getProjectBySlug(
       client_email: data.client_email,
       created_at: data.created_at,
       updated_at: data.updated_at,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
   } catch (error) {
     console.error("[GET PROJECT ERROR]", error);
@@ -267,7 +272,7 @@ export async function getProjectBySlug(
 // =============================================================================
 export async function getQuotes(limit = 50): Promise<DataQuote[]> {
   try {
-    const supabase = (await getAdminClient()) as any;
+    const supabase = await getAdminClient();
     const { data, error } = await supabase
       .from("quotes")
       .select("*")
@@ -276,6 +281,7 @@ export async function getQuotes(limit = 50): Promise<DataQuote[]> {
     if (error) throw error;
     if (!data) return [];
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (data as any[]).slice(0, limit).map((q: any) => ({
       id: q.id,
       projectType: q.title || "",
@@ -300,7 +306,7 @@ export async function getQuotes(limit = 50): Promise<DataQuote[]> {
 // =============================================================================
 export async function getMessages(limit = 50): Promise<DataMessage[]> {
   try {
-    const supabase = (await getAdminClient()) as any;
+    const supabase = await getAdminClient();
     const { data, error } = await supabase
       .from("messages")
       .select("*")
@@ -309,6 +315,7 @@ export async function getMessages(limit = 50): Promise<DataMessage[]> {
     if (error) throw error;
     if (!data) return [];
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (data as any[]).slice(0, limit).map((m: any) => ({
       id: m.id,
       name: m.name || "",

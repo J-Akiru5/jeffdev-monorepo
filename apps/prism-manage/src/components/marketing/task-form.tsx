@@ -118,7 +118,7 @@ export function TaskForm({ team }: { team: MarketingTeamMember[] }) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="What needs to be done?"
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-cyan-400"
+            className="w-full bg-glass-10 border border-white/20 rounded px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-cyan-400"
             autoFocus
           />
         </div>
@@ -132,7 +132,7 @@ export function TaskForm({ team }: { team: MarketingTeamMember[] }) {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Optional details..."
             rows={3}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-cyan-400 resize-none"
+            className="w-full bg-glass-10 border border-white/20 rounded px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-cyan-400 resize-none"
           />
         </div>
 
@@ -144,7 +144,7 @@ export function TaskForm({ team }: { team: MarketingTeamMember[] }) {
             <select
               value={phase}
               onChange={(e) => setPhase(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-sm text-white"
+              className="w-full bg-glass-10 border border-white/20 rounded px-3 py-2 text-sm text-white"
             >
               {PHASES.map((p) => (
                 <option key={p.value} value={p.value} className="bg-black">
@@ -161,7 +161,7 @@ export function TaskForm({ team }: { team: MarketingTeamMember[] }) {
             <select
               value={priority}
               onChange={(e) => setPriority(e.target.value)}
-              className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-sm text-white"
+              className="w-full bg-glass-10 border border-white/20 rounded px-3 py-2 text-sm text-white"
             >
               {PRIORITIES.map((p) => (
                 <option key={p.value} value={p.value} className="bg-black">
@@ -179,7 +179,7 @@ export function TaskForm({ team }: { team: MarketingTeamMember[] }) {
           <select
             value={platform}
             onChange={(e) => setPlatform(e.target.value)}
-            className="w-full bg-white/10 border border-white/20 rounded px-3 py-2 text-sm text-white"
+            className="w-full bg-glass-10 border border-white/20 rounded px-3 py-2 text-sm text-white"
           >
             {PLATFORMS.map((p) => (
               <option key={p.value} value={p.value} className="bg-black">

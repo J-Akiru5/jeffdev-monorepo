@@ -77,6 +77,7 @@ class PrismFixCodeActionProvider implements vscode.CodeActionProvider {
     context: vscode.CodeActionContext,
     _token: vscode.CancellationToken,
   ): vscode.CodeAction[] {
+    void _token;
     const actions: vscode.CodeAction[] = [];
 
     for (const diag of context.diagnostics) {

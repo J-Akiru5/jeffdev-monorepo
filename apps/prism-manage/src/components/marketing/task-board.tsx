@@ -9,7 +9,7 @@ import { TaskForm } from "@/components/marketing/task-form";
 import type { MarketingTask, MarketingTeamMember } from "@/lib/schemas";
 
 const statusConfig: Record<string, { label: string; dotColor: string }> = {
-  todo: { label: "To Do", dotColor: "bg-white/30" },
+  todo: { label: "To Do", dotColor: "bg-glass-30" },
   "in-progress": { label: "In Progress", dotColor: "bg-cyan-400" },
   done: { label: "Done", dotColor: "bg-emerald-400" },
 };
@@ -108,7 +108,7 @@ export function TaskBoard({
               onChange={(e) =>
                 setFilter({ ...filter, phase: e.target.value || undefined })
               }
-              className="bg-white/5 border border-white/10 rounded px-3 py-1.5 text-xs text-white/70"
+              className="bg-glass-05 border border-white/10 rounded px-3 py-1.5 text-xs text-white/70"
             >
               <option value="" className="bg-black">
                 All Phases
@@ -127,7 +127,7 @@ export function TaskBoard({
               onChange={(e) =>
                 setFilter({ ...filter, owner: e.target.value || undefined })
               }
-              className="bg-white/5 border border-white/10 rounded px-3 py-1.5 text-xs text-white/70"
+              className="bg-glass-05 border border-white/10 rounded px-3 py-1.5 text-xs text-white/70"
             >
               <option value="" className="bg-black">
                 All Owners

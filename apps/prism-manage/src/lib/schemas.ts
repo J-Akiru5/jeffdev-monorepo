@@ -1,5 +1,17 @@
 import { z } from "zod";
 
+// ──────────────────────────────────────────────
+// Task Type Enum
+// ──────────────────────────────────────────────
+export const TaskTypeEnum = z.enum(["feature", "nice-to-have", "bug", "error"]);
+export type TaskType = z.infer<typeof TaskTypeEnum>;
+
+export const TaskStatusEnum = z.enum(["todo", "in_progress", "review", "done"]);
+export type TaskStatus = z.infer<typeof TaskStatusEnum>;
+
+export const TaskPriorityEnum = z.enum(["low", "medium", "high"]);
+export type TaskPriority = z.infer<typeof TaskPriorityEnum>;
+
 /**
  * Project/List Schema
  * -------------------
@@ -20,24 +32,73 @@ export type Project = z.infer<typeof ProjectSchema>;
 /**
  * Task Schema
  * -----------
- * Individual task item within a project
+ * Individual task item within a project.
+ * Maps directly to the Supabase tasks table columns.
  */
 export const TaskSchema = z.object({
   id: z.string(),
   projectId: z.string(),
   title: z.string().min(1).max(500),
-  notes: z.string().optional(),
-  completed: z.boolean().default(false),
-  starred: z.boolean().default(false),
+
+  // Classification
+  taskType: TaskTypeEnum.default("feature"),
+  status: TaskStatusEnum.default("todo"),
+  priority: TaskPriorityEnum.default("medium"),
+
+  // Content
+  description: z.string().optional(), // Long-form (repro steps, acceptance criteria)
+  notes: z.string().optional(), // Short internal notes
+
+  // Metadata
+  isStarred: z.boolean().default(false),
+  assignedTo: z.string().optional(), // User ID
+  tags: z.array(z.string()).optional(),
+
+  // Dates
   dueDate: z.string().optional(), // ISO date (YYYY-MM-DD)
   dueTime: z.string().optional(), // HH:mm format
   googleEventId: z.string().optional(), // Linked calendar event
-  order: z.number(),
+
+  // Ordering
+  order: z.number().default(0),
+
+  // Timestamps
   createdAt: z.string(),
   updatedAt: z.string(),
 });
 
 export type Task = z.infer<typeof TaskSchema>;
+
+// ──────────────────────────────────────────────
+// Create Task Input Schema
+// ──────────────────────────────────────────────
+export const CreateTaskSchema = TaskSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type CreateTaskInput = z.infer<typeof CreateTaskSchema>;
+
+// ──────────────────────────────────────────────
+// Update Task Input Schema (partial)
+// ──────────────────────────────────────────────
+export const UpdateTaskSchema = z.object({
+  title: z.string().min(1).max(500).optional(),
+  taskType: TaskTypeEnum.optional(),
+  status: TaskStatusEnum.optional(),
+  priority: TaskPriorityEnum.optional(),
+  description: z.string().optional(),
+  notes: z.string().optional(),
+  isStarred: z.boolean().optional(),
+  assignedTo: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  dueDate: z.string().optional(),
+  dueTime: z.string().optional(),
+  order: z.number().optional(),
+});
+
+export type UpdateTaskInput = z.infer<typeof UpdateTaskSchema>;
 
 /**
  * Calendar Event Schema
@@ -56,17 +117,6 @@ export const CalendarEventSchema = z.object({
 });
 
 export type CalendarEvent = z.infer<typeof CalendarEventSchema>;
-
-/**
- * Create Task Input Schema
- */
-export const CreateTaskSchema = TaskSchema.omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export type CreateTaskInput = z.infer<typeof CreateTaskSchema>;
 
 /**
  * Create Project Input Schema
@@ -136,18 +186,6 @@ export const CreateMarketingTaskSchema = MarketingTaskSchema.omit({
   updatedAt: true,
 });
 export type CreateMarketingTaskInput = z.infer<typeof CreateMarketingTaskSchema>;
-
-// Partial update schemas for type-safe updates
-export const UpdateTaskSchema = TaskSchema.partial().pick({
-  title: true,
-  notes: true,
-  completed: true,
-  starred: true,
-  dueDate: true,
-  dueTime: true,
-  order: true,
-});
-export type UpdateTaskInput = z.infer<typeof UpdateTaskSchema>;
 
 export const UpdateCalendarEventSchema = CalendarEventSchema.partial().pick({
   title: true,

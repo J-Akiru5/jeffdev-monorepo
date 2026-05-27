@@ -7,6 +7,8 @@ export default [
   {
     rules: {
       "@typescript-eslint/no-explicit-any": "warn",
+      // Allow Next.js <style jsx> and <style jsx global> attributes
+      "react/no-unknown-property": ["warn", { ignore: ["jsx", "global"] }],
     },
   },
 ];

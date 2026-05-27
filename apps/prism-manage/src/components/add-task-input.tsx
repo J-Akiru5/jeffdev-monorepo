@@ -4,20 +4,34 @@
  * Add Task Input
  * --------------
  * Quick inline input for adding new tasks.
+ * Features:
+ * - Title + Enter creates a basic task (defaults to 'feature' type)
+ * - Expand button opens the full TaskSheet slide-over for metadata entry
  */
 
 import { useState, useRef, KeyboardEvent } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Maximize2 } from "lucide-react";
+import { TASK_TYPES } from "@/lib/task-types";
+import { getTaskTypeConfig } from "@/lib/task-types";
+import type { TaskTypeKey } from "@/lib/task-types";
 
 interface AddTaskInputProps {
   projectId: string;
   onAdd?: (title: string, projectId: string) => void;
+  onExpand?: (title: string, projectId: string) => void;
+  defaultType?: TaskTypeKey;
 }
 
-export function AddTaskInput({ projectId, onAdd }: AddTaskInputProps) {
+export function AddTaskInput({
+  projectId,
+  onAdd,
+  onExpand,
+  defaultType = "feature",
+}: AddTaskInputProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [value, setValue] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const typeConfig = getTaskTypeConfig(defaultType);
 
   const handleSubmit = () => {
     if (value.trim()) {
@@ -41,6 +55,12 @@ export function AddTaskInput({ projectId, onAdd }: AddTaskInputProps) {
     setTimeout(() => inputRef.current?.focus(), 0);
   };
 
+  const handleOpenSheet = () => {
+    onExpand?.(value.trim(), projectId);
+    setValue("");
+    setIsExpanded(false);
+  };
+
   if (!isExpanded) {
     return (
       <button
@@ -48,32 +68,51 @@ export function AddTaskInput({ projectId, onAdd }: AddTaskInputProps) {
         className="flex w-full items-center gap-3 rounded-lg border border-dashed border-white/10 p-3 text-sm text-white/40 transition-all hover:border-cyan-500/30 hover:text-cyan-400"
       >
         <Plus className="h-4 w-4" />
-        Add a task
+        <span className="flex-1 text-left">Add a task</span>
+        <span className="flex items-center gap-1 text-[10px] text-white/20">
+          {typeConfig.icon}
+        </span>
       </button>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-cyan-500/30 bg-white/[0.02]">
-      <input
-        ref={inputRef}
-        type="text"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onBlur={() => {
-          if (!value.trim()) setIsExpanded(false);
-        }}
-        placeholder="Task title..."
-        className="w-full bg-transparent px-4 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none"
-      />
-      <div className="flex items-center justify-end gap-2 border-t border-white/5 bg-white/[0.02] px-3 py-2">
+    <div className="overflow-hidden rounded-lg border border-cyan-500/30 glass-subtle">
+      <div className="flex items-center gap-2 px-4">
+        {/* Type indicator */}
+        <span className="flex-shrink-0 text-sm">{typeConfig.icon}</span>
+
+        <input
+          ref={inputRef}
+          type="text"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onBlur={() => {
+            if (!value.trim()) setIsExpanded(false);
+          }}
+          placeholder='Task title... (press Enter for quick-add)'
+          className="flex-1 bg-transparent py-3 text-sm text-white placeholder:text-white/30 focus:outline-none"
+        />
+
+        {/* Expand to sheet button */}
+        <button
+          onClick={handleOpenSheet}
+          disabled={!value.trim()}
+          title="Open full task form"
+          className="flex-shrink-0 rounded-md p-1.5 text-white/30 transition-colors hover:bg-glass-05 hover:text-cyan-400 disabled:cursor-not-allowed disabled:opacity-30"
+        >
+          <Maximize2 className="h-4 w-4" />
+        </button>
+      </div>
+
+      <div className="flex items-center justify-end gap-2 border-t border-white/5 glass-subtle px-3 py-2">
         <button
           onClick={() => {
             setValue("");
             setIsExpanded(false);
           }}
-          className="rounded-md px-3 py-1.5 text-xs text-white/50 hover:bg-white/5 hover:text-white"
+          className="rounded-md px-3 py-1.5 text-xs text-white/50 hover:bg-glass-05 hover:text-white"
         >
           Cancel
         </button>

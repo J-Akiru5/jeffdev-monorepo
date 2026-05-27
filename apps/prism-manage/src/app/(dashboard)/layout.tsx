@@ -15,7 +15,7 @@ const mockProjects = [
   {
     id: "1",
     name: "My Tasks",
-    color: "#06b6d4",
+    color: "var(--color-cyan)",
     order: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -23,7 +23,7 @@ const mockProjects = [
   {
     id: "2",
     name: "Academics",
-    color: "#8b5cf6",
+    color: "var(--color-purple)",
     order: 1,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -31,7 +31,7 @@ const mockProjects = [
   {
     id: "3",
     name: "Student Council",
-    color: "#10b981",
+    color: "var(--color-emerald)",
     order: 2,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -39,7 +39,7 @@ const mockProjects = [
   {
     id: "4",
     name: "USC",
-    color: "#f59e0b",
+    color: "var(--color-amber)",
     order: 3,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -70,7 +70,7 @@ export default async function DashboardLayout({
 
   return (
     <ProjectProvider initialProjects={mockProjects}>
-      <div className="min-h-screen bg-void">
+      <div className="min-h-screen bg-surface">
         {/* Desktop Sidebar */}
         <Sidebar />
 

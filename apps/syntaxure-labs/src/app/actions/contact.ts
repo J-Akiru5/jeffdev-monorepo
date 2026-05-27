@@ -28,7 +28,7 @@ export async function submitContactForm(data: ContactFormData) {
     const validated = contactSchema.parse(data);
 
     // Save to Supabase
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data: result, error } = await supabase
       .from("messages")
       .insert({
@@ -36,6 +36,7 @@ export async function submitContactForm(data: ContactFormData) {
         status: "new",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       .select()
       .single();
@@ -84,7 +85,7 @@ export async function updateMessageStatus(
   try {
     const { logAuditEvent } = await import("@/lib/audit");
 
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     // Get current message for audit
     const { data: current, error: fetchError } = await supabase

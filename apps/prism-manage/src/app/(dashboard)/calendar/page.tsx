@@ -46,8 +46,8 @@ export default function CalendarPage() {
       start: event.start,
       end: event.end,
       allDay: event.allDay,
-      backgroundColor: event.linkedTaskId ? "#06b6d4" : "#8b5cf6",
-      borderColor: event.linkedTaskId ? "#06b6d4" : "#8b5cf6",
+      backgroundColor: event.linkedTaskId ? "var(--color-cyan)" : "var(--color-purple)",
+      borderColor: event.linkedTaskId ? "var(--color-cyan)" : "var(--color-purple)",
       extendedProps: {
         linkedTaskId: event.linkedTaskId,
         googleCalendarId: event.googleCalendarId,
@@ -145,7 +145,7 @@ export default function CalendarPage() {
       </div>
 
       {/* Calendar */}
-      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
+      <div className="rounded-xl border border-white/10 glass-subtle p-4">
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
@@ -167,7 +167,7 @@ export default function CalendarPage() {
       </div>
 
       {/* Sync Status */}
-      <div className="mt-6 flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.02] p-4">
+      <div className="mt-6 flex items-center justify-between rounded-lg border border-white/10 glass-subtle p-4">
         <div>
           <h3 className="text-sm font-medium text-white">
             Google Calendar Sync
@@ -186,7 +186,7 @@ export default function CalendarPage() {
           <button
             onClick={handleSync}
             disabled={syncing}
-            className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-white/60 transition-colors hover:bg-white/[0.08] disabled:opacity-50"
+            className="rounded-lg border border-white/10 bg-glass-04 px-4 py-2 text-sm font-medium text-white/60 transition-colors hover:bg-glass-08 disabled:opacity-50"
           >
             {syncing ? "Syncing..." : "Sync Now"}
           </button>

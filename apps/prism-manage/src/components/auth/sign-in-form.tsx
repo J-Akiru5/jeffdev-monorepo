@@ -61,8 +61,8 @@ const OAUTH_PROVIDERS: OAuthProvider[] = [
     id: "google",
     label: "Google",
     icon: Chrome,
-    brandBg: "bg-white/5",
-    brandHover: "hover:bg-white/10 hover:border-white/20",
+    brandBg: "bg-glass-05",
+    brandHover: "hover:bg-glass-10 hover:border-white/20",
     brandBorder: "border-white/10",
     brandText: "text-white/80",
   },
@@ -70,8 +70,8 @@ const OAUTH_PROVIDERS: OAuthProvider[] = [
     id: "github",
     label: "GitHub",
     icon: Github,
-    brandBg: "bg-white/5",
-    brandHover: "hover:bg-white/10 hover:border-white/20",
+    brandBg: "bg-glass-05",
+    brandHover: "hover:bg-glass-10 hover:border-white/20",
     brandBorder: "border-white/10",
     brandText: "text-white/80",
   },
@@ -116,7 +116,7 @@ export function SignInForm() {
 
   // ── Password strength ─────────────────────────────────────────────────────
   const getPasswordStrength = (pass: string) => {
-    if (!pass) return { score: 0, label: "None", color: "bg-white/10" };
+    if (!pass) return { score: 0, label: "None", color: "bg-glass-10" };
     let score = 0;
     if (pass.length >= 8) score += 1;
     if (/[a-z]/.test(pass) && /[A-Z]/.test(pass)) score += 1;
@@ -294,7 +294,7 @@ export function SignInForm() {
   if (registered) {
     return (
       <div className="w-full max-w-md mx-auto">
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl p-8 text-center space-y-5">
+        <div className="rounded-xl border border-white/[0.06] glass-subtle backdrop-blur-xl p-8 text-center space-y-5">
           <div className="mx-auto w-14 h-14 rounded-full bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
             <CheckCircle2 className="h-7 w-7 text-cyan-400" />
           </div>
@@ -329,7 +329,7 @@ export function SignInForm() {
   if (needsPosition) {
     return (
       <div className="w-full max-w-md mx-auto">
-        <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl p-8 text-center space-y-6">
+        <div className="rounded-xl border border-white/[0.06] glass-subtle backdrop-blur-xl p-8 text-center space-y-6">
           <div className="mx-auto w-14 h-14 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20">
             <User className="h-7 w-7 text-purple-400" />
           </div>
@@ -352,14 +352,14 @@ export function SignInForm() {
               <select
                 value={oAuthPosition}
                 onChange={(e) => setOAuthPosition(e.target.value)}
-                className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2.5 pl-10 font-mono text-sm text-white outline-none transition-all duration-200 focus:border-white/20 focus:bg-white/8 appearance-none cursor-pointer"
+                className="w-full rounded-md border border-white/10 bg-glass-05 px-3 py-2.5 pl-10 font-mono text-sm text-white outline-none transition-all duration-200 focus:border-white/20 focus:bg-glass-08 appearance-none cursor-pointer"
               >
                 {POSITION_OPTIONS.map((opt) => (
                   <option
                     key={opt.value}
                     value={opt.value}
                     disabled={opt.disabled}
-                    className="bg-[#0a0a0a] text-white"
+                    className="bg-elevated text-white"
                   >
                     {opt.label}
                   </option>
@@ -400,7 +400,7 @@ export function SignInForm() {
   // ── Main Auth Form ────────────────────────────────────────────────────────
   return (
     <div className="w-full max-w-md mx-auto">
-      <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl relative overflow-hidden">
+      <div className="rounded-xl border border-white/[0.06] glass-subtle backdrop-blur-xl relative overflow-hidden">
         {/* Dynamic top gradient line */}
         <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500 to-purple-500" />
 
@@ -419,7 +419,7 @@ export function SignInForm() {
 
         <div className="px-8 pb-8">
           {/* ── Toggle Tabs ── */}
-          <div className="grid grid-cols-2 gap-1 bg-white/5 p-1 rounded-md mb-6 border border-white/5">
+          <div className="grid grid-cols-2 gap-1 bg-glass-05 p-1 rounded-md mb-6 border border-white/5">
             <button
               type="button"
               onClick={() => {
@@ -501,7 +501,7 @@ export function SignInForm() {
               <div className="w-full border-t border-white/5" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-[#0a0a0a] px-3 text-white/30 font-mono uppercase tracking-wider">
+              <span className="bg-elevated px-3 text-white/30 font-mono uppercase tracking-wider">
                 Or continue with email
               </span>
             </div>
@@ -562,7 +562,7 @@ export function SignInForm() {
                                 key={opt.value}
                                 value={opt.value}
                                 disabled={opt.disabled}
-                                className="bg-[#0a0a0a] text-white"
+                                className="bg-elevated text-white"
                               >
                                 {opt.label}
                               </option>
@@ -632,7 +632,7 @@ export function SignInForm() {
                           {strength.label}
                         </span>
                       </div>
-                      <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                      <div className="h-1 w-full bg-glass-05 rounded-full overflow-hidden">
                         <div
                           className={`h-full ${strength.color} transition-all duration-300`}
                           style={{

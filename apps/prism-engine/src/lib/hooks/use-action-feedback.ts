@@ -75,5 +75,5 @@ export function useActionFeedback(
     ) {
       toast.error(fallbackErrorMessage);
     }
-  }, [state?.success, state?.error, successMessage, fallbackErrorMessage]);
+  }, [state, state?.success, state?.error, successMessage, fallbackErrorMessage]);
 }

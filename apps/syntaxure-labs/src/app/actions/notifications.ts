@@ -5,6 +5,7 @@
  * ---------------------------
  * Server-side operations for managing user notifications.
  *
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
  * NOTE: Type casting with 'as any' is used due to Supabase's limitation with
  * dynamically determined table schemas. The actual runtime behavior is correct.
  */
@@ -31,12 +32,13 @@ export async function getNotifications(
   limit = 20,
 ): Promise<Notification[]> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data, error } = (await supabase
       .from(NOTIFICATIONS_COLLECTION)
       .select("*")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .limit(limit)) as any;
 
     if (error || !data) return [];
@@ -53,11 +55,12 @@ export async function getNotifications(
  */
 export async function getUnreadCount(userId: string): Promise<number> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { count, error } = (await supabase
       .from(NOTIFICATIONS_COLLECTION)
       .select("*", { count: "exact", head: true })
       .eq("user_id", userId)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .eq("read", false)) as any;
 
     if (error) return 0;
@@ -75,10 +78,12 @@ export async function markAsRead(
   notificationId: string,
 ): Promise<{ success: boolean }> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { error } = (await supabase
       .from(NOTIFICATIONS_COLLECTION)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .update({ read: true } as any)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .eq("id", notificationId)) as any;
 
     if (error) throw error;
@@ -96,11 +101,13 @@ export async function markAllAsRead(
   userId: string,
 ): Promise<{ success: boolean }> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { error } = (await supabase
       .from(NOTIFICATIONS_COLLECTION)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .update({ read: true } as any)
       .eq("user_id", userId)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .eq("read", false)) as any;
 
     if (error) throw error;
@@ -118,10 +125,11 @@ export async function dismissNotification(
   notificationId: string,
 ): Promise<{ success: boolean }> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { error } = (await supabase
       .from(NOTIFICATIONS_COLLECTION)
       .delete()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .eq("id", notificationId)) as any;
 
     if (error) throw error;
@@ -140,7 +148,7 @@ export async function createNotification(
   input: NotificationCreateInput,
 ): Promise<{ success: boolean; id?: string }> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data, error } = (await supabase
       .from(NOTIFICATIONS_COLLECTION)
       .insert({
@@ -148,8 +156,10 @@ export async function createNotification(
         read: false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       .select()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .single()) as any;
 
     if (error) throw error;

@@ -1,5 +1,4 @@
 import { ChildProcess, spawn } from "child_process";
-import * as vscode from "vscode";
 
 export interface Rule {
   name: string;

@@ -77,13 +77,14 @@ export async function getProjectsList(): Promise<
   { slug: string; title: string }[]
 > {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data, error } = await supabase
       .from("projects")
       .select("slug, title");
 
     if (error) throw error;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (data || []).map((project: any) => ({
       slug: project.slug || "",
       title: project.title,
@@ -102,7 +103,7 @@ export async function createProject(
 ): Promise<ActionResult> {
   try {
     const validated = projectSchema.parse(data);
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     // Check if slug already exists
     const { data: existing } = await supabase
@@ -154,6 +155,7 @@ export async function createProject(
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ] as any);
 
     if (error) throw error;
@@ -187,7 +189,7 @@ export async function updateProject(
 ): Promise<ActionResult> {
   try {
     const validated = projectSchema.parse(data);
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     // Check if current slug exists
     const { data: existing } = await supabase
@@ -251,6 +253,7 @@ export async function updateProject(
           assignedEmployees: validated.assignedEmployees || [],
         },
         updated_at: new Date().toISOString(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       .eq("slug", slug);
 
@@ -288,7 +291,7 @@ export async function updateProject(
  */
 export async function deleteProject(slug: string): Promise<ActionResult> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     const { data: existing, error: fetchError } = await supabase
       .from("projects")

@@ -4,6 +4,7 @@
  * Task List Component
  * -------------------
  * Container for displaying tasks grouped by project.
+ * Shows incomplete and completed (collapsible) sections.
  */
 
 import { TaskItem } from "./task-item";
@@ -17,6 +18,8 @@ interface TaskListProps {
   onToggleStar?: (id: string) => void;
   onDelete?: (id: string) => void;
   onAdd?: (title: string, projectId: string) => void;
+  onExpand?: (title: string, projectId: string) => void;
+  onTaskClick?: (id: string) => void;
 }
 
 export function TaskList({
@@ -26,9 +29,11 @@ export function TaskList({
   onToggleStar,
   onDelete,
   onAdd,
+  onExpand,
+  onTaskClick,
 }: TaskListProps) {
-  const incompleteTasks = tasks.filter((t) => !t.completed);
-  const completedTasks = tasks.filter((t) => t.completed);
+  const incompleteTasks = tasks.filter((t) => t.status !== "done");
+  const completedTasks = tasks.filter((t) => t.status === "done");
 
   return (
     <div className="space-y-4">
@@ -36,7 +41,7 @@ export function TaskList({
       <div className="flex items-center gap-3">
         <span
           className="h-3 w-3 rounded-full"
-          style={{ backgroundColor: project.color || "#06b6d4" }}
+          style={{ backgroundColor: project.color || "var(--color-cyan)" }}
         />
         <h2 className="text-lg font-semibold text-white">{project.name}</h2>
         <span className="font-mono text-xs text-white/30">
@@ -45,7 +50,11 @@ export function TaskList({
       </div>
 
       {/* Add Task Input */}
-      <AddTaskInput projectId={project.id} onAdd={onAdd} />
+      <AddTaskInput
+        projectId={project.id}
+        onAdd={onAdd}
+        onExpand={onExpand}
+      />
 
       {/* Incomplete Tasks */}
       <div className="space-y-2">
@@ -56,6 +65,7 @@ export function TaskList({
             onToggleComplete={onToggleComplete}
             onToggleStar={onToggleStar}
             onDelete={onDelete}
+            onClick={onTaskClick}
           />
         ))}
       </div>
@@ -89,6 +99,7 @@ export function TaskList({
                 onToggleComplete={onToggleComplete}
                 onToggleStar={onToggleStar}
                 onDelete={onDelete}
+                onClick={onTaskClick}
               />
             ))}
           </div>
