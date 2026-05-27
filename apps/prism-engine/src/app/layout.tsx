@@ -57,12 +57,12 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" },
+      { url: "/prism-engine/favicon.svg", type: "image/svg+xml" },
+      { url: "/prism-engine/favicon.ico", sizes: "any" },
     ],
-    apple: "/apple-touch-icon.png",
+    apple: "/prism-engine/apple-touch-icon.png",
   },
-  manifest: "/manifest.json",
+  manifest: "/prism-engine/site.webmanifest",
 };
 
 export default function RootLayout({

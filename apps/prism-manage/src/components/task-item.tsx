@@ -36,7 +36,7 @@ export function TaskItem({
 }: TaskItemProps) {
   const [showMenu, setShowMenu] = useState(false);
   const typeConfig = getTaskTypeConfig(task.taskType);
-  const isCompleted = task.status === "done";
+  const isCompleted = task.status === "approved";
   const isInProgress = task.status === "in_progress";
 
   return (
