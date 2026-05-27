@@ -25,6 +25,35 @@ export const metadata: Metadata = {
     template: "%s | Prism Manage",
   },
   description: "Personal project tracker with Google Calendar integration",
+  keywords: ["project management", "task tracker", "Google Calendar", "productivity"],
+  authors: [{ name: "Syntaxure Labs", url: "https://www.syntaxure.dev" }],
+  creator: "Syntaxure Labs",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_MANAGE_URL || "https://manage.syntaxure.dev",
+  ),
+  openGraph: {
+    title: "Prism Manage - Personal Project Tracker",
+    description: "Track tasks, manage projects, and sync with Google Calendar.",
+    url: "/",
+    siteName: "Prism Manage",
+    images: [
+      {
+        url: "/web-app-manifest-512x512.png",
+        width: 512,
+        height: 512,
+        alt: "Prism Manage",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Prism Manage - Personal Project Tracker",
+    description: "Track tasks, manage projects, and sync with Google Calendar.",
+    images: ["/web-app-manifest-512x512.png"],
+    creator: "@syntaxure_dev",
+  },
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },

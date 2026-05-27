@@ -94,6 +94,7 @@ export async function getWorkspaceMembers(workspaceId: string) {
       .select(`
         user_id,
         role,
+        department_id,
         user_profiles!inner(id, full_name, email, avatar_url)
       `)
       .eq("workspace_id", workspaceId);
@@ -102,6 +103,7 @@ export async function getWorkspaceMembers(workspaceId: string) {
       members: (members || []).map((m: Record<string, unknown>) => ({
         userId: String(m.user_id),
         role: String(m.role),
+        departmentId: m.department_id ? String(m.department_id) : null,
         name: (m.user_profiles as Record<string, unknown>)?.full_name as string || (m.user_profiles as Record<string, unknown>)?.email as string,
         email: (m.user_profiles as Record<string, unknown>)?.email as string,
         avatarUrl: (m.user_profiles as Record<string, unknown>)?.avatar_url as string | null,

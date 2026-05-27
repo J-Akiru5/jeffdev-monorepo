@@ -59,6 +59,14 @@ html[data-theme="theme-light"] {
   --color-glass-30: rgba(0, 0, 0, 0.30);
   --color-glass-60: rgba(0, 0, 0, 0.60);
 
+  /* Semantic text colors */
+  --color-text-primary: #0f172a;
+  --color-text-secondary: rgba(0, 0, 0, 0.70);
+  --color-text-tertiary: rgba(0, 0, 0, 0.50);
+  --color-text-muted: rgba(0, 0, 0, 0.40);
+  --color-text-quiet: rgba(0, 0, 0, 0.30);
+  --color-text-faint: rgba(0, 0, 0, 0.20);
+
   --color-cyan: #0e7490;
   --color-purple: #6d28d9;
   --color-emerald: #047857;
@@ -71,6 +79,19 @@ html[data-theme="theme-light"] {
 /* ── Legacy: keep bg-void as alias during migration ── */
 :root {
   --color-void: var(--color-surface);
+
+  /* Border CSS variable aliases */
+  --color-border: var(--border-subtle);
+  --color-border-active: var(--border-active);
+  --color-border-glow: var(--border-glow);
+  
+  /* Semantic text colors (dark mode defaults) */
+  --color-text-primary: #ededed;
+  --color-text-secondary: rgba(255, 255, 255, 0.70);
+  --color-text-tertiary: rgba(255, 255, 255, 0.50);
+  --color-text-muted: rgba(255, 255, 255, 0.40);
+  --color-text-quiet: rgba(255, 255, 255, 0.30);
+  --color-text-faint: rgba(255, 255, 255, 0.20);
 }
 
 /* ----------------------------------------
@@ -92,6 +113,18 @@ html[data-theme="theme-light"] {
   --color-glass-20: var(--color-glass-20);
   --color-glass-30: var(--color-glass-30);
   --color-glass-60: var(--color-glass-60);
+  
+  /* Semantic text & border tokens */
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-tertiary: var(--color-text-tertiary);
+  --color-text-muted: var(--color-text-muted);
+  --color-text-quiet: var(--color-text-quiet);
+  --color-text-faint: var(--color-text-faint);
+  --color-border: var(--color-border);
+  --color-border-active: var(--color-border-active);
+  --color-border-glow: var(--color-border-glow);
+  
   --color-cyan-accent: var(--color-cyan);
   --color-purple-accent: var(--color-purple);
   --color-emerald-accent: var(--color-emerald);

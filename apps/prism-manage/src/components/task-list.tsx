@@ -43,8 +43,8 @@ export function TaskList({
           className="h-3 w-3 rounded-full"
           style={{ backgroundColor: project.color || "var(--color-cyan)" }}
         />
-        <h2 className="text-lg font-semibold text-white">{project.name}</h2>
-        <span className="font-mono text-xs text-white/30">
+        <h2 className="text-lg font-semibold text-text-primary">{project.name}</h2>
+        <span className="font-mono text-xs text-text-quiet">
           {incompleteTasks.length}
         </span>
       </div>
@@ -74,7 +74,7 @@ export function TaskList({
       {completedTasks.length > 0 && (
         <details className="group">
           <summary className="cursor-pointer list-none">
-            <div className="flex items-center gap-2 py-2 text-sm text-white/40 transition-colors hover:text-white/60">
+            <div className="flex items-center gap-2 py-2 text-sm text-text-muted transition-colors hover:text-text-secondary">
               <svg
                 className="h-4 w-4 transition-transform group-open:rotate-90"
                 fill="none"
