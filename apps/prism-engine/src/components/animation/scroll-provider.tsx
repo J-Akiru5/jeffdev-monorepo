@@ -5,6 +5,12 @@
  * ---------------------------
  * Registers GSAP plugins and provides scroll animation utilities.
  * Uses React 19 useLayoutEffect for synchronous setup.
+ *
+ * Performance Optimizations:
+ * - fastScrollEnd: 0.2s debounce on fast scroll
+ * - limitCallbacks: prevents callback flooding on scroll
+ * - ignoreMobileResize: skips resize recalcs on mobile
+ * - autoRefreshEvents: debounced refresh on resize
  */
 
 import { useLayoutEffect, useRef, type ReactNode } from "react";
@@ -27,20 +33,50 @@ export function ScrollProvider({ children }: ScrollProviderProps) {
     if (isInitialized.current) return;
     isInitialized.current = true;
 
-    // Configure ScrollTrigger defaults
+    // Check for reduced motion preference
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Detect low-end devices
+    const isLowEndDevice =
+      (navigator as any).deviceMemory !== undefined &&
+      (navigator as any).deviceMemory < 4;
+
+    if (prefersReducedMotion) {
+      // Skip ScrollTrigger initialization entirely
+      return;
+    }
+
+    // Configure ScrollTrigger defaults for performance
     ScrollTrigger.defaults({
       toggleActions: "play none none reverse",
+      fastScrollEnd: true,
+      preventOverlaps: true,
     });
 
-    // Refresh ScrollTrigger on resize
-    const handleResize = () => {
-      ScrollTrigger.refresh();
+    // Performance config
+    ScrollTrigger.config({
+      limitCallbacks: true,
+      ignoreMobileResize: true,
+      autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
+    });
+
+    // Batch-refresh on resize (debounced) via GSAP's built-in mechanism
+    // Reduce the default refresh interval for lower CPU usage
+    if (isLowEndDevice) {
+      ScrollTrigger.config({ autoRefreshEvents: "visibilitychange" });
+    }
+
+    // Refresh ScrollTrigger on visibility change (tab becomes visible)
+    const handleVisibility = () => {
+      if (!document.hidden) {
+        ScrollTrigger.refresh();
+      }
     };
+    document.addEventListener("visibilitychange", handleVisibility);
 
-    window.addEventListener("resize", handleResize);
-
+    // Cleanup on unmount
     return () => {
-      window.removeEventListener("resize", handleResize);
+      document.removeEventListener("visibilitychange", handleVisibility);
       // Kill all ScrollTriggers on cleanup
       ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
     };

@@ -88,6 +88,16 @@ export function Features() {
   const cardsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReducedMotion) {
+      gsap.set(
+        [headerRef.current, cardsRef.current?.children || []],
+        { opacity: 1, y: 0, scale: 1, clearProps: "all" },
+      );
+      return;
+    }
+
     const ctx = gsap.context(() => {
       gsap.fromTo(
         headerRef.current,
@@ -125,7 +135,7 @@ export function Features() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative py-24 md:py-32" id="features">
+    <section ref={sectionRef} className="relative py-24 md:py-32 lazy-section" id="features">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Section Header */}
         <div ref={headerRef} className="mx-auto max-w-2xl text-center">

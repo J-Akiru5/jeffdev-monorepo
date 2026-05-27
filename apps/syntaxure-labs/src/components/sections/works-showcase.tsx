@@ -60,6 +60,16 @@ export function WorksShowcase() {
   }, [featuredProjects.length]);
 
   useEffect(() => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReducedMotion) {
+      gsap.set(
+        [headerRef.current, carouselRef.current],
+        { opacity: 1, y: 0, clearProps: "all" },
+      );
+      return;
+    }
+
     const ctx = gsap.context(() => {
       gsap.fromTo(
         headerRef.current,
@@ -96,7 +106,7 @@ export function WorksShowcase() {
   if (featuredProjects.length === 0) return null;
 
   return (
-    <section ref={sectionRef} className="relative py-24 md:py-32" id="work">
+    <section ref={sectionRef} className="relative py-24 md:py-32 lazy-section" id="work">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Section Header */}
         <div ref={headerRef} className="flex items-end justify-between mb-12">

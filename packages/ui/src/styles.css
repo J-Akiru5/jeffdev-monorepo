@@ -669,6 +669,49 @@ body {
 }
 
 /* ----------------------------------------
+   PERFORMANCE: GPU Acceleration & Layout Containment
+   ---------------------------------------- */
+.gpu {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* Content visibility for below-fold sections */
+.lazy-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 3000px;
+}
+
+/* ----------------------------------------
+   REDUCED MOTION: Respect OS accessibility setting
+   ---------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Shimmer is a hover animation effect — hide it */
+  .glass-shimmer::after {
+    display: none !important;
+  }
+
+  .animate-neon-pulse,
+  .animate-float-subtle,
+  .animate-neon-breathe,
+  .animate-pulse-glow,
+  .animate-border-beam,
+  .animate-fade-in {
+    animation: none !important;
+  }
+}
+
+/* ----------------------------------------
    ANIMATIONS
    ---------------------------------------- */
 @keyframes fade-in {
@@ -792,6 +835,15 @@ body {
     filter: drop-shadow(0 0 30px rgba(6, 182, 212, 1));
   }
 }
+  0%, 100% {
+    opacity: 0.6;
+    filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.6));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 30px rgba(6, 182, 212, 1));
+  }
+}
 
 .animate-neon-pulse {
   animation: neon-pulse 3s ease-in-out infinite;
@@ -812,6 +864,9 @@ body {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-6px); }
 }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
 
 .animate-float-subtle {
   animation: float-subtle 4s ease-in-out infinite;
@@ -819,6 +874,19 @@ body {
 
 /* Neon breathe — slow, ambient cyan glow pulse for glass-neon panels */
 @keyframes neon-breathe {
+  0%, 100% {
+    box-shadow:
+      0 0 20px var(--glass-blend-cyan),
+      0 0 40px var(--glass-blend-purple),
+      inset 0 0 20px var(--glass-blend-cyan);
+  }
+  50% {
+    box-shadow:
+      0 0 40px rgba(6, 182, 212, 0.15),
+      0 0 80px var(--glass-blend-purple),
+      inset 0 0 40px rgba(6, 182, 212, 0.08);
+  }
+}
   0%, 100% {
     box-shadow:
       0 0 20px var(--glass-blend-cyan),

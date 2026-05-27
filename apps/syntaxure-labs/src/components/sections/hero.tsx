@@ -272,6 +272,31 @@ export function Hero({
   const badgeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Check reduced motion preference — skip animations if enabled
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReducedMotion) {
+      // Just set elements visible immediately, no animation
+      gsap.set(
+        [
+          taglineRef.current,
+          headlineRef.current,
+          subtextRef.current,
+          ctaRef.current,
+          servicesRef.current?.children || [],
+          badgeRef.current,
+        ],
+        { opacity: 1, y: 0, x: 0, scale: 1, clearProps: "all" },
+      );
+      const neonLines = heroRef.current?.querySelectorAll(
+        ".neon-line line, .neon-line-main, .neon-line-secondary",
+      );
+      if (neonLines?.length) {
+        gsap.set(neonLines, { opacity: 1, strokeDashoffset: 0 });
+      }
+      return;
+    }
+
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
