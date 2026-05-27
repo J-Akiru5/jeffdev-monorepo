@@ -100,10 +100,13 @@ export function ProjectForm({ mode, initialData, users }: Props) {
   const [formData, setFormData] = useState<FormData>({
     slug: initialData?.slug || "",
     title: initialData?.title || "",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     userId: (initialData as any)?.user_id || (initialData as any)?.userId || "",
     client: initialData?.client || "",
     clientEmail:
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (initialData as any)?.client_email ||
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (initialData as any)?.clientEmail ||
       "",
     category: initialData?.category || CATEGORIES[0],
@@ -136,6 +139,7 @@ export function ProjectForm({ mode, initialData, users }: Props) {
 
   // Local helper to map user full name
   const getUserName = (u: UserProfile) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (u as any).full_name || u.displayName || u.email || "No Name";
   };
 
@@ -446,6 +450,7 @@ export function ProjectForm({ mode, initialData, users }: Props) {
                 </label>
                 <select
                   value={formData.status}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   onChange={(e) => updateField("status", e.target.value as any)}
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2.5 text-white focus:border-cyan-500/50 focus:outline-none bg-[#0a0a0a]"
                 >

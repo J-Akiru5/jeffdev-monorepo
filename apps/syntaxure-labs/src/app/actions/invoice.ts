@@ -91,7 +91,7 @@ function determineInvoiceStatus(
 // =============================================================================
 export async function getInvoices(): Promise<Invoice[]> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data, error } = await supabase
       .from("invoices")
       .select("*")
@@ -99,6 +99,7 @@ export async function getInvoices(): Promise<Invoice[]> {
 
     if (error || !data) return [];
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return data.map((row: any) => normalizeInvoiceRow(row));
   } catch (error) {
     console.error("[GET INVOICES ERROR]", error);
@@ -110,7 +111,7 @@ export async function getInvoiceByRefNo(
   refNo: string,
 ): Promise<Invoice | null> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data, error } = await supabase
       .from("invoices")
       .select("*")
@@ -190,7 +191,7 @@ export async function createInvoice(data: z.infer<typeof createInvoiceSchema>) {
       return { success: false, error: "Authentication required" };
     }
 
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     const { data: result, error } = await supabase
       .from("invoices")
@@ -222,6 +223,7 @@ export async function createInvoice(data: z.infer<typeof createInvoiceSchema>) {
         },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       .select("id")
       .single();
@@ -267,7 +269,7 @@ export async function updateInvoice(
   data: Partial<z.infer<typeof createInvoiceSchema>>,
 ) {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     const { data: existing, error: fetchError } = await supabase
       .from("invoices")
@@ -336,6 +338,7 @@ export async function updateInvoice(
 
     const { error } = await supabase
       .from("invoices")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .update(updates as any)
       .eq("id", id);
 
@@ -363,7 +366,7 @@ export async function updateInvoice(
 // =============================================================================
 export async function sendInvoice(id: string) {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     const { data: existing, error: fetchError } = await supabase
       .from("invoices")
@@ -427,6 +430,7 @@ export async function sendInvoice(id: string) {
         status: "sent",
         metadata,
         updated_at: new Date().toISOString(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       .eq("id", id);
 
@@ -458,7 +462,7 @@ export async function recordPayment(
 ) {
   try {
     const validated = paymentSchema.parse(data);
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     const { data: existing, error: fetchError } = await supabase
       .from("invoices")
@@ -509,6 +513,7 @@ export async function recordPayment(
 
     const { error } = await supabase
       .from("invoices")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .update(updates as any)
       .eq("id", invoiceId);
 
@@ -545,7 +550,7 @@ export async function verifyGcashPayment(
   verified: boolean,
 ) {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     const { data: existing, error: fetchError } = await supabase
       .from("invoices")
@@ -600,6 +605,7 @@ export async function verifyGcashPayment(
 
     const { error } = await supabase
       .from("invoices")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .update(updates as any)
       .eq("id", invoiceId);
 
@@ -627,7 +633,7 @@ export async function verifyGcashPayment(
 // =============================================================================
 export async function deleteInvoice(id: string) {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     const { data: existing, error: fetchError } = await supabase
       .from("invoices")

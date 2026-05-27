@@ -16,7 +16,7 @@ const COLLECTION = "user_profiles";
  */
 export async function getUserProfile(uid: string): Promise<UserProfile | null> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data, error } = await supabase
       .from(COLLECTION)
       .select("*")
@@ -38,7 +38,7 @@ export async function getPublicNamecard(
   username: string,
 ): Promise<PublicNamecard | null> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data, error } = await supabase
       .from(COLLECTION)
       .select("*")
@@ -99,7 +99,7 @@ export async function updateUserProfile(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { role: _role, created_at: _createdAt, ...safeData } = data;
 
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     // Fetch existing user profile to merge preferences
     const { data: existing, error: fetchError } = await supabase
@@ -110,10 +110,10 @@ export async function updateUserProfile(
 
     if (fetchError) throw fetchError;
 
-    const existingPrefs = (existing?.preferences || {}) as Record<string, any>;
+    const existingPrefs = (existing?.preferences || {}) as Record<string, unknown>;
 
     // Build standard column updates
-    const updatePayload: any = {
+    const updatePayload: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
     };
 
@@ -168,7 +168,7 @@ export async function checkUsernameAvailable(
   excludeUid?: string,
 ): Promise<boolean> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data, error } = await supabase
       .from(COLLECTION)
       .select("id")
@@ -190,7 +190,7 @@ export async function checkUsernameAvailable(
  */
 export async function getAllUsers(): Promise<UserProfile[]> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data, error } = await supabase
       .from(COLLECTION)
       .select("*")
@@ -198,6 +198,7 @@ export async function getAllUsers(): Promise<UserProfile[]> {
 
     if (error || !data) return [];
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return data.map((doc: any) => ({
       uid: doc.id,
       ...doc,

@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Settings, Palette, Mail, Shield, Code } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { ArrowLeft, Settings, Palette, Mail, Shield } from "lucide-react";
 
 /**
  * Agency Settings Page
@@ -9,11 +8,6 @@ import { createClient } from "@/lib/supabase/server";
  */
 
 export default async function AgencySettingsPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   return (
     <div className="space-y-6">
       <Link

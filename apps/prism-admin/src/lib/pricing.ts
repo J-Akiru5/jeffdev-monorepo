@@ -53,7 +53,7 @@ export async function getPricingPlans(
   app: "prism-engine" | "syntaxure-labs",
 ): Promise<PricingPlan[]> {
   try {
-    const client = getAdminClient() as any;
+    const client = getAdminClient();
     const { data, error } = await client
       .from("pricing_plans")
       .select("*")
@@ -61,7 +61,8 @@ export async function getPricingPlans(
       .order("sort_order", { ascending: true });
 
     if (error) throw error;
-    return (data || []) as PricingPlan[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (data || []) as any as PricingPlan[];
   } catch (error) {
     console.error(`[pricing] Failed to fetch plans for ${app}:`, error);
     return [];
@@ -72,7 +73,7 @@ export async function getPricingFAQs(
   app: "prism-engine" | "syntaxure-labs",
 ): Promise<PricingFAQ[]> {
   try {
-    const client = getAdminClient() as any;
+    const client = getAdminClient();
     const { data, error } = await client
       .from("pricing_faqs")
       .select("*")
@@ -80,7 +81,8 @@ export async function getPricingFAQs(
       .order("sort_order", { ascending: true });
 
     if (error) throw error;
-    return (data || []) as PricingFAQ[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (data || []) as any as PricingFAQ[];
   } catch (error) {
     console.error(`[pricing] Failed to fetch FAQs for ${app}:`, error);
     return [];
@@ -95,7 +97,7 @@ export async function getPricingPlanBySlug(
   slug: string,
 ): Promise<PricingPlan | null> {
   try {
-    const client = getAdminClient() as any;
+    const client = getAdminClient();
     const { data, error } = await client
       .from("pricing_plans")
       .select("*")
@@ -104,7 +106,8 @@ export async function getPricingPlanBySlug(
       .maybeSingle();
 
     if (error) throw error;
-    return (data as PricingPlan) || null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (data as any as PricingPlan) || null;
   } catch (error) {
     console.error(`[pricing] Failed to fetch plan ${slug}:`, error);
     return null;

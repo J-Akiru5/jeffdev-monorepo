@@ -44,6 +44,7 @@ export function AdminCalendar({ initialEvents = [] }: AdminCalendarProps) {
   // Refresh events
   const refreshEvents = useCallback(async () => {
     const newEvents = await getCalendarEvents();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setEvents(newEvents as any);
   }, []);
 

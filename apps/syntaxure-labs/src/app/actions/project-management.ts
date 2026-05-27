@@ -38,7 +38,7 @@ const milestoneSchema = z.object({
  * Get project by slug and return its ID
  */
 async function getProjectId(slug: string): Promise<string | null> {
-  const supabase = getAdminClient() as any;
+  const supabase = getAdminClient();
   const { data } = await supabase
     .from("projects")
     .select("id")
@@ -52,7 +52,7 @@ async function getProjectId(slug: string): Promise<string | null> {
  */
 export async function updateProjectStatus(slug: string, status: string) {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     const { data: project } = await supabase
       .from("projects")
@@ -80,6 +80,7 @@ export async function updateProjectStatus(slug: string, status: string) {
         status: status as "active" | "paused" | "completed" | "archived",
         metadata,
         updated_at: new Date().toISOString(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       .eq("slug", slug);
 
@@ -109,7 +110,7 @@ export async function updateProjectProgress(slug: string, progress: number) {
   try {
     const validProgress = Math.max(0, Math.min(100, progress));
 
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     const { data: project } = await supabase
       .from("projects")
@@ -129,6 +130,7 @@ export async function updateProjectProgress(slug: string, progress: number) {
       .update({
         metadata,
         updated_at: new Date().toISOString(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       .eq("slug", slug);
 
@@ -161,7 +163,7 @@ export async function updateProjectDetails(
   try {
     const validated = projectUpdateSchema.parse(data);
 
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     const { data: project } = await supabase
       .from("projects")
@@ -210,6 +212,7 @@ export async function updateProjectDetails(
 
     const { error } = await supabase
       .from("projects")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .update(updates as any)
       .eq("slug", slug);
 
@@ -244,7 +247,7 @@ export async function addMilestone(
 ) {
   try {
     const validated = milestoneSchema.parse(milestone);
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     const projectId = await getProjectId(slug);
     if (!projectId) {
@@ -262,6 +265,7 @@ export async function addMilestone(
         deliverables: validated.deliverables || null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       .select("*")
       .single();
@@ -293,7 +297,7 @@ export async function updateMilestoneStatus(
   status: string,
 ) {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     const projectId = await getProjectId(slug);
     if (!projectId) {
@@ -305,6 +309,7 @@ export async function updateMilestoneStatus(
       .update({
         status: status as "pending" | "in_progress" | "completed" | "blocked",
         updated_at: new Date().toISOString(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       .eq("id", milestoneId)
       .eq("project_id", projectId);
@@ -319,6 +324,7 @@ export async function updateMilestoneStatus(
 
     const total = milestones?.length || 0;
     const completed =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       milestones?.filter((m: any) => m.status === "completed").length || 0;
     const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
 
@@ -337,6 +343,7 @@ export async function updateMilestoneStatus(
       .update({
         metadata,
         updated_at: new Date().toISOString(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
       .eq("slug", slug);
 
@@ -361,7 +368,7 @@ export async function updateMilestoneStatus(
  */
 export async function deleteMilestone(slug: string, milestoneId: string) {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     const projectId = await getProjectId(slug);
     if (!projectId) {

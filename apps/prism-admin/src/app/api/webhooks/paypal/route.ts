@@ -111,9 +111,10 @@ type PayPalEvent = {
 };
 
 // Helper to get a typed Supabase table reference
-// Using `any` cast because Supabase client lacks generated DB types
 function table(name: string) {
-  const supabase = getAdminClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const supabase = getAdminClient() as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return supabase.from(name) as any;
 }
 

@@ -97,7 +97,7 @@ export function AvailabilityManager({
       resetForm();
 
       const { data } = await refreshSlots();
-      if (data) setSlots(data);
+      if (data) setSlots([...data]);
     } else {
       setMessage({ type: "error", text: result.error || "Failed to save" });
     }

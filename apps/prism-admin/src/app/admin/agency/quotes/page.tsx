@@ -55,8 +55,8 @@ export default async function AgencyQuotesPage() {
                     {quote.title}
                   </h3>
                   <p className="text-xs text-white/40 mt-0.5">
-                    {(quote as any).client_name || "Client"} &middot; $
-                    {(quote as any).amount || 0}
+                    {(quote as { client_name?: string }).client_name || "Client"} &middot; $
+                    {(quote as { amount?: number }).amount || 0}
                   </p>
                 </div>
                 <span

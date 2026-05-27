@@ -34,11 +34,12 @@ export async function GET() {
 
   try {
     const admin = getAdminClient();
-    const { data: subscriptions, error } = await (admin
-      .from("subscriptions")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const subsQuery = admin.from("subscriptions") as any;
+    const { data: subscriptions, error } = await subsQuery
       .select("*")
       .order("created_at", { ascending: false })
-      .limit(100) as any);
+      .limit(100);
 
     if (error) {
       console.error("[admin/subscription] GET error:", error);
@@ -49,7 +50,7 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      subscriptions: (subscriptions || []).map((sub: any) => ({
+      subscriptions: (subscriptions || []).map((sub: Record<string, unknown>) => ({
         id: sub.id,
         userId: sub.user_id,
         userEmail: sub.user_email,
@@ -101,11 +102,12 @@ export async function PATCH(request: NextRequest) {
     const { userId, tier } = parsed.data;
     const now = new Date().toISOString();
     const admin = getAdminClient();
-    const subs = admin.from("subscriptions") as any;
-    const profiles = admin.from("user_profiles") as any;
+    const subs = admin.from("subscriptions");
+    const profiles = admin.from("user_profiles");
 
     // Upsert subscription record
-    const { error: subError } = await subs.upsert({
+    const { error: subError } = await (subs as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+      .upsert({
       user_id: userId,
       plan: tier,
       status: "active",
@@ -132,7 +134,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Update user tier in profiles
-    const { error: profileError } = await profiles
+    const { error: profileError } = await (profiles as any) // eslint-disable-line @typescript-eslint/no-explicit-any
       .update({ tier, updated_at: now })
       .eq("id", userId);
 

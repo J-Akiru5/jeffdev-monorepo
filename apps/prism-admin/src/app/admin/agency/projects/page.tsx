@@ -54,7 +54,7 @@ export default async function AgencyProjectsPage() {
                     {project.title}
                   </h3>
                   <p className="text-xs text-white/40 mt-0.5">
-                    {(project as any).client_name || "Client"}{" "}
+                    {(project as { client_name?: string }).client_name || "Client"}{" "}
                     {project.start_date ? `· ${project.start_date}` : ""}
                   </p>
                 </div>

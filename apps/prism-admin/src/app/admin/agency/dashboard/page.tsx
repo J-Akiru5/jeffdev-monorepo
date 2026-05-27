@@ -5,13 +5,10 @@ import {
   Mail,
   FolderKanban,
   Receipt,
-  TrendingUp,
   ArrowUpRight,
   BarChart3,
   Users,
-  Globe,
   Calendar,
-  ExternalLink,
 } from "lucide-react";
 
 /**
@@ -143,8 +140,8 @@ export default async function AgencyDashboardPage() {
                     {quote.title}
                   </div>
                   <div className="text-xs text-white/40">
-                    {(quote as any).client_name || "Client"} &middot; $
-                    {(quote as any).amount || 0}
+                    {(quote as { client_name?: string }).client_name || "Client"} &middot; $
+                    {(quote as { amount?: number }).amount || 0}
                   </div>
                 </div>
                 <span
