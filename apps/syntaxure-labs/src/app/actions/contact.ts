@@ -29,15 +29,15 @@ export async function submitContactForm(data: ContactFormData) {
 
     // Save to Supabase
     const supabase = getAdminClient();
-    const { data: result, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: result, error } = await (supabase as any)
       .from("messages")
       .insert({
         ...validated,
         status: "new",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .select()
       .single();
 
@@ -88,7 +88,8 @@ export async function updateMessageStatus(
     const supabase = getAdminClient();
 
     // Get current message for audit
-    const { data: current, error: fetchError } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: current, error: fetchError } = await (supabase as any)
       .from("messages")
       .select("status")
       .eq("id", messageId)
@@ -100,7 +101,8 @@ export async function updateMessageStatus(
 
     const oldStatus = current.status;
 
-    const { error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
       .from("messages")
       .update({
         status,

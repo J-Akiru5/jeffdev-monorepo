@@ -14,7 +14,7 @@ export async function GET(
   try {
     const { uid } = await params;
 
-    const supabase = await getAdminClient();
+    const supabase = getAdminClient() as any;
     const { data: profile, error } = await supabase
       .from("user_profiles")
       .select("*")

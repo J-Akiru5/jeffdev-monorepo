@@ -69,15 +69,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app:
-          [
-            prism-engine,
-            prism-admin,
-            prism-manage,
-            syntaxure-labs,
-            prism-docs,
-            prism-mcp-server,
-          ]
+        app: [prism-engine, prism-admin, prism-manage, syntaxure-labs, prism-docs, prism-mcp-server]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -93,5 +85,8 @@ jobs:
       - run: sfw pnpm install --frozen-lockfile
       - run: pnpm --filter ${{ matrix.app }} run build
         env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || '' }}
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY || '' }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}

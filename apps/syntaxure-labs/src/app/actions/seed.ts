@@ -19,7 +19,8 @@ export async function bootstrapCurrentUserAsFounder(
   displayName: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     // Check if user document already exists
     const { data: existingUser } = await supabase
@@ -35,8 +36,7 @@ export async function bootstrapCurrentUserAsFounder(
       .update({
         role: "admin",
         updated_at: new Date().toISOString(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      })
       .eq("id", uid);
 
       if (updateError) throw updateError;
@@ -63,8 +63,7 @@ export async function bootstrapCurrentUserAsFounder(
       },
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    });
 
     if (insertError) throw insertError;
 
@@ -102,7 +101,8 @@ export async function upsertUserProfile(
   },
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
 
     // Check if user exists
     const { data: existingUser } = await supabase
@@ -136,8 +136,7 @@ export async function upsertUserProfile(
 
       const { error } = await supabase
         .from("user_profiles")
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .update(updates as any)
+        .update(updates)
         .eq("id", uid);
 
       if (error) throw error;
@@ -156,8 +155,7 @@ export async function upsertUserProfile(
         },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any);
+      });
 
       if (error) throw error;
     }

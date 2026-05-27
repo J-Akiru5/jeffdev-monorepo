@@ -17,7 +17,8 @@ const COLLECTION = "feedback";
  */
 export async function getFeedback(): Promise<FirestoreFeedback[]> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(COLLECTION)
       .select("*")
@@ -41,7 +42,8 @@ export async function getFeedback(): Promise<FirestoreFeedback[]> {
  */
 export async function getPublicFeedback(): Promise<FirestoreFeedback[]> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
     const { data, error } = await supabase
       .from(COLLECTION)
       .select("*")
@@ -79,7 +81,8 @@ export async function createFeedback(
       updated_at: new Date().toISOString(),
     };
 
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
     const { data: result, error } = await supabase
       .from(COLLECTION)
       .insert(feedback)
@@ -110,7 +113,8 @@ export async function updateFeedbackStatus(
   status: FeedbackStatus,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
     const { error } = await supabase
       .from(COLLECTION)
       .update({
@@ -143,7 +147,8 @@ export async function deleteFeedback(
   id: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const supabase = getAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
     const { error } = await supabase.from(COLLECTION).delete().eq("id", id);
 
     if (error) throw error;
