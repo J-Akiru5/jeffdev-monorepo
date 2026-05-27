@@ -12,7 +12,7 @@ const priorityColor: Record<string, string> = {
 };
 
 const statusDotColor: Record<string, string> = {
-  todo: "bg-white/30",
+  todo: "bg-glass-30",
   "in-progress": "bg-cyan-400",
   done: "bg-emerald-400",
 };
@@ -94,7 +94,7 @@ export function TaskCard({
         {task.ownerIds.map((o) => (
           <span
             key={o}
-            className="text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/10 text-white/60"
+            className="text-[10px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded bg-glass-10 text-white/60"
           >
             {getOwnerInitials(o)}
           </span>

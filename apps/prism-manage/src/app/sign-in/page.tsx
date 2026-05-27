@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function SignInPage() {
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-void">
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-surface">
       {/* ── Left: Syntaxure Labs Branding ── */}
       <div className="relative hidden lg:flex flex-col justify-center items-center p-12 lg:p-16 border-r border-white/[0.04] overflow-hidden">
         {/* Grid + Glow Background */}
@@ -100,7 +100,7 @@ export default function SignInPage() {
         </div>
 
         {/* Dark overlay gradient for visual separation */}
-        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-transparent via-void/80 to-void lg:hidden" />
+        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-transparent via-surface/80 to-surface lg:hidden" />
 
         <div className="w-full pt-20 lg:pt-0">
           <SignInForm />

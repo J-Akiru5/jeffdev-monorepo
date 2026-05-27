@@ -11,9 +11,10 @@ import { useProjects } from "@/contexts/project-context";
 import { GripVertical, Plus } from "lucide-react";
 import { updateTaskStatus, createTask } from "@/app/actions/tasks";
 import type { Task } from "@/lib/schemas";
+import { getTaskTypeConfig } from "@/lib/task-types";
 import { toast } from "sonner";
 
-type KanbanColumn = "backlog" | "in_progress" | "done";
+type KanbanColumn = "backlog" | "in_progress" | "review" | "done";
 
 interface KanbanTask extends Task {
   column: KanbanColumn;
@@ -21,8 +22,9 @@ interface KanbanTask extends Task {
 
 const columns: { id: KanbanColumn; title: string; color: string }[] = [
   { id: "backlog", title: "Backlog", color: "#6b7280" },
-  { id: "in_progress", title: "In Progress", color: "#f59e0b" },
-  { id: "done", title: "Done", color: "#10b981" },
+  { id: "in_progress", title: "In Progress", color: "#3b82f6" },
+  { id: "review", title: "In Review", color: "var(--color-purple)" },
+  { id: "done", title: "Done", color: "var(--color-emerald)" },
 ];
 
 export default function KanbanPage() {
@@ -37,20 +39,32 @@ export default function KanbanPage() {
       try {
         const res = await fetch("/api/tasks");
         const data = await res.json();
-        // Map API tasks to kanban format with column assignment
+        // API returns camelCase Task[] — map to KanbanTask
         const mapped: KanbanTask[] = (data || []).map(
           (t: Record<string, unknown>) => ({
             id: (t.id as string)?.toString() || String(Math.random()),
             projectId:
-              (t.project_id as string) || (t.projectId as string) || "",
-            title: t.title,
-            completed: t.status === "done",
-            starred: t.priority ? Number(t.priority) > 0 : false,
-            order: t.order || 0,
-            notes: t.notes || t.description || "",
+              (t.projectId as string) || (t.project_id as string) || "",
+            title: String(t.title || ""),
+            taskType: (t.taskType as Task["taskType"]) || (t.task_type as Task["taskType"]) || "feature",
+            status: (t.status as Task["status"]) || "todo",
+            priority: (t.priority as Task["priority"]) || "medium",
+            isStarred:
+              t.isStarred === true || t.is_starred === true || t.is_starred === "true" || false,
+            order: Number(t.order || 0),
+            description: t.description
+              ? String(t.description)
+              : t.notes
+                ? String(t.notes)
+                : undefined,
+            assignedTo: t.assignedTo ? String(t.assignedTo) : t.assigned_to ? String(t.assigned_to) : undefined,
+            tags: Array.isArray(t.tags) ? (t.tags as string[]) : undefined,
+            dueDate: t.dueDate ? String(t.dueDate) : t.due_date ? String(t.due_date) : undefined,
+            createdAt:
+              String(t.createdAt || t.created_at || new Date().toISOString()),
+            updatedAt:
+              String(t.updatedAt || t.updated_at || new Date().toISOString()),
             column: mapStatusToColumn(String(t.status ?? "todo")),
-            createdAt: t.created_at || t.createdAt || new Date().toISOString(),
-            updatedAt: t.updated_at || t.updatedAt || new Date().toISOString(),
           }),
         );
         setTasks(mapped);
@@ -82,14 +96,16 @@ export default function KanbanPage() {
     if (!task) return;
 
     try {
-      await updateTaskStatus(draggedTask, column === "done" ? "done" : column);
+      const dbStatus =
+        column === "done" ? "done" : column === "in_progress" ? "in_progress" : column === "review" ? "review" : "todo";
+      await updateTaskStatus(draggedTask, dbStatus);
       setTasks((prev) =>
         prev.map((t) =>
           t.id === draggedTask
             ? {
                 ...t,
                 column,
-                completed: column === "done",
+                status: dbStatus as Task["status"],
                 updatedAt: new Date().toISOString(),
               }
             : t,
@@ -112,8 +128,10 @@ export default function KanbanPage() {
         id: Date.now().toString(),
         projectId: projectId.toString(),
         title,
-        completed: false,
-        starred: false,
+        taskType: "feature",
+        status: "todo",
+        priority: "medium",
+        isStarred: false,
         order: tasks.filter((t) => t.projectId === projectId).length,
         column,
         createdAt: new Date().toISOString(),
@@ -151,11 +169,11 @@ export default function KanbanPage() {
       </div>
 
       {/* Kanban Columns */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         {columns.map((column) => (
           <div
             key={column.id}
-            className="min-h-[400px] rounded-xl border border-white/10 bg-white/[0.02] p-4"
+            className="min-h-[400px] rounded-xl border border-white/10 glass-subtle p-4"
             onDragOver={handleDragOver}
             onDrop={() => handleDrop(column.id)}
           >
@@ -177,33 +195,48 @@ export default function KanbanPage() {
             <div className="space-y-2">
               {getTasksByColumn(column.id).map((task) => {
                 const project = projects.find((p) => p.id === task.projectId);
+                const typeConfig = getTaskTypeConfig(task.taskType);
 
                 return (
                   <div
                     key={task.id}
                     draggable
                     onDragStart={() => handleDragStart(task.id)}
-                    className={`cursor-grab rounded-lg border border-white/5 bg-white/[0.04] p-3 transition-all hover:border-white/10 active:cursor-grabbing ${
+                    className={`cursor-grab rounded-lg border border-white/5 bg-glass-04 p-3 transition-all hover:border-white/10 active:cursor-grabbing ${
                       draggedTask === task.id ? "opacity-50" : ""
                     }`}
                   >
                     <div className="flex items-start gap-2">
                       <GripVertical className="mt-0.5 h-4 w-4 flex-shrink-0 text-white/20" />
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm text-white">{task.title}</p>
-                        {project && (
-                          <div className="mt-2 flex items-center gap-2">
-                            <span
-                              className="h-2 w-2 rounded-full"
-                              style={{
-                                backgroundColor: project.color || "#06b6d4",
-                              }}
-                            />
-                            <span className="text-[11px] text-white/40">
-                              {project.name}
+                        {/* Type icon + Title */}
+                        <div className="flex items-center gap-2">
+                          <span className="flex-shrink-0 text-xs">
+                            {typeConfig.icon}
+                          </span>
+                          <p className="text-sm text-white">{task.title}</p>
+                        </div>
+                        <div className="mt-2 flex items-center gap-2">
+                          {project && (
+                            <>
+                              <span
+                                className="h-2 w-2 rounded-full"
+                                style={{
+                                  backgroundColor: project.color || "var(--color-cyan)",
+                                }}
+                              />
+                              <span className="text-[11px] text-white/40">
+                                {project.name}
+                              </span>
+                            </>
+                          )}
+                          {/* Priority indicator */}
+                          {task.priority === "high" && (
+                            <span className="text-[10px] text-red-400">
+                              High
                             </span>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -230,6 +263,8 @@ function mapStatusToColumn(status: string): KanbanColumn {
   switch (status) {
     case "in_progress":
       return "in_progress";
+    case "review":
+      return "review";
     case "done":
       return "done";
     default:

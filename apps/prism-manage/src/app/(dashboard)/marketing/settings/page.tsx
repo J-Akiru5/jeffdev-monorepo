@@ -83,15 +83,15 @@ export default async function MarketingSettingsPage() {
             issue syncing:
           </p>
           <div className="space-y-2 font-mono text-xs">
-            <div className="flex items-center justify-between p-2 bg-white/5 rounded">
+            <div className="flex items-center justify-between p-2 bg-glass-05 rounded">
               <span className="text-white/60">GITHUB_MARKETING_REPO_OWNER</span>
               <span className="text-white/30">e.g., J-Akiru5</span>
             </div>
-            <div className="flex items-center justify-between p-2 bg-white/5 rounded">
+            <div className="flex items-center justify-between p-2 bg-glass-05 rounded">
               <span className="text-white/60">GITHUB_MARKETING_REPO_NAME</span>
               <span className="text-white/30">e.g., jeffdev-monorepo</span>
             </div>
-            <div className="flex items-center justify-between p-2 bg-white/5 rounded">
+            <div className="flex items-center justify-between p-2 bg-glass-05 rounded">
               <span className="text-white/60">GITHUB_PAT</span>
               <span className="text-white/30">Personal Access Token (fine-grained)</span>
             </div>

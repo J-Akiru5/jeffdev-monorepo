@@ -153,13 +153,13 @@ export default function MarketingGithubPage() {
                                   : "rgba(244,63,94,0.2)",
                         color:
                           member.color === "cyan"
-                            ? "#06b6d4"
+                            ? "var(--color-cyan)"
                             : member.color === "purple"
-                              ? "#8b5cf6"
+                              ? "var(--color-purple)"
                               : member.color === "emerald"
-                                ? "#10b981"
+                                ? "var(--color-emerald)"
                                 : member.color === "amber"
-                                  ? "#f59e0b"
+                                  ? "var(--color-amber)"
                                   : "#f43f5e",
                       }}
                     >

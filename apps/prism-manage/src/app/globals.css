@@ -6,7 +6,7 @@
  * ============================================
  * TRACKER APP - PERSONAL DESIGN SYSTEM
  * ============================================
- * Dark Mode Only. The universe is #050505.
+ * Dark-first with light mode support via data-theme="theme-light".
  */
 
 /* ----------------------------------------
@@ -14,9 +14,19 @@
    ---------------------------------------- */
 :root {
   /* Canvas (Backgrounds) */
-  --color-void: #050505;
+  --color-surface: #050505;
+  --color-elevated: #0a0a0a;
+  --color-overlay: rgba(255, 255, 255, 0.02);
   --color-glass: rgba(10, 10, 10, 0.6);
   --color-glass-heavy: rgba(10, 10, 10, 0.85);
+  --color-glass-subtle: rgba(255, 255, 255, 0.02);
+  --color-glass-04: rgba(255, 255, 255, 0.04);
+  --color-glass-05: rgba(255, 255, 255, 0.05);
+  --color-glass-08: rgba(255, 255, 255, 0.08);
+  --color-glass-10: rgba(255, 255, 255, 0.10);
+  --color-glass-20: rgba(255, 255, 255, 0.20);
+  --color-glass-30: rgba(255, 255, 255, 0.30);
+  --color-glass-60: rgba(0, 0, 0, 0.60);
 
   /* Accents (Holographic) */
   --color-cyan: #06b6d4;
@@ -33,14 +43,55 @@
   --tracking-mono: -0.01em;
 }
 
+/* ── Light Mode ── */
+html[data-theme="theme-light"] {
+  --color-surface: #f5f5f0;
+  --color-elevated: #ffffff;
+  --color-overlay: rgba(0, 0, 0, 0.02);
+  --color-glass: rgba(255, 255, 255, 0.6);
+  --color-glass-heavy: rgba(255, 255, 255, 0.85);
+  --color-glass-subtle: rgba(0, 0, 0, 0.02);
+  --color-glass-04: rgba(0, 0, 0, 0.04);
+  --color-glass-05: rgba(0, 0, 0, 0.05);
+  --color-glass-08: rgba(0, 0, 0, 0.08);
+  --color-glass-10: rgba(0, 0, 0, 0.10);
+  --color-glass-20: rgba(0, 0, 0, 0.20);
+  --color-glass-30: rgba(0, 0, 0, 0.30);
+  --color-glass-60: rgba(0, 0, 0, 0.60);
+
+  --color-cyan: #0e7490;
+  --color-purple: #6d28d9;
+  --color-emerald: #047857;
+
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-active: rgba(0, 0, 0, 0.15);
+  --border-glow: rgba(0, 0, 0, 0.25);
+}
+
+/* ── Legacy: keep bg-void as alias during migration ── */
+:root {
+  --color-void: var(--color-surface);
+}
+
 /* ----------------------------------------
    TAILWIND v4 THEME CONFIGURATION
    ---------------------------------------- */
 @theme inline {
   /* Colors */
+  --color-surface: var(--color-surface);
+  --color-elevated: var(--color-elevated);
+  --color-overlay: var(--color-overlay);
   --color-void: var(--color-void);
   --color-glass: var(--color-glass);
   --color-glass-heavy: var(--color-glass-heavy);
+  --color-glass-subtle: var(--color-glass-subtle);
+  --color-glass-04: var(--color-glass-04);
+  --color-glass-05: var(--color-glass-05);
+  --color-glass-08: var(--color-glass-08);
+  --color-glass-10: var(--color-glass-10);
+  --color-glass-20: var(--color-glass-20);
+  --color-glass-30: var(--color-glass-30);
+  --color-glass-60: var(--color-glass-60);
   --color-cyan-accent: var(--color-cyan);
   --color-purple-accent: var(--color-purple);
   --color-emerald-accent: var(--color-emerald);
@@ -63,18 +114,27 @@ html {
   scroll-behavior: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color-scheme: dark;
+}
+
+html[data-theme="theme-light"] {
+  color-scheme: light;
 }
 
 body {
-  background: var(--color-void);
+  background: var(--color-surface);
   color: #ededed;
   font-family: var(--font-sans);
   line-height: 1.6;
   overflow-x: hidden;
 }
 
+html[data-theme="theme-light"] body {
+  color: #0f172a;
+}
+
 /* ----------------------------------------
-   PERFORMANCE: GPU Acceleration & Layout Containment
+   PERFORMANCE
    ---------------------------------------- */
 .gpu {
   -webkit-transform: translateZ(0);
@@ -82,14 +142,13 @@ body {
   will-change: transform;
 }
 
-/* Content visibility for below-fold sections */
 .lazy-section {
   content-visibility: auto;
   contain-intrinsic-size: 1px 3000px;
 }
 
 /* ----------------------------------------
-   REDUCED MOTION: Respect OS accessibility setting
+   REDUCED MOTION
    ---------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -129,7 +188,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-void);
+  background: var(--color-surface);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -151,11 +210,22 @@ body {
   border: 1px solid var(--border-subtle);
 }
 
+.glass-subtle {
+  background: var(--color-glass-subtle);
+}
+
 .glass-heavy {
   background: var(--color-glass-heavy);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-active);
+}
+
+/* ----------------------------------------
+   OVERLAY UTILITY
+   ---------------------------------------- */
+.overlay {
+  background: var(--color-overlay);
 }
 
 /* ----------------------------------------

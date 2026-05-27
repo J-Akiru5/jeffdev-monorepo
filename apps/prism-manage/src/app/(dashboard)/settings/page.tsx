@@ -4,7 +4,8 @@
  * App settings and Google Calendar configuration.
  */
 
-import { Calendar, RefreshCw, User, Bell } from "lucide-react";
+import { Calendar, RefreshCw, Monitor, User, Bell } from "lucide-react";
+import { ThemeSection } from "@/components/settings/theme-section";
 
 export default function SettingsPage() {
   return (
@@ -19,8 +20,10 @@ export default function SettingsPage() {
 
       {/* Settings Sections */}
       <div className="space-y-6">
+        {/* Appearance */}
+        <ThemeSection />
         {/* Google Calendar Integration */}
-        <section className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
+        <section className="rounded-xl border border-white/10 glass-subtle p-6">
           <div className="flex items-start gap-4">
             <div className="rounded-lg bg-cyan-500/10 p-3">
               <Calendar className="h-6 w-6 text-cyan-400" />
@@ -48,7 +51,7 @@ export default function SettingsPage() {
         </section>
 
         {/* Sync Settings */}
-        <section className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
+        <section className="rounded-xl border border-white/10 glass-subtle p-6">
           <div className="flex items-start gap-4">
             <div className="rounded-lg bg-purple-500/10 p-3">
               <RefreshCw className="h-6 w-6 text-purple-400" />
@@ -95,7 +98,7 @@ export default function SettingsPage() {
         </section>
 
         {/* Notifications */}
-        <section className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
+        <section className="rounded-xl border border-white/10 glass-subtle p-6">
           <div className="flex items-start gap-4">
             <div className="rounded-lg bg-emerald-500/10 p-3">
               <Bell className="h-6 w-6 text-emerald-400" />
@@ -134,9 +137,9 @@ export default function SettingsPage() {
         </section>
 
         {/* Profile */}
-        <section className="rounded-xl border border-white/10 bg-white/[0.02] p-6">
+        <section className="rounded-xl border border-white/10 glass-subtle p-6">
           <div className="flex items-start gap-4">
-            <div className="rounded-lg bg-white/10 p-3">
+            <div className="rounded-lg bg-glass-10 p-3">
               <User className="h-6 w-6 text-white/70" />
             </div>
             <div className="flex-1">

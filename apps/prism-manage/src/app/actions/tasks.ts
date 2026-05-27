@@ -5,6 +5,68 @@ import { revalidatePath } from "next/cache";
 import { CreateTaskSchema, UpdateTaskSchema } from "@/lib/schemas";
 import type { Task } from "@/lib/schemas";
 
+/**
+ * Map a raw Supabase row (snake_case) to the Task type (camelCase).
+ */
+function mapTask(raw: Record<string, unknown>): Task {
+  return {
+    id: String(raw.id || ""),
+    projectId: String(raw.project_id || raw.projectId || ""),
+    title: String(raw.title || ""),
+
+    // Classification
+    taskType: (raw.task_type as Task["taskType"]) || "feature",
+    status: (raw.status as Task["status"]) || "todo",
+    priority: (raw.priority as Task["priority"]) || "medium",
+
+    // Content
+    description: raw.description ? String(raw.description) : undefined,
+    notes: raw.notes ? String(raw.notes) : undefined,
+
+    // Metadata
+    isStarred: raw.is_starred === true || raw.is_starred === "true" || false,
+    assignedTo: raw.assigned_to ? String(raw.assigned_to) : undefined,
+    tags: Array.isArray(raw.tags) ? (raw.tags as string[]) : undefined,
+
+    // Dates
+    dueDate: raw.due_date ? String(raw.due_date) : undefined,
+    dueTime: raw.due_time ? String(raw.due_time) : undefined,
+    googleEventId: raw.google_event_id ? String(raw.google_event_id) : undefined,
+
+    // Ordering
+    order: Number(raw.order || 0),
+
+    // Timestamps
+    createdAt: String(raw.created_at || raw.createdAt || new Date().toISOString()),
+    updatedAt: String(raw.updated_at || raw.updatedAt || new Date().toISOString()),
+  };
+}
+
+/**
+ * Map Task to Supabase insert format (snake_case).
+ */
+function toDbInsert(task: Partial<Task> & { user_id: string; project_id: string }) {
+  const db: Record<string, unknown> = {
+    user_id: task.user_id,
+    project_id: task.project_id,
+    title: task.title,
+    task_type: task.taskType || "feature",
+    status: task.status || "todo",
+    priority: task.priority || "medium",
+    is_starred: task.isStarred || false,
+  };
+
+  if (task.description !== undefined) db.description = task.description;
+  if (task.notes !== undefined) db.notes = task.notes;
+  if (task.assignedTo !== undefined) db.assigned_to = task.assignedTo;
+  if (task.tags !== undefined) db.tags = task.tags;
+  if (task.dueDate !== undefined) db.due_date = task.dueDate;
+  if (task.dueTime !== undefined) db.due_time = task.dueTime;
+  if (task.order !== undefined) db.order = task.order;
+
+  return db;
+}
+
 export async function getTasks(): Promise<Task[]> {
   try {
     const supabase = await createClient();
@@ -17,19 +79,7 @@ export async function getTasks(): Promise<Task[]> {
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
-    return (tasks || []).map((t: Record<string, unknown>) => ({
-      id: String(t.id || ""),
-      projectId: String(t.project_id || ""),
-      title: String(t.title || ""),
-      notes: String(t.notes || t.description || ""),
-      completed: t.status === "done",
-      starred: t.priority ? Number(t.priority) > 0 : false,
-      dueDate: t.due_date ? String(t.due_date) : undefined,
-      dueTime: t.due_time ? String(t.due_time) : undefined,
-      order: Number(t.order || 0),
-      createdAt: String(t.created_at || new Date().toISOString()),
-      updatedAt: String(t.updated_at || new Date().toISOString()),
-    }));
+    return (tasks || []).map((t: Record<string, unknown>) => mapTask(t));
   } catch {
     return [];
   }
@@ -38,28 +88,48 @@ export async function getTasks(): Promise<Task[]> {
 export async function createTask(input: {
   title: string;
   projectId: string | number;
-  completed?: boolean;
-  starred?: boolean;
+  taskType?: Task["taskType"];
+  status?: Task["status"];
+  priority?: Task["priority"];
+  description?: string;
+  notes?: string;
+  isStarred?: boolean;
+  assignedTo?: string;
+  tags?: string[];
+  dueDate?: string;
+  dueTime?: string;
 }) {
   const parsed = CreateTaskSchema.pick({ title: true }).safeParse({
     title: input.title,
-    ...(input.completed !== undefined ? { completed: input.completed } : {}),
-    ...(input.starred !== undefined ? { starred: input.starred } : {}),
   });
   if (!parsed.success) throw new Error(parsed.error!.issues[0]!.message);
+
+  // Validate taskType against the enum if provided (catches invalid values before DB CHECK)
+  if (input.taskType && !["feature", "nice-to-have", "bug", "error"].includes(input.taskType)) {
+    throw new Error("Invalid task type");
+  }
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  const { error } = await supabase.from("tasks").insert({
+  const dbRecord = toDbInsert({
     user_id: user.id,
     project_id: String(input.projectId),
     title: parsed.data.title,
-    status: input.completed ? "done" : "todo",
-    priority: input.starred ? 1 : 0,
+    taskType: input.taskType || "feature",
+    status: input.status || "todo",
+    priority: input.priority || "medium",
+    isStarred: input.isStarred || false,
+    description: input.description,
+    notes: input.notes,
+    assignedTo: input.assignedTo,
+    tags: input.tags,
+    dueDate: input.dueDate,
+    dueTime: input.dueTime,
   });
 
+  const { error } = await supabase.from("tasks").insert(dbRecord);
   if (error) throw error;
   revalidatePath("/tasks");
 }
@@ -81,7 +151,7 @@ export async function toggleTaskComplete(taskId: string, completed: boolean) {
   revalidatePath("/tasks");
 }
 
-export async function toggleTaskStar(taskId: string, starred: boolean) {
+export async function toggleTaskStar(taskId: string, isStarred: boolean) {
   if (!taskId) throw new Error("Task ID is required");
 
   const supabase = await createClient();
@@ -90,7 +160,7 @@ export async function toggleTaskStar(taskId: string, starred: boolean) {
 
   const { error } = await supabase
     .from("tasks")
-    .update({ priority: starred ? 1 : 0 })
+    .update({ is_starred: isStarred })
     .eq("id", taskId)
     .eq("user_id", user.id);
 
@@ -100,7 +170,7 @@ export async function toggleTaskStar(taskId: string, starred: boolean) {
 
 export async function updateTaskStatus(taskId: string, status: string) {
   if (!taskId) throw new Error("Task ID is required");
-  if (!["todo", "done", "in-progress"].includes(status)) {
+  if (!["todo", "in_progress", "review", "done"].includes(status)) {
     throw new Error("Invalid status");
   }
 
@@ -133,9 +203,17 @@ export async function updateTask(
 
   const updateData: Record<string, unknown> = {};
   if (parsed.data.title !== undefined) updateData.title = parsed.data.title;
+  if (parsed.data.taskType !== undefined) updateData.task_type = parsed.data.taskType;
+  if (parsed.data.status !== undefined) updateData.status = parsed.data.status;
+  if (parsed.data.priority !== undefined) updateData.priority = parsed.data.priority;
+  if (parsed.data.description !== undefined) updateData.description = parsed.data.description;
   if (parsed.data.notes !== undefined) updateData.notes = parsed.data.notes;
-  if (parsed.data.completed !== undefined) updateData.status = parsed.data.completed ? "done" : "todo";
-  if (parsed.data.starred !== undefined) updateData.priority = parsed.data.starred ? 1 : 0;
+  if (parsed.data.isStarred !== undefined) updateData.is_starred = parsed.data.isStarred;
+  if (parsed.data.assignedTo !== undefined) updateData.assigned_to = parsed.data.assignedTo;
+  if (parsed.data.tags !== undefined) updateData.tags = parsed.data.tags;
+  if (parsed.data.dueDate !== undefined) updateData.due_date = parsed.data.dueDate;
+  if (parsed.data.dueTime !== undefined) updateData.due_time = parsed.data.dueTime;
+  if (parsed.data.order !== undefined) updateData.order = parsed.data.order;
 
   const { error } = await supabase
     .from("tasks")

@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { useProjects } from "@/contexts/project-context";
 import { SupabaseUserButton } from "@/components/auth/supabase-user-button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface NavItem {
   label: string;
@@ -61,7 +62,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className={`fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-white/6 bg-void transition-all duration-300 lg:flex ${
+      className={`fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-white/6 bg-surface transition-all duration-300 lg:flex ${
         collapsed ? "w-16" : "w-64"
       }`}
     >
@@ -75,7 +76,7 @@ export function Sidebar() {
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="rounded-md p-1.5 text-white/40 transition-colors hover:bg-white/5 hover:text-white"
+          className="rounded-md p-1.5 text-white/40 transition-colors hover:bg-glass-05 hover:text-white"
         >
           {collapsed ? (
             <ChevronRight className="h-4 w-4" />
@@ -105,8 +106,8 @@ export function Sidebar() {
                     href={item.href}
                     className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all ${
                       active
-                        ? "bg-white/10 text-white"
-                        : "text-white/50 hover:bg-white/5 hover:text-white"
+                        ? "bg-glass-10 text-white"
+                        : "text-white/50 hover:bg-glass-05 hover:text-white"
                     } ${collapsed ? "justify-center" : ""}`}
                     title={collapsed ? item.label : undefined}
                   >
@@ -137,8 +138,8 @@ export function Sidebar() {
                     href={item.href}
                     className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all ${
                       active
-                        ? "bg-white/10 text-white"
-                        : "text-white/50 hover:bg-white/5 hover:text-white"
+                        ? "bg-glass-10 text-white"
+                        : "text-white/50 hover:bg-glass-05 hover:text-white"
                     } ${collapsed ? "justify-center" : ""}`}
                     title={collapsed ? item.label : undefined}
                   >
@@ -158,7 +159,7 @@ export function Sidebar() {
               <h3 className="font-mono text-[10px] uppercase tracking-wider text-white/30">
                 Lists
               </h3>
-              <button className="rounded p-1 text-white/30 hover:bg-white/5 hover:text-white">
+              <button className="rounded p-1 text-white/30 hover:bg-glass-05 hover:text-white">
                 <Plus className="h-3 w-3" />
               </button>
             </div>
@@ -173,14 +174,14 @@ export function Sidebar() {
                     onClick={() => setActiveProjectId(project.id)}
                     className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-all ${
                       active
-                        ? "bg-white/10 text-white"
-                        : "text-white/50 hover:bg-white/5 hover:text-white"
+                        ? "bg-glass-10 text-white"
+                        : "text-white/50 hover:bg-glass-05 hover:text-white"
                     } ${collapsed ? "justify-center" : ""}`}
                     title={collapsed ? project.name : undefined}
                   >
                     <span
                       className="h-2 w-2 flex-shrink-0 rounded-full"
-                      style={{ backgroundColor: project.color || "#06b6d4" }}
+                      style={{ backgroundColor: project.color || "var(--color-cyan)" }}
                     />
                     {!collapsed && (
                       <span className="truncate">{project.name}</span>
@@ -196,9 +197,10 @@ export function Sidebar() {
       {/* Bottom Section */}
       <div className="border-t border-white/[0.06] p-3 space-y-1">
         {!collapsed && <SupabaseUserButton />}
+        {!collapsed && <ThemeToggle />}
         <Link
           href="/settings"
-          className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm text-white/50 transition-all hover:bg-white/5 hover:text-white ${
+          className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm text-white/50 transition-all hover:bg-glass-05 hover:text-white ${
             collapsed ? "justify-center" : ""
           }`}
           title={collapsed ? "Settings" : undefined}

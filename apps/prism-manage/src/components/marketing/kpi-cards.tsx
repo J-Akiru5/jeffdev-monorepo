@@ -48,7 +48,7 @@ function KpiEditableValue({
             if (e.key === "Enter") handleSave();
             if (e.key === "Escape") setEditing(false);
           }}
-          className="w-24 bg-white/10 border border-cyan-500/50 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-cyan-400"
+          className="w-24 bg-glass-10 border border-cyan-500/50 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-cyan-400"
           autoFocus
           disabled={saving}
         />
@@ -104,7 +104,7 @@ export function KpiCards({ kpis }: { kpis: MarketingKpi[] }) {
                 {kpi.target.toLocaleString()}
               </p>
             </div>
-            <div className="mt-3 h-1.5 w-full rounded-full bg-white/10">
+            <div className="mt-3 h-1.5 w-full rounded-full bg-glass-10">
               <div
                 className="h-1.5 rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 transition-all"
                 style={{ width: `${percent}%` }}
