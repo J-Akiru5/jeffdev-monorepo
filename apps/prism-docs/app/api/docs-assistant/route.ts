@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+export const runtime = "edge";
+
 // Rate limiting store (in-memory for simplicity, use Redis in production)
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
