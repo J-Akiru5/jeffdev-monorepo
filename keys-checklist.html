@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Syntaxure Labs — Deployment Keys Checklist</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface-2: #1a1a28;
+    --border: rgba(255,255,255,0.08);
+    --text: #e8e8f0;
+    --text-muted: #8888a0;
+    --cyan: #06b6d4;
+    --cyan-dim: rgba(6,182,212,0.15);
+    --green: #22c55e;
+    --green-dim: rgba(34,197,94,0.12);
+    --amber: #eab308;
+    --red: #ef4444;
+    --red-dim: rgba(239,68,68,0.12);
+    --purple: #a855f7;
+    --radius: 10px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 24px;
+  }
+  .container { max-width: 960px; margin: 0 auto; }
+  .header {
+    text-align: center;
+    padding: 48px 24px 32px;
+    margin-bottom: 32px;
+  }
+  .header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+  .header p { color: var(--text-muted); font-size: 0.9rem; }
+  .header .meta {
+    display: flex; justify-content: center; gap: 16px; margin-top: 12px;
+    font-size: 0.8rem; color: var(--text-muted); flex-wrap: wrap;
+  }
+  .header .meta span {
+    background: var(--surface); padding: 4px 12px; border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+  .summary {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px; margin-bottom: 40px;
+  }
+  .summary-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; text-align: center;
+    transition: border-color 0.2s;
+  }
+  .summary-card:hover { border-color: var(--cyan); }
+  .summary-card .count { font-size: 2rem; font-weight: 700; color: var(--cyan); }
+  .summary-card .label {
+    color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;
+    letter-spacing: 0.05em; margin-top: 4px;
+  }
+  .progress-section {
+    margin-bottom: 40px; padding: 24px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius);
+  }
+  .progress-header {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+  }
+  .progress-header h2 { font-size: 1rem; font-weight: 600; }
+  .progress-header .percentage { font-size: 1.2rem; font-weight: 700; color: var(--cyan); }
+  .progress-bar { height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
+  .progress-bar-fill {
+    height: 100%; background: linear-gradient(90deg, var(--cyan), var(--purple));
+    border-radius: 3px; transition: width 0.5s ease; width: 0%;
+  }
+  .app-section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 20px; overflow: hidden;
+  }
+  .app-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px 24px; cursor: pointer; user-select: none; transition: background 0.2s;
+  }
+  .app-header:hover { background: var(--surface-2); }
+  .app-header-left { display: flex; align-items: center; gap: 16px; flex: 1; flex-wrap: wrap; }
+  .app-name { font-size: 1.1rem; font-weight: 600; }
+  .app-domain {
+    font-size: 0.75rem; color: var(--cyan); background: var(--cyan-dim);
+    padding: 2px 10px; border-radius: 20px;
+  }
+  .app-badge {
+    font-size: 0.7rem; padding: 2px 8px; border-radius: 4px;
+    font-weight: 500; text-transform: uppercase; letter-spacing: 0.03em;
+  }
+  .badge-yes { background: var(--green-dim); color: var(--green); }
+  .badge-no { background: var(--red-dim); color: var(--red); }
+  .app-progress { font-size: 0.85rem; color: var(--text-muted); min-width: 40px; text-align: right; }
+  .app-chevron { color: var(--text-muted); margin-left: 12px; transition: transform 0.2s; font-size: 1.2rem; }
+  .app-chevron.open { transform: rotate(180deg); }
+  .app-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+  .app-body.open { max-height: 5000px; }
+  .app-body-inner { padding: 0 24px 24px; }
+  .var-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .var-table th {
+    text-align: left; font-size: 0.75rem; text-transform: uppercase;
+    letter-spacing: 0.05em; color: var(--text-muted); padding: 8px 12px;
+    border-bottom: 1px solid var(--border); font-weight: 600;
+  }
+  .var-table td { padding: 8px 12px; font-size: 0.88rem; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: top; }
+  .var-table tr:last-child td { border-bottom: none; }
+  .var-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .var-name {
+    font-family: 'SF Mono', 'Cascadia Code', 'JetBrains Mono', monospace;
+    font-size: 0.82rem; color: var(--cyan); word-break: break-all; cursor: pointer;
+  }
+  .var-name:hover { text-decoration: underline; }
+  .var-desc { color: var(--text-muted); font-size: 0.82rem; }
+  .var-desc strong { color: var(--amber); }
+  .var-source { color: var(--purple); font-size: 0.78rem; }
+  .tag-secret {
+    display: inline-block; font-size: 0.65rem; padding: 1px 6px; border-radius: 3px;
+    background: var(--amber); color: #000; font-weight: 600; text-transform: uppercase;
+  }
+  .section-label {
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--text-muted); margin: 20px 0 8px; font-weight: 600;
+  }
+  .deps { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .dep-tag {
+    font-size: 0.75rem; background: var(--surface-2); border: 1px solid var(--border);
+    padding: 2px 10px; border-radius: 20px; color: var(--text-muted);
+    font-family: 'SF Mono', monospace;
+  }
+  .note {
+    margin-top: 12px; padding: 12px 16px; border-radius: 6px; font-size: 0.85rem;
+    border-left: 3px solid var(--amber); background: rgba(234,179,8,0.06); color: var(--text-muted);
+  }
+  .note strong { color: var(--amber); }
+  .note-cyan { border-left-color: var(--cyan); background: var(--cyan-dim); }
+  .note-cyan strong { color: var(--cyan); }
+  .note-red { border-left-color: var(--red); background: var(--red-dim); }
+  .note-red strong { color: var(--red); }
+  .footer { text-align: center; padding: 32px; color: var(--text-muted); font-size: 0.8rem; }
+  .controls { display: flex; gap: 8px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap; }
+  .btn {
+    padding: 8px 18px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text); font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+  }
+  .btn:hover { border-color: var(--cyan); background: var(--surface-2); }
+  .btn-primary { background: var(--cyan); color: #000; border-color: var(--cyan); font-weight: 600; }
+  .btn-primary:hover { background: #0ed4f2; }
+  .checkbox-row { display: flex; align-items: center; gap: 10px; padding: 4px 0; }
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; background: #000; color: #fff;
+    padding: 10px 18px; border-radius: 8px; border: 1px solid var(--border);
+    font-size: 0.8rem; opacity: 0; transform: translateY(10px);
+    transition: all 0.3s ease; pointer-events: none; z-index: 999;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .last-saved {
+    text-align: center; font-size: 0.75rem; color: var(--text-muted);
+    margin-bottom: 16px; min-height: 20px;
+  }
+  @media (max-width: 600px) {
+    body { padding: 12px; }
+    .header h1 { font-size: 1.4rem; }
+    .app-header { padding: 16px; }
+    .app-body-inner { padding: 0 16px 16px; }
+    .summary { grid-template-columns: repeat(2, 1fr); }
+    .var-table td, .var-table th { padding: 6px 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>☸ Deployment Keys Checklist</h1>
+    <p>Syntaxure Labs Monorepo — Vercel Environment Variables &amp; Secrets</p>
+    <div class="meta">
+      <span>📅 May 21, 2026</span>
+      <span>🌿 develop</span>
+      <span>🔑 ba08a82</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-primary" onclick="expandAll()">Expand All</button>
+    <button class="btn" onclick="collapseAll()">Collapse All</button>
+    <button class="btn" onclick="checkAll()">✓ Check All</button>
+    <button class="btn" onclick="uncheckAll()">Uncheck All</button>
+    <button class="btn" onclick="clearSaved()">🗑 Clear Saved</button>
+  </div>
+
+  <div id="lastSaved" class="last-saved"></div>
+
+  <div class="summary">
+    <div class="summary-card">
+      <div class="count" id="varCount">0</div>
+      <div class="label">Variables Total</div>
+    </div>
+    <div class="summary-card">
+      <div class="count" id="checkedCount">0</div>
+      <div class="label">Checked Off</div>
+    </div>
+    <div class="summary-card">
+      <div class="count" id="appsCount">7</div>
+      <div class="label">Apps / Services</div>
+    </div>
+    <div class="summary-card">
+      <div class="count" id="secretCount">0</div>
+      <div class="label">🔒 Secrets</div>
+    </div>
+  </div>
+
+  <div class="progress-section">
+    <div class="progress-header">
+      <h2>Overall Progress</h2>
+      <span class="percentage" id="percentage">0%</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-bar-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <div id="appContainer"></div>
+
+  <div class="footer">
+    Generated from jeffdev-monorepo · Progress auto-saves to your browser
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'syntaxure-deploy-checklist';
+
+// ========================
+// DATA
+// ========================
+const apps = [
+  { name: "syntaxure-labs", domain: "jeffdev.studio", vercel: true, vars: [
+    { name: "NEXT_PUBLIC_SITE_URL", desc: "https://jeffdev.studio", source: "You set", secret: false, group: "Public" },
+    { name: "NEXT_PUBLIC_BASE_URL", desc: "Same as SITE_URL — keep in sync", source: "You set", secret: false, group: "Public" },
+    { name: "NEXT_PUBLIC_SUPABASE_URL", desc: "Supabase project URL", source: "Supabase Dashboard", secret: false, group: "Public" },
+    { name: "NEXT_PUBLIC_SUPABASE_ANON_KEY", desc: "Supabase anon key", source: "Supabase Dashboard", secret: false, group: "Public" },
+    { name: "NEXT_PUBLIC_PAYPAL_CLIENT_ID", desc: "PayPal client-side ID", source: "PayPal Developer", secret: false, group: "Public" },
+    { name: "NEXT_PUBLIC_GCASH_NUMBER", desc: "GCash number for proof upload", source: "You set", secret: false, group: "Public" },
+    { name: "NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION", desc: "Google Search Console code", source: "Google Search Console", secret: false, group: "Public" },
+    { name: "NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID", desc: "GA4 measurement ID (optional)", source: "Firebase Console", secret: false, group: "Public" },
+    { name: "SUPABASE_SERVICE_ROLE_KEY", desc: "Service role key", source: "Supabase Dashboard", secret: true, group: "Private" },
+    { name: "RESEND_API_KEY", desc: "Transactional email API key", source: "Resend Dashboard", secret: true, group: "Private" },
+    { name: "PAYPAL_CLIENT_ID", desc: "Server-side PayPal client ID", source: "PayPal Developer", secret: false, group: "Private" },
+    { name: "PAYPAL_CLIENT_SECRET", desc: "PayPal client secret", source: "PayPal Developer", secret: true, group: "Private" },
+    { name: "PAYPAL_MODE", desc: "live or sandbox", source: "You set", secret: false, group: "Private" },
+    { name: "GOOGLE_GEMINI_API_KEY", desc: "Gemini AI API key", source: "Google AI Studio", secret: true, group: "Private" },
+    { name: "EXCHANGE_RATE_API_KEY", desc: "Currency conversion API key", source: "Exchange rate provider", secret: true, group: "Private" },
+    { name: "FOUNDER_UID", desc: "Your Supabase user ID for admin access", source: "Supabase Auth", secret: false, group: "Private" },
+    { name: "CONTACT_EMAIL", desc: "contact@jeffdev.studio", source: "You set", secret: false, group: "Private" },
+    { name: "HIRE_EMAIL", desc: "hire@jeffdev.studio", source: "You set", secret: false, group: "Private" },
+    { name: "NOREPLY_EMAIL", desc: "noreply@jeffdev.studio", source: "You set", secret: false, group: "Private" },
+    { name: "SUPPORT_EMAIL", desc: "support@jeffdev.studio", source: "You set", secret: false, group: "Private" },
+    { name: "FEATURE_PRISM_ENGINE_ENABLED", desc: "Feature flag true/false", source: "You set", secret: false, group: "Private" },
+    { name: "FEATURE_PRISM_ENGINE_TEASER", desc: "Feature flag", source: "You set", secret: false, group: "Private" },
+    { name: "N8N_WEBHOOK_URL", desc: "n8n automation (optional)", source: "n8n", secret: false, group: "Private" },
+    { name: "GA_PROPERTY_ID", desc: "Google Analytics property ID (optional)", source: "Google Analytics", secret: false, group: "Optional" },
+    { name: "FIREBASE_ADMIN_CLIENT_EMAIL", desc: "Firebase service account email (optional)", source: "Firebase Console", secret: false, group: "Optional" },
+    { name: "FIREBASE_ADMIN_PRIVATE_KEY", desc: "Firebase private key (optional)", source: "Firebase Console", secret: true, group: "Optional" },
+  ], deps: ["next@16.1.4", "@supabase/supabase-js", "@paypal/react-paypal-js", "resend", "framer-motion", "gsap", "recharts", "@tanstack/react-query", "@vercel/analytics", "@react-pdf/renderer", "sonner", "lucide-react", "@syntaxure/ui", "zod"], notes: [] },
+
+  { name: "prism-engine", domain: "prism.jeffdev.studio", vercel: true, vars: [
+    { name: "NEXT_PUBLIC_PRISM_URL", desc: "https://prism.jeffdev.studio", source: "You set", secret: false, group: "Public" },
+    { name: "NEXT_PUBLIC_SUPABASE_URL", desc: "Supabase project URL", source: "Supabase Dashboard", secret: false, group: "Public" },
+    { name: "NEXT_PUBLIC_SUPABASE_ANON_KEY", desc: "Supabase anon key", source: "Supabase Dashboard", secret: false, group: "Public" },
+    { name: "NEXT_PUBLIC_SENTRY_DSN", desc: "Sentry public DSN", source: "Sentry Dashboard", secret: false, group: "Public" },
+    { name: "SUPABASE_SERVICE_ROLE_KEY", desc: "Service role key", source: "Supabase Dashboard", secret: true, group: "Private" },
+    { name: "MONGODB_URI", desc: "Cosmos DB connection string", source: "Azure Portal", secret: true, group: "Private" },
+    { name: "COSMOS_DATABASE_NAME", desc: "Database name (default: prism)", source: "You set", secret: false, group: "Private" },
+    { name: "GEMINI_API_KEY", desc: "Gemini AI API key", source: "Google AI Studio", secret: true, group: "Private" },
+    { name: "AZURE_OPENAI_ENDPOINT", desc: "Azure OpenAI endpoint", source: "Azure Portal", secret: true, group: "Private" },
+    { name: "AZURE_OPENAI_API_KEY", desc: "Azure OpenAI API key", source: "Azure Portal", secret: true, group: "Private" },
+    { name: "AZURE_OPENAI_DEPLOYMENT_NAME", desc: "Model (default: gpt-4o-mini)", source: "Azure Portal", secret: false, group: "Private" },
+    { name: "AZURE_OPENAI_EMBEDDING_DEPLOYMENT", desc: "Embedding model (default: text-embedding-3-small)", source: "Azure Portal", secret: false, group: "Private" },
+    { name: "SENTRY_DSN", desc: "Sentry secret DSN", source: "Sentry Dashboard", secret: true, group: "Private" },
+    { name: "SENTRY_ORG", desc: "Sentry org: jeffdev", source: "Sentry Dashboard", secret: false, group: "Private" },
+    { name: "SENTRY_PROJECT", desc: "Sentry project: prism-engine", source: "Sentry Dashboard", secret: false, group: "Private" },
+    { name: "SENTRY_AUTH_TOKEN", desc: "Required for source map uploads", source: "Sentry Dashboard", secret: true, group: "Private" },
+    { name: "RESEND_API_KEY", desc: "Transactional email", source: "Resend Dashboard", secret: true, group: "Private" },
+    { name: "PAYPAL_CLIENT_ID", desc: "PayPal client ID", source: "PayPal Developer", secret: false, group: "Private" },
+    { name: "PAYPAL_CLIENT_SECRET", desc: "PayPal client secret", source: "PayPal Developer", secret: true, group: "Private" },
+    { name: "PAYPAL_WEBHOOK_ID", desc: "Webhook verification ID", source: "PayPal Developer", secret: true, group: "Private" },
+    { name: "PAYPAL_PLAN_PRO_MONTHLY", desc: "Plan ID: pro-monthly", source: "PayPal Developer", secret: false, group: "Private" },
+    { name: "PAYPAL_PLAN_PRO_ANNUAL", desc: "Plan ID: pro-annual", source: "PayPal Developer", secret: false, group: "Private" },
+    { name: "PAYPAL_PLAN_TEAM_MONTHLY", desc: "Plan ID: team-monthly", source: "PayPal Developer", secret: false, group: "Private" },
+    { name: "PAYPAL_PLAN_TEAM_ANNUAL", desc: "Plan ID: team-annual", source: "PayPal Developer", secret: false, group: "Private" },
+    { name: "PAYPAL_MODE", desc: "live or sandbox", source: "You set", secret: false, group: "Private" },
+    { name: "N8N_WEBHOOK_URL", desc: "n8n automation (optional)", source: "n8n", secret: false, group: "Private" },
+    { name: "PRISM_API_KEY", desc: "<strong>Must match</strong> prism-mcp-server's PRISM_API_KEY", source: "You generate", secret: true, group: "Private" },
+  ], deps: ["next@16.1.4", "@sentry/nextjs", "@supabase/ssr", "@supabase/supabase-js", "@google/generative-ai", "openai", "@codesandbox/sandpack-react", "sonner", "gsap", "prismjs", "sharp", "@syntaxure/ui", "@syntaxure-labs/db", "zod"], notes: ["<strong>⚠️ Sentry:</strong> withSentryConfig() wraps next config. Ensure SENTRY_ORG/SENTRY_PROJECT match Sentry dashboard. If source maps are enabled, SENTRY_AUTH_TOKEN is required."] },
+
+  { name: "prism-docs", domain: "docs.jeffdev.studio", vercel: true, vars: [
+    { name: "NEXT_PUBLIC_DOCS_URL", desc: "https://docs.jeffdev.studio", source: "You set", secret: false, group: "Public" },
+    { name: "NEXT_PUBLIC_SENTRY_DSN", desc: "Sentry public DSN", source: "Sentry Dashboard", secret: false, group: "Public" },
+    { name: "NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION", desc: "Google Search Console code", source: "Google Search Console", secret: false, group: "Public" },
+    { name: "SENTRY_DSN", desc: "Sentry secret DSN", source: "Sentry Dashboard", secret: true, group: "Private" },
+    { name: "GEMINI_API_KEY", desc: "Gemini AI API key for docs search", source: "Google AI Studio", secret: true, group: "Private" },
+  ], deps: ["next@16.1.4", "nextra@4.6.1", "nextra-theme-docs@4.6.1", "@sentry/nextjs", "@google/generative-ai", "@syntaxure/ui"], notes: [] },
+
+  { name: "prism-admin", domain: "admin subdomain (TBD)", vercel: true, vars: [
+    { name: "NEXT_PUBLIC_SUPABASE_URL", desc: "Supabase project URL", source: "Supabase Dashboard", secret: false, group: "Public" },
+    { name: "NEXT_PUBLIC_SUPABASE_ANON_KEY", desc: "Supabase anon key", source: "Supabase Dashboard", secret: false, group: "Public" },
+    { name: "SUPABASE_SERVICE_ROLE_KEY", desc: "Service role key", source: "Supabase Dashboard", secret: true, group: "Private" },
+    { name: "RESEND_API_KEY", desc: "Transactional email", source: "Resend Dashboard", secret: true, group: "Private" },
+    { name: "ZOHO_REFRESH_TOKEN", desc: "Zoho OAuth refresh token", source: "Zoho Developer Console", secret: true, group: "Private" },
+    { name: "ZOHO_CLIENT_ID", desc: "Zoho OAuth client ID", source: "Zoho Developer Console", secret: false, group: "Private" },
+    { name: "ZOHO_CLIENT_SECRET", desc: "Zoho OAuth client secret", source: "Zoho Developer Console", secret: true, group: "Private" },
+    { name: "ZOHO_ACCOUNT_ID", desc: "Zoho Books account ID", source: "Zoho Books Settings", secret: false, group: "Private" },
+  ], deps: ["next@16.1.4", "@supabase/ssr", "@supabase/supabase-js", "resend", "sonner", "@syntaxure/ui", "@syntaxure-labs/db", "zod"], notes: [] },
+
+  { name: "prism-manage", domain: "manage subdomain (TBD)", vercel: true, vars: [
+    { name: "NEXT_PUBLIC_SUPABASE_URL", desc: "Supabase project URL", source: "Supabase Dashboard", secret: false, group: "Public" },
+    { name: "NEXT_PUBLIC_SUPABASE_ANON_KEY", desc: "Supabase anon key", source: "Supabase Dashboard", secret: false, group: "Public" },
+    { name: "NEXT_PUBLIC_SITE_URL", desc: "App base URL", source: "You set", secret: false, group: "Public" },
+    { name: "NEXT_PUBLIC_GITHUB_MARKETING_REPO_OWNER", desc: "GitHub org/username", source: "GitHub", secret: false, group: "Public" },
+    { name: "NEXT_PUBLIC_GITHUB_MARKETING_REPO_NAME", desc: "GitHub repo name", source: "GitHub", secret: false, group: "Public" },
+    { name: "SUPABASE_SERVICE_ROLE_KEY", desc: "Service role key", source: "Supabase Dashboard", secret: true, group: "Private" },
+    { name: "GOOGLE_CLIENT_ID", desc: "Google OAuth client ID", source: "Google Cloud Console", secret: true, group: "Private" },
+    { name: "GOOGLE_CLIENT_SECRET", desc: "Google OAuth client secret", source: "Google Cloud Console", secret: true, group: "Private" },
+    { name: "GITHUB_PAT", desc: "GitHub Personal Access Token", source: "GitHub Settings", secret: true, group: "Private" },
+  ], deps: ["next@16.1.4", "@supabase/ssr", "@supabase/supabase-js", "@fullcalendar/react", "googleapis", "@octokit/rest", "framer-motion", "sonner", "@syntaxure/ui", "zod"], notes: [] },
+
+  { name: "prism-mcp-server", domain: "❌ Not Vercel", vercel: false, vars: [
+    { name: "MONGODB_URI", desc: "Cosmos DB connection string", source: "Azure Portal", secret: true, group: "Required" },
+    { name: "COSMOS_DATABASE_NAME", desc: "Database name (default: prism)", source: "You set", secret: false, group: "Required" },
+    { name: "AZURE_OPENAI_ENDPOINT", desc: "Azure OpenAI endpoint", source: "Azure Portal", secret: true, group: "Required" },
+    { name: "AZURE_OPENAI_API_KEY", desc: "Azure OpenAI API key", source: "Azure Portal", secret: true, group: "Required" },
+    { name: "AZURE_OPENAI_DEPLOYMENT_NAME", desc: "Model deployment name", source: "Azure Portal", secret: false, group: "Required" },
+    { name: "AZURE_OPENAI_EMBEDDING_DEPLOYMENT", desc: "Embedding model name", source: "Azure Portal", secret: false, group: "Required" },
+    { name: "GEMINI_MODEL", desc: "Gemini model (fallback)", source: "You set", secret: false, group: "Required" },
+    { name: "PRISM_API_KEY", desc: "<strong>Must match</strong> prism-engine's PRISM_API_KEY", source: "You generate", secret: true, group: "Required" },
+    { name: "PRISM_API_URL", desc: "Prism Engine URL", source: "You set", secret: false, group: "Required" },
+    { name: "USE_GREMLIN_RANKING", desc: "true/false — Gremlin ranking", source: "You set", secret: false, group: "Required" },
+  ], deps: ["@modelcontextprotocol/sdk", "@google/generative-ai", "openai", "mongodb", "playwright", "gpt-tokenizer", "@syntaxure-labs/db"], notes: ["<strong>⚠️</strong> Uses playwright in production — needs headless browser env.", "<strong>⚠️</strong> Node.js stdio transport — NOT an HTTP server. Cannot run on Vercel."] },
+
+  { name: "prism-analytics", domain: "❌ Not Vercel — Docker/Railway/VM", vercel: false, vars: [
+    { name: "SUPABASE_URL", desc: "Supabase project URL (no NEXT_PUBLIC_ — Python)", source: "Supabase Dashboard", secret: true, group: "Required" },
+    { name: "SUPABASE_SERVICE_ROLE_KEY", desc: "Service role key", source: "Supabase Dashboard", secret: true, group: "Required" },
+  ], deps: ["fastapi", "uvicorn", "supabase", "pandas", "matplotlib", "seaborn", "pydantic"], notes: ["<strong>🐍</strong> Python FastAPI — build with Docker. Has Dockerfile at apps/prism-analytics/Dockerfile"] }
+];
+
+// ========================
+// STORAGE
+// ========================
+function loadSaved() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const saved = JSON.parse(raw);
+      apps.forEach((app, ai) => {
+        app.vars.forEach((v, vi) => {
+          const key = `${ai}:${vi}`;
+          if (saved[key]) v._checked = true;
+        });
+      });
+    }
+  } catch (e) { /* ignore */ }
+}
+
+function saveState() {
+  const state = {};
+  apps.forEach((app, ai) => {
+    app.vars.forEach((v, vi) => {
+      if (v._checked) state[`${ai}:${vi}`] = true;
+    });
+  });
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const now = new Date();
+    document.getElementById('lastSaved').textContent = `💾 Saved ${now.toLocaleTimeString()}`;
+  } catch (e) { /* ignore */ }
+}
+
+function clearSaved() {
+  if (confirm('Clear all saved progress?')) {
+    localStorage.removeItem(STORAGE_KEY);
+    apps.forEach(a => a.vars.forEach(v => v._checked = false));
+    render();
+    showToast('Progress cleared');
+  }
+}
+
+// ========================
+// TOAST
+// ========================
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ========================
+// RENDER
+// ========================
+function render() {
+  let html = '';
+  apps.forEach((app, idx) => {
+    const badgeClass = app.vercel ? 'badge-yes' : 'badge-no';
+    const badgeText = app.vercel ? 'Vercel' : 'Self-Host';
+    const totalVars = app.vars.length;
+    const checkedVars = app.vars.filter(v => v._checked).length;
+    html += `<div class="app-section" data-app-index="${idx}">
+      <div class="app-header" onclick="toggleApp(${idx})">
+        <div class="app-header-left">
+          <div>
+            <span class="app-name">${app.name}</span>
+            <span class="app-badge ${badgeClass}">${badgeText}</span>
+            <span class="app-domain">${app.domain}</span>
+          </div>
+        </div>
+        <span class="app-progress">${checkedVars}/${totalVars}</span>
+        <span class="app-chevron">▼</span>
+      </div>
+      <div class="app-body" id="appBody-${idx}">
+        <div class="app-body-inner">
+          ${renderVars(app.vars)}
+          <div class="section-label">📦 Dependencies</div>
+          <div class="deps">${app.deps.map(d => `<span class="dep-tag">${d}</span>`).join('')}</div>
+          ${app.notes.length ? app.notes.map(n => `<div class="note">${n}</div>`).join('') : ''}
+        </div>
+      </div>
+    </div>`;
+  });
+  container.innerHTML = html;
+  updateStats();
+}
+
+function renderVars(vars) {
+  const groups = {};
+  vars.forEach(v => {
+    if (!groups[v.group]) groups[v.group] = [];
+    groups[v.group].push(v);
+  });
+  let html = '';
+  Object.keys(groups).forEach(group => {
+    const icon = group === 'Public' ? '🌐' : group === 'Private' ? '🔒' : group === 'Optional' ? '📋' : '⚙️';
+    html += `<div class="section-label">${icon} ${group}</div>`;
+    html += `<table class="var-table"><thead><tr><th style="width:28px"></th><th>Variable</th><th>Description</th><th>Source</th></tr></thead><tbody>`;
+    groups[group].forEach(v => {
+      const checked = v._checked ? 'checked' : '';
+      const secretTag = v.secret ? '<span class="tag-secret">Secret</span>' : '';
+      html += `<tr>
+        <td><input type="checkbox" class="var-checkbox" data-var-id="${v.name}" ${checked} onchange="onCheckChange(event)"></td>
+        <td><span class="var-name" onclick="copyVar('${v.name}')" title="Click to copy">${v.name}</span> ${secretTag}</td>
+        <td><span class="var-desc">${v.desc}</span></td>
+        <td><span class="var-source">${v.source}</span></td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+  });
+  return html;
+}
+
+// ========================
+// FUNCTIONS
+// ========================
+const container = document.getElementById('appContainer');
+
+function toggleApp(idx) {
+  const body = document.getElementById(`appBody-${idx}`);
+  const chevron = body.previousElementSibling.querySelector('.app-chevron');
+  body.classList.toggle('open');
+  chevron.classList.toggle('open');
+}
+
+function expandAll() {
+  apps.forEach((_, idx) => {
+    const body = document.getElementById(`appBody-${idx}`);
+    const chevron = body.previousElementSibling.querySelector('.app-chevron');
+    body.classList.add('open');
+    chevron.classList.add('open');
+  });
+}
+
+function collapseAll() {
+  apps.forEach((_, idx) => {
+    const body = document.getElementById(`appBody-${idx}`);
+    const chevron = body.previousElementSibling.querySelector('.app-chevron');
+    body.classList.remove('open');
+    chevron.classList.remove('open');
+  });
+}
+
+function checkAll() {
+  document.querySelectorAll('.var-checkbox').forEach(cb => cb.checked = true);
+  apps.forEach(a => a.vars.forEach(v => v._checked = true));
+  saveState();
+  updateStats();
+  showToast('All checked');
+}
+
+function uncheckAll() {
+  document.querySelectorAll('.var-checkbox').forEach(cb => cb.checked = false);
+  apps.forEach(a => a.vars.forEach(v => v._checked = false));
+  saveState();
+  updateStats();
+  showToast('All unchecked');
+}
+
+function copyVar(name) {
+  navigator.clipboard.writeText(name).then(() => showToast(`Copied: ${name}`)).catch(() => {});
+}
+
+function onCheckChange(event) {
+  const cb = event.target;
+  const idx = parseInt(cb.closest('.app-section').dataset.appIndex);
+  const varName = cb.dataset.varId;
+  const v = apps[idx].vars.find(x => x.name === varName);
+  if (v) v._checked = cb.checked;
+  saveState();
+  updateStats();
+}
+
+function updateStats() {
+  let total = 0, checked = 0, secrets = 0;
+  apps.forEach(a => {
+    a.vars.forEach(v => {
+      total++;
+      if (v._checked) checked++;
+      if (v.secret) secrets++;
+    });
+  });
+  document.getElementById('varCount').textContent = total;
+  document.getElementById('checkedCount').textContent = checked;
+  document.getElementById('secretCount').textContent = secrets;
+  const pct = total ? Math.round((checked / total) * 100) : 0;
+  document.getElementById('percentage').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
+  apps.forEach((a, idx) => {
+    const totalV = a.vars.length;
+    const checkedV = a.vars.filter(v => v._checked).length;
+    const header = document.querySelector(`[data-app-index="${idx}"] .app-progress`);
+    if (header) header.textContent = `${checkedV}/${totalV}`;
+  });
+}
+
+// Init
+loadSaved();
+render();
+</script>
+</body>
+</html>

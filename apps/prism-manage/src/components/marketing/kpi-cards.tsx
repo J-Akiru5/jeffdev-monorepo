@@ -1,52 +1,70 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { Pencil } from "lucide-react";
+import { useState, useCallback, useEffect } from "react";
+import { Pencil, Loader2 } from "lucide-react";
 import { updateKpi } from "@/app/actions/marketing";
 import type { MarketingKpi } from "@/lib/schemas";
+import { toast } from "sonner";
 
 function KpiEditableValue({
-  label,
   value,
   unit,
   onSave,
 }: {
-  label: string;
   value: number;
   unit: string;
   onSave: (v: number) => Promise<void>;
 }) {
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setEditValue(value);
+  }, [value]);
 
   const handleSave = useCallback(async () => {
     const num = Number(editValue);
     if (isNaN(num)) return;
-    await onSave(num);
-    setEditing(false);
+    setSaving(true);
+    try {
+      await onSave(num);
+      setEditing(false);
+    } catch {
+      toast.error("Failed to save KPI value");
+    }
+    setSaving(false);
   }, [editValue, onSave]);
 
   if (editing) {
     return (
-      <input
-        type="number"
-        value={editValue}
-        onChange={(e) => setEditValue(Number(e.target.value))}
-        onBlur={handleSave}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") handleSave();
-          if (e.key === "Escape") setEditing(false);
-        }}
-        className="w-24 bg-white/10 border border-cyan-500/50 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-cyan-400"
-        autoFocus
-      />
+      <div className="flex items-center gap-1">
+        <input
+          type="number"
+          value={editValue}
+          onChange={(e) => setEditValue(Number(e.target.value))}
+          onBlur={handleSave}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSave();
+            if (e.key === "Escape") setEditing(false);
+          }}
+          className="w-24 bg-white/10 border border-cyan-500/50 rounded px-2 py-1 text-sm text-white focus:outline-none focus:border-cyan-400"
+          autoFocus
+          disabled={saving}
+        />
+        {saving && <Loader2 className="h-3 w-3 animate-spin text-cyan-400" />}
+      </div>
     );
   }
 
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-label="Edit value"
       className="group flex items-center gap-1 cursor-pointer"
       onClick={() => setEditing(true)}
+      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setEditing(true); }}
     >
       <span className="text-2xl font-bold text-white">
         {unit}
@@ -62,7 +80,9 @@ export function KpiCards({ kpis }: { kpis: MarketingKpi[] }) {
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       {kpis.map((kpi) => {
         const percent = Math.min(
-          Math.round((kpi.current / kpi.target) * 100),
+          kpi.target > 0
+            ? Math.round((kpi.current / kpi.target) * 100)
+            : 0,
           100
         );
 
@@ -73,7 +93,6 @@ export function KpiCards({ kpis }: { kpis: MarketingKpi[] }) {
             </p>
             <div className="mt-2">
               <KpiEditableValue
-                label={kpi.label}
                 value={kpi.current}
                 unit={kpi.unit}
                 onSave={async (v) => {

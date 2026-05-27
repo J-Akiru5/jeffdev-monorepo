@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { GithubSyncButton } from "@/components/marketing/github-sync-button";
 import type { MarketingTask, MarketingTeamMember } from "@/lib/schemas";
-
-export const dynamic = "force-dynamic";
+import { toast } from "sonner";
 
 export default function MarketingGithubPage() {
   const [tasks, setTasks] = useState<MarketingTask[]>([]);

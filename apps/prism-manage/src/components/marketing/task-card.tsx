@@ -23,6 +23,9 @@ const nextStatus: Record<string, string> = {
   done: "todo",
 };
 
+const repoOwner = process.env.NEXT_PUBLIC_GITHUB_MARKETING_REPO_OWNER || "";
+const repoName = process.env.NEXT_PUBLIC_GITHUB_MARKETING_REPO_NAME || "";
+
 export function TaskCard({
   task,
   team,
@@ -35,13 +38,14 @@ export function TaskCard({
   const [updating, setUpdating] = useState(false);
 
   const cycleStatus = useCallback(async () => {
+    const prevStatus = status;
     const next = nextStatus[status] as "todo" | "in-progress" | "done";
     setStatus(next);
     setUpdating(true);
     try {
       await updateMarketingTaskStatus(task.id, next);
     } catch {
-      setStatus(status);
+      setStatus(prevStatus);
     }
     setUpdating(false);
   }, [status, task.id]);
@@ -50,8 +54,8 @@ export function TaskCard({
     return team.find((m) => m.id === ownerId)?.initials || ownerId;
   };
 
-  const githubUrl = task.githubIssueNumber
-    ? `https://github.com/issues/${task.githubIssueNumber}`
+  const githubUrl = task.githubIssueNumber && repoOwner && repoName
+    ? `https://github.com/${repoOwner}/${repoName}/issues/${task.githubIssueNumber}`
     : null;
 
   return (

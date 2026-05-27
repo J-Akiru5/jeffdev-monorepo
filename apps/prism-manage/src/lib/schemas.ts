@@ -136,3 +136,52 @@ export const CreateMarketingTaskSchema = MarketingTaskSchema.omit({
   updatedAt: true,
 });
 export type CreateMarketingTaskInput = z.infer<typeof CreateMarketingTaskSchema>;
+
+// Partial update schemas for type-safe updates
+export const UpdateTaskSchema = TaskSchema.partial().pick({
+  title: true,
+  notes: true,
+  completed: true,
+  starred: true,
+  dueDate: true,
+  dueTime: true,
+  order: true,
+});
+export type UpdateTaskInput = z.infer<typeof UpdateTaskSchema>;
+
+export const UpdateCalendarEventSchema = CalendarEventSchema.partial().pick({
+  title: true,
+  start: true,
+  end: true,
+  allDay: true,
+  linkedTaskId: true,
+});
+export type UpdateCalendarEventInput = z.infer<typeof UpdateCalendarEventSchema>;
+
+export const UpdateMarketingKpiSchema = MarketingKpiSchema.partial().pick({
+  current: true,
+  target: true,
+});
+export type UpdateMarketingKpiInput = z.infer<typeof UpdateMarketingKpiSchema>;
+
+export const UpdateMarketingTaskSchema = MarketingTaskSchema.partial().pick({
+  title: true,
+  status: true,
+  phaseId: true,
+  ownerIds: true,
+  priority: true,
+  platform: true,
+  description: true,
+});
+export type UpdateMarketingTaskInput = z.infer<typeof UpdateMarketingTaskSchema>;
+
+export const GitHubIssueSchema = z.object({
+  number: z.number(),
+  title: z.string(),
+  state: z.string(),
+  body: z.string().nullable().optional(),
+  html_url: z.string(),
+  created_at: z.string(),
+  labels: z.array(z.union([z.string(), z.object({ name: z.string().optional() })])),
+});
+export type GitHubIssue = z.infer<typeof GitHubIssueSchema>;

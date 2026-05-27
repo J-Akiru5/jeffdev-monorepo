@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, RefreshCw } from "lucide-react";
-import { updateMarketingTaskStatus, getMarketingTasks } from "@/app/actions/marketing";
+import { getMarketingTasks } from "@/app/actions/marketing";
 import { TaskCard } from "@/components/marketing/task-card";
 import { TaskForm } from "@/components/marketing/task-form";
 import type { MarketingTask, MarketingTeamMember } from "@/lib/schemas";
@@ -46,10 +46,18 @@ export function TaskBoard({
   const [filter, setFilter] = useState<Filter>({});
   const [refreshing, setRefreshing] = useState(false);
 
+  useEffect(() => {
+    setTasks(initialTasks);
+  }, [initialTasks]);
+
   const refresh = useCallback(async () => {
     setRefreshing(true);
-    const fresh = await getMarketingTasks();
-    setTasks(fresh);
+    try {
+      const fresh = await getMarketingTasks();
+      setTasks(fresh);
+    } catch {
+      // Tasks remain at previous state on failure
+    }
     setRefreshing(false);
   }, []);
 
