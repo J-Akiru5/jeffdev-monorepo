@@ -34,7 +34,7 @@ export default function NewInvoicePage() {
   const [dueDate, setDueDate] = useState(() => {
     const date = new Date();
     date.setDate(date.getDate() + 14);
-    return date.toISOString().split("T")[0];
+    return date.toISOString().split("T")[0] ?? "";
   });
   const [items, setItems] = useState<LineItem[]>([
     { id: "1", description: "", quantity: 1, unitPrice: 0, amount: 0 },

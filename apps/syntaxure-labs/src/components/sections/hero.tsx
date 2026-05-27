@@ -4,14 +4,13 @@
  * Hero Section — Maximum Neon Aesthetic
  * --------------------------------------
  * Syntaxure Labs landing hero featuring:
- * - Multiple SVG neon angular border lines with GSAP draw-on
+ * - Multiple SVG neon angular border lines with CSS draw-on
  * - "INNOVATE • BUILD • ELEVATE" tagline
  * - Floating "Startup Driven" badge (desktop)
  * - Service shortcut icons in neon-bordered strip
  * - Clip-path diagonal image with neon geometric frame
  */
 
-import { useRef, useEffect } from "react";
 import Link from "next/link";
 import {
   ArrowUpRight,
@@ -24,7 +23,7 @@ import {
   LineChart,
   Zap,
 } from "lucide-react";
-import { gsap } from "gsap";
+import { useInView } from "@/lib/use-in-view";
 
 /* ────────────────────────────────────────
    DATA
@@ -263,110 +262,12 @@ export function Hero({
 }: {
   availabilityText?: string | null;
 }) {
-  const heroRef = useRef<HTMLElement>(null);
-  const headlineRef = useRef<HTMLHeadingElement>(null);
-  const subtextRef = useRef<HTMLParagraphElement>(null);
-  const ctaRef = useRef<HTMLDivElement>(null);
-  const servicesRef = useRef<HTMLDivElement>(null);
-  const taglineRef = useRef<HTMLDivElement>(null);
-  const badgeRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Check reduced motion preference — skip animations if enabled
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (prefersReducedMotion) {
-      // Just set elements visible immediately, no animation
-      gsap.set(
-        [
-          taglineRef.current,
-          headlineRef.current,
-          subtextRef.current,
-          ctaRef.current,
-          servicesRef.current?.children || [],
-          badgeRef.current,
-        ],
-        { opacity: 1, y: 0, x: 0, scale: 1, clearProps: "all" },
-      );
-      const neonLines = heroRef.current?.querySelectorAll(
-        ".neon-line line, .neon-line-main, .neon-line-secondary",
-      );
-      if (neonLines?.length) {
-        gsap.set(neonLines, { opacity: 1, strokeDashoffset: 0 });
-      }
-      return;
-    }
-
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-
-      /* ── Neon SVG Line Draw-On ── */
-      const neonLines = heroRef.current?.querySelectorAll(
-        ".neon-line line, .neon-line-main, .neon-line-secondary",
-      );
-      if (neonLines?.length) {
-        gsap.set(neonLines, { strokeDasharray: 1, strokeDashoffset: 1 });
-        tl.to(neonLines, {
-          strokeDashoffset: 0,
-          duration: 1.8,
-          stagger: 0.08,
-          ease: "power2.inOut",
-        });
-      }
-
-      /* ── Tagline ── */
-      tl.fromTo(
-        taglineRef.current,
-        { opacity: 0, y: -15 },
-        { opacity: 1, y: 0, duration: 0.5 },
-        "-=1.2",
-      );
-
-      /* ── Headline ── */
-      tl.fromTo(
-        headlineRef.current,
-        { opacity: 0, x: -40 },
-        { opacity: 1, x: 0, duration: 0.8 },
-        "-=0.8",
-      );
-
-      /* ── Subtext ── */
-      tl.fromTo(
-        subtextRef.current,
-        { opacity: 0, x: -30 },
-        { opacity: 1, x: 0, duration: 0.6 },
-        "-=0.4",
-      );
-
-      /* ── CTAs ── */
-      tl.fromTo(
-        ctaRef.current,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.5 },
-        "-=0.3",
-      );
-
-      /* ── Service Shortcuts ── */
-      tl.fromTo(
-        servicesRef.current?.children || [],
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.4, stagger: 0.08 },
-        "-=0.2",
-      );
-
-      /* ── Floating Badge ── */
-      if (badgeRef.current) {
-        tl.fromTo(
-          badgeRef.current,
-          { opacity: 0, scale: 0.9 },
-          { opacity: 1, scale: 1, duration: 0.5 },
-          "-=0.6",
-        );
-      }
-    }, heroRef);
-
-    return () => ctx.revert();
-  }, []);
+  const { ref: taglineRef, isInView: taglineInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
+  const { ref: headlineRef, isInView: headlineInView } = useInView<HTMLHeadingElement>({ threshold: 0.1 });
+  const { ref: subtextRef, isInView: subtextInView } = useInView<HTMLParagraphElement>({ threshold: 0.1 });
+  const { ref: ctaRef, isInView: ctaInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
+  const { ref: servicesRef, isInView: servicesInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
+  const { ref: badgeRef, isInView: badgeInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
 
   const scrollToContent = () => {
     window.scrollTo({
@@ -378,7 +279,6 @@ export function Hero({
   return (
     <div className="relative z-10 drop-shadow-[0_15px_25px_rgba(6,182,212,0.15)] -mb-10">
       <section
-        ref={heroRef}
         className="relative flex min-h-[90vh] items-center bg-void hero-section-bg clip-diagonal pb-32"
       >
         {/* ═══════════════════════════════════════
@@ -449,7 +349,9 @@ export function Hero({
             ═══════════════════════════════════════ */}
         <div
           ref={badgeRef}
-          className="hero-floating-badge absolute top-24 right-12 z-30 hidden lg:flex items-center gap-3 rounded-md border border-cyan-500/30 bg-void/60 px-5 py-3 backdrop-blur-xl shadow-glow-cyan animate-float-subtle opacity-0"
+          className={`hero-floating-badge absolute top-24 right-12 z-30 hidden lg:flex items-center gap-3 rounded-md border border-cyan-500/30 bg-void/60 px-5 py-3 backdrop-blur-xl shadow-glow-cyan animate-float-subtle transition-all duration-700 ${
+            badgeInView ? "opacity-100 scale-100" : "opacity-0 scale-95"
+          }`}
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-cyan-500/20 to-purple-500/20 border border-cyan-500/30">
             <Zap className="h-4 w-4 text-cyan-400" strokeWidth={1.5} />
@@ -470,7 +372,7 @@ export function Hero({
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 flex items-center mt-12 lg:mt-0">
           <div className="w-full lg:w-[55%] lg:pr-12 py-24 lg:py-32">
             {/* ── Motto Tagline ── */}
-            <div ref={taglineRef} className="mb-6 opacity-0">
+            <div ref={taglineRef} className={`mb-6 transition-all duration-700 ${taglineInView ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-3"}`}>
               <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-cyan-400/80">
                 Innovate &bull; Build &bull; Elevate
               </p>
@@ -492,7 +394,9 @@ export function Hero({
             {/* ── Headline ── */}
             <h1
               ref={headlineRef}
-              className="text-4xl font-bold leading-[1.1] tracking-tight text-white opacity-0 sm:text-5xl md:text-6xl lg:text-7xl text-left"
+              className={`text-4xl font-bold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl text-left transition-all duration-700 delay-100 ${
+                headlineInView ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
+              }`}
             >
               Innovating Digital Solutions <br className="hidden sm:block" />
               for a{" "}
@@ -504,7 +408,9 @@ export function Hero({
             {/* ── Subtext ── */}
             <p
               ref={subtextRef}
-              className="mt-6 max-w-2xl text-lg leading-relaxed text-white/60 opacity-0 md:text-xl text-left"
+              className={`mt-6 max-w-2xl text-lg leading-relaxed text-white/60 md:text-xl text-left transition-all duration-700 delay-200 ${
+                subtextInView ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-6"
+              }`}
             >
               We transform ideas into powerful digital experiences. Building
               modern solutions that help businesses
@@ -516,7 +422,9 @@ export function Hero({
             {/* ── CTAs ── */}
             <div
               ref={ctaRef}
-              className="mt-10 flex flex-col items-start sm:flex-row gap-4 opacity-0"
+              className={`mt-10 flex flex-col items-start sm:flex-row gap-4 transition-all duration-700 delay-300 ${
+                ctaInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+              }`}
             >
               {/* Primary CTA — Neon Glow */}
               <Link
@@ -555,14 +463,16 @@ export function Hero({
 
                 <div
                   ref={servicesRef}
-                  className="grid grid-cols-3 gap-4 sm:flex sm:flex-wrap sm:justify-between"
+                  className={`grid grid-cols-3 gap-4 sm:flex sm:flex-wrap sm:justify-between transition-all duration-700 delay-500 ${
+                    servicesInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                  }`}
                 >
                   {serviceShortcuts.map((service, idx) => {
                     const Icon = service.icon;
                     return (
                       <div
                         key={idx}
-                        className="flex flex-col items-center gap-2 group cursor-default opacity-0"
+                        className="flex flex-col items-center gap-2 group cursor-default"
                       >
                         <div className="flex h-12 w-12 items-center justify-center rounded-md border border-white/10 bg-white/5 transition-all duration-300 group-hover:border-neon-cyan group-hover:bg-cyan-500/10 group-hover:shadow-glow-cyan">
                           <Icon

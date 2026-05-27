@@ -109,7 +109,7 @@ export function ProjectForm({ mode, initialData, users }: Props) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (initialData as any)?.clientEmail ||
       "",
-    category: initialData?.category || CATEGORIES[0],
+    category: initialData?.category || CATEGORIES[0]!,
     tagline: initialData?.tagline || "",
     description: initialData?.description || "",
     challenge: initialData?.challenge || "",
@@ -503,7 +503,7 @@ export function ProjectForm({ mode, initialData, users }: Props) {
                 <input
                   type="date"
                   value={
-                    formData.startDate ? formData.startDate.split("T")[0] : ""
+                    formData.startDate ? formData.startDate.split("T")[0]! : ""
                   }
                   onChange={(e) => updateField("startDate", e.target.value)}
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2 text-white focus:border-cyan-500/50 focus:outline-none text-sm"
@@ -517,7 +517,7 @@ export function ProjectForm({ mode, initialData, users }: Props) {
                 <input
                   type="date"
                   value={
-                    formData.deadline ? formData.deadline.split("T")[0] : ""
+                    formData.deadline ? formData.deadline.split("T")[0]! : ""
                   }
                   onChange={(e) => updateField("deadline", e.target.value)}
                   className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-2 text-white focus:border-cyan-500/50 focus:outline-none text-sm"

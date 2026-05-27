@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef, useEffect } from "react";
 import {
   Bot,
   PiggyBank,
@@ -10,12 +9,7 @@ import {
   HeartHandshake,
   type LucideIcon,
 } from "lucide-react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
+import { useInView } from "@/lib/use-in-view";
 
 type Feature = {
   id: string;
@@ -83,62 +77,19 @@ const features: Feature[] = [
 ];
 
 export function Features() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const cardsRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    if (prefersReducedMotion) {
-      gsap.set(
-        [headerRef.current, cardsRef.current?.children || []],
-        { opacity: 1, y: 0, scale: 1, clearProps: "all" },
-      );
-      return;
-    }
-
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        headerRef.current,
-        { opacity: 0, y: 30 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          scrollTrigger: {
-            trigger: headerRef.current,
-            start: "top 85%",
-          },
-        },
-      );
-
-      gsap.fromTo(
-        cardsRef.current?.children || [],
-        { opacity: 0, y: 40, scale: 0.97 },
-        {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          duration: 0.6,
-          stagger: 0.1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: cardsRef.current,
-            start: "top 80%",
-          },
-        },
-      );
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
+  const { ref: headerRef, isInView: headerInView } = useInView<HTMLDivElement>({ threshold: 0.2 });
+  const { ref: cardsRef, isInView: cardsInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
 
   return (
-    <section ref={sectionRef} className="relative py-24 md:py-32 lazy-section" id="features">
+    <section className="relative section-padding lazy-section" id="features">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Section Header */}
-        <div ref={headerRef} className="mx-auto max-w-2xl text-center">
+        <div
+          ref={headerRef}
+          className={`mx-auto max-w-2xl text-center transition-all duration-700 ${
+            headerInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          }`}
+        >
           <span className="font-mono text-xs uppercase tracking-wider text-purple-400">
             {"// Why Choose Us"}
           </span>
@@ -157,7 +108,9 @@ export function Features() {
         {/* Features Grid */}
         <div
           ref={cardsRef}
-          className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          className={`mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 transition-all duration-700 ${
+            cardsInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          }`}
         >
           {features.map((feature) => (
             <div
