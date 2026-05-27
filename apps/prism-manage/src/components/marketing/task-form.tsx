@@ -48,6 +48,16 @@ export function TaskForm({ team }: { team: MarketingTeamMember[] }) {
     );
   }, []);
 
+  const resetForm = useCallback(() => {
+    setTitle("");
+    setDescription("");
+    setPhase("phase-1");
+    setPriority("high");
+    setPlatform("");
+    setSelectedOwners(team.length > 0 ? [team[0]!.id] : []);
+    setError("");
+  }, [team]);
+
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -69,23 +79,19 @@ export function TaskForm({ team }: { team: MarketingTeamMember[] }) {
           platform: platform || undefined,
         });
         setOpen(false);
-        setTitle("");
-        setDescription("");
-        setPhase("phase-1");
-        setPriority("high");
-        setPlatform("");
+        resetForm();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to create task");
       }
       setSubmitting(false);
     },
-    [title, description, phase, priority, platform, selectedOwners]
+    [title, description, phase, priority, platform, selectedOwners, resetForm]
   );
 
   if (!open) {
     return (
       <button
-        onClick={() => setOpen(true)}
+        onClick={() => { resetForm(); setOpen(true); }}
         className="glass inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm text-white transition-all hover:border-cyan-500/40"
       >
         <Plus className="h-4 w-4" />
@@ -98,7 +104,7 @@ export function TaskForm({ team }: { team: MarketingTeamMember[] }) {
     <div className="glass rounded-lg p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold text-white">New Marketing Task</h3>
-        <button onClick={() => setOpen(false)} className="text-white/40 hover:text-white">
+        <button type="button" onClick={() => { resetForm(); setOpen(false); }} className="text-white/40 hover:text-white">
           <X className="h-4 w-4" />
         </button>
       </div>

@@ -1,23 +1,8 @@
 "use client";
 
-/**
- * Project Context
- * ---------------
- * Manages the currently active project and project list.
- */
-
-import { createContext, useContext, useState, ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { useProjectStore } from "@/stores/project-store";
 import type { Project } from "@/lib/schemas";
-
-interface ProjectContextType {
-  projects: Project[];
-  setProjects: (projects: Project[]) => void;
-  activeProjectId: string | null;
-  setActiveProjectId: (id: string | null) => void;
-  activeProject: Project | null;
-}
-
-const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 
 export function ProjectProvider({
   children,
@@ -26,32 +11,29 @@ export function ProjectProvider({
   children: ReactNode;
   initialProjects?: Project[];
 }) {
-  const [projects, setProjects] = useState<Project[]>(initialProjects);
-  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
+  const setProjects = useProjectStore((s) => s.setProjects);
 
-  const activeProject = activeProjectId
-    ? projects.find((p) => p.id === activeProjectId) || null
-    : null;
+  useEffect(() => {
+    if (initialProjects.length > 0) {
+      setProjects(initialProjects);
+    }
+  }, [initialProjects, setProjects]);
 
-  return (
-    <ProjectContext.Provider
-      value={{
-        projects,
-        setProjects,
-        activeProjectId,
-        setActiveProjectId,
-        activeProject,
-      }}
-    >
-      {children}
-    </ProjectContext.Provider>
-  );
+  return <>{children}</>;
 }
 
 export function useProjects() {
-  const context = useContext(ProjectContext);
-  if (context === undefined) {
-    throw new Error("useProjects must be used within a ProjectProvider");
-  }
-  return context;
+  const projects = useProjectStore((s) => s.projects);
+  const setProjects = useProjectStore((s) => s.setProjects);
+  const activeProjectId = useProjectStore((s) => s.activeProjectId);
+  const setActiveProjectId = useProjectStore((s) => s.setActiveProjectId);
+  const activeProject = useProjectStore((s) => s.getActiveProject());
+
+  return {
+    projects,
+    setProjects,
+    activeProjectId,
+    setActiveProjectId,
+    activeProject,
+  };
 }

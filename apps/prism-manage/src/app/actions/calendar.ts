@@ -2,28 +2,25 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { CalendarEventSchema, UpdateCalendarEventSchema } from "@/lib/schemas";
 import type { CalendarEvent } from "@/lib/schemas";
 
-/**
- * Calendar Server Actions
- * -----------------------
- * CRUD operations for calendar events backed by Supabase.
- */
-
 export async function fetchEvents(): Promise<CalendarEvent[]> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return [];
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
 
-  const { data: events } = await supabase
-    .from("calendar_events")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("start_time", { ascending: true });
+    const { data: events } = await supabase
+      .from("calendar_events")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("start_time", { ascending: true });
 
-  return (events || []).map(normalizeEvent);
+    return (events || []).map(normalizeEvent);
+  } catch {
+    return [];
+  }
 }
 
 export async function createEvent(event: {
@@ -33,23 +30,36 @@ export async function createEvent(event: {
   allDay?: boolean;
   description?: string;
   linkedTaskId?: string;
-}) {
+}): Promise<CalendarEvent> {
+  const parsed = CalendarEventSchema.pick({
+    title: true,
+    start: true,
+    end: true,
+    allDay: true,
+    linkedTaskId: true,
+  }).safeParse({
+    title: event.title,
+    start: event.start,
+    end: event.end,
+    allDay: event.allDay ?? false,
+    ...(event.linkedTaskId ? { linkedTaskId: event.linkedTaskId } : {}),
+  });
+  if (!parsed.success) throw new Error(parsed.error.errors[0].message);
+
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
   const { data, error } = await supabase
     .from("calendar_events")
     .insert({
       user_id: user.id,
-      title: event.title,
-      start_time: event.start,
-      end_time: event.end,
-      all_day: event.allDay || false,
+      title: parsed.data.title,
+      start_time: parsed.data.start,
+      end_time: parsed.data.end,
+      all_day: parsed.data.allDay,
       description: event.description || null,
-      linked_task_id: event.linkedTaskId || null,
+      linked_task_id: parsed.data.linkedTaskId || null,
     })
     .select()
     .single();
@@ -62,16 +72,26 @@ export async function createEvent(event: {
 export async function updateEvent(
   eventId: string,
   data: Record<string, unknown>,
-) {
+): Promise<CalendarEvent> {
+  if (!eventId) throw new Error("Event ID is required");
+
+  const parsed = UpdateCalendarEventSchema.safeParse(data);
+  if (!parsed.success) throw new Error(parsed.error.errors[0].message);
+
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
+
+  const updateData: Record<string, unknown> = {};
+  if (parsed.data.title !== undefined) updateData.title = parsed.data.title;
+  if (parsed.data.start !== undefined) updateData.start_time = parsed.data.start;
+  if (parsed.data.end !== undefined) updateData.end_time = parsed.data.end;
+  if (parsed.data.allDay !== undefined) updateData.all_day = parsed.data.allDay;
+  if (parsed.data.linkedTaskId !== undefined) updateData.linked_task_id = parsed.data.linkedTaskId;
 
   const { data: updated, error } = await supabase
     .from("calendar_events")
-    .update(data)
+    .update(updateData)
     .eq("id", eventId)
     .eq("user_id", user.id)
     .select()
@@ -83,10 +103,10 @@ export async function updateEvent(
 }
 
 export async function deleteEvent(eventId: string) {
+  if (!eventId) throw new Error("Event ID is required");
+
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
   const { error } = await supabase
@@ -101,14 +121,11 @@ export async function deleteEvent(eventId: string) {
 
 export async function syncCalendar(): Promise<CalendarEvent[]> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     throw new Error("Not authenticated. Connect Google Calendar first.");
   }
 
-  // One-way sync: pull events from Supabase (Google sync flow handled via OAuth)
   const { data: events } = await supabase
     .from("calendar_events")
     .select("*")
@@ -119,29 +136,14 @@ export async function syncCalendar(): Promise<CalendarEvent[]> {
 }
 
 function normalizeEvent(raw: Record<string, unknown>): CalendarEvent {
-  const id = raw.id as string | undefined;
-  const title = raw.title as string | undefined;
-  const startTime = raw.start_time as string | undefined;
-  const start = raw.start as string | undefined;
-  const endTime = raw.end_time as string | undefined;
-  const end = raw.end as string | undefined;
-  const allDay = raw.all_day as boolean | undefined;
-  const allDayAlt = raw.allDay as boolean | undefined;
-  const googleCalId = raw.google_calendar_id as string | undefined;
-  const googleCalIdAlt = raw.googleCalendarId as string | undefined;
-  const linkedTaskId = raw.linked_task_id as string | undefined;
-  const linkedTaskIdAlt = raw.linkedTaskId as string | undefined;
-  const syncedAt = raw.synced_at as string | undefined;
-  const syncedAtAlt = raw.syncedAt as string | undefined;
-
   return {
-    id: id || "",
-    title: title || "",
-    start: startTime || start || "",
-    end: endTime || end || "",
-    allDay: allDay || allDayAlt || false,
-    googleCalendarId: googleCalId || googleCalIdAlt || "",
-    linkedTaskId: linkedTaskId || linkedTaskIdAlt || undefined,
-    syncedAt: syncedAt || syncedAtAlt || new Date().toISOString(),
+    id: String(raw.id || ""),
+    title: String(raw.title || ""),
+    start: String(raw.start_time || raw.start || ""),
+    end: String(raw.end_time || raw.end || ""),
+    allDay: Boolean(raw.all_day || raw.allDay || false),
+    googleCalendarId: String(raw.google_calendar_id || raw.googleCalendarId || ""),
+    linkedTaskId: (raw.linked_task_id || raw.linkedTaskId) as string | undefined,
+    syncedAt: String(raw.synced_at || raw.syncedAt || new Date().toISOString()),
   };
 }

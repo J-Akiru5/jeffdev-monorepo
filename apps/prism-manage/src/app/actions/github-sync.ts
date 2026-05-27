@@ -3,7 +3,7 @@
 import { Octokit } from "@octokit/rest";
 import { revalidatePath } from "next/cache";
 import type { MarketingTask } from "@/lib/schemas";
-import { buildLabels, issueToMarketingTask } from "@/lib/github-utils";
+import { buildLabels, issueToMarketingTask, extractLabels } from "@/lib/github-utils";
 import { createClient } from "@/lib/supabase/server";
 
 function getOctokit() {
@@ -23,6 +23,13 @@ function getRepoConfig(): { owner: string; repo: string } {
   return { owner, repo };
 }
 
+async function requireAuth() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+  return supabase;
+}
+
 export async function fetchGitHubIssues(): Promise<
   Array<{
     number: number;
@@ -34,6 +41,7 @@ export async function fetchGitHubIssues(): Promise<
     labels: (string | { name?: string })[];
   }>
 > {
+  await requireAuth();
   const octokit = getOctokit();
   const { owner, repo } = getRepoConfig();
 
@@ -70,30 +78,30 @@ export async function syncGitHubIssuesToSupabase(): Promise<{
 
   try {
     const issues = await fetchGitHubIssues();
+    if (issues.length === 0) return { imported: 0 };
 
-    let imported = 0;
-    for (const issue of issues) {
-      const task = issueToMarketingTask(issue);
-      const { error } = await supabase.from("marketing_tasks").upsert(
-        {
-          id: task.id,
-          title: task.title,
-          status: task.status,
-          phase_id: task.phaseId,
-          owner_ids: task.ownerIds,
-          priority: task.priority,
-          platform: task.platform,
-          description: task.description,
-          github_issue_number: task.githubIssueNumber,
-          updated_at: task.updatedAt,
-        },
-        { onConflict: "id" }
-      );
-      if (!error) imported++;
-    }
+    const tasks = issues.map(issueToMarketingTask);
+
+    const { error } = await supabase.from("marketing_tasks").upsert(
+      tasks.map((task) => ({
+        id: task.id,
+        title: task.title,
+        status: task.status,
+        phase_id: task.phaseId,
+        owner_ids: task.ownerIds,
+        priority: task.priority,
+        platform: task.platform,
+        description: task.description,
+        github_issue_number: task.githubIssueNumber,
+        updated_at: task.updatedAt,
+      })),
+      { onConflict: "id", ignoreDuplicates: false }
+    );
+
+    if (error) throw error;
 
     revalidatePath("/marketing");
-    return { imported };
+    return { imported: tasks.length };
   } catch (err) {
     return {
       imported: 0,
@@ -109,7 +117,8 @@ export async function createGitHubIssue(task: {
   priority: string;
   ownerIds: string[];
   platform?: string;
-}): Promise<MarketingTask | null> {
+}): Promise<MarketingTask> {
+  await requireAuth();
   const octokit = getOctokit();
   const { owner, repo } = getRepoConfig();
 
@@ -129,6 +138,8 @@ export async function createGitHubIssue(task: {
     labels,
   });
 
+  revalidatePath("/marketing");
+
   return issueToMarketingTask({
     number: issue.number,
     title: issue.title,
@@ -144,9 +155,9 @@ export async function updateGitHubIssueStatus(
   issueNumber: number,
   newStatus: "todo" | "in-progress" | "done"
 ): Promise<void> {
+  await requireAuth();
   const octokit = getOctokit();
   const { owner, repo } = getRepoConfig();
-  const { extractLabels } = await import("@/lib/github-utils");
 
   const { data: issue } = await octokit.issues.get({
     owner,

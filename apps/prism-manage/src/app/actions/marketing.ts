@@ -2,64 +2,88 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import {
+  MarketingKpiSchema,
+  MarketingTaskSchema,
+  UpdateMarketingKpiSchema,
+  UpdateMarketingTaskSchema,
+  CreateMarketingTaskSchema,
+  GitHubIssueSchema,
+} from "@/lib/schemas";
 import type { MarketingKpi, MarketingPhase, MarketingTask, MarketingTeamMember } from "@/lib/schemas";
+import { issueToMarketingTask } from "@/lib/github-utils";
 
 export async function getMarketingPhases(): Promise<MarketingPhase[]> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
 
-  const { data } = await supabase
-    .from("marketing_phases")
-    .select("*")
-    .order("order", { ascending: true });
-  return data || [];
+    const { data } = await supabase
+      .from("marketing_phases")
+      .select("*")
+      .order("order", { ascending: true });
+    return data || [];
+  } catch {
+    return [];
+  }
 }
 
 export async function getMarketingTeam(): Promise<MarketingTeamMember[]> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
 
-  const { data } = await supabase.from("marketing_team").select("*");
-  return data || [];
+    const { data } = await supabase.from("marketing_team").select("*");
+    return data || [];
+  } catch {
+    return [];
+  }
 }
 
 export async function getKpis(): Promise<MarketingKpi[]> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
 
-  const { data } = await supabase
-    .from("marketing_kpis")
-    .select("*");
+    const { data } = await supabase
+      .from("marketing_kpis")
+      .select("*");
 
-  if (data && data.length > 0) {
-    return data.map((k: Record<string, unknown>) => ({
-      id: k.id as string,
-      label: k.label as string,
-      current: (k.current_value as number) ?? 0,
-      target: (k.target_value as number) ?? 0,
-      unit: (k.unit as string) || "",
-    }));
+    if (data && data.length > 0) {
+      return data.map((k: Record<string, unknown>) => ({
+        id: k.id as string,
+        label: k.label as string,
+        current: (k.current_value as number) ?? 0,
+        target: (k.target_value as number) ?? 0,
+        unit: (k.unit as string) || "",
+      }));
+    }
+
+    return [
+      { id: "waitlist-signups", label: "Waitlist Signups", current: 0, target: 1500, unit: "" },
+      { id: "linkedin-followers", label: "LinkedIn Followers", current: 0, target: 2000, unit: "" },
+      { id: "twitter-followers", label: "Twitter Followers", current: 0, target: 3000, unit: "" },
+      { id: "youtube-subs", label: "YouTube Subs", current: 0, target: 1000, unit: "" },
+      { id: "github-stars", label: "GitHub Stars", current: 0, target: 1000, unit: "" },
+      { id: "mrr", label: "MRR", current: 0, target: 1500, unit: "$" },
+      { id: "paying-customers", label: "Pay Customers", current: 0, target: 75, unit: "" },
+      { id: "discord-members", label: "Discord Members", current: 0, target: 500, unit: "" },
+    ];
+  } catch {
+    return [];
   }
-
-  return [
-    { id: "waitlist-signups", label: "Waitlist Signups", current: 0, target: 1500, unit: "" },
-    { id: "linkedin-followers", label: "LinkedIn Followers", current: 0, target: 2000, unit: "" },
-    { id: "twitter-followers", label: "Twitter Followers", current: 0, target: 3000, unit: "" },
-    { id: "youtube-subs", label: "YouTube Subs", current: 0, target: 1000, unit: "" },
-    { id: "github-stars", label: "GitHub Stars", current: 0, target: 1000, unit: "" },
-    { id: "mrr", label: "MRR", current: 0, target: 1500, unit: "$" },
-    { id: "paying-customers", label: "Pay Customers", current: 0, target: 75, unit: "" },
-    { id: "discord-members", label: "Discord Members", current: 0, target: 500, unit: "" },
-  ];
 }
 
 export async function updateKpi(
   id: string,
   updates: { current?: number; target?: number }
 ): Promise<void> {
+  const parsed = UpdateMarketingKpiSchema.safeParse(updates);
+  if (!parsed.success) throw new Error(parsed.error.errors[0].message);
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
@@ -72,23 +96,39 @@ export async function updateKpi(
     .from("marketing_kpis")
     .upsert({ id, ...doc }, { onConflict: "id" });
 
-  if (error) throw new Error("Failed to update KPI");
+  if (error) throw error;
   revalidatePath("/marketing");
 }
 
 export async function getMarketingTasks(): Promise<MarketingTask[]> {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return [];
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
 
-  const { data } = await supabase
-    .from("marketing_tasks")
-    .select("*")
-    .order("created_at", { ascending: false });
-  return data || [];
+    const { data } = await supabase
+      .from("marketing_tasks")
+      .select("*")
+      .order("created_at", { ascending: false });
+    return (data || []).map((t: Record<string, unknown>) => ({
+      id: t.id as string,
+      title: t.title as string,
+      status: (t.status as "todo" | "in-progress" | "done") || "todo",
+      phaseId: (t.phase_id as string) || "",
+      ownerIds: (t.owner_ids as string[]) || [],
+      priority: (t.priority as "high" | "medium" | "low") || "medium",
+      platform: t.platform as string | undefined,
+      description: t.description as string | undefined,
+      githubIssueNumber: t.github_issue_number as number | undefined,
+      createdAt: (t.created_at as string) || new Date().toISOString(),
+      updatedAt: (t.updated_at as string) || new Date().toISOString(),
+    }));
+  } catch {
+    return [];
+  }
 }
 
-export async function createMarketingTask(task: {
+export async function createMarketingTask(input: {
   title: string;
   description?: string;
   phaseId: string;
@@ -96,18 +136,29 @@ export async function createMarketingTask(task: {
   ownerIds: string[];
   platform?: string;
 }): Promise<void> {
+  const parsed = CreateMarketingTaskSchema.safeParse({
+    title: input.title,
+    status: "todo",
+    phaseId: input.phaseId,
+    ownerIds: input.ownerIds,
+    priority: input.priority as "high" | "medium" | "low",
+    platform: input.platform,
+    description: input.description,
+  });
+  if (!parsed.success) throw new Error(parsed.error.errors[0].message);
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
   const { error } = await supabase.from("marketing_tasks").insert({
-    id: `mt-${Date.now()}`,
-    title: task.title,
-    description: task.description || null,
-    phase_id: task.phaseId,
-    priority: task.priority,
-    owner_ids: task.ownerIds,
-    platform: task.platform || null,
+    id: `mt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    title: parsed.data.title,
+    description: parsed.data.description || null,
+    phase_id: parsed.data.phaseId,
+    priority: parsed.data.priority,
+    owner_ids: parsed.data.ownerIds,
+    platform: parsed.data.platform || null,
     status: "todo",
   });
 
@@ -117,8 +168,13 @@ export async function createMarketingTask(task: {
 
 export async function updateMarketingTaskStatus(
   taskId: string,
-  status: string
+  status: "todo" | "in-progress" | "done"
 ): Promise<void> {
+  if (!taskId) throw new Error("Task ID is required");
+  if (!["todo", "in-progress", "done"].includes(status)) {
+    throw new Error("Invalid status");
+  }
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
@@ -134,16 +190,31 @@ export async function updateMarketingTaskStatus(
 
 export async function updateMarketingTask(
   taskId: string,
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
 ): Promise<void> {
+  if (!taskId) throw new Error("Task ID is required");
+
+  const parsed = UpdateMarketingTaskSchema.safeParse(data);
+  if (!parsed.success) throw new Error(parsed.error.errors[0].message);
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  data.updated_at = new Date().toISOString();
+  const updateData: Record<string, unknown> = {
+    updated_at: new Date().toISOString(),
+  };
+  if (parsed.data.title !== undefined) updateData.title = parsed.data.title;
+  if (parsed.data.status !== undefined) updateData.status = parsed.data.status;
+  if (parsed.data.phaseId !== undefined) updateData.phase_id = parsed.data.phaseId;
+  if (parsed.data.ownerIds !== undefined) updateData.owner_ids = parsed.data.ownerIds;
+  if (parsed.data.priority !== undefined) updateData.priority = parsed.data.priority;
+  if (parsed.data.platform !== undefined) updateData.platform = parsed.data.platform;
+  if (parsed.data.description !== undefined) updateData.description = parsed.data.description;
+
   const { error } = await supabase
     .from("marketing_tasks")
-    .update(data)
+    .update(updateData)
     .eq("id", taskId);
 
   if (error) throw error;
@@ -151,6 +222,8 @@ export async function updateMarketingTask(
 }
 
 export async function deleteMarketingTask(taskId: string): Promise<void> {
+  if (!taskId) throw new Error("Task ID is required");
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
@@ -168,28 +241,40 @@ export async function getMarketingTaskStats(): Promise<{
   byStatus: Record<string, number>;
   byPhase: Record<string, { total: number; done: number }>;
 }> {
-  const tasks = await getMarketingTasks();
-  const byStatus: Record<string, number> = { todo: 0, "in-progress": 0, done: 0 };
-  const byPhase: Record<string, { total: number; done: number }> = {};
+  try {
+    const tasks = await getMarketingTasks();
+    const byStatus: Record<string, number> = { todo: 0, "in-progress": 0, done: 0 };
+    const byPhase: Record<string, { total: number; done: number }> = {};
 
-  for (const t of tasks) {
-    byStatus[t.status] = (byStatus[t.status] || 0) + 1;
-    if (!byPhase[t.phaseId]) {
-      byPhase[t.phaseId] = { total: 0, done: 0 };
+    for (const t of tasks) {
+      if (t.status in byStatus) {
+        byStatus[t.status]++;
+      }
+      if (!byPhase[t.phaseId]) {
+        byPhase[t.phaseId] = { total: 0, done: 0 };
+      }
+      byPhase[t.phaseId]!.total++;
+      if (t.status === "done") {
+        byPhase[t.phaseId]!.done++;
+      }
     }
-    byPhase[t.phaseId]!.total++;
-    if (t.status === "done") {
-      byPhase[t.phaseId]!.done++;
-    }
+
+    return { byStatus, byPhase };
+  } catch {
+    return { byStatus: { todo: 0, "in-progress": 0, done: 0 }, byPhase: {} };
   }
-
-  return { byStatus, byPhase };
 }
 
 export async function seedMarketingData(): Promise<void> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
+
+  // Check if data already exists to prevent double-seeding
+  const { data: existing } = await supabase.from("marketing_phases").select("id").limit(1);
+  if (existing && existing.length > 0) {
+    throw new Error("Marketing data already seeded. Delete existing data first if you want to reseed.");
+  }
 
   const phases = [
     { id: "phase-1", name: "Foundation", timeframe: "May-June 2026", description: "Build the audience engine — accounts, waitlist, first content wave, visual assets.", color: "cyan", order: 1 },
@@ -267,18 +352,17 @@ export async function seedMarketingData(): Promise<void> {
     { id: "og-12", title: "Review waitlist numbers + MRR monthly", status: "todo", phase_id: "ongoing", owner_ids: ["jeff", "mark"], priority: "high", platform: "Website" },
   ];
 
-  for (const p of phases) {
-    await supabase.from("marketing_phases").upsert(p, { onConflict: "id" });
-  }
-  for (const k of kpis) {
-    await supabase.from("marketing_kpis").upsert(k, { onConflict: "id" });
-  }
-  for (const m of team) {
-    await supabase.from("marketing_team").upsert(m, { onConflict: "id" });
-  }
-  for (const t of tasks) {
-    await supabase.from("marketing_tasks").upsert(t, { onConflict: "id" });
-  }
+  const { error: pErr } = await supabase.from("marketing_phases").upsert(phases, { onConflict: "id", ignoreDuplicates: false });
+  if (pErr) throw pErr;
+
+  const { error: kErr } = await supabase.from("marketing_kpis").upsert(kpis, { onConflict: "id", ignoreDuplicates: false });
+  if (kErr) throw kErr;
+
+  const { error: tErr } = await supabase.from("marketing_team").upsert(team, { onConflict: "id", ignoreDuplicates: false });
+  if (tErr) throw tErr;
+
+  const { error: taskErr } = await supabase.from("marketing_tasks").upsert(tasks, { onConflict: "id", ignoreDuplicates: false });
+  if (taskErr) throw taskErr;
 
   revalidatePath("/marketing");
 }
@@ -294,27 +378,35 @@ export async function syncGitHubToSupabase(
     labels: (string | { name?: string })[];
   }>
 ): Promise<void> {
+  const parsedIssues = issues.map((issue) => GitHubIssueSchema.safeParse(issue));
+  const validIssues = parsedIssues.filter((r) => r.success).map((r) => r.data!);
+  if (validIssues.length === 0) return;
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  const { issueToMarketingTask } = await import("@/lib/github-utils");
+  const tasks = validIssues
+    .map((issue) => {
+      const task = issueToMarketingTask(issue);
+      return {
+        id: task.id,
+        title: task.title,
+        status: task.status,
+        phase_id: task.phaseId,
+        owner_ids: task.ownerIds,
+        priority: task.priority,
+        platform: task.platform,
+        description: task.description,
+        github_issue_number: task.githubIssueNumber,
+        updated_at: task.updatedAt,
+      };
+    });
 
-  for (const issue of issues) {
-    const task = issueToMarketingTask(issue);
-    await supabase.from("marketing_tasks").upsert({
-      id: task.id,
-      title: task.title,
-      status: task.status,
-      phase_id: task.phaseId,
-      owner_ids: task.ownerIds,
-      priority: task.priority,
-      platform: task.platform,
-      description: task.description,
-      github_issue_number: task.githubIssueNumber,
-      updated_at: task.updatedAt,
-    }, { onConflict: "id" });
-  }
+  const { error } = await supabase
+    .from("marketing_tasks")
+    .upsert(tasks, { onConflict: "id", ignoreDuplicates: false });
 
+  if (error) throw error;
   revalidatePath("/marketing");
 }

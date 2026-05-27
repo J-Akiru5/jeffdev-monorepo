@@ -11,16 +11,18 @@ export function GithubSyncButton() {
     setSyncing(true);
     try {
       const res = await fetch("/api/github/sync", { method: "POST" });
-      const data = await res.json();
-      if (data.error) {
-        toast.error(data.error);
-      } else {
-        toast.success(`Synced ${data.imported} issues from GitHub`);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data?.error || "Sync failed");
+        return;
       }
+      const data = await res.json();
+      toast.success(`Synced ${data.imported} issues from GitHub`);
     } catch {
       toast.error("Failed to sync with GitHub");
+    } finally {
+      setSyncing(false);
     }
-    setSyncing(false);
   }, []);
 
   return (
