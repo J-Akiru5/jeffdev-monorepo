@@ -1,6 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+/** Cookie domain for cross-subdomain auth sharing. Set COOKIE_DOMAIN=.syntaxure.dev in production. */
+const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || undefined;
+
 export async function updateSession(request: NextRequest) {
   // Skip if environment variables are not set (during build time)
   if (
@@ -36,7 +39,10 @@ export async function updateSession(request: NextRequest) {
           }>,
         ) {
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
+            response.cookies.set(name, value, {
+              ...options,
+              ...(COOKIE_DOMAIN ? { domain: COOKIE_DOMAIN } : {}),
+            }),
           );
         },
       },

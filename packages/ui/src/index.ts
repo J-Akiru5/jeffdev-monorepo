@@ -32,3 +32,5 @@ export { GridBackground } from "./grid-background";
 export { SectionHeader } from "./section-header";
 export { GlassPanel } from "./glass-panel";
 export { SyntaxureLogo } from "./logo";
+export { Select, type SelectOption, type SelectProps } from "./select";
+

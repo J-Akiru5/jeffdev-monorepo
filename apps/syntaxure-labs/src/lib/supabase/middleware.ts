@@ -1,6 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+/** Cookie domain for cross-subdomain auth sharing. Set COOKIE_DOMAIN=.syntaxure.dev in production. */
+const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || undefined;
+
 /**
  * Supabase Middleware
  * -------------------
@@ -42,7 +45,10 @@ export async function updateSession(request: NextRequest) {
                 headers: request.headers,
               },
             });
-            response.cookies.set(name, value, options);
+            response.cookies.set(name, value, {
+              ...options,
+              ...(COOKIE_DOMAIN ? { domain: COOKIE_DOMAIN } : {}),
+            });
           });
         },
       },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Search,
   Filter,
@@ -10,6 +10,8 @@ import {
   Mail,
   Calendar,
   X,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { overrideUserTier, toggleUserStatus } from "@/app/actions/users";
 
@@ -29,9 +31,12 @@ interface Props {
 
 const TIERS = ["free", "pro", "team"] as const;
 
+const PAGE_SIZE = 25;
+
 export function UsersTable({ users, isFounder }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [tierFilter, setTierFilter] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const [actionMessage, setActionMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -90,6 +95,19 @@ export function UsersTable({ users, isFounder }: Props) {
     });
     setTimeout(() => setActionMessage(null), 3000);
   }
+
+  const paginatedUsers = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return filteredUsers.slice(start, start + PAGE_SIZE);
+  }, [filteredUsers, currentPage]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
+  const startRange = (currentPage - 1) * PAGE_SIZE + 1;
+  const endRange = Math.min(currentPage * PAGE_SIZE, filteredUsers.length);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, tierFilter]);
 
   return (
     <>
@@ -196,7 +214,7 @@ export function UsersTable({ users, isFounder }: Props) {
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map((user) => (
+                paginatedUsers.map((user) => (
                   <tr
                     key={user._id.toString()}
                     className="hover:bg-white/[0.02] transition-colors"
@@ -276,7 +294,7 @@ export function UsersTable({ users, isFounder }: Props) {
               No users match your search
             </div>
           ) : (
-            filteredUsers.map((user) => (
+            paginatedUsers.map((user) => (
               <div key={user._id.toString()} className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -338,6 +356,56 @@ export function UsersTable({ users, isFounder }: Props) {
           )}
         </div>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-4 py-3 border-t border-white/5">
+          <span className="text-xs text-white/30 font-mono">
+            {startRange}–{endRange} of {filteredUsers.length}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage <= 1}
+              className="rounded p-1.5 text-white/30 hover:text-white hover:bg-white/5 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(
+                (p) =>
+                  p === 1 ||
+                  p === totalPages ||
+                  Math.abs(p - currentPage) <= 1,
+              )
+              .map((p, idx, arr) => (
+                <span key={p} className="flex items-center gap-2">
+                  {idx > 0 && arr[idx - 1] !== p - 1 && (
+                    <span className="text-xs text-white/20">...</span>
+                  )}
+                  <button
+                    onClick={() => setCurrentPage(p)}
+                    className={`min-w-[28px] rounded px-2 py-1 text-xs font-mono transition-colors ${
+                      p === currentPage
+                        ? "bg-amber-500/20 text-amber-400"
+                        : "text-white/40 hover:text-white hover:bg-white/5"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                </span>
+              ))}
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage >= totalPages}
+              className="rounded p-1.5 text-white/30 hover:text-white hover:bg-white/5 disabled:opacity-20 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+          <div className="w-20" />
+        </div>
+      )}
     </>
   );
 }

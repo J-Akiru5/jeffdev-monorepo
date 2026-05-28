@@ -97,7 +97,7 @@ export default async function AdminLayout({
             </span>
           </div>
           <NavItem href="/admin/users" icon={Users}>
-            Users
+            Engine Users
           </NavItem>
           <NavItem href="/admin/subscriptions" icon={CreditCard}>
             Subscriptions
@@ -127,7 +127,7 @@ export default async function AdminLayout({
             Calendar
           </NavItem>
           <NavItem href="/admin/agency/users" icon={Users}>
-            Users
+            Team Members
           </NavItem>
           <NavItem href="/admin/agency/content" icon={FileText}>
             Content
@@ -200,7 +200,7 @@ export default async function AdminLayout({
             <Mail className="h-5 w-5" />
           </Link>
         </div>
-        <MobileNavItem href="/admin/users" icon={Users} label="Users" />
+        <MobileNavItem href="/admin/users" icon={Users} label="Engine" />
         <MobileNavItem
           href="/admin/agency/calendar"
           icon={Calendar}

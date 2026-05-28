@@ -6,5 +6,10 @@ export function createClient() {
   if (!url || !anonKey) {
     throw new Error("Supabase environment variables are not configured");
   }
-  return createBrowserClient(url, anonKey);
+
+  const COOKIE_DOMAIN = process.env.NEXT_PUBLIC_COOKIE_DOMAIN || undefined;
+
+  return createBrowserClient(url, anonKey, {
+    ...(COOKIE_DOMAIN ? { cookieOptions: { domain: COOKIE_DOMAIN } } : {}),
+  });
 }

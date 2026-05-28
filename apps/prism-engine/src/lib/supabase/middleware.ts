@@ -56,6 +56,8 @@ export async function updateSession(request: NextRequest) {
     });
   }
 
+  const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || undefined;
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
@@ -72,7 +74,10 @@ export async function updateSession(request: NextRequest) {
           }>,
         ) {
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
+            response.cookies.set(name, value, {
+              ...options,
+              ...(COOKIE_DOMAIN ? { domain: COOKIE_DOMAIN } : {}),
+            }),
           );
         },
       },

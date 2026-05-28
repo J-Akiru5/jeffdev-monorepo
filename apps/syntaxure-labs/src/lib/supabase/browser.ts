@@ -11,5 +11,9 @@ export function createClient() {
     return null as unknown as ReturnType<typeof createBrowserClient>;
   }
 
-  return createBrowserClient(url, anonKey);
+  const COOKIE_DOMAIN = process.env.NEXT_PUBLIC_COOKIE_DOMAIN || undefined;
+
+  return createBrowserClient(url, anonKey, {
+    ...(COOKIE_DOMAIN ? { cookieOptions: { domain: COOKIE_DOMAIN } } : {}),
+  });
 }

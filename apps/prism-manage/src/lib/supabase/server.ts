@@ -1,6 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+/** Cookie domain for cross-subdomain auth sharing. Set COOKIE_DOMAIN=.syntaxure.dev in production. */
+const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || undefined;
+
 export async function createClient() {
   const cookieStore = await cookies();
 
@@ -28,7 +31,10 @@ export async function createClient() {
         ) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options),
+              cookieStore.set(name, value, {
+                ...options,
+                ...(COOKIE_DOMAIN ? { domain: COOKIE_DOMAIN } : {}),
+              }),
             );
           } catch {
             // The `setAll` method was called from a Server Component

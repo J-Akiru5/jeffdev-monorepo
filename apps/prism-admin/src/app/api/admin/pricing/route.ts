@@ -1,21 +1,10 @@
-/**
- * Pricing Plans API
- *
- * GET  /api/admin/pricing          — List all plans, optionally filtered by ?app=
- * POST /api/admin/pricing          — Create a new plan
- * PATCH /api/admin/pricing         — Update a plan (requires id in body)
- * DELETE /api/admin/pricing?id=... — Delete a plan
- */
-
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 
-const TABLE = "pricing_plans";
-
-function table() {
-  return getAdminClient().from(TABLE);
+function db() {
+  return getAdminClient().from("pricing_plans") as any;
 }
 
 // GET — List pricing plans
@@ -30,12 +19,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const app = searchParams.get("app");
 
-    let query = table().select("*").order("sort_order", { ascending: true });
-
-    if (app) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      query = (query as any).eq("app", app);
-    }
+    const query = app
+      ? db().select("*").order("sort_order", { ascending: true }).eq("app", app)
+      : db().select("*").order("sort_order", { ascending: true });
 
     const { data, error } = await query;
 
@@ -62,8 +48,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (table() as any)
+    const { data, error } = await db()
       .insert({
         app: body.app,
         plan_type: body.plan_type || "tier",
@@ -123,7 +108,6 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    // Build update object with only provided fields
     const updateFields: Record<string, unknown> = {};
     const allowedFields = [
       "app", "plan_type", "name", "tier_slug", "tagline", "description",
@@ -139,11 +123,9 @@ export async function PATCH(request: NextRequest) {
       }
     }
 
-    // Always update the timestamp
     updateFields.updated_at = new Date().toISOString();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (table() as any)
+    const { data, error } = await db()
       .update(updateFields)
       .eq("id", id)
       .select()
@@ -181,7 +163,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const { error } = await table().delete().eq("id", id);
+    const { error } = await db().delete().eq("id", id);
 
     if (error) throw error;
 

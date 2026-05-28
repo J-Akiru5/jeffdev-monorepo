@@ -15,13 +15,29 @@ export default async function SettingsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Basic user info for profile
+  // Fetch full profile from user_profiles
   let userName = "User";
   let userEmail = "";
+  let userBio: string | null = null;
+  let userCompany: string | null = null;
+  let userPhone: string | null = null;
+  let userTimezone: string | null = null;
+  let userAvatarUrl: string | null = null;
 
   if (user) {
-    userName = (user.user_metadata?.full_name as string) || user.email?.split("@")[0] || "User";
-    userEmail = user.email || "";
+    const { data: profile } = await supabase
+      .from("user_profiles")
+      .select("full_name, email, bio, company_name, phone, timezone, avatar_url")
+      .eq("id", user.id)
+      .single();
+
+    userName = profile?.full_name || user.user_metadata?.full_name as string || user.email?.split("@")[0] || "User";
+    userEmail = profile?.email || user.email || "";
+    userBio = profile?.bio || null;
+    userCompany = profile?.company_name || null;
+    userPhone = profile?.phone || null;
+    userTimezone = profile?.timezone || null;
+    userAvatarUrl = profile?.avatar_url || null;
   }
 
   // Fetch members for the Syntaxure Labs workspace if user is logged in
@@ -64,6 +80,11 @@ export default async function SettingsPage() {
             userName={userName}
             userEmail={userEmail}
             workspaceId={syntaxureWorkspaceId}
+            userBio={userBio}
+            userCompany={userCompany}
+            userPhone={userPhone}
+            userTimezone={userTimezone}
+            userAvatarUrl={userAvatarUrl}
           />
         )}
 

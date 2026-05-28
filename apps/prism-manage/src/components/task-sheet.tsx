@@ -12,7 +12,6 @@ import { useState, useRef, useEffect, KeyboardEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
-  ChevronDown,
   User,
   Tag,
   Calendar,
@@ -22,6 +21,7 @@ import { TASK_TYPES, PRIORITY_CONFIG, STATUS_CONFIG, STAFF_LOCKED_STATUSES } fro
 import type { TaskTypeKey, StatusKey } from "@/lib/task-types";
 import type { Task, Project, Department } from "@/lib/schemas";
 import { useWorkspaceStore } from "@/stores/workspace-store";
+import { Select } from "@syntaxure/ui";
 
 // ──────────────────────────────────────────────
 // Types
@@ -225,47 +225,39 @@ export function TaskSheet({
                 <div className="flex items-center gap-3">
                   {/* Department Selector (when departments exist) */}
                   {departments.length > 0 && data.departmentId !== undefined && (
-                    <div className="relative">
-                      <select
-                        value={data.departmentId}
-                        onChange={(e) =>
-                          setData((prev) => ({
-                            ...prev,
-                            departmentId: e.target.value,
-                          }))
-                        }
-                        className="appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2 pr-8 text-sm text-text-secondary outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
-                      >
-                        {departments.map((dept) => (
-                          <option key={dept.id} value={dept.id}>
-                            {dept.name}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
-                    </div>
+                    <Select
+                      value={data.departmentId}
+                      onChange={(val) =>
+                        setData((prev) => ({
+                          ...prev,
+                          departmentId: val,
+                        }))
+                      }
+                      options={departments.map((dept) => ({
+                        value: dept.id,
+                        label: dept.name,
+                      }))}
+                      buttonClassName="h-9 rounded-lg border border-border bg-glass-04 text-xs text-text-secondary hover:border-border-active hover:bg-black/30 focus:border-cyan-500/50 py-1.5 px-3 min-w-[130px]"
+                      optionsClassName="min-w-[150px]"
+                    />
                   )}
 
                   {/* Project Selector */}
-                  <div className="relative">
-                    <select
-                      value={data.projectId}
-                      onChange={(e) =>
-                        setData((prev) => ({
-                          ...prev,
-                          projectId: e.target.value,
-                        }))
-                      }
-                      className="appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2 pr-8 text-sm text-text-secondary outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
-                    >
-                      {projects.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.name}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
-                  </div>
+                  <Select
+                    value={data.projectId}
+                    onChange={(val) =>
+                      setData((prev) => ({
+                        ...prev,
+                        projectId: val,
+                      }))
+                    }
+                    options={projects.map((p) => ({
+                      value: p.id,
+                      label: p.name,
+                    }))}
+                    buttonClassName="h-9 rounded-lg border border-border bg-glass-04 text-xs text-text-secondary hover:border-border-active hover:bg-black/30 focus:border-cyan-500/50 py-1.5 px-3 min-w-[130px]"
+                    optionsClassName="min-w-[150px]"
+                  />
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -387,25 +379,30 @@ export function TaskSheet({
                             </span>
                           )}
                         </label>
-                        <select
+                        <Select
                           value={data.status}
-                          onChange={(e) =>
+                          onChange={(val) =>
                             setData((prev) => ({
                               ...prev,
-                              status: e.target.value as Task["status"],
+                              status: val as Task["status"],
                             }))
                           }
-                          className="w-full appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2.5 text-sm text-text-secondary outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
-                        >
-                          {availableStatuses.map(([key, config]) => {
+                          options={availableStatuses.map(([key, config]) => {
                             const isLocked = STAFF_LOCKED_STATUSES.includes(key as StatusKey);
-                            return (
-                              <option key={key} value={key} disabled={isLocked && !canApprove}>
-                                {config.label}{isLocked && !canApprove ? " (approval required)" : ""}
-                              </option>
-                            );
+                            return {
+                              value: key,
+                              label: `${config.label}${isLocked && !canApprove ? " (approval required)" : ""}`,
+                              disabled: isLocked && !canApprove,
+                              icon: (
+                                <span
+                                  className="h-2 w-2 rounded-full"
+                                  style={{ backgroundColor: config.color }}
+                                />
+                              ),
+                            };
                           })}
-                        </select>
+                          buttonClassName="bg-glass-04 border border-border focus:border-cyan-500/50 h-10"
+                        />
                         {!canApprove && data.status === "approved" && (
                           <p className="mt-1 text-[10px] text-amber-400/60">
                             Only CPO or CEO can set &quot;Approved&quot;
@@ -418,24 +415,26 @@ export function TaskSheet({
                         <label className="mb-1.5 block text-[11px] text-text-muted">
                           Priority
                         </label>
-                        <select
+                        <Select
                           value={data.priority}
-                          onChange={(e) =>
+                          onChange={(val) =>
                             setData((prev) => ({
                               ...prev,
-                              priority: e.target.value as Task["priority"],
+                              priority: val as Task["priority"],
                             }))
                           }
-                          className="w-full appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2.5 text-sm text-text-secondary outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
-                        >
-                          {Object.entries(PRIORITY_CONFIG).map(
-                            ([key, config]) => (
-                              <option key={key} value={key}>
-                                {config.label}
-                              </option>
+                          options={Object.entries(PRIORITY_CONFIG).map(([key, config]) => ({
+                            value: key,
+                            label: config.label,
+                            icon: (
+                              <span
+                                className="h-2 w-2 rounded-full"
+                                style={{ backgroundColor: config.color }}
+                              />
                             ),
-                          )}
-                        </select>
+                          }))}
+                          buttonClassName="bg-glass-04 border border-border focus:border-cyan-500/50 h-10"
+                        />
                       </div>
 
                       {/* Due Date */}
