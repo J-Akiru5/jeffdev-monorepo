@@ -11,12 +11,11 @@
 
 import { useRouter } from "next/navigation";
 import { NotificationPopover } from "./notification-popover";
-import { AppTopNavbar, AccountDropdown, type AppNavLink } from "@syntaxure/ui";
-import { useUser } from "@/contexts/user-context";
+import { AppTopNavbar, AccountDropdown, useAuth, type AppNavLink } from "@syntaxure/ui";
 import { LayoutDashboard, Box, Sparkles, User } from "lucide-react";
 
 export function AdminHeader() {
-  const { user, loading, logout } = useUser();
+  const { user, loading, signOut } = useAuth();
   const router = useRouter();
 
   // Cross-app links for the AppTopNavbar switcher
@@ -48,12 +47,12 @@ export function AdminHeader() {
   ];
 
   async function handleSignOut() {
-    await logout();
+    await signOut();
     router.push("/sign-in");
     router.refresh();
   }
 
-  const displayName = user?.displayName || "User";
+  const displayName = user?.full_name || "User";
   const initials = displayName.charAt(0).toUpperCase();
 
   return (
@@ -62,8 +61,8 @@ export function AdminHeader() {
       appLinks={appLinks}
       searchPlaceholder="Search..."
       notifications={
-        user?.uid ? (
-          <NotificationPopover userId={user.uid} />
+        user?.id ? (
+          <NotificationPopover userId={user.id} />
         ) : undefined
       }
       accountDropdown={
@@ -75,7 +74,7 @@ export function AdminHeader() {
             email={user?.email}
             displayName={displayName}
             role={user?.role}
-            avatarUrl={user?.photoURL}
+            avatarUrl={user?.avatar_url}
             settingsHref="/admin/profile"
             onSignOut={handleSignOut}
           />

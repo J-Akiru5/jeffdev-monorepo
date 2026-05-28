@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "next-themes";
-import { SupabaseProvider } from "@/components/providers/supabase-provider";
 import { ThemeDefaultSyncClient } from "@/components/settings/theme-default-sync-client";
 import { AuthWrapper } from "@/components/providers/auth-wrapper";
+import { ThemeBootstrap } from "@/components/theme-bootstrap";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
@@ -92,15 +92,17 @@ export default function RootLayout({
       className={`${inter.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        <ThemeBootstrap />
+      </head>
       <body className="min-h-screen bg-surface antialiased">
         <ThemeProvider
           attribute="data-theme"
-          defaultTheme="dark"
-          enableSystem={false}
+          defaultTheme="system"
+          enableSystem={true}
           value={{ dark: "dark", light: "theme-light" }}
         >
-          <SupabaseProvider>
-            <AuthWrapper>
+          <AuthWrapper>
               <ThemeDefaultSyncClient />
               <Toaster
                 position="bottom-right"
@@ -115,7 +117,6 @@ export default function RootLayout({
               />
               {children}
             </AuthWrapper>
-          </SupabaseProvider>
         </ThemeProvider>
       </body>
     </html>

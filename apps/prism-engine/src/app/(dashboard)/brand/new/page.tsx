@@ -673,7 +673,6 @@ function StepVoice({
 
 function StepReview({ formData }: { formData: Record<string, unknown> }) {
   const colors = formData.colors as Record<string, string>;
-  const c = (k: keyof typeof colors) => colors[k]!;
   const typography = formData.typography as Record<string, string>;
   const voice = formData.voice as Record<string, string>;
 

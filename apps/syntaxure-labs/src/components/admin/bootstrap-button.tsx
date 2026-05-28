@@ -11,10 +11,10 @@ import { useState } from "react";
 import { Shield, Loader2, Check } from "lucide-react";
 import { toast } from "sonner";
 import { bootstrapCurrentUserAsFounder } from "@/app/actions/seed";
-import { useUser } from "@/contexts/user-context";
+import { useAuth } from "@syntaxure/ui";
 
 export function BootstrapButton() {
-  const { user } = useUser();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isDone, setIsDone] = useState(false);
 
@@ -27,9 +27,9 @@ export function BootstrapButton() {
     setIsLoading(true);
     try {
       const result = await bootstrapCurrentUserAsFounder(
-        user.uid,
+        user.id,
         user.email,
-        user.displayName,
+        user.full_name || "User",
       );
 
       if (result.success) {

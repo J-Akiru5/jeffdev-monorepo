@@ -47,7 +47,6 @@ export default async function DashboardPage() {
   const projectsCollection = await getCollection("projects");
   const rulesCollection = await getCollection("rules");
   const generationsCollection = await getCollection("generations");
-  const videosCollection = await getCollection("videos");
 
   const [
     projectCount,
@@ -234,7 +233,7 @@ export default async function DashboardPage() {
 
         {recentProjects.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-3">
-            {recentProjects.map((project: any) => (
+            {recentProjects.map((project: Record<string, unknown>) => (
               <Link
                 key={project._id.toString()}
                 href={`/projects/${project.slug}`}

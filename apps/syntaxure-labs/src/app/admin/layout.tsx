@@ -1,6 +1,6 @@
 import { AdminSidebar } from "@/components/admin/sidebar";
 import { AdminHeader } from "@/components/admin/header";
-import { UserProvider } from "@/contexts/user-context";
+import { AuthWrapper } from "@/components/providers/auth-wrapper";
 import { ThemeDefaultSync } from "@/components/admin/theme-default-sync";
 
 /**
@@ -20,7 +20,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <UserProvider>
+    <AuthWrapper>
       <ThemeDefaultSync />
       <div className="min-h-screen bg-void">
         {/* Desktop Sidebar */}
@@ -36,6 +36,6 @@ export default function AdminLayout({
           <main className="p-4 pb-24 lg:p-6 lg:pb-6">{children}</main>
         </div>
       </div>
-    </UserProvider>
+    </AuthWrapper>
   );
 }

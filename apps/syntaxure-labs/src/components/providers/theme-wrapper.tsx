@@ -9,7 +9,7 @@
  * Configuration matches prism-admin:
  * - attribute="data-theme" — sets data-theme on <html>
  * - defaultTheme="dark" — dark is the default (no class/attribute needed)
- * - enableSystem={false} — don't follow OS preference
+ * - enableSystem={true} — follow OS preference
  * - value map — "light" → "theme-light" class value, "dark" → "dark"
  */
 
@@ -20,8 +20,8 @@ export function ThemeWrapper({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider
       attribute="data-theme"
-      defaultTheme="dark"
-      enableSystem={false}
+      defaultTheme="system"
+      enableSystem={true}
       value={{ dark: "dark", light: "theme-light" }}
     >
       {children}

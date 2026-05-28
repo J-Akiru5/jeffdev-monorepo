@@ -42,13 +42,36 @@ interface ThemeDefaultSyncProps {
    * Called once on mount.
    */
   getDefaultTheme?: () => Promise<string | null | undefined>;
+  /**
+   * When true (default), checks if the user has a locally stored theme override
+   * (i.e., they've toggled the theme manually before). If they have, the server
+   * default is NOT applied — the user's local choice is respected.
+   *
+   * Uses the same localStorage key ("theme") that next-themes uses internally.
+   */
+  respectLocalOverride?: boolean;
 }
 
-export function ThemeDefaultSync({ getDefaultTheme }: ThemeDefaultSyncProps) {
+export function ThemeDefaultSync({
+  getDefaultTheme,
+  respectLocalOverride = true,
+}: ThemeDefaultSyncProps) {
   const { setTheme, theme } = useTheme();
 
   useEffect(() => {
     if (!getDefaultTheme) return;
+
+    // If the user has a local theme override, respect it
+    if (respectLocalOverride) {
+      try {
+        const stored = localStorage.getItem("theme");
+        if (stored === "dark" || stored === "light" || stored === "system") {
+          return; // User has made a manual choice — don't override
+        }
+      } catch {
+        // localStorage unavailable — silently continue
+      }
+    }
 
     getDefaultTheme().then((defaultTheme) => {
       if (

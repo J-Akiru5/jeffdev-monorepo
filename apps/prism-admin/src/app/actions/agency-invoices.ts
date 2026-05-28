@@ -10,6 +10,7 @@ import { z } from "zod";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { logAuditEvent } from "@/lib/audit";
+import type { InvoiceRow } from "@/lib/database.types";
 import { revalidatePath } from "next/cache";
 import { generateInvoiceRef, generatePaymentRef } from "@/lib/ref-generator";
 
@@ -123,7 +124,7 @@ function calculateInvoiceTotals(items: { amount: number }[], taxRate?: number, d
   return { subtotal, tax, total };
 }
 
-function normalizeInvoiceRow(row: Record<string, unknown>): Invoice {
+function normalizeInvoiceRow(row: InvoiceRow): Invoice {
   const metadata = (row.metadata || {}) as Record<string, unknown>;
   const payments = (metadata.payments || []) as PaymentRecord[];
   return {
@@ -165,7 +166,7 @@ export async function getAgencyInvoices(): Promise<Invoice[]> {
     const supabase = getAdminClient();
     const { data, error } = await supabase.from("invoices").select("*").order("created_at", { ascending: false });
     if (error || !data) return [];
-    return data.map((row: any) => normalizeInvoiceRow(row));
+    return data.map((row) => normalizeInvoiceRow(row));
   } catch (error) {
     console.error("[GET AGENCY INVOICES ERROR]", error);
     return [];
@@ -196,7 +197,7 @@ export async function createAgencyInvoice(data: z.infer<typeof createInvoiceSche
     const { data: { user } } = await authClient.auth.getUser();
     if (!user) return { success: false, error: "Authentication required" };
 
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data: result, error } = await supabase.from("invoices").insert({
       user_id: user.id,
       invoice_number: refNo,
@@ -248,7 +249,7 @@ export async function createAgencyInvoice(data: z.infer<typeof createInvoiceSche
 
 export async function updateAgencyInvoice(id: string, data: Partial<z.infer<typeof createInvoiceSchema>>): Promise<ActionResult> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data: existing } = await supabase.from("invoices").select("*").eq("id", id).maybeSingle();
     if (!existing) return { success: false, error: "Invoice not found" };
     if (existing.status !== "draft") return { success: false, error: "Can only edit draft invoices" };
@@ -299,7 +300,7 @@ export async function updateAgencyInvoice(id: string, data: Partial<z.infer<type
 
 export async function sendAgencyInvoice(id: string): Promise<ActionResult> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data: existing } = await supabase.from("invoices").select("*").eq("id", id).maybeSingle();
     if (!existing) return { success: false, error: "Invoice not found" };
     if (existing.status !== "draft") return { success: false, error: "Invoice already sent" };
@@ -326,7 +327,7 @@ export async function sendAgencyInvoice(id: string): Promise<ActionResult> {
 export async function recordAgencyPayment(invoiceId: string, data: z.infer<typeof paymentSchema>): Promise<ActionResult> {
   try {
     const validated = paymentSchema.parse(data);
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data: existing } = await supabase.from("invoices").select("*").eq("id", invoiceId).maybeSingle();
     if (!existing) return { success: false, error: "Invoice not found" };
 
@@ -376,7 +377,7 @@ export async function recordAgencyPayment(invoiceId: string, data: z.infer<typeo
 
 export async function deleteAgencyInvoice(id: string): Promise<ActionResult> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data: existing } = await supabase.from("invoices").select("id, status").eq("id", id).maybeSingle();
     if (!existing) return { success: false, error: "Invoice not found" };
     if (existing.status !== "draft") return { success: false, error: "Can only delete draft invoices" };

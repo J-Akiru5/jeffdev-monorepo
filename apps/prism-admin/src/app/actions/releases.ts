@@ -21,9 +21,8 @@ const sb = () => getAdminClient();
 
 export async function getReleases() {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const releasesQuery = sb().from("releases") as any;
-    const { data, error } = await releasesQuery
+    const { data, error } = await sb()
+      .from("releases")
       .select("*")
       .order("date", { ascending: false });
 
@@ -42,9 +41,8 @@ export async function getReleases() {
 
 export async function getRelease(id: string) {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const releasesQuery = sb().from("releases") as any;
-    const { data, error } = await releasesQuery
+    const { data, error } = await sb()
+      .from("releases")
       .select("*")
       .eq("id", id)
       .single();
@@ -76,17 +74,18 @@ export async function createRelease(
       };
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (sb().from("releases") as any).insert({
-      title: parsed.data.title,
-      version: parsed.data.version,
-      date: parsed.data.date,
-      type: parsed.data.type,
-      description: parsed.data.description,
-      link: parsed.data.link,
-      tags: parsed.data.tags,
-      is_featured: parsed.data.is_featured,
-    });
+    const { error } = await sb()
+      .from("releases")
+      .insert({
+        title: parsed.data.title,
+        version: parsed.data.version,
+        date: parsed.data.date,
+        type: parsed.data.type,
+        description: parsed.data.description,
+        link: parsed.data.link,
+        tags: parsed.data.tags,
+        is_featured: parsed.data.is_featured,
+      });
 
     if (error) throw error;
 
@@ -115,9 +114,8 @@ export async function updateRelease(
       };
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const releasesQuery = sb().from("releases") as any;
-    const { error } = await releasesQuery
+    const { error } = await sb()
+      .from("releases")
       .update({
         title: parsed.data.title,
         version: parsed.data.version,
@@ -148,8 +146,7 @@ export async function deleteRelease(
   id: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (sb().from("releases") as any).delete().eq("id", id);
+    const { error } = await sb().from("releases").delete().eq("id", id);
 
     if (error) throw error;
 

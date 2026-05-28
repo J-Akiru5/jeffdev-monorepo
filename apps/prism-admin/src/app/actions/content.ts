@@ -66,8 +66,7 @@ export async function saveAboutContent(
 
     const adminClient = getAdminClient();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (adminClient.from("site_pages") as any).upsert(
+    const { error } = await adminClient.from("site_pages").upsert(
       {
         slug: "about",
         content: parsed.data,
@@ -94,8 +93,8 @@ export async function getAboutContent(): Promise<AboutContent | null> {
   try {
     const adminClient = getAdminClient();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (adminClient.from("site_pages") as any)
+    const { data, error } = await adminClient
+      .from("site_pages")
       .select("content")
       .eq("slug", "about")
       .single();
@@ -105,7 +104,7 @@ export async function getAboutContent(): Promise<AboutContent | null> {
       throw error;
     }
 
-    return data?.content ?? null;
+    return (data?.content ?? null) as AboutContent | null;
   } catch (error) {
     console.error("[content] getAboutContent error:", error);
     return null;
