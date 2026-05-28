@@ -42,7 +42,7 @@ export function Header() {
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         isScrolled
-          ? "bg-white/80 backdrop-blur-xl border-b border-slate-200 shadow-sm"
+          ? "bg-glass-heavy backdrop-blur-xl border-b border-white/10 shadow-sm"
           : "bg-transparent",
       )}
     >
@@ -53,7 +53,7 @@ export function Header() {
             className="group flex items-center gap-2 transition-opacity hover:opacity-80"
           >
             <SyntaxureLogo className="h-8 w-8" />
-            <span className="hidden font-semibold tracking-tight text-slate-900 sm:block">
+            <span className="hidden font-semibold tracking-tight text-white sm:block">
               Syntaxure Labs
             </span>
           </Link>
@@ -66,14 +66,14 @@ export function Header() {
                 className={cn(
                   "relative px-4 py-2 text-sm transition-colors",
                   link.highlight
-                    ? "flex items-center gap-1.5 text-purple-600 hover:text-purple-700"
-                    : "text-slate-600 hover:text-slate-900",
+                    ? "flex items-center gap-1.5 text-purple-400 hover:text-purple-300"
+                    : "text-white/60 hover:text-white",
                 )}
               >
                 {link.highlight && <Sparkles className="h-3.5 w-3.5" />}
                 {link.label}
                 {link.highlight && (
-                  <span className="ml-1 rounded-full border border-purple-200 bg-purple-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-purple-700">
+                  <span className="ml-1 rounded-full border border-purple-400/20 bg-purple-500/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-purple-400">
                     New
                   </span>
                 )}
@@ -85,9 +85,9 @@ export function Header() {
             <ThemeToggle />
             <Link
               href="/quote"
-              className="group relative hidden overflow-hidden rounded-lg border border-slate-200 bg-white px-5 py-2 shadow-sm transition-all hover:border-slate-300 hover:shadow-md sm:flex"
+              className="group relative hidden overflow-hidden rounded-md border border-white/10 bg-white/5 px-5 py-2 transition-all hover:border-white/20 sm:flex"
             >
-              <span className="relative z-10 flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-slate-700 transition-colors group-hover:text-slate-900">
+              <span className="relative z-10 flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-white/80 transition-colors group-hover:text-white">
                 GET_QUOTE
                 <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </span>
@@ -95,7 +95,7 @@ export function Header() {
 
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition-colors hover:border-slate-300 hover:text-slate-900 md:hidden"
+              className="flex h-10 w-10 items-center justify-center rounded-md border border-white/10 text-white/60 transition-colors hover:border-white/20 hover:text-white md:hidden"
               aria-label="Toggle menu"
             >
               {isMobileMenuOpen ? (
@@ -110,7 +110,7 @@ export function Header() {
 
       <div
         className={cn(
-          "overflow-hidden border-b border-slate-200 bg-white/95 backdrop-blur-xl transition-all duration-300 md:hidden",
+          "overflow-hidden border-b border-white/10 bg-glass-heavy backdrop-blur-xl transition-all duration-300 md:hidden",
           isMobileMenuOpen ? "max-h-96" : "max-h-0 border-transparent",
         )}
       >
@@ -121,16 +121,16 @@ export function Header() {
               href={link.href}
               onClick={() => setIsMobileMenuOpen(false)}
               className={cn(
-                "block rounded-lg px-4 py-3 text-sm transition-colors hover:bg-slate-50",
+                "block rounded-md px-4 py-3 text-sm transition-colors hover:bg-white/5",
                 link.highlight
-                  ? "flex items-center gap-2 text-purple-600"
-                  : "text-slate-600 hover:text-slate-900",
+                  ? "flex items-center gap-2 text-purple-400"
+                  : "text-white/60 hover:text-white",
               )}
             >
               {link.highlight && <Sparkles className="h-4 w-4" />}
               {link.label}
               {link.highlight && (
-                <span className="ml-auto rounded bg-purple-50 px-2 py-0.5 text-[10px] font-semibold uppercase text-purple-700">
+                <span className="ml-auto rounded bg-purple-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-purple-400">
                   New
                 </span>
               )}
@@ -142,7 +142,7 @@ export function Header() {
           <Link
             href="/quote"
             onClick={() => setIsMobileMenuOpen(false)}
-            className="mt-2 flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-3 font-mono text-xs uppercase tracking-wider text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:text-slate-900"
+            className="mt-2 flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 py-3 font-mono text-xs uppercase tracking-wider text-white/80 transition-all hover:border-white/20 hover:text-white"
           >
             GET_QUOTE
             <ArrowUpRight className="h-3.5 w-3.5" />
