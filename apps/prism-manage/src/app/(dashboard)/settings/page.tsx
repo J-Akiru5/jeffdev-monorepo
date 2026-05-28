@@ -5,14 +5,24 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
-import { Calendar, RefreshCw, User, Bell } from "lucide-react";
+import { Calendar, RefreshCw, Bell } from "lucide-react";
 import { ThemeSection } from "@/components/settings/theme-section";
+import { ProfileSection } from "@/components/settings/profile-section";
 import { WorkspaceMembersSettings } from "@/components/settings/workspace-members";
 import { getWorkspaceMembers } from "@/app/actions/workspace";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+
+  // Basic user info for profile
+  let userName = "User";
+  let userEmail = "";
+
+  if (user) {
+    userName = (user.user_metadata?.full_name as string) || user.email?.split("@")[0] || "User";
+    userEmail = user.email || "";
+  }
 
   // Fetch members for the Syntaxure Labs workspace if user is logged in
   let members: Awaited<ReturnType<typeof getWorkspaceMembers>>["members"] = [];
@@ -48,6 +58,15 @@ export default async function SettingsPage() {
       </div>
 
       <div className="space-y-6">
+        {/* Profile Section (with C-Level title editor for founders) */}
+        {user && syntaxureWorkspaceId && (
+          <ProfileSection
+            userName={userName}
+            userEmail={userEmail}
+            workspaceId={syntaxureWorkspaceId}
+          />
+        )}
+
         {/* Workspace Members (only shown for Syntaxure Labs workspace members) */}
         {syntaxureWorkspaceId && members.length > 0 && (
           <WorkspaceMembersSettings
@@ -169,27 +188,6 @@ export default async function SettingsPage() {
                     className="h-5 w-5 rounded border-glass-20 bg-transparent text-cyan-500 focus:ring-cyan-500"
                   />
                 </label>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Profile */}
-        <section className="rounded-xl border border-glass-10 glass-subtle p-6">
-          <div className="flex items-start gap-4">
-            <div className="rounded-lg bg-glass-10 p-3">
-              <User className="h-6 w-6 text-text-secondary" />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-lg font-semibold text-text-primary">Account</h2>
-              <p className="mt-1 text-sm text-text-muted">
-                Manage your account settings.
-              </p>
-
-              <div className="mt-4">
-                <p className="text-sm text-text-tertiary">
-                  Logged in via Supabase Auth (same as Syntaxure Labs app)
-                </p>
               </div>
             </div>
           </div>

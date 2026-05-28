@@ -1,0 +1,10 @@
+# Ignore giant generated and dependency folders to optimize memory
+node_modules/
+.next/
+.turbo/
+.git/
+.changeset/
+dist/
+build/
+out/
+pnpm-lock.yaml

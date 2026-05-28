@@ -59,12 +59,18 @@ export function MobileNav() {
   const departments = useWorkspaceStore((s) => s.departments);
   const userRole = useWorkspaceStore((s) => s.userRole);
   const userDepartmentId = useWorkspaceStore((s) => s.userDepartmentId);
+  const cLevelTitle = useWorkspaceStore((s) => s.cLevelTitle);
   const setActiveWorkspace = useWorkspaceStore((s) => s.setActiveWorkspace);
 
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId);
   const isSyntaxureLabs = activeWorkspace?.name === "Syntaxure Labs" || activeWorkspace?.name === "Syntaxure Labs, Inc.";
   const isPersonal = activeWorkspace?.name === "Personal";
   const isFounder = userRole === "founder";
+
+  // C-Level scoping
+  const cLevelDepartment = cLevelTitle
+    ? ({ ceo: null, cto: "Engineering", cpo: "Product", coo: "Operations", cmo: "Marketing" } as const)[cLevelTitle]
+    : null;
 
   const tabs = [
     { label: "Tasks", href: "/tasks", icon: CheckSquare },
@@ -76,7 +82,12 @@ export function MobileNav() {
 
   // Determine if Marketing tab should be shown
   const marketingDept = departments.find((d) => d.name === "Marketing");
-  const isMarketingMember = !!marketingDept && (isFounder || userDepartmentId === marketingDept.id);
+  const isMarketingMember = !!marketingDept && (
+    cLevelTitle === "ceo" ||
+    cLevelTitle === "cmo" ||
+    (!cLevelTitle && isFounder) ||
+    userDepartmentId === marketingDept.id
+  );
 
   const handleProjectClick = (projectId: string) => {
     setActiveProjectId(projectId);
@@ -247,7 +258,12 @@ export function MobileNav() {
                     </h3>
                   </div>
                   <div className="space-y-2">
-                    {(isFounder ? departments : departments.slice(0, 1)).map((dept) => (
+                    {(isFounder
+                ? cLevelDepartment
+                  ? departments.filter((d) => d.name === cLevelDepartment)
+                  : departments
+                : departments.filter((d) => d.id === userDepartmentId)
+              ).map((dept) => (
                       <Link
                         key={dept.id}
                         href={`/tasks?department=${dept.id}`}

@@ -100,11 +100,18 @@ export function Sidebar() {
   const departments = useWorkspaceStore((s) => s.departments);
   const userRole = useWorkspaceStore((s) => s.userRole);
   const userDepartmentId = useWorkspaceStore((s) => s.userDepartmentId);
+  const cLevelTitle = useWorkspaceStore((s) => s.cLevelTitle);
 
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId);
   const isSyntaxureLabs = activeWorkspace?.name === "Syntaxure Labs" || activeWorkspace?.name === "Syntaxure Labs, Inc.";
   const isPersonal = activeWorkspace?.name === "Personal";
   const isFounder = userRole === "founder";
+
+  // C-Level scoping: determines which department(s) this user can see
+  const cLevelDepartment = cLevelTitle
+    ? ({ ceo: null, cto: "Engineering", cpo: "Product", coo: "Operations", cmo: "Marketing" } as const)[cLevelTitle]
+    : null;
+  const isCLevelScoped = cLevelTitle !== null && cLevelTitle !== "ceo";
 
   // Inline editing state
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -123,11 +130,19 @@ export function Sidebar() {
   }, [showNewListInput]);
 
   const visibleDepartments: Department[] = isFounder
-    ? departments
-    : departments.slice(0, 1);
+    ? cLevelDepartment
+      ? departments.filter((d) => d.name === cLevelDepartment)
+      : departments
+    : departments.filter((d) => d.id === userDepartmentId);
 
   const marketingDept = departments.find((d) => d.name === "Marketing");
-  const isMarketingMember = !!marketingDept && (isFounder || userDepartmentId === marketingDept.id);
+  // Marketing link visible to: CEO, CMO, Marketing dept staff, unrefined founders
+  const isMarketingMember = !!marketingDept && (
+    cLevelTitle === "ceo" ||
+    cLevelTitle === "cmo" ||
+    (!cLevelTitle && isFounder) ||
+    userDepartmentId === marketingDept.id
+  );
 
   const isActive = (href: string) => {
     if (href.includes("?")) {

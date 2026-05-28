@@ -99,12 +99,16 @@ export function TaskSheet({
 
   /** Is the current user a founder? Reads from workspace store (hydrated from DB) */
   const userRole = useWorkspaceStore((s) => s.userRole);
+  const cLevelTitle = useWorkspaceStore((s) => s.cLevelTitle);
   const isFounder = userRole === "founder";
   const isEmployee = userRole === "employee";
 
+  // Approval rights: CPO and CEO can approve tasks; other C-level / employees cannot
+  const canApprove = isFounder && (cLevelTitle === null || cLevelTitle === "ceo" || cLevelTitle === "cpo");
+
   // Determine which statuses are available for selection based on RBAC
   const availableStatuses = Object.entries(STATUS_CONFIG).filter(([key]) => {
-    if (isFounder) return true;
+    if (canApprove) return true;
     return !STAFF_LOCKED_STATUSES.includes(key as StatusKey);
   });
 
@@ -396,15 +400,15 @@ export function TaskSheet({
                           {availableStatuses.map(([key, config]) => {
                             const isLocked = STAFF_LOCKED_STATUSES.includes(key as StatusKey);
                             return (
-                              <option key={key} value={key} disabled={isLocked && isEmployee}>
-                                {config.label}{isLocked && isEmployee ? " (founder only)" : ""}
+                              <option key={key} value={key} disabled={isLocked && !canApprove}>
+                                {config.label}{isLocked && !canApprove ? " (approval required)" : ""}
                               </option>
                             );
                           })}
                         </select>
-                        {isEmployee && data.status === "approved" && (
+                        {!canApprove && data.status === "approved" && (
                           <p className="mt-1 text-[10px] text-amber-400/60">
-                            Only founders can set &quot;Approved&quot;
+                            Only CPO or CEO can set &quot;Approved&quot;
                           </p>
                         )}
                       </div>

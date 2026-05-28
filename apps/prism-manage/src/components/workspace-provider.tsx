@@ -3,6 +3,8 @@
 import { useEffect, type ReactNode } from "react";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 
+import type { CLevelTitle } from "@/lib/schemas";
+
 interface WorkspaceProviderProps {
   children: ReactNode;
   workspaces: { id: string; name: string; createdAt: string }[];
@@ -11,6 +13,7 @@ interface WorkspaceProviderProps {
   userRole: "founder" | "employee";
   userDepartmentId: string | null;
   cpoUserId: string | null;
+  cLevelTitle: CLevelTitle | null;
 }
 
 /**
@@ -27,6 +30,7 @@ export function WorkspaceProvider({
   userRole,
   userDepartmentId,
   cpoUserId,
+  cLevelTitle,
 }: WorkspaceProviderProps) {
   const setWorkspaces = useWorkspaceStore((s) => s.setWorkspaces);
   const setActiveWorkspace = useWorkspaceStore((s) => s.setActiveWorkspace);
@@ -34,6 +38,7 @@ export function WorkspaceProvider({
   const setUserRole = useWorkspaceStore((s) => s.setUserRole);
   const setUserDepartmentId = useWorkspaceStore((s) => s.setUserDepartmentId);
   const setCpoUserId = useWorkspaceStore((s) => s.setCpoUserId);
+  const setCLevelTitle = useWorkspaceStore((s) => s.setCLevelTitle);
   const setLoaded = useWorkspaceStore((s) => s.setLoaded);
 
   useEffect(() => {
@@ -45,6 +50,7 @@ export function WorkspaceProvider({
     setUserRole(userRole);
     setUserDepartmentId(userDepartmentId);
     setCpoUserId(cpoUserId);
+    setCLevelTitle(cLevelTitle);
     setLoaded(true);
   }, [
     workspaces,
@@ -53,12 +59,14 @@ export function WorkspaceProvider({
     userRole,
     userDepartmentId,
     cpoUserId,
+    cLevelTitle,
     setWorkspaces,
     setActiveWorkspace,
     setDepartments,
     setUserRole,
     setUserDepartmentId,
     setCpoUserId,
+    setCLevelTitle,
     setLoaded,
   ]);
 

@@ -1,7 +1,7 @@
 "use server";
 
 import { getAdminClient } from "@/lib/supabase/admin";
-import { revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 const slotInputSchema = z.object({
@@ -13,8 +13,6 @@ const slotInputSchema = z.object({
 });
 
 export type SlotInput = z.infer<typeof slotInputSchema>;
-
-const AVAILABILITY_TAG = "availability-slots";
 
 export async function getAvailabilitySlots() {
   try {
@@ -78,7 +76,7 @@ export async function saveAvailabilitySlot(
       if (error) throw error;
     }
 
-    revalidateTag(AVAILABILITY_TAG, "seconds");
+    revalidatePath("/admin/agency/availability");
     return { success: true };
   } catch (error) {
     console.error("[availability] saveAvailabilitySlot error:", error);
@@ -112,7 +110,7 @@ export async function setActiveQuarter(
 
     if (error) throw error;
 
-    revalidateTag(AVAILABILITY_TAG, "seconds");
+    revalidatePath("/admin/agency/availability");
     return { success: true };
   } catch (error) {
     console.error("[availability] setActiveQuarter error:", error);
@@ -136,7 +134,7 @@ export async function deleteAvailabilitySlot(
 
     if (error) throw error;
 
-    revalidateTag(AVAILABILITY_TAG, "seconds");
+    revalidatePath("/admin/agency/availability");
     return { success: true };
   } catch (error) {
     console.error("[availability] deleteAvailabilitySlot error:", error);
