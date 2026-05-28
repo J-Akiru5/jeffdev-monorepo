@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { SupabaseProvider } from "@/components/providers/supabase-provider";
 import { Toaster } from "sonner";
 import { ThemeWrapper } from "@/components/admin/theme-wrapper";
+import { ThemeBootstrap } from "@/components/admin/theme-bootstrap";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
@@ -72,8 +72,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SupabaseProvider>
-      <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
+        <head>
+          <ThemeBootstrap />
+        </head>
         <body className="antialiased bg-[#030303] text-white min-h-screen">
           <ThemeWrapper>{children}</ThemeWrapper>
           <Toaster
@@ -89,6 +91,5 @@ export default function RootLayout({
           />
         </body>
       </html>
-    </SupabaseProvider>
   );
 }

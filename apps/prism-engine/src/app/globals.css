@@ -18,6 +18,17 @@
   --color-glass: rgba(10, 10, 10, 0.6);
   --color-glass-heavy: rgba(10, 10, 10, 0.85);
 
+  /* Surface colors */
+  --bg-primary: #050505;
+  --bg-secondary: #0a0a0a;
+  --bg-tertiary: #141414;
+
+  /* Text colors */
+  --text-primary: #ededed;
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-tertiary: rgba(255, 255, 255, 0.4);
+  --text-quiet: rgba(255, 255, 255, 0.25);
+
   /* Accents (Holographic) */
   --color-cyan: #06b6d4;
   --color-purple: #8b5cf6;
@@ -37,6 +48,31 @@
   /* Shadows */
   --shadow-glow-cyan: 0 0 20px rgba(6, 182, 212, 0.15);
   --shadow-glow-purple: 0 0 20px rgba(139, 92, 246, 0.15);
+}
+
+/* Light mode overrides */
+[data-theme="theme-light"] {
+  --color-void: #f5f5f5;
+  --color-glass: rgba(255, 255, 255, 0.6);
+  --color-glass-heavy: rgba(255, 255, 255, 0.85);
+
+  --bg-primary: #f5f5f5;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #e8e8e8;
+
+  --text-primary: #171717;
+  --text-secondary: rgba(0, 0, 0, 0.6);
+  --text-tertiary: rgba(0, 0, 0, 0.4);
+  --text-quiet: rgba(0, 0, 0, 0.2);
+
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-active: rgba(0, 0, 0, 0.15);
+  --border-glow: rgba(0, 0, 0, 0.2);
+  --border-neon-cyan: rgba(6, 182, 212, 0.4);
+  --border-neon-purple: rgba(139, 92, 246, 0.4);
+
+  --shadow-glow-cyan: 0 0 20px rgba(6, 182, 212, 0.08);
+  --shadow-glow-purple: 0 0 20px rgba(139, 92, 246, 0.08);
 }
 
 /* ----------------------------------------

@@ -43,6 +43,8 @@ export interface AuthProfile {
   avatar_url?: string;
   /** RBAC role from user_profiles table */
   role?: string;
+  /** Account creation timestamp from auth */
+  created_at?: string;
   /** Raw profile columns from user_profiles */
   [key: string]: unknown;
 }

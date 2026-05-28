@@ -3,6 +3,7 @@ import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 import { AccountDropdownWrapper } from "@/components/auth/account-dropdown-wrapper";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -28,17 +29,17 @@ export default async function DashboardLayout({
   children: ReactNode;
 }) {
   return (
-    <div className="relative flex min-h-screen bg-[#050505]">
+    <div className="relative flex min-h-screen bg-[var(--bg-primary)]">
       <GridBackground variant="neon" />
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex fixed left-0 top-0 z-40 h-screen w-64 flex-col border-r border-white/5 bg-[#050505]/95 backdrop-blur-xl">
+      <aside className="hidden md:flex fixed left-0 top-0 z-40 h-screen w-64 flex-col border-r border-[var(--border-subtle)] bg-[var(--bg-primary)]/95 backdrop-blur-xl">
         {/* Logo */}
-        <div className="flex h-16 items-center border-b border-white/5 px-6">
+        <div className="flex h-16 items-center border-b border-[var(--border-subtle)] px-6">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-cyan-500/20 to-violet-500/20 border border-white/10 group-hover:border-cyan-500/30 transition-colors">
               <Sparkles className="h-4 w-4 text-cyan-400" />
             </div>
-            <span className="font-semibold text-white tracking-tight">
+            <span className="font-semibold text-[var(--text-primary)] tracking-tight">
               Prism Engine
             </span>
             <BetaBadge />
@@ -66,14 +67,14 @@ export default async function DashboardLayout({
             Analytics
           </NavItem>
 
-          <div className="my-4 border-t border-white/5" />
+          <div className="my-4 border-t border-[var(--border-subtle)]" />
 
           {/* Quick Connect — highlighted in sidebar */}
           <NavItem href="/quickstart" icon={Plug} highlight>
             Quick Connect
           </NavItem>
 
-          <div className="my-4 border-t border-white/5" />
+          <div className="my-4 border-t border-[var(--border-subtle)]" />
 
           <NavItem href="/subscription" icon={CreditCard}>
             Subscription
@@ -83,24 +84,28 @@ export default async function DashboardLayout({
           </NavItem>
         </nav>
 
-        {/* User */}
-        <div className="border-t border-white/5 p-4 bg-black/20">
-          <div className="flex items-center gap-3">
+        {/* User & Theme */}
+        <div className="border-t border-[var(--border-subtle)] p-4 bg-black/20">
+          <div className="flex items-center justify-between gap-2">
             <AccountDropdownWrapper />
+            <ThemeToggle />
           </div>
         </div>
       </aside>
 
       {/* Mobile Header */}
-      <header className="md:hidden fixed top-0 left-0 right-0 z-40 h-16 border-b border-white/5 bg-[#050505]/80 backdrop-blur-lg flex items-center justify-between px-4">
+      <header className="md:hidden fixed top-0 left-0 right-0 z-40 h-16 border-b border-[var(--border-subtle)] bg-[var(--bg-primary)]/80 backdrop-blur-lg flex items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-cyan-500/20 to-violet-500/20 border border-white/10">
             <Sparkles className="h-4 w-4 text-cyan-400" />
           </div>
-          <span className="font-semibold text-white tracking-tight">Prism</span>
+          <span className="font-semibold text-[var(--text-primary)] tracking-tight">Prism</span>
           <BetaBadge />
         </Link>
-        <AccountDropdownWrapper />
+        <div className="flex items-center gap-1">
+          <ThemeToggle />
+          <AccountDropdownWrapper />
+        </div>
       </header>
 
       {/* Main Content */}
@@ -111,7 +116,7 @@ export default async function DashboardLayout({
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-16 border-t border-white/10 bg-black/80 backdrop-blur-lg flex items-center justify-around px-2 pb-safe">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-16 border-t border-[var(--border-subtle)] bg-black/80 backdrop-blur-lg flex items-center justify-around px-2 pb-safe">
         <MobileNavItem href="/dashboard" icon={LayoutDashboard} label="Home" />
         <MobileNavItem href="/projects" icon={FolderKanban} label="Projects" />
         <div className="relative -top-5">
@@ -150,11 +155,10 @@ function NavItem({
         {children}
       </Link>
     );
-  }
-  return (
+  }      return (
     <Link
       href={href}
-      className="group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-white/60 transition-all hover:bg-white/5 hover:text-white hover:shadow-[inset_3px_0_0_0_#06b6d4]"
+      className="group flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-[var(--text-secondary)] transition-all hover:bg-white/5 hover:text-[var(--text-primary)] hover:shadow-[inset_3px_0_0_0_#06b6d4]"
     >
       <Icon className="h-4 w-4 transition-colors group-hover:text-cyan-400" />
       {children}
@@ -174,7 +178,7 @@ function MobileNavItem({
   return (
     <Link
       href={href}
-      className="flex flex-col items-center justify-center gap-1 p-2 text-white/50 hover:text-white transition-colors"
+      className="flex flex-col items-center justify-center gap-1 p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
     >
       <Icon className="h-5 w-5" />
       <span className="text-[10px] font-medium">{label}</span>

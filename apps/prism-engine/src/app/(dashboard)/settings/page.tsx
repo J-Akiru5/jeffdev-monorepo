@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useUser } from "@/components/auth/supabase-provider";
+import { useAuth } from "@syntaxure/ui";
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -61,8 +61,8 @@ interface NewKeyResponse {
  * User profile, notifications, subscription, and API key management.
  */
 export default function SettingsPage() {
-  const user = useUser();
-  const isLoading = !user;
+  const { user, loading } = useAuth();
+  const isLoading = loading || !user;
 
   if (isLoading) {
     return (
@@ -113,7 +113,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between py-2 border-b border-white/5">
                 <span className="text-sm text-white/60">Name</span>
                 <span className="text-sm text-white">
-                  {user?.user_metadata?.full_name || "—"}
+                  {user?.full_name || "—"}
                 </span>
               </div>
               <div className="flex items-center justify-between py-2">
@@ -122,6 +122,7 @@ export default function SettingsPage() {
                   {user?.created_at
                     ? new Date(user.created_at).toLocaleDateString()
                     : "—"}
+                {/* Note: This uses raw created_at — migrate to a 'member_since' field when profiles have one */}
                 </span>
               </div>
             </div>

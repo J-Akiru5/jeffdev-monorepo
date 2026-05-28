@@ -5,94 +5,78 @@
  * ----------------------
  * Client component wrapper that wires prism-engine's auth data into
  * the shared AccountDropdown from @syntaxure/ui.
+ * Uses the shared useAuth() hook for all auth state.
  */
 
-import { useEffect, useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/browser";
-import { AccountDropdown, type AppLink } from "@syntaxure/ui";
+import { useAuth, AccountDropdown } from "@syntaxure/ui";
 import { LayoutDashboard, User, Sparkles, Shield } from "lucide-react";
+import Link from "next/link";
 
-export function AccountDropdownWrapper() {
-  const [userId, setUserId] = useState<string | null>(null);
-  const [email, setEmail] = useState<string | undefined>();
-  const [name, setName] = useState("User");
-  const [role, setRole] = useState("");
-  const supabase = useMemo(() => createClient(), []);
-  const router = useRouter();
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        setUserId(data.user.id);
-        setEmail(data.user.email || undefined);
-        setName(
-          (data.user.user_metadata as Record<string, unknown> | undefined)
-            ?.full_name as string | undefined ||
-            data.user.email?.split("@")[0] ||
-            "User",
-        );
-      }
-    });
-  }, [supabase]);
-
-  useEffect(() => {
-    if (userId) {
-      supabase
-        .from("user_profiles")
-        .select("role")
-        .eq("id", userId)
-        .maybeSingle()
-        .then(({ data }) => {
-          if (data) setRole((data as { role?: string }).role || "");
-        });
-    }
-  }, [userId, supabase]);
-
-  async function handleSignOut() {
-    await supabase.auth.signOut();
-    router.push("/sign-in");
-    router.refresh();
-  }
-
-  const initials = name.charAt(0).toUpperCase();
-
-  const appLinks: AppLink[] = [
+/** Cross-app links shown as extra actions in the dropdown */
+function AppLinks() {
+  const links = [
     {
       label: "Engine",
       href: process.env.NEXT_PUBLIC_PRISM_URL || "http://localhost:3001",
-      shortLabel: "Engine",
-      icon: <Shield className="h-3.5 w-3.5" />,
+      icon: Shield,
     },
     {
       label: "Manage",
       href: process.env.NEXT_PUBLIC_MANAGE_URL || "http://localhost:3007",
-      shortLabel: "Mgmt",
-      icon: <LayoutDashboard className="h-3.5 w-3.5" />,
+      icon: LayoutDashboard,
     },
     {
       label: "Admin",
       href: process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3004",
-      shortLabel: "Admin",
-      icon: <User className="h-3.5 w-3.5" />,
+      icon: User,
     },
     {
-      label: "Syntaxure Labs",
+      label: "Labs",
       href: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-      shortLabel: "Labs",
-      icon: <Sparkles className="h-3.5 w-3.5" />,
+      icon: Sparkles,
     },
   ];
 
   return (
+    <>
+      <div className="border-t border-white/5 my-1" />
+      {links.map((l) => {
+        const Icon = l.icon;
+        return (
+          <Link
+            key={l.label}
+            href={l.href}
+            className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-white/60 transition-colors hover:bg-white/5 hover:text-white"
+          >
+            <Icon className="h-4 w-4" />
+            <span>{l.label}</span>
+          </Link>
+        );
+      })}
+    </>
+  );
+}
+
+export function AccountDropdownWrapper() {
+  const { user, loading, signOut } = useAuth();
+
+  const initials = (user?.full_name?.charAt(0) || user?.email?.charAt(0) || "U").toUpperCase();
+
+  if (loading) {
+    return (
+      <div className="h-9 w-9 rounded-full bg-white/5 animate-pulse" />
+    );
+  }
+
+  return (
     <AccountDropdown
       initials={initials}
-      email={email}
-      displayName={name}
-      role={role || undefined}
+      email={user?.email}
+      displayName={user?.full_name || "User"}
+      role={user?.role || undefined}
       settingsHref="/settings"
-      appLinks={appLinks}
-      onSignOut={handleSignOut}
+      extraActions={<AppLinks />}
+      onSignOut={signOut}
     />
   );
 }
