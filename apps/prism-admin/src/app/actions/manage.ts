@@ -1,6 +1,7 @@
 "use server";
 
 import { getAdminClient } from "@/lib/supabase/admin";
+import type { ProjectRow, WorkspaceMemberRow, UserProfileRow } from "@/lib/database.types";
 import { revalidatePath } from "next/cache";
 
 // ──────────────────────────────────────────────
@@ -75,6 +76,8 @@ export async function getWorkspaceDetail(workspaceId: string) {
       .eq("workspace_id", workspaceId)
       .order("name", { ascending: true });
 
+    type MemberWithProfile = WorkspaceMemberRow & { user_profiles: Pick<UserProfileRow, "id" | "full_name" | "email" | "avatar_url"> | null };
+
     return {
       id: workspace.id,
       name: workspace.name,
@@ -83,15 +86,13 @@ export async function getWorkspaceDetail(workspaceId: string) {
         id: d.id,
         name: d.name,
       })),
-      members: (members || []).map((m: Record<string, unknown>) => ({
-        userId: String(m.user_id),
-        role: String(m.role),
-        departmentId: m.department_id ? String(m.department_id) : null,
-        name:
-          (m.user_profiles as Record<string, unknown>)?.full_name as string ||
-          (m.user_profiles as Record<string, unknown>)?.email as string,
-        email: (m.user_profiles as Record<string, unknown>)?.email as string,
-        avatarUrl: (m.user_profiles as Record<string, unknown>)?.avatar_url as string | null,
+      members: (members || []).map((m: MemberWithProfile) => ({
+        userId: m.user_id,
+        role: m.role,
+        departmentId: m.department_id,
+        name: m.user_profiles?.full_name || m.user_profiles?.email || "",
+        email: m.user_profiles?.email || "",
+        avatarUrl: m.user_profiles?.avatar_url ?? null,
       })),
       projects: (projects || []).map((p) => ({
         id: p.id,
@@ -186,7 +187,18 @@ export async function adminRemoveMember(workspaceId: string, userId: string) {
 // Projects (Cross-workspace)
 // ──────────────────────────────────────────────
 
-export async function getAllProjects() {
+interface EnrichedProject {
+  id: string;
+  name: string;
+  color?: string;
+  workspaceName: string;
+  workspaceId: string;
+  taskCount: number;
+  completedCount: number;
+  createdAt: string;
+}
+
+export async function getAllProjects(): Promise<EnrichedProject[]> {
   try {
     const admin = getAdminClient();
     const { data: projects } = await admin
@@ -196,8 +208,9 @@ export async function getAllProjects() {
 
     if (!projects) return [];
 
+    type ProjectWithWorkspace = ProjectRow & { workspaces: { name: string } | null };
     const enriched = await Promise.all(
-      projects.map(async (p) => {
+      (projects as ProjectWithWorkspace[]).map(async (p) => {
         const { count } = await admin
           .from("tasks")
           .select("*", { count: "exact", head: true })
@@ -212,9 +225,9 @@ export async function getAllProjects() {
         return {
           id: p.id,
           name: p.name,
-          color: p.color,
-          workspaceName: (p.workspaces as Record<string, unknown>)?.name as string,
-          workspaceId: p.workspace_id,
+          color: p.color ?? undefined,
+          workspaceName: p.workspaces?.name ?? "",
+          workspaceId: p.workspace_id ?? "",
           taskCount: count || 0,
           completedCount: completedCount || 0,
           createdAt: p.created_at,

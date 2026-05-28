@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
+import type { PricingPlanRow } from "@/lib/database.types";
 
 function db() {
-  return getAdminClient().from("pricing_plans") as any;
+  return getAdminClient().from("pricing_plans");
 }
 
 // GET — List pricing plans
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
     const app = searchParams.get("app");
 
     const query = app
-      ? db().select("*").order("sort_order", { ascending: true }).eq("app", app)
+      ? db().select("*").order("sort_order", { ascending: true }).eq("app", app as PricingPlanRow["app"])
       : db().select("*").order("sort_order", { ascending: true });
 
     const { data, error } = await query;
@@ -108,8 +109,10 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const updateFields: Record<string, unknown> = {};
-    const allowedFields = [
+    const updateFields: Partial<PricingPlanRow> & { updated_at: string } = {
+      updated_at: new Date().toISOString(),
+    };
+    const allowedFields: (keyof PricingPlanRow)[] = [
       "app", "plan_type", "name", "tier_slug", "tagline", "description",
       "price_monthly_php", "price_monthly_usd", "price_annual_php", "price_annual_usd",
       "price_original_php", "price_original_usd", "discount_label", "monthly_addon",
@@ -119,11 +122,9 @@ export async function PATCH(request: NextRequest) {
 
     for (const field of allowedFields) {
       if (field in updates) {
-        updateFields[field] = updates[field] ?? null;
+        (updateFields as Record<string, unknown>)[field] = updates[field] ?? null;
       }
     }
-
-    updateFields.updated_at = new Date().toISOString();
 
     const { data, error } = await db()
       .update(updateFields)

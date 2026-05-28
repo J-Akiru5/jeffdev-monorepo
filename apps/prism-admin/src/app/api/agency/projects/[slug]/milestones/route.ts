@@ -10,7 +10,7 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await params;
-  const supabase = getAdminClient() as any;
+  const supabase = getAdminClient();
 
   const { data: project } = await supabase
     .from("projects")

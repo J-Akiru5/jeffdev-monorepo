@@ -10,6 +10,7 @@ import { z } from "zod";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logAuditEvent } from "@/lib/audit";
 import { revalidatePath } from "next/cache";
+import type { MilestoneRow } from "@/lib/database.types";
 
 // ─── Validation Schemas ──────────────────────────────────────────────────────
 
@@ -50,7 +51,7 @@ interface ActionResult {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 async function getProjectId(slug: string): Promise<string | null> {
-  const supabase = getAdminClient() as any;
+  const supabase = getAdminClient();
   const { data } = await supabase.from("projects").select("id").eq("slug", slug).maybeSingle();
   return data?.id || null;
 }
@@ -60,12 +61,12 @@ async function getProjectId(slug: string): Promise<string | null> {
 export async function createAgencyProject(data: ProjectFormData): Promise<ActionResult> {
   try {
     const validated = projectSchema.parse(data);
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     const { data: existing } = await supabase.from("projects").select("id").eq("slug", validated.slug).maybeSingle();
     if (existing) return { success: false, error: "A project with this slug already exists" };
 
-    const { error } = await supabase.from("projects").insert([{
+    const { error } = await supabase.from("projects").insert({
       user_id: validated.userId,
       title: validated.title,
       description: validated.description,
@@ -94,7 +95,7 @@ export async function createAgencyProject(data: ProjectFormData): Promise<Action
       },
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-    }]);
+    });
 
     if (error) throw error;
 
@@ -112,7 +113,7 @@ export async function createAgencyProject(data: ProjectFormData): Promise<Action
 export async function updateAgencyProject(slug: string, data: ProjectFormData): Promise<ActionResult> {
   try {
     const validated = projectSchema.parse(data);
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
 
     const { data: existing } = await supabase.from("projects").select("id").eq("slug", slug).maybeSingle();
     if (!existing) return { success: false, error: "Project not found" };
@@ -169,7 +170,7 @@ export async function updateAgencyProject(slug: string, data: ProjectFormData): 
 
 export async function deleteAgencyProject(slug: string): Promise<ActionResult> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data: existing } = await supabase.from("projects").select("title").eq("slug", slug).maybeSingle();
     if (!existing) return { success: false, error: "Project not found" };
 
@@ -190,7 +191,7 @@ export async function deleteAgencyProject(slug: string): Promise<ActionResult> {
 
 export async function updateAgencyProjectStatus(slug: string, status: string): Promise<ActionResult> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data: project } = await supabase.from("projects").select("id, metadata").eq("slug", slug).maybeSingle();
     if (!project) return { success: false, error: "Project not found" };
 
@@ -215,7 +216,7 @@ export async function updateAgencyProjectStatus(slug: string, status: string): P
 export async function updateAgencyProjectProgress(slug: string, progress: number): Promise<ActionResult> {
   try {
     const validProgress = Math.max(0, Math.min(100, progress));
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data: project } = await supabase.from("projects").select("id, metadata").eq("slug", slug).maybeSingle();
     if (!project) return { success: false, error: "Project not found" };
 
@@ -238,7 +239,7 @@ export async function updateAgencyProjectProgress(slug: string, progress: number
 
 export async function updateAgencyProjectDetails(slug: string, data: { status?: string; progress?: number; deadline?: string; startDate?: string; budget?: number; paidAmount?: number; assignedPartner?: string; assignedEmployees?: string[] }): Promise<ActionResult> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const { data: project } = await supabase.from("projects").select("id, metadata").eq("slug", slug).maybeSingle();
     if (!project) return { success: false, error: "Project not found" };
 
@@ -273,7 +274,7 @@ export async function updateAgencyProjectDetails(slug: string, data: { status?: 
 
 export async function addAgencyMilestone(slug: string, milestone: { title: string; description?: string; due_date: string; status?: string; deliverables?: string[] }): Promise<ActionResult & { milestone?: unknown }> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const projectId = await getProjectId(slug);
     if (!projectId) return { success: false, error: "Project not found" };
 
@@ -282,7 +283,7 @@ export async function addAgencyMilestone(slug: string, milestone: { title: strin
       title: milestone.title,
       description: milestone.description || null,
       due_date: milestone.due_date,
-      status: milestone.status || "pending",
+      status: (milestone.status || "pending") as MilestoneRow["status"],
       deliverables: milestone.deliverables || null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -302,16 +303,16 @@ export async function addAgencyMilestone(slug: string, milestone: { title: strin
 
 export async function updateAgencyMilestoneStatus(slug: string, milestoneId: string, status: string): Promise<ActionResult & { progress?: number }> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const projectId = await getProjectId(slug);
     if (!projectId) return { success: false, error: "Project not found" };
 
-    const { error } = await supabase.from("milestones").update({ status, updated_at: new Date().toISOString() }).eq("id", milestoneId).eq("project_id", projectId);
+    const { error } = await supabase.from("milestones").update({ status: status as MilestoneRow["status"], updated_at: new Date().toISOString() }).eq("id", milestoneId).eq("project_id", projectId);
     if (error) throw error;
 
     const { data: milestones } = await supabase.from("milestones").select("status").eq("project_id", projectId);
     const total = milestones?.length || 0;
-    const completed = milestones?.filter((m: any) => m.status === "completed").length || 0;
+    const completed = milestones?.filter((m) => m.status === "completed").length || 0;
     const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
 
     const { data: project } = await supabase.from("projects").select("metadata").eq("slug", slug).maybeSingle();
@@ -331,7 +332,7 @@ export async function updateAgencyMilestoneStatus(slug: string, milestoneId: str
 
 export async function deleteAgencyMilestone(slug: string, milestoneId: string): Promise<ActionResult> {
   try {
-    const supabase = getAdminClient() as any;
+    const supabase = getAdminClient();
     const projectId = await getProjectId(slug);
     if (!projectId) return { success: false, error: "Project not found" };
 

@@ -6,7 +6,7 @@ import { getAdminClient } from "@/lib/supabase/admin";
  * Returns chart data for the agency dashboard (revenue, project statuses, activity)
  */
 export async function GET() {
-  const supabase = getAdminClient() as any;
+  const supabase = getAdminClient();
 
   // Project statuses
   const { data: projects } = await supabase
@@ -50,7 +50,7 @@ export async function GET() {
       status,
       count,
     })),
-    recentActivity: (auditLogs || []).map((log: any) => ({
+    recentActivity: (auditLogs || []).map((log) => ({
       date: log.created_at,
       action: log.action,
       resource: `${log.resource_type}/${log.resource_id}`,

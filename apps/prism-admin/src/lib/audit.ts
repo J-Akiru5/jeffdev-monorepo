@@ -5,6 +5,7 @@
  */
 
 import { getAdminClient } from "@/lib/supabase/admin";
+import type { AuditLogRow } from "@/lib/database.types";
 
 export interface AuditEvent {
   action: "CREATE" | "UPDATE" | "DELETE" | "STATUS_CHANGE";
@@ -38,21 +39,18 @@ export async function logAuditEvent(event: AuditEvent): Promise<void> {
   try {
     const supabase = getAdminClient();
 
-    const payload: Record<string, unknown> = {
-      action: event.action,
-      resource_type: event.resource,
-      resource_id: event.resourceId,
-      changes: {
-        ...(event.details || {}),
-        userEmail: event.userEmail || "admin@syntaxure.dev",
-      },
-      created_at: new Date().toISOString(),
-    };
-
     const { error } = await supabase
       .from("audit_logs")
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .insert([payload] as any);
+      .insert({
+        action: event.action,
+        resource_type: event.resource,
+        resource_id: event.resourceId,
+        changes: {
+          ...(event.details || {}),
+          userEmail: event.userEmail || "admin@syntaxure.dev",
+        },
+        created_at: new Date().toISOString(),
+      } satisfies Partial<AuditLogRow> & Record<string, unknown>);
 
     if (error) {
       console.error("[AUDIT DB ERROR]", error);

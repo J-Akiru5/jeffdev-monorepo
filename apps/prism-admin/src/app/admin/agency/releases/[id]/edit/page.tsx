@@ -23,12 +23,12 @@ export default async function EditReleasePage({
       initialData={{
         id: release.id,
         title: release.title,
-        version: release.version,
+        version: release.version ?? "",
         date: release.date,
         type: release.type as "tool" | "update" | "patch",
         description: release.description,
-        link: release.link,
-        tags: release.tags,
+        link: release.link ?? "",
+        tags: release.tags ?? [],
         is_featured: release.is_featured,
       }}
       isEditing
