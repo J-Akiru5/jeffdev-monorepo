@@ -100,8 +100,8 @@ export default function TermsPage() {
               <h2>Contact</h2>
               <p>
                 For questions about these terms, contact us at{" "}
-                <a href="mailto:legal@jeffdev.studio" className="text-cyan-400">
-                  legal@jeffdev.studio
+                <a href="mailto:legal@syntaxure.dev" className="text-cyan-400">
+                  legal@syntaxure.dev
                 </a>
                 .
               </p>

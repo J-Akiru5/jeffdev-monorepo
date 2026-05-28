@@ -4,7 +4,7 @@
  * Handles contact form submissions:
  * 1. Validates input with Zod
  * 2. Saves to Supabase
- * 3. Sends email notification to contact@jeffdev.studio
+ * 3. Sends email notification to contact@syntaxure.dev
  */
 
 "use server";

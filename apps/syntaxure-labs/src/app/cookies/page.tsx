@@ -123,10 +123,10 @@ export default function CookiePolicyPage() {
                 If you have any questions about our use of cookies, please
                 contact us at{" "}
                 <a
-                  href="mailto:contact@jeffdev.studio"
+                  href="mailto:contact@syntaxure.dev"
                   className="text-cyan-400"
                 >
-                  contact@jeffdev.studio
+                  contact@syntaxure.dev
                 </a>
                 .
               </p>

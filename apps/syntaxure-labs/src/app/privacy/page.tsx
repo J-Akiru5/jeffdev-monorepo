@@ -37,7 +37,7 @@ export default function PrivacyPolicyPage() {
                 Syntaxure Labs (&ldquo;we,&rdquo; &ldquo;our,&rdquo; or
                 &ldquo;us&rdquo;) is committed to protecting your privacy. This
                 Privacy Policy explains how we collect, use, and safeguard your
-                information when you visit our website jeffdev.studio (the
+                information when you visit our website syntaxure.dev (the
                 &ldquo;Site&rdquo;).
               </p>
 
@@ -130,10 +130,10 @@ export default function PrivacyPolicyPage() {
                 If you have any questions about this Privacy Policy, please
                 contact us at{" "}
                 <a
-                  href="mailto:contact@jeffdev.studio"
+                  href="mailto:contact@syntaxure.dev"
                   className="text-cyan-400"
                 >
-                  contact@jeffdev.studio
+                  contact@syntaxure.dev
                 </a>
                 .
               </p>
