@@ -244,7 +244,7 @@ export function AgenticProtocol() {
     <section
       ref={sectionRef}
       id="agentic-protocol"
-      className="relative overflow-hidden py-24 md:py-32 bg-void lazy-section"
+      className="relative overflow-hidden py-24 md:py-32 bg-void"
       style={{ perspective: "1000px" }}
     >
       {/* Background Ambient Glows */}

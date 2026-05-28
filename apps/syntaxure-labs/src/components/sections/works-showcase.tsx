@@ -106,7 +106,7 @@ export function WorksShowcase() {
   if (featuredProjects.length === 0) return null;
 
   return (
-    <section ref={sectionRef} className="relative py-24 md:py-32 lazy-section" id="work">
+    <section ref={sectionRef} className="relative py-24 md:py-32" id="work">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         {/* Section Header */}
         <div ref={headerRef} className="flex items-end justify-between mb-12">
