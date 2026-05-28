@@ -28,10 +28,17 @@ export type Workspace = z.infer<typeof WorkspaceSchema>;
 export const WorkspaceRoleEnum = z.enum(["founder", "employee"]);
 export type WorkspaceRole = z.infer<typeof WorkspaceRoleEnum>;
 
+// ──────────────────────────────────────────────
+// C-Level Title Enum
+// ──────────────────────────────────────────────
+export const CLevelTitleEnum = z.enum(["ceo", "cto", "cpo", "coo", "cmo"]);
+export type CLevelTitle = z.infer<typeof CLevelTitleEnum>;
+
 export const WorkspaceMemberSchema = z.object({
   workspaceId: z.string(),
   userId: z.string(),
   role: WorkspaceRoleEnum,
+  cLevelTitle: CLevelTitleEnum.nullable().optional(),
   createdAt: z.string(),
 });
 export type WorkspaceMember = z.infer<typeof WorkspaceMemberSchema>;

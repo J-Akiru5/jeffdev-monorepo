@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Workspace, Department, WorkspaceRole } from "@/lib/schemas";
+import type { Workspace, Department, WorkspaceRole, CLevelTitle } from "@/lib/schemas";
 
 interface WorkspaceState {
   /** All workspaces the user belongs to */
@@ -14,6 +14,8 @@ interface WorkspaceState {
   userDepartmentId: string | null;
   /** The CPO user ID (user in the Product department of Syntaxure Labs) */
   cpoUserId: string | null;
+  /** C-Level title refinement (founder-only: ceo, cto, cpo, coo, cmo) */
+  cLevelTitle: CLevelTitle | null;
   /** Is the workspace data loaded? */
   loaded: boolean;
 
@@ -24,6 +26,7 @@ interface WorkspaceState {
   setUserRole: (role: WorkspaceRole) => void;
   setUserDepartmentId: (id: string | null) => void;
   setCpoUserId: (id: string | null) => void;
+  setCLevelTitle: (title: CLevelTitle | null) => void;
   setLoaded: (loaded: boolean) => void;
 }
 
@@ -34,6 +37,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   userRole: null,
   userDepartmentId: null,
   cpoUserId: null,
+  cLevelTitle: null,
   loaded: false,
 
   setWorkspaces: (workspaces) => {
@@ -53,6 +57,8 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   setUserDepartmentId: (id) => set({ userDepartmentId: id }),
 
   setCpoUserId: (id) => set({ cpoUserId: id }),
+
+  setCLevelTitle: (title) => set({ cLevelTitle: title }),
 
   setLoaded: (loaded) => set({ loaded }),
 }));

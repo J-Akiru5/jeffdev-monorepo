@@ -8,11 +8,8 @@ import {
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
+import { ClearCacheButton } from "@/components/admin/clear-cache-button";
 
-/**
- * Admin Settings Page
- * Founder-only access for system configuration
- */
 export default async function SettingsPage() {
   const supabase = await createClient();
   const {
@@ -21,7 +18,6 @@ export default async function SettingsPage() {
 
   if (!user) return null;
 
-  // Get user role
   const { data: profile } = await supabase
     .from("user_profiles")
     .select("role")
@@ -30,12 +26,10 @@ export default async function SettingsPage() {
 
   const role = profile?.role || "employee";
 
-  // Founder-only page
   if (role !== "founder") {
     redirect("/admin/dashboard");
   }
 
-  // Check integration status
   const integrations = {
     supabase: { connected: true, name: "Supabase (Auth + Database)" },
     cosmos: {
@@ -52,7 +46,6 @@ export default async function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white">Settings</h1>
         <p className="text-sm text-white/50">
@@ -60,7 +53,6 @@ export default async function SettingsPage() {
         </p>
       </div>
 
-      {/* Integrations Status */}
       <section>
         <h2 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
           <Database className="h-4 w-4 text-amber-400" />
@@ -73,7 +65,6 @@ export default async function SettingsPage() {
         </div>
       </section>
 
-      {/* Environment Variables */}
       <section>
         <h2 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
           <Key className="h-4 w-4 text-amber-400" />
@@ -96,7 +87,6 @@ export default async function SettingsPage() {
         </div>
       </section>
 
-      {/* Danger Zone */}
       <section>
         <h2 className="text-sm font-medium text-red-400 mb-4 flex items-center gap-2">
           <AlertCircle className="h-4 w-4" />
@@ -107,10 +97,12 @@ export default async function SettingsPage() {
             These actions are irreversible. Proceed with caution.
           </p>
           <div className="flex flex-wrap gap-3">
-            <button className="px-4 py-2 text-xs font-medium text-red-400 border border-red-500/30 hover:bg-red-500/10 rounded-lg transition-colors">
-              Clear Cache
-            </button>
-            <button className="px-4 py-2 text-xs font-medium text-red-400 border border-red-500/30 hover:bg-red-500/10 rounded-lg transition-colors">
+            <ClearCacheButton />
+            <button
+              disabled
+              title="Webhook management coming soon"
+              className="px-4 py-2 text-xs font-medium text-white/30 border border-white/10 rounded-lg cursor-not-allowed opacity-50"
+            >
               Reset Webhooks
             </button>
           </div>

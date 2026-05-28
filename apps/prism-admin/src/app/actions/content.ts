@@ -1,7 +1,7 @@
 "use server";
 
 import { getAdminClient } from "@/lib/supabase/admin";
-import { revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 const statSchema = z.object({
@@ -78,7 +78,7 @@ export async function saveAboutContent(
 
     if (error) throw error;
 
-    revalidateTag("about-page", "seconds");
+    revalidatePath("/admin/agency/content");
 
     return { success: true };
   } catch (error) {

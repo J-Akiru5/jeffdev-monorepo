@@ -39,7 +39,7 @@ export default async function DashboardLayout({
   // Get all workspace memberships for this user
   const { data: memberships } = await supabase
     .from("workspace_members")
-    .select("workspace_id, role, department_id, workspaces!inner(id, name, created_at)")
+    .select("workspace_id, role, department_id, c_level_title, workspaces!inner(id, name, created_at)")
     .eq("user_id", user.id);
 
   const workspaces = (memberships || []).map((m: Record<string, unknown>) => ({
@@ -61,6 +61,7 @@ export default async function DashboardLayout({
   let userRole: "founder" | "employee" = "employee";
   let userDepartmentId: string | null = null;
   let cpoUserId: string | null = null;
+  let cLevelTitle: "ceo" | "cto" | "cpo" | "coo" | "cmo" | null = null;
 
   if (syntaxureWorkspace) {
     const { data: deptData } = await supabase
@@ -82,6 +83,7 @@ export default async function DashboardLayout({
     );
     userRole = (membership?.role as "founder" | "employee") || "employee";
     userDepartmentId = (membership?.department_id as string | null) || null;
+    cLevelTitle = (membership?.c_level_title as "ceo" | "cto" | "cpo" | "coo" | "cmo" | null) || null;
 
     // Find the CPO: the member assigned to the Product department
     const productDept = departments.find((d) => d.name === "Product");
@@ -111,6 +113,7 @@ export default async function DashboardLayout({
       userRole={userRole}
       userDepartmentId={userDepartmentId}
       cpoUserId={cpoUserId}
+      cLevelTitle={cLevelTitle}
     >
       <ProjectProvider initialProjects={getDefaultProjects()}>
         <div className="min-h-screen bg-surface">

@@ -35,9 +35,24 @@ export function WorkspaceMembersSettings({
 }: WorkspaceMembersProps) {
   const departments = useWorkspaceStore((s) => s.departments);
   const userRole = useWorkspaceStore((s) => s.userRole);
+  const cLevelTitle = useWorkspaceStore((s) => s.cLevelTitle);
+  const userDepartmentId = useWorkspaceStore((s) => s.userDepartmentId);
   const isFounder = userRole === "founder";
+  const isCLevelScoped = cLevelTitle !== null && cLevelTitle !== "ceo";
+
+  // C-Level scoping: only show members in the user's department if scoped
+  const cLevelDeptName = cLevelTitle
+    ? ({ ceo: null, cto: "Engineering", cpo: "Product", coo: "Operations", cmo: "Marketing" } as const)[cLevelTitle]
+    : null;
+  const cLevelDepartmentId = cLevelDeptName
+    ? departments.find((d) => d.name === cLevelDeptName)?.id ?? null
+    : null;
 
   const [optimisticMembers, setOptimisticMembers] = useState(members);
+
+  const filteredMembers = isCLevelScoped && cLevelDepartmentId
+    ? optimisticMembers.filter((m) => m.departmentId === cLevelDepartmentId || m.userId === currentUserId)
+    : optimisticMembers;
   const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
 
   const handleRoleChange = async (userId: string, newRole: "founder" | "employee") => {
@@ -95,11 +110,17 @@ export function WorkspaceMembersSettings({
             {!isFounder && <span className="block mt-1 italic">(Only founders can edit members)</span>}
           </p>
 
-          {optimisticMembers.length === 0 ? (
+          {isCLevelScoped && cLevelDeptName && (
+            <p className="mt-2 text-xs text-text-tertiary">
+              Showing members in <strong className="text-text-secondary">{cLevelDeptName}</strong> (your C-Level scope).
+            </p>
+          )}
+
+          {filteredMembers.length === 0 ? (
             <p className="mt-4 text-sm text-text-tertiary">No members found.</p>
           ) : (
             <div className="mt-4 space-y-2">
-              {optimisticMembers.map((member) => {
+              {filteredMembers.map((member) => {
                 const isCurrentUser = member.userId === currentUserId;
                 const isLoadingRole = loadingMap[`role-${member.userId}`];
                 const isLoadingDept = loadingMap[`dept-${member.userId}`];
