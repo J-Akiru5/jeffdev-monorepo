@@ -25,10 +25,23 @@ const DATABASE_NAME = process.env.COSMOS_DATABASE_NAME || "prism";
 /**
  * Get or create the MongoDB client connection.
  * Uses connection pooling for efficient reuse.
+ * Includes automatic reconnection on stale connections.
  */
 export async function getMongoClient(): Promise<MongoClient> {
   if (client) {
-    return client;
+    try {
+      await client.db(DATABASE_NAME).command({ ping: 1 });
+      return client;
+    } catch {
+      console.warn("[packages/db] Connection stale, reconnecting...");
+      try {
+        await client.close();
+      } catch {
+        // ignore close errors
+      }
+      client = null;
+      database = null;
+    }
   }
 
   if (!MONGODB_URI) {

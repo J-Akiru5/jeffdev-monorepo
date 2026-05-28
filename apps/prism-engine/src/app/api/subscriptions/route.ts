@@ -14,7 +14,14 @@ const PAYPAL_API_URL =
     ? "https://api-m.paypal.com"
     : "https://api-m.sandbox.paypal.com";
 
+// Cache PayPal access token (valid for 8 hours, refresh at 7 hours)
+let cachedPayPalToken: { token: string; expiresAt: number } | null = null;
+
 async function getPayPalAccessToken(): Promise<string> {
+  if (cachedPayPalToken && Date.now() < cachedPayPalToken.expiresAt) {
+    return cachedPayPalToken.token;
+  }
+
   const clientId = process.env.PAYPAL_CLIENT_ID;
   const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
 
@@ -32,6 +39,17 @@ async function getPayPalAccessToken(): Promise<string> {
   });
 
   const data = await response.json();
+  if (!data.access_token) {
+    throw new Error(
+      `PayPal auth failed: ${data.error || "no access_token in response"}`,
+    );
+  }
+
+  cachedPayPalToken = {
+    token: data.access_token,
+    expiresAt: Date.now() + 7 * 60 * 60 * 1000, // 7 hours
+  };
+
   return data.access_token;
 }
 

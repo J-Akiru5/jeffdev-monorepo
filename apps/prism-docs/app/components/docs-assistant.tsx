@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useTheme } from "next-themes";
 import { ChatAssistant } from "@syntaxure/ui/chat-assistant";
 
 interface DocsAssistantProps {
@@ -7,6 +9,17 @@ interface DocsAssistantProps {
 }
 
 export function DocsAssistant({ className }: DocsAssistantProps) {
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (resolvedTheme === "light") {
+      root.classList.add("theme-light");
+    } else {
+      root.classList.remove("theme-light");
+    }
+  }, [resolvedTheme]);
+
   return (
     <ChatAssistant
       className={className}
@@ -23,3 +36,4 @@ export function DocsAssistant({ className }: DocsAssistantProps) {
 }
 
 export default DocsAssistant;
+

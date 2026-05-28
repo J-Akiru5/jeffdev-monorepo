@@ -10,16 +10,20 @@ import { getCollection } from "@syntaxure-labs/db";
 import { Resend } from "resend";
 
 const PAYPAL_WEBHOOK_ID = process.env.PAYPAL_WEBHOOK_ID;
+const PAYPAL_API_URL =
+  process.env.PAYPAL_MODE === "live"
+    ? "https://api-m.paypal.com"
+    : "https://api-m.sandbox.paypal.com";
 
 async function verifyPayPalWebhook(
   request: NextRequest,
   body: string,
 ): Promise<boolean> {
   if (!PAYPAL_WEBHOOK_ID) {
-    console.warn(
-      "[paypal-webhook] PAYPAL_WEBHOOK_ID not set — skipping verification",
+    console.error(
+      "[paypal-webhook] PAYPAL_WEBHOOK_ID not set — rejecting webhook",
     );
-    return true;
+    return false;
   }
   try {
     const transmissionId = request.headers.get("paypal-transmission-id") || "";
@@ -29,7 +33,7 @@ async function verifyPayPalWebhook(
     const authAlgo = request.headers.get("paypal-auth-algo") || "";
 
     const verificationResponse = await fetch(
-      "https://api-m.paypal.com/v1/notifications/verify-webhook-signature",
+      `${PAYPAL_API_URL}/v1/notifications/verify-webhook-signature`,
       {
         method: "POST",
         headers: {
@@ -205,7 +209,7 @@ async function handlePaymentFailed(userId: string) {
       const resend = new Resend(process.env.RESEND_API_KEY);
       await resend.emails.send({
         from: "Prism <billing@prism.syntaxure.dev>",
-        to: userId, // will be resolved by email lookup
+        to: userId, // TODO: resolve user email from Supabase auth lookup
         subject: "Payment Failed — Prism Subscription",
         html: `<p>Your Prism subscription payment failed. Please update your payment method.</p>`,
       });

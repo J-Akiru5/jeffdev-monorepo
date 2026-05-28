@@ -107,3 +107,18 @@ export function getTierDisplayName(tier: SubscriptionTier): string {
   };
   return names[tier];
 }
+
+/**
+ * Get a user's subscription tier from the database.
+ * Returns "free" if no subscription is found.
+ */
+export async function getUserTier(userId: string): Promise<SubscriptionTier> {
+  try {
+    const { getCollection } = await import("@syntaxure-labs/db/cosmos");
+    const subscriptions = await getCollection("subscriptions");
+    const sub = await subscriptions.findOne({ userId });
+    return (sub?.tier as SubscriptionTier) || "free";
+  } catch {
+    return "free";
+  }
+}

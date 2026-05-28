@@ -65,13 +65,13 @@ Return ONLY valid JSON in this format:
   const response = result.response.text();
 
   try {
-    // Extract JSON from response (handle markdown code blocks)
     const jsonMatch = response.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
       throw new Error("No JSON found in response");
     }
     return JSON.parse(jsonMatch[0]);
-  } catch {
+  } catch (parseError) {
+    console.error("[gemini] Failed to parse generateComponent response:", parseError);
     return {
       code: "// Error generating component",
       explanation: response,

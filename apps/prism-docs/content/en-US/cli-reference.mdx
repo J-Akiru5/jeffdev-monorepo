@@ -279,9 +279,21 @@ Prism stores local state in `~/.prism/`:
 
 ## Environment Variables
 
+### CLI Variables
+
 | Variable | Description |
 |----------|-------------|
 | `PRISM_API_KEY` | API key for MCP authentication |
 | `PRISM_PROJECT_ID` | Default project ID |
 | `PRISM_OFFLINE` | Set to `1` for offline mode |
 | `AI_PROVIDER` | `gemini` (default) or `azure` |
+
+### MCP Server Variables (in IDE config `env` block)
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `MONGODB_URI` | Yes | — | Azure Cosmos DB connection string |
+| `COSMOS_DATABASE_NAME` | No | `prism` | Database name |
+| `GOOGLE_GEMINI_API_KEY` | For AI features | — | Gemini API key |
+| `GEMINI_MODEL` | No | `gemini-3.5-flash` | Chat model |
+| `GEMINI_EMBEDDING_MODEL` | No | `gemini-embedding-2` | Embedding model |
