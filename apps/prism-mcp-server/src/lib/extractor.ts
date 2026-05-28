@@ -167,8 +167,7 @@ export async function scanUrl(
   }
   const { chromium } = playwright;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let browser: any = null;
+  let browser: import("playwright").Browser | null = null;
   const visited = new Set<string>();
   const pagesToVisit: Array<{ url: string; currentDepth: number }> = [
     { url, currentDepth: 0 },

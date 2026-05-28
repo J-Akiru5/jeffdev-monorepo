@@ -1,9 +1,6 @@
-import type { Violation } from "./prism-check.js";
+import type { Violation, PrismFixInput, ToolOutput } from "../types.js";
 
-export interface PrismFixInput {
-  violation: Violation;
-  code: string;
-}
+export type { PrismFixInput };
 
 export interface FixResult {
   correctedCode: string;
@@ -81,10 +78,9 @@ const KNOWN_FIXES: Array<{
   },
 ];
 
-export async function handlePrismFix(input: PrismFixInput): Promise<{
-  content: Array<{ type: "text"; text: string }>;
-  isError?: boolean;
-}> {
+export async function handlePrismFix(
+  input: PrismFixInput,
+): Promise<ToolOutput> {
   const { violation, code } = input;
 
   if (!violation || !code) {

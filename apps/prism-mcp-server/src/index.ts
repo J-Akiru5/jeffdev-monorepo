@@ -14,9 +14,12 @@
 
 // Stdout safety: redirect any stray console.log to stderr to prevent
 // corrupting the MCP JSON-RPC protocol stream on stdout.
-console.log = (...args: unknown[]) => {
-  console.error("[prism-mcp-server] console.log intercepted:", ...args);
-};
+// Skip in test environment to preserve console.log for test output.
+if (process.env.NODE_ENV !== "test") {
+  console.log = (...args: unknown[]) => {
+    console.error("[prism-mcp-server] console.log intercepted:", ...args);
+  };
+}
 
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -27,7 +30,7 @@ import {
   ReadResourceRequestSchema,
   InitializeRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { ObjectId, type Document } from "mongodb";
+import { ObjectId, type Document } from "@syntaxure-labs/db/cosmos";
 import { getCollection, closeConnection } from "@syntaxure-labs/db/cosmos";
 import { handlePrismScan } from "./tools/prism-scan.js";
 import { handleGetSkill } from "./tools/get-skill.js";
@@ -952,7 +955,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   })();
 
   const trackedResult = trackToolResponse(rawResult);
-  const rMeta = (rawResult as Record<string, unknown>)?._meta as
+  const rMeta = (rawResult as unknown as Record<string, unknown>)?._meta as
     | Record<string, unknown>
     | undefined;
 

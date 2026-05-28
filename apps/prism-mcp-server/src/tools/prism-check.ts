@@ -1,24 +1,6 @@
-export interface Violation {
-  ruleId: string;
-  ruleName: string;
-  pattern: string;
-  message: string;
-  severity: "error" | "warning" | "info";
-  line: number;
-  column: number;
-  endLine: number;
-  endColumn: number;
-  matchedText: string;
-  suggestion: string;
-}
+import type { Violation, PrismCheckInput, ToolOutput } from "../types.js";
 
-export interface PrismCheckInput {
-  code: string;
-  ruleIds?: string[];
-  projectId?: string;
-  filePath?: string;
-  category?: string;
-}
+export type { Violation, PrismCheckInput };
 
 export function findLineColumn(
   code: string,
@@ -39,10 +21,7 @@ export function buildSuggestion(
   return `Fix for "${ruleName}": ${clean.replace(matchedText, `\`${matchedText}\``)}`;
 }
 
-export async function handlePrismCheck(input: PrismCheckInput): Promise<{
-  content: Array<{ type: "text"; text: string }>;
-  isError?: boolean;
-}> {
+export async function handlePrismCheck(input: PrismCheckInput): Promise<ToolOutput> {
   const { code, ruleIds, projectId, category } = input;
 
   if (!code || typeof code !== "string") {

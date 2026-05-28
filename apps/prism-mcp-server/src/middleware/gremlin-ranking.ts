@@ -17,11 +17,8 @@
 
 import type { RankedRule } from "./smart-select.js";
 
-// @ts-expect-error - gremlin package has no TypeScript declarations
-import gremlin from "gremlin";
-
-const { process: gremlinProcess } = gremlin;
-const { P } = gremlinProcess;
+// Gremlin is an optional dependency — loaded dynamically when the feature flag is on.
+// If the package is not installed, gremlin ranking will be silently disabled.
 
 // ---------------------------------------------------------------------------
 // Types
@@ -93,6 +90,17 @@ export async function computeGremlinBoosts(
   try {
     // Dynamically import Gremlin client (safe — only called when feature is on)
     const { getGremlinClient } = await import("@syntaxure-labs/db");
+
+    // Load gremlin package dynamically (optional dependency)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let P: any;
+    try {
+      const gremlin = await import("gremlin");
+      P = gremlin.default?.process?.P ?? gremlin.process?.P;
+    } catch {
+      console.error("[gremlin-ranking] gremlin package not installed, skipping graph boosts");
+      return {};
+    }
 
     const g = getGremlinClient();
 

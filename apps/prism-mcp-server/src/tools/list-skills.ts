@@ -1,15 +1,10 @@
-export interface ListSkillsInput {
-  projectId: string;
-}
+import type { ListSkillsInput, ToolOutput } from "../types.js";
 
-export interface ListSkillsOutput {
-  content: Array<{ type: "text"; text: string }>;
-  isError?: boolean;
-}
+export type { ListSkillsInput };
 
 export async function handleListSkills(
   input: ListSkillsInput,
-): Promise<ListSkillsOutput> {
+): Promise<ToolOutput> {
   const { projectId } = input;
 
   if (!projectId) {

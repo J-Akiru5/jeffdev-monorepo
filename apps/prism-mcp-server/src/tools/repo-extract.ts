@@ -1,38 +1,12 @@
+import type { RepoScanData, RepoExtractInput, ToolOutput } from "../types.js";
 import { generateContent } from "../lib/ai-router.js";
+
+export type { RepoScanData, RepoExtractInput };
 
 const CHAT_MODEL =
   process.env.GEMINI_MODEL ||
   process.env.AZURE_OPENAI_DEPLOYMENT_NAME ||
   "gemini-3.5-flash";
-
-export interface RepoScanData {
-  root: string;
-  namingConventions: {
-    files: Record<string, number>;
-    functions: Record<string, number>;
-    components: Record<string, number>;
-    variables: Record<string, number>;
-  };
-  imports: {
-    relative: number;
-    absolute: number;
-    external: Record<string, number>;
-    internal: Record<string, number>;
-  };
-  structure: {
-    directories: string[];
-    fileCount: number;
-    dirCount: number;
-    languages: Record<string, number>;
-  };
-  configs: Record<string, unknown>;
-  summary: string;
-}
-
-export interface RepoExtractInput {
-  scan: RepoScanData;
-  model?: string;
-}
 
 export interface ExtractedRule {
   name: string;
@@ -47,10 +21,7 @@ export interface ExtractedRule {
 
 export async function extractRulesFromRepoScan(
   input: RepoExtractInput,
-): Promise<{
-  content: Array<{ type: "text"; text: string }>;
-  isError?: boolean;
-}> {
+): Promise<ToolOutput> {
   const { scan, model } = input;
 
   if (!scan || !scan.structure) {
