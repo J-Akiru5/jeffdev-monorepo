@@ -25,6 +25,7 @@ export function Header() {
     },
     { href: "/services", label: "Services" },
     { href: "/work", label: "Work" },
+    { href: "/community", label: "Community" },
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
   ];
