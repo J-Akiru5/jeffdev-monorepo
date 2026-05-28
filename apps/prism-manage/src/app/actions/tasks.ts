@@ -217,6 +217,28 @@ export async function updateTaskStatus(taskId: string, status: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
+  // Server-side RBAC: only founders/CPO can set status to "approved"
+  if (status === "approved") {
+    const { data: task } = await supabase
+      .from("tasks")
+      .select("workspace_id")
+      .eq("id", taskId)
+      .single();
+
+    if (task?.workspace_id) {
+      const { data: membership } = await supabase
+        .from("workspace_members")
+        .select("role")
+        .eq("workspace_id", task.workspace_id)
+        .eq("user_id", user.id)
+        .single();
+
+      if (membership && membership.role === "employee") {
+        throw new Error("Only founders and the CPO can approve tasks");
+      }
+    }
+  }
+
   const { error } = await supabase
     .from("tasks")
     .update({ status })

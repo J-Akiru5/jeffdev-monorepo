@@ -12,6 +12,8 @@ interface WorkspaceState {
   userRole: WorkspaceRole | null;
   /** The department this user is assigned to (only for employees) */
   userDepartmentId: string | null;
+  /** The CPO user ID (user in the Product department of Syntaxure Labs) */
+  cpoUserId: string | null;
   /** Is the workspace data loaded? */
   loaded: boolean;
 
@@ -21,6 +23,7 @@ interface WorkspaceState {
   setDepartments: (departments: Department[]) => void;
   setUserRole: (role: WorkspaceRole) => void;
   setUserDepartmentId: (id: string | null) => void;
+  setCpoUserId: (id: string | null) => void;
   setLoaded: (loaded: boolean) => void;
 }
 
@@ -30,6 +33,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   departments: [],
   userRole: null,
   userDepartmentId: null,
+  cpoUserId: null,
   loaded: false,
 
   setWorkspaces: (workspaces) => {
@@ -47,6 +51,8 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   setUserRole: (role) => set({ userRole: role }),
 
   setUserDepartmentId: (id) => set({ userDepartmentId: id }),
+
+  setCpoUserId: (id) => set({ cpoUserId: id }),
 
   setLoaded: (loaded) => set({ loaded }),
 }));
