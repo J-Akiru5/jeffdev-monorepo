@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import withBundleAnalyzer from "@next/bundle-analyzer";
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@syntaxure/ui", "@syntaxure-labs/db"],
@@ -10,6 +9,10 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default process.env.ANALYZE === "true"
-  ? withBundleAnalyzer()(nextConfig)
-  : nextConfig;
+export default async function config() {
+  if (process.env.ANALYZE === "true") {
+    const withBundleAnalyzer = (await import("@next/bundle-analyzer")).default;
+    return withBundleAnalyzer()(nextConfig);
+  }
+  return nextConfig;
+}

@@ -95,6 +95,38 @@ export async function changePassword(
 
 // ─── Update Avatar URL ──────────────────────────────────────────────────────
 
+// ─── Update Default Theme (cross-app) ─────────────────────────────────────
+
+export async function updateDefaultTheme(theme: string): Promise<ActionResult> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: "Unauthorized" };
+
+    // Fetch current preferences so we merge (not overwrite) other keys
+    const { data: profile } = await supabase
+      .from("user_profiles")
+      .select("preferences")
+      .eq("id", user.id)
+      .single();
+
+    const currentPrefs = (profile?.preferences as Record<string, unknown>) || {};
+    const mergedPrefs = { ...currentPrefs, default_theme: theme };
+
+    const { error } = await supabase
+      .from("user_profiles")
+      .update({ preferences: mergedPrefs })
+      .eq("id", user.id);
+
+    if (error) return { error: error.message };
+
+    revalidatePath("/settings");
+    return { success: true };
+  } catch {
+    return { error: "Failed to update default theme" };
+  }
+}
+
 export async function updateAvatarUrl(avatarUrl: string | null): Promise<ActionResult> {
   try {
     const supabase = await createClient();

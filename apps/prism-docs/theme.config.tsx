@@ -96,10 +96,10 @@ const config = {
     </>
   ),
   primaryHue: 189, // Cyan
-  darkMode: false,
+  darkMode: true,
   nextThemes: {
-    defaultTheme: "dark",
-    forcedTheme: "dark",
+    defaultTheme: "system",
+    storageKey: "syntaxure-theme",
   },
   i18n: [
     { locale: "en-US", text: "English (US)" },
@@ -123,7 +123,7 @@ const config = {
       <span>
         {new Date().getFullYear()} ©{" "}
         <a
-          href="https://jeffdev.studio"
+          href="https://www.syntaxure.dev"
           target="_blank"
           rel="noopener noreferrer"
         >

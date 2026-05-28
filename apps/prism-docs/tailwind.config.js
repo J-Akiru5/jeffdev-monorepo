@@ -7,8 +7,8 @@ const config = {
   theme: {
     extend: {
       colors: {
-        void: "#050505",
-        "void-light": "#0a0a0a",
+        void: "var(--color-void)",
+        "void-light": "var(--color-surface)",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",

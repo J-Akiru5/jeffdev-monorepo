@@ -59,7 +59,32 @@ export default async function WorkPage() {
             <h2 className="font-mono text-xs uppercase tracking-wider text-white/40">
               Featured Projects
             </h2>
-            <div className="mt-6 grid gap-6">
+
+            {allProjects.length === 0 ? (
+              <div className="mt-6 rounded-md border border-white/[0.06] bg-white/[0.02] p-12 text-center">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-white/10 bg-white/5">
+                  <ArrowUpRight className="h-6 w-6 text-white/30" />
+                </div>
+                <h3 className="mt-6 text-xl font-semibold text-white">
+                  Case Studies Coming Soon
+                </h3>
+                <p className="mt-2 max-w-md mx-auto text-sm text-white/50">
+                  We&apos;re documenting our latest projects and success stories.
+                  Check back soon or get in touch to learn how we can help build
+                  your next system.
+                </p>
+                <div className="mt-8 flex justify-center">
+                  <Link
+                    href="/contact"
+                    className="inline-flex items-center gap-2 rounded-md border border-cyan-500/50 bg-cyan-500/10 px-5 py-2.5 font-mono text-xs uppercase tracking-wider text-white backdrop-blur-md transition-all hover:border-cyan-400 hover:bg-cyan-500/20"
+                  >
+                    Contact Us
+                    <ArrowUpRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-6 grid gap-6">
               {featuredProjects.map((project) => (
                 <Link
                   key={project.slug}
@@ -120,6 +145,7 @@ export default async function WorkPage() {
                 </Link>
               ))}
             </div>
+            )}
           </div>
         </section>
 

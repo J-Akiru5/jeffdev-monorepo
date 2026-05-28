@@ -40,7 +40,11 @@ export async function POST(request: Request) {
   try {
     // Verify internal API key
     const apiKey = request.headers.get("X-Api-Key");
-    if (INTERNAL_API_KEY && apiKey !== INTERNAL_API_KEY) {
+    if (!INTERNAL_API_KEY) {
+      console.error("[n8n-relay] PRISM_API_KEY not configured — rejecting request");
+      return NextResponse.json({ error: "Server misconfiguration" }, { status: 500 });
+    }
+    if (apiKey !== INTERNAL_API_KEY) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

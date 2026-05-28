@@ -34,7 +34,10 @@ export async function GET(request: NextRequest) {
     ruleCount,
     componentCount,
     generationCount,
-    telemetryEvents,
+    telemetryAgg,
+    toolBreakdown,
+    projectBreakdown,
+    platformBreakdown,
   ] = await Promise.all([
     projects.countDocuments({ userId: auth.userId }),
     rules.countDocuments({ createdBy: auth.userId }),
@@ -43,47 +46,105 @@ export async function GET(request: NextRequest) {
       userId: auth.userId,
       createdAt: { $gte: monthStart.toISOString() },
     }),
+    // Use aggregation pipeline instead of fetching all documents
     telemetryColl
-      .find({
-        userId: auth.userId,
-        timestamp: { $gte: monthStart.toISOString() },
-      })
+      .aggregate([
+        {
+          $match: {
+            userId: auth.userId,
+            timestamp: { $gte: monthStart.toISOString() },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalTokens: { $sum: { $ifNull: ["$tokenCount", 0] } },
+            totalCalls: { $sum: 1 },
+            errorCalls: { $sum: { $cond: ["$isError", 1, 0] } },
+            cacheHitCalls: { $sum: { $cond: ["$cacheHit", 1, 0] } },
+          },
+        },
+      ])
+      .toArray(),
+    // Aggregate tokens by tool
+    telemetryColl
+      .aggregate([
+        {
+          $match: {
+            userId: auth.userId,
+            timestamp: { $gte: monthStart.toISOString() },
+          },
+        },
+        {
+          $group: {
+            _id: "$toolName",
+            tokens: { $sum: { $ifNull: ["$tokenCount", 0] } },
+          },
+        },
+      ])
+      .toArray(),
+    // Aggregate tokens by project
+    telemetryColl
+      .aggregate([
+        {
+          $match: {
+            userId: auth.userId,
+            timestamp: { $gte: monthStart.toISOString() },
+            projectId: { $ne: null },
+          },
+        },
+        {
+          $group: {
+            _id: "$projectId",
+            tokens: { $sum: { $ifNull: ["$tokenCount", 0] } },
+          },
+        },
+      ])
+      .toArray(),
+    // Aggregate calls by platform
+    telemetryColl
+      .aggregate([
+        {
+          $match: {
+            userId: auth.userId,
+            timestamp: { $gte: monthStart.toISOString() },
+          },
+        },
+        {
+          $group: {
+            _id: { $ifNull: ["$clientPlatform", "unknown"] },
+            count: { $sum: 1 },
+          },
+        },
+      ])
       .toArray(),
   ]);
 
-  const telemetryEventsTyped = telemetryEvents as unknown as Array<{
-    toolName: string;
-    tokenCount: number;
-    byteSize: number;
-    isError: boolean;
-    cacheHit?: boolean;
-    fromCache?: boolean;
-    clientPlatform?: string;
-    projectId?: string;
-    model?: string;
-    timestamp: string;
-  }>;
+  const agg = (telemetryAgg as unknown as Array<{
+    totalTokens: number;
+    totalCalls: number;
+    errorCalls: number;
+    cacheHitCalls: number;
+  }>)[0];
 
-  const totalTokens = telemetryEventsTyped.reduce(
-    (sum, e) => sum + (e.tokenCount || 0),
-    0,
-  );
-  const totalCalls = telemetryEventsTyped.length;
-  const errorCalls = telemetryEventsTyped.filter((e) => e.isError).length;
-  const cacheHitCalls = telemetryEventsTyped.filter((e) => e.cacheHit).length;
+  const totalTokens = agg?.totalTokens || 0;
+  const totalCalls = agg?.totalCalls || 0;
+  const errorCalls = agg?.errorCalls || 0;
+  const cacheHitCalls = agg?.cacheHitCalls || 0;
 
   const tokensByTool: Record<string, number> = {};
+  for (const t of toolBreakdown as unknown as Array<{ _id: string; tokens: number }>) {
+    if (t._id) tokensByTool[t._id] = t.tokens;
+  }
+
   const tokensByProject: Record<string, number> = {};
+  for (const p of projectBreakdown as unknown as Array<{ _id: string; tokens: number }>) {
+    if (p._id) tokensByProject[p._id] = p.tokens;
+  }
+
   const callsByPlatform: Record<string, number> = {};
-  for (const e of telemetryEventsTyped) {
-    tokensByTool[e.toolName] =
-      (tokensByTool[e.toolName] || 0) + (e.tokenCount || 0);
-    if (e.projectId) {
-      tokensByProject[e.projectId] =
-        (tokensByProject[e.projectId] || 0) + (e.tokenCount || 0);
-    }
-    const platform = e.clientPlatform || "unknown";
-    callsByPlatform[platform] = (callsByPlatform[platform] || 0) + 1;
+  for (const p of platformBreakdown as unknown as Array<{ _id: string; count: number }>) {
+    if (p._id) callsByPlatform[p._id] = p.count;
   }
 
   const costEstimate =

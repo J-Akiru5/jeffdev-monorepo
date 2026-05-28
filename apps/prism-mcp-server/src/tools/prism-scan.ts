@@ -1,3 +1,4 @@
+import type { PrismScanInput, ToolOutput } from "../types.js";
 import { scanUrl, type ScanResult } from "../lib/extractor.js";
 import {
   generateRulesFromTokens,
@@ -5,26 +6,14 @@ import {
   type GeneratedRules,
 } from "../lib/rule-generator.js";
 
+export type { PrismScanInput };
+
 const RATING_PROMPT =
   "\n\n---\n**Rate these rules** — reply with 👍 if good, 👎 if you want regenerated with a different model.";
 
-export interface PrismScanInput {
-  url: string;
-  maxPages?: number;
-  depth?: number;
-  projectId?: string;
-  userId?: string;
-  model?: string;
-}
-
-export interface PrismScanOutput {
-  content: Array<{ type: string; text: string }>;
-  isError?: boolean;
-}
-
 export async function handlePrismScan(
   args: PrismScanInput,
-): Promise<PrismScanOutput> {
+): Promise<ToolOutput> {
   const { url, maxPages = 5, depth = 2, projectId, userId, model } = args;
 
   if (!url || typeof url !== "string") {
@@ -170,7 +159,7 @@ export async function handlePrismScan(
 export async function handleRateRules(
   rating: "good" | "bad",
   url: string,
-): Promise<PrismScanOutput> {
+): Promise<ToolOutput> {
   if (rating === "bad") {
     // Re-generate with a different model
     const differentModel = "gemini-flash-lite";

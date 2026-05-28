@@ -5,7 +5,6 @@
  * Uses the Apache TinkerPop Gremlin client over WebSockets.
  */
 
-// @ts-expect-error - gremlin package has no TypeScript declarations
 import gremlin from "gremlin";
 
 const { process, driver } = gremlin;

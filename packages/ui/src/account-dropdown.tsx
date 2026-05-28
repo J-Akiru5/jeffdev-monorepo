@@ -18,19 +18,9 @@ import {
   LogOut,
   Sun,
   Moon,
-  ExternalLink,
 } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-
-export interface AppLink {
-  label: string;
-  href: string;
-  /** Shown on the right edge (e.g. "Mgmt", "Admin") */
-  shortLabel?: string;
-  /** Icon element */
-  icon?: ReactNode;
-}
 
 export interface AccountDropdownProps {
   /** Avatar initials (1-2 characters, required) */
@@ -45,8 +35,6 @@ export interface AccountDropdownProps {
   avatarUrl?: string | null;
   /** Settings page path */
   settingsHref: string;
-  /** Cross-app quick links */
-  appLinks?: AppLink[];
   /** Whether to show the Settings link */
   showSettings?: boolean;
   /** Current theme */
@@ -68,7 +56,6 @@ export function AccountDropdown({
   role,
   avatarUrl,
   settingsHref,
-  appLinks = [],
   showSettings = true,
   theme,
   onToggleTheme,
@@ -168,31 +155,6 @@ export function AccountDropdown({
                 </div>
               )}
             </div>
-
-            {/* ── Cross-app quick links ── */}
-            {appLinks.length > 0 && (
-              <div className="border-b border-white/5 px-2 py-1.5">
-                <p className="px-2 pb-1 text-[10px] font-mono uppercase tracking-wider text-white/30">
-                  Apps
-                </p>
-                {appLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setOpen(false)}
-                    className="flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm text-white/60 transition-colors hover:bg-white/5 hover:text-white"
-                  >
-                    {link.icon || <ExternalLink className="h-3.5 w-3.5" />}
-                    <span className="flex-1">{link.label}</span>
-                    {link.shortLabel && (
-                      <span className="text-[10px] font-mono uppercase text-white/30">
-                        {link.shortLabel}
-                      </span>
-                    )}
-                  </Link>
-                ))}
-              </div>
-            )}
 
             {/* ── Actions ── */}
             <div className="px-2 py-1">

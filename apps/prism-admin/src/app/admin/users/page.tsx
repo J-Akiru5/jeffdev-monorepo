@@ -1,5 +1,7 @@
+import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getCollection } from "@syntaxure-labs/db/cosmos";
+import { SkeletonTable } from "@syntaxure/ui";
 import { UsersTable } from "@/components/admin/users-table";
 
 export default async function UsersPage() {
@@ -41,7 +43,9 @@ export default async function UsersPage() {
         </div>
       </div>
 
-      <UsersTable users={users} isFounder={isFounder} />
+      <Suspense fallback={<SkeletonTable rows={8} columns={5} />}>
+        <UsersTable users={users} isFounder={isFounder} />
+      </Suspense>
     </div>
   );
 }

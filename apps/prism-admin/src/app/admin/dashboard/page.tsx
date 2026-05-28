@@ -10,10 +10,11 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
+import { computeMonthlyTrend } from "@/lib/trends";
 
 /**
  * Admin Dashboard - Overview Stats
- * Reads data from Supabase.
+ * Reads data from Supabase and computes monthly trends.
  */
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -43,6 +44,12 @@ export default async function DashboardPage() {
     (s) => s.plan === "team" && s.status === "active",
   ).length;
 
+  // Real trends from month-over-month data
+  const userTrend = computeMonthlyTrend(profiles);
+  const subTrend = computeMonthlyTrend(subscriptions);
+  const proSubs = subscriptions.filter((s) => s.plan === "pro" && s.status === "active");
+  const proSubTrend = computeMonthlyTrend(proSubs);
+
   // Recent users
   const recentUsers = profiles
     .sort(
@@ -56,28 +63,28 @@ export default async function DashboardPage() {
       label: "Total Users",
       value: totalUsers,
       icon: Users,
-      trend: { value: 12, direction: "up" as const },
+      trend: userTrend,
       href: "/admin/users",
     },
     {
       label: "Pro Subscribers",
       value: proUsers,
       icon: CreditCard,
-      trend: { value: 8, direction: "up" as const },
+      trend: proSubTrend,
       href: "/admin/subscriptions",
     },
     {
       label: "Team Plans",
       value: teamUsers,
       icon: Users,
-      trend: { value: 0, direction: "neutral" as const },
+      trend: computeMonthlyTrend(subscriptions.filter((s) => s.plan === "team" && s.status === "active")),
       href: "/admin/subscriptions",
     },
     {
       label: "Active Subscriptions",
       value: activeSubscriptions,
       icon: CreditCard,
-      trend: { value: 5, direction: "up" as const },
+      trend: subTrend,
       href: "/admin/subscriptions",
     },
     {

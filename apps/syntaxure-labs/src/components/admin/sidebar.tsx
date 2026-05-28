@@ -31,6 +31,7 @@ import {
   LogOut,
   User,
   Layers,
+  GitCommit,
 } from "lucide-react";
 import { logout } from "@/app/actions/auth";
 
@@ -61,6 +62,7 @@ export const navSections: NavSection[] = [
       { label: "Services", href: "/admin/services", icon: Wrench },
       { label: "Projects", href: "/admin/projects", icon: FolderKanban },
       { label: "Case Studies", href: "/admin/case-studies", icon: Layers },
+      { label: "Community", href: "/admin/community", icon: GitCommit },
     ],
   },
   {

@@ -1,21 +1,22 @@
 @import "tailwindcss";
 
+@import "@syntaxure/ui/styles.css";
+
 /*
  * ============================================
  * PRISM CONTEXT ENGINE - DOCUMENTATION THEME
  * ============================================
  * Inherits Syntaxure Labs's "Endgame" Design System
- * Dark Mode Only. The universe is #050505.
  */
 
 :root {
-  --bg-void: #050505;
-  --bg-surface: #0a0a0a;
-  --color-cyan: #06b6d4;
-  --color-purple: #8b5cf6;
+  --bg-void: var(--color-void);
+  --bg-surface: var(--color-surface);
+  --color-cyan: var(--color-cyan);
+  --color-purple: var(--color-purple);
 }
 
-/* Global Background */
+/* Global Background Grid */
 .docs-grid-bg {
   position: fixed;
   inset: 0;
@@ -27,6 +28,34 @@
   background-size: 100px 100px;
   mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
   pointer-events: none;
+  transition: background-color 0.3s ease;
+}
+
+.theme-light .docs-grid-bg {
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.05) 1px, transparent 1px);
+}
+
+/* Light mode overrides for hardcoded dark background containers */
+.theme-light footer,
+.theme-light .bg-\[\#050505\] {
+  background-color: var(--color-surface) !important;
+  border-color: var(--border-subtle) !important;
+}
+
+/* Nextra codeblocks custom styling to match design system */
+.theme-light pre {
+  background-color: var(--color-surface) !important;
+  border: 1px solid var(--border-subtle);
+}
+
+/* Custom scrollbar in light mode */
+.theme-light ::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.15);
+}
+.theme-light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 23, 42, 0.25);
 }
 
 /*
@@ -49,8 +78,8 @@
   gap: 1rem;
   padding: 1.5rem;
   border-radius: 0.75rem;
-  background-color: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: var(--color-glass);
+  border: 1px solid var(--border-subtle);
   transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   text-decoration: none !important;
   position: relative;
@@ -58,12 +87,19 @@
 }
 
 .nextra-card:hover {
-  background-color: rgba(255, 255, 255, 0.04);
+  background-color: var(--color-glass-heavy);
   border-color: rgba(6, 182, 212, 0.4);
   transform: translateY(-2px);
   box-shadow:
     0 20px 40px -20px rgba(6, 182, 212, 0.2),
     0 0 0 1px rgba(6, 182, 212, 0.2);
+}
+
+.theme-light .nextra-card:hover {
+  border-color: rgba(14, 116, 144, 0.4);
+  box-shadow:
+    0 20px 40px -20px rgba(14, 116, 144, 0.15),
+    0 0 0 1px rgba(14, 116, 144, 0.15);
 }
 
 /* Icon Container */
@@ -74,7 +110,7 @@
   width: 40px;
   height: 40px;
   border-radius: 8px;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: var(--border-subtle);
   color: var(--color-cyan);
   margin-bottom: 0.5rem;
   transition: all 0.3s ease;
@@ -82,7 +118,7 @@
 
 .nextra-card:hover .card-icon-container {
   background-color: rgba(6, 182, 212, 0.1);
-  color: #fff;
+  color: var(--color-cyan);
 }
 
 /* Content */
@@ -95,13 +131,14 @@
 .card-title {
   font-weight: 600;
   font-size: 1.1rem;
-  color: #fff;
+  color: var(--color-ink);
   letter-spacing: -0.01em;
 }
 
 .card-description {
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--color-ink);
+  opacity: 0.6;
   line-height: 1.5;
 }
 
@@ -111,7 +148,7 @@
  * ============================================
  */
 .text-gradient-cyan {
-  background: linear-gradient(135deg, #22d3ee 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, var(--color-cyan), #67e8f9);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

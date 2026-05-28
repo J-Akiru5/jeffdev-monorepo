@@ -2,12 +2,14 @@
   "name": "jeffdev-monorepo",
   "private": true,
   "scripts": {
-    "build": "doppler run -- turbo build",
-    "dev": "doppler run -- turbo dev",
+    "build": "node scripts/with-memory-limit.js doppler run -- turbo build",
+    "dev": "node scripts/with-memory-limit.js doppler run -- turbo dev --concurrency=2",
+    "dev:local": "node scripts/with-memory-limit.js turbo dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
     "test": "turbo run test",
+    "clean": "node scripts/clean.js",
     "changeset": "changeset",
     "prepare": "husky"
   },

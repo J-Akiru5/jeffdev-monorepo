@@ -1,19 +1,12 @@
-import { ObjectId } from "mongodb";
+import { ObjectId } from "@syntaxure-labs/db/cosmos";
+import type { GetSkillInput, ToolOutput } from "../types.js";
 import { countTokensInText } from "../middleware/token-counter.js";
 
-export interface GetSkillInput {
-  skillId: string;
-  projectId?: string;
-}
-
-export interface GetSkillOutput {
-  content: Array<{ type: "text"; text: string }>;
-  isError?: boolean;
-}
+export type { GetSkillInput };
 
 export async function handleGetSkill(
   input: GetSkillInput,
-): Promise<GetSkillOutput> {
+): Promise<ToolOutput> {
   const { skillId } = input;
 
   if (!skillId) {

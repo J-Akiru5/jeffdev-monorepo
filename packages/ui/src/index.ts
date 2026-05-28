@@ -33,5 +33,30 @@ export { SectionHeader } from "./section-header";
 export { GlassPanel } from "./glass-panel";
 export { SyntaxureLogo } from "./logo";
 export { Select, type SelectOption, type SelectProps } from "./select";
-export { AccountDropdown, type AccountDropdownProps, type AppLink } from "./account-dropdown";
+export { AccountDropdown, type AccountDropdownProps } from "./account-dropdown";
+export { AppTopNavbar, type AppNavLink, type AppTopNavbarProps } from "./app-top-navbar";
+export { RealtimeClock } from "./realtime-clock";
+export { ThemeDefaultSync } from "./theme-default-sync";
+export { AuthProvider, useAuth, type AuthProfile, type AuthContextValue } from "./auth-provider";
+export {
+  Skeleton,
+  SkeletonTable,
+  SkeletonBackLink,
+  SkeletonPageHeader,
+  SkeletonStatsGrid,
+  SkeletonCard,
+} from "./skeleton";
+export { EmptyState } from "./empty-state";
+export { ConfirmDialog } from "./confirm-dialog";
+export { ErrorBoundary } from "./error-boundary";
+export {
+  FeatureFlagProvider,
+  useFeatureFlag,
+  useFeatureFlags,
+  type FeatureFlags,
+} from "./feature-flags";
+
+// Hooks
+export { useDebouncedValue } from "./use-debounced-value";
+export { useActionFeedback, type ActionState } from "./use-action-feedback";
 

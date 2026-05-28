@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SmoothScroll } from "@/components/providers/smooth-scroll";
+import { ThemeWrapper } from "@/components/providers/theme-wrapper";
+import { ThemeBootstrap } from "@/components/providers/theme-bootstrap";
 import { CurrencyProvider } from "@/contexts/currency-context";
 import { FeatureFlagProvider } from "@/components/providers/feature-flag-provider";
 import { getFeatureFlags } from "@/lib/feature-flags";
@@ -138,23 +140,7 @@ export default async function RootLayout({
     >
       <head>
         <AnalyticsProvider />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(() => {
-  try {
-    const storageKey = 'syntaxure-theme';
-    const stored = localStorage.getItem(storageKey);
-    const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-    const theme = stored === 'light' || stored === 'dark' ? stored : prefersLight ? 'light' : 'dark';
-    const root = document.documentElement;
-    root.classList.toggle('theme-light', theme === 'light');
-    root.dataset.theme = theme;
-  } catch (error) {
-    console.warn('Theme bootstrap failed', error);
-  }
-})();`,
-          }}
-        />
+        <ThemeBootstrap />
       </head>
       <body className="bg-void text-white antialiased font-sans selection:bg-cyan-500/30 selection:text-white">
         {/* Global Grid Background */}
@@ -179,7 +165,8 @@ export default async function RootLayout({
         </div>
 
         {/* Application Content */}
-        <SmoothScroll>
+        <ThemeWrapper>
+          <SmoothScroll>
           <FeatureFlagProvider flags={featureFlags}>
             <CurrencyProvider>
               <div className="relative z-10 min-h-screen flex flex-col">
@@ -209,6 +196,7 @@ export default async function RootLayout({
             </CurrencyProvider>
           </FeatureFlagProvider>
         </SmoothScroll>
+        </ThemeWrapper>
 
         {/* Vercel Analytics - Web Vitals Tracking */}
         <Analytics />

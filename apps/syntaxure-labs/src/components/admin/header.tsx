@@ -1,16 +1,17 @@
 "use client";
 
 /**
- * Admin Header
+ * AdminHeader
  * -------------
- * Top header bar with user info and quick actions.
+ * Top header bar that wraps the shared AppTopNavbar from @syntaxure/ui.
+ *
+ * Provides syntaxure-labs-specific wiring: search, notifications,
+ * and account dropdown with cross-app links.
  */
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
 import { NotificationPopover } from "./notification-popover";
-import { AccountDropdown, type AppLink } from "@syntaxure/ui";
+import { AppTopNavbar, AccountDropdown, type AppNavLink } from "@syntaxure/ui";
 import { useUser } from "@/contexts/user-context";
 import { LayoutDashboard, Box, Sparkles, User } from "lucide-react";
 
@@ -18,8 +19,8 @@ export function AdminHeader() {
   const { user, loading, logout } = useUser();
   const router = useRouter();
 
-  // Cross-app quick links
-  const appLinks: AppLink[] = [
+  // Cross-app links for the AppTopNavbar switcher
+  const appLinks: AppNavLink[] = [
     {
       label: "Syntaxure Labs",
       href: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
@@ -56,29 +57,17 @@ export function AdminHeader() {
   const initials = displayName.charAt(0).toUpperCase();
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-white/6 bg-void/80 px-4 backdrop-blur-md lg:px-6">
-      {/* Search - Hidden on mobile */}
-      <div className="flex items-center gap-4">
-        <div className="relative hidden md:block">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
-          <input
-            type="text"
-            placeholder="Search..."
-            className="w-64 rounded-md border border-white/10 bg-white/5 py-2 pl-10 pr-4 text-sm text-white placeholder-white/30 outline-none transition-colors focus:border-white/20 focus:bg-white/10"
-          />
-        </div>
-
-        {/* Mobile Logo/Title */}
-        <div className="md:hidden font-semibold text-white">Dashboard</div>
-      </div>
-
-      {/* Right side */}
-      <div className="flex items-center gap-4">
-        {/* Notifications */}
-        {user?.uid && <NotificationPopover userId={user.uid} />}
-
-        {/* Unified Account Dropdown */}
-        {loading ? (
+    <AppTopNavbar
+      appName="Labs"
+      appLinks={appLinks}
+      searchPlaceholder="Search..."
+      notifications={
+        user?.uid ? (
+          <NotificationPopover userId={user.uid} />
+        ) : undefined
+      }
+      accountDropdown={
+        loading ? (
           <div className="h-8 w-8 animate-pulse rounded-full bg-white/10" />
         ) : (
           <AccountDropdown
@@ -88,11 +77,10 @@ export function AdminHeader() {
             role={user?.role}
             avatarUrl={user?.photoURL}
             settingsHref="/admin/profile"
-            appLinks={appLinks}
             onSignOut={handleSignOut}
           />
-        )}
-      </div>
-    </header>
+        )
+      }
+    />
   );
 }

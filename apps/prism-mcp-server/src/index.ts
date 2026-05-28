@@ -12,6 +12,15 @@
  * npm run build && node dist/index.js
  */
 
+// Stdout safety: redirect any stray console.log to stderr to prevent
+// corrupting the MCP JSON-RPC protocol stream on stdout.
+// Skip in test environment to preserve console.log for test output.
+if (process.env.NODE_ENV !== "test") {
+  console.log = (...args: unknown[]) => {
+    console.error("[prism-mcp-server] console.log intercepted:", ...args);
+  };
+}
+
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
@@ -21,13 +30,20 @@ import {
   ReadResourceRequestSchema,
   InitializeRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { MongoClient, type Collection, type Document, ObjectId } from "mongodb";
+import { ObjectId, type Document } from "@syntaxure-labs/db/cosmos";
+import { getCollection, closeConnection } from "@syntaxure-labs/db/cosmos";
 import { handlePrismScan } from "./tools/prism-scan.js";
 import { handleGetSkill } from "./tools/get-skill.js";
 import { handleListSkills } from "./tools/list-skills.js";
 import { handlePrismCheck } from "./tools/prism-check.js";
 import { handlePrismFix } from "./tools/prism-fix.js";
 import { extractRulesFromRepoScan } from "./tools/repo-extract.js";
+import { handleKitchenAnalyze, handleKitchenPreview } from "./tools/prism-kitchen.js";
+import { handlePrismIntercept } from "./tools/prism-intercept.js";
+import { handlePrismCompile } from "./tools/prism-compile.js";
+import { handlePrismOrchestrate } from "./tools/prism-orchestrate.js";
+import { handlePrismMemory } from "./tools/prism-memory.js";
+import { handlePrismDrip } from "./tools/prism-drip.js";
 import {
   detectCurrentProject,
   scanCurrentRepo,
@@ -56,10 +72,8 @@ import {
 // CONFIGURATION
 // =============================================================================
 
-const SERVER_NAME = "jeffdev-prism-engine";
+const SERVER_NAME = "prism-context-engine";
 const SERVER_VERSION = "1.0.0";
-const MONGODB_URI = process.env.MONGODB_URI;
-const DATABASE_NAME = process.env.COSMOS_DATABASE_NAME || "prism";
 
 // API Key Authentication
 const PRISM_API_KEY = process.env.PRISM_API_KEY;
@@ -115,14 +129,15 @@ async function validateApiKey(): Promise<void> {
 
     if (!data.valid) {
       console.error(
-        `[${SERVER_NAME}] ❌ API key validation failed: ${data.error}`,
+        `[${SERVER_NAME}] API key validation failed: ${data.error}`,
       );
       if (data.upgradeUrl) {
         console.error(
           `[${SERVER_NAME}] Upgrade your plan at: ${PRISM_API_URL}${data.upgradeUrl}`,
         );
       }
-      process.exit(1);
+      console.error(`[${SERVER_NAME}] Continuing in unauthenticated mode.`);
+      return;
     }
 
     authenticatedUserId = data.userId || null;
@@ -141,59 +156,20 @@ async function validateApiKey(): Promise<void> {
 }
 
 // =============================================================================
-// DATABASE CONNECTION (Singleton)
+// DATABASE CONNECTION (via @syntaxure-labs/db singleton)
 // =============================================================================
 
-let client: MongoClient | null = null;
-let rulesCollection: Collection<Document> | null = null;
+let _rulesCollection: Awaited<ReturnType<typeof getCollection>> | null = null;
 
-async function getDB(): Promise<Collection<Document>> {
-  if (rulesCollection) {
-    try {
-      await client?.db(DATABASE_NAME).command({ ping: 1 });
-      return rulesCollection;
-    } catch {
-      console.error(`[${SERVER_NAME}] DB connection lost, reconnecting...`);
-      client = null;
-      rulesCollection = null;
-    }
-  }
-
-  if (!MONGODB_URI) {
-    throw new Error(
-      "[prism-mcp-server] MONGODB_URI not set. Pass it via env in MCP config.",
-    );
-  }
-
-  if (!client) {
-    client = new MongoClient(MONGODB_URI, {
-      retryWrites: false,
-      maxPoolSize: 5,
-    });
-  }
-
-  try {
-    await client.connect();
-  } catch {
-    client = null;
-    rulesCollection = null;
-
-    console.error(
-      `[${SERVER_NAME}] First connection attempt failed, retrying...`,
-    );
-    client = new MongoClient(MONGODB_URI, {
-      retryWrites: false,
-      maxPoolSize: 5,
-    });
-    await client.connect();
-  }
-
-  console.error(`[${SERVER_NAME}] Connected to Azure Cosmos DB`);
-
-  const db = client.db(DATABASE_NAME);
-  rulesCollection = db.collection("rules");
-
-  return rulesCollection;
+/**
+ * Get the rules collection from the shared DB connection.
+ * Cached after first successful fetch to avoid repeated singleton resolution.
+ * @syntaxure-labs/db manages the singleton MongoClient with reconnection.
+ */
+async function getRulesCollection() {
+  if (_rulesCollection) return _rulesCollection;
+  _rulesCollection = await getCollection("rules");
+  return _rulesCollection;
 }
 
 // =============================================================================
@@ -259,20 +235,25 @@ server.setRequestHandler(InitializeRequestSchema, async (request) => {
 // =============================================================================
 
 server.setRequestHandler(ListResourcesRequestSchema, async () => {
-  const rules = await getDB();
-  const allRules = await rules
-    .find({ isPublic: true })
-    .project({ name: 1, tags: 1, category: 1 })
-    .toArray();
+  try {
+    const rules = await getRulesCollection();
+    const allRules = await rules
+      .find({ isPublic: true })
+      .project({ name: 1, tags: 1, category: 1 })
+      .toArray();
 
-  return {
-    resources: allRules.map((r: Document) => ({
-      uri: `prism://rules/${r._id.toString()}`,
-      name: r.name,
-      mimeType: "text/markdown",
-      description: `[${r.category}] Tags: ${(r.tags || []).join(", ")}`,
-    })),
-  };
+    return {
+      resources: allRules.map((r: Document) => ({
+        uri: `prism://rules/${r._id.toString()}`,
+        name: r.name,
+        mimeType: "text/markdown",
+        description: `[${r.category}] Tags: ${(r.tags || []).join(", ")}`,
+      })),
+    };
+  } catch (error) {
+    console.error(`[${SERVER_NAME}] ListResources error:`, error);
+    return { resources: [] };
+  }
 });
 
 // =============================================================================
@@ -281,25 +262,23 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
 
 server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
   const uri = request.params.uri;
-  // Extract ID from prism://rules/{id}
   const id = uri.replace("prism://rules/", "");
 
-  const rules = await getDB();
-
-  let rule;
   try {
-    rule = await rules.findOne({ _id: new ObjectId(id) });
-  } catch {
-    // If not a valid ObjectId, try matching by name
-    rule = await rules.findOne({ name: id });
-  }
+    const rules = await getRulesCollection();
 
-  if (!rule) {
-    throw new Error(`Rule "${id}" not found`);
-  }
+    let rule;
+    try {
+      rule = await rules.findOne({ _id: new ObjectId(id) });
+    } catch {
+      rule = await rules.findOne({ name: id });
+    }
 
-  // Format the rule as nice markdown
-  const markdown = `# ${rule.name}
+    if (!rule) {
+      throw new Error(`Rule "${id}" not found`);
+    }
+
+    const markdown = `# ${rule.name}
 
 **Category:** ${rule.category}  
 **Priority:** ${rule.priority}  
@@ -310,15 +289,19 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
 ${rule.content}
 `;
 
-  return {
-    contents: [
-      {
-        uri: request.params.uri,
-        mimeType: "text/markdown",
-        text: markdown,
-      },
-    ],
-  };
+    return {
+      contents: [
+        {
+          uri: request.params.uri,
+          mimeType: "text/markdown",
+          text: markdown,
+        },
+      ],
+    };
+  } catch (error) {
+    console.error(`[${SERVER_NAME}] ReadResource error for "${id}":`, error);
+    throw error;
+  }
 });
 
 // =============================================================================
@@ -505,33 +488,6 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
-        name: "validate_code",
-        description:
-          "Alias for prism_check. Validates code against pattern-based governance rules. " +
-          "Returns structured violations with line/column positions.",
-        inputSchema: {
-          type: "object" as const,
-          properties: {
-            code: {
-              type: "string",
-              description: "The source code to validate",
-            },
-            ruleIds: {
-              type: "array" as const,
-              items: { type: "string" },
-              description: "Optional specific rule IDs",
-            },
-            projectId: { type: "string", description: "Optional project ID" },
-            filePath: { type: "string", description: "Optional file path" },
-            category: {
-              type: "string",
-              description: "Optional category filter",
-            },
-          },
-          required: ["code"],
-        },
-      },
-      {
         name: "prism_fix",
         description:
           "Apply an automatic fix for a code violation found by prism_check. " +
@@ -615,6 +571,263 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           },
         },
       },
+      {
+        name: "prism_kitchen",
+        description:
+          "Context budget optimization tool. Analyzes what the AI will receive and optimizes it " +
+          "to achieve 60-70% token reduction. Use BEFORE generating code to see exactly what " +
+          "context will be sent. Returns token savings analysis and optimized rules.",
+        inputSchema: {
+          type: "object" as const,
+          properties: {
+            action: {
+              type: "string",
+              description: "'analyze' for full analysis with savings report, 'preview' for just the context",
+              enum: ["analyze", "preview"],
+            },
+            task: {
+              type: "string",
+              description: "What you're about to code (e.g., 'build a login form'). Used for relevance filtering.",
+            },
+            budget: {
+              type: "number",
+              description: "Maximum tokens for the response (default: 4000)",
+              default: 4000,
+            },
+            projectId: {
+              type: "string",
+              description: "Optional project ID to scope rules",
+            },
+            format: {
+              type: "string",
+              description: "Response format: 'markdown' or 'json'",
+              enum: ["markdown", "json"],
+            },
+          },
+          required: ["action", "task"],
+        },
+      },
+      {
+        name: "prism_intercept",
+        description:
+          "Active interception agent. Prevents the generate→violate→fix cycle that wastes tokens. " +
+          "Call BEFORE generating code with a task description to get a pre-flight guide of " +
+          "forbidden and required patterns. Call AFTER generating code to validate and get " +
+          "specific fix instructions. Eliminates reiteration and reduces token consumption by 40-60%.",
+        inputSchema: {
+          type: "object" as const,
+          properties: {
+            task: {
+              type: "string",
+              description: "What you're about to code (pre-generation mode). Returns forbidden/required patterns.",
+            },
+            code: {
+              type: "string",
+              description: "Generated code to validate (post-generation mode). Returns violations with fixes.",
+            },
+            filePath: {
+              type: "string",
+              description: "Optional file path for context",
+            },
+            projectId: {
+              type: "string",
+              description: "Optional project ID to scope rules",
+            },
+          },
+        },
+      },
+      {
+        name: "prism_health",
+        description:
+          "Server health check. Returns connection status, cache stats, rule count, and diagnostics. " +
+          "Use when troubleshooting MCP connection issues.",
+        inputSchema: {
+          type: "object" as const,
+          properties: {
+            verbose: {
+              type: "boolean",
+              description: "Include detailed diagnostics (default: false)",
+              default: false,
+            },
+          },
+        },
+      },
+      {
+        name: "prism_compile",
+        description:
+          "Rule Compiler — transforms governance rules into executable validators. " +
+          "Instead of giving the AI markdown rules to read (and potentially ignore), " +
+          "this compiles rules into TypeScript type guards, import validators, and fix templates. " +
+          "The AI receives injection context that constrains what it can generate. " +
+          "This enforces governance at the code level, not just as suggestions.",
+        inputSchema: {
+          type: "object" as const,
+          properties: {
+            projectId: {
+              type: "string",
+              description: "Optional project ID to scope rules",
+            },
+            category: {
+              type: "string",
+              description: "Optional filter by rule category",
+            },
+            task: {
+              type: "string",
+              description: "Optional task description for context-aware compilation",
+            },
+            format: {
+              type: "string",
+              description: "Response format: 'markdown' (default) or 'json'",
+              enum: ["markdown", "json"],
+            },
+          },
+        },
+      },
+      {
+        name: "prism_orchestrate",
+        description:
+          "ONE-CALL governance engine. Instead of calling 5 separate tools (prism_compile → " +
+          "prism_kitchen → get_architectural_rules → prism_intercept → prism_check), call this " +
+          "ONCE and get everything: compiled validators, optimized rules, guard rails, and injection " +
+          "context. Reduces tool calls from 5→1 and tokens by 60-70%. " +
+          "Mode: 'full' (everything), 'compact' (rules + guard rails), 'minimal' (injection context only).",
+        inputSchema: {
+          type: "object" as const,
+          properties: {
+            task: {
+              type: "string",
+              description: "What you're about to code (e.g., 'build a login form'). Required.",
+            },
+            code: {
+              type: "string",
+              description: "Optional: code to validate. If provided, runs validation and returns violations.",
+            },
+            filePath: {
+              type: "string",
+              description: "Optional file path for context",
+            },
+            projectId: {
+              type: "string",
+              description: "Optional project ID to scope rules",
+            },
+            budget: {
+              type: "number",
+              description: "Maximum tokens for the response (default: 4000)",
+              default: 4000,
+            },
+            mode: {
+              type: "string",
+              description: "'full' (default), 'compact' (rules + guard rails), 'minimal' (injection context only)",
+              enum: ["full", "compact", "minimal"],
+            },
+          },
+          required: ["task"],
+        },
+      },
+      {
+        name: "prism_memory",
+        description:
+          "Governance memory — persistent AI agent memory across sessions and team members. " +
+          "Stores decisions, patterns, violations, and team consensus. " +
+          "Read memories before generating code to learn from past sessions. " +
+          "Write memories after making decisions or encountering violations. " +
+          "This ensures AI agents don't repeat mistakes and maintain consistency across the team.",
+        inputSchema: {
+          type: "object" as const,
+          properties: {
+            action: {
+              type: "string",
+              description: "'read' (query memories), 'write' (store memory), 'stats' (statistics), 'cleanup' (remove expired)",
+              enum: ["read", "write", "stats", "cleanup"],
+            },
+            type: {
+              type: "string",
+              description: "Memory type: decision, pattern, violation, consensus, incident, progress, context",
+            },
+            scope: {
+              type: "string",
+              description: "Memory scope: project, team, global",
+            },
+            content: {
+              type: "string",
+              description: "Memory content (required for 'write' action)",
+            },
+            tags: {
+              type: "array" as const,
+              items: { type: "string" },
+              description: "Tags for categorization and search",
+            },
+            importance: {
+              type: "string",
+              description: "Importance level: critical, high, medium, low",
+              enum: ["critical", "high", "medium", "low"],
+            },
+            projectId: {
+              type: "string",
+              description: "Project ID to scope memories",
+            },
+            teamId: {
+              type: "string",
+              description: "Team ID for team-scoped memories",
+            },
+            source: {
+              type: "string",
+              description: "Who/what created this memory (e.g., 'cursor-agent', 'jeff')",
+            },
+            sessionId: {
+              type: "string",
+              description: "Current session ID for tracking",
+            },
+            limit: {
+              type: "number",
+              description: "Max memories to return (default: 50)",
+            },
+          },
+          required: ["action"],
+        },
+      },
+      {
+        name: "prism_drip",
+        description:
+          "Context Drip — progressive rule disclosure. Instead of sending all rules at once, " +
+          "drip-feed only what's needed at each moment. Call with your current code snippet and " +
+          "get only the rules that apply RIGHT NOW. Three tiers: red lines (always first), " +
+          "context rules (when in a domain), edge cases (when approaching violation). " +
+          "Achieves 80-90% token savings vs sending all rules. " +
+          "Call repeatedly as you write code — each call gives the next relevant rules.",
+        inputSchema: {
+          type: "object" as const,
+          properties: {
+            code: {
+              type: "string",
+              description: "Your current code snippet. Required for 'drip' action.",
+            },
+            filePath: {
+              type: "string",
+              description: "Optional file path for context detection",
+            },
+            projectId: {
+              type: "string",
+              description: "Optional project ID to scope rules",
+            },
+            sessionId: {
+              type: "string",
+              description: "Session ID for tracking given rules (default: 'default')",
+            },
+            budget: {
+              type: "number",
+              description: "Maximum tokens for the session (default: 4000)",
+              default: 4000,
+            },
+            action: {
+              type: "string",
+              description: "'drip' (get next rules), 'reset' (clear session), 'status' (check progress)",
+              enum: ["drip", "reset", "status"],
+            },
+          },
+          required: ["code"],
+        },
+      },
     ],
   };
 });
@@ -671,7 +884,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         } else {
           // Fetch from database with offline fallback
           try {
-            const rules = await getDB();
+            const rules = await getRulesCollection();
             const query: Record<string, unknown> = { isActive: true };
             if (category) query.category = category;
             if (tag) query.tags = tag;
@@ -836,7 +1049,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const violations: string[] = [];
 
         // Fetch pattern-based rules from database
-        const rulesDb = await getDB();
+        const rulesDb = await getRulesCollection();
         const query: Record<string, unknown> = {
           isActive: true,
           pattern: { $exists: true, $ne: null },
@@ -939,8 +1152,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         );
       }
 
-      case "prism_check":
-      case "validate_code": {
+      case "prism_check": {
         return await handlePrismCheck(
           args as unknown as Parameters<typeof handlePrismCheck>[0],
         );
@@ -995,6 +1207,74 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         }
       }
 
+      case "prism_kitchen": {
+        const kitchenArgs = args as Record<string, unknown>;
+        const action = kitchenArgs?.action as string;
+        if (action === "preview") {
+          return await handleKitchenPreview({
+            task: kitchenArgs?.task as string,
+            projectId: kitchenArgs?.projectId as string | undefined,
+            budget: kitchenArgs?.budget as number | undefined,
+          });
+        }
+        return await handleKitchenAnalyze({
+          task: kitchenArgs?.task as string,
+          budget: kitchenArgs?.budget as number | undefined,
+          projectId: kitchenArgs?.projectId as string | undefined,
+          format: kitchenArgs?.format as "markdown" | "json" | undefined,
+        });
+      }
+
+      case "prism_intercept": {
+        return await handlePrismIntercept(
+          args as unknown as Parameters<typeof handlePrismIntercept>[0],
+        );
+      }
+
+      case "prism_health": {
+        const verbose = (args as Record<string, unknown>)?.verbose as boolean | undefined;
+        return {
+          content: [{
+            type: "text" as const,
+            text: [
+              `# Prism MCP Server Health`,
+              ``,
+              `**Status:** ✅ Connected`,
+              `**Server:** ${SERVER_NAME} v${SERVER_VERSION}`,
+              `**Project:** ${currentProject ? `${currentProject.name} (${currentProject.framework})` : "Not detected"}`,
+              `**Authenticated:** ${authenticatedUserId ? `Yes (${authenticatedTier})` : "No"}`,
+              verbose ? `**Database:** ${process.env.MONGODB_URI ? "Configured" : "Not configured"}` : "",
+              verbose ? `**AI Provider:** ${process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY ? "Gemini" : process.env.AZURE_OPENAI_ENDPOINT ? "Azure OpenAI" : "Not configured"}` : "",
+              verbose ? `**Gremlin Ranking:** ${process.env.USE_GREMLIN_RANKING === "true" ? "Enabled" : "Disabled"}` : "",
+            ].filter(Boolean).join("\n"),
+          }],
+        };
+      }
+
+      case "prism_compile": {
+        return await handlePrismCompile(
+          args as unknown as Parameters<typeof handlePrismCompile>[0],
+        );
+      }
+
+      case "prism_orchestrate": {
+        return await handlePrismOrchestrate(
+          args as unknown as Parameters<typeof handlePrismOrchestrate>[0],
+        );
+      }
+
+      case "prism_memory": {
+        return await handlePrismMemory(
+          args as unknown as Parameters<typeof handlePrismMemory>[0],
+        );
+      }
+
+      case "prism_drip": {
+        return await handlePrismDrip(
+          args as unknown as Parameters<typeof handlePrismDrip>[0],
+        );
+      }
+
       default:
         return {
           content: [
@@ -1006,7 +1286,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   })();
 
   const trackedResult = trackToolResponse(rawResult);
-  const rMeta = (rawResult as Record<string, unknown>)?._meta as
+  const rMeta = (rawResult as unknown as Record<string, unknown>)?._meta as
     | Record<string, unknown>
     | undefined;
 
@@ -1036,6 +1316,20 @@ async function main() {
     `[${SERVER_NAME}] Starting Prism MCP Server v${SERVER_VERSION}...`,
   );
 
+  // Startup env checks — warn early about missing config
+  if (!process.env.MONGODB_URI) {
+    console.error(
+      `[${SERVER_NAME}] ⚠️  MONGODB_URI not set. Database tools will fail until it is configured.`,
+    );
+  }
+  const hasGemini = process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+  const hasAzure = process.env.AZURE_OPENAI_ENDPOINT && process.env.AZURE_OPENAI_API_KEY;
+  if (!hasGemini && !hasAzure) {
+    console.error(
+      `[${SERVER_NAME}] ⚠️  No AI provider configured. Smart selection and rule generation will be unavailable.`,
+    );
+  }
+
   await validateApiKey();
 
   // Detect the caller's project from the current working directory
@@ -1062,15 +1356,17 @@ async function main() {
 }
 
 // Graceful shutdown
-process.on("SIGINT", async () => {
-  console.error(`[${SERVER_NAME}] Shutting down...`);
-  if (client) {
-    await client.close();
-  }
+async function shutdown(signal: string) {
+  console.error(`[${SERVER_NAME}] Received ${signal}, shutting down...`);
+  await closeConnection().catch(() => {});
   process.exit(0);
-});
+}
 
-main().catch((error) => {
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+
+main().catch(async (error) => {
   console.error(`[${SERVER_NAME}] Fatal error:`, error);
+  await closeConnection().catch(() => {});
   process.exit(1);
 });

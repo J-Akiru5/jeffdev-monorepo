@@ -23,6 +23,14 @@ export const metadata: Metadata = {
 
 export const revalidate = 60;
 
+interface TeamMember {
+  name: string;
+  title: string;
+  role: string;
+  bio: string;
+  image: string;
+}
+
 interface AboutData {
   hero: {
     tagline: string;
@@ -41,6 +49,7 @@ interface AboutData {
     location: string;
     availability: string;
   };
+  team: TeamMember[];
   techStack: Record<string, string[]>;
   values: { title: string; description: string }[];
   brandAssets: {
@@ -76,6 +85,7 @@ export default async function AboutPage() {
   const activeAvailability = await getActiveAvailability();
 
   const { hero, stats, founder, techStack, values, brandAssets } = content;
+  const team = content.team || DEFAULT_ABOUT_DATA.team;
 
   const founderAvailability =
     activeAvailability?.aboutText ?? founder.availability;
@@ -218,6 +228,97 @@ export default async function AboutPage() {
           </div>
         </section>
 
+        {/* Team Section */}
+        <section className="px-6 py-16 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <h2 className="font-mono text-xs uppercase tracking-wider text-white/40">
+              {"// Team"}
+            </h2>
+            <p className="mt-4 max-w-xl text-white/60">
+              Meet the leadership team behind Syntaxure Labs.
+            </p>
+            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+              {team.map((member) => (
+                <div
+                  key={member.role}
+                  className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6 text-center"
+                >
+                  <div className="mx-auto h-20 w-20 rounded-full border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden">
+                    {member.image.includes("placeholder") ? (
+                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-cyan-500/20 to-purple-500/20">
+                        <span className="text-lg font-bold text-white/40">
+                          {member.role.slice(0, 2)}
+                        </span>
+                      </div>
+                    ) : (
+                      <Image
+                        src={member.image}
+                        alt={member.name}
+                        width={80}
+                        height={80}
+                        className="h-full w-full object-cover"
+                      />
+                    )}
+                  </div>
+                  <h3 className="mt-4 font-semibold text-white">{member.name}</h3>
+                  <p className="text-sm text-cyan-400">{member.title}</p>
+                  <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-white/30">
+                    {member.role}
+                  </p>
+                  <p className="mt-3 text-xs text-white/50">{member.bio}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Kwadra TBI Cohort 5 Section */}
+        <section className="px-6 py-16 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <div className="rounded-md border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-transparent p-8 md:p-12">
+              <div className="flex flex-col items-center text-center md:flex-row md:text-left md:items-start md:gap-8">
+                <div className="shrink-0">
+                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-full border border-amber-500/30 bg-amber-500/10">
+                    <span className="text-2xl font-bold text-amber-400">TBI</span>
+                  </div>
+                </div>
+                <div className="mt-4 md:mt-0">
+                  <span className="font-mono text-xs uppercase tracking-wider text-amber-400">
+                    {"// Accelerator"}
+                  </span>
+                  <h2 className="mt-2 text-2xl font-bold text-white">
+                    Kwadra TBI Cohort 5
+                  </h2>
+                  <p className="mt-3 max-w-2xl text-white/60">
+                    Syntaxure Labs is proud to be part of Kwadra TBI Cohort 5 — a
+                    startup acceleration program by the{" "}
+                    <span className="text-white/80">
+                      Iloilo Provincial Government&apos;s Kwadra Care
+                    </span>{" "}
+                    initiative. This program supports innovation-driven startups
+                    with mentorship, funding access, and go-to-market strategy.
+                  </p>
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    {[
+                      "Startup Acceleration",
+                      "Mentorship",
+                      "Funding Access",
+                      "GotoMarket Strategy",
+                    ].map((item) => (
+                      <span
+                        key={item}
+                        className="rounded-sm border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-amber-400"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Values Section */}
         <section className="px-6 py-16 lg:px-8">
           <div className="mx-auto max-w-7xl">
@@ -291,7 +392,7 @@ const DEFAULT_ABOUT_DATA: AboutData = {
     description:
       "Syntaxure Labs is a new-breed development agency architecting high-performance systems for ambitious startups. We don't just write code — we partner with founders to turn 'Zero to One' ideas into scalable reality.",
     subDescription:
-      "Est. 2025. Built on 5+ years of the founder's hands-on experience shipping production systems across SaaS, AI, and enterprise platforms.",
+      "Est. 2025. Built on 5+ years of the founder's hands-on experience shipping production systems across SaaS, AI, and enterprise platforms. Proud member of Kwadra TBI Cohort 5.",
   },
   stats: [
     { label: "Niche Focus", value: "Specialized" },
@@ -308,6 +409,43 @@ const DEFAULT_ABOUT_DATA: AboutData = {
     location: "Iloilo City, Philippines",
     availability: "Currently accepting new projects",
   },
+  team: [
+    {
+      name: "Jeff Edrick Martinez",
+      title: "Chief Executive Officer",
+      role: "CEO",
+      bio: "Visionary leader driving the company strategy and growth.",
+      image: "/profilepic.webp",
+    },
+    {
+      name: "To Be Announced",
+      title: "Chief Technology Officer",
+      role: "CTO",
+      bio: "Leading technical vision and engineering excellence.",
+      image: "/placeholder-avatar.svg",
+    },
+    {
+      name: "To Be Announced",
+      title: "Chief Marketing Officer",
+      role: "CMO",
+      bio: "Driving brand strategy, growth, and market positioning.",
+      image: "/placeholder-avatar.svg",
+    },
+    {
+      name: "To Be Announced",
+      title: "Chief Operating Officer",
+      role: "COO",
+      bio: "Overseeing operations, partnerships, and delivery excellence.",
+      image: "/placeholder-avatar.svg",
+    },
+    {
+      name: "To Be Announced",
+      title: "Chief Product Officer",
+      role: "CPO",
+      bio: "Shaping product vision and user experience strategy.",
+      image: "/placeholder-avatar.svg",
+    },
+  ],
   techStack: {
     frontend: ["Next.js", "React", "TypeScript", "Tailwind CSS", "GSAP"],
     backend: ["Node.js", "Laravel", "PostgreSQL", "Firebase"],

@@ -1,29 +1,8 @@
 import { readFileSync, existsSync, readdirSync, statSync } from "fs";
 import { join, relative, basename, extname } from "path";
+import type { RepoScanData } from "../types.js";
 
-export interface RepoScanReport {
-  root: string;
-  namingConventions: {
-    files: Record<string, number>;
-    functions: Record<string, number>;
-    components: Record<string, number>;
-    variables: Record<string, number>;
-  };
-  imports: {
-    relative: number;
-    absolute: number;
-    external: Record<string, number>;
-    internal: Record<string, number>;
-  };
-  structure: {
-    directories: string[];
-    fileCount: number;
-    dirCount: number;
-    languages: Record<string, number>;
-  };
-  configs: Record<string, unknown>;
-  summary: string;
-}
+export type RepoScanReport = RepoScanData;
 
 const SCAN_DIRS = ["src", "components", "lib", "utils", "styles", "app", "pages"];
 const CONFIG_FILES = [

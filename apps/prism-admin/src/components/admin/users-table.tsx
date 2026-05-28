@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useDebouncedValue, useActionFeedback } from "@syntaxure/ui";
 import {
   Search,
   Filter,
@@ -34,21 +36,48 @@ const TIERS = ["free", "pro", "team"] as const;
 const PAGE_SIZE = 25;
 
 export function UsersTable({ users, isFounder }: Props) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [tierFilter, setTierFilter] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [actionMessage, setActionMessage] = useState<{
-    type: "success" | "error";
-    text: string;
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Read initial state from URL search params
+  const [searchQuery, setSearchQuery] = useState(
+    () => searchParams.get("q") || "",
+  );
+  const debouncedQuery = useDebouncedValue(searchQuery, 300);
+  const [tierFilter, setTierFilter] = useState<string | null>(
+    () => searchParams.get("tier") || null,
+  );
+  const [currentPage, setCurrentPage] = useState(
+    () => Number(searchParams.get("page")) || 1,
+  );
+  const [, startTransition] = useTransition();
+
+  // Track action state for toast feedback via useActionFeedback
+  const [tierActionState, setTierActionState] = useState<{
+    success?: boolean;
+    error?: string;
   } | null>(null);
+  const [statusActionState, setStatusActionState] = useState<{
+    success?: boolean;
+    error?: string;
+  } | null>(null);
+
+  useActionFeedback(tierActionState, {
+    successMessage: "Tier updated",
+    fallbackErrorMessage: "Failed to update tier",
+  });
+  useActionFeedback(statusActionState, {
+    successMessage: "User status updated",
+    fallbackErrorMessage: "Failed to update status",
+  });
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
       const email = (user.email || "").toLowerCase();
       const name = (user.name || "").toLowerCase();
-      const query = searchQuery.toLowerCase();
+      const query = debouncedQuery.toLowerCase();
 
-      if (searchQuery && !email.includes(query) && !name.includes(query)) {
+      if (debouncedQuery && !email.includes(query) && !name.includes(query)) {
         return false;
       }
 
@@ -58,7 +87,7 @@ export function UsersTable({ users, isFounder }: Props) {
 
       return true;
     });
-  }, [users, searchQuery, tierFilter]);
+  }, [users, debouncedQuery, tierFilter]);
 
   const tierCounts = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -72,28 +101,20 @@ export function UsersTable({ users, isFounder }: Props) {
   async function handleOverrideTier(userId: string) {
     const tier = prompt("Enter new tier (free, pro, team):");
     if (!tier || !TIERS.includes(tier as typeof TIERS[number])) {
-      setActionMessage({ type: "error", text: "Invalid tier. Choose: free, pro, or team." });
+      setTierActionState({ success: false, error: "Invalid tier. Choose: free, pro, or team." });
       return;
     }
-    const result = await overrideUserTier(userId, tier);
-    setActionMessage({
-      type: result.success ? "success" : "error",
-      text: result.success
-        ? `Tier updated to "${tier}"`
-        : result.error || "Failed to update tier",
+    startTransition(async () => {
+      const result = await overrideUserTier(userId, tier);
+      setTierActionState(result);
     });
-    setTimeout(() => setActionMessage(null), 3000);
   }
 
   async function handleToggleStatus(userId: string, currentStatus: string) {
-    const result = await toggleUserStatus(userId, currentStatus);
-    setActionMessage({
-      type: result.success ? "success" : "error",
-      text: result.success
-        ? `User ${currentStatus === "suspended" ? "reactivated" : "suspended"}`
-        : result.error || "Failed to update status",
+    startTransition(async () => {
+      const result = await toggleUserStatus(userId, currentStatus);
+      setStatusActionState(result);
     });
-    setTimeout(() => setActionMessage(null), 3000);
   }
 
   const paginatedUsers = useMemo(() => {
@@ -105,25 +126,39 @@ export function UsersTable({ users, isFounder }: Props) {
   const startRange = (currentPage - 1) * PAGE_SIZE + 1;
   const endRange = Math.min(currentPage * PAGE_SIZE, filteredUsers.length);
 
+  // Skip initial mount sync to avoid redundant router.replace on first render
+  const isInitialMount = useRef(true);
+
+  const syncToUrl = useCallback(
+    (q: string, tier: string | null, page: number) => {
+      const params = new URLSearchParams();
+      if (q) params.set("q", q);
+      if (tier) params.set("tier", tier);
+      if (page > 1) params.set("page", String(page));
+      const newUrl = params.toString()
+        ? `/admin/users?${params.toString()}`
+        : "/admin/users";
+      router.replace(newUrl, { scroll: false });
+    },
+    [router],
+  );
+
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, tierFilter]);
 
+  // Sync to URL whenever search params change (skip initial mount)
+  // URL sync uses debouncedQuery so rapid typing doesn't spam router.replace
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    syncToUrl(debouncedQuery, tierFilter, currentPage);
+  }, [debouncedQuery, tierFilter, currentPage, syncToUrl]);
+
   return (
     <>
-      {/* Action Message */}
-      {actionMessage && (
-        <div
-          className={`rounded-lg border px-4 py-3 text-sm ${
-            actionMessage.type === "success"
-              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-              : "border-red-500/30 bg-red-500/10 text-red-300"
-          }`}
-        >
-          {actionMessage.text}
-        </div>
-      )}
-
       {/* Tier Summary */}
       <div className="flex gap-2 flex-wrap">
         <TierCountBadge
