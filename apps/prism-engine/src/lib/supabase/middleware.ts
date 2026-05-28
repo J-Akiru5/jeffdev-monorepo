@@ -5,6 +5,7 @@ const ALLOWED_ORIGINS = [
   "https://www.syntaxure.dev",
   "https://prism-engine.vercel.app",
   process.env.NEXT_PUBLIC_APP_URL,
+  process.env.NEXT_PUBLIC_PRISM_URL,
 ].filter(Boolean) as string[];
 
 function getCorsHeaders(origin: string | null): Record<string, string> {

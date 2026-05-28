@@ -44,26 +44,20 @@ https://prism.jeffdev.studio/sign-up
 # 4. .cursorrules ファイルをエクスポートしてプロジェクトに貼り付け
 ```
 
-### オプション B: MCP サーバー（上級者向け）
+### オプション B: CLI と MCP 連携（推奨）
 
 IDE とのリアルタイム同期に：
 
 ```bash
-# 1. MCP サーバーをグローバルにインストール
-npm install -g @prism/mcp-server
+# 1. CLIをグローバルにインストール
+npm install -g prism-context-engine
 
-# 2. IDE を設定（Cursor/Windsurf/VS Code）
-# MCP 設定に追加：
-{
-  "mcpServers": {
-    "prism": {
-      "command": "prism-mcp",
-      "args": ["--api-key", "YOUR_API_KEY"]
-    }
-  }
-}
+# 2. ログインしてルールを同期
+prism login
+prism sync
 
-# 3. AI アシスタントがルールにライブアクセスできるようになりました
+# 3. IDE（Cursor/Windsurf/VS Code）を自動設定
+prism init
 ```
 
 ## 主要機能

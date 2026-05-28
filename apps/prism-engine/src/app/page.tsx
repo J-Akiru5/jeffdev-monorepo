@@ -4,6 +4,8 @@ import Image from "next/image";
 import { PublicNav } from "@/components/layout/public-nav";
 import { AnimatedHero } from "@/components/hero";
 
+const PRISM_URL = process.env.NEXT_PUBLIC_PRISM_URL || "https://prism.syntaxure.dev";
+
 export const metadata: Metadata = {
   title: 'Prism Context Engine - The Context Operating System for Vibecoders',
   description:
@@ -65,7 +67,7 @@ export default function HomePage() {
             "operatingSystem": "Web, macOS, Windows, Linux",
             "description":
               "Record your architecture. AI learns your rules. Deploy context directly to Cursor, Windsurf, and Claude via MCP. Eliminate context pollution.",
-            "url": "https://prism.syntaxure.dev",
+            "url": PRISM_URL,
             "author": {
               "@type": "Organization",
               "name": "Syntaxure Labs",

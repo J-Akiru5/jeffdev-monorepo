@@ -1,5 +1,4 @@
 /// <reference lib="dom" />
-import { chromium, type Browser, type Page } from "playwright";
 
 export interface ExtractedDesignTokens {
   url: string;
@@ -158,7 +157,18 @@ export async function scanUrl(
   maxPages: number = 5,
   depth: number = 2,
 ): Promise<ScanResult> {
-  let browser: Browser | null = null;
+  let playwright;
+  try {
+    playwright = await import("playwright");
+  } catch {
+    throw new Error(
+      "Playwright is not installed. Run `npx playwright install chromium` to enable URL scanning.",
+    );
+  }
+  const { chromium } = playwright;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let browser: any = null;
   const visited = new Set<string>();
   const pagesToVisit: Array<{ url: string; currentDepth: number }> = [
     { url, currentDepth: 0 },
@@ -184,7 +194,7 @@ export async function scanUrl(
 
       visited.add(current.url);
 
-      const page: Page = await browser.newPage();
+      const page = await browser.newPage();
 
       try {
         await page.goto(current.url, {

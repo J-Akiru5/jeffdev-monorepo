@@ -32,6 +32,11 @@ async function getPayPalAccessToken(): Promise<string> {
   });
 
   const data = await response.json();
+  if (!data.access_token) {
+    throw new Error(
+      `PayPal auth failed: ${data.error || "no access_token in response"}`,
+    );
+  }
   return data.access_token;
 }
 

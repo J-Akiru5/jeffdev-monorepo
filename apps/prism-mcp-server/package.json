@@ -3,6 +3,9 @@
   "version": "1.0.3",
   "private": true,
   "type": "module",
+  "bin": {
+    "prism-mcp-server": "./dist/index.js"
+  },
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
@@ -16,14 +19,16 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@syntaxure-labs/db": "workspace:*",
-    "@modelcontextprotocol/sdk": "^1.0.0",
+    "@modelcontextprotocol/sdk": "1.12.1",
     "gpt-tokenizer": "^3.4.0",
     "mongodb": "^6.15.0",
     "openai": "^6.15.0",
     "zod": "^4.2.1"
   },
+  "optionalDependencies": {
+    "playwright": "^1.52.0"
+  },
   "devDependencies": {
-    "playwright": "^1.52.0",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/node": "^22.15.3",

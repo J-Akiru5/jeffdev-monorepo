@@ -12,6 +12,12 @@
  * npm run build && node dist/index.js
  */
 
+// Stdout safety: redirect any stray console.log to stderr to prevent
+// corrupting the MCP JSON-RPC protocol stream on stdout.
+console.log = (...args: unknown[]) => {
+  console.error("[prism-mcp-server] console.log intercepted:", ...args);
+};
+
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
@@ -21,7 +27,8 @@ import {
   ReadResourceRequestSchema,
   InitializeRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { MongoClient, type Collection, type Document, ObjectId } from "mongodb";
+import { ObjectId, type Document } from "mongodb";
+import { getCollection, closeConnection } from "@syntaxure-labs/db/cosmos";
 import { handlePrismScan } from "./tools/prism-scan.js";
 import { handleGetSkill } from "./tools/get-skill.js";
 import { handleListSkills } from "./tools/list-skills.js";
@@ -58,8 +65,6 @@ import {
 
 const SERVER_NAME = "jeffdev-prism-engine";
 const SERVER_VERSION = "1.0.0";
-const MONGODB_URI = process.env.MONGODB_URI;
-const DATABASE_NAME = process.env.COSMOS_DATABASE_NAME || "prism";
 
 // API Key Authentication
 const PRISM_API_KEY = process.env.PRISM_API_KEY;
@@ -115,14 +120,15 @@ async function validateApiKey(): Promise<void> {
 
     if (!data.valid) {
       console.error(
-        `[${SERVER_NAME}] ❌ API key validation failed: ${data.error}`,
+        `[${SERVER_NAME}] API key validation failed: ${data.error}`,
       );
       if (data.upgradeUrl) {
         console.error(
           `[${SERVER_NAME}] Upgrade your plan at: ${PRISM_API_URL}${data.upgradeUrl}`,
         );
       }
-      process.exit(1);
+      console.error(`[${SERVER_NAME}] Continuing in unauthenticated mode.`);
+      return;
     }
 
     authenticatedUserId = data.userId || null;
@@ -141,59 +147,20 @@ async function validateApiKey(): Promise<void> {
 }
 
 // =============================================================================
-// DATABASE CONNECTION (Singleton)
+// DATABASE CONNECTION (via @syntaxure-labs/db singleton)
 // =============================================================================
 
-let client: MongoClient | null = null;
-let rulesCollection: Collection<Document> | null = null;
+let _rulesCollection: Awaited<ReturnType<typeof getCollection>> | null = null;
 
-async function getDB(): Promise<Collection<Document>> {
-  if (rulesCollection) {
-    try {
-      await client?.db(DATABASE_NAME).command({ ping: 1 });
-      return rulesCollection;
-    } catch {
-      console.error(`[${SERVER_NAME}] DB connection lost, reconnecting...`);
-      client = null;
-      rulesCollection = null;
-    }
-  }
-
-  if (!MONGODB_URI) {
-    throw new Error(
-      "[prism-mcp-server] MONGODB_URI not set. Pass it via env in MCP config.",
-    );
-  }
-
-  if (!client) {
-    client = new MongoClient(MONGODB_URI, {
-      retryWrites: false,
-      maxPoolSize: 5,
-    });
-  }
-
-  try {
-    await client.connect();
-  } catch {
-    client = null;
-    rulesCollection = null;
-
-    console.error(
-      `[${SERVER_NAME}] First connection attempt failed, retrying...`,
-    );
-    client = new MongoClient(MONGODB_URI, {
-      retryWrites: false,
-      maxPoolSize: 5,
-    });
-    await client.connect();
-  }
-
-  console.error(`[${SERVER_NAME}] Connected to Azure Cosmos DB`);
-
-  const db = client.db(DATABASE_NAME);
-  rulesCollection = db.collection("rules");
-
-  return rulesCollection;
+/**
+ * Get the rules collection from the shared DB connection.
+ * Cached after first successful fetch to avoid repeated singleton resolution.
+ * @syntaxure-labs/db manages the singleton MongoClient with reconnection.
+ */
+async function getRulesCollection() {
+  if (_rulesCollection) return _rulesCollection;
+  _rulesCollection = await getCollection("rules");
+  return _rulesCollection;
 }
 
 // =============================================================================
@@ -259,20 +226,25 @@ server.setRequestHandler(InitializeRequestSchema, async (request) => {
 // =============================================================================
 
 server.setRequestHandler(ListResourcesRequestSchema, async () => {
-  const rules = await getDB();
-  const allRules = await rules
-    .find({ isPublic: true })
-    .project({ name: 1, tags: 1, category: 1 })
-    .toArray();
+  try {
+    const rules = await getRulesCollection();
+    const allRules = await rules
+      .find({ isPublic: true })
+      .project({ name: 1, tags: 1, category: 1 })
+      .toArray();
 
-  return {
-    resources: allRules.map((r: Document) => ({
-      uri: `prism://rules/${r._id.toString()}`,
-      name: r.name,
-      mimeType: "text/markdown",
-      description: `[${r.category}] Tags: ${(r.tags || []).join(", ")}`,
-    })),
-  };
+    return {
+      resources: allRules.map((r: Document) => ({
+        uri: `prism://rules/${r._id.toString()}`,
+        name: r.name,
+        mimeType: "text/markdown",
+        description: `[${r.category}] Tags: ${(r.tags || []).join(", ")}`,
+      })),
+    };
+  } catch (error) {
+    console.error(`[${SERVER_NAME}] ListResources error:`, error);
+    return { resources: [] };
+  }
 });
 
 // =============================================================================
@@ -281,25 +253,23 @@ server.setRequestHandler(ListResourcesRequestSchema, async () => {
 
 server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
   const uri = request.params.uri;
-  // Extract ID from prism://rules/{id}
   const id = uri.replace("prism://rules/", "");
 
-  const rules = await getDB();
-
-  let rule;
   try {
-    rule = await rules.findOne({ _id: new ObjectId(id) });
-  } catch {
-    // If not a valid ObjectId, try matching by name
-    rule = await rules.findOne({ name: id });
-  }
+    const rules = await getRulesCollection();
 
-  if (!rule) {
-    throw new Error(`Rule "${id}" not found`);
-  }
+    let rule;
+    try {
+      rule = await rules.findOne({ _id: new ObjectId(id) });
+    } catch {
+      rule = await rules.findOne({ name: id });
+    }
 
-  // Format the rule as nice markdown
-  const markdown = `# ${rule.name}
+    if (!rule) {
+      throw new Error(`Rule "${id}" not found`);
+    }
+
+    const markdown = `# ${rule.name}
 
 **Category:** ${rule.category}  
 **Priority:** ${rule.priority}  
@@ -310,15 +280,19 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
 ${rule.content}
 `;
 
-  return {
-    contents: [
-      {
-        uri: request.params.uri,
-        mimeType: "text/markdown",
-        text: markdown,
-      },
-    ],
-  };
+    return {
+      contents: [
+        {
+          uri: request.params.uri,
+          mimeType: "text/markdown",
+          text: markdown,
+        },
+      ],
+    };
+  } catch (error) {
+    console.error(`[${SERVER_NAME}] ReadResource error for "${id}":`, error);
+    throw error;
+  }
 });
 
 // =============================================================================
@@ -505,33 +479,6 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         },
       },
       {
-        name: "validate_code",
-        description:
-          "Alias for prism_check. Validates code against pattern-based governance rules. " +
-          "Returns structured violations with line/column positions.",
-        inputSchema: {
-          type: "object" as const,
-          properties: {
-            code: {
-              type: "string",
-              description: "The source code to validate",
-            },
-            ruleIds: {
-              type: "array" as const,
-              items: { type: "string" },
-              description: "Optional specific rule IDs",
-            },
-            projectId: { type: "string", description: "Optional project ID" },
-            filePath: { type: "string", description: "Optional file path" },
-            category: {
-              type: "string",
-              description: "Optional category filter",
-            },
-          },
-          required: ["code"],
-        },
-      },
-      {
         name: "prism_fix",
         description:
           "Apply an automatic fix for a code violation found by prism_check. " +
@@ -671,7 +618,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         } else {
           // Fetch from database with offline fallback
           try {
-            const rules = await getDB();
+            const rules = await getRulesCollection();
             const query: Record<string, unknown> = { isActive: true };
             if (category) query.category = category;
             if (tag) query.tags = tag;
@@ -836,7 +783,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const violations: string[] = [];
 
         // Fetch pattern-based rules from database
-        const rulesDb = await getDB();
+        const rulesDb = await getRulesCollection();
         const query: Record<string, unknown> = {
           isActive: true,
           pattern: { $exists: true, $ne: null },
@@ -939,8 +886,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         );
       }
 
-      case "prism_check":
-      case "validate_code": {
+      case "prism_check": {
         return await handlePrismCheck(
           args as unknown as Parameters<typeof handlePrismCheck>[0],
         );
@@ -1036,6 +982,20 @@ async function main() {
     `[${SERVER_NAME}] Starting Prism MCP Server v${SERVER_VERSION}...`,
   );
 
+  // Startup env checks — warn early about missing config
+  if (!process.env.MONGODB_URI) {
+    console.error(
+      `[${SERVER_NAME}] ⚠️  MONGODB_URI not set. Database tools will fail until it is configured.`,
+    );
+  }
+  const hasGemini = process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+  const hasAzure = process.env.AZURE_OPENAI_ENDPOINT && process.env.AZURE_OPENAI_API_KEY;
+  if (!hasGemini && !hasAzure) {
+    console.error(
+      `[${SERVER_NAME}] ⚠️  No AI provider configured. Smart selection and rule generation will be unavailable.`,
+    );
+  }
+
   await validateApiKey();
 
   // Detect the caller's project from the current working directory
@@ -1062,15 +1022,17 @@ async function main() {
 }
 
 // Graceful shutdown
-process.on("SIGINT", async () => {
-  console.error(`[${SERVER_NAME}] Shutting down...`);
-  if (client) {
-    await client.close();
-  }
+async function shutdown(signal: string) {
+  console.error(`[${SERVER_NAME}] Received ${signal}, shutting down...`);
+  await closeConnection().catch(() => {});
   process.exit(0);
-});
+}
 
-main().catch((error) => {
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+
+main().catch(async (error) => {
   console.error(`[${SERVER_NAME}] Fatal error:`, error);
+  await closeConnection().catch(() => {});
   process.exit(1);
 });

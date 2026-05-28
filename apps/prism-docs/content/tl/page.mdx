@@ -44,26 +44,20 @@ https://prism.jeffdev.studio/sign-up
 # 4. I-export ang .cursorrules file at i-paste sa iyong proyekto
 ```
 
-### Opsyon B: MCP Server (Advanced)
+### Opsyon B: CLI at MCP Integration (Inirerekomenda)
 
 Para sa real-time na sync sa iyong IDE:
 
 ```bash
-# 1. I-install ang MCP server globally
-npm install -g @prism/mcp-server
+# 1. I-install ang CLI globally
+npm install -g prism-context-engine
 
-# 2. I-configure ang iyong IDE (Cursor/Windsurf/VS Code)
-# Idagdag sa iyong MCP settings:
-{
-  "mcpServers": {
-    "prism": {
-      "command": "prism-mcp",
-      "args": ["--api-key", "YOUR_API_KEY"]
-    }
-  }
-}
+# 2. Mag-login at mag-sync ng iyong mga patakaran
+prism login
+prism sync
 
-# 3. May live access na ang iyong AI assistant sa iyong mga patakaran
+# 3. I-configure ang iyong IDE (Cursor/Windsurf/VS Code) nang awtomatiko
+prism init
 ```
 
 ## Mga Pangunahing Feature
