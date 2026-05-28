@@ -3,6 +3,8 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "next-themes";
 import { SupabaseProvider } from "@/components/providers/supabase-provider";
+import { ThemeDefaultSyncClient } from "@/components/settings/theme-default-sync-client";
+import { AuthWrapper } from "@/components/providers/auth-wrapper";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
@@ -98,18 +100,21 @@ export default function RootLayout({
           value={{ dark: "dark", light: "theme-light" }}
         >
           <SupabaseProvider>
-            <Toaster
-              position="bottom-right"
-              theme="dark"
-              toastOptions={{
-                style: {
-                  background: "var(--color-elevated)",
-                  border: "1px solid var(--border-subtle)",
-                  color: "var(--color-text, #ededed)",
-                },
-              }}
-            />
-            {children}
+            <AuthWrapper>
+              <ThemeDefaultSyncClient />
+              <Toaster
+                position="bottom-right"
+                theme="dark"
+                toastOptions={{
+                  style: {
+                    background: "var(--color-elevated)",
+                    border: "1px solid var(--border-subtle)",
+                    color: "var(--color-text, #ededed)",
+                  },
+                }}
+              />
+              {children}
+            </AuthWrapper>
           </SupabaseProvider>
         </ThemeProvider>
       </body>

@@ -110,6 +110,33 @@ body {
   border-radius: 3px;
 }
 
+/* ── Light Mode ── */
+html[data-theme="theme-light"] {
+  --color-void: #f5f5f0;
+  --color-surface: #fafaf8;
+  --color-glass: rgba(255, 255, 255, 0.6);
+  --color-elevated: #ffffff;
+  --color-amber: #d97706;
+  --color-amber-light: #f59e0b;
+  --color-amber-dark: #b45309;
+  --color-orange: #ea580c;
+  --color-success: #059669;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+  --color-info: #0891b2;
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-active: rgba(0, 0, 0, 0.15);
+  --border-amber: rgba(217, 119, 6, 0.4);
+}
+
+html[data-theme="theme-light"] body {
+  color: #1c1917;
+}
+
+html[data-theme="theme-light"] ::selection {
+  background: rgba(217, 119, 6, 0.2);
+}
+
 /* Admin-specific utilities */
 .glass-admin {
   background: var(--color-glass);

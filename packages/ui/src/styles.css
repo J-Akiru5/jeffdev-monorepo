@@ -353,6 +353,45 @@ body {
   background-color: rgba(15, 23, 42, 0.13);
 }
 
+.theme-light .bg-white\/\[0\.06\] {
+  background-color: rgba(15, 23, 42, 0.06);
+}
+
+/* AppTopNavbar background — uses opacity-modifier on the surface color */
+.theme-light .bg-\[\#0a0a0a\]\/80 {
+  background-color: color-mix(in srgb, var(--color-surface) 80%, transparent);
+}
+
+.theme-light .bg-\[\#0a0a0a\]\/95 {
+  background-color: color-mix(in srgb, var(--color-surface) 95%, transparent);
+}
+
+/* Hover state overrides for white-based utility classes */
+.theme-light .hover\:bg-white\/5:hover {
+  background-color: rgba(15, 23, 42, 0.05);
+}
+
+.theme-light .hover\:bg-white\/\[0\.06\]:hover {
+  background-color: rgba(15, 23, 42, 0.06);
+}
+
+.theme-light .hover\:text-white:hover {
+  color: #0b0f14;
+}
+
+.theme-light .hover\:text-white\/70:hover {
+  color: rgba(11, 15, 20, 0.7);
+}
+
+.theme-light .hover\:border-white\/\[0\.14\]:hover {
+  border-color: rgba(15, 23, 42, 0.22);
+}
+
+/* Ring color — matches navbar background for notification bell etc. */
+.theme-light .ring-\[\#0a0a0a\] {
+  --tw-ring-color: var(--color-surface);
+}
+
 .theme-light .bg-black\/50 {
   background-color: rgba(255, 255, 255, 0.6);
 }
