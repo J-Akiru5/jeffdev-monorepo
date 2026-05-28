@@ -1,5 +1,20 @@
 const requestCounts = new Map<string, { count: number; resetAt: number }>();
 
+// Periodic cleanup to prevent unbounded memory growth
+const CLEANUP_INTERVAL = 5 * 60 * 1000; // 5 minutes
+let lastCleanup = Date.now();
+
+function cleanupExpired(): void {
+  const now = Date.now();
+  if (now - lastCleanup < CLEANUP_INTERVAL) return;
+  lastCleanup = now;
+  for (const [key, entry] of requestCounts) {
+    if (now > entry.resetAt) {
+      requestCounts.delete(key);
+    }
+  }
+}
+
 export interface RateLimitConfig {
   windowMs: number;
   maxRequests: number;
@@ -15,6 +30,7 @@ export function checkRateLimit(
   key: string,
   tier: string = "free",
 ): { allowed: boolean; remaining: number; resetAt: number } {
+  cleanupExpired();
   const now = Date.now();
   const config = (LIMITS[tier] || LIMITS.free)!;
   const entry = requestCounts.get(key);

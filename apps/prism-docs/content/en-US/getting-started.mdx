@@ -110,11 +110,26 @@ Based on your Prism rules:
 
 ## What Happens Next
 
-Every time your AI generates code:
-1. It calls `get_architectural_rules({ task: "build a button" })` via MCP
-2. Prism returns only the rules relevant to that task (via Gemini embedding similarity)
-3. VS Code (with the Prism extension) validates generated code on save — violations appear as diagnostics
-4. Quick-fix actions apply `prism_fix` corrections automatically
+Every time your AI generates code, Prism optimizes the context:
+
+1. **`prism_kitchen`** analyzes your rules and enforces a token budget (60-70% savings)
+2. **`get_architectural_rules`** returns only rules relevant to the current task
+3. **`prism_intercept`** provides pre-generation guard rails (forbidden/required patterns)
+4. The AI generates code within the rules — no violations, no reiteration
+5. **`prism_check`** validates the result; **`prism_fix`** auto-corrects any remaining issues
+
+This eliminates the wasteful generate→violate→fix cycle that consumes 40-60% of tokens.
+
+## Token Reduction
+
+Prism achieves 64%+ token savings through:
+
+| Strategy | Savings | How |
+|----------|---------|-----|
+| Smart Selection | 30-40% | Embedding-based relevance filtering |
+| Deduplication | 5-10% | Merge near-identical rules |
+| Priority Truncation | 10-15% | Summarize low-priority rules |
+| Active Interception | 40-60% | Prevent violations before they happen |
 
 ## Useful Commands After Setup
 

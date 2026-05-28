@@ -66,26 +66,41 @@ export async function GET(request: NextRequest) {
   const rules = await getCollection("rules");
   const videos = await getCollection("videos");
 
-  const enriched = await Promise.all(
-    items.map(async (p) => {
-      const projectId = p._id.toString();
-      const [ruleCount, videoCount] = await Promise.all([
-        rules.countDocuments({ projectId }),
-        videos.countDocuments({ projectId }),
-      ]);
-      return {
-        id: projectId,
-        name: p.name,
-        slug: p.slug,
-        designSystem: p.designSystem,
-        stack: p.stack,
-        ruleCount,
-        videoCount,
-        createdAt: p.createdAt,
-        updatedAt: p.updatedAt,
-      };
-    }),
-  );
+  const projectIds = items.map((p) => p._id.toString());
+
+  // Batch count queries using aggregation instead of N+1
+  const [ruleCounts, videoCounts] = await Promise.all([
+    rules
+      .aggregate([
+        { $match: { projectId: { $in: projectIds } } },
+        { $group: { _id: "$projectId", count: { $sum: 1 } } },
+      ])
+      .toArray(),
+    videos
+      .aggregate([
+        { $match: { projectId: { $in: projectIds } } },
+        { $group: { _id: "$projectId", count: { $sum: 1 } } },
+      ])
+      .toArray(),
+  ]);
+
+  const ruleCountMap = new Map(ruleCounts.map((r) => [r._id, r.count]));
+  const videoCountMap = new Map(videoCounts.map((v) => [v._id, v.count]));
+
+  const enriched = items.map((p) => {
+    const projectId = p._id.toString();
+    return {
+      id: projectId,
+      name: p.name,
+      slug: p.slug,
+      designSystem: p.designSystem,
+      stack: p.stack,
+      ruleCount: ruleCountMap.get(projectId) || 0,
+      videoCount: videoCountMap.get(projectId) || 0,
+      createdAt: p.createdAt,
+      updatedAt: p.updatedAt,
+    };
+  });
 
   const response = successResponse(enriched, {
     page,
