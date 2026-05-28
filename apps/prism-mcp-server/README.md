@@ -74,12 +74,13 @@ npx prism-git-hook
 
 ### Context Optimization
 
-| Tool              | Description                                         |
-| ----------------- | --------------------------------------------------- |
-| `prism_kitchen`   | Context budget optimizer with savings report        |
-| `prism_intercept` | Active interception (prevents generate→violate→fix) |
-| `prism_compile`   | Rule Compiler (rules → executable validators)       |
-| `prism_memory`    | Persistent governance memory across sessions/teams  |
+| Tool              | Description                                                                                   |
+| ----------------- | --------------------------------------------------------------------------------------------- |
+| `prism_drip`      | **Context Drip.** Progressive rule disclosure. Drip-feeds only what's needed. 80-90% savings. |
+| `prism_kitchen`   | Context budget optimizer with savings report                                                  |
+| `prism_intercept` | Active interception (prevents generate→violate→fix)                                           |
+| `prism_compile`   | Rule Compiler (rules → executable validators)                                                 |
+| `prism_memory`    | Persistent governance memory across sessions/teams                                            |
 
 ### Core Tools
 

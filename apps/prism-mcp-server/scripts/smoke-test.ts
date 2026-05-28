@@ -296,6 +296,7 @@ async function testListTools(): Promise<TestResult> {
                   "get_skill", "list_skills", "prism_check", "prism_fix",
                   "repo_extract", "repo_scan", "prism_kitchen", "prism_intercept",
                   "prism_health", "prism_compile", "prism_orchestrate", "prism_memory",
+                  "prism_drip",
                 ];
 
                 const missing = expected.filter((t) => !toolNames.includes(t));

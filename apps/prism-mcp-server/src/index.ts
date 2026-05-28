@@ -43,6 +43,7 @@ import { handlePrismIntercept } from "./tools/prism-intercept.js";
 import { handlePrismCompile } from "./tools/prism-compile.js";
 import { handlePrismOrchestrate } from "./tools/prism-orchestrate.js";
 import { handlePrismMemory } from "./tools/prism-memory.js";
+import { handlePrismDrip } from "./tools/prism-drip.js";
 import {
   detectCurrentProject,
   scanCurrentRepo,
@@ -785,6 +786,48 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ["action"],
         },
       },
+      {
+        name: "prism_drip",
+        description:
+          "Context Drip — progressive rule disclosure. Instead of sending all rules at once, " +
+          "drip-feed only what's needed at each moment. Call with your current code snippet and " +
+          "get only the rules that apply RIGHT NOW. Three tiers: red lines (always first), " +
+          "context rules (when in a domain), edge cases (when approaching violation). " +
+          "Achieves 80-90% token savings vs sending all rules. " +
+          "Call repeatedly as you write code — each call gives the next relevant rules.",
+        inputSchema: {
+          type: "object" as const,
+          properties: {
+            code: {
+              type: "string",
+              description: "Your current code snippet. Required for 'drip' action.",
+            },
+            filePath: {
+              type: "string",
+              description: "Optional file path for context detection",
+            },
+            projectId: {
+              type: "string",
+              description: "Optional project ID to scope rules",
+            },
+            sessionId: {
+              type: "string",
+              description: "Session ID for tracking given rules (default: 'default')",
+            },
+            budget: {
+              type: "number",
+              description: "Maximum tokens for the session (default: 4000)",
+              default: 4000,
+            },
+            action: {
+              type: "string",
+              description: "'drip' (get next rules), 'reset' (clear session), 'status' (check progress)",
+              enum: ["drip", "reset", "status"],
+            },
+          },
+          required: ["code"],
+        },
+      },
     ],
   };
 });
@@ -1223,6 +1266,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case "prism_memory": {
         return await handlePrismMemory(
           args as unknown as Parameters<typeof handlePrismMemory>[0],
+        );
+      }
+
+      case "prism_drip": {
+        return await handlePrismDrip(
+          args as unknown as Parameters<typeof handlePrismDrip>[0],
         );
       }
 

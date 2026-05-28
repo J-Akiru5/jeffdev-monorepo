@@ -167,6 +167,16 @@ export interface MemoryWriteInput {
   metadata?: Record<string, unknown>;
 }
 
+/** Input for prism_drip */
+export interface DripInput {
+  code: string;
+  filePath?: string;
+  projectId?: string;
+  sessionId?: string;
+  budget?: number;
+  action?: "drip" | "reset" | "status";
+}
+
 /** Repo scan report data structure (also used in repo_extract input) */
 export interface RepoScanData {
   root: string;
