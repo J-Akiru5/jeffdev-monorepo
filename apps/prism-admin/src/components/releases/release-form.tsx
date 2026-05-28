@@ -277,7 +277,7 @@ export function ReleaseForm({ initialData, isEditing }: ReleaseFormProps) {
                 setForm((prev) => ({ ...prev, link: e.target.value }))
               }
               className="w-full"
-              placeholder="https://prism.jeffdev.studio"
+              placeholder="https://prism.syntaxure.dev"
             />
           </div>
         </div>
