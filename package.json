@@ -4,6 +4,7 @@
   "scripts": {
     "build": "doppler run -- turbo build",
     "dev": "doppler run -- turbo dev",
+    "dev:local": "turbo dev",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
