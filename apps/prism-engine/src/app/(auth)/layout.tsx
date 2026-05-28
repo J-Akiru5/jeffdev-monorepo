@@ -1,3 +1,5 @@
+import { SyntaxureLogo } from "@syntaxure/ui";
+
 export default function AuthLayout({
   children,
 }: {
@@ -13,21 +15,9 @@ export default function AuthLayout({
 
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-16">
-            <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-cyan-500 to-violet-600 flex items-center justify-center">
-              <svg
-                viewBox="0 0 24 24"
-                className="h-6 w-6 text-white"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                <path d="M2 17l10 5 10-5" />
-                <path d="M2 12l10 5 10-5" />
-              </svg>
-            </div>
+            <SyntaxureLogo className="h-10 w-10 drop-shadow-[0_0_20px_rgba(0,229,255,0.15)]" />
             <span className="text-xl font-bold text-white">
-              Prism Context Engine
+              Syntaxure Labs
             </span>
           </div>
 
@@ -36,7 +26,7 @@ export default function AuthLayout({
               The Context Operating System
               <br />
               <span className="bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent">
-                for Vibecoders
+                for AI-Native Teams
               </span>
             </h1>
             <p className="text-lg text-white/60 max-w-md leading-relaxed">

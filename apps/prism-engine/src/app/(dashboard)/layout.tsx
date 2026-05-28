@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
-import { SupabaseUserButton } from "@/components/auth/supabase-user-button";
+import { AccountDropdownWrapper } from "@/components/auth/account-dropdown-wrapper";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -86,11 +86,7 @@ export default async function DashboardLayout({
         {/* User */}
         <div className="border-t border-white/5 p-4 bg-black/20">
           <div className="flex items-center gap-3">
-            <SupabaseUserButton />
-            <div className="flex-1 truncate">
-              <p className="text-sm font-medium text-white truncate">Account</p>
-              <p className="text-xs text-white/50">Manage profile</p>
-            </div>
+            <AccountDropdownWrapper />
           </div>
         </div>
       </aside>
@@ -104,7 +100,7 @@ export default async function DashboardLayout({
           <span className="font-semibold text-white tracking-tight">Prism</span>
           <BetaBadge />
         </Link>
-        <SupabaseUserButton />
+        <AccountDropdownWrapper />
       </header>
 
       {/* Main Content */}

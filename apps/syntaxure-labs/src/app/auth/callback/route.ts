@@ -4,23 +4,27 @@ import { acceptInvite } from "@/app/actions/accept-invite";
 
 export const dynamic = "force-dynamic";
 
+const ADMIN_BASE =
+  process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3004";
+
 /**
  * OAuth Callback Route
  * --------------------
  * Receives the authorization code from Supabase OAuth provider,
- * exchanges it for a session, and processes any pending invite tokens.
+ * exchanges it for a session, processes any pending invite tokens,
+ * then redirects to prism-admin.
  */
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
   const invite = searchParams.get("invite");
-  const next = searchParams.get("next") || "/admin";
 
   if (code) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
+      // Invite flow → prism-admin profile setup
       if (invite) {
         const {
           data: { user },
@@ -33,20 +37,28 @@ export async function GET(request: Request) {
               user.email,
             );
             if (inviteResult.success) {
-              return NextResponse.redirect(`${origin}/admin/profile`);
-            } else {
-              console.error("Failed to accept invite:", inviteResult.error);
+              return NextResponse.redirect(
+                new URL("/admin/agency/settings", ADMIN_BASE).toString(),
+              );
             }
+            console.error("Failed to accept invite:", inviteResult.error);
           } catch (err) {
             console.error("Error during invite acceptance:", err);
           }
         }
       }
-      return NextResponse.redirect(`${origin}${next}`);
-    } else {
-      console.error("[AUTH CALLBACK ERROR]", error);
+
+      // Normal login → prism-admin dashboard
+      return NextResponse.redirect(
+        new URL("/admin/agency/dashboard", ADMIN_BASE).toString(),
+      );
     }
+
+    console.error("[AUTH CALLBACK ERROR]", error);
   }
 
-  return NextResponse.redirect(`${origin}/admin/login?error=auth_failed`);
+  // Auth failed → back to login
+  return NextResponse.redirect(
+    new URL("/admin/login?error=auth_failed", origin).toString(),
+  );
 }

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
 import { Button, Input } from "@syntaxure/ui";
-import { Loader2, Lock, Shield } from "lucide-react";
+import { Loader2, Lock, Sparkles } from "lucide-react";
 
 export function SignInForm() {
   const [email, setEmail] = useState("");
@@ -72,10 +72,10 @@ export function SignInForm() {
       {/* Header */}
       <div className="mb-8 text-center">
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-cyan-500/10 border border-cyan-500/30 animate-neon-pulse">
-          <Shield className="h-8 w-8 text-cyan-400" />
+          <Sparkles className="h-8 w-8 text-cyan-400" />
         </div>
-        <h1 className="text-2xl font-bold text-white">Prism Admin</h1>
-        <p className="mt-2 text-white/50 text-sm">Mission Control Access</p>
+        <h1 className="text-2xl font-bold text-white">Syntaxure Labs</h1>
+        <p className="mt-2 text-white/50 text-sm">Admin Access Portal</p>
       </div>
 
       {error && (
@@ -114,7 +114,7 @@ export function SignInForm() {
               />
             </svg>
           )}
-          Sign in with Google
+          Continue with Google
         </button>
         <button
           type="button"
@@ -132,6 +132,10 @@ export function SignInForm() {
           Sign in with GitHub
         </button>
       </div>
+
+      <p className="text-center text-[11px] text-white/30 font-mono mb-6">
+        Authorized personnel only
+      </p>
 
       {/* Divider */}
       <div className="relative mb-6">
@@ -180,7 +184,7 @@ export function SignInForm() {
           variant="primary"
           className="w-full mt-2"
         >
-          Sign In
+          Sign In with Email
         </Button>
       </form>
 

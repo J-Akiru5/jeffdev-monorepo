@@ -16,6 +16,7 @@
     "@syntaxure/ui": "workspace:*",
     "clsx": "^2.1.1",
     "lucide-react": "^0.562.0",
+    "nanoid": "^5.1.11",
     "next": "16.1.4",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
@@ -25,6 +26,7 @@
     "zod": "^4.2.1"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^15.1.0",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4.1.18",
@@ -33,7 +35,6 @@
     "@types/react-dom": "19.2.2",
     "eslint": "^9.39.1",
     "eslint-config-next": "16.1.4",
-    "@next/bundle-analyzer": "^15.1.0",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.2"
   }

@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { SupabaseUserButton } from "@/components/auth/supabase-user-button";
+import { AccountDropdownWrapper } from "@/components/auth/account-dropdown-wrapper";
 import {
   LayoutDashboard,
   Users,
@@ -17,6 +17,14 @@ import {
   Calendar,
   FileText,
   Clock,
+  Building2,
+  ListTodo,
+  Activity,
+  UserCircle,
+  MessageSquare,
+  KeyRound,
+  PlusCircle,
+  ClipboardList,
 } from "lucide-react";
 
 /**
@@ -135,8 +143,50 @@ export default async function AdminLayout({
           <NavItem href="/admin/agency/releases" icon={FileText}>
             Releases
           </NavItem>
+          <NavItem href="/admin/agency/case-studies" icon={FileText}>
+            Case Studies
+          </NavItem>
+          <NavItem href="/admin/agency/feedback" icon={Mail}>
+            Feedback
+          </NavItem>
+          <NavItem href="/admin/agency/messages" icon={MessageSquare}>
+            Messages
+          </NavItem>
+
+          <div className="px-3 mt-4 mb-2">
+            <span className="text-[10px] font-medium text-white/30 uppercase tracking-wider">
+              Management
+            </span>
+          </div>
+          <NavItem href="/admin/agency/projects/new" icon={PlusCircle}>
+            New Project
+          </NavItem>
+          <NavItem href="/admin/agency/invoices/new" icon={ClipboardList}>
+            New Invoice
+          </NavItem>
+          <NavItem href="/admin/agency/profile" icon={UserCircle}>
+            Profile
+          </NavItem>
+          <NavItem href="/admin/agency/access" icon={KeyRound}>
+            Access Control
+          </NavItem>
+          <NavItem href="/admin/agency/audit" icon={Activity}>
+            Audit Log
+          </NavItem>
           <NavItem href="/admin/agency/availability" icon={Clock}>
             Availability
+          </NavItem>
+
+          <div className="px-3 mt-4 mb-2">
+            <span className="text-[10px] font-medium text-white/30 uppercase tracking-wider">
+              Prism Manage
+            </span>
+          </div>
+          <NavItem href="/admin/workspaces" icon={Building2}>
+            Workspaces
+          </NavItem>
+          <NavItem href="/admin/manage-projects" icon={ListTodo}>
+            All Projects
           </NavItem>
 
           {isFounder && (
@@ -155,7 +205,7 @@ export default async function AdminLayout({
 
         {/* User */}
         <div className="border-t border-white/5 p-3">
-          <SupabaseUserButton />
+          <AccountDropdownWrapper />
         </div>
       </aside>
 
@@ -171,7 +221,7 @@ export default async function AdminLayout({
           <span className="text-[10px] text-amber-400 font-mono uppercase bg-amber-500/10 px-2 py-1 rounded">
             {role}
           </span>
-          <SupabaseUserButton />
+          <AccountDropdownWrapper />
         </div>
       </header>
 

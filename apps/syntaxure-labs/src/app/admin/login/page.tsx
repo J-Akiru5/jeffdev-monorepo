@@ -79,12 +79,16 @@ function AdminLoginForm() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 6v6l4 2" />
+                <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                <path d="M2 17l10 5 10-5" />
+                <path d="M2 12l10 5 10-5" />
               </svg>
             </div>
 
-            <h1 className="text-3xl font-bold text-white">{title}</h1>
+            <h1 className="text-2xl font-bold text-white">Syntaxure Labs</h1>
+            <p className="mt-1 text-xs font-mono uppercase tracking-widest text-white/30">
+              {title}
+            </p>
             <p className="mt-2 text-white/50 text-sm">{subtitle}</p>
           </div>
 
@@ -133,9 +137,9 @@ function AdminLoginForm() {
           <div className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
         </div>
 
-        {/* Small footer text */}
-        <p className="mt-6 text-center text-[11px] text-white/25 font-mono">
-          Authorized personnel only
+        {/* Footer */}
+        <p className="mt-6 text-center text-[10px] text-white/20 font-mono uppercase tracking-wider">
+          Est. 2025 · Built with Next.js
         </p>
       </div>
     </div>

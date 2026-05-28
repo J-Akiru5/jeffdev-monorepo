@@ -147,3 +147,19 @@ function normalizeEvent(raw: Record<string, unknown>): CalendarEvent {
     syncedAt: String(raw.synced_at || raw.syncedAt || new Date().toISOString()),
   };
 }
+
+export async function disconnectCalendar() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const { error } = await supabase
+    .from("user_tokens")
+    .delete()
+    .eq("user_id", user.id)
+    .eq("provider", "google");
+
+  if (error) throw error;
+  revalidatePath("/settings");
+}
+

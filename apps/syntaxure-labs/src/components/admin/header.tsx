@@ -7,21 +7,53 @@
  */
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { NotificationPopover } from "./notification-popover";
+import { AccountDropdown, type AppLink } from "@syntaxure/ui";
 import { useUser } from "@/contexts/user-context";
+import { LayoutDashboard, Box, Sparkles, User } from "lucide-react";
 
 export function AdminHeader() {
-  const { user, loading } = useUser();
+  const { user, loading, logout } = useUser();
+  const router = useRouter();
 
-  // Fallback while loading
-  const displayUser = user || {
-    uid: "",
-    displayName: "Loading...",
-    email: "",
-    photoURL: null,
-    role: "employee" as const,
-  };
+  // Cross-app quick links
+  const appLinks: AppLink[] = [
+    {
+      label: "Syntaxure Labs",
+      href: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+      shortLabel: "Labs",
+      icon: <Sparkles className="h-3.5 w-3.5" />,
+    },
+    {
+      label: "Manage",
+      href: process.env.NEXT_PUBLIC_MANAGE_URL || "http://localhost:3007",
+      shortLabel: "Mgmt",
+      icon: <LayoutDashboard className="h-3.5 w-3.5" />,
+    },
+    {
+      label: "Admin",
+      href: process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3004",
+      shortLabel: "Admin",
+      icon: <User className="h-3.5 w-3.5" />,
+    },
+    {
+      label: "Engine",
+      href: process.env.NEXT_PUBLIC_PRISM_URL || "http://localhost:3001",
+      shortLabel: "Engine",
+      icon: <Box className="h-3.5 w-3.5" />,
+    },
+  ];
+
+  async function handleSignOut() {
+    await logout();
+    router.push("/sign-in");
+    router.refresh();
+  }
+
+  const displayName = user?.displayName || "User";
+  const initials = displayName.charAt(0).toUpperCase();
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-white/6 bg-void/80 px-4 backdrop-blur-md lg:px-6">
@@ -36,39 +68,30 @@ export function AdminHeader() {
           />
         </div>
 
-        {/* Mobile Logo/Title (Optional, if you want something on the left) */}
+        {/* Mobile Logo/Title */}
         <div className="md:hidden font-semibold text-white">Dashboard</div>
       </div>
 
       {/* Right side */}
       <div className="flex items-center gap-4">
         {/* Notifications */}
-        {displayUser.uid && <NotificationPopover userId={displayUser.uid} />}
+        {user?.uid && <NotificationPopover userId={user.uid} />}
 
-        {/* User - Clickable to Profile */}
-        <Link
-          href="/admin/profile"
-          className="flex items-center gap-3 rounded-md px-2 py-1.5 transition-colors hover:bg-white/5"
-        >
-          <div className="hidden text-right md:block">
-            <div className="text-sm font-medium text-white">
-              {loading ? "Loading..." : displayUser.displayName}
-            </div>
-            <div className="font-mono text-[10px] uppercase tracking-wider text-white/40">
-              {displayUser.role}
-            </div>
-          </div>
-          {displayUser.photoURL ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={displayUser.photoURL}
-              alt={displayUser.displayName}
-              className="h-9 w-9 rounded-full object-cover"
-            />
-          ) : (
-            <div className="h-9 w-9 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500" />
-          )}
-        </Link>
+        {/* Unified Account Dropdown */}
+        {loading ? (
+          <div className="h-8 w-8 animate-pulse rounded-full bg-white/10" />
+        ) : (
+          <AccountDropdown
+            initials={initials}
+            email={user?.email}
+            displayName={displayName}
+            role={user?.role}
+            avatarUrl={user?.photoURL}
+            settingsHref="/admin/profile"
+            appLinks={appLinks}
+            onSignOut={handleSignOut}
+          />
+        )}
       </div>
     </header>
   );

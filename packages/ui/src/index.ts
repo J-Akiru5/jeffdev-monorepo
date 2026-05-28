@@ -33,4 +33,5 @@ export { SectionHeader } from "./section-header";
 export { GlassPanel } from "./glass-panel";
 export { SyntaxureLogo } from "./logo";
 export { Select, type SelectOption, type SelectProps } from "./select";
+export { AccountDropdown, type AccountDropdownProps, type AppLink } from "./account-dropdown";
 

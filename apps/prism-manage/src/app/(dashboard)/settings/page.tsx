@@ -10,6 +10,7 @@ import { ThemeSection } from "@/components/settings/theme-section";
 import { ProfileSection } from "@/components/settings/profile-section";
 import { WorkspaceMembersSettings } from "@/components/settings/workspace-members";
 import { getWorkspaceMembers } from "@/app/actions/workspace";
+import { disconnectCalendar } from "@/app/actions/calendar";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
@@ -38,6 +39,18 @@ export default async function SettingsPage() {
     userPhone = profile?.phone || null;
     userTimezone = profile?.timezone || null;
     userAvatarUrl = profile?.avatar_url || null;
+  }
+
+  // Check Google Calendar connection status
+  let isCalendarConnected = false;
+  if (user) {
+    const { data: token } = await supabase
+      .from("user_tokens")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("provider", "google")
+      .maybeSingle();
+    isCalendarConnected = !!token;
   }
 
   // Fetch members for the Syntaxure Labs workspace if user is logged in
@@ -114,16 +127,42 @@ export default async function SettingsPage() {
                 Connect your Google Calendar to sync events and tasks.
               </p>
 
-              <div className="mt-4 rounded-lg border border-amber-500/20 bg-amber-500/10 p-4">
-                <p className="text-sm text-amber-400">
-                  <strong>Not connected.</strong> Configure Google Cloud Console
-                  to enable sync.
-                </p>
-              </div>
+              {isCalendarConnected ? (
+                <>
+                  <div className="mt-4 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4">
+                    <p className="text-sm text-emerald-400">
+                      <strong>Connected.</strong> Your Google Calendar is successfully linked.
+                    </p>
+                  </div>
 
-              <button className="mt-4 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-[#050505] transition-colors hover:bg-cyan-400 disabled:opacity-50">
-                Connect Google Account
-              </button>
+                  <form
+                    action={async () => {
+                      "use server";
+                      await disconnectCalendar();
+                    }}
+                  >
+                    <button className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/20">
+                      Disconnect Google Account
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <>
+                  <div className="mt-4 rounded-lg border border-amber-500/20 bg-amber-500/10 p-4">
+                    <p className="text-sm text-amber-400">
+                      <strong>Not connected.</strong> Configure Google Cloud Console
+                      to enable sync.
+                    </p>
+                  </div>
+
+                  <a
+                    href="/api/calendar/auth"
+                    className="mt-4 inline-block rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-[#050505] transition-colors hover:bg-cyan-400"
+                  >
+                    Connect Google Account
+                  </a>
+                </>
+              )}
             </div>
           </div>
         </section>

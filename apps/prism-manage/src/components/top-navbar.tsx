@@ -17,19 +17,19 @@ import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
 import { useWorkspaceStore } from "@/stores/workspace-store";
-import { SyntaxureLogo } from "@syntaxure/ui";
+import { SyntaxureLogo, AccountDropdown } from "@syntaxure/ui";
 import {
   Search,
   Plus,
   Bell,
-  Sun,
-  Moon,
-  Settings,
-  LogOut,
   Building2,
   User,
   Check,
   ChevronDown,
+  LayoutDashboard,
+  Shield,
+  Box,
+  Sparkles,
 } from "lucide-react";
 import { CommandPalette } from "@/components/command-palette";
 
@@ -107,31 +107,45 @@ function NavWorkspaceSwitcher() {
 }
 
 // ──────────────────────────────────────────────
-// Zone 3 Helpers — User Dropdown
+// Zone 3 Helpers — Unified Account Dropdown
 // ──────────────────────────────────────────────
 
-function UserDropdown() {
-  const [user, setUser] = useState<{ email?: string } | null>(null);
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+function AccountMenu() {
+  const [userId, setUserId] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | undefined>();
+  const [name, setName] = useState("User");
+  const [role, setRole] = useState("");
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
   const { theme, setTheme } = useTheme();
-  const isDark = theme === "dark";
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) setUser(data.user as unknown as { email?: string });
+      if (data.user) {
+        setUserId(data.user.id);
+        setEmail(data.user.email || undefined);
+        setName(
+          (data.user.user_metadata as Record<string, unknown> | undefined)
+            ?.full_name as string | undefined ||
+            data.user.email?.split("@")[0] ||
+            "User"
+        );
+      }
     });
   }, [supabase]);
 
   useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
+    if (userId) {
+      supabase
+        .from("user_profiles")
+        .select("role")
+        .eq("id", userId)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data) setRole((data as { role?: string }).role || "");
+        });
+    }
+  }, [userId, supabase]);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -139,66 +153,47 @@ function UserDropdown() {
     router.refresh();
   }
 
-  const displayName = user?.email?.split("@")[0] || "User";
-  const avatar = displayName.charAt(0).toUpperCase();
+  const initials = name.charAt(0).toUpperCase();
+
+  const appLinks = [
+    {
+      label: "Manage",
+      href: process.env.NEXT_PUBLIC_MANAGE_URL || "http://localhost:3007",
+      shortLabel: "Mgmt",
+      icon: <LayoutDashboard className="h-3.5 w-3.5" />,
+    },
+    {
+      label: "Admin",
+      href: process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3004",
+      shortLabel: "Admin",
+      icon: <Shield className="h-3.5 w-3.5" />,
+    },
+    {
+      label: "Engine",
+      href: process.env.NEXT_PUBLIC_PRISM_URL || "http://localhost:3001",
+      shortLabel: "Engine",
+      icon: <Box className="h-3.5 w-3.5" />,
+    },
+    {
+      label: "Syntaxure Labs",
+      href: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+      shortLabel: "Labs",
+      icon: <Sparkles className="h-3.5 w-3.5" />,
+    },
+  ];
 
   return (
-    <div className="relative" ref={ref}>
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex h-8 w-8 items-center justify-center rounded-lg text-sm font-medium text-cyan-400 transition-colors hover:bg-glass-05"
-        title="Profile"
-      >
-        <div className="flex h-7 w-7 items-center justify-center rounded-full border border-cyan-500/30 bg-cyan-500/20 text-xs font-medium">
-          {avatar}
-        </div>
-      </button>
-
-      {open && (
-        <div className="absolute right-0 top-full z-50 mt-1.5 w-56 rounded-xl border border-border bg-elevated py-1 shadow-2xl">
-          {/* User info */}
-          <div className="border-b border-border px-4 py-3">
-            <p className="truncate text-xs font-medium text-text-primary">
-              {user?.email || "User"}
-            </p>
-          </div>
-
-          {/* Theme toggle */}
-          <button
-            onClick={() => setTheme(isDark ? "theme-light" : "dark")}
-            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-text-tertiary transition-colors hover:bg-glass-05 hover:text-text-primary"
-          >
-            {isDark ? (
-              <Sun className="h-4 w-4" />
-            ) : (
-              <Moon className="h-4 w-4" />
-            )}
-            <span>{isDark ? "Light Mode" : "Dark Mode"}</span>
-          </button>
-
-          {/* Settings */}
-          <Link
-            href="/settings"
-            onClick={() => setOpen(false)}
-            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-text-tertiary transition-colors hover:bg-glass-05 hover:text-text-primary"
-          >
-            <Settings className="h-4 w-4" />
-            <span>Settings</span>
-          </Link>
-
-          {/* Sign Out */}
-          <div className="border-t border-border pt-1">
-            <button
-              onClick={handleSignOut}
-              className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-text-tertiary transition-colors hover:bg-glass-05 hover:text-red-400"
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Sign Out</span>
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+    <AccountDropdown
+      initials={initials}
+      email={email}
+      displayName={name}
+      role={role || undefined}
+      settingsHref="/settings"
+      appLinks={appLinks}
+      theme={theme as "dark" | "light" | undefined}
+      onToggleTheme={() => setTheme(theme === "dark" ? "theme-light" : "dark")}
+      onSignOut={handleSignOut}
+    />
   );
 }
 
@@ -282,7 +277,7 @@ export function TopNavbar() {
             </button>
 
             {/* User Profile */}
-            <UserDropdown />
+            <AccountMenu />
           </div>
         </div>
       </header>
