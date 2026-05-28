@@ -20,7 +20,7 @@ const statusColors: Record<string, string> = {
 
 function SendInvoiceButton({ id }: { id: string }) {
   return (
-    <form action={sendAgencyInvoice.bind(null, id)}>
+    <form action={async () => { await sendAgencyInvoice(id); }}>
       <button
         type="submit"
         className="inline-flex items-center gap-2 rounded-lg bg-cyan-500/20 px-4 py-2 text-sm text-cyan-400 hover:bg-cyan-500/30 transition-colors"
@@ -165,7 +165,7 @@ export default async function AgencyInvoiceDetailPage({
           {(invoice.tax ?? 0) > 0 && (
             <div className="flex justify-between text-sm">
               <span className="text-white/40">Tax</span>
-              <span className="text-white/70">{currencySymbol}{invoice.tax.toLocaleString()}</span>
+              <span className="text-white/70">{currencySymbol}{(invoice.tax ?? 0).toLocaleString()}</span>
             </div>
           )}
           {invoice.discount && invoice.discount > 0 && (

@@ -15,13 +15,11 @@ VALUES ('avatars', 'avatars', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- =============================================================================
--- 2. Enable RLS on storage.objects (it's enabled by default on new buckets,
---    but we ensure it here for clarity)
--- =============================================================================
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
-
--- =============================================================================
--- 3. Drop any existing avatar policies (idempotent re-run safety)
+-- 2. Drop any existing avatar policies (idempotent re-run safety)
+--    Note: storage.objects RLS is already enabled by default in Supabase.
+--    DO NOT add ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY here
+--    because the table is owned by supabase_storage_admin and migrations
+--    run as supabase_admin, causing "must be owner of table objects" error.
 -- =============================================================================
 DROP POLICY IF EXISTS "Anyone can view avatars" ON storage.objects;
 DROP POLICY IF EXISTS "Users can upload own avatar" ON storage.objects;
