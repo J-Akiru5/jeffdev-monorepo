@@ -581,7 +581,7 @@ const DEFAULT_ABOUT_CONTENT: AboutContent = {
     title: "Lead Architect & Founder",
     bio: "Full-stack engineer with 5+ years building production systems. Specializing in Next.js, cloud architecture, and AI integration. Previously worked on projects for education, e-commerce, and SaaS clients.",
     image: "/profilepic.webp",
-    email: "jeff@jeffdev.studio",
+    email: "jeff@syntaxure.dev",
     location: "Iloilo City, Philippines",
     availability: "Available for Q1 2026 projects",
   },
