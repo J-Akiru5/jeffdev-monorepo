@@ -11,7 +11,8 @@ import { useProjects } from "@/contexts/project-context";
 import { GripVertical, Plus } from "lucide-react";
 import { updateTaskStatus, createTask } from "@/app/actions/tasks";
 import type { Task } from "@/lib/schemas";
-import { getTaskTypeConfig } from "@/lib/task-types";
+import { getTaskTypeConfig, STAFF_LOCKED_STATUSES } from "@/lib/task-types";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 import { toast } from "sonner";
 
 type KanbanColumn = "backlog" | "todo" | "in_progress" | "in_review" | "approved";
@@ -30,6 +31,15 @@ const columns: { id: KanbanColumn; title: string; color: string }[] = [
 
 export default function KanbanPage() {
   const { projects, activeProjectId } = useProjects();
+  const userRole = useWorkspaceStore((s) => s.userRole);
+  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
+  const workspaces = useWorkspaceStore((s) => s.workspaces);
+  const cpoUserId = useWorkspaceStore((s) => s.cpoUserId);
+  // Find Syntaxure Labs workspace — only there does the RBAC apply
+  const syntaxureWorkspaceId = workspaces.find(
+    (w) => w.name === "Syntaxure Labs" || w.name === "Syntaxure Labs, Inc."
+  )?.id;
+  const isSyntaxureLabs = syntaxureWorkspaceId && activeWorkspaceId === syntaxureWorkspaceId;
   const [tasks, setTasks] = useState<KanbanTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [draggedTask, setDraggedTask] = useState<string | null>(null);
@@ -97,6 +107,19 @@ export default function KanbanPage() {
     const task = tasks.find((t) => t.id === draggedTask);
     if (!task) return;
 
+    // Skip if dropping into the same column
+    if (task.column === column) {
+      setDraggedTask(null);
+      return;
+    }
+
+    // RBAC check: employees cannot drop into Approved (only in Syntaxure Labs workspace)
+    if (isSyntaxureLabs && userRole === "employee" && STAFF_LOCKED_STATUSES.includes(column)) {
+      toast.error("Only founders and the CPO can approve tasks");
+      setDraggedTask(null);
+      return;
+    }
+
     try {
       const dbStatus = column;
       await updateTaskStatus(draggedTask, dbStatus);
@@ -112,6 +135,15 @@ export default function KanbanPage() {
             : t,
         ),
       );
+
+      // Show contextual toast based on the target column
+      if (column === "in_review") {
+        toast.success("Sent to CPO for review");
+      } else if (column === "approved") {
+        toast.success("Task approved");
+      } else if (column === "backlog") {
+        toast.info("Moved to backlog");
+      }
     } catch {
       toast.error("Failed to update task status");
     }
@@ -238,6 +270,18 @@ export default function KanbanPage() {
                               High
                             </span>
                           )}
+                          {/* CPO Review badge */}
+                          {isSyntaxureLabs && (
+                            hasCpoReviewTag(task) || isAssignedToCpo(task, cpoUserId)
+                          ) && (
+                            <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-purple-500/15 px-2 py-0.5 text-[10px] font-medium text-purple-400">
+                              <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 20h9" />
+                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                              </svg>
+                              CPO Review
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -274,4 +318,12 @@ function mapStatusToColumn(status: string): KanbanColumn {
     default:
       return "backlog";
   }
+}
+
+function hasCpoReviewTag(task: KanbanTask): boolean {
+  return Array.isArray(task.tags) && task.tags.includes("CPO Review");
+}
+
+function isAssignedToCpo(task: KanbanTask, cpoUserId: string | null): boolean {
+  return !!cpoUserId && !!task.assignedTo && task.assignedTo === cpoUserId;
 }

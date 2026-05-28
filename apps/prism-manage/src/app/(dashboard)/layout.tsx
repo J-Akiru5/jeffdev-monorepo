@@ -59,6 +59,7 @@ export default async function DashboardLayout({
   let departments: { id: string; workspaceId: string; name: string; createdAt: string }[] = [];
   let userRole: "founder" | "employee" = "employee";
   let userDepartmentId: string | null = null;
+  let cpoUserId: string | null = null;
 
   if (syntaxureWorkspace) {
     const { data: deptData } = await supabase
@@ -80,6 +81,21 @@ export default async function DashboardLayout({
     );
     userRole = (membership?.role as "founder" | "employee") || "employee";
     userDepartmentId = (membership?.department_id as string | null) || null;
+
+    // Find the CPO: the member assigned to the Product department
+    const productDept = departments.find((d) => d.name === "Product");
+    if (productDept) {
+      const { data: cpoMembership } = await supabase
+        .from("workspace_members")
+        .select("user_id")
+        .eq("workspace_id", syntaxureWorkspace.id)
+        .eq("department_id", productDept.id)
+        .maybeSingle();
+
+      if (cpoMembership) {
+        cpoUserId = String(cpoMembership.user_id);
+      }
+    }
   }
 
   return (
@@ -93,6 +109,7 @@ export default async function DashboardLayout({
       departments={departments}
       userRole={userRole}
       userDepartmentId={userDepartmentId}
+      cpoUserId={cpoUserId}
     >
       <ProjectProvider initialProjects={getDefaultProjects()}>
         <div className="min-h-screen bg-surface">

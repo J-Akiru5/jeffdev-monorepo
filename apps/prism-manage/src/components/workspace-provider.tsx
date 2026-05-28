@@ -10,6 +10,7 @@ interface WorkspaceProviderProps {
   departments: { id: string; workspaceId: string; name: string; createdAt: string }[];
   userRole: "founder" | "employee";
   userDepartmentId: string | null;
+  cpoUserId: string | null;
 }
 
 /**
@@ -25,12 +26,14 @@ export function WorkspaceProvider({
   departments,
   userRole,
   userDepartmentId,
+  cpoUserId,
 }: WorkspaceProviderProps) {
   const setWorkspaces = useWorkspaceStore((s) => s.setWorkspaces);
   const setActiveWorkspace = useWorkspaceStore((s) => s.setActiveWorkspace);
   const setDepartments = useWorkspaceStore((s) => s.setDepartments);
   const setUserRole = useWorkspaceStore((s) => s.setUserRole);
   const setUserDepartmentId = useWorkspaceStore((s) => s.setUserDepartmentId);
+  const setCpoUserId = useWorkspaceStore((s) => s.setCpoUserId);
   const setLoaded = useWorkspaceStore((s) => s.setLoaded);
 
   useEffect(() => {
@@ -41,6 +44,7 @@ export function WorkspaceProvider({
     setDepartments(departments);
     setUserRole(userRole);
     setUserDepartmentId(userDepartmentId);
+    setCpoUserId(cpoUserId);
     setLoaded(true);
   }, [
     workspaces,
@@ -48,11 +52,13 @@ export function WorkspaceProvider({
     departments,
     userRole,
     userDepartmentId,
+    cpoUserId,
     setWorkspaces,
     setActiveWorkspace,
     setDepartments,
     setUserRole,
     setUserDepartmentId,
+    setCpoUserId,
     setLoaded,
   ]);
 
