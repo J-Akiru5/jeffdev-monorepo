@@ -41,6 +41,7 @@ import { extractRulesFromRepoScan } from "./tools/repo-extract.js";
 import { handleKitchenAnalyze, handleKitchenPreview } from "./tools/prism-kitchen.js";
 import { handlePrismIntercept } from "./tools/prism-intercept.js";
 import { handlePrismCompile } from "./tools/prism-compile.js";
+import { handlePrismOrchestrate } from "./tools/prism-orchestrate.js";
 import {
   detectCurrentProject,
   scanCurrentRepo,
@@ -680,6 +681,47 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           },
         },
       },
+      {
+        name: "prism_orchestrate",
+        description:
+          "ONE-CALL governance engine. Instead of calling 5 separate tools (prism_compile → " +
+          "prism_kitchen → get_architectural_rules → prism_intercept → prism_check), call this " +
+          "ONCE and get everything: compiled validators, optimized rules, guard rails, and injection " +
+          "context. Reduces tool calls from 5→1 and tokens by 60-70%. " +
+          "Mode: 'full' (everything), 'compact' (rules + guard rails), 'minimal' (injection context only).",
+        inputSchema: {
+          type: "object" as const,
+          properties: {
+            task: {
+              type: "string",
+              description: "What you're about to code (e.g., 'build a login form'). Required.",
+            },
+            code: {
+              type: "string",
+              description: "Optional: code to validate. If provided, runs validation and returns violations.",
+            },
+            filePath: {
+              type: "string",
+              description: "Optional file path for context",
+            },
+            projectId: {
+              type: "string",
+              description: "Optional project ID to scope rules",
+            },
+            budget: {
+              type: "number",
+              description: "Maximum tokens for the response (default: 4000)",
+              default: 4000,
+            },
+            mode: {
+              type: "string",
+              description: "'full' (default), 'compact' (rules + guard rails), 'minimal' (injection context only)",
+              enum: ["full", "compact", "minimal"],
+            },
+          },
+          required: ["task"],
+        },
+      },
     ],
   };
 });
@@ -1106,6 +1148,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case "prism_compile": {
         return await handlePrismCompile(
           args as unknown as Parameters<typeof handlePrismCompile>[0],
+        );
+      }
+
+      case "prism_orchestrate": {
+        return await handlePrismOrchestrate(
+          args as unknown as Parameters<typeof handlePrismOrchestrate>[0],
         );
       }
 

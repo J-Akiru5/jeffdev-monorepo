@@ -128,6 +128,16 @@ export interface CompileInput {
   format?: "markdown" | "json";
 }
 
+/** Input for prism_orchestrate */
+export interface OrchestrateInput {
+  task: string;
+  code?: string;
+  filePath?: string;
+  projectId?: string;
+  budget?: number;
+  mode?: "full" | "compact" | "minimal";
+}
+
 /** Repo scan report data structure (also used in repo_extract input) */
 export interface RepoScanData {
   root: string;
