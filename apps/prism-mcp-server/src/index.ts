@@ -40,6 +40,7 @@ import { handlePrismFix } from "./tools/prism-fix.js";
 import { extractRulesFromRepoScan } from "./tools/repo-extract.js";
 import { handleKitchenAnalyze, handleKitchenPreview } from "./tools/prism-kitchen.js";
 import { handlePrismIntercept } from "./tools/prism-intercept.js";
+import { handlePrismCompile } from "./tools/prism-compile.js";
 import {
   detectCurrentProject,
   scanCurrentRepo,
@@ -648,6 +649,37 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           },
         },
       },
+      {
+        name: "prism_compile",
+        description:
+          "Rule Compiler — transforms governance rules into executable validators. " +
+          "Instead of giving the AI markdown rules to read (and potentially ignore), " +
+          "this compiles rules into TypeScript type guards, import validators, and fix templates. " +
+          "The AI receives injection context that constrains what it can generate. " +
+          "This enforces governance at the code level, not just as suggestions.",
+        inputSchema: {
+          type: "object" as const,
+          properties: {
+            projectId: {
+              type: "string",
+              description: "Optional project ID to scope rules",
+            },
+            category: {
+              type: "string",
+              description: "Optional filter by rule category",
+            },
+            task: {
+              type: "string",
+              description: "Optional task description for context-aware compilation",
+            },
+            format: {
+              type: "string",
+              description: "Response format: 'markdown' (default) or 'json'",
+              enum: ["markdown", "json"],
+            },
+          },
+        },
+      },
     ],
   };
 });
@@ -1069,6 +1101,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             ].filter(Boolean).join("\n"),
           }],
         };
+      }
+
+      case "prism_compile": {
+        return await handlePrismCompile(
+          args as unknown as Parameters<typeof handlePrismCompile>[0],
+        );
       }
 
       default:

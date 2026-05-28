@@ -120,6 +120,14 @@ export interface HealthInput {
   verbose?: boolean;
 }
 
+/** Input for prism_compile */
+export interface CompileInput {
+  projectId?: string;
+  category?: string;
+  task?: string;
+  format?: "markdown" | "json";
+}
+
 /** Repo scan report data structure (also used in repo_extract input) */
 export interface RepoScanData {
   root: string;

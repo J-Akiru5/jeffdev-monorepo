@@ -40,10 +40,11 @@ pnpm --filter prism-mcp-server run dev
 
 ### Context Optimization Tools
 
-| Tool              | Description                                                                                                                                                                                                                 |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `prism_kitchen`   | **Context budget optimizer.** Analyzes what the AI will receive and optimizes it. Returns token savings report. Use `action: "analyze"` for full report or `action: "preview"` for just the context.                        |
-| `prism_intercept` | **Active interception agent.** Prevents the generate→violate→fix cycle. Call with `task` before generating code to get forbidden/required patterns. Call with `code` after generating to validate and get fix instructions. |
+| Tool              | Description                                                                                                                                                                                                                                                               |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `prism_kitchen`   | **Context budget optimizer.** Analyzes what the AI will receive and optimizes it. Returns token savings report. Use `action: "analyze"` for full report or `action: "preview"` for just the context.                                                                      |
+| `prism_intercept` | **Active interception agent.** Prevents the generate→violate→fix cycle. Call with `task` before generating code to get forbidden/required patterns. Call with `code` after generating to validate and get fix instructions.                                               |
+| `prism_compile`   | **Rule Compiler.** Transforms governance rules into executable validators. Compiles rules into TypeScript type guards, import validators, and fix templates. The AI receives injection context that constrains what it can generate — rules become code, not suggestions. |
 
 ### Scanning Tools
 
@@ -69,19 +70,26 @@ The 64% token reduction target is achieved through:
 3. **Priority Truncation** — High priority = full content, medium = summary, low = skip
 4. **Active Interception** — `prism_intercept` prevents the generate→violate→fix cycle
 5. **Context Kitchen** — `prism_kitchen` analyzes and optimizes before sending
+6. **Rule Compilation** — `prism_compile` transforms rules into executable constraints
 
 ### Recommended Workflow
 
 ```
-1. prism_kitchen (analyze)    → See what the AI will receive, check savings
-2. get_architectural_rules    → Fetch optimized rules for the task
-3. prism_intercept (task)     → Get pre-flight guard rails
-4. [AI generates code]        → Uses rules + guard rails as constraints
-5. prism_check                → Validate generated code
-6. prism_fix                  → Auto-fix any remaining violations
+1. prism_compile              → Compile rules into executable validators
+2. prism_kitchen (analyze)    → See what the AI will receive, check savings
+3. get_architectural_rules    → Fetch optimized rules for the task
+4. prism_intercept (task)     → Get pre-flight guard rails
+5. [AI generates code]        → Uses compiled constraints + rules + guard rails
+6. prism_check                → Validate generated code
+7. prism_fix                  → Auto-fix any remaining violations
 ```
 
-This workflow eliminates the wasteful generate→violate→regenerate cycle.
+The **Rule Compiler** (`prism_compile`) is the key differentiator. Instead of giving the AI markdown rules to read (and potentially ignore), it compiles rules into:
+
+- **TypeScript type guards** — violating code fails to compile
+- **Import validators** — banned imports are caught at the module level
+- **Fix templates** — deterministic auto-fixes (not AI-generated)
+- **Injection context** — system-level constraints the AI cannot ignore
 
 ## IDE Configuration
 
