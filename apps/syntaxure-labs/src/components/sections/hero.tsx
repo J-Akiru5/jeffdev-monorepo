@@ -330,7 +330,7 @@ export function Hero({
           </div>
 
           {/* ── Right Column: Logo (Text Mosaic) ── */}
-          <div className="flex-1 flex justify-center lg:justify-end mt-12 lg:mt-0 lg:-translate-y-16 relative z-10 w-full max-w-[400px] lg:max-w-[500px]">
+          <div className="flex-1 flex justify-center lg:justify-end mt-12 lg:mt-0 lg:-translate-y-2 relative z-10 w-full max-w-[400px] lg:max-w-[500px]">
              <div className="relative w-full aspect-square opacity-90 mix-blend-screen drop-shadow-[0_0_40px_rgba(139,92,246,0.2)] overflow-hidden flex items-center justify-center">
                 <div 
                   className="absolute inset-0 w-full h-full font-mono text-[8px] sm:text-[10px] leading-[1] font-bold tracking-tighter text-justify break-all select-none"
