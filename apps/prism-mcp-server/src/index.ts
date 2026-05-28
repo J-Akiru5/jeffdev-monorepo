@@ -71,7 +71,7 @@ import {
 // CONFIGURATION
 // =============================================================================
 
-const SERVER_NAME = "jeffdev-prism-engine";
+const SERVER_NAME = "prism-context-engine";
 const SERVER_VERSION = "1.0.0";
 
 // API Key Authentication
