@@ -138,6 +138,35 @@ export interface OrchestrateInput {
   mode?: "full" | "compact" | "minimal";
 }
 
+/** Input for prism_memory read */
+export interface MemoryReadInput {
+  action: "read" | "stats" | "cleanup";
+  type?: string;
+  scope?: string;
+  projectId?: string;
+  teamId?: string;
+  tags?: string[];
+  importance?: string;
+  limit?: number;
+  since?: string;
+}
+
+/** Input for prism_memory write */
+export interface MemoryWriteInput {
+  action: "write";
+  type?: string;
+  scope?: string;
+  projectId?: string;
+  teamId?: string;
+  content: string;
+  tags?: string[];
+  importance?: "critical" | "high" | "medium" | "low";
+  source?: string;
+  sessionId?: string;
+  expiresAt?: string;
+  metadata?: Record<string, unknown>;
+}
+
 /** Repo scan report data structure (also used in repo_extract input) */
 export interface RepoScanData {
   root: string;

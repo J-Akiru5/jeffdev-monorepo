@@ -23,6 +23,7 @@ import {
 } from "../middleware/smart-select.js";
 import { countTokensInText } from "../middleware/token-counter.js";
 import { getCached, setCached, getCacheKey } from "../middleware/cache.js";
+import { queryMemories, formatMemoriesForContext } from "../lib/governance-memory.js";
 
 const DEFAULT_BUDGET = 4000;
 
@@ -63,13 +64,27 @@ export async function handlePrismOrchestrate(
       };
     }
 
-    // Phase 1: Compile rules into executable validators
+    // Phase 1: Load governance memory (lessons from past sessions)
+    let memoryContext = "";
+    try {
+      const memories = await queryMemories({
+        projectId,
+        limit: 20,
+      });
+      if (memories.length > 0) {
+        memoryContext = formatMemoriesForContext(memories);
+      }
+    } catch {
+      // Memory load failure is non-fatal
+    }
+
+    // Phase 2: Compile rules into executable validators
     const compiled = compileRules(allRules);
 
-    // Phase 2: Smart selection with token budget
+    // Phase 3: Smart selection with token budget
     const ranked = await rankRulesByTask(task, allRules, budget);
 
-    // Phase 3: Calculate savings
+    // Phase 4: Calculate savings
     const totalTokensIfSentAll = allRules.reduce(
       (sum, r) => sum + countTokensInText((r.content as string) || ""),
       0,
@@ -119,7 +134,7 @@ export async function handlePrismOrchestrate(
       }
     }
 
-    // Phase 6: Build the single unified response
+    // Phase 7: Build the single unified response
     const response = buildOrchestratedResponse({
       task,
       rules: ranked.rules,
@@ -129,6 +144,7 @@ export async function handlePrismOrchestrate(
       forbiddenPatterns,
       requiredPatterns,
       injectionContext: compiled.injectionContext,
+      memoryContext,
       savingsPercent,
       tokenCount: ranked.tokenCount,
       budget,
@@ -146,6 +162,7 @@ export async function handlePrismOrchestrate(
         savingsPercent,
         tokenCount: ranked.tokenCount,
         budgetUsed: Math.round((ranked.tokenCount / budget) * 100),
+        hasMemory: memoryContext.length > 0,
       },
     };
   } catch (error) {
@@ -168,6 +185,7 @@ function buildOrchestratedResponse(ctx: {
   forbiddenPatterns: string[];
   requiredPatterns: string[];
   injectionContext: string;
+  memoryContext: string;
   savingsPercent: number;
   tokenCount: number;
   budget: number;
@@ -184,8 +202,12 @@ function buildOrchestratedResponse(ctx: {
     return [
       `# Prism Governance — "${ctx.task}"`,
       ``,
-      `**Rules:** ${ctx.rules.length}/${ctx.totalRules} | **Savings:** ${ctx.savingsPercent}% | **Tokens:** ${ctx.tokenCount}/${ctx.budget}`,
+      `╔══════════════════════════════════════════╗`,
+      `║  💰 CONTEXT SAVINGS: ${ctx.savingsPercent}% reduction      ║`,
+      `║  📊 ${ctx.rules.length}/${ctx.totalRules} rules | ${ctx.tokenCount}/${ctx.budget} tokens     ║`,
+      `╚══════════════════════════════════════════╝`,
       ``,
+      ctx.memoryContext,
       ctx.forbiddenPatterns.length > 0
         ? `## ⛔ FORBIDDEN\n${ctx.forbiddenPatterns.map((p) => `- ${p}`).join("\n")}\n`
         : "",
@@ -205,14 +227,13 @@ function buildOrchestratedResponse(ctx: {
   return [
     `# Prism Orchestration — "${ctx.task}"`,
     ``,
-    `| Metric | Value |`,
-    `|--------|-------|`,
-    `| Rules in DB | ${ctx.totalRules} |`,
-    `| Rules compiled | ${ctx.compiledRules} |`,
-    `| Validators generated | ${ctx.compiledValidators} |`,
-    `| Rules returned | ${ctx.rules.length} |`,
-    `| Token savings | ${ctx.savingsPercent}% |`,
-    `| Tokens used | ${ctx.tokenCount}/${ctx.budget} |`,
+    `╔══════════════════════════════════════════════════════╗`,
+    `║  💰 CONTEXT SAVINGS: ${String(ctx.savingsPercent).padStart(2)}% reduction                ║`,
+    `║  📊 ${String(ctx.rules.length).padStart(2)}/${String(ctx.totalRules).padEnd(2)} rules compiled │ ${String(ctx.tokenCount).padStart(4)}/${String(ctx.budget).padEnd(4)} tokens used  ║`,
+    `║  🔒 ${String(ctx.compiledValidators).padStart(2)} executable validators generated         ║`,
+    `╚══════════════════════════════════════════════════════╝`,
+    ``,
+    ctx.memoryContext,
     ``,
     `---`,
     ``,

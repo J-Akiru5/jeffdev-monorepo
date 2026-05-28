@@ -42,6 +42,7 @@ import { handleKitchenAnalyze, handleKitchenPreview } from "./tools/prism-kitche
 import { handlePrismIntercept } from "./tools/prism-intercept.js";
 import { handlePrismCompile } from "./tools/prism-compile.js";
 import { handlePrismOrchestrate } from "./tools/prism-orchestrate.js";
+import { handlePrismMemory } from "./tools/prism-memory.js";
 import {
   detectCurrentProject,
   scanCurrentRepo,
@@ -722,6 +723,68 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ["task"],
         },
       },
+      {
+        name: "prism_memory",
+        description:
+          "Governance memory — persistent AI agent memory across sessions and team members. " +
+          "Stores decisions, patterns, violations, and team consensus. " +
+          "Read memories before generating code to learn from past sessions. " +
+          "Write memories after making decisions or encountering violations. " +
+          "This ensures AI agents don't repeat mistakes and maintain consistency across the team.",
+        inputSchema: {
+          type: "object" as const,
+          properties: {
+            action: {
+              type: "string",
+              description: "'read' (query memories), 'write' (store memory), 'stats' (statistics), 'cleanup' (remove expired)",
+              enum: ["read", "write", "stats", "cleanup"],
+            },
+            type: {
+              type: "string",
+              description: "Memory type: decision, pattern, violation, consensus, incident, progress, context",
+            },
+            scope: {
+              type: "string",
+              description: "Memory scope: project, team, global",
+            },
+            content: {
+              type: "string",
+              description: "Memory content (required for 'write' action)",
+            },
+            tags: {
+              type: "array" as const,
+              items: { type: "string" },
+              description: "Tags for categorization and search",
+            },
+            importance: {
+              type: "string",
+              description: "Importance level: critical, high, medium, low",
+              enum: ["critical", "high", "medium", "low"],
+            },
+            projectId: {
+              type: "string",
+              description: "Project ID to scope memories",
+            },
+            teamId: {
+              type: "string",
+              description: "Team ID for team-scoped memories",
+            },
+            source: {
+              type: "string",
+              description: "Who/what created this memory (e.g., 'cursor-agent', 'jeff')",
+            },
+            sessionId: {
+              type: "string",
+              description: "Current session ID for tracking",
+            },
+            limit: {
+              type: "number",
+              description: "Max memories to return (default: 50)",
+            },
+          },
+          required: ["action"],
+        },
+      },
     ],
   };
 });
@@ -1154,6 +1217,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case "prism_orchestrate": {
         return await handlePrismOrchestrate(
           args as unknown as Parameters<typeof handlePrismOrchestrate>[0],
+        );
+      }
+
+      case "prism_memory": {
+        return await handlePrismMemory(
+          args as unknown as Parameters<typeof handlePrismMemory>[0],
         );
       }
 

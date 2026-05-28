@@ -40,11 +40,13 @@ pnpm --filter prism-mcp-server run dev
 
 ### Context Optimization Tools
 
-| Tool              | Description                                                                                                                                                                                                                                                               |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `prism_kitchen`   | **Context budget optimizer.** Analyzes what the AI will receive and optimizes it. Returns token savings report. Use `action: "analyze"` for full report or `action: "preview"` for just the context.                                                                      |
-| `prism_intercept` | **Active interception agent.** Prevents the generate→violate→fix cycle. Call with `task` before generating code to get forbidden/required patterns. Call with `code` after generating to validate and get fix instructions.                                               |
-| `prism_compile`   | **Rule Compiler.** Transforms governance rules into executable validators. Compiles rules into TypeScript type guards, import validators, and fix templates. The AI receives injection context that constrains what it can generate — rules become code, not suggestions. |
+| Tool                | Description                                                                                                                                               |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `prism_orchestrate` | **One-call governance engine.** Chains all tools in a single call. Reduces tool calls from 5→1 and tokens by 60-70%. Three modes: full, compact, minimal. |
+| `prism_kitchen`     | **Context budget optimizer.** Analyzes what the AI will receive and optimizes it. Returns token savings report.                                           |
+| `prism_intercept`   | **Active interception agent.** Prevents the generate→violate→fix cycle. Pre-generation guard rails + post-generation validation.                          |
+| `prism_compile`     | **Rule Compiler.** Transforms rules into executable validators (TypeScript type guards, import validators, fix templates).                                |
+| `prism_memory`      | **Governance memory.** Persistent AI agent memory across sessions and team members. Stores decisions, patterns, violations, and team consensus.           |
 
 ### Scanning Tools
 
@@ -75,13 +77,10 @@ The 64% token reduction target is achieved through:
 ### Recommended Workflow
 
 ```
-1. prism_compile              → Compile rules into executable validators
-2. prism_kitchen (analyze)    → See what the AI will receive, check savings
-3. get_architectural_rules    → Fetch optimized rules for the task
-4. prism_intercept (task)     → Get pre-flight guard rails
-5. [AI generates code]        → Uses compiled constraints + rules + guard rails
-6. prism_check                → Validate generated code
-7. prism_fix                  → Auto-fix any remaining violations
+1. prism_memory (read)        → Load lessons from past sessions
+2. prism_orchestrate          → One call: compile + optimize + guard rails + memory
+3. [AI generates code]        → Uses compiled constraints + memory as context
+4. prism_memory (write)       → Store decisions and patterns for future sessions
 ```
 
 The **Rule Compiler** (`prism_compile`) is the key differentiator. Instead of giving the AI markdown rules to read (and potentially ignore), it compiles rules into:
