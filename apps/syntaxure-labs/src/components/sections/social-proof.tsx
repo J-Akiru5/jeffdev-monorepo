@@ -17,10 +17,10 @@ export function SocialProof() {
   return (
     <section
       ref={ref}
-      className="section-padding border-y border-slate-100 bg-white"
+      className="section-padding border-y border-white/5 bg-[#0a0a0a]"
     >
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <p className="mb-10 text-center font-mono text-xs uppercase tracking-[0.2em] text-slate-400">
+        <p className="mb-10 text-center font-mono text-xs uppercase tracking-[0.2em] text-white/40">
           Built for the tools you already use
         </p>
         <div
@@ -33,14 +33,14 @@ export function SocialProof() {
           {logos.map((name, i) => (
             <div
               key={name}
-              className="flex items-center gap-2 font-mono text-sm font-semibold text-slate-300"
+              className="flex items-center gap-2 font-mono text-sm font-semibold text-white/60"
               style={{
                 opacity: isInView ? 1 : 0,
                 transform: isInView ? "translateY(0)" : "translateY(10px)",
                 transition: `opacity 0.4s ease-out ${i * 0.08}s, transform 0.4s ease-out ${i * 0.08}s`,
               }}
             >
-              <span className="text-slate-400">/</span>
+              <span className="text-white/30">/</span>
               {name}
             </div>
           ))}

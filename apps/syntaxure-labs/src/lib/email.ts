@@ -18,9 +18,9 @@ function getResendClient() {
 
 // Brand sender names with display name for professional appearance
 export const EMAIL_ADDRESSES = {
-  contact: process.env.CONTACT_EMAIL || "contact@jeffdev.studio",
-  hire: process.env.HIRE_EMAIL || "hire@jeffdev.studio",
-  noreply: process.env.NOREPLY_EMAIL || "noreply@jeffdev.studio",
+  contact: process.env.CONTACT_EMAIL || "contact@syntaxure.dev",
+  hire: process.env.HIRE_EMAIL || "hire@syntaxure.dev",
+  noreply: process.env.NOREPLY_EMAIL || "noreply@syntaxure.dev",
 } as const;
 
 // Branded sender format for external emails
@@ -424,7 +424,7 @@ export function invoiceEmailTemplate(data: {
       <p style="margin: 0; font-size: 12px; color: rgba(255,255,255,0.6);">
         <strong>Bank Transfer:</strong> Landbank • 1936-2091-96 • Jeff Edrick Martinez<br>
         <strong>GCash:</strong> +63 951 916 7103<br>
-        <strong>PayPal:</strong> contact@jeffdev.studio
+        <strong>PayPal:</strong> contact@syntaxure.dev
       </p>
     </div>
     

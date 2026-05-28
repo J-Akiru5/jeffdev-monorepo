@@ -209,10 +209,10 @@ export default async function PublicPaymentPage({
           <p className="mt-2">
             Questions? Contact us at{" "}
             <a
-              href="mailto:hello@jeffdev.studio"
+              href="mailto:hello@syntaxure.dev"
               className="text-cyan-400 hover:underline"
             >
-              hello@jeffdev.studio
+              hello@syntaxure.dev
             </a>
           </p>
           <p className="mt-4">© {new Date().getFullYear()} Syntaxure Labs</p>

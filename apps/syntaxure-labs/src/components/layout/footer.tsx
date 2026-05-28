@@ -37,29 +37,29 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-slate-200 bg-white">
+    <footer className="border-t border-white/10 bg-[#0a0a0a]">
       <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-1">
             <Link href="/" className="inline-flex items-center gap-2">
               <SyntaxureLogo className="h-8 w-8" />
-              <span className="font-semibold tracking-tight text-slate-900">
+              <span className="font-semibold tracking-tight text-white">
                 Syntaxure Labs
               </span>
             </Link>
-            <p className="mt-4 text-sm leading-relaxed text-slate-500">
+            <p className="mt-4 text-sm leading-relaxed text-white/50">
               Enterprise-grade web architecture for startups and scaling
               businesses. We build systems that grow with you.
             </p>
             <div className="mt-6 space-y-2">
               <a
-                href="mailto:hello@jeffdev.studio"
-                className="flex items-center gap-2 text-sm text-slate-500 transition-colors hover:text-cyan-600"
+                href="mailto:hello@syntaxure.dev"
+                className="flex items-center gap-2 text-sm text-white/50 transition-colors hover:text-cyan-500"
               >
                 <Mail className="h-4 w-4" />
-                hello@jeffdev.studio
+                hello@syntaxure.dev
               </a>
-              <div className="flex items-center gap-2 text-sm text-slate-500">
+              <div className="flex items-center gap-2 text-sm text-white/50">
                 <MapPin className="h-4 w-4" />
                 Iloilo City, Philippines
               </div>
@@ -67,7 +67,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="font-mono text-xs uppercase tracking-wider text-slate-400">
+            <h3 className="font-mono text-xs uppercase tracking-wider text-white/40">
               Services
             </h3>
             <ul className="mt-4 space-y-3">
@@ -75,7 +75,7 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-slate-600 transition-colors hover:text-slate-900"
+                    className="text-sm text-white/60 transition-colors hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -85,7 +85,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="font-mono text-xs uppercase tracking-wider text-slate-400">
+            <h3 className="font-mono text-xs uppercase tracking-wider text-white/40">
               Products
             </h3>
             <ul className="mt-4 space-y-3">
@@ -95,7 +95,7 @@ export function Footer() {
                     href={link.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm text-cyan-600 transition-colors hover:text-cyan-700"
+                    className="text-sm text-cyan-500 transition-colors hover:text-cyan-400"
                   >
                     {link.label}
                   </a>
@@ -105,7 +105,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="font-mono text-xs uppercase tracking-wider text-slate-400">
+            <h3 className="font-mono text-xs uppercase tracking-wider text-white/40">
               Company
             </h3>
             <ul className="mt-4 space-y-3">
@@ -113,7 +113,7 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-slate-600 transition-colors hover:text-slate-900"
+                    className="text-sm text-white/60 transition-colors hover:text-white"
                   >
                     {link.label}
                   </Link>
@@ -123,16 +123,16 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="font-mono text-xs uppercase tracking-wider text-slate-400">
+            <h3 className="font-mono text-xs uppercase tracking-wider text-white/40">
               Start a Project
             </h3>
-            <p className="mt-4 text-sm text-slate-500">
+            <p className="mt-4 text-sm text-white/50">
               Ready to build something exceptional? Let&apos;s discuss your
               vision.
             </p>
             <Link
               href="/quote"
-              className="group mt-4 inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-5 py-2.5 font-mono text-xs uppercase tracking-wider text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:text-slate-900 hover:shadow-md"
+              className="group relative mt-4 inline-flex items-center gap-2 overflow-hidden rounded-md border border-white/10 bg-white/5 px-5 py-2.5 font-mono text-xs uppercase tracking-wider text-white/80 transition-all hover:border-white/20 hover:text-white hover:bg-white/[0.08]"
             >
               Get_Quote
               <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
@@ -141,23 +141,23 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-slate-100">
+      <div className="border-t border-white/5">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-6 md:flex-row lg:px-8">
           <div className="flex items-center gap-6">
             {footerLinks.legal.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-xs text-slate-400 transition-colors hover:text-slate-600"
+                className="text-xs text-white/45 transition-colors hover:text-white/60"
               >
                 {link.label}
               </Link>
             ))}
           </div>
 
-          <div className="text-center text-xs text-slate-400 md:text-right">
+          <div className="text-center text-xs text-white/45 md:text-right">
             <p>© {currentYear} Syntaxure Labs.</p>
-            <p className="mt-1 font-mono text-[10px] text-slate-300">
+            <p className="mt-1 font-mono text-[10px] text-white/30">
               DTI: VLLP979818395984
             </p>
           </div>

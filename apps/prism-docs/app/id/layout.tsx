@@ -253,10 +253,10 @@ export default async function RootLayout({
                       </p>
                       <div className="space-y-2 text-sm">
                         <a
-                          href="mailto:hello@jeffdev.studio"
+                          href="mailto:hello@syntaxure.dev"
                           className="flex items-center gap-2 text-white/40 hover:text-cyan-400 transition-colors"
                         >
-                          <span>✉</span> hello@jeffdev.studio
+                          <span>✉</span> hello@syntaxure.dev
                         </a>
                       </div>
                     </div>

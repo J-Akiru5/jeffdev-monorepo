@@ -197,7 +197,7 @@ export default async function RootLayout({
                         "@type": "ContactPoint",
                         telephone: "+63-951-916-7103",
                         contactType: "customer service",
-                        email: "contact@jeffdev.studio",
+                        email: "contact@syntaxure.dev",
                         areaServed: "Global",
                         availableLanguage: ["English", "Tagalog"],
                       },

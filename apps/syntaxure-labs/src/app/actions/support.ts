@@ -42,7 +42,7 @@ export async function sendSupportRequest(
     const validated = supportSchema.parse(data);
 
     // Support email address
-    const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || "support@jeffdev.studio";
+    const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || "support@syntaxure.dev";
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const supabase = getAdminClient() as any;

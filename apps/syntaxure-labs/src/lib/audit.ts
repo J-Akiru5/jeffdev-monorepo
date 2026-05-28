@@ -45,7 +45,7 @@ export async function logAuditEvent(event: AuditEvent): Promise<void> {
       resource_id: event.resourceId,
       changes: {
         ...(event.details || {}),
-        userEmail: event.userEmail || "admin@jeffdev.studio",
+        userEmail: event.userEmail || "admin@syntaxure.dev",
       },
       created_at: new Date().toISOString(),
     };

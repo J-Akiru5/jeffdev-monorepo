@@ -309,7 +309,7 @@ function InvoicePDFDocument({ invoice }: { invoice: Invoice }) {
               <Text style={styles.contactInfo}>
                 Dingle, Iloilo, Philippines
               </Text>
-              <Text style={styles.contactInfo}>contact@jeffdev.studio</Text>
+              <Text style={styles.contactInfo}>contact@syntaxure.dev</Text>
               <Text style={styles.contactInfo}>DTI: VLLP979818395984</Text>
             </View>
           </View>
