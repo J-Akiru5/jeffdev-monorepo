@@ -14,7 +14,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowUpRight, ArrowDown } from "lucide-react";
+import { ArrowUpRight, ArrowDown, Zap } from "lucide-react";
 import { useInView } from "@/lib/use-in-view";
 
 /* ────────────────────────────────────────
@@ -202,25 +202,60 @@ export function Hero({
         </svg>
 
         {/* ═══════════════════════════════════════
+            NEON DIVIDER LINE (Desktop Background)
+            ═══════════════════════════════════════ */}
+        <svg
+          className="absolute inset-0 h-full w-full pointer-events-none z-0 hidden lg:block"
+          preserveAspectRatio="none"
+          viewBox="0 0 100 100"
+          aria-hidden="true"
+        >
+          <defs>
+            <linearGradient id="neon-edge" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#06b6d4" />
+              <stop offset="50%" stopColor="#3060ff" />
+              <stop offset="100%" stopColor="#8b5cf6" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M57.5 0 L62.5 55 L50 100"
+            fill="none"
+            stroke="url(#neon-edge)"
+            strokeWidth="0.4"
+            vectorEffect="non-scaling-stroke"
+            className="animate-neon-pulse"
+          />
+        </svg>
+
+        {/* ═══════════════════════════════════════
+            FLOATING BADGE — "Startup Driven" (Desktop)
+            ═══════════════════════════════════════ */}
+        <div
+          ref={badgeRef}
+          className={`hero-floating-badge absolute top-24 right-12 z-30 hidden lg:flex items-center gap-3 rounded-md border border-cyan-500/30 bg-[#0a0a0a]/80 px-5 py-3 backdrop-blur-xl shadow-glow-cyan animate-float-subtle transition-all duration-700 ${
+            badgeInView ? "opacity-100 scale-100" : "opacity-0 scale-95"
+          }`}
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-cyan-500/20 to-purple-500/20 border border-cyan-500/30">
+            <Zap className="h-4 w-4 text-cyan-400" strokeWidth={1.5} />
+          </div>
+          <div>
+            <p className="text-[10px] font-mono uppercase tracking-wider text-cyan-400">
+              A Startup Driven by
+            </p>
+            <p className="text-xs font-semibold text-white">
+              Technology &amp; Innovation
+            </p>
+          </div>
+        </div>
+
+        {/* ═══════════════════════════════════════
             CONTENT LAYOUT (2 Columns on Desktop)
             ═══════════════════════════════════════ */}
         <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 py-24 lg:py-32 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-8">
           
           {/* ── Left Column: Copy & CTAs ── */}
           <div className="flex-1 text-center lg:text-left">
-            {/* ── Studio Badge ── */}
-            <div
-              ref={badgeRef}
-              className={`mb-8 inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.03] px-5 py-2 backdrop-blur-sm transition-all duration-700 ${
-                badgeInView ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
-              }`}
-            >
-              <span className="text-cyan-400 text-xs">✦</span>
-              <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/60">
-                A Startup Driven by Technology &amp; Innovation
-              </span>
-            </div>
-
             {/* ── Availability Badge ── */}
             {availabilityText && (
               <div className="mb-8 flex justify-center lg:justify-start">
@@ -239,14 +274,13 @@ export function Hero({
             {/* ── Headline ── */}
             <h1
               ref={headlineRef}
-              className={`text-3xl font-bold leading-[1.1] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl transition-all duration-700 delay-100 ${
+              className={`text-2xl font-semibold leading-[1.2] tracking-tight text-white sm:text-3xl md:text-4xl lg:text-5xl transition-all duration-700 delay-100 ${
                 headlineInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
               }`}
             >
-              Innovating Digital Solutions<br />
-              for a Smarter Tomorrow,<br />
-              <span className="text-gradient-holographic">Engineering with Precision:</span><br />
-              Governance over Generation.
+              Innovating Digital Solutions,<br />
+              Engineering with Precision:<br />
+              <span className="text-gradient-holographic">Governance over Generation.</span>
             </h1>
 
             {/* ── Neon Divider ── */}
@@ -296,7 +330,7 @@ export function Hero({
           </div>
 
           {/* ── Right Column: Logo (Text Mosaic) ── */}
-          <div className="flex-1 flex justify-center lg:justify-end mt-12 lg:mt-0 relative z-10 w-full max-w-[400px] lg:max-w-[500px]">
+          <div className="flex-1 flex justify-center lg:justify-end mt-12 lg:mt-0 lg:-translate-y-16 relative z-10 w-full max-w-[400px] lg:max-w-[500px]">
              <div className="relative w-full aspect-square opacity-90 mix-blend-screen drop-shadow-[0_0_40px_rgba(139,92,246,0.2)] overflow-hidden flex items-center justify-center">
                 <div 
                   className="absolute inset-0 w-full h-full font-mono text-[8px] sm:text-[10px] leading-[1] font-bold tracking-tighter text-justify break-all select-none"
@@ -308,6 +342,8 @@ export function Hero({
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     color: "transparent",
+                    maskImage: "radial-gradient(circle, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 95%)",
+                    WebkitMaskImage: "radial-gradient(circle, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 95%)",
                   }}
                 >
                   {"SYNTAXURE LABS ENGINEERING WITH PRECISION GOVERNANCE OVER GENERATION INNOVATING DIGITAL SOLUTIONS FOR A SMARTER TOMORROW ".repeat(150)}
