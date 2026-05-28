@@ -20,10 +20,10 @@
     "gpt-tokenizer": "^3.4.0",
     "mongodb": "^6.15.0",
     "openai": "^6.15.0",
-    "playwright": "^1.52.0",
     "zod": "^4.2.1"
   },
   "devDependencies": {
+    "playwright": "^1.52.0",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/node": "^22.15.3",

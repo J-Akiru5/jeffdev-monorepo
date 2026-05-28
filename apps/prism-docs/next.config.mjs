@@ -1,6 +1,5 @@
 /* global process */
 import nextra from 'nextra'
-import withBundleAnalyzer from '@next/bundle-analyzer'
 
 const withNextra = nextra({
   defaultShowCopyCode: true,
@@ -22,6 +21,10 @@ const nextConfig = {
 
 const finalConfig = withNextra(nextConfig)
 
-export default process.env.ANALYZE === 'true'
-  ? withBundleAnalyzer()(finalConfig)
-  : finalConfig
+export default async function config() {
+  if (process.env.ANALYZE === 'true') {
+    const withBundleAnalyzer = (await import('@next/bundle-analyzer')).default;
+    return withBundleAnalyzer()(finalConfig);
+  }
+  return finalConfig;
+}

@@ -3,7 +3,7 @@
 ## Package Manager
 
 - **Actual:** `pnpm@9.1.0` (README says `npm install` — ignore that, use `pnpm install`)
-- `.npmrc` sets `shamefully-hoist=true` and `strict-peer-dependencies=false`
+- `.npmrc` sets `shamefully-hoist=false` (strict isolation for faster resolution) and `strict-peer-dependencies=false`
 - Node 20+ (`.nvmrc`), TypeScript 5.9
 
 ## Key Commands
@@ -11,8 +11,8 @@
 | Command                                 | Description                          |
 | --------------------------------------- | ------------------------------------ |
 | `pnpm install`                          | Install all workspace deps           |
-| `doppler run -- turbo dev`              | Start all apps (secrets via Doppler) |
-| `turbo run build`                       | Build all apps/packages              |
+| `doppler run -- turbo dev --concurrency=2` | Start up to 2 apps concurrently (secrets via Doppler) |
+| `doppler run -- turbo build`               | Build all apps/packages              |
 | `turbo run lint`                        | ESLint all workspaces                |
 | `turbo run check-types`                 | TypeScript check all workspaces      |
 | `turbo run test`                        | Run all tests                        |
@@ -66,6 +66,15 @@ CI order: `check-types` → `lint` → `test` → `build`. Run in that sequence 
 - `.agent/rules/` — tech stack, security, design, debugging, SEO, admin guide
 - `.agent/skills/` — Prism development, monorepo patterns, Firestore boundaries, design system
 - `TESTING.md` — detailed test setup and troubleshooting
+
+## Build Performance
+
+- **Use `pnpm --filter <app> run dev`** for focused work on a single app instead of `turbo dev`.
+- **Cache sizes are aggressive:** `.turbo/cache` grows to several GB. Run `pnpm clean` periodically.
+- **`NODE_OPTIONS=--max-old-space-size=4096`** is set automatically via `scripts/with-memory-limit.js` for dev/build commands. Each Node.js worker gets a 4 GB heap ceiling.
+- **`@next/bundle-analyzer`** is lazy-loaded — only activates when `ANALYZE=true` is set.
+- **CI/CD:** Use `turbo prune --scope=<app>` for focused deployments instead of full workspace builds.
+- **After adding deps:** Run `pnpm install --fix-lockfile` to keep lockfile clean.
 
 ## Tooling Quirks
 

@@ -1,6 +1,5 @@
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
-import withBundleAnalyzer from "@next/bundle-analyzer";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
@@ -65,16 +64,20 @@ const nextConfig: NextConfig = {
   },
 };
 
-const configWithSentry = withSentryConfig(nextConfig, {
-  org: process.env.SENTRY_ORG || "jeffdev",
-  project: process.env.SENTRY_PROJECT || "prism-engine",
-  silent: !process.env.CI,
-  widenClientFileUpload: true,
-  reactComponentAnnotation: { enabled: true },
-  tunnelRoute: "/monitoring",
-  disableLogger: true,
-});
+export default async function config() {
+  const configWithSentry = withSentryConfig(nextConfig, {
+    org: process.env.SENTRY_ORG || "jeffdev",
+    project: process.env.SENTRY_PROJECT || "prism-engine",
+    silent: !process.env.CI,
+    widenClientFileUpload: false,
+    reactComponentAnnotation: { enabled: true },
+    tunnelRoute: "/monitoring",
+    disableLogger: true,
+  });
 
-export default process.env.ANALYZE === "true"
-  ? withBundleAnalyzer()(configWithSentry)
-  : configWithSentry;
+  if (process.env.ANALYZE === "true") {
+    const withBundleAnalyzer = (await import("@next/bundle-analyzer")).default;
+    return withBundleAnalyzer()(configWithSentry);
+  }
+  return configWithSentry;
+}
