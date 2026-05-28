@@ -6,6 +6,7 @@ import { Services } from "@/components/sections/services";
 import { WorksShowcase } from "@/components/sections/works-showcase";
 import { Features } from "@/components/sections/features";
 import { PrismHighlight } from "@/components/sections/prism-highlight";
+import { AgenticProtocol } from "@/components/sections/agentic-protocol";
 import { CTASection } from "@/components/sections/cta-section";
 
 export default function HomePage() {
@@ -19,6 +20,7 @@ export default function HomePage() {
         <WorksShowcase />
         <Features />
         <PrismHighlight />
+        <AgenticProtocol />
         <CTASection />
       </main>
       <Footer />
