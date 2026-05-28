@@ -85,8 +85,14 @@ export function ChatAssistant({
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to get response");
+        let errMsg = "Failed to get response";
+        try {
+          const errorData = await response.json();
+          errMsg = errorData.error || errMsg;
+        } catch {
+          errMsg = `Server error: ${response.status} ${response.statusText || "Service Unavailable"}`;
+        }
+        throw new Error(errMsg);
       }
 
       const data = await response.json();
