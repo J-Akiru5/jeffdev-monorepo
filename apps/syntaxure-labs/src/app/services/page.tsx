@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/footer";
 import { CTASection } from "@/components/sections/cta-section";
 import { getServices } from "@/lib/data";
 import { getIcon } from "@/lib/icons";
+import { services as staticServices } from "@/data/services";
 import type { Metadata } from "next";
 
 /**
@@ -21,7 +22,25 @@ export const metadata: Metadata = {
 };
 
 export default async function ServicesPage() {
-  const services = await getServices();
+  let services = await getServices();
+
+  // Fallback to static data when Supabase returns empty
+  if (services.length === 0) {
+    services = staticServices.map((s) => ({
+      slug: s.slug,
+      icon: s.icon.name,
+      title: s.title,
+      tagline: s.tagline,
+      description: s.description,
+      features: s.features,
+      deliverables: s.deliverables,
+      investment: {
+        starting: `PHP ${s.investment.startingPrice.toLocaleString()}`,
+        timeline: s.investment.timeline,
+      },
+      order: 0,
+    }));
+  }
 
   return (
     <>

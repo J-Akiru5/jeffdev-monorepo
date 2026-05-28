@@ -123,7 +123,7 @@ const config = {
       <span>
         {new Date().getFullYear()} ©{" "}
         <a
-          href="https://jeffdev.studio"
+          href="https://www.syntaxure.dev"
           target="_blank"
           rel="noopener noreferrer"
         >
