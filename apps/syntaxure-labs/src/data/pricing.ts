@@ -159,7 +159,7 @@ export const pricingTiers: PricingTier[] = [
       { label: "Custom architecture design", included: true },
       { label: "Multi-platform solutions", included: true },
       { label: "Enterprise security audit", included: true, highlight: true },
-      { label: "SLA & uptime guarantee", included: true },
+      { label: "High-availability architecture & monitoring", included: true },
       { label: "24/7 priority support", included: true },
       { label: "On-demand scaling", included: true },
       { label: "Custom integrations", included: true },

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
+import { TopNavbar } from "@/components/top-navbar";
 import { MobileNav } from "@/components/mobile-nav";
 import { ProjectProvider } from "@/contexts/project-context";
 import { WorkspaceProvider } from "@/components/workspace-provider";
@@ -113,6 +114,9 @@ export default async function DashboardLayout({
     >
       <ProjectProvider initialProjects={getDefaultProjects()}>
         <div className="min-h-screen bg-surface">
+          {/* Top Navigation Bar */}
+          <TopNavbar />
+
           {/* Desktop Sidebar */}
           <Sidebar />
 
@@ -120,7 +124,7 @@ export default async function DashboardLayout({
           <MobileNav />
 
           {/* Main Content */}
-          <div className="ml-0 transition-all duration-300 lg:ml-64">
+          <div className="ml-0 pt-14 transition-all duration-300 lg:ml-64">
             <main className="min-h-screen p-4 pb-24 lg:p-6 lg:pb-6">
               {children}
             </main>

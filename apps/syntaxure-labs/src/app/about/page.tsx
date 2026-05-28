@@ -297,7 +297,7 @@ const DEFAULT_ABOUT_DATA: AboutData = {
     { label: "Niche Focus", value: "Specialized" },
     { label: "Founder Exp", value: "5+" },
     { label: "Dedication", value: "100%" },
-    { label: "Uptime SLA", value: "99.9%" },
+    { label: "Infrastructure", value: "High-Avail" },
   ],
   founder: {
     name: "Jeff Edrick Martinez",
@@ -306,7 +306,7 @@ const DEFAULT_ABOUT_DATA: AboutData = {
     image: "/profilepic.webp",
     email: "jeff@syntaxure.dev",
     location: "Iloilo City, Philippines",
-    availability: "Available for Q1 2026 projects",
+    availability: "Currently accepting new projects",
   },
   techStack: {
     frontend: ["Next.js", "React", "TypeScript", "Tailwind CSS", "GSAP"],

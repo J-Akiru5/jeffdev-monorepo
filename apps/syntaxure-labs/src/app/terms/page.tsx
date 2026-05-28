@@ -40,6 +40,12 @@ export default function TermsPage() {
                 governed by individual project agreements that specify scope,
                 deliverables, timelines, and payment terms.
               </p>
+              <p>
+                No uptime or availability SLA is provided unless explicitly
+                stated in a signed project agreement. Any performance or
+                uptime references on our website or marketing materials are
+                architectural targets and not contractual guarantees.
+              </p>
 
               <h2>2. Project Agreements</h2>
               <p>

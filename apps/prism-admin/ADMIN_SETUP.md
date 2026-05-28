@@ -1,88 +1,69 @@
 # 🔐 Admin User Configuration Guide
 
-## Setting Up Your Admin Account in Clerk
-
-### Step 1: Sign in to Clerk Dashboard
-
-1. Go to https://dashboard.clerk.com
-2. Select your project (the one matching your publishable key: `pk_test_c3RyaWtpbmctcGlnZW9uLTIyLmNsZXJrLmFjY291bnRzLmRldiQ`)
-
-### Step 2: Find Your User Account
-
-1. In the left sidebar, click **"Users"**
-2. Find your account by your business email
-3. Click on your user to open the profile
-
-### Step 3: Add Admin Role Metadata
-
-1. Scroll down to **"Public metadata"** section
-2. Click **"Edit"**
-3. Add this JSON:
-
-```json
-{
-  "role": "founder"
-}
-```
-
-**Role Hierarchy:**
-
-- `founder` - Full access (highest)
-- `admin` - Admin access
-- `partner` - Partner access
-- `employee` - Basic access
-
-### Step 4: Save Changes
-
-1. Click **"Save"**
-2. Sign out and sign in again to refresh your session
+This app uses **Supabase Auth** for authentication and role-based access control.
 
 ---
 
-## Alternative: Use Clerk API (Programmatic)
+## Quick Setup: Bootstrap Your Admin Account
 
-If you want to set it via API:
+The fastest way to set yourself as **founder** is via the bootstrap endpoint:
 
-```bash
-# Get your Clerk Secret Key from .env.local
-# CLERK_SECRET_KEY="sk_test_7rZmxEdSD8naGYl4ohygpUUNgCd7kcha6Oe9CivKL3"
+1. **Sign in** to the admin app at `http://localhost:3004/sign-in`
+2. **Visit** `http://localhost:3004/api/bootstrap`
 
-# Find your user ID from Clerk dashboard, then:
-curl -X PATCH https://api.clerk.com/v1/users/USER_ID/metadata \
-  -H "Authorization: Bearer YOUR_SECRET_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "public_metadata": {
-      "role": "founder"
-    }
-  }'
-```
+This automatically grants your account the `founder` role. Refresh the admin page and you'll see the full sidebar (including the "System" section).
+
+> The bootstrap endpoint is only available in development mode.
+
+---
+
+## Manual Setup Via Supabase Dashboard
+
+If the bootstrap endpoint doesn't work (e.g. in production), set your role manually:
+
+### Step 1: Sign in to Supabase Dashboard
+
+1. Go to [https://supabase.com/dashboard](https://supabase.com/dashboard)
+2. Select your project
+
+### Step 2: Update Your User Profile
+
+1. In the left sidebar, go to **"Table Editor"**
+2. Select the `user_profiles` table
+3. Find your user record (by your email)
+4. Set the `role` column to `founder`
+5. Click **"Save"**
+
+**Role Hierarchy:**
+
+| Role       | Description                                  |
+| ---------- | -------------------------------------------- |
+| `founder`  | Full access (highest)                        |
+| `admin`    | Admin access                                 |
+| `manager`  | Manager access                               |
+| `employee` | Basic access (redirected to `/unauthorized`) |
 
 ---
 
 ## Access Levels
 
-### Founder (Your Account)
+### Founder
 
-✅ Access to all routes  
-✅ Can view/manage users  
-✅ Can view/manage subscriptions  
-✅ Can view/manage inquiries  
-✅ Can view Agency projects/clients  
-✅ Can access Settings (System section visible)
+✅ Access to all routes including System settings  
+✅ Can view/manage Prism Engine users & subscriptions  
+✅ Can view/manage Agency projects, clients, content  
+✅ Can access Settings (System section in sidebar)
 
 ### Admin
 
 ✅ Access to most routes  
-✅ Can view/manage users  
-✅ Can view/manage subscriptions  
+✅ Can view/manage Prism Engine users & subscriptions  
 ❌ Cannot access System settings (founder only)
 
-### Partner
+### Manager
 
 ✅ Limited access  
-✅ Can view inquiries  
-✅ Can view projects  
+✅ Can view Agency projects, quotes, inquiries  
 ❌ Cannot manage users  
 ❌ Cannot access System settings
 
@@ -97,10 +78,10 @@ curl -X PATCH https://api.clerk.com/v1/users/USER_ID/metadata \
 
 **Your Apps:**
 
-- **Prism Dashboard** (port 3001) - Users manage their rules/projects
-- **Prism Admin** (port 3003) - You manage the platform
+- **Prism Engine** (port 3001) — Users manage their rules/projects
+- **Prism Admin** (port 3004) — You manage the platform
 
-**Same Clerk Instance:** Both apps use the same authentication, so your role applies to both.
+**Same Supabase Instance:** Both apps use the same Supabase project, so user roles apply across both.
 
 ---
 
@@ -108,22 +89,23 @@ curl -X PATCH https://api.clerk.com/v1/users/USER_ID/metadata \
 
 After setting your role to `founder`:
 
-1. Navigate to http://localhost:3003
-2. Sign in with your business email
+1. Navigate to `http://localhost:3004`
+2. Sign in with your business email (email/password or Google/GitHub OAuth)
 3. You should see all admin sections in the sidebar
-4. Check the top-right badge - should show "Founder" role
+4. Check the top-right badge — should show **"founder"** role
 
 **If you still see "Unauthorized":**
 
-- Clear cookies and sign out
-- Hard refresh (Ctrl+Shift+R)
-- Sign in again
+- Sign out and sign in again
+- Hard refresh (`Ctrl+Shift+R`)
+- Check the `user_profiles` table to confirm the role was saved
 
 ---
 
 ## Security Notes
 
-- **Never commit** your Clerk Secret Key to git
+- **Never commit** Supabase service role keys to git
 - **Production:** Use Doppler to manage secrets
 - **Development:** Use `.env.local` (already in `.gitignore`)
 - **Role changes** require sign-out/sign-in to take effect
+- The `/api/bootstrap` endpoint is disabled in production

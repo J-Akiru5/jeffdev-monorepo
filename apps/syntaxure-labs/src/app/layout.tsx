@@ -190,7 +190,7 @@ export default async function RootLayout({
                       "@context": "https://schema.org",
                       "@type": "ProfessionalService",
                       name: "Syntaxure Labs",
-                      alternateName: ["JeffDev Studio"],
+                      
                       url: "https://www.syntaxure.dev",
                       logo: "https://www.syntaxure.dev/favicon.svg",
                       contactPoint: {
