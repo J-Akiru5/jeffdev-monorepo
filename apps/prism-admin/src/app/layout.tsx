@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SupabaseProvider } from "@/components/providers/supabase-provider";
 import { Toaster } from "sonner";
+import { ThemeWrapper } from "@/components/admin/theme-wrapper";
 import "./globals.css";
 
 export const dynamic = "force-dynamic";
@@ -72,9 +73,9 @@ export default function RootLayout({
 }) {
   return (
     <SupabaseProvider>
-      <html lang="en" className="dark">
+      <html lang="en" suppressHydrationWarning>
         <body className="antialiased bg-[#030303] text-white min-h-screen">
-          {children}
+          <ThemeWrapper>{children}</ThemeWrapper>
           <Toaster
             theme="dark"
             position="bottom-right"

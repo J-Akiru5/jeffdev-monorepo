@@ -1,12 +1,14 @@
 import { AdminSidebar } from "@/components/admin/sidebar";
 import { AdminHeader } from "@/components/admin/header";
 import { UserProvider } from "@/contexts/user-context";
+import { ThemeDefaultSync } from "@/components/admin/theme-default-sync";
 
 /**
  * Admin Layout
  * -------------
  * Layout wrapper for all /admin pages.
  * Includes sidebar navigation and header.
+ * Syncs cross-app theme default from user_profiles.preferences.
  * Toaster is provided by root layout.
  */
 
@@ -19,6 +21,7 @@ export default function AdminLayout({
 }) {
   return (
     <UserProvider>
+      <ThemeDefaultSync />
       <div className="min-h-screen bg-void">
         {/* Desktop Sidebar */}
         <AdminSidebar />

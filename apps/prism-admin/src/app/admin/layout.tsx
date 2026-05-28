@@ -3,6 +3,9 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AccountDropdownWrapper } from "@/components/auth/account-dropdown-wrapper";
+import { ThemeToggle } from "@/components/admin/theme-toggle";
+import { AdminErrorBoundary } from "@/components/admin/error-boundary-wrapper";
+import { AdminTopNavbar } from "./top-navbar";
 import {
   LayoutDashboard,
   Users,
@@ -30,6 +33,9 @@ import {
 /**
  * Admin Layout
  * Mobile-first with Android-style bottom navigation
+ *
+ * Now features a shared top navbar (AppTopNavbar) on all screen sizes.
+ * The desktop sidebar sits below the navbar at `top-14`.
  */
 export default async function AdminLayout({
   children,
@@ -66,8 +72,11 @@ export default async function AdminLayout({
 
   return (
     <div className="min-h-screen bg-[#030303]">
+      {/* Shared Top Navbar (all screen sizes) */}
+      <AdminTopNavbar />
+
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex fixed left-0 top-0 z-40 h-screen w-60 flex-col border-r border-white/5 bg-[#030303]">
+      <aside className="hidden lg:flex fixed left-0 top-14 z-40 h-[calc(100vh-3.5rem)] w-60 flex-col border-r border-white/5 bg-[#030303]">
         {/* Logo */}
         <div className="flex h-14 items-center border-b border-white/5 px-4">
           <Link
@@ -203,31 +212,18 @@ export default async function AdminLayout({
           )}
         </nav>
 
-        {/* User */}
-        <div className="border-t border-white/5 p-3">
+        {/* User & Theme */}
+        <div className="border-t border-white/5 p-3 space-y-1">
+          <ThemeToggle />
           <AccountDropdownWrapper />
         </div>
       </aside>
 
-      {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-40 h-14 border-b border-white/5 bg-[#030303]/95 backdrop-blur-lg flex items-center justify-between px-4">
-        <Link href="/admin/dashboard" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-amber-500/20 border border-amber-500/30">
-            <Shield className="h-4 w-4 text-amber-400" />
-          </div>
-          <span className="font-semibold text-white text-sm">Admin</span>
-        </Link>
-        <div className="flex items-center gap-3">
-          <span className="text-[10px] text-amber-400 font-mono uppercase bg-amber-500/10 px-2 py-1 rounded">
-            {role}
-          </span>
-          <AccountDropdownWrapper />
-        </div>
-      </header>
-
       {/* Main Content */}
-      <main className="lg:ml-60 pt-14 lg:pt-0 pb-20 lg:pb-0">
-        <div className="min-h-screen p-4 lg:p-6">{children}</div>
+      <main className="lg:ml-60 pt-14 pb-20 lg:pb-0">
+        <div className="min-h-screen p-4 lg:p-6">
+          <AdminErrorBoundary>{children}</AdminErrorBoundary>
+        </div>
       </main>
 
       {/* Mobile Bottom Navigation */}
