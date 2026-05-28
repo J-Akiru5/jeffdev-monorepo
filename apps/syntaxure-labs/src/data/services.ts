@@ -87,7 +87,7 @@ export const services: Service[] = [
     slug: "cloud-architecture",
     icon: Cpu,
     title: "Cloud Architecture",
-    tagline: "Infrastructure built for 99.9% uptime.",
+    tagline: "Infrastructure built for high availability.",
     description:
       "Enterprise-grade infrastructure on Vercel, AWS, or Google Cloud. We design systems that scale infinitely, recover automatically, and cost-optimize as you grow.",
     features: [
@@ -103,7 +103,7 @@ export const services: Service[] = [
       "CI/CD pipelines",
       "Monitoring dashboards",
       "Runbooks & documentation",
-      "SLA guarantee",
+      "HA architecture & uptime monitoring",
     ],
     investment: {
       startingPrice: 50000,

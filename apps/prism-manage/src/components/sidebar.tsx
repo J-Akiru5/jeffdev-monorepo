@@ -36,9 +36,7 @@ import {
 } from "lucide-react";
 import { useProjects } from "@/contexts/project-context";
 import { useWorkspaceStore } from "@/stores/workspace-store";
-import { SupabaseUserButton } from "@/components/auth/supabase-user-button";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { WorkspaceSwitcher } from "@/components/workspace-switcher";
+import { RealtimeClock } from "@/components/realtime-clock";
 import { PERSONAL_LISTS } from "@/lib/schemas";
 import type { Department } from "@/lib/schemas";
 
@@ -178,18 +176,12 @@ export function Sidebar() {
   // ── Render ──
   return (
     <aside
-      className={`fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-border bg-surface transition-all duration-300 lg:flex ${
+      className={`fixed left-0 top-14 z-40 hidden h-[calc(100vh-3.5rem)] flex-col border-r border-border bg-surface transition-all duration-300 lg:flex ${
         collapsed ? "w-16" : "w-64"
       }`}
     >
-      {/* Header */}
-      <div className="flex h-14 items-center justify-between border-b border-border px-4">
-        {!collapsed && (
-          <div className="flex items-center gap-2">
-            <FolderKanban className="h-5 w-5 text-cyan-400" />
-            <span className="font-semibold text-text-primary">Tracker</span>
-          </div>
-        )}
+      {/* Collapse toggle */}
+      <div className="flex items-center justify-end border-b border-border px-4 py-2">
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="rounded-md p-1.5 text-text-muted transition-colors hover:bg-glass-05 hover:text-text-primary"
@@ -204,10 +196,7 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-4">
-        {/* Workspace Switcher */}
-        <div className="mb-4">
-          <WorkspaceSwitcher collapsed={collapsed} />
-        </div>
+
 
         {/* Quick Filters */}
         <div className="mb-6">
@@ -619,8 +608,7 @@ export function Sidebar() {
 
       {/* Bottom Section */}
       <div className="border-t border-border p-3 space-y-1">
-        {!collapsed && <SupabaseUserButton />}
-        {!collapsed && <ThemeToggle />}
+        {!collapsed && <RealtimeClock />}
         <Link
           href="/settings"
           className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm text-text-tertiary transition-all hover:bg-glass-05 hover:text-text-primary ${

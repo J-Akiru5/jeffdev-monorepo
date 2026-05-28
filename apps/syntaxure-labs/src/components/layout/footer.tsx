@@ -11,14 +11,8 @@ const footerLinks = {
   ],
   products: [
     {
-      href: "https://www.syntaxure.dev/prism",
+      href: "/prism",
       label: "Prism Context Engine",
-      external: true,
-    },
-    {
-      href: "https://www.syntaxure.dev/prism/guide/getting-started",
-      label: "Documentation",
-      external: true,
     },
   ],
   company: [
@@ -91,14 +85,12 @@ export function Footer() {
             <ul className="mt-4 space-y-3">
               {footerLinks.products.map((link) => (
                 <li key={link.href}>
-                  <a
+                  <Link
                     href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className="text-sm text-cyan-500 transition-colors hover:text-cyan-400"
                   >
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -157,9 +149,7 @@ export function Footer() {
 
           <div className="text-center text-xs text-white/45 md:text-right">
             <p>© {currentYear} Syntaxure Labs.</p>
-            <p className="mt-1 font-mono text-[10px] text-white/30">
-              DTI: VLLP979818395984
-            </p>
+            
           </div>
         </div>
       </div>

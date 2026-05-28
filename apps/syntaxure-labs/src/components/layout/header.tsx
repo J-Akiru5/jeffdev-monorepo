@@ -19,7 +19,7 @@ export function Header() {
 
   const navLinks: NavLink[] = [
     {
-      href: "https://www.syntaxure.dev/prism",
+      href: "/prism",
       label: "Prism Context Engine",
       highlight: true,
     },
@@ -75,7 +75,7 @@ export function Header() {
                 {link.label}
                 {link.highlight && (
                   <span className="ml-1 rounded-full border border-purple-400/20 bg-purple-500/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-purple-400">
-                    New
+                    Waitlist
                   </span>
                 )}
               </Link>
@@ -132,7 +132,7 @@ export function Header() {
               {link.label}
               {link.highlight && (
                 <span className="ml-auto rounded bg-purple-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-purple-400">
-                  New
+                  Waitlist
                 </span>
               )}
             </Link>

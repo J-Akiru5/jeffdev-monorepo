@@ -35,16 +35,16 @@ export async function getActiveAvailability(): Promise<ActiveAvailability | null
       hasAvailability: remaining > 0,
       ctaText:
         remaining > 0
-          ? `${remaining} Slots Available for ${label}`
-          : `Fully Booked for ${label}`,
+          ? `Currently accepting new projects`
+          : `Fully Booked`,
       heroText:
         remaining > 0
-          ? `Available for ${label} Projects`
-          : `Fully Booked for ${label}`,
+          ? `Currently accepting new projects`
+          : `Fully Booked`,
       aboutText:
         remaining > 0
-          ? `Available for ${label} projects`
-          : `Fully Booked for ${label}`,
+          ? `Currently accepting new projects`
+          : `Fully Booked`,
     };
   } catch {
     return null;
