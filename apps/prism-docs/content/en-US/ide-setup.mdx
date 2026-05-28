@@ -168,8 +168,10 @@ When your IDE starts `prism serve`, it:
 3. Sets up a transparent stdio relay between your IDE and the MCP server
 4. Falls back to a local lite server (offline mode) if Cosmos DB is unreachable
 
-The MCP server exposes 8 tools to your AI:
-- `get_architectural_rules` — Smart-ranked rules for any task
+The MCP server exposes 12 tools to your AI:
+- `get_architectural_rules` — Smart-ranked rules for any task (with token budget)
+- `prism_kitchen` — Context budget optimizer (60-70% token savings)
+- `prism_intercept` — Active interception (prevents generate→violate→fix cycle)
 - `prism_scan` — Playwright URL extraction
 - `get_skill` — Procedural guides on demand
 - `list_skills` — Discover available skills
@@ -178,6 +180,7 @@ The MCP server exposes 8 tools to your AI:
 - `repo_extract` — AI rules from repo scan
 - `repo_scan` — Scan current project directory
 - `validate_code_pattern` — Pattern matching
+- `prism_health` — Server diagnostics
 
 ## Offline Mode
 

@@ -92,6 +92,34 @@ export interface ValidateCodePatternInput {
   category?: string;
 }
 
+/** Input for prism_kitchen analyze */
+export interface KitchenAnalyzeInput {
+  task: string;
+  budget?: number;
+  projectId?: string;
+  format?: "markdown" | "json";
+}
+
+/** Input for prism_kitchen preview */
+export interface KitchenPreviewInput {
+  task: string;
+  projectId?: string;
+  budget?: number;
+}
+
+/** Input for prism_intercept */
+export interface InterceptInput {
+  task?: string;
+  code?: string;
+  filePath?: string;
+  projectId?: string;
+}
+
+/** Input for prism_health */
+export interface HealthInput {
+  verbose?: boolean;
+}
+
 /** Repo scan report data structure (also used in repo_extract input) */
 export interface RepoScanData {
   root: string;

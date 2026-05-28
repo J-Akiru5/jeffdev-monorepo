@@ -38,6 +38,8 @@ import { handleListSkills } from "./tools/list-skills.js";
 import { handlePrismCheck } from "./tools/prism-check.js";
 import { handlePrismFix } from "./tools/prism-fix.js";
 import { extractRulesFromRepoScan } from "./tools/repo-extract.js";
+import { handleKitchenAnalyze, handleKitchenPreview } from "./tools/prism-kitchen.js";
+import { handlePrismIntercept } from "./tools/prism-intercept.js";
 import {
   detectCurrentProject,
   scanCurrentRepo,
@@ -565,6 +567,87 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           },
         },
       },
+      {
+        name: "prism_kitchen",
+        description:
+          "Context budget optimization tool. Analyzes what the AI will receive and optimizes it " +
+          "to achieve 60-70% token reduction. Use BEFORE generating code to see exactly what " +
+          "context will be sent. Returns token savings analysis and optimized rules.",
+        inputSchema: {
+          type: "object" as const,
+          properties: {
+            action: {
+              type: "string",
+              description: "'analyze' for full analysis with savings report, 'preview' for just the context",
+              enum: ["analyze", "preview"],
+            },
+            task: {
+              type: "string",
+              description: "What you're about to code (e.g., 'build a login form'). Used for relevance filtering.",
+            },
+            budget: {
+              type: "number",
+              description: "Maximum tokens for the response (default: 4000)",
+              default: 4000,
+            },
+            projectId: {
+              type: "string",
+              description: "Optional project ID to scope rules",
+            },
+            format: {
+              type: "string",
+              description: "Response format: 'markdown' or 'json'",
+              enum: ["markdown", "json"],
+            },
+          },
+          required: ["action", "task"],
+        },
+      },
+      {
+        name: "prism_intercept",
+        description:
+          "Active interception agent. Prevents the generate→violate→fix cycle that wastes tokens. " +
+          "Call BEFORE generating code with a task description to get a pre-flight guide of " +
+          "forbidden and required patterns. Call AFTER generating code to validate and get " +
+          "specific fix instructions. Eliminates reiteration and reduces token consumption by 40-60%.",
+        inputSchema: {
+          type: "object" as const,
+          properties: {
+            task: {
+              type: "string",
+              description: "What you're about to code (pre-generation mode). Returns forbidden/required patterns.",
+            },
+            code: {
+              type: "string",
+              description: "Generated code to validate (post-generation mode). Returns violations with fixes.",
+            },
+            filePath: {
+              type: "string",
+              description: "Optional file path for context",
+            },
+            projectId: {
+              type: "string",
+              description: "Optional project ID to scope rules",
+            },
+          },
+        },
+      },
+      {
+        name: "prism_health",
+        description:
+          "Server health check. Returns connection status, cache stats, rule count, and diagnostics. " +
+          "Use when troubleshooting MCP connection issues.",
+        inputSchema: {
+          type: "object" as const,
+          properties: {
+            verbose: {
+              type: "boolean",
+              description: "Include detailed diagnostics (default: false)",
+              default: false,
+            },
+          },
+        },
+      },
     ],
   };
 });
@@ -942,6 +1025,50 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             isError: true,
           };
         }
+      }
+
+      case "prism_kitchen": {
+        const kitchenArgs = args as Record<string, unknown>;
+        const action = kitchenArgs?.action as string;
+        if (action === "preview") {
+          return await handleKitchenPreview({
+            task: kitchenArgs?.task as string,
+            projectId: kitchenArgs?.projectId as string | undefined,
+            budget: kitchenArgs?.budget as number | undefined,
+          });
+        }
+        return await handleKitchenAnalyze({
+          task: kitchenArgs?.task as string,
+          budget: kitchenArgs?.budget as number | undefined,
+          projectId: kitchenArgs?.projectId as string | undefined,
+          format: kitchenArgs?.format as "markdown" | "json" | undefined,
+        });
+      }
+
+      case "prism_intercept": {
+        return await handlePrismIntercept(
+          args as unknown as Parameters<typeof handlePrismIntercept>[0],
+        );
+      }
+
+      case "prism_health": {
+        const verbose = (args as Record<string, unknown>)?.verbose as boolean | undefined;
+        return {
+          content: [{
+            type: "text" as const,
+            text: [
+              `# Prism MCP Server Health`,
+              ``,
+              `**Status:** ✅ Connected`,
+              `**Server:** ${SERVER_NAME} v${SERVER_VERSION}`,
+              `**Project:** ${currentProject ? `${currentProject.name} (${currentProject.framework})` : "Not detected"}`,
+              `**Authenticated:** ${authenticatedUserId ? `Yes (${authenticatedTier})` : "No"}`,
+              verbose ? `**Database:** ${process.env.MONGODB_URI ? "Configured" : "Not configured"}` : "",
+              verbose ? `**AI Provider:** ${process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY ? "Gemini" : process.env.AZURE_OPENAI_ENDPOINT ? "Azure OpenAI" : "Not configured"}` : "",
+              verbose ? `**Gremlin Ranking:** ${process.env.USE_GREMLIN_RANKING === "true" ? "Enabled" : "Disabled"}` : "",
+            ].filter(Boolean).join("\n"),
+          }],
+        };
       }
 
       default:
