@@ -24,6 +24,9 @@ const LIMITS: Record<string, RateLimitConfig> = {
   default: { windowMs: 60_000, maxRequests: 60 },
   strict: { windowMs: 60_000, maxRequests: 10 },
   free: { windowMs: 60_000, maxRequests: 20 },
+  pro: { windowMs: 60_000, maxRequests: 120 },
+  team: { windowMs: 60_000, maxRequests: 300 },
+  enterprise: { windowMs: 60_000, maxRequests: 1000 },
 };
 
 export function checkRateLimit(
