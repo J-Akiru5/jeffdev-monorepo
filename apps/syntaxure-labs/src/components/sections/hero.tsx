@@ -213,7 +213,7 @@ export function Hero({
           >
             <span className="text-cyan-400 text-xs">✦</span>
             <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/60">
-              Syntaxure Labs — Enterprise Software Studio
+              A Startup Driven by Technology &amp; Innovation
             </span>
           </div>
 
@@ -239,13 +239,18 @@ export function Hero({
               headlineInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
             }`}
           >
-            We Build Software
+            Engineering with{" "}
+            <span className="text-gradient-holographic">Precision</span>
+            <span className="text-cyan-400">:</span>
             <br />
-            That{" "}
-            <span className="text-gradient-holographic">
-              Scales
+            <span className="relative">
+              Governance{" "}
+              <span className="relative inline-block">
+                <span className="relative z-10 text-white">over</span>
+              </span>
+              {" "}Generation
+              <span className="text-cyan-400">.</span>
             </span>
-            <span className="text-cyan-400">.</span>
           </h1>
 
           {/* ── Neon Divider ── */}
@@ -258,11 +263,11 @@ export function Hero({
               subtextInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
             }`}
           >
-            From zero to production. Full-stack engineering for startups
-            and enterprises that demand{" "}
-            <span className="text-white/70">performance</span>,{" "}
-            <span className="text-white/70">reliability</span>, and{" "}
-            <span className="text-white/70">scale</span>.
+            From zero to production. We transform complex ideas into powerful,
+            reliable software ecosystems built for scale and absolute control.{" "}
+            <em className="not-italic font-semibold text-gradient-holographic [background-clip:text] [-webkit-background-clip:text]" style={{ WebkitTextFillColor: "transparent", background: "linear-gradient(90deg,#06b6d4,#a78bfa,#8b5cf6)" }}>
+              Engineering with Precision: Governance over Generation.
+            </em>
           </p>
 
           {/* ── CTAs ── */}
