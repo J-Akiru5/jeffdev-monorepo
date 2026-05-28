@@ -609,35 +609,44 @@ export function SignInForm() {
                 </div>
 
                 {/* Password */}
-                 <div className="relative">
-                  <Lock className="absolute left-3 top-[34px] h-4 w-4 text-white/30 pointer-events-none" />
-                  <Input
-                    label="Password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    error={validationErrors.password}
-                    className="pl-10 pr-10"
-                    variant="glass"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                    className="absolute right-3 top-[34px] text-white/30 hover:text-white/60 transition-colors"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium uppercase tracking-wider text-white/50">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 pointer-events-none z-10" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className={`w-full rounded-md border ${
+                        validationErrors.password
+                          ? "border-red-500/50"
+                          : "border-white/10"
+                      } bg-white/5 px-3 py-2.5 pl-10 pr-10 font-mono text-sm text-white outline-none transition-all duration-200 focus:border-white/20 focus:bg-white/[0.08] placeholder:text-white/20`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors z-10"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+                  {validationErrors.password && (
+                    <p className="text-xs text-red-400">{validationErrors.password}</p>
+                  )}
 
                   {/* Password strength (Sign Up only) */}
                   {mode === "signup" && password && (
-                    <div className="mt-2 space-y-1">
+                    <div className="space-y-1">
                       <div className="flex justify-between items-center text-[10px] font-mono text-white/40">
                         <span>Password Strength:</span>
                         <span className="text-white/60">
