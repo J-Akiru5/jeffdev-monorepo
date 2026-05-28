@@ -38,8 +38,8 @@ export function ScrollProvider({ children }: ScrollProviderProps) {
 
     // Detect low-end devices
     const isLowEndDevice =
-      (navigator as any).deviceMemory !== undefined &&
-      (navigator as any).deviceMemory < 4;
+      (navigator as unknown as { deviceMemory?: number }).deviceMemory !== undefined &&
+      (navigator as unknown as { deviceMemory?: number }).deviceMemory < 4;
 
     if (prefersReducedMotion) {
       // Skip ScrollTrigger initialization entirely

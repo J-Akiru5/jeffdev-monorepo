@@ -19,7 +19,9 @@ export default async function UsersPage() {
 
   if (!currentUser) return null;
 
-  let users: any[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  type UserRecord = any;
+  let users: UserRecord[] = [];
   try {
     const usersCollection = await getCollection("users");
     users = await usersCollection

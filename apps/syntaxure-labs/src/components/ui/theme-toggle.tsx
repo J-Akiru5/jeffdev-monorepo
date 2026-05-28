@@ -39,7 +39,6 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
   // already applied the correct class before React hydrates, so there is no flash.
   useEffect(() => {
     const initialTheme = resolveStoredTheme();
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(initialTheme);
     applyTheme(initialTheme);
   }, []);
