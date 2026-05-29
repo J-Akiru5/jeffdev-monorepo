@@ -4,7 +4,7 @@
  * ThemeBootstrap
  * --------------
  * Renders an inline <script> that:
- * 1. Reads the user's saved theme from localStorage (same key as next-themes uses)
+ * 1. Reads the user's saved theme from localStorage ("theme" key — same as next-themes default)
  * 2. Applies data-theme attribute to <html> before React hydrates (no flash)
  * 3. Syncs data-theme → .theme-light class so the shared @syntaxure/ui/styles.css
  *    class-based selectors (.theme-light .text-white, etc.) work correctly.
@@ -19,7 +19,7 @@ export function ThemeBootstrap() {
         __html: `(() => {
   try {
     const root = document.documentElement;
-    const key = 'syntaxure-theme';
+    const key = 'theme';
     const stored = localStorage.getItem(key);
     const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
     const theme = stored === 'light' || stored === 'dark' ? stored : prefersLight ? 'light' : 'dark';
