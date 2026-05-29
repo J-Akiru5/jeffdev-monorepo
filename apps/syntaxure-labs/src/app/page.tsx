@@ -13,7 +13,7 @@ export default function HomePage() {
   return (
     <>
       <Header />
-      <main className="pt-24">
+      <main>
         <HeroSection />
         <SocialProof />
         <Services />
