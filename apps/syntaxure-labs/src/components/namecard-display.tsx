@@ -10,13 +10,15 @@ import { useState, useEffect } from "react";
 import {
   Mail,
   Phone,
-  Linkedin,
-  Github,
   Globe,
   Download,
   QrCode,
-  X as TwitterIcon,
 } from "lucide-react";
+import {
+  LinkedinIcon as Linkedin,
+  GithubIcon as Github,
+  TwitterIcon,
+} from "@/components/icons/brand-icons";
 import type { PublicNamecard } from "@/types/user";
 
 interface NamecardDisplayProps {

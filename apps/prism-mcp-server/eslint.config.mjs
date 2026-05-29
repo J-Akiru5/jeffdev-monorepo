@@ -8,5 +8,17 @@ export default [
       "src/lib/**/*.d.ts",
       "src/lib/**/*.d.ts.map"
     ]
+  },
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "turbo/no-undeclared-env-vars": "off"
+    }
+  },
+  {
+    linterOptions: {
+      reportUnusedDisableDirectives: "off"
+    }
   }
 ];

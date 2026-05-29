@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Mail, MapPin, ArrowUpRight, Github, BookOpen } from "lucide-react";
+import { Mail, MapPin, ArrowUpRight, BookOpen } from "lucide-react";
+import { GithubIcon as Github } from "@/components/icons/brand-icons";
 import { SyntaxureLogo } from "@syntaxure/ui";
 
 const DOCS_URL = process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.syntaxure.dev";

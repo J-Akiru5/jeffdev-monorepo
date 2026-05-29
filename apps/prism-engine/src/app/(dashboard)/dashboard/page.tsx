@@ -233,7 +233,7 @@ export default async function DashboardPage() {
 
         {recentProjects.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-3">
-            {recentProjects.map((project: Record<string, unknown>) => (
+            {recentProjects.map((project: any) => (
               <Link
                 key={project._id.toString()}
                 href={`/projects/${project.slug}`}

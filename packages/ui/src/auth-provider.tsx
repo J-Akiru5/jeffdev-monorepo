@@ -84,6 +84,7 @@ export function useAuth(): AuthContextValue {
 export interface AuthProviderProps {
   children: ReactNode;
   /** Function that returns a Supabase browser client (called once per mount) */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   createClient: () => any;
 }
 
@@ -93,6 +94,7 @@ export function AuthProvider({ children, createClient }: AuthProviderProps) {
   const [error, setError] = useState<string | null>(null);
 
   // Create client once per mount and hold in a ref so it's stable across renders
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const clientRef = useRef<any>(null);
 
   // ── Refresh: fetch user + profile from Supabase ──
@@ -173,7 +175,7 @@ export function AuthProvider({ children, createClient }: AuthProviderProps) {
 
     // Subscribe to auth changes (doesn't flash loading on token refresh)
     const { data: sub } = clientRef.current.auth.onAuthStateChange(
-      (_event: string) => {
+      () => {
         refresh();
       },
     );

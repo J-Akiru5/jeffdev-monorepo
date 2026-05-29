@@ -13,12 +13,14 @@ import {
   Loader2,
   Save,
   ExternalLink,
-  Linkedin,
-  Github,
   Globe,
-  Twitter,
   Smartphone,
 } from "lucide-react";
+import {
+  LinkedinIcon as Linkedin,
+  GithubIcon as Github,
+  TwitterIcon as Twitter,
+} from "@/components/icons/brand-icons";
 import { updateUserProfile, checkUsernameAvailable } from "@/app/actions/users";
 import type { UserProfile } from "@/types/user";
 import { toast } from "sonner";

@@ -37,9 +37,8 @@ export function ScrollProvider({ children }: ScrollProviderProps) {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // Detect low-end devices
-    const isLowEndDevice =
-      (navigator as unknown as { deviceMemory?: number }).deviceMemory !== undefined &&
-      (navigator as unknown as { deviceMemory?: number }).deviceMemory < 4;
+    const deviceMemory = (navigator as any).deviceMemory;
+    const isLowEndDevice = deviceMemory !== undefined && deviceMemory < 4;
 
     if (prefersReducedMotion) {
       // Skip ScrollTrigger initialization entirely

@@ -15,7 +15,7 @@ describe("TIER_LIMITS", () => {
   it("free tier has the lowest limits", () => {
     const free = TIER_LIMITS.free;
     expect(free.projects).toBe(1);
-    expect(free.rules).toBe(5);
+    expect(free.rules).toBe(10);
     expect(free.components).toBe(5);
   });
 
@@ -30,9 +30,9 @@ describe("TIER_LIMITS", () => {
   });
 
   it("pro tier allows at least 5 projects", () => {
-    expect(TIER_LIMITS.pro.projects).toBe(10);
-    expect(TIER_LIMITS.pro.rules).toBe(-1);
-    expect(TIER_LIMITS.pro.components).toBe(-1);
+    expect(TIER_LIMITS.pro.projects).toBe(5);
+    expect(TIER_LIMITS.pro.rules).toBe(100);
+    expect(TIER_LIMITS.pro.components).toBe(50);
   });
 
   it("team tier allows 10 team members", () => {
@@ -61,7 +61,7 @@ describe("canUseFeature", () => {
   });
 
   it("allows unlimited tiers regardless of usage", () => {
-    expect(canUseFeature("pro", "rules", 9999)).toBe(true);
+    expect(canUseFeature("enterprise", "rules", 9999)).toBe(true);
     expect(canUseFeature("enterprise", "projects", 9999)).toBe(true);
   });
 

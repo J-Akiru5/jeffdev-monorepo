@@ -7,6 +7,21 @@ import { toast } from "sonner";
 import { updateBrand, deleteBrand, type BrandFormState } from "../../actions";
 import { useActionFeedback } from "@/lib/hooks/use-action-feedback";
 
+const FONT_OPTIONS = [
+  {
+    value: "Plus Jakarta Sans",
+    label: "Plus Jakarta Sans",
+    category: "Modern",
+  },
+  { value: "Outfit", label: "Outfit", category: "Geometric" },
+  { value: "Satoshi", label: "Satoshi", category: "Neo-Grotesque" },
+  { value: "Manrope", label: "Manrope", category: "Modern" },
+  { value: "Space Grotesk", label: "Space Grotesk", category: "Display" },
+  { value: "Sora", label: "Sora", category: "Technical" },
+  { value: "DM Sans", label: "DM Sans", category: "Clean" },
+  { value: "Inter", label: "Inter", category: "Neutral" },
+];
+
 interface BrandData {
   slug: string;
   companyName: string;

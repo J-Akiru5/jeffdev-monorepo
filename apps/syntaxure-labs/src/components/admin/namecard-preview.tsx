@@ -1,7 +1,12 @@
 "use client";
 
 import { UserProfile } from "@/types/user";
-import { Mail, Phone, Globe, Linkedin, Github, Twitter } from "lucide-react";
+import { Mail, Phone, Globe } from "lucide-react";
+import {
+  LinkedinIcon as Linkedin,
+  GithubIcon as Github,
+  TwitterIcon as Twitter,
+} from "@/components/icons/brand-icons";
 
 interface NamecardPreviewProps {
   displayName: string;

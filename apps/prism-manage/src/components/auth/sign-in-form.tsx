@@ -12,272 +12,48 @@ import {
   Briefcase,
   Sparkles,
   CheckCircle2,
-  Chrome,
-  Github,
   ArrowRight,
   Eye,
   EyeOff,
 } from "lucide-react";
-import {
-  Lock,
-  Mail,
-  User,
-  Briefcase,
-  Sparkles,
-  CheckCircle2,
-  Chrome,
-  Github,
-  ArrowRight,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import {
-  Lock,
-  Mail,
-  User,
-  Briefcase,
-  Sparkles,
-  CheckCircle2,
-  Chrome,
-  Github,
-  ArrowRight,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import {
-  Lock,
-  Mail,
-  User,
-  Briefcase,
-  Sparkles,
-  CheckCircle2,
-  Chrome,
-  Github,
-  ArrowRight,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import {
-  Lock,
-  Mail,
-  User,
-  Briefcase,
-  Sparkles,
-  CheckCircle2,
-  Chrome,
-  Github,
-  ArrowRight,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import {
-  Lock,
-  Mail,
-  User,
-  Briefcase,
-  Sparkles,
-  CheckCircle2,
-  Chrome,
-  Github,
-  ArrowRight,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import {
-  Lock,
-  Mail,
-  User,
-  Briefcase,
-  Sparkles,
-  CheckCircle2,
-  Chrome,
-  Github,
-  ArrowRight,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import {
-  Lock,
-  Mail,
-  User,
-  Briefcase,
-  Sparkles,
-  CheckCircle2,
-  Chrome,
-  Github,
-  ArrowRight,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import {
-  Lock,
-  Mail,
-  User,
-  Briefcase,
-  Sparkles,
-  CheckCircle2,
-  Chrome,
-  Github,
-  ArrowRight,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import {
-  Lock,
-  Mail,
-  User,
-  Briefcase,
-  Sparkles,
-  CheckCircle2,
-  Chrome,
-  Github,
-  ArrowRight,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import {
-  Lock,
-  Mail,
-  User,
-  Briefcase,
-  Sparkles,
-  CheckCircle2,
-  Chrome,
-  Github,
-  ArrowRight,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import {
-  Lock,
-  Mail,
-  User,
-  Briefcase,
-  Sparkles,
-  CheckCircle2,
-  Chrome,
-  Github,
-  ArrowRight,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import {
-  Lock,
-  Mail,
-  User,
-  Briefcase,
-  Sparkles,
-  CheckCircle2,
-  Chrome,
-  Github,
-  ArrowRight,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import {
-  Lock,
-  Mail,
-  User,
-  Briefcase,
-  Sparkles,
-  CheckCircle2,
-  Chrome,
-  Github,
-  ArrowRight,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import {
-  Lock,
-  Mail,
-  User,
-  Briefcase,
-  Sparkles,
-  CheckCircle2,
-  Chrome,
-  Github,
-  ArrowRight,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import {
-  Lock,
-  Mail,
-  User,
-  Briefcase,
-  Sparkles,
-  CheckCircle2,
-  Chrome,
-  Github,
-  ArrowRight,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import {
-  Lock,
-  Mail,
-  User,
-  Briefcase,
-  Sparkles,
-  CheckCircle2,
-  Chrome,
-  Github,
-  ArrowRight,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import {
-  Lock,
-  Mail,
-  User,
-  Briefcase,
-  Sparkles,
-  CheckCircle2,
-  Chrome,
-  Github,
-  ArrowRight,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import {
-  Lock,
-  Mail,
-  User,
-  Briefcase,
-  Sparkles,
-  CheckCircle2,
-  Chrome,
-  Github,
-  ArrowRight,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import {
-  Lock,
-  Mail,
-  User,
-  Briefcase,
-  Sparkles,
-  CheckCircle2,
-  Chrome,
-  Github,
-  ArrowRight,
-  Eye,
-  EyeOff,
-} from "lucide-react";
-import {
-  Lock,
-  Mail,
-  User,
-  Briefcase,
-  Sparkles,
-  CheckCircle2,
-  Chrome,
-  Github,
-  ArrowRight,
-  Eye,
-  EyeOff,
-} from "lucide-react";
+import { z } from "zod";
+import { motion, AnimatePresence } from "framer-motion";
+
+function GoogleIcon(props: React.ComponentPropsWithoutRef<"svg">) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="M12 5.04c1.78 0 3.38.61 4.64 1.8l3.46-3.46C17.98 1.19 15.15 0 12 0 7.31 0 3.25 2.69 1.25 6.63l4.08 3.16C6.29 7.04 8.91 5.04 12 5.04z" />
+      <path d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.46c-.28 1.48-1.12 2.74-2.38 3.58l3.69 2.87c2.16-1.99 3.42-4.91 3.42-8.6z" />
+      <path d="M5.33 14.21c-.24-.73-.38-1.5-.38-2.31s.14-1.58.38-2.31L1.25 6.63C.45 8.24 0 10.06 0 12s.45 3.76 1.25 5.37l4.08-3.16z" />
+      <path d="M12 18.96c-3.09 0-5.71-2-6.67-4.75l-4.08 3.16C3.25 21.31 7.31 24 12 24c3.15 0 5.82-1.04 7.76-2.84l-3.69-2.87c-1.04.7-2.38 1.11-4.07 1.11z" />
+    </svg>
+  );
+}
+
+function GitHubIcon(props: React.ComponentPropsWithoutRef<"svg">) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+      <path d="M9 18c-4.51 2-5-2-7-2" />
+    </svg>
+  );
+}
 
 const signInSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -307,12 +83,12 @@ type Mode = "signin" | "signup";
 interface OAuthProvider {
   id: "google" | "github";
   label: string;
-  icon: typeof Chrome;
+  icon: React.ComponentType<React.ComponentPropsWithoutRef<"svg">>;
 }
 
 const OAUTH_PROVIDERS: OAuthProvider[] = [
-  { id: "google", label: "Google", icon: Chrome },
-  { id: "github", label: "GitHub", icon: Github },
+  { id: "google", label: "Google", icon: GoogleIcon },
+  { id: "github", label: "GitHub", icon: GitHubIcon },
 ];
 
 // ─── Position Select Options ────────────────────────────────────────────────
@@ -522,7 +298,7 @@ export function SignInForm() {
           );
         }
       }
-    } catch (err: unknown) {
+    } catch (err: any) {
       toast.error(err.message || "An unexpected error occurred");
     } finally {
       setLoading(false);
