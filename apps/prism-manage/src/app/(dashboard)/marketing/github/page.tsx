@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { GithubSyncButton } from "@/components/marketing/github-sync-button";
 import type { MarketingTask, MarketingTeamMember } from "@/lib/schemas";
-import { toast } from "sonner";
 
 export default function MarketingGithubPage() {
   const [tasks, setTasks] = useState<MarketingTask[]>([]);
@@ -33,13 +32,17 @@ export default function MarketingGithubPage() {
             }));
           setTasks(marketingTasks);
         }
-      } catch {}
+      } catch {
+        // Silently skip if API is unavailable
+      }
       try {
         const res = await fetch("/api/marketing/team");
         if (res.ok) {
           setTeam(await res.json());
         }
-      } catch {}
+      } catch {
+        // Silently skip if API is unavailable
+      }
       setLoading(false);
     }
     load();

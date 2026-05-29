@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { getCollection } from "@syntaxure-labs/db";
+import type { Document } from "mongodb";
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -188,7 +189,7 @@ export async function createBrand(
 /**
  * Get user's brands
  */
-export async function getUserBrands() {
+export async function getUserBrands(): Promise<Document[]> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -213,7 +214,7 @@ export async function getUserBrands() {
 /**
  * Get a single brand by slug
  */
-export async function getBrand(slug: string) {
+export async function getBrand(slug: string): Promise<Document | null> {
   const supabase = await createClient();
   const {
     data: { user },

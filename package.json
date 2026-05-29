@@ -25,7 +25,7 @@
     "prettier": "^3.7.4",
     "supabase": "^2.101.0",
     "syncpack": "^13.0.4",
-    "turbo": "^2.7.2",
+    "turbo": "^2.9.0",
     "typescript": "^5.9.2"
   },
   "engines": {

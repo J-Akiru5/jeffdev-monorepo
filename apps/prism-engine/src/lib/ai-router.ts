@@ -22,7 +22,6 @@ export async function generateChatCompletion(params: {
       return generateChatCompletion(params);
     }
     case "azure": {
-      const { default: OpenAI } = await import("openai");
       const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
       const apiKey = process.env.AZURE_OPENAI_API_KEY;
       const deployment = process.env.AZURE_OPENAI_DEPLOYMENT_NAME || "gpt-4o-mini";

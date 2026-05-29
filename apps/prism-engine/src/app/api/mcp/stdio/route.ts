@@ -522,7 +522,6 @@ async function handleToolCall(
       // If no task, fall back to priority sort
       if (!task) {
         const top5 = foundRules.slice(0, 5);
-        const name_ = String(top5[0]?.name || "");
         const formatted = top5
           .map(
             (r) =>
@@ -890,9 +889,8 @@ async function handleToolCall(
     case "get_brand_rules": {
       const brands = await getCollection("brands");
       const brand = (await brands.findOne({ userId })) as unknown as BrandDoc | null;
-      const brand_ = brand || ((await brands.findOne({ userId: "demo-user" })) as unknown as BrandDoc | null);
 
-      if (!brand_) {
+      if (!brand) {
         return { content: [{ type: "text", text: "No brand configured" }] };
       }
 
@@ -901,10 +899,10 @@ async function handleToolCall(
           {
             type: "text",
             text:
-              `# ${brand_.companyName} Brand Rules\n\n` +
-              `## Colors\n- Primary: ${brand_.colors.primary}\n- Accent: ${brand_.colors.accent}\n\n` +
-              `## Typography\n- Headings: ${brand_.typography.headingFont}\n- Body: ${brand_.typography.bodyFont}\n\n` +
-              `## Voice\n- Personality: ${brand_.voice.personality}\n- Formality: ${brand_.voice.formality}`,
+              `# ${brand.companyName} Brand Rules\n\n` +
+              `## Colors\n- Primary: ${brand.colors.primary}\n- Accent: ${brand.colors.accent}\n\n` +
+              `## Typography\n- Headings: ${brand.typography.headingFont}\n- Body: ${brand.typography.bodyFont}\n\n` +
+              `## Voice\n- Personality: ${brand.voice.personality}\n- Formality: ${brand.voice.formality}`,
           },
         ],
       };
@@ -1259,17 +1257,6 @@ async function handleToolCall(
     default:
       throw new Error(`Unknown tool: ${name}`);
   }
-}
-
-/**
- * Extract snippet around search match
- */
-function extractSnippet(text: string, query: string): string {
-  const index = text.toLowerCase().indexOf(query.toLowerCase());
-  if (index === -1) return text.slice(0, 100);
-  const start = Math.max(0, index - 30);
-  const end = Math.min(text.length, index + query.length + 30);
-  return text.slice(start, end);
 }
 
 /**

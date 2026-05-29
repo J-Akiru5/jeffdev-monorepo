@@ -110,12 +110,9 @@ type PayPalEvent = {
   create_time?: string;
 };
 
-// Helper to get a typed Supabase table reference
-function table(name: string) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const supabase = getAdminClient() as any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return supabase.from(name) as any;
+// Helper to get a typed Supabase client
+function getDb() {
+  return getAdminClient();
 }
 
 export async function POST(request: NextRequest) {
@@ -201,12 +198,12 @@ async function handleSubscriptionActivated(
     : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
   // Upsert the subscription in Supabase
-  const { error: subError } = await table("subscriptions").upsert({
+  const { error: subError } = await getDb().from("subscriptions").upsert({
     user_id: userId,
     plan: tier,
     status: "active",
     billing_cycle: billingCycle,
-    amount: lastPayment ? parseFloat(lastPayment) : 0,
+    amount: lastPayment ? parseFloat(lastPayment).toString() : "0",
     currency: "USD",
     current_period_start: now.toISOString(),
     current_period_end: periodEnd.toISOString(),
@@ -227,7 +224,7 @@ async function handleSubscriptionActivated(
   }
 
   // Update the user's tier in user_profiles
-  const { error: profileError } = await table("user_profiles")
+  const { error: profileError } = await getDb().from("user_profiles")
     .update({ tier, updated_at: now.toISOString() })
     .eq("id", userId);
 
@@ -250,7 +247,7 @@ async function handleSubscriptionActivated(
 async function handleSubscriptionCancelled(userId: string) {
   const now = new Date();
 
-  const { error: subError } = await table("subscriptions")
+  const { error: subError } = await getDb().from("subscriptions")
     .update({
       status: "cancelled",
       cancel_at_period_end: true,
@@ -277,7 +274,7 @@ async function handleSubscriptionCancelled(userId: string) {
 async function handleSubscriptionSuspended(userId: string) {
   const now = new Date();
 
-  const { error: subError } = await table("subscriptions")
+  const { error: subError } = await getDb().from("subscriptions")
     .update({ status: "past_due", updated_at: now.toISOString() })
     .eq("user_id", userId);
 
@@ -302,7 +299,7 @@ async function handlePaymentCompleted(userId: string) {
     now.getTime() + 30 * 24 * 60 * 60 * 1000,
   );
 
-  const { error: subError } = await table("subscriptions")
+  const { error: subError } = await getDb().from("subscriptions")
     .update({
       status: "active",
       current_period_end: nextPeriodEnd.toISOString(),
@@ -335,7 +332,7 @@ async function handlePaymentFailed(
   const now = new Date();
   const subscriberEmail = resource.subscriber?.email_address;
 
-  const { error: subError } = await table("subscriptions")
+  const { error: subError } = await getDb().from("subscriptions")
     .update({ status: "past_due", updated_at: now.toISOString() })
     .eq("user_id", userId);
 
@@ -350,7 +347,7 @@ async function handlePaymentFailed(
   // otherwise look up the user's email from the database
   let emailTo = subscriberEmail;
   if (!emailTo) {
-    const { data: profile } = await table("user_profiles")
+    const { data: profile } = await getDb().from("user_profiles")
       .select("email")
       .eq("id", userId)
       .single();

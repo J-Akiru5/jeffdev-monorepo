@@ -33,7 +33,9 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
     // Detect low-end devices by checking cores or memory
     const isLowEndDevice =
       !window.matchMedia("(min-width: 768px)").matches ||
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (navigator as any).deviceMemory !== undefined &&
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (navigator as any).deviceMemory < 4;
 
     // Disable Lenis entirely on low-end mobile with reduced motion

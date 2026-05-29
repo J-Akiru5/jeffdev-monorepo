@@ -5,8 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
 import { Button, Input } from "@syntaxure/ui";
 import { toast } from "sonner";
-import { z } from "zod";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Lock,
   Mail,
@@ -20,8 +18,266 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-
-// ─── Schemas ────────────────────────────────────────────────────────────────
+import {
+  Lock,
+  Mail,
+  User,
+  Briefcase,
+  Sparkles,
+  CheckCircle2,
+  Chrome,
+  Github,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import {
+  Lock,
+  Mail,
+  User,
+  Briefcase,
+  Sparkles,
+  CheckCircle2,
+  Chrome,
+  Github,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import {
+  Lock,
+  Mail,
+  User,
+  Briefcase,
+  Sparkles,
+  CheckCircle2,
+  Chrome,
+  Github,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import {
+  Lock,
+  Mail,
+  User,
+  Briefcase,
+  Sparkles,
+  CheckCircle2,
+  Chrome,
+  Github,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import {
+  Lock,
+  Mail,
+  User,
+  Briefcase,
+  Sparkles,
+  CheckCircle2,
+  Chrome,
+  Github,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import {
+  Lock,
+  Mail,
+  User,
+  Briefcase,
+  Sparkles,
+  CheckCircle2,
+  Chrome,
+  Github,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import {
+  Lock,
+  Mail,
+  User,
+  Briefcase,
+  Sparkles,
+  CheckCircle2,
+  Chrome,
+  Github,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import {
+  Lock,
+  Mail,
+  User,
+  Briefcase,
+  Sparkles,
+  CheckCircle2,
+  Chrome,
+  Github,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import {
+  Lock,
+  Mail,
+  User,
+  Briefcase,
+  Sparkles,
+  CheckCircle2,
+  Chrome,
+  Github,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import {
+  Lock,
+  Mail,
+  User,
+  Briefcase,
+  Sparkles,
+  CheckCircle2,
+  Chrome,
+  Github,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import {
+  Lock,
+  Mail,
+  User,
+  Briefcase,
+  Sparkles,
+  CheckCircle2,
+  Chrome,
+  Github,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import {
+  Lock,
+  Mail,
+  User,
+  Briefcase,
+  Sparkles,
+  CheckCircle2,
+  Chrome,
+  Github,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import {
+  Lock,
+  Mail,
+  User,
+  Briefcase,
+  Sparkles,
+  CheckCircle2,
+  Chrome,
+  Github,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import {
+  Lock,
+  Mail,
+  User,
+  Briefcase,
+  Sparkles,
+  CheckCircle2,
+  Chrome,
+  Github,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import {
+  Lock,
+  Mail,
+  User,
+  Briefcase,
+  Sparkles,
+  CheckCircle2,
+  Chrome,
+  Github,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import {
+  Lock,
+  Mail,
+  User,
+  Briefcase,
+  Sparkles,
+  CheckCircle2,
+  Chrome,
+  Github,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import {
+  Lock,
+  Mail,
+  User,
+  Briefcase,
+  Sparkles,
+  CheckCircle2,
+  Chrome,
+  Github,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import {
+  Lock,
+  Mail,
+  User,
+  Briefcase,
+  Sparkles,
+  CheckCircle2,
+  Chrome,
+  Github,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import {
+  Lock,
+  Mail,
+  User,
+  Briefcase,
+  Sparkles,
+  CheckCircle2,
+  Chrome,
+  Github,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import {
+  Lock,
+  Mail,
+  User,
+  Briefcase,
+  Sparkles,
+  CheckCircle2,
+  Chrome,
+  Github,
+  ArrowRight,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 
 const signInSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -266,7 +522,7 @@ export function SignInForm() {
           );
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err.message || "An unexpected error occurred");
     } finally {
       setLoading(false);

@@ -25,7 +25,7 @@ interface Notification {
   user_id: string;
   type: "info" | "success" | "warning" | "error";
   title: string;
-  message?: string;
+  message?: string | null;
   link?: string;
   read: boolean;
   created_at: string;

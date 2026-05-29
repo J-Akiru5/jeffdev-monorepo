@@ -57,13 +57,13 @@ export function ProjectsManager({ initialProjects }: Props) {
     setShowForm(true);
     const ws = await getWorkspaces();
     setWorkspaces(ws.map((w) => ({ id: w.id, name: w.name })));
-    setNewWorkspaceId(ws[0]?.id || "");
+    setNewWorkspaceId(ws[0]?.id ?? "");
   }
 
   function startEdit(p: Project) {
     setEditingId(p.id);
     setEditName(p.name);
-    setEditColor(p.color || COLORS[0]);
+    setEditColor(p.color ?? COLORS[0]!);
     setShowForm(true);
   }
 

@@ -62,15 +62,15 @@ export async function saveAvailabilitySlot(
     const { id, ...row } = parsed.data;
 
     if (id) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (adminClient.from("availability_slots") as any)
+      const { error } = await adminClient
+        .from("availability_slots")
         .update({ ...row, updated_at: new Date().toISOString() })
         .eq("id", id);
 
       if (error) throw error;
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (adminClient.from("availability_slots") as any)
+      const { error } = await adminClient
+        .from("availability_slots")
         .insert({ ...row, updated_at: new Date().toISOString() });
 
       if (error) throw error;
@@ -96,15 +96,15 @@ export async function setActiveQuarter(
   try {
     const adminClient = getAdminClient();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: resetError } = await (adminClient.from("availability_slots") as any)
+    const { error: resetError } = await adminClient
+      .from("availability_slots")
       .update({ is_active: false, updated_at: new Date().toISOString() })
       .neq("id", id);
 
     if (resetError) throw resetError;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (adminClient.from("availability_slots") as any)
+    const { error } = await adminClient
+      .from("availability_slots")
       .update({ is_active: true, updated_at: new Date().toISOString() })
       .eq("id", id);
 

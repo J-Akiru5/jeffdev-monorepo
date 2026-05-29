@@ -3,22 +3,9 @@
 import { useState, useActionState } from "react";
 import { ArrowLeft, Save, Trash2, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { updateBrand, deleteBrand, type BrandFormState } from "../../actions";
 import { useActionFeedback } from "@/lib/hooks/use-action-feedback";
-
-// Font options
-const FONT_OPTIONS = [
-  { value: "Plus Jakarta Sans", label: "Plus Jakarta Sans" },
-  { value: "Outfit", label: "Outfit" },
-  { value: "Satoshi", label: "Satoshi" },
-  { value: "Manrope", label: "Manrope" },
-  { value: "Space Grotesk", label: "Space Grotesk" },
-  { value: "Sora", label: "Sora" },
-  { value: "DM Sans", label: "DM Sans" },
-  { value: "Inter", label: "Inter" },
-];
 
 interface BrandData {
   slug: string;
@@ -60,7 +47,6 @@ interface EditBrandFormProps {
 }
 
 export default function EditBrandForm({ brand }: EditBrandFormProps) {
-  const router = useRouter();
   const [state, formAction, pending] = useActionState<BrandFormState, FormData>(
     updateBrand,
     null,

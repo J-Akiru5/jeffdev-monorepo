@@ -11,11 +11,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
+import type { PricingFAQRow } from "@/lib/database.types";
 
-const TABLE = "pricing_faqs";
-
-function table() {
-  return getAdminClient().from(TABLE);
+function faqs() {
+  return getAdminClient().from("pricing_faqs");
 }
 
 // GET — List FAQs
@@ -30,11 +29,10 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const app = searchParams.get("app");
 
-    let query = table().select("*").order("sort_order", { ascending: true });
+    let query = faqs().select("*").order("sort_order", { ascending: true });
 
     if (app) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      query = (query as any).eq("app", app);
+      query = query.eq("app", app as PricingFAQRow["app"]);
     }
 
     const { data, error } = await query;
@@ -62,8 +60,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (table() as any)
+    const { data, error } = await faqs()
       .insert({
         app: body.app,
         question: body.question,
@@ -105,19 +102,18 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    const updateFields: Record<string, unknown> = {};
-    const allowedFields = ["app", "question", "answer", "sort_order"];
+    const updateFields: Partial<PricingFAQRow> & { updated_at: string } = {
+      updated_at: new Date().toISOString(),
+    };
+    const allowedFields: (keyof PricingFAQRow)[] = ["app", "question", "answer", "sort_order"];
 
     for (const field of allowedFields) {
       if (field in updates) {
-        updateFields[field] = updates[field] ?? null;
+        (updateFields as Record<string, unknown>)[field] = updates[field] ?? null;
       }
     }
 
-    updateFields.updated_at = new Date().toISOString();
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (table() as any)
+    const { data, error } = await faqs()
       .update(updateFields)
       .eq("id", id)
       .select()
@@ -155,7 +151,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const { error } = await table().delete().eq("id", id);
+    const { error } = await faqs().delete().eq("id", id);
 
     if (error) throw error;
 
