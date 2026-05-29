@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start --port 3001",
     "lint": "eslint",
-    "check-types": "tsc --noEmit",
+    "check-types": "node ../../scripts/with-memory-limit.js tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "seed:keandrew": "dotenv -e .env.local -- tsx scripts/seed-keandrew.ts",

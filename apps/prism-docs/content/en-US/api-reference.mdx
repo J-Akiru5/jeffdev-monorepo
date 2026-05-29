@@ -235,7 +235,7 @@ DELETE /api/api-keys/:id
 
 ## MCP Tool Reference
 
-Prism exposes 9 MCP tools via stdio transport (JSON-RPC 2.0). Your IDE accesses these automatically when `prism serve` is running.
+Prism exposes 16 MCP tools via stdio transport (JSON-RPC 2.0). Your IDE accesses these automatically when `prism serve` is running.
 
 ### `get_architectural_rules`
 
@@ -245,7 +245,7 @@ Returns ranked, relevant rules for a developer task.
 ```typescript
 {
   task: string;          // REQUIRED — current coding task
-  projectId: string;     // REQUIRED — project to fetch rules for
+  projectId?: string;    // Optional — project to fetch rules for
   maxTokens?: number;    // Default: 4000
   format?: "json" | "markdown";  // Default: "markdown"
   category?: string;     // Filter by category
@@ -363,17 +363,7 @@ Generate rules from a repository scan report.
 
 ---
 
-### `search_video_transcript` (Beta)
-
-Semantic search over video transcripts.
-
-**Input:** `{ query: string; projectId: string }`
-
-**Output:** `{ results: VideoResult[] }`
-
----
-
-### `validate_code_pattern` (Legacy)
+### `validate_code_pattern`
 
 Pattern matching on code.
 

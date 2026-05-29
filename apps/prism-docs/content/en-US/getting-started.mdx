@@ -24,7 +24,7 @@ Verify the installation:
 
 ```bash
 prism --version
-# prism-engine/cli v1.1.0
+# prism-engine/cli v1.0.3
 ```
 
 ## Step 3 — Extract Your Rules
@@ -142,15 +142,20 @@ prism doctor             # Health check — all systems status
 
 ## Free Plan vs Pro
 
-| Feature | Free | Pro (₱990/mo) |
-|---------|------|------|
-| Manual rule creation | ✅ Up to 5 rules | ✅ Unlimited |
-| Export as `.cursorrules` / `rules.md` | ✅ | ✅ |
-| URL scanning (Playwright) | ✅ | ✅ |
-| Repo scanning | ✅ | ✅ |
-| API keys (live MCP sync) | ❌ | ✅ 1 key |
-| AI rule enhancement | ❌ | ✅ |
-| Analytics dashboard | ❌ | ✅ |
+| Feature | Free | Pro ($12/mo) | Team ($36/mo) |
+|---------|------|-------------|---------------|
+| Rules | Up to 10 | Up to 100 | Unlimited |
+| Projects | 1 | 5 | Unlimited |
+| MCP Access | ❌ | ✅ | ✅ |
+| AI Generations | 0/mo | 500/mo | 2000/mo |
+| Code Validations | 50/mo | Unlimited | Unlimited |
+| Git Hooks | ❌ | ✅ | ✅ |
+| REST Gateway | ❌ | ✅ | ✅ |
+| File Export | ✅ | ✅ | ✅ |
+| Memory | ❌ | ✅ | ✅ |
+| Rule Compiler | ❌ | ✅ | ✅ |
+| API Keys | 0 | 2 | 10 |
+| Team Members | 0 | 0 | 10 |
 
 > [!NOTE]
-> Free plan users can still get value: create rules manually in the dashboard and export them as `.cursorrules` or `rules.md`. Drop the exported file in your project root — Cursor and VS Code will pick it up automatically.
+> Free plan users get file export (`.cursorrules`, `rules.md`) and 50 code validations/month. Upgrade to Pro for MCP access, AI features, and unlimited validations.

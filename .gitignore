@@ -15,6 +15,9 @@ node_modules
 # Testing
 coverage
 
+# Logs
+ts_errors.log
+
 # Turbo
 .turbo
 
