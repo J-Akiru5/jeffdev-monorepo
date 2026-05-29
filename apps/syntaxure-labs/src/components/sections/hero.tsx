@@ -131,9 +131,9 @@ export function Hero({
   };
 
   return (
-    <div className="relative z-10 drop-shadow-[0_15px_25px_rgba(6,182,212,0.15)] -mb-10">
+    <div className="relative z-10 drop-shadow-[0_15px_25px_rgba(6,182,212,0.15)]">
       <section
-        className="relative flex min-h-[90vh] items-center justify-center bg-void hero-section-bg clip-diagonal pb-32"
+        className="relative flex min-h-[90vh] items-center justify-center bg-void hero-section-bg clip-diagonal pb-24"
       >
         {/* ═══════════════════════════════════════
             BACKGROUND LAYERS
@@ -252,7 +252,7 @@ export function Hero({
         {/* ═══════════════════════════════════════
             CONTENT LAYOUT (2 Columns on Desktop)
             ═══════════════════════════════════════ */}
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 py-24 lg:py-32 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-8">
+        <div          className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 pb-24 lg:pb-32 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-8">
           
           {/* ── Left Column: Copy & CTAs ── */}
           <div className="flex-1 text-center lg:text-left">
