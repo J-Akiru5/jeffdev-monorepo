@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
+    "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/node": "^22.15.3",

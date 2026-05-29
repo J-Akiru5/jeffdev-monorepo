@@ -25,6 +25,7 @@
     "@syntaxure-labs/db": "workspace:*",
     "@modelcontextprotocol/sdk": "1.12.1",
     "gpt-tokenizer": "^3.4.0",
+    "mongodb": "^6.15.0",
     "openai": "^6.15.0",
     "zod": "^4.2.1"
   },
