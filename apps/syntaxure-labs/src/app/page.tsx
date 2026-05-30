@@ -8,8 +8,8 @@ import { Features } from "@/components/sections/features";
 import { PrismHighlight } from "@/components/sections/prism-highlight";
 import { AgenticProtocol } from "@/components/sections/agentic-protocol";
 import { CTASection } from "@/components/sections/cta-section";
-import { getFeaturedProjects } from "@/lib/data";
-import { getServices } from "@/lib/data";
+import { getFeaturedProjects, getServices } from "@/lib/data";
+import { services as staticServices } from "@/data/services";
 
 export default async function HomePage() {
   const [featuredProjects, dbServices] = await Promise.all([
@@ -17,13 +17,26 @@ export default async function HomePage() {
     getServices(),
   ]);
 
+  // Use DB services if available, fallback to static data
+  const services = dbServices.length > 0 ? dbServices : staticServices.map((svc, idx) => ({
+    slug: svc.slug,
+    icon: svc.slug.includes("web") ? "web" : svc.slug.includes("saas") ? "saas" : svc.slug.includes("cloud") ? "cloud" : "ai",
+    title: svc.title,
+    tagline: svc.tagline,
+    description: svc.description,
+    features: svc.features,
+    deliverables: svc.deliverables,
+    investment: { starting: `₱${svc.investment.startingPrice.toLocaleString()}`, timeline: svc.investment.timeline },
+    order: idx,
+  }));
+
   return (
     <>
       <Header />
       <main>
         <HeroSection />
         <SocialProof />
-        <Services services={dbServices} />
+        <Services services={services} />
         <WorksShowcase projects={featuredProjects} />
         <Features />
         <PrismHighlight />

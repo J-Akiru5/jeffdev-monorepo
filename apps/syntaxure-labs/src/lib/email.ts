@@ -28,7 +28,7 @@ export const BRANDED_SENDER = `Syntaxure Labs <${EMAIL_ADDRESSES.noreply}>`;
 
 // Base URL for assets in emails
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.syntaxure.dev";
-const LOGO_URL = `${BASE_URL}/favicon/icon1.png`;
+const LOGO_URL = `${BASE_URL}/favicon.svg`;
 
 interface EmailAttachment {
   filename: string;

@@ -140,14 +140,6 @@ export default function HomePage() {
               <ul className="space-y-2">
                 <li>
                   <Link
-                    href="/features"
-                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm transition-colors"
-                  >
-                    Features
-                  </Link>
-                </li>
-                <li>
-                  <Link
                     href="/pricing"
                     className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm transition-colors"
                   >

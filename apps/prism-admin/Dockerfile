@@ -5,22 +5,23 @@ WORKDIR /app
 FROM base AS deps
 RUN apk add --no-cache libc6-compat
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json ./
-COPY apps/syntaxure-labs/package.json apps/syntaxure-labs/
+COPY apps/prism-admin/package.json apps/prism-admin/
 COPY packages/ui/package.json packages/ui/
+COPY packages/db/package.json packages/db/
 COPY packages/eslint-config/package.json packages/eslint-config/
 COPY packages/typescript-config/package.json packages/typescript-config/
 RUN pnpm install --frozen-lockfile
 
 FROM deps AS build
 COPY . .
-RUN pnpm --filter syntaxure-labs... run build
+RUN pnpm --filter prism-admin... run build
 
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=build /app/apps/syntaxure-labs/.next/standalone ./
-COPY --from=build /app/apps/syntaxure-labs/.next/static ./apps/syntaxure-labs/.next/static
-COPY --from=build /app/apps/syntaxure-labs/public ./apps/syntaxure-labs/public
-EXPOSE 3000
-ENV PORT=3000
-CMD ["node", "apps/syntaxure-labs/server.js"]
+COPY --from=build /app/apps/prism-admin/.next/standalone ./
+COPY --from=build /app/apps/prism-admin/.next/static ./apps/prism-admin/.next/static
+COPY --from=build /app/apps/prism-admin/public ./apps/prism-admin/public
+EXPOSE 3004
+ENV PORT=3004
+CMD ["node", "apps/prism-admin/server.js"]

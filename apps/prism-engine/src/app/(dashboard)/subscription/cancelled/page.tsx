@@ -36,9 +36,9 @@ export default function SubscriptionCancelledPage() {
 
       <p className="mt-8 text-sm text-white/40">
         Have questions?{" "}
-        <Link href="/contact" className="text-cyan-400 hover:underline">
+        <a href="mailto:support@syntaxure.dev" className="text-cyan-400 hover:underline">
           Contact support
-        </Link>
+        </a>
       </p>
     </div>
   );

@@ -8,6 +8,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCollection } from "@syntaxure-labs/db";
 import { Resend } from "resend";
+import { createClient } from "@supabase/supabase-js";
 
 const PAYPAL_WEBHOOK_ID = process.env.PAYPAL_WEBHOOK_ID;
 const PAYPAL_API_URL =
@@ -206,10 +207,22 @@ async function handlePaymentFailed(userId: string) {
 
   if (process.env.RESEND_API_KEY) {
     try {
+      // Look up user email from Supabase Auth
+      let recipientEmail = userId;
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (supabaseUrl && supabaseServiceKey) {
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        const { data: user } = await supabase.auth.admin.getUserById(userId);
+        if (user?.user?.email) {
+          recipientEmail = user.user.email;
+        }
+      }
+
       const resend = new Resend(process.env.RESEND_API_KEY);
       await resend.emails.send({
         from: "Prism <billing@prism.syntaxure.dev>",
-        to: userId, // TODO: resolve user email from Supabase auth lookup
+        to: recipientEmail,
         subject: "Payment Failed — Prism Subscription",
         html: `<p>Your Prism subscription payment failed. Please update your payment method.</p>`,
       });
