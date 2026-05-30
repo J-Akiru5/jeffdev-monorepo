@@ -25,7 +25,7 @@ export default function TermsPage() {
               Terms of Service
             </h1>
             <p className="text-white/40 font-mono text-sm">
-              Last updated: January 2026
+              Last updated: May 2026
             </p>
           </header>
 
@@ -41,7 +41,6 @@ export default function TermsPage() {
               </p>
               <ul className="list-disc list-inside text-white/70 mt-4 space-y-2">
                 <li>MCP (Model Context Protocol) Server deployment</li>
-                <li>Video-to-context processing and transcription</li>
                 <li>AI-powered architectural rule extraction</li>
                 <li>Component library management</li>
                 <li>IDE integration and synchronization</li>
@@ -88,8 +87,8 @@ export default function TermsPage() {
                 3. Payment Terms
               </h2>
               <p className="text-white/70 leading-relaxed mb-4">
-                All payments are processed securely through PayPal. By
-                subscribing to a paid plan:
+                All payments will be processed securely through PayPal. Payment
+                processing is coming soon. By subscribing to a paid plan:
               </p>
               <ul className="list-disc list-inside text-white/70 space-y-2">
                 <li>
@@ -161,19 +160,15 @@ export default function TermsPage() {
               </p>
               <ul className="list-disc list-inside text-white/70 space-y-2">
                 <li>
-                  Content is processed using third-party AI services (OpenAI,
-                  Google Gemini)
+                  Content is processed using third-party AI services (Google
+                  Gemini, Azure OpenAI)
                 </li>
                 <li>
-                  Transcripts and extracted rules are stored in your account
+                  Extracted rules and project data are stored in your account
                 </li>
                 <li>
                   We do not use your content to train public AI models without
                   explicit consent
-                </li>
-                <li>
-                  Video files may be temporarily cached during processing and
-                  deleted within 24 hours
                 </li>
               </ul>
             </section>

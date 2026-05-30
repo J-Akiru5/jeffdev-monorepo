@@ -153,8 +153,8 @@ export default function PrivacyPage() {
                   processing (coming soon)
                 </li>
                 <li>
-                  <strong className="text-white">Vercel:</strong> Platform
-                  hosting and analytics
+                  <strong className="text-white">Prism Analytics:</strong> Usage
+                  analytics and KPI tracking
                 </li>
               </ul>
               <p className="text-white/70 leading-relaxed mt-4">
@@ -174,7 +174,7 @@ export default function PrivacyPage() {
                 </p>
               </div>
               <p className="text-white/70 leading-relaxed">
-                Your rules, components, and video transcripts are your
+                Your rules, components, and project data are your
                 intellectual property. We may use aggregated, anonymized usage
                 patterns to improve our platform, but your specific content is
                 never used to train AI models without your explicit consent.
@@ -192,9 +192,7 @@ export default function PrivacyPage() {
               <ul className="list-disc list-inside text-white/70 space-y-2">
                 <li>All data transmitted using TLS/HTTPS encryption</li>
                 <li>Database encryption at rest</li>
-                <li>Regular security audits and penetration testing</li>
                 <li>Strict access controls and authentication</li>
-                <li>Secrets managed through Doppler (never stored in code)</li>
               </ul>
               <p className="text-white/70 leading-relaxed mt-4">
                 While we strive to protect your data, no method of transmission
@@ -216,10 +214,6 @@ export default function PrivacyPage() {
                 <li>
                   <strong className="text-white">Cancelled accounts:</strong>{" "}
                   Read-only access for 30 days, then data may be deleted
-                </li>
-                <li>
-                  <strong className="text-white">Video files:</strong> Deleted
-                  within 24-48 hours after processing
                 </li>
                 <li>
                   <strong className="text-white">Audit logs:</strong> Retained
@@ -275,10 +269,10 @@ export default function PrivacyPage() {
               <h2 className="text-xl font-bold text-white mb-4">9. Cookies</h2>
               <p className="text-white/70 leading-relaxed">
                 We use essential cookies for authentication and session
-                management. We also use analytics cookies (Vercel Analytics) to
-                understand how our platform is used. You can configure your
-                browser to refuse cookies, but some features may not work
-                properly.
+                management. We also use analytics cookies through our dedicated
+                analytics platform to understand how our platform is used. You
+                can configure your browser to refuse cookies, but some features
+                may not work properly.
               </p>
             </section>
 
