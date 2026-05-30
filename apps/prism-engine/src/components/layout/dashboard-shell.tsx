@@ -204,13 +204,13 @@ export default function DashboardShell({
             >
               <Sparkles className="h-4 w-4 text-cyan-400" />
             </Link>
-            {/* Expand button — slides in on hover */}
+            {/* Expand button — perfectly centered over logo on hover */}
             <button
               onClick={toggle}
               aria-label="Expand sidebar"
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--bg-primary)] border border-cyan-500/30 text-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.2)] opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-md bg-[var(--bg-primary)] border border-cyan-500/50 text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.3)] opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200"
             >
-              <ChevronRight className="h-3.5 w-3.5" />
+              <ChevronRight className="h-4 w-4" />
             </button>
           </div>
         ) : (

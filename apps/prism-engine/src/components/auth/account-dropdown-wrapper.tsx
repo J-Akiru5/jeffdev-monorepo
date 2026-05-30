@@ -77,13 +77,13 @@ export function AccountDropdownWrapper() {
 
   const initials = (user?.full_name?.charAt(0) || user?.email?.charAt(0) || "U").toUpperCase();
 
+  const { theme, setTheme } = useTheme();
+
   if (loading) {
     return (
       <div className="h-9 w-9 rounded-full bg-[var(--border-subtle)] animate-pulse" />
     );
   }
-
-  const { theme, setTheme } = useTheme();
 
   return (
     <AccountDropdown
