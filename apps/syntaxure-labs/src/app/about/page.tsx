@@ -284,14 +284,14 @@ export default async function AboutPage() {
                 </div>
                 <div className="mt-4 md:mt-0">
                   <span className="font-mono text-xs uppercase tracking-wider text-amber-400">
-                    {"// Accelerator"}
+                    {"// Startup Incubator"}
                   </span>
                   <h2 className="mt-2 text-2xl font-bold text-white">
                     Kwadra TBI Cohort 5
                   </h2>
                   <p className="mt-3 max-w-2xl text-white/60">
                     Syntaxure Labs is proud to be part of Kwadra TBI Cohort 5 — a
-                    startup acceleration program by the{" "}
+                    startup incubation program by the{" "}
                     <span className="text-white/80">
                       Iloilo Provincial Government&apos;s Kwadra Care
                     </span>{" "}
@@ -300,7 +300,7 @@ export default async function AboutPage() {
                   </p>
                   <div className="mt-6 flex flex-wrap gap-3">
                     {[
-                      "Startup Acceleration",
+                      "Startup Incubation",
                       "Mentorship",
                       "Funding Access",
                       "GotoMarket Strategy",
