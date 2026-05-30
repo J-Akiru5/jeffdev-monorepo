@@ -14,11 +14,11 @@ import { Sun, Moon } from "lucide-react";
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
 
-  const isLight = theme === "theme-light";
+  const isLight = theme === "light";
 
   return (
     <button
-      onClick={() => setTheme(isLight ? "dark" : "theme-light")}
+      onClick={() => setTheme(isLight ? "dark" : "light")}
       className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-[var(--text-secondary)] transition-all hover:bg-white/5 hover:text-[var(--text-primary)]"
       title={isLight ? "Switch to dark mode" : "Switch to light mode"}
     >

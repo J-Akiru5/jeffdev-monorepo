@@ -24,7 +24,7 @@ export function GridBackground({
       <div className="absolute inset-0 opacity-60 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,_#000_70%,_transparent_100%)]" />
 
       {/* Spotlight / Vignette */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#050505]/35 to-[#050505]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[var(--color-void)]/35 to-[var(--color-void)]" />
 
       {/* Top Glow */}
       {variant === "neon" && (

@@ -5,7 +5,6 @@ import { useAuth } from "@syntaxure/ui";
 import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import {
-  ArrowLeft,
   User,
   Bell,
   Key,
@@ -21,8 +20,7 @@ import {
   Download,
   FileJson,
 } from "lucide-react";
-
-import { GlassPanel, Button, Badge } from "@syntaxure/ui";
+import { GlassPanel, Button, Badge, PageContainer } from "@syntaxure/ui";
 
 // =============================================================================
 // TYPES
@@ -73,16 +71,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-8 max-w-4xl">
-      {/* Back Link */}
-      <Link
-        href="/dashboard"
-        className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Dashboard
-      </Link>
-
+    <PageContainer className="space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-semibold text-white">Settings</h1>
@@ -158,7 +147,7 @@ export default function SettingsPage() {
 
       {/* Dev Tools Section - Only in development */}
       {process.env.NODE_ENV === "development" && <DevToolsSection />}
-    </div>
+    </PageContainer>
   );
 }
 

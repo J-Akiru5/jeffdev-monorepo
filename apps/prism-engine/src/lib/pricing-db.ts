@@ -6,6 +6,7 @@
  */
 
 import { getAdminClient } from "@/lib/supabase/admin";
+import { createClient as createServerClient } from "@/lib/supabase/server";
 
 // =============================================================================
 // RAW DB TYPES
@@ -164,10 +165,19 @@ const FALLBACK_FAQS: PricingFAQItem[] = [
 // FETCHERS
 // =============================================================================
 
+async function getPricingClient() {
+  const admin = getAdminClient();
+  if (admin) {
+    return admin;
+  }
+
+  // Fallback to regular server client when service role is not configured.
+  return await createServerClient();
+}
+
 async function fetchPlans(): Promise<DBPricingPlan[]> {
   try {
-    const client = getAdminClient();
-    if (!client) throw new Error("Supabase admin client not initialized");
+    const client = await getPricingClient();
     const { data, error } = await client
       .from("pricing_plans")
       .select("*")
@@ -184,8 +194,7 @@ async function fetchPlans(): Promise<DBPricingPlan[]> {
 
 async function fetchFAQs(): Promise<DBPricingFAQ[]> {
   try {
-    const client = getAdminClient();
-    if (!client) throw new Error("Supabase admin client not initialized");
+    const client = await getPricingClient();
     const { data, error } = await client
       .from("pricing_faqs")
       .select("*")

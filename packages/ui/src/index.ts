@@ -60,4 +60,5 @@ export {
 // Hooks
 export { useDebouncedValue } from "./use-debounced-value";
 export { useActionFeedback, type ActionState } from "./use-action-feedback";
+export { PageContainer, type PageContainerProps } from "./page-container";
 

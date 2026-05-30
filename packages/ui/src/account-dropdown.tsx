@@ -84,8 +84,8 @@ export function AccountDropdown({
         onClick={() => setOpen(!open)}
         className={cn(
           "flex h-8 w-8 items-center justify-center rounded-lg transition-colors",
-          "hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/50",
-          open && "bg-white/5",
+          "hover:bg-[var(--border-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/50",
+          open && "bg-[var(--border-subtle)]",
         )}
         title={displayName || email || "Account"}
         aria-label="Account menu"
@@ -116,12 +116,12 @@ export function AccountDropdown({
           <div
             className={cn(
               "absolute right-0 top-full z-50 mt-1.5 w-64 origin-top-right",
-              "rounded-xl border border-white/10 bg-[#0a0a0a]/95 backdrop-blur-xl",
+              "rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/95 backdrop-blur-xl",
               "shadow-2xl shadow-black/50 py-1",
             )}
           >
             {/* ── Header: User info ── */}
-            <div className="border-b border-white/5 px-4 py-3">
+            <div className="border-b border-[var(--border-subtle)] px-4 py-3">
               <div className="flex items-center gap-3">
                 {avatarUrl ? (
                   <img
@@ -136,11 +136,11 @@ export function AccountDropdown({
                 )}
                 <div className="min-w-0 flex-1">
                   {displayName && (
-                    <p className="truncate text-sm font-medium text-white">
+                    <p className="truncate text-sm font-medium text-[var(--text-primary)]">
                       {displayName}
                     </p>
                   )}
-                  <p className="truncate text-xs text-white/50">
+                  <p className="truncate text-xs text-[var(--text-tertiary)]">
                     {email || "Signed in"}
                   </p>
                 </div>
@@ -163,7 +163,7 @@ export function AccountDropdown({
                     onToggleTheme();
                     setOpen(false);
                   }}
-                  className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-white/60 transition-colors hover:bg-white/5 hover:text-white"
+                  className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-subtle)] hover:text-[var(--text-primary)]"
                 >
                   {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                   <span>{isDark ? "Light Mode" : "Dark Mode"}</span>
@@ -175,7 +175,7 @@ export function AccountDropdown({
                 <Link
                   href={settingsHref}
                   onClick={() => setOpen(false)}
-                  className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-white/60 transition-colors hover:bg-white/5 hover:text-white"
+                  className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-subtle)] hover:text-[var(--text-primary)]"
                 >
                   <Settings className="h-4 w-4" />
                   <span>Settings</span>
@@ -187,13 +187,13 @@ export function AccountDropdown({
             </div>
 
             {/* ── Sign out ── */}
-            <div className="border-t border-white/5 px-2 py-1">
+            <div className="border-t border-[var(--border-subtle)] px-2 py-1">
               <button
                 onClick={() => {
                   onSignOut();
                   setOpen(false);
                 }}
-                className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-white/60 transition-colors hover:bg-red-500/10 hover:text-red-400"
+                className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-[var(--text-secondary)] transition-colors hover:bg-red-500/10 hover:text-red-500"
               >
                 <LogOut className="h-4 w-4" />
                 <span>Sign Out</span>

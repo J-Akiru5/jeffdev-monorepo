@@ -46,7 +46,7 @@ function AppLinks() {
           <Link
             key={l.label}
             href={l.href}
-            className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-white/60 transition-colors hover:bg-white/5 hover:text-white"
+            className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-[var(--text-secondary)] transition-colors hover:bg-[var(--border-subtle)] hover:text-[var(--text-primary)]"
           >
             <Icon className="h-4 w-4" />
             <span>{l.label}</span>

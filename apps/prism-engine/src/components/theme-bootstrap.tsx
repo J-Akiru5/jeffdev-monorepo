@@ -21,7 +21,9 @@ export function ThemeBootstrap() {
     const key = 'theme';
     const stored = localStorage.getItem(key);
     const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-    const theme = stored === 'light' || stored === 'dark' ? stored : prefersLight ? 'light' : 'dark';
+    const theme = (stored === 'light' || stored === 'dark' || stored === 'theme-light')
+      ? (stored === 'theme-light' ? 'light' : stored)
+      : prefersLight ? 'light' : 'dark';
 
     // Apply data-theme — next-themes reads this on mount
     root.setAttribute('data-theme', theme === 'light' ? 'theme-light' : 'dark');
