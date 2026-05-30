@@ -73,8 +73,8 @@ export function SignUpForm() {
         toast.error(signUpError.message);
         return;
       }
-      toast.success("Account created! Check your email to confirm.");
-      router.push("/dashboard");
+      toast.success("Account created! Let's set up your first project.");
+      router.push("/onboarding");
     } catch (err) {
       const message = err instanceof Error ? err.message : "An error occurred";
       setError(message);
