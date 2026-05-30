@@ -172,7 +172,7 @@ export default async function CommunityPage() {
             </p>
             <div className="mt-8 flex justify-center">
               <Link
-                href="/contact"
+                href="/community/register"
                 className="group relative inline-flex items-center gap-2 overflow-hidden rounded-md border border-cyan-500/50 bg-cyan-500/10 px-6 py-3.5 font-mono text-sm uppercase tracking-wider text-white backdrop-blur-md transition-all hover:border-cyan-400 hover:bg-cyan-500/20 hover:shadow-[0_0_30px_rgba(6,182,212,0.25)]"
               >
                 Join the Community

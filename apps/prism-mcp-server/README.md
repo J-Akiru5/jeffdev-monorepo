@@ -1,4 +1,4 @@
-# prism-context-engine
+# prism-mcp-server
 
 **Universal Context Governance for AI Coding Assistants.**
 
@@ -39,11 +39,11 @@ One service. All protocols. Always-on governance. No matter what agent, IDE, or 
 
 ```bash
 # MCP server (for IDEs)
-pnpm --filter prism-context-engine run build
-pnpm --filter prism-context-engine run start
+pnpm --filter prism-mcp-server run build
+pnpm --filter prism-mcp-server run start
 
 # REST gateway (for CI/CD, custom agents)
-pnpm --filter prism-context-engine run start:gateway
+pnpm --filter prism-mcp-server run start:gateway
 
 # Git hook (for pre-commit enforcement)
 npx prism-git-hook
@@ -64,7 +64,7 @@ npx prism-git-hook
 | `USE_GREMLIN_RANKING`    | No              | `false`                        | Enable graph-based rule ranking   |
 | `PRISM_GATEWAY_PORT`     | No              | `3003`                         | REST gateway port                 |
 
-## MCP Tools (15)
+## MCP Tools (16)
 
 ### One-Call Governance
 
