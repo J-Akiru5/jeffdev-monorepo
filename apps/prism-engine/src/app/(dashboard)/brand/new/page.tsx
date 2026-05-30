@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useActionState } from "react";
+import { useState, useActionState, Fragment } from "react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 import { createBrand, type BrandFormState } from "../actions";
@@ -102,15 +102,27 @@ export default function NewBrandPage() {
     });
   };
 
-  const nextStep = () => setStep((s) => Math.min(s + 1, 5));
-  const prevStep = () => setStep((s) => Math.max(s - 1, 1));
+  const [touched, setTouched] = useState(false);
+
+  // Per-step required field validation
+  const canProceed = (() => {
+    if (step === 1) return formData.companyName.trim().length > 0;
+    return true; // steps 2–4 have no hard requirements
+  })();
+
+  const nextStep = () => {
+    if (!canProceed) { setTouched(true); return; }
+    setTouched(false);
+    setStep((s) => Math.min(s + 1, 5));
+  };
+  const prevStep = () => { setTouched(false); setStep((s) => Math.max(s - 1, 1)); };
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       {/* Back Link */}
       <Link
         href="/brand"
-        className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors"
+        className="inline-flex items-center gap-2 text-sm text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
         Back to Brands
@@ -118,44 +130,45 @@ export default function NewBrandPage() {
 
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold text-white">
+        <h1 className="text-2xl font-semibold text-[var(--text-primary)]">
           Create Brand Profile
         </h1>
-        <p className="text-sm text-white/50 mt-1">
+        <p className="text-sm text-[var(--text-tertiary)] mt-1">
           Define your brand identity to generate consistent Prism Rules.
         </p>
       </div>
 
       {/* Progress Steps */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center w-full">
         {STEPS.map((s, i) => (
-          <div key={s.id} className="flex items-center">
+          <Fragment key={s.id}>
             <div
-              className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors ${
+              className={`shrink-0 flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors ${
                 step > s.id
-                  ? "bg-cyan-500 text-white"
+                  ? "bg-blue-500 dark:bg-cyan-500 !text-white"
                   : step === s.id
-                    ? "bg-cyan-500/20 border border-cyan-500/50 text-cyan-400"
-                    : "bg-white/5 text-white/40"
+                    ? "bg-blue-500/10 border border-blue-500/50 text-blue-600 dark:bg-cyan-500/20 dark:border-cyan-500/50 dark:text-cyan-400"
+                    : "bg-[var(--bg-secondary)] border border-[var(--border-subtle)] text-[var(--text-tertiary)]"
               }`}
             >
               {step > s.id ? <Check className="h-4 w-4" /> : s.id}
             </div>
             {i < STEPS.length - 1 && (
               <div
-                className={`h-0.5 w-12 mx-2 ${step > s.id ? "bg-cyan-500" : "bg-white/10"}`}
+                className="flex-1 mx-2 md:mx-4"
+                style={{ height: "2px", backgroundColor: step > s.id ? "#3b82f6" : "#cbd5e1" }}
               />
             )}
-          </div>
+          </Fragment>
         ))}
       </div>
 
       {/* Step Title */}
       <div className="text-center">
-        <h2 className="text-lg font-medium text-white">
+        <h2 className="text-lg font-medium text-[var(--text-primary)]">
           {STEPS[step - 1]!.name}
         </h2>
-        <p className="text-sm text-white/50">{STEPS[step - 1]!.description}</p>
+        <p className="text-sm text-[var(--text-tertiary)]">{STEPS[step - 1]!.description}</p>
       </div>
 
       {/* Form */}
@@ -254,7 +267,7 @@ export default function NewBrandPage() {
         {/* Step Content */}
         <div className="min-h-[300px]">
           {step === 1 && (
-            <StepIdentity formData={formData} updateFormData={updateFormData} />
+            <StepIdentity formData={formData} updateFormData={updateFormData} touched={touched} />
           )}
           {step === 2 && (
             <StepColors formData={formData} updateFormData={updateFormData} />
@@ -272,29 +285,15 @@ export default function NewBrandPage() {
           {step === 5 && <StepReview formData={formData} />}
         </div>
 
-        {/* Error Display */}
-        {state?.error && (
-          <div className="rounded-md bg-red-500/10 border border-red-500/30 p-4 mb-4">
-            <p className="text-sm text-red-400">
-              Please fix the following errors:
-            </p>
-            <ul className="mt-2 text-xs text-red-300">
-              {Object.entries(state.error).map(([key, errors]) => (
-                <li key={key}>
-                  {key}: {(errors as string[]).join(", ")}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {/* Server errors shown inline — no alert box */}
 
         {/* Navigation */}
-        <div className="flex justify-between pt-6 border-t border-white/5">
+        <div className="flex justify-between pt-6 border-t border-[var(--border-subtle)]">
           <button
             type="button"
             onClick={prevStep}
             disabled={step === 1}
-            className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/2 px-4 py-2 text-sm text-white/60 hover:text-white hover:border-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="inline-flex items-center gap-2 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-4 py-2 text-sm text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:border-[var(--border-active)] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Previous
@@ -304,7 +303,13 @@ export default function NewBrandPage() {
             <button
               type="button"
               onClick={nextStep}
-              className="inline-flex items-center gap-2 rounded-md bg-cyan-500/10 border border-cyan-500/30 px-4 py-2 text-sm font-medium text-cyan-400 hover:bg-cyan-500/20 transition-colors"
+              disabled={!canProceed}
+              title={!canProceed ? "Fill in all required fields to continue" : undefined}
+              className={`inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium !text-white transition-colors bg-blue-600 dark:bg-cyan-500/10 border border-blue-600 dark:border-cyan-500/30 dark:text-cyan-400 ${
+                canProceed
+                  ? "hover:bg-blue-700 dark:hover:bg-cyan-500/20"
+                  : "cursor-not-allowed opacity-50"
+              }`}
             >
               Next
               <ArrowRight className="h-4 w-4" />
@@ -313,7 +318,7 @@ export default function NewBrandPage() {
             <button
               type="submit"
               disabled={pending}
-              className="inline-flex items-center gap-2 rounded-md bg-linear-to-r from-cyan-500 to-violet-500 px-6 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50 transition-all"
+              className="inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-blue-600 to-violet-600 dark:from-cyan-500 dark:to-violet-500 px-6 py-2 text-sm font-medium !text-white hover:opacity-90 disabled:opacity-50 transition-all"
             >
               {pending ? "Creating..." : "Create Brand"}
               <Check className="h-4 w-4" />
@@ -329,45 +334,57 @@ export default function NewBrandPage() {
 function StepIdentity({
   formData,
   updateFormData,
+  touched,
 }: {
   formData: Record<string, unknown>;
   updateFormData: (key: string, value: unknown) => void;
+  touched: boolean;
 }) {
+  const companyName = formData.companyName as string;
+  const showCompanyError = touched && !companyName.trim();
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-white">
-          Company Name *
+        <label className="block text-sm font-medium text-[var(--text-primary)]">
+          Company Name <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
-          value={formData.companyName as string}
+          value={companyName}
           onChange={(e) => updateFormData("companyName", e.target.value)}
-          placeholder="Keandrew Photography"
-          className="w-full rounded-md border border-white/10 bg-white/2 px-4 py-3 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
+          placeholder="e.g. Keandrew Photography"
+          className={`w-full rounded-md border px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-quiet)] focus:outline-none transition-colors ${
+            showCompanyError
+              ? "border-red-400 bg-red-50 dark:bg-red-500/5 focus:border-red-500"
+              : "border-[var(--border-subtle)] bg-[var(--bg-secondary)] focus:border-blue-500 dark:focus:border-cyan-500/50"
+          }`}
         />
+        {showCompanyError && (
+          <p className="text-xs text-red-500 mt-1">Company name is required to continue.</p>
+        )}
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-white">Tagline</label>
+        <label className="block text-sm font-medium text-[var(--text-primary)]">Tagline</label>
         <input
           type="text"
           value={formData.tagline as string}
           onChange={(e) => updateFormData("tagline", e.target.value)}
           placeholder="Capturing Life's Authentic Moments"
-          className="w-full rounded-md border border-white/10 bg-white/2 px-4 py-3 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
+          className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-quiet)] focus:border-blue-500 dark:focus:border-cyan-500/50 focus:outline-none"
         />
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-white">
+        <label className="block text-sm font-medium text-[var(--text-primary)]">
           Industry *
         </label>
         <select
           aria-label="Select industry"
           value={formData.industry as string}
           onChange={(e) => updateFormData("industry", e.target.value)}
-          className="w-full rounded-md border border-white/10 bg-[#0a0a0a] px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none"
+          className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-4 py-3 text-[var(--text-primary)] focus:border-blue-500 dark:focus:border-cyan-500/50 focus:outline-none"
         >
           <option value="photography">Photography</option>
           <option value="tech">Technology</option>
@@ -396,7 +413,7 @@ function StepColors({
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-white/50 mb-4">
+      <p className="text-sm text-[var(--text-tertiary)] mb-4">
         Define your brand&apos;s color palette
       </p>
 
@@ -438,9 +455,9 @@ function StepColors({
         />
       </div>
 
-      {/* Preview */}
+      {/* Preview — intentionally uses inline styles to render the user's actual brand colors */}
       <div
-        className="mt-6 rounded-md border border-white/10 p-6"
+        className="mt-6 rounded-md border border-[var(--border-subtle)] p-6"
         style={{ backgroundColor: colors.background }}
       >
         <div
@@ -492,16 +509,16 @@ function ColorPicker({
         aria-label={`${label} color picker`}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-10 w-10 cursor-pointer rounded border border-white/10 bg-transparent"
+        className="h-10 w-10 cursor-pointer rounded border border-[var(--border-subtle)] bg-transparent"
       />
       <div className="flex-1">
-        <p className="text-sm font-medium text-white">{label}</p>
+        <p className="text-sm font-medium text-[var(--text-primary)]">{label}</p>
         <input
           type="text"
           aria-label={`${label} hex value`}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full bg-transparent text-xs text-white/50 font-mono focus:outline-none"
+          className="w-full bg-transparent text-xs text-[var(--text-tertiary)] font-mono focus:outline-none"
         />
       </div>
     </div>
@@ -522,7 +539,7 @@ function StepTypography({
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-white">
+        <label className="block text-sm font-medium text-[var(--text-primary)]">
           Heading Font
         </label>
         <select
@@ -531,7 +548,7 @@ function StepTypography({
           onChange={(e) =>
             updateFormData("typography.headingFont", e.target.value)
           }
-          className="w-full rounded-md border border-white/10 bg-[#0a0a0a] px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none"
+          className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-4 py-3 text-[var(--text-primary)] focus:border-blue-500 dark:focus:border-cyan-500/50 focus:outline-none"
         >
           {fontOptions.map((f) => (
             <option key={f.value} value={f.value}>
@@ -542,7 +559,7 @@ function StepTypography({
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-white">
+        <label className="block text-sm font-medium text-[var(--text-primary)]">
           Body Font
         </label>
         <select
@@ -551,7 +568,7 @@ function StepTypography({
           onChange={(e) =>
             updateFormData("typography.bodyFont", e.target.value)
           }
-          className="w-full rounded-md border border-white/10 bg-[#0a0a0a] px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none"
+          className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-4 py-3 text-[var(--text-primary)] focus:border-blue-500 dark:focus:border-cyan-500/50 focus:outline-none"
         >
           {fontOptions.map((f) => (
             <option key={f.value} value={f.value}>
@@ -562,7 +579,7 @@ function StepTypography({
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-white">
+        <label className="block text-sm font-medium text-[var(--text-primary)]">
           Typography Scale
         </label>
         <div className="grid grid-cols-3 gap-3">
@@ -573,8 +590,8 @@ function StepTypography({
               onClick={() => updateFormData("typography.scale", scale)}
               className={`rounded-md border px-4 py-3 text-sm capitalize transition-colors ${
                 typography.scale === scale
-                  ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
-                  : "border-white/10 bg-white/2 text-white/60 hover:border-white/20"
+                  ? "border-blue-500/50 bg-blue-500/10 text-blue-600 dark:border-cyan-500/50 dark:bg-cyan-500/10 dark:text-cyan-400"
+                  : "border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[var(--text-tertiary)] hover:border-[var(--border-active)]"
               }`}
             >
               {scale}
@@ -598,7 +615,7 @@ function StepVoice({
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-white">
+        <label className="block text-sm font-medium text-[var(--text-primary)]">
           Brand Personality
         </label>
         <div className="grid grid-cols-3 gap-3">
@@ -619,19 +636,19 @@ function StepVoice({
               onClick={() => updateFormData("voice.personality", p.value)}
               className={`rounded-md border px-4 py-3 text-left transition-colors ${
                 voice.personality === p.value
-                  ? "border-cyan-500/50 bg-cyan-500/10"
-                  : "border-white/10 bg-white/2 hover:border-white/20"
+                  ? "border-blue-500/50 bg-blue-500/10 dark:border-cyan-500/50 dark:bg-cyan-500/10"
+                  : "border-[var(--border-subtle)] bg-[var(--bg-secondary)] hover:border-[var(--border-active)]"
               }`}
             >
-              <p className="text-sm font-medium text-white">{p.label}</p>
-              <p className="text-xs text-white/50">{p.desc}</p>
+              <p className="text-sm font-medium text-[var(--text-primary)]">{p.label}</p>
+              <p className="text-xs text-[var(--text-tertiary)]">{p.desc}</p>
             </button>
           ))}
         </div>
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-white">
+        <label className="block text-sm font-medium text-[var(--text-primary)]">
           Formality Level
         </label>
         <div className="grid grid-cols-3 gap-3">
@@ -642,8 +659,8 @@ function StepVoice({
               onClick={() => updateFormData("voice.formality", f)}
               className={`rounded-md border px-4 py-3 text-sm capitalize transition-colors ${
                 voice.formality === f
-                  ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
-                  : "border-white/10 bg-white/2 text-white/60 hover:border-white/20"
+                  ? "border-blue-500/50 bg-blue-500/10 text-blue-600 dark:border-cyan-500/50 dark:bg-cyan-500/10 dark:text-cyan-400"
+                  : "border-[var(--border-subtle)] bg-[var(--bg-secondary)] text-[var(--text-tertiary)] hover:border-[var(--border-active)]"
               }`}
             >
               {f}
@@ -653,7 +670,7 @@ function StepVoice({
       </div>
 
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-white">
+        <label className="block text-sm font-medium text-[var(--text-primary)]">
           Brand Keywords
         </label>
         <input
@@ -661,9 +678,9 @@ function StepVoice({
           value={voice.keywords}
           onChange={(e) => updateFormData("voice.keywords", e.target.value)}
           placeholder="authentic, timeless, elegant (comma-separated)"
-          className="w-full rounded-md border border-white/10 bg-white/2 px-4 py-3 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
+          className="w-full rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-quiet)] focus:border-blue-500 dark:focus:border-cyan-500/50 focus:outline-none"
         />
-        <p className="text-xs text-white/40">
+        <p className="text-xs text-[var(--text-quiet)]">
           Up to 10 keywords that define your brand
         </p>
       </div>
@@ -678,58 +695,58 @@ function StepReview({ formData }: { formData: Record<string, unknown> }) {
 
   return (
     <div className="space-y-6">
-      <p className="text-sm text-white/50">
+      <p className="text-sm text-[var(--text-tertiary)]">
         Review your brand profile before creating
       </p>
 
       {/* Identity */}
-      <div className="rounded-md border border-white/5 bg-white/2 p-4">
-        <h3 className="text-sm font-medium text-white mb-2">Identity</h3>
-        <p className="text-lg font-semibold text-white">
+      <div className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4">
+        <h3 className="text-sm font-medium text-[var(--text-primary)] mb-2">Identity</h3>
+        <p className="text-lg font-semibold text-[var(--text-primary)]">
           {formData.companyName as string}
         </p>
         {typeof formData.tagline === "string" && formData.tagline && (
-          <p className="text-sm text-white/50">{formData.tagline}</p>
+          <p className="text-sm text-[var(--text-tertiary)]">{formData.tagline}</p>
         )}
-        <span className="inline-block mt-2 text-xs text-cyan-400 capitalize">
+        <span className="inline-block mt-2 text-xs text-blue-600 dark:text-cyan-400 capitalize">
           {formData.industry as string}
         </span>
       </div>
 
       {/* Colors Preview */}
-      <div className="rounded-md border border-white/5 bg-white/2 p-4">
-        <h3 className="text-sm font-medium text-white mb-3">Colors</h3>
+      <div className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4">
+        <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">Colors</h3>
         <div className="flex gap-2">
           {Object.entries(colors)
             .slice(0, 4)
             .map(([key, value]) => (
               <div key={key} className="text-center">
                 <div
-                  className="h-8 w-8 rounded-full border border-white/10"
+                  className="h-8 w-8 rounded-full border border-[var(--border-subtle)]"
                   style={{ backgroundColor: value }}
                 />
-                <p className="text-xs text-white/40 mt-1 capitalize">{key}</p>
+                <p className="text-xs text-[var(--text-quiet)] mt-1 capitalize">{key}</p>
               </div>
             ))}
         </div>
       </div>
 
       {/* Typography */}
-      <div className="rounded-md border border-white/5 bg-white/2 p-4">
-        <h3 className="text-sm font-medium text-white mb-2">Typography</h3>
-        <p className="text-sm text-white/70">
-          <span className="text-white">{typography.headingFont}</span> /{" "}
+      <div className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4">
+        <h3 className="text-sm font-medium text-[var(--text-primary)] mb-2">Typography</h3>
+        <p className="text-sm text-[var(--text-secondary)]">
+          <span className="text-[var(--text-primary)]">{typography.headingFont}</span> /{" "}
           {typography.bodyFont}
         </p>
-        <p className="text-xs text-white/40 capitalize">
+        <p className="text-xs text-[var(--text-quiet)] capitalize">
           Scale: {typography.scale}
         </p>
       </div>
 
       {/* Voice */}
-      <div className="rounded-md border border-white/5 bg-white/2 p-4">
-        <h3 className="text-sm font-medium text-white mb-2">Voice</h3>
-        <p className="text-sm text-white/70 capitalize">
+      <div className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-4">
+        <h3 className="text-sm font-medium text-[var(--text-primary)] mb-2">Voice</h3>
+        <p className="text-sm text-[var(--text-secondary)] capitalize">
           {voice.personality} • {voice.formality}
         </p>
         {voice.keywords && (
@@ -737,7 +754,7 @@ function StepReview({ formData }: { formData: Record<string, unknown> }) {
             {(voice.keywords as string).split(",").map((k, i) => (
               <span
                 key={i}
-                className="text-xs bg-white/5 px-2 py-0.5 rounded text-white/50"
+                className="text-xs bg-[var(--border-subtle)] px-2 py-0.5 rounded text-[var(--text-tertiary)]"
               >
                 {k.trim()}
               </span>
@@ -748,3 +765,4 @@ function StepReview({ formData }: { formData: Record<string, unknown> }) {
     </div>
   );
 }
+

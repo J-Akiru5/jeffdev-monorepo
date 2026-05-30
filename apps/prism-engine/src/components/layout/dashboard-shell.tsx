@@ -123,7 +123,7 @@ function ThemeToggleIcon({ className = "" }: { className?: string }) {
     <button
       onClick={() => setTheme(isLight ? "dark" : "light")}
       title={isLight ? "Switch to dark" : "Switch to light"}
-      className={`flex h-9 w-9 items-center justify-center rounded-md text-white/60 hover:text-white hover:bg-[var(--border-subtle)] transition-colors ${className}`}
+      className={`flex h-9 w-9 items-center justify-center rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-subtle)] transition-colors ${className}`}
     >
       {isLight ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
     </button>
@@ -200,17 +200,17 @@ export default function DashboardShell({
           >
             <Link
               href="/"
-              className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-cyan-500/20 to-violet-500/20 border border-white/10 hover:border-cyan-500/30 transition-colors"
+              className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-cyan-500/20 to-violet-500/20 border border-[var(--border-subtle)] hover:border-cyan-500/30 transition-colors"
             >
               <Sparkles className="h-4 w-4 text-cyan-400" />
             </Link>
-            {/* Expand button — slides in on hover */}
+            {/* Expand button — perfectly centered over logo on hover */}
             <button
               onClick={toggle}
               aria-label="Expand sidebar"
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full bg-[var(--bg-primary)] border border-cyan-500/30 text-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.2)] opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-md bg-[var(--bg-primary)] border border-cyan-500/50 text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.3)] opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-200"
             >
-              <ChevronRight className="h-3.5 w-3.5" />
+              <ChevronRight className="h-4 w-4" />
             </button>
           </div>
         ) : (
@@ -223,7 +223,7 @@ export default function DashboardShell({
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-cyan-500/20 to-violet-500/20 border border-white/10 group-hover:border-cyan-500/30 transition-colors">
                 <Sparkles className="h-4 w-4 text-cyan-400" />
               </div>
-              <span className="font-semibold text-sm text-white tracking-tight whitespace-nowrap">
+              <span className="font-semibold text-sm text-[var(--text-primary)] tracking-tight whitespace-nowrap">
                 Prism Engine
               </span>
               <BetaBadge />
@@ -231,7 +231,7 @@ export default function DashboardShell({
             <button
               onClick={toggle}
               aria-label="Collapse sidebar"
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-white/40 hover:text-white hover:bg-[var(--border-subtle)] transition-colors"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-subtle)] transition-colors"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -244,7 +244,7 @@ export default function DashboardShell({
             <React.Fragment key={item.href || item.label}>
               {item.isSection ? (
                 <div
-                  className={`px-3 pb-1 text-xs font-mono tracking-wider text-white/40 uppercase ${
+                  className={`px-3 pb-1 text-xs font-mono tracking-wider text-[var(--text-tertiary)] uppercase ${
                     i > 0 ? "mt-6" : ""
                   }`}
                 >
@@ -291,12 +291,12 @@ export default function DashboardShell({
               <div className="rounded-md border border-cyan-500/15 bg-cyan-500/[0.04] p-3">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <div>
-                    <p className="text-[10px] uppercase tracking-[0.18em] text-white/40 font-mono">
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-[var(--text-tertiary)] font-mono">
                       Current Plan
                     </p>
                     <div className="mt-1 flex items-center gap-1.5">
                       <Crown className="h-3.5 w-3.5 text-cyan-400" />
-                      <span className="text-sm font-semibold text-white">
+                      <span className="text-sm font-semibold text-[var(--text-primary)]">
                         {userInfo.planLabel}
                       </span>
                     </div>
@@ -305,20 +305,20 @@ export default function DashboardShell({
                     className={`shrink-0 text-[10px] font-mono px-1.5 py-0.5 rounded-sm border ${
                       userInfo.isPaidTier
                         ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                        : "border-white/10 bg-white/5 text-white/40"
+                        : "border-[var(--border-subtle)] bg-[var(--bg-tertiary)] text-[var(--text-tertiary)]"
                     }`}
                   >
                     {userInfo.isPaidTier ? "ACTIVE" : "FREE"}
                   </span>
                 </div>
-                <p className="text-[11px] leading-relaxed text-white/40 mb-2.5">
+                <p className="text-[11px] leading-relaxed text-[var(--text-tertiary)] mb-2.5">
                   {userInfo.isPaidTier
                     ? "Workspace unlocked with expanded limits and team features."
                     : "Upgrade to unlock more projects and AI generations."}
                 </p>
                 <Link
                   href="/subscription"
-                  className="flex w-full items-center justify-center gap-1.5 rounded-md border border-cyan-500/20 bg-cyan-500/10 px-3 py-1.5 text-xs font-medium text-cyan-300 hover:bg-cyan-500/15 hover:text-cyan-200 transition-colors"
+                  className="flex w-full items-center justify-center gap-1.5 rounded-md border border-transparent bg-black px-3 py-1.5 text-xs font-medium text-white hover:bg-black/90 dark:border-cyan-500/20 dark:bg-cyan-500/10 dark:text-cyan-300 dark:hover:bg-cyan-500/15 dark:hover:text-cyan-200 transition-colors"
                 >
                   {userInfo.isPaidTier ? "Manage Plan" : "Upgrade Plan"}
                   <ArrowUpRight className="h-3 w-3" />
@@ -326,15 +326,15 @@ export default function DashboardShell({
               </div>
 
               {/* User identity row */}
-              <div className="flex items-center gap-2.5 rounded-md border border-white/10 bg-[#0a0a0a] px-3 py-2">
+              <div className="flex items-center gap-2.5 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2">
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-cyan-500/20 bg-cyan-500/10 text-xs font-semibold text-cyan-300 select-none">
                   {userInfo.userInitial}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-medium text-white">
+                  <p className="truncate text-xs font-medium text-[var(--text-primary)]">
                     {userInfo.displayName}
                   </p>
-                  <p className="truncate text-[10px] font-mono text-white/40">
+                  <p className="truncate text-[10px] font-mono text-[var(--text-tertiary)]">
                     {userInfo.email}
                   </p>
                 </div>
@@ -350,7 +350,7 @@ export default function DashboardShell({
           Lives inside the content column; left edge tracks sidebar width.
       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <header
-        className="hidden md:flex fixed top-0 right-0 z-50 items-center justify-end gap-1 border-b border-[var(--border-subtle)] bg-black/90 backdrop-blur-xl px-4"
+        className="hidden md:flex fixed top-0 right-0 z-50 items-center justify-end gap-1 border-b border-[var(--border-subtle)] bg-[var(--bg-primary)]/90 backdrop-blur-xl px-4"
         style={{
           left: isDesktop ? sbw : 0,
           height: TOPBAR_H,
@@ -360,7 +360,7 @@ export default function DashboardShell({
         {/* New Project CTA */}
         <Link
           href="/projects/new"
-          className="flex items-center gap-1.5 h-8 rounded-md bg-cyan-500 hover:bg-cyan-400 active:scale-95 px-4 text-xs font-semibold text-black transition-all whitespace-nowrap mr-2"
+          className="flex items-center gap-1.5 h-8 rounded-md bg-blue-600 hover:bg-blue-700 dark:bg-cyan-500 dark:hover:bg-cyan-400 active:scale-95 px-4 text-xs font-semibold !text-white transition-all whitespace-nowrap mr-2 shadow-[0_2px_8px_rgba(37,99,235,0.3)] dark:shadow-none dark:!text-black"
         >
           <Plus className="h-3.5 w-3.5" />
           New Project
@@ -369,7 +369,7 @@ export default function DashboardShell({
         {/* Bell */}
         <button
           title="Notifications"
-          className="flex h-9 w-9 items-center justify-center rounded-md text-white/40 hover:text-white hover:bg-[var(--border-subtle)] transition-colors"
+          className="flex h-9 w-9 items-center justify-center rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-subtle)] transition-colors"
         >
           <Bell className="h-4 w-4" />
         </button>
@@ -392,7 +392,7 @@ export default function DashboardShell({
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-cyan-500/20 to-violet-500/20 border border-white/10">
             <Sparkles className="h-4 w-4 text-cyan-400" />
           </div>
-          <span className="font-semibold text-sm text-white tracking-tight">
+          <span className="font-semibold text-sm text-[var(--text-primary)] tracking-tight">
             Prism Engine
           </span>
           <BetaBadge />
@@ -413,7 +413,7 @@ export default function DashboardShell({
           marginLeft: isDesktop ? sbw : 0,
           transition: contentTransition,
         }}
-        className="w-full min-h-screen pt-16 pb-20 md:pt-14 md:pb-0"
+        className="relative z-0 w-full min-h-screen pt-16 pb-20 md:pt-14 md:pb-0"
       >
         <div className="p-4 md:p-6 w-full">{children}</div>
       </main>
@@ -421,7 +421,7 @@ export default function DashboardShell({
       {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           MOBILE BOTTOM NAVIGATION
       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-16 border-t border-[var(--border-subtle)] bg-black/80 backdrop-blur-lg flex items-center">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-16 border-t border-[var(--border-subtle)] bg-[var(--bg-primary)]/80 backdrop-blur-lg flex items-center">
         {MOBILE_NAV.slice(0, 2).map((item) => (
           <MobileNavLink
             key={item.href}
@@ -492,12 +492,12 @@ function SidebarItem({
     "flex items-center text-sm font-medium transition-colors duration-150 outline-none focus-visible:ring-1 focus-visible:ring-cyan-500/50";
 
   const colors = active
-    ? "bg-cyan-500/10 text-cyan-400 shadow-[inset_2px_0_0_0_#06b6d4]"
+    ? "bg-blue-500/10 dark:bg-cyan-500/10 text-blue-600 dark:text-cyan-400 shadow-[inset_2px_0_0_0_#2563eb] dark:shadow-[inset_2px_0_0_0_#06b6d4]"
     : highlight
-    ? "text-cyan-400/70 hover:bg-cyan-500/10 hover:text-cyan-300"
-    : "text-white/60 hover:bg-[var(--border-subtle)] hover:text-white";
+    ? "text-blue-600/70 dark:text-cyan-400/70 hover:bg-blue-500/10 dark:hover:bg-cyan-500/10 hover:text-blue-700 dark:hover:text-cyan-300"
+    : "text-[var(--text-secondary)] hover:bg-[var(--border-subtle)] hover:text-[var(--text-primary)]";
 
-  const iconColor = active ? "text-cyan-400" : highlight ? "text-cyan-400/70 group-hover:text-cyan-300" : "";
+  const iconColor = active ? "text-blue-600 dark:text-cyan-400" : highlight ? "text-blue-600/70 dark:text-cyan-400/70 group-hover:text-blue-700 dark:group-hover:text-cyan-300" : "";
 
   if (collapsed) {
     return (
@@ -531,8 +531,8 @@ function SidebarItem({
             e.preventDefault();
             setIsOpen(!isOpen);
           }}
-                  className={`ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-md hover:bg-[var(--border-subtle)] transition-colors ${
-            isOpen ? "text-white" : "text-white/40"
+          className={`ml-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-md hover:bg-[var(--border-subtle)] transition-colors ${
+            isOpen ? "text-[var(--text-primary)]" : "text-[var(--text-tertiary)]"
           }`}
         >
           <ChevronDown
@@ -549,7 +549,7 @@ function SidebarItem({
             const subActive = pathname.startsWith(sub.href);
             const subColors = subActive
               ? "text-cyan-400 font-semibold"
-              : "text-white/60 hover:text-white hover:bg-[var(--border-subtle)]";
+              : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-subtle)]";
             const SubIcon = sub.icon;
             
             return (
@@ -586,7 +586,7 @@ function MobileNavLink({
     <Link
       href={href}
           className={`flex flex-1 flex-col items-center justify-center gap-1 py-2 transition-colors ${
-            active ? "text-cyan-400" : "text-white/40 hover:text-white/60"
+            active ? "text-cyan-400" : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
           }`}
     >
       <Icon className="h-5 w-5" />

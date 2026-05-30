@@ -40,16 +40,16 @@ export default function Error({
 
         {/* Message */}
         <div>
-          <h1 className="text-xl font-semibold text-white mb-2">
+          <h1 className="text-xl font-semibold text-[var(--text-primary)] mb-2">
             Something went wrong
           </h1>
-          <p className="text-sm text-white/50">
+          <p className="text-sm text-[var(--text-secondary)]">
             An unexpected error occurred. Our team has been notified.
           </p>
           {error.digest && (
-            <p className="mt-2 text-xs font-mono text-white/30">
-              Error ID: {error.digest}
-            </p>
+              <p className="mt-2 text-xs font-mono text-[var(--text-tertiary)]">
+                Error ID: {error.digest}
+              </p>
           )}
         </div>
 
@@ -63,7 +63,7 @@ export default function Error({
           </button>
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/[0.02] px-4 py-2 text-sm font-medium text-white/60 hover:text-white hover:border-white/20 transition-colors"
+            className="inline-flex items-center gap-2 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-active)] transition-colors"
           >
             Go to Dashboard
           </Link>

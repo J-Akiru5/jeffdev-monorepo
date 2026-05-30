@@ -253,7 +253,7 @@ export function AnimatedHero() {
               ref={headlineRef}
               className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight"
             >
-              <span className="bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[var(--text-primary)] to-[var(--text-secondary)] bg-clip-text text-transparent">
                 The Context Operating System
               </span>
               <br />
@@ -265,7 +265,7 @@ export function AnimatedHero() {
             {/* Subheadline - Hidden Initially */}
             <p
               ref={subheadlineRef}
-              className="text-white/60 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
+              className="text-[var(--text-secondary)] text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
             >
               Record your architecture. AI learns your rules. Deploy context
               directly to Cursor, Windsurf, and Claude via MCP.
@@ -288,24 +288,24 @@ export function AnimatedHero() {
                 href="/sign-up"
                 className="group relative overflow-hidden rounded-md border border-cyan-500/30 bg-cyan-500/10 px-8 py-4 transition-all hover:border-cyan-500/50 hover:bg-cyan-500/20 active:scale-95"
               >
-                <span className="font-mono text-sm uppercase tracking-wider text-white font-semibold">
+                <span className="font-mono text-sm uppercase tracking-wider text-[var(--text-primary)] font-semibold">
                   Start Free →
                 </span>
               </Link>
               <Link
                 href="/pricing"
-                className="rounded-md border border-white/10 bg-white/5 px-8 py-4 transition-all hover:bg-white/10 hover:border-white/20 active:scale-95"
+                className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-8 py-4 transition-all hover:bg-[var(--bg-tertiary)] hover:border-[var(--border-active)] active:scale-95"
               >
-                <span className="font-mono text-sm uppercase tracking-wider text-white/80">
+                <span className="font-mono text-sm uppercase tracking-wider text-[var(--text-primary)]">
                   View Pricing
                 </span>
               </Link>
               <Link
                 href="https://docs.syntaxure.dev"
                 target="_blank"
-                className="rounded-md border border-white/10 bg-white/5 px-8 py-4 transition-all hover:bg-white/10 hover:border-white/20 active:scale-95"
+                className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-8 py-4 transition-all hover:bg-[var(--bg-tertiary)] hover:border-[var(--border-active)] active:scale-95"
               >
-                <span className="font-mono text-sm uppercase tracking-wider text-white/80">
+                <span className="font-mono text-sm uppercase tracking-wider text-[var(--text-primary)]">
                   View Docs
                 </span>
               </Link>
@@ -314,22 +314,22 @@ export function AnimatedHero() {
             {/* Feature Pills - Hidden Initially */}
             <div ref={pillsRef} className="flex flex-wrap gap-3 justify-center">
               <div className="glass px-4 py-2 rounded-full">
-                <span className="text-xs text-white/60 font-mono">
+                <span className="text-xs text-[var(--text-secondary)] font-mono">
                   📹 Video → Context
                 </span>
               </div>
               <div className="glass px-4 py-2 rounded-full">
-                <span className="text-xs text-white/60 font-mono">
+                <span className="text-xs text-[var(--text-secondary)] font-mono">
                   🤖 AI Rule Extraction
                 </span>
               </div>
               <div className="glass px-4 py-2 rounded-full">
-                <span className="text-xs text-white/60 font-mono">
+                <span className="text-xs text-[var(--text-secondary)] font-mono">
                   🔌 MCP Protocol
                 </span>
               </div>
               <div className="glass px-4 py-2 rounded-full">
-                <span className="text-xs text-white/60 font-mono">
+                <span className="text-xs text-[var(--text-secondary)] font-mono">
                   ⚡ Real-time Sync
                 </span>
               </div>

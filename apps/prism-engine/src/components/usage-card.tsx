@@ -66,7 +66,7 @@ export function UsageCard({ className }: UsageCardProps) {
     return (
       <GlassPanel className={`p-6 ${className}`}>
         <div className="flex items-center justify-center h-32">
-          <Loader2 className="h-6 w-6 animate-spin text-white/40" />
+          <Loader2 className="h-6 w-6 animate-spin text-[var(--text-tertiary)]" />
         </div>
       </GlassPanel>
     );
@@ -95,8 +95,8 @@ export function UsageCard({ className }: UsageCardProps) {
             <BarChart3 className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="font-medium text-white">Usage</h3>
-            <p className="text-xs text-white/50">Current period</p>
+            <h3 className="font-medium text-[var(--text-primary)]">Usage</h3>
+            <p className="text-xs text-[var(--text-tertiary)]">Current period</p>
           </div>
         </div>
         <Badge variant={usage.tier === "free" ? "default" : "success"}>
@@ -133,8 +133,8 @@ export function UsageCard({ className }: UsageCardProps) {
       </div>
 
       {/* Footer */}
-      <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
-        <p className="text-xs text-white/40">
+      <div className="mt-6 pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between">
+        <p className="text-xs text-[var(--text-tertiary)]">
           Resets:{" "}
           {resetDate.toLocaleDateString("en-US", {
             month: "short",
@@ -175,19 +175,19 @@ function UsageBar({ icon: Icon, label, used, limit }: UsageBarProps) {
     <div>
       <div className="flex items-center justify-between mb-1.5">
         <div className="flex items-center gap-2">
-          <Icon className="h-3.5 w-3.5 text-white/40" />
-          <span className="text-sm text-white/70">{label}</span>
+          <Icon className="h-3.5 w-3.5 text-[var(--text-tertiary)]" />
+          <span className="text-sm text-[var(--text-primary)]">{label}</span>
         </div>
         <span
-          className={`text-sm font-mono ${isAtLimit ? "text-red-400" : isNearLimit ? "text-amber-400" : "text-white/70"}`}
+          className={`text-sm font-mono ${isAtLimit ? "text-red-400" : isNearLimit ? "text-amber-400" : "text-[var(--text-primary)]"}`}
         >
           {used}
-          <span className="text-white/30">/{isUnlimited ? "∞" : limit}</span>
+          <span className="text-[var(--text-tertiary)]">/{ isUnlimited ? "∞" : limit}</span>
         </span>
       </div>
 
       {!isUnlimited && (
-        <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
+        <div className="h-1.5 rounded-full bg-[var(--border-subtle)] overflow-hidden">
           <div
             className={`h-full rounded-full transition-all ${
               isAtLimit

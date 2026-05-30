@@ -47,7 +47,7 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
     return (
       <div className={cn("w-full space-y-1.5", className)} ref={ref}>
         {label && (
-          <label className="block text-xs font-medium uppercase tracking-wider text-white/50">
+          <label className="block text-xs font-medium uppercase tracking-wider text-[var(--text-tertiary)]">
             {label}
           </label>
         )}
@@ -57,7 +57,7 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
               <>
                 <ListboxButton
                   className={cn(
-                    "flex h-10 w-full items-center justify-between rounded-md border border-white/10 bg-black/20 px-3 py-2 text-left font-mono text-sm text-white shadow-sm transition-all hover:border-white/15 focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 disabled:cursor-not-allowed disabled:opacity-50",
+                    "flex h-10 w-full items-center justify-between rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-2 text-left font-mono text-sm text-[var(--text-primary)] shadow-sm transition-all hover:border-[var(--border-active)] focus:border-cyan-500/50 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 disabled:cursor-not-allowed disabled:opacity-50",
                     open && "border-cyan-500/50 ring-1 ring-cyan-500/50",
                     buttonClassName
                   )}
@@ -74,7 +74,7 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
                   </div>
                   <ChevronDown
                     className={cn(
-                      "h-4 w-4 text-white/40 transition-transform duration-200",
+                      "h-4 w-4 text-[var(--text-tertiary)] transition-transform duration-200",
                       open && "rotate-180 text-cyan-400"
                     )}
                   />
@@ -83,7 +83,7 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
                 <ListboxOptions
                   transition
                   className={cn(
-                    "absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-white/10 bg-surface p-1 text-base shadow-xl backdrop-blur-md transition duration-100 ease-out focus:outline-none data-[closed]:scale-95 data-[closed]:opacity-0 sm:text-sm",
+                    "absolute z-[200] mt-1 max-h-60 w-full overflow-auto rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-1 text-base shadow-xl backdrop-blur-md transition duration-100 ease-out focus:outline-none data-[closed]:scale-95 data-[closed]:opacity-0 sm:text-sm",
                     optionsClassName
                   )}
                 >
@@ -97,9 +97,9 @@ export const Select = React.forwardRef<HTMLDivElement, SelectProps>(
                           "relative cursor-pointer select-none rounded-sm py-2 pl-9 pr-4 font-mono text-sm transition-all",
                           active
                             ? "bg-cyan-500/10 text-cyan-400"
-                            : "text-white/70",
-                          selected && "text-white font-medium",
-                          optDisabled && "cursor-not-allowed opacity-40 hover:bg-transparent hover:text-white/70"
+                            : "text-[var(--text-secondary)]",
+                          selected && "text-[var(--text-primary)] font-medium",
+                          optDisabled && "cursor-not-allowed opacity-40 hover:bg-transparent hover:text-[var(--text-secondary)]"
                         )
                       }
                     >

@@ -8,10 +8,10 @@ export default function NotFound() {
           <span className="text-2xl font-bold text-cyan-400">404</span>
         </div>
         <div>
-          <h1 className="text-xl font-semibold text-white mb-2">
+          <h1 className="text-xl font-semibold text-[var(--text-primary)] mb-2">
             Page not found
           </h1>
-          <p className="text-sm text-white/50">
+          <p className="text-sm text-[var(--text-secondary)]">
             The page you&apos;re looking for doesn&apos;t exist or has been moved.
           </p>
         </div>

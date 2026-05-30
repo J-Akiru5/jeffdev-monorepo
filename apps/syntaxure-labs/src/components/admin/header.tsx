@@ -48,8 +48,7 @@ export function AdminHeader() {
 
   async function handleSignOut() {
     await signOut();
-    router.push("/sign-in");
-    router.refresh();
+    window.location.href = "/";
   }
 
   const displayName = user?.full_name || "User";
