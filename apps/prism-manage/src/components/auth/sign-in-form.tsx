@@ -3,14 +3,13 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/browser";
-import { Button, Input } from "@syntaxure/ui";
+import { Button, Input, SyntaxureLogo } from "@syntaxure/ui";
 import { toast } from "sonner";
 import {
   Lock,
   Mail,
   User,
   Briefcase,
-  Sparkles,
   CheckCircle2,
   ArrowRight,
   Eye,
@@ -433,8 +432,8 @@ export function SignInForm() {
 
         {/* Header */}
         <div className="px-10 pt-10 pb-4 text-center">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-cyan-500/10 border border-cyan-500/30 animate-neon-pulse">
-            <Sparkles className="h-8 w-8 text-cyan-400" />
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center">
+            <SyntaxureLogo className="h-12 w-12 drop-shadow-[0_0_20px_rgba(6,182,212,0.2)]" />
           </div>
           <h2 className="text-xl font-bold text-white">
             {mode === "signin" ? "Access Portal" : "Create Account"}
@@ -530,7 +529,7 @@ export function SignInForm() {
               <div className="w-full border-t border-white/5" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-glass-heavy px-3 text-white/30 font-mono uppercase tracking-wider">
+              <span className="bg-[#0a0a0a]/85 px-3 text-white/30 font-mono uppercase tracking-wider">
                 Or continue with email
               </span>
             </div>
