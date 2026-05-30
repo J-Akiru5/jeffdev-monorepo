@@ -44,7 +44,7 @@ export async function getPublishedServices(): Promise<Service[]> {
     const { data, error } = await supabase
       .from(COLLECTION)
       .select("*")
-      .eq("status", "published")
+      .eq("status", "active")
       .order("order", { ascending: true });
 
     if (error || !data) return [];

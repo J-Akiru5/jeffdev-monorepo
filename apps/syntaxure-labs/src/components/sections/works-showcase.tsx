@@ -5,20 +5,22 @@ import Link from "next/link";
 import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { getFeaturedProjects } from "@/data/projects";
-import type { Project } from "@/data/projects";
+import type { DataProject } from "@/lib/data";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-export function WorksShowcase() {
+interface WorksShowcaseProps {
+  projects: DataProject[];
+}
+
+export function WorksShowcase({ projects: featuredProjects }: WorksShowcaseProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const [activeIndex, setActiveIndex] = useState(0);
-  const featuredProjects: Project[] = getFeaturedProjects();
 
   const scrollToIndex = useCallback((index: number) => {
     const container = carouselRef.current;

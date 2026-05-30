@@ -41,6 +41,14 @@ export default async function AgencyProjectDetailPage({
   const assignedPartner = (metadata.assignedPartner as string) || "";
   const assignedEmployees = (metadata.assignedEmployees as string[]) || [];
 
+  const isPublished = (project as any).published === true || metadata.published === true;
+
+  async function handleTogglePublish() {
+    "use server";
+    const { toggleAgencyProjectPublish } = await import("@/app/actions/agency-projects");
+    await toggleAgencyProjectPublish(project.slug, !isPublished);
+  }
+
   return (
     <div className="space-y-6">
       {/* Back */}
@@ -59,6 +67,15 @@ export default async function AgencyProjectDetailPage({
             <h1 className="text-2xl font-bold text-white">{project.title}</h1>
             <span
               className={`rounded-sm px-2 py-0.5 text-[10px] uppercase tracking-wider ${
+                isPublished
+                  ? "bg-cyan-500/20 text-cyan-400"
+                  : "bg-white/10 text-white/40"
+              }`}
+            >
+              {isPublished ? "Published" : "Draft"}
+            </span>
+            <span
+              className={`rounded-sm px-2 py-0.5 text-[10px] uppercase tracking-wider ${
                 statusColors[project.status] || statusColors.pending
               }`}
             >
@@ -74,12 +91,26 @@ export default async function AgencyProjectDetailPage({
             {project.client_name && <span>Client: {project.client_name}</span>}
           </div>
         </div>
-        <Link
-          href={`/admin/agency/projects/${slug}/edit`}
-          className="rounded-lg bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/15 transition-colors"
-        >
-          Edit Project
-        </Link>
+        <div className="flex items-center gap-3">
+          <form action={handleTogglePublish}>
+            <button
+              type="submit"
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                isPublished
+                  ? "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
+                  : "bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30"
+              }`}
+            >
+              {isPublished ? "Unpublish Study" : "Publish Study"}
+            </button>
+          </form>
+          <Link
+            href={`/admin/agency/projects/${slug}/edit`}
+            className="rounded-lg bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/15 transition-colors"
+          >
+            Edit Project
+          </Link>
+        </div>
       </div>
 
       {/* Progress Bar */}

@@ -8,16 +8,23 @@ import { Features } from "@/components/sections/features";
 import { PrismHighlight } from "@/components/sections/prism-highlight";
 import { AgenticProtocol } from "@/components/sections/agentic-protocol";
 import { CTASection } from "@/components/sections/cta-section";
+import { getFeaturedProjects } from "@/lib/data";
+import { getServices } from "@/lib/data";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [featuredProjects, dbServices] = await Promise.all([
+    getFeaturedProjects(),
+    getServices(),
+  ]);
+
   return (
     <>
       <Header />
       <main>
         <HeroSection />
         <SocialProof />
-        <Services />
-        <WorksShowcase />
+        <Services services={dbServices} />
+        <WorksShowcase projects={featuredProjects} />
         <Features />
         <PrismHighlight />
         <AgenticProtocol />

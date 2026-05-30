@@ -44,6 +44,7 @@ export default async function EditAgencyProjectPage({
     testimonial: (metadata.testimonial as { quote: string; author: string; role: string } | null) || null,
     image: (metadata.image as string) || null,
     featured: (metadata.featured as boolean) || false,
+    published: ((project as any).published as boolean) || (metadata.published as boolean) || false,
     order: (metadata.order as number) || 0,
     status: (project.status as "pending" | "active" | "paused" | "completed") || "active",
     progress: (metadata.progress as number) || 0,

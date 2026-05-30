@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Globe, Cloud, Cpu, Sparkles, ArrowUpRight } from "lucide-react";
+import { Globe, Cloud, Cpu, Sparkles, Code, Smartphone, Lightbulb, ArrowUpRight } from "lucide-react";
 import { cn } from "@syntaxure/ui";
 import { useInView } from "@/lib/use-in-view";
+import type { DataService } from "@/lib/data";
 
 /**
  * Services Section
@@ -15,48 +16,33 @@ import { useInView } from "@/lib/use-in-view";
  * - Investment-focused language
  */
 
-const services = [
-  {
-    id: "web-development",
-    icon: Globe,
-    title: "Web Development",
-    description:
-      "High-performance web applications built with Next.js, React, and modern tooling. Optimized for speed, SEO, and conversions.",
-    features: ["Next.js 14+", "TypeScript", "Edge Functions"],
-    href: "/services/web-development",
-  },
-  {
-    id: "saas-platforms",
-    icon: Cloud,
-    title: "SaaS Platforms",
-    description:
-      "Full-stack SaaS solutions with multi-tenancy, billing integration, and scalable infrastructure from day one.",
-    features: ["Multi-tenant", "Stripe/Paddle", "Analytics"],
-    href: "/services/saas-platforms",
-  },
-  {
-    id: "cloud-architecture",
-    icon: Cpu,
-    title: "Cloud Architecture",
-    description:
-      "Enterprise-grade infrastructure on Vercel, AWS, or Google Cloud. Built for 99.9% uptime and infinite scale.",
-    features: ["Vercel/AWS", "CI/CD", "99.9% SLA"],
-    href: "/services/cloud-architecture",
-  },
-  {
-    id: "ai-integration",
-    icon: Sparkles,
-    title: "AI Integration",
-    description:
-      "Embed AI capabilities into your product — chatbots, content generation, recommendation engines, and more.",
-    features: ["OpenAI/Claude", "RAG Systems", "Fine-tuning"],
-    href: "/services/ai-integration",
-  },
-];
+const categoryIcons: Record<string, typeof Globe> = {
+  web: Globe,
+  saas: Cloud,
+  ai: Sparkles,
+  cloud: Cpu,
+  mobile: Smartphone,
+  design: Lightbulb,
+  consulting: Code,
+};
 
-export function Services() {
+interface ServicesProps {
+  services: DataService[];
+}
+
+export function Services({ services: dbServices }: ServicesProps) {
   const { ref: headerRef, isInView: headerInView } = useInView<HTMLDivElement>({ threshold: 0.2 });
   const { ref: cardsRef, isInView: cardsInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
+
+  // Map DB services to display format, fallback to empty array
+  const displayServices = dbServices.map((svc) => ({
+    id: svc.slug,
+    icon: categoryIcons[svc.icon] || Globe,
+    title: svc.title,
+    description: svc.description || svc.tagline,
+    features: svc.features?.slice(0, 3) || [],
+    href: `/services/${svc.slug}`,
+  }));
 
   return (
     <section className="relative section-padding lazy-section" id="services">
@@ -89,7 +75,7 @@ export function Services() {
             cardsInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          {services.map((service) => (
+          {displayServices.map((service) => (
             <Link
               key={service.id}
               href={service.href}

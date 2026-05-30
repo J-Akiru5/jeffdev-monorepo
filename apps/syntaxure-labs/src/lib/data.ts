@@ -94,6 +94,7 @@ export async function getServices(): Promise<DataService[]> {
     const { data, error } = await supabase
       .from("services")
       .select("*")
+      .eq("status", "active")
       .order("name", { ascending: true });
 
     if (error) throw error;
@@ -157,45 +158,47 @@ export async function getProjects(): Promise<DataProject[]> {
     const { data, error } = await supabase
       .from("projects")
       .select("*")
+      .eq("published", true)
       .order("created_at", { ascending: false });
 
     if (error) throw error;
     if (!data) return [];
 
-    return data.map(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (p: any) =>
-        ({
-          slug: p.slug || p.id,
-          refNo: undefined,
-          title: p.title || "",
-          client: p.client_name || "",
-          category: p.metadata?.category || "",
-          tagline: p.description?.slice(0, 120) || "",
-          description: p.description || "",
-          challenge: p.metadata?.challenge || "",
-          solution: p.metadata?.solution || "",
-          results: p.metadata?.results || [],
-          technologies: p.metadata?.technologies || [],
-          testimonial: p.metadata?.testimonial || null,
-          image: p.metadata?.image || null,
-          featured: p.metadata?.featured === true,
-          order: p.metadata?.order || 0,
-          status: p.status || "active",
-          progress: p.metadata?.progress ?? 0,
-          deadline: p.end_date || undefined,
-          startDate: p.start_date || undefined,
-          budget: p.budget ? Number(p.budget) : undefined,
-          paidAmount: p.budget_spent ? Number(p.budget_spent) : undefined,
-          assignedPartner: p.metadata?.assignedPartner || undefined,
-          assignedEmployees: p.metadata?.assignedEmployees || [],
-          user_id: p.user_id,
-          client_email: p.client_email,
-          created_at: p.created_at,
-          updated_at: p.updated_at,
+    return data
+      .map(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        }) as any,
-    );
+        (p: any) =>
+          ({
+            slug: p.slug || p.id,
+            refNo: undefined,
+            title: p.title || "",
+            client: p.client_name || "",
+            category: p.metadata?.category || "",
+            tagline: p.description?.slice(0, 120) || "",
+            description: p.description || "",
+            challenge: p.metadata?.challenge || "",
+            solution: p.metadata?.solution || "",
+            results: p.metadata?.results || [],
+            technologies: p.metadata?.technologies || [],
+            testimonial: p.metadata?.testimonial || null,
+            image: p.metadata?.image || null,
+            featured: p.metadata?.featured === true,
+            order: p.metadata?.order || 0,
+            status: p.status || "active",
+            progress: p.metadata?.progress ?? 0,
+            deadline: p.end_date || undefined,
+            startDate: p.start_date || undefined,
+            budget: p.budget ? Number(p.budget) : undefined,
+            paidAmount: p.budget_spent ? Number(p.budget_spent) : undefined,
+            assignedPartner: p.metadata?.assignedPartner || undefined,
+            assignedEmployees: p.metadata?.assignedEmployees || [],
+            user_id: p.user_id,
+            client_email: p.client_email,
+            created_at: p.created_at,
+            updated_at: p.updated_at,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          }) as any,
+      );
   } catch (error) {
     console.error("[GET PROJECTS ERROR]", error);
     return [];
@@ -216,6 +219,7 @@ export async function getProjectBySlug(
       .from("projects")
       .select("*, milestones(*)")
       .eq("slug", slug)
+      .eq("published", true)
       .maybeSingle();
 
     if (error) throw error;

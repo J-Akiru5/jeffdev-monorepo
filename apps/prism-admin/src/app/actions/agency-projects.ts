@@ -30,6 +30,7 @@ const projectSchema = z.object({
   testimonial: z.object({ quote: z.string(), author: z.string(), role: z.string() }).nullable().optional(),
   image: z.string().nullable().optional(),
   featured: z.boolean().default(false),
+  published: z.boolean().default(false),
   order: z.number().int().min(0).default(0),
   status: z.enum(["pending", "active", "paused", "completed"]).default("active"),
   progress: z.number().int().min(0).max(100).default(0),
@@ -68,16 +69,16 @@ export async function createAgencyProject(data: ProjectFormData): Promise<Action
 
     const { error } = await supabase.from("projects").insert({
       user_id: validated.userId,
+      slug: validated.slug,
       title: validated.title,
       description: validated.description,
-      slug: validated.slug,
       status: validated.status,
+      budget: validated.budget || null,
       start_date: validated.startDate || null,
       end_date: validated.deadline || null,
-      budget: validated.budget !== undefined ? validated.budget.toString() : null,
-      budget_spent: validated.paidAmount !== undefined ? validated.paidAmount.toString() : "0",
       client_name: validated.client,
       client_email: validated.clientEmail || null,
+      published: validated.published,
       metadata: {
         category: validated.category,
         tagline: validated.tagline,
@@ -135,6 +136,7 @@ export async function updateAgencyProject(slug: string, data: ProjectFormData): 
       budget_spent: validated.paidAmount !== undefined ? validated.paidAmount.toString() : "0",
       client_name: validated.client,
       client_email: validated.clientEmail || null,
+      published: validated.published,
       metadata: {
         category: validated.category,
         tagline: validated.tagline,
@@ -348,3 +350,27 @@ export async function deleteAgencyMilestone(slug: string, milestoneId: string): 
     return { success: false, error: "Failed to delete milestone" };
   }
 }
+
+export async function toggleAgencyProjectPublish(slug: string, published: boolean): Promise<ActionResult> {
+  try {
+    const supabase = getAdminClient();
+    const { data: project } = await supabase.from("projects").select("id, metadata").eq("slug", slug).maybeSingle();
+    if (!project) return { success: false, error: "Project not found" };
+
+    const metadata = (project.metadata || {}) as Record<string, unknown>;
+    metadata.published = published;
+
+    const { error } = await supabase.from("projects").update({ published, metadata, updated_at: new Date().toISOString() }).eq("slug", slug);
+    if (error) throw error;
+
+    await logAuditEvent({ action: "UPDATE", resource: "projects", resourceId: slug, details: { published } });
+    revalidatePath("/admin/agency/projects");
+    revalidatePath(`/admin/agency/projects/${slug}`);
+
+    return { success: true };
+  } catch (error) {
+    console.error("[TOGGLE PROJECT PUBLISH ERROR]", error);
+    return { success: false, error: "Failed to toggle published state" };
+  }
+}
+
