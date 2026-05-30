@@ -156,8 +156,9 @@ CREATE POLICY "Allow member insert during onboarding" ON workspace_members
   FOR INSERT WITH CHECK (
     -- First workspace member creation (no existing members)
     NOT EXISTS (
-      SELECT 1 FROM workspace_members
-      WHERE workspace_members.workspace_id = workspace_members.workspace_id
+      SELECT 1
+      FROM workspace_members wm
+      WHERE wm.workspace_id = workspace_members.workspace_id
     )
     OR
     -- Or the user is inserting their own membership
@@ -167,12 +168,12 @@ CREATE POLICY "Allow member insert during onboarding" ON workspace_members
 -- =============================================================================
 -- 7. RLS POLICIES for departments
 -- =============================================================================
--- Members can view departments in their workspaces
 DROP POLICY IF EXISTS "Members can view departments" ON departments;
 CREATE POLICY "Members can view departments" ON departments
   FOR SELECT USING (
     EXISTS (
-      SELECT 1 FROM workspace_members
+      SELECT 1
+      FROM workspace_members
       WHERE workspace_members.workspace_id = departments.workspace_id
       AND workspace_members.user_id = auth.uid()
     )
@@ -181,7 +182,6 @@ CREATE POLICY "Members can view departments" ON departments
 -- =============================================================================
 -- 8. UPDATED RLS POLICIES for tasks
 -- =============================================================================
--- Drop old policies and recreate with workspace-aware scoping
 DROP POLICY IF EXISTS "Users can view their own tasks" ON tasks;
 DROP POLICY IF EXISTS "Users can manage their own tasks" ON tasks;
 DROP POLICY IF EXISTS "Users can update their own tasks" ON tasks;
@@ -190,74 +190,62 @@ DROP POLICY IF EXISTS "Members can insert workspace tasks" ON tasks;
 DROP POLICY IF EXISTS "Members can update workspace tasks" ON tasks;
 DROP POLICY IF EXISTS "Members can delete workspace tasks" ON tasks;
 
--- Members can view tasks in workspaces they belong to
 CREATE POLICY "Members can view workspace tasks" ON tasks
   FOR SELECT USING (
     workspace_id IS NULL
-    OR
-    EXISTS (
-      SELECT 1 FROM workspace_members
+    OR EXISTS (
+      SELECT 1
+      FROM workspace_members
       WHERE workspace_members.workspace_id = tasks.workspace_id
       AND workspace_members.user_id = auth.uid()
     )
-    OR
-    auth.uid() = tasks.user_id
-    OR
-    public.is_admin()
+    OR auth.uid() = tasks.user_id
+    OR public.is_admin()
   );
 
--- Members can create tasks in their workspaces
 CREATE POLICY "Members can insert workspace tasks" ON tasks
   FOR INSERT WITH CHECK (
     workspace_id IS NULL
-    OR
-    EXISTS (
-      SELECT 1 FROM workspace_members
+    OR EXISTS (
+      SELECT 1
+      FROM workspace_members
       WHERE workspace_members.workspace_id = tasks.workspace_id
       AND workspace_members.user_id = auth.uid()
     )
-    OR
-    auth.uid() = tasks.user_id
-    OR
-    public.is_admin()
+    OR auth.uid() = tasks.user_id
+    OR public.is_admin()
   );
 
--- Members can update tasks in their workspaces
 CREATE POLICY "Members can update workspace tasks" ON tasks
   FOR UPDATE USING (
     workspace_id IS NULL
-    OR
-    EXISTS (
-      SELECT 1 FROM workspace_members
+    OR EXISTS (
+      SELECT 1
+      FROM workspace_members
       WHERE workspace_members.workspace_id = tasks.workspace_id
       AND workspace_members.user_id = auth.uid()
     )
-    OR
-    auth.uid() = tasks.user_id
-    OR
-    public.is_admin()
+    OR auth.uid() = tasks.user_id
+    OR public.is_admin()
   );
 
 CREATE POLICY "Members can delete workspace tasks" ON tasks
   FOR DELETE USING (
     workspace_id IS NULL
-    OR
-    EXISTS (
-      SELECT 1 FROM workspace_members
+    OR EXISTS (
+      SELECT 1
+      FROM workspace_members
       WHERE workspace_members.workspace_id = tasks.workspace_id
       AND workspace_members.user_id = auth.uid()
     )
-    OR
-    auth.uid() = tasks.user_id
-    OR
-    public.is_admin()
+    OR auth.uid() = tasks.user_id
+    OR public.is_admin()
   );
 
 -- =============================================================================
 -- 9. HELPER FUNCTIONS
 -- =============================================================================
 
--- Check if a user is a founder in a given workspace
 CREATE OR REPLACE FUNCTION public.is_founder(workspace_id UUID)
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -266,7 +254,8 @@ STABLE
 AS $$
 BEGIN
   RETURN EXISTS (
-    SELECT 1 FROM workspace_members
+    SELECT 1
+    FROM workspace_members
     WHERE workspace_members.workspace_id = is_founder.workspace_id
     AND workspace_members.user_id = auth.uid()
     AND workspace_members.role = 'founder'
@@ -274,7 +263,6 @@ BEGIN
 END;
 $$;
 
--- Get the user's default workspace (their personal workspace)
 CREATE OR REPLACE FUNCTION public.get_default_workspace()
 RETURNS UUID
 LANGUAGE plpgsql
@@ -290,22 +278,42 @@ END;
 $$;
 
 -- =============================================================================
--- 10. TRIGGER: Auto-join Personal workspace on user registration
+-- 10. TRIGGER: Auto-join Personal and Syntaxure Labs on user registration
 -- =============================================================================
-CREATE OR REPLACE FUNCTION public.auto_join_personal_workspace()
+CREATE OR REPLACE FUNCTION public.auto_join_workspaces()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   personal_ws_id UUID;
+  syntaxure_ws_id UUID;
 BEGIN
   SELECT id INTO personal_ws_id FROM workspaces WHERE name = 'Personal' LIMIT 1;
-
   IF personal_ws_id IS NOT NULL THEN
-    INSERT INTO workspace_members (workspace_id, user_id, role)
-    VALUES (personal_ws_id, NEW.id, 'founder')
-    ON CONFLICT (workspace_id, user_id) DO NOTHING;
+    BEGIN
+      INSERT INTO workspace_members (workspace_id, user_id, role)
+      VALUES (personal_ws_id, NEW.id, 'founder')
+      ON CONFLICT DO NOTHING;
+    EXCEPTION WHEN others THEN
+      RAISE NOTICE 'Skipping Personal workspace auto-join for user %: %', NEW.id, SQLERRM;
+    END;
+  END IF;
+
+  SELECT id INTO syntaxure_ws_id
+  FROM workspaces
+  WHERE name = 'Syntaxure Labs' OR name = 'Syntaxure Labs, Inc.'
+  LIMIT 1;
+
+  IF syntaxure_ws_id IS NOT NULL THEN
+    BEGIN
+      INSERT INTO workspace_members (workspace_id, user_id, role)
+      VALUES (syntaxure_ws_id, NEW.id, 'founder')
+      ON CONFLICT DO NOTHING;
+    EXCEPTION WHEN others THEN
+      RAISE NOTICE 'Skipping Syntaxure Labs auto-join for user %: %', NEW.id, SQLERRM;
+    END;
   END IF;
 
   RETURN NEW;
@@ -313,7 +321,8 @@ END;
 $$;
 
 DROP TRIGGER IF EXISTS auto_join_personal_workspace_trigger ON user_profiles;
-CREATE TRIGGER auto_join_personal_workspace_trigger
+DROP TRIGGER IF EXISTS auto_join_workspaces ON user_profiles;
+CREATE TRIGGER auto_join_workspaces
   AFTER INSERT ON user_profiles
   FOR EACH ROW
-  EXECUTE FUNCTION public.auto_join_personal_workspace();
+  EXECUTE FUNCTION public.auto_join_workspaces();

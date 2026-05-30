@@ -1,4 +1,7 @@
+"use client";
+
 import * as React from "react";
+import { motion } from "framer-motion";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "./utils";
 import { ArrowUpRight, ArrowDownRight, Minus } from "lucide-react";
@@ -19,15 +22,13 @@ const metricTileVariants = cva(
   },
 );
 
-type IconType = React.ComponentType<{ className?: string }>;
-
 export interface MetricTileProps
   extends
     React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof metricTileVariants> {
   label: string;
   value: string | number;
-  icon?: IconType;
+  icon?: React.ComponentType<{ className?: string }> | React.ReactNode;
   trend?: {
     value: number;
     label?: string;
@@ -41,27 +42,42 @@ export function MetricTile({
   intent,
   label,
   value,
-  icon: Icon,
+  icon,
   trend,
   href,
   ...props
 }: MetricTileProps) {
+  const renderIcon = () => {
+    if (!icon) return null;
+    if (React.isValidElement(icon)) {
+      return icon;
+    }
+    const IconComponent = icon as React.ComponentType<{ className?: string }>;
+    return <IconComponent className="h-4 w-4" />;
+  };
+
   const Content = (
     <>
       <div className="flex items-center justify-between mb-4">
         <span className="text-xs font-medium text-white/50 uppercase tracking-wider">
           {label}
         </span>
-        {Icon && (
+        {icon && (
           <div className="flex h-8 w-8 items-center justify-center rounded-md bg-white/5 text-white/40 transition-colors group-hover:bg-white/10 group-hover:text-white">
-            <Icon className="h-4 w-4" />
+            {renderIcon()}
           </div>
         )}
       </div>
 
       <div className="flex items-end justify-between">
         <div className="text-2xl font-semibold text-white tracking-tight font-mono">
-          {value}
+          <motion.span
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          >
+            {value}
+          </motion.span>
         </div>
 
         {trend && (

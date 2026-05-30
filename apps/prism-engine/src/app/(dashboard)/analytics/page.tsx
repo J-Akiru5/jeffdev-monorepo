@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   BarChart3,
   Activity,
-  ArrowLeft,
   FileJson,
   Sparkles,
   Monitor,
@@ -97,33 +96,26 @@ export default function AnalyticsPage() {
 
   return (
     <div className="space-y-8">
-      {/* Back + Refresh */}
-      <div className="flex items-center justify-between">
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Dashboard
-        </Link>
-        <button
-          onClick={load}
-          disabled={loading}
-          className="inline-flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors disabled:opacity-50"
-        >
-          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-          Refresh
-        </button>
-      </div>
-
       {/* Header */}
       <div>
-        <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 mb-4">
-          <BarChart3 className="h-3 w-3 text-amber-400" />
-          <span className="text-xs font-medium text-amber-400 uppercase tracking-wider">
-            Analytics
-          </span>
+        <div className="flex items-center justify-between mb-4">
+          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1">
+            <BarChart3 className="h-3 w-3 text-amber-400" />
+            <span className="text-xs font-medium text-amber-400 uppercase tracking-wider">
+              Analytics
+            </span>
+          </div>
+          
+          <button
+            onClick={load}
+            disabled={loading}
+            className="inline-flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+            Refresh
+          </button>
         </div>
+        
         <div className="flex items-end justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-white">Usage & Analytics</h1>

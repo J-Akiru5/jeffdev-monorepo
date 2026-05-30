@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { getSupabaseUrlAndKey } from "./env";
 
 const ALLOWED_ORIGINS = [
   "https://www.syntaxure.dev",
@@ -32,10 +33,9 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Skip if environment variables are not set (during build time)
-  if (
-    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  ) {
+  const { url, key } = getSupabaseUrlAndKey();
+
+  if (!url || !key) {
     return NextResponse.next({
       request: {
         headers: request.headers,
@@ -60,8 +60,8 @@ export async function updateSession(request: NextRequest) {
   const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || undefined;
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    url,
+    key,
     {
       cookies: {
         getAll() {

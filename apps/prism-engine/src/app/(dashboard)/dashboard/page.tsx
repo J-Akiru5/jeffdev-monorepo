@@ -107,17 +107,32 @@ export default async function DashboardPage() {
     return { value: 0, direction: "neutral" };
   };
 
+  let greetingMsg = "Welcome to Prism Context Engine. Your architecture is being monitored and optimized.";
+  if (recentProjects.length > 0) {
+    const lastProject = recentProjects[0];
+    if (lastProject) {
+      const daysSince = Math.floor((now.getTime() - new Date(lastProject.updatedAt || now).getTime()) / (1000 * 3600 * 24));
+      if (daysSince > 7) {
+        greetingMsg = `Good to see you again. Project '${lastProject.name}' hasn't had context updates in ${daysSince} days.`;
+      } else if (daysSince === 0) {
+        greetingMsg = `System active. You made updates to '${lastProject.name}' today. Your architecture is perfectly aligned.`;
+      } else {
+        greetingMsg = `System active. You recently updated '${lastProject.name}'. Your architecture is healthy.`;
+      }
+    }
+  }
+
   return (
-    <div className="relative space-y-10">
+    <div className="relative space-y-8">
       {/* Hero Section */}
       <div className="relative z-10 pt-4">
-        <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-3 py-1 mb-6">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+        <div className="inline-flex items-center gap-2 rounded border border-cyan-500/30 bg-black/50 px-3 py-1.5 mb-6 shadow-[inset_0_0_10px_rgba(6,182,212,0.1)]">
+          <span className="font-mono text-[11px] text-white/50 tracking-wider">
+            STATUS:
           </span>
+          <span className="text-cyan-400 animate-pulse">●</span>
           <span className="text-xs font-mono font-medium text-cyan-400 uppercase tracking-wider">
-            System Operational
+            ONLINE
           </span>
         </div>
 
@@ -127,8 +142,7 @@ export default async function DashboardPage() {
               Dashboard
             </h1>
             <p className="text-lg text-white/60 max-w-xl">
-              Welcome to Prism Context Engine. Your architecture is being
-              monitored and optimized.
+              {greetingMsg}
             </p>
           </div>
 
@@ -138,7 +152,7 @@ export default async function DashboardPage() {
                 Documentation
               </Link>
             </Button>
-            <Button variant="primary" className="shadow-glow-cyan/20" asChild>
+            <Button variant="primary" className="shadow-glow-cyan/20 active:scale-[0.97] transition-transform" asChild>
               <Link href="/projects/new">
                 <Plus className="mr-2 h-4 w-4" />
                 New Project
@@ -148,12 +162,12 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Metrics Grid — all real data */}
+      {/* Metrics Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricTile
           label="Active Projects"
           value={totalProjects}
-          icon={FolderKanban}
+          icon={<FolderKanban className="h-4 w-4" />}
           intent="cyan"
           href="/projects"
           trend={calcTrend(projectCount, projectPrev)}
@@ -161,7 +175,7 @@ export default async function DashboardPage() {
         <MetricTile
           label="Context Rules"
           value={totalRules}
-          icon={FileJson}
+          icon={<FileJson className="h-4 w-4" />}
           intent="purple"
           href="/projects"
           trend={calcTrend(ruleCount, rulePrev)}
@@ -169,128 +183,134 @@ export default async function DashboardPage() {
         <MetricTile
           label="AI Generations"
           value={genCount}
-          icon={Sparkles}
+          icon={<Sparkles className="h-4 w-4" />}
           href="/generate"
           trend={calcTrend(genCount, genPrev)}
         />
       </div>
 
-      {/* Usage Stats */}
-      <UsageCard />
+      {/* Bento Grid Layout */}
+      <div className="grid gap-6 md:grid-cols-12 items-start">
+        {/* Left Column (Usage + Recent) */}
+        <div className="md:col-span-8 space-y-6">
+          <UsageCard />
+          
+          <section>
+            <SectionHeader
+              title="Recent Activity"
+              kicker="Projects"
+              action={{ label: "View All", href: "/projects" }}
+            />
 
-      {/* Quick Actions Row */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <Link
-          href="/projects/new"
-          className="group relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-cyan-500/10 to-blue-500/5 p-6 transition-all hover:border-cyan-500/30 hover:shadow-glow-cyan/20"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/20 text-cyan-400 mb-4">
-                <FolderKanban className="h-5 w-5" />
-              </div>
-              <h3 className="text-lg font-semibold text-white">
-                Create Project
-              </h3>
-              <p className="text-sm text-white/50 mt-1">
-                Initialize a new context environment.
-              </p>
-            </div>
-            <ArrowRight className="h-5 w-5 text-white/20 group-hover:text-cyan-400 transition-colors" />
-          </div>
-        </Link>
-
-        <Link
-          href="/brand/new"
-          className="group relative overflow-hidden rounded-xl border border-white/10 bg-gradient-to-br from-purple-500/10 to-pink-500/5 p-6 transition-all hover:border-purple-500/30 hover:shadow-glow-purple/20"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/20 text-purple-400 mb-4">
-                <Palette className="h-5 w-5" />
-              </div>
-              <h3 className="text-lg font-semibold text-white">
-                Brand Profile
-              </h3>
-              <p className="text-sm text-white/50 mt-1">
-                Define visual guidelines for AI.
-              </p>
-            </div>
-            <ArrowRight className="h-5 w-5 text-white/20 group-hover:text-purple-400 transition-colors" />
-          </div>
-        </Link>
-      </div>
-
-      {/* Recent Projects */}
-      <section>
-        <SectionHeader
-          title="Recent Activity"
-          kicker="Projects"
-          action={{ label: "View All", href: "/projects" }}
-        />
-
-        {recentProjects.length > 0 ? (
-          <div className="grid gap-4 md:grid-cols-3">
-            {recentProjects.map((project: any) => (
-              <Link
-                key={project._id.toString()}
-                href={`/projects/${project.slug}`}
-              >
-                <GlassPanel
-                  hoverEffect
-                  className="h-full p-5 flex flex-col justify-between group"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded bg-white/5 text-white/40 group-hover:text-white transition-colors">
-                        <FolderKanban className="h-4 w-4" />
+            {recentProjects.length > 0 ? (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
+                {recentProjects.map((project: any) => (
+                  <Link
+                    key={project._id.toString()}
+                    href={`/projects/${project.slug}`}
+                    className="group"
+                  >
+                    <GlassPanel
+                      hoverEffect
+                      className="h-full p-5 flex flex-col justify-between group backdrop-blur-2xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] border-white/5 active:scale-[0.98] transition-all"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded bg-white/5 text-white/40 group-hover:text-white transition-colors">
+                            <FolderKanban className="h-4 w-4" />
+                          </div>
+                          <Badge variant="default" className="text-[10px]">
+                            Active
+                          </Badge>
+                        </div>
+                        <h3 className="font-medium text-white group-hover:text-cyan-400 transition-colors">
+                          {project.name}
+                        </h3>
+                        <p className="text-xs text-white/40 mt-1 line-clamp-2">
+                          {(project.description) || "No description provided."}
+                        </p>
                       </div>
-                      <Badge variant="default" className="text-[10px]">
-                        Active
-                      </Badge>
-                    </div>
-                    <h3 className="font-medium text-white group-hover:text-cyan-400 transition-colors">
-                      {project.name}
-                    </h3>
-                    <p className="text-xs text-white/40 mt-1 line-clamp-2">
-                      {(project.description) ||
-                        "No description provided."}
-                    </p>
-                  </div>
 
-                  <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
-                    <span className="text-[10px] font-mono text-white/30">
-                      {(project.stack?.split(",")[0]) || "Next.js"}
-                    </span>
-                    <span className="text-[10px] text-white/30">
-                      {new Date(
-                        (project.updatedAt) ||
-                          new Date().toISOString(),
-                      ).toLocaleDateString()}
-                    </span>
-                  </div>
-                </GlassPanel>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <GlassPanel className="p-12 flex flex-col items-center justify-center text-center border-dashed border-white/10">
-            <div className="h-12 w-12 rounded-full bg-white/5 flex items-center justify-center mb-4">
-              <FolderKanban className="h-6 w-6 text-white/20" />
+                      <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
+                        <span className="text-[10px] font-mono text-white/30">
+                          {(project.stack?.split(",")[0]) || "Next.js"}
+                        </span>
+                        <span className="text-[10px] text-white/30">
+                          {new Date(
+                            (project.updatedAt) || new Date().toISOString(),
+                          ).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </GlassPanel>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <GlassPanel className="p-12 flex flex-col items-center justify-center text-center border-dashed border-white/10 mt-4 backdrop-blur-2xl">
+                <div className="h-12 w-12 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                  <FolderKanban className="h-6 w-6 text-white/20" />
+                </div>
+                <h3 className="text-white font-medium">No projects yet</h3>
+                <p className="text-white/40 text-sm mt-1 max-w-xs mx-auto">
+                  Create your first project to start tracking context rules and architecture.
+                </p>
+                <Button variant="primary" size="sm" className="mt-4 active:scale-[0.97] transition-transform" asChild>
+                  <Link href="/projects/new">Create Project</Link>
+                </Button>
+              </GlassPanel>
+            )}
+          </section>
+        </div>
+
+        {/* Right Column (Quick Actions) */}
+        <div className="md:col-span-4 space-y-4">
+          <SectionHeader
+            title="Quick Actions"
+            kicker="System"
+          />
+          <Link
+            href="/projects/new"
+            className="block group relative overflow-hidden rounded-xl border border-white/10 bg-[#0a0a0a] p-6 transition-all hover:border-cyan-500/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] active:scale-[0.97]"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+            <div className="flex items-start justify-between relative z-10">
+              <div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 mb-4 shadow-[inset_0_0_10px_rgba(6,182,212,0.1)]">
+                  <FolderKanban className="h-5 w-5" />
+                </div>
+                <h3 className="text-lg font-semibold text-white">
+                  Create Project
+                </h3>
+                <p className="text-sm text-white/50 mt-1">
+                  Initialize a new context environment.
+                </p>
+              </div>
+              <ArrowRight className="h-5 w-5 text-white/20 group-hover:text-cyan-400 transition-colors" />
             </div>
-            <h3 className="text-white font-medium">No projects yet</h3>
-            <p className="text-white/40 text-sm mt-1 max-w-xs mx-auto">
-              Create your first project to start tracking context rules and
-              architecture.
-            </p>
-            <Button variant="primary" size="sm" className="mt-4" asChild>
-              <Link href="/projects/new">Create Project</Link>
-            </Button>
-          </GlassPanel>
-        )}
-      </section>
+          </Link>
+
+          <Link
+            href="/brand/new"
+            className="block group relative overflow-hidden rounded-xl border border-white/10 bg-[#0a0a0a] p-6 transition-all hover:border-purple-500/50 hover:shadow-[0_0_20px_rgba(139,92,246,0.15)] active:scale-[0.97]"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+            <div className="flex items-start justify-between relative z-10">
+              <div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400 mb-4 shadow-[inset_0_0_10px_rgba(139,92,246,0.1)]">
+                  <Palette className="h-5 w-5" />
+                </div>
+                <h3 className="text-lg font-semibold text-white">
+                  Brand Profile
+                </h3>
+                <p className="text-sm text-white/50 mt-1">
+                  Define visual guidelines for AI.
+                </p>
+              </div>
+              <ArrowRight className="h-5 w-5 text-white/20 group-hover:text-purple-400 transition-colors" />
+            </div>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

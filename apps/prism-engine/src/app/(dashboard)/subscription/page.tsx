@@ -2,14 +2,13 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getCollection } from "@syntaxure-labs/db";
 import {
-  ArrowLeft,
   Check,
   Crown,
   Sparkles,
   Users,
   Building2,
 } from "lucide-react";
-import { GlassPanel, Button, Badge } from "@syntaxure/ui";
+import { GlassPanel, Button, Badge, PageContainer } from "@syntaxure/ui";
 import { getPricingPlans, getPricingFAQs } from "@/lib/pricing-db";
 import type { SubscriptionDoc } from "@/lib/types";
 
@@ -54,16 +53,7 @@ export default async function SubscriptionPage() {
   };
 
   return (
-    <div className="space-y-8 max-w-5xl">
-      {/* Back Link */}
-      <Link
-        href="/dashboard"
-        className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Dashboard
-      </Link>
-
+    <PageContainer className="space-y-8">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-semibold text-white">Subscription</h1>
@@ -165,7 +155,7 @@ export default async function SubscriptionPage() {
           ))}
         </div>
       </GlassPanel>
-    </div>
+    </PageContainer>
   );
 }
 

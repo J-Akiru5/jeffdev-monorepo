@@ -17,9 +17,9 @@ export function GlassPanel({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-xl border border-white/[0.08] bg-[#0a0a0a]/80 backdrop-blur-xl",
+        "relative overflow-hidden rounded-xl border border-white/5 bg-black/40 backdrop-blur-2xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]",
         hoverEffect &&
-          "transition-all duration-300 hover:border-white/20 hover:shadow-lg hover:shadow-cyan-500/5",
+          "transition-all duration-300 hover:border-white/10 hover:bg-black/60 hover:shadow-lg hover:shadow-cyan-500/10",
         className,
       )}
       {...props}
