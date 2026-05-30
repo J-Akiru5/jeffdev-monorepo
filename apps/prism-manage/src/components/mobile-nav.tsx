@@ -26,6 +26,7 @@ import { useProjects } from "@/contexts/project-context";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { createClient } from "@/lib/supabase/browser";
 import { PERSONAL_LISTS } from "@/lib/schemas";
+import { getDepartmentColor } from "@/lib/constants";
 
 function SignOutButton() {
   const router = useRouter();
@@ -97,7 +98,7 @@ export function MobileNav() {
   return (
     <>
       {/* Bottom Tab Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 flex h-16 items-center justify-around border-t border-border bg-surface/80 px-2 backdrop-blur-xl lg:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-50 flex h-16 items-center justify-around border-t border-white/[0.06] bg-[#0a0a0a]/80 px-2 backdrop-blur-xl lg:hidden">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = pathname === tab.href;
@@ -337,13 +338,4 @@ export function MobileNav() {
   );
 }
 
-function getDepartmentColor(name: string): string {
-  const colorMap: Record<string, string> = {
-    Executive: "#8b5cf6",
-    Engineering: "#06b6d4",
-    Operations: "#f59e0b",
-    Marketing: "#10b981",
-    Product: "#3b82f6",
-  };
-  return colorMap[name] || "var(--color-cyan)";
-}
+

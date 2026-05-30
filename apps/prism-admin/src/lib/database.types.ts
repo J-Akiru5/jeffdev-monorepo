@@ -53,6 +53,7 @@ export interface Database {
       product_templates: ToGenericTable<ProductTemplateRow>;
       contract_terms: ToGenericTable<ContractTermRow>;
       customization_services: ToGenericTable<CustomizationServiceRow>;
+      services: ToGenericTable<ServiceRow>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -442,6 +443,20 @@ export interface CustomizationServiceRow {
   turnaround_days: number | null;
   sort_order: number;
   status: "active" | "inactive";
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Catalog Services ──
+
+export interface ServiceRow {
+  id: string;
+  name: string;
+  category: string;
+  description: string | null;
+  price_min: number | null;
+  price_max: number | null;
+  status: string;
   created_at: string;
   updated_at: string;
 }

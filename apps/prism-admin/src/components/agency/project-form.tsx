@@ -34,6 +34,7 @@ export function ProjectForm({ mode, defaultValues }: Props) {
     startDate: defaultValues?.startDate || "",
     deadline: defaultValues?.deadline || "",
     budget: defaultValues?.budget ?? undefined,
+    published: defaultValues?.published || false,
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -50,6 +51,7 @@ export function ProjectForm({ mode, defaultValues }: Props) {
       testimonial: defaultValues?.testimonial || null,
       image: defaultValues?.image || null,
       featured: defaultValues?.featured || false,
+      published: form.published,
       order: defaultValues?.order || 0,
       paidAmount: defaultValues?.paidAmount,
       assignedPartner: defaultValues?.assignedPartner || "",
@@ -202,6 +204,24 @@ export function ProjectForm({ mode, defaultValues }: Props) {
               onChange={(e) => setForm((f) => ({ ...f, deadline: e.target.value }))}
               className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500/50"
             />
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-3 pt-2">
+          <input
+            type="checkbox"
+            id="projectPublished"
+            checked={form.published}
+            onChange={(e) => setForm((f) => ({ ...f, published: e.target.checked }))}
+            className="h-4 w-4 rounded border-white/10 bg-white/5 text-cyan-600 focus:ring-cyan-500/50"
+          />
+          <div>
+            <label htmlFor="projectPublished" className="block text-sm font-medium text-white/80">
+              Publish to Portfolio
+            </label>
+            <p className="text-xs text-white/40 mt-0.5">
+              If enabled, this project will be listed publicly on the main Syntaxure Labs `/work` page.
+            </p>
           </div>
         </div>
       </div>

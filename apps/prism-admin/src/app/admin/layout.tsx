@@ -169,6 +169,9 @@ export default async function AdminLayout({
           <NavItem href="/admin/agency/community" icon={Users}>
             Community
           </NavItem>
+          <NavItem href="/admin/agency/services" icon={Wrench}>
+            Services Catalog
+          </NavItem>
           <NavItem href="/admin/agency/case-studies" icon={FileText}>
             Case Studies
           </NavItem>
