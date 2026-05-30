@@ -25,7 +25,7 @@ export default function PrivacyPage() {
               Privacy Policy
             </h1>
             <p className="text-white/40 font-mono text-sm">
-              Last updated: January 2026
+              Last updated: May 2026
             </p>
           </header>
 
@@ -62,7 +62,7 @@ export default function PrivacyPage() {
                     a. Account Information
                   </h3>
                   <p className="text-white/70 leading-relaxed">
-                    When you create an account through Clerk (our authentication
+                    When you create an account through Supabase (our authentication
                     provider), we collect:
                   </p>
                   <ul className="list-disc list-inside text-white/70 mt-2 space-y-1">
@@ -115,7 +115,7 @@ export default function PrivacyPage() {
               </p>
               <ul className="list-disc list-inside text-white/70 space-y-2">
                 <li>Provide and maintain the Service</li>
-                <li>Process video uploads and generate context rules</li>
+                <li>Process content and generate context rules</li>
                 <li>Manage your subscription and billing</li>
                 <li>Send important service notifications</li>
                 <li>Improve our AI models and platform features</li>
@@ -140,7 +140,7 @@ export default function PrivacyPage() {
                 </li>
                 <li>
                   <strong className="text-white">
-                    OpenAI / Google Gemini:
+                    Google Gemini / Azure OpenAI:
                   </strong>{" "}
                   AI-powered rule extraction
                 </li>
@@ -150,7 +150,7 @@ export default function PrivacyPage() {
                 </li>
                 <li>
                   <strong className="text-white">PayPal:</strong> Payment
-                  processing
+                  processing (coming soon)
                 </li>
                 <li>
                   <strong className="text-white">Vercel:</strong> Platform
