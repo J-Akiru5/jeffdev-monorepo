@@ -139,7 +139,7 @@ function SandpackPreviewInner({
 
   if (loadError) {
     return (
-      <div className="flex items-center justify-center h-[400px] text-white/40">
+      <div className="flex items-center justify-center h-[400px] text-[var(--text-tertiary)]">
         <p>Preview unavailable</p>
       </div>
     );
@@ -148,7 +148,7 @@ function SandpackPreviewInner({
   if (!SandpackComponents) {
     return (
       <div className="flex items-center justify-center h-[400px]">
-        <div className="flex items-center gap-3 text-white/40">
+        <div className="flex items-center gap-3 text-[var(--text-tertiary)]">
           <div className="h-5 w-5 border-2 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin" />
           <span>Loading preview...</span>
         </div>
@@ -252,10 +252,10 @@ export function ComponentPreview({ code }: ComponentPreviewProps) {
   // Disabled state
   if (!showPreview) {
     return (
-      <div className="rounded-lg border border-white/10 bg-[#0a0a0a] p-8">
+      <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-8">
         <div className="flex flex-col items-center justify-center text-center">
-          <EyeOff className="h-10 w-10 text-white/20 mb-4" />
-          <p className="text-sm text-white/50 mb-4">Preview disabled</p>
+          <EyeOff className="h-10 w-10 text-[var(--text-tertiary)] opacity-50 mb-4" />
+          <p className="text-sm text-[var(--text-secondary)] mb-4">Preview disabled</p>
           <button
             onClick={() => setShowPreview(true)}
             className="flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
@@ -293,7 +293,7 @@ export function ComponentPreview({ code }: ComponentPreviewProps) {
               </button>
               <button
                 onClick={() => setShowPreview(false)}
-                className="flex items-center gap-2 text-sm text-white/50 hover:text-white/70 transition-colors"
+                className="flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
               >
                 <EyeOff className="h-4 w-4" />
                 Disable Preview
@@ -324,7 +324,7 @@ export function ComponentPreview({ code }: ComponentPreviewProps) {
         </div>
       }
     >
-      <div className="rounded-lg border border-white/10 overflow-hidden bg-[#0a0a0a]">
+      <div className="rounded-lg border border-[var(--border-subtle)] overflow-hidden bg-[var(--bg-secondary)]">
         <SandpackPreviewInner key={key} code={code} onError={handleError} />
       </div>
     </PreviewErrorBoundary>

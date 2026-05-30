@@ -28,7 +28,7 @@ export function ComingSoon({
       {backHref && (
         <Link
           href={backHref}
-          className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors"
+          className="inline-flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
           {backLabel}
@@ -39,10 +39,10 @@ export function ComingSoon({
         <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-500/10 border border-cyan-500/20 shadow-[0_0_40px_-10px_rgba(6,182,212,0.3)]">
           <Icon className="h-8 w-8 text-cyan-400" />
         </div>
-        <h1 className="text-3xl font-bold text-white tracking-tight">
+        <h1 className="text-3xl font-bold text-[var(--text-primary)] tracking-tight">
           {title}
         </h1>
-        <p className="text-white/50 max-w-md mx-auto">{description}</p>
+        <p className="text-[var(--text-secondary)] max-w-md mx-auto">{description}</p>
       </div>
 
       <GlassPanel className="p-8">
@@ -54,7 +54,7 @@ export function ComingSoon({
             </span>
           </div>
 
-          <p className="text-white/40 text-sm max-w-sm mx-auto">
+          <p className="text-[var(--text-tertiary)] text-sm max-w-sm mx-auto">
             This feature is currently under development and will be available in
             a future release. Stay tuned for updates.
           </p>

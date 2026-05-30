@@ -33,7 +33,7 @@ export function RealtimeClock() {
   return (
     <time
       dateTime={dateTime}
-      className="hidden font-mono text-xs text-white/40 tabular-nums sm:inline"
+      className="hidden font-mono text-xs text-[var(--text-tertiary)] tabular-nums sm:inline"
     >
       {time}
     </time>

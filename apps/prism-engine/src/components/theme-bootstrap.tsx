@@ -22,21 +22,17 @@ export function ThemeBootstrap() {
     const stored = localStorage.getItem(key);
     const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
     const theme = (stored === 'light' || stored === 'dark' || stored === 'theme-light')
-      ? (stored === 'theme-light' ? 'light' : stored)
-      : prefersLight ? 'light' : 'dark';
+      ? (stored === 'theme-light' ? 'theme-light' : stored)
+      : prefersLight ? 'theme-light' : 'dark';
 
-    // Apply data-theme — next-themes reads this on mount
-    root.setAttribute('data-theme', theme === 'light' ? 'theme-light' : 'dark');
-
-    // Sync class for shared CSS selectors (.theme-light .xxx)
-    root.classList.toggle('theme-light', theme === 'light');
-
-    // Watch for data-theme changes from next-themes and sync class
-    const observer = new MutationObserver(() => {
-      const current = root.getAttribute('data-theme');
-      root.classList.toggle('theme-light', current === 'theme-light');
-    });
-    observer.observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+    // Apply class for next-themes
+    if (theme === 'theme-light' || theme === 'light') {
+      root.classList.add('theme-light');
+      root.classList.remove('dark');
+    } else {
+      root.classList.add('dark');
+      root.classList.remove('theme-light');
+    }
   } catch (e) {
     // Silently fail — next-themes handles fallback
   }

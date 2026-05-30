@@ -7,7 +7,7 @@ import { cn } from "./utils";
 import { ArrowUpRight, ArrowDownRight, Minus } from "lucide-react";
 
 const metricTileVariants = cva(
-  "group relative overflow-hidden rounded-lg border border-white/[0.05] bg-white/[0.02] p-5 transition-all duration-300 hover:border-white/10 hover:bg-white/[0.04]",
+  "group relative overflow-hidden rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 transition-all duration-300 hover:border-[var(--border-active)] hover:bg-[var(--bg-tertiary)]",
   {
     variants: {
       intent: {
@@ -59,18 +59,18 @@ export function MetricTile({
   const Content = (
     <>
       <div className="flex items-center justify-between mb-4">
-        <span className="text-xs font-medium text-white/50 uppercase tracking-wider">
+        <span className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
           {label}
         </span>
         {icon && (
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-white/5 text-white/40 transition-colors group-hover:bg-white/10 group-hover:text-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[var(--border-subtle)] text-[var(--text-tertiary)] transition-colors group-hover:bg-[var(--border-active)] group-hover:text-[var(--text-primary)]">
             {renderIcon()}
           </div>
         )}
       </div>
 
       <div className="flex items-end justify-between">
-        <div className="text-2xl font-semibold text-white tracking-tight font-mono">
+        <div className="text-2xl font-semibold text-[var(--text-primary)] tracking-tight font-mono">
           <motion.span
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -86,7 +86,7 @@ export function MetricTile({
               "flex items-center gap-1 text-xs font-mono",
               trend.direction === "up" && "text-emerald-400",
               trend.direction === "down" && "text-red-400",
-              trend.direction === "neutral" && "text-white/40",
+              trend.direction === "neutral" && "text-[var(--text-tertiary)]",
             )}
           >
             {trend.direction === "up" && <ArrowUpRight className="h-3 w-3" />}
@@ -100,7 +100,7 @@ export function MetricTile({
       </div>
 
       {/* Hover Beam Effect */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-white/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[var(--border-subtle)] to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
     </>
   );
 

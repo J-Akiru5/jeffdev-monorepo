@@ -6,10 +6,15 @@ import { useAuth } from "@syntaxure/ui";
 export default function SignOutButton() {
   const { signOut } = useAuth();
 
+  const handleSignOut = async () => {
+    signOut();
+    window.location.href = "/sign-in";
+  };
+
   return (
     <button
-      onClick={() => signOut()}
-      className="flex items-center justify-center rounded-md p-1.5 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+      onClick={handleSignOut}
+      className="flex items-center justify-center rounded-md p-1.5 text-[var(--text-tertiary)] transition-colors hover:bg-[var(--border-subtle)] hover:text-[var(--text-primary)]"
       title="Sign out"
     >
       <LogOut className="h-4 w-4" />

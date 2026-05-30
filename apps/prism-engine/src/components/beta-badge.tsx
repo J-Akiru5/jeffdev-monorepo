@@ -27,7 +27,7 @@ export function BetaBadge() {
 export function BetaNotice() {
   return (
     <div className="w-full bg-gradient-to-r from-cyan-500/10 via-violet-500/10 to-cyan-500/10 border-b border-cyan-500/20 py-2 px-4">
-      <p className="text-center text-sm text-white/80">
+      <p className="text-center text-sm text-[var(--text-secondary)]">
         <span className="inline-flex items-center gap-2">
           <span className="inline-flex items-center rounded-full bg-cyan-500/20 border border-cyan-500/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-400">
             Beta

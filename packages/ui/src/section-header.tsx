@@ -33,16 +33,16 @@ export function SectionHeader({
         {kicker && (
           <div className="flex items-center gap-2 mb-2">
             <span className="h-px w-4 bg-cyan-500/50" />
-            <span className="text-xs font-mono text-cyan-400 uppercase tracking-wider">
+            <span className="text-xs font-mono text-cyan-500 uppercase tracking-wider">
               {kicker}
             </span>
           </div>
         )}
-        <h2 className="text-xl font-semibold text-white tracking-tight">
+        <h2 className="text-xl font-semibold text-[var(--text-primary)] tracking-tight">
           {title}
         </h2>
         {description && (
-          <p className="text-sm text-white/50 mt-1 max-w-2xl">{description}</p>
+          <p className="text-sm text-[var(--text-secondary)] mt-1 max-w-2xl">{description}</p>
         )}
       </div>
 

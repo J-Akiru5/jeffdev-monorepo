@@ -21,33 +21,37 @@ const buttonVariants = cva(
     "group relative inline-flex items-center justify-center gap-2",
     "overflow-hidden rounded-md font-medium",
     "transition-all duration-200",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500/50",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 dark:focus-visible:ring-cyan-500/50",
     "disabled:pointer-events-none disabled:opacity-50",
     "active:scale-[0.98]",
   ],
   {
     variants: {
       variant: {
-        // Primary: Ghost Glow pattern
+        // Primary: Solid blue in light, Ghost Glow in dark
         primary: [
-          "border border-white/10 bg-black/20 backdrop-blur-sm",
-          "text-white",
-          "hover:border-cyan-500/50 hover:bg-black/30",
-          "hover:shadow-[0_0_20px_rgba(6,182,212,0.2)]",
-          // Inner glow on hover
+          // Light mode: solid blue-600 with forced white text
+          "bg-blue-600 border border-blue-600 !text-white",
+          "hover:bg-blue-700 hover:border-blue-700",
+          "hover:shadow-[0_4px_12px_rgba(37,99,235,0.35)]",
+          // Dark mode: Ghost Glow pattern
+          "dark:border-[var(--border-subtle)] dark:bg-[var(--bg-secondary)] dark:!text-[var(--text-primary)] dark:backdrop-blur-sm",
+          "dark:hover:border-cyan-500/50 dark:hover:bg-[var(--bg-tertiary)]",
+          "dark:hover:shadow-[0_0_20px_rgba(6,182,212,0.2)]",
+          // Inner glow on hover (dark only)
           "before:absolute before:inset-0 before:-z-10",
           "before:bg-gradient-to-r before:from-cyan-500/20 before:to-purple-500/20",
           "before:opacity-0 before:transition-opacity",
-          "hover:before:opacity-100",
+          "dark:hover:before:opacity-100",
         ],
         // Secondary: Subtle glass
         secondary: [
-          "border border-white/8 bg-white/5",
-          "text-white/70",
-          "hover:border-white/15 hover:bg-white/8 hover:text-white",
+          "border border-[var(--border-active)] bg-[var(--bg-tertiary)]",
+          "text-[var(--text-secondary)]",
+          "hover:border-[var(--border-glow)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]",
         ],
         // Ghost: No border, just hover effect
-        ghost: ["text-white/60", "hover:bg-white/5 hover:text-white"],
+        ghost: ["text-[var(--text-secondary)]", "hover:bg-[var(--border-subtle)] hover:text-[var(--text-primary)]"],
         // Danger: Red accent
         danger: [
           "border border-red-500/30 bg-red-500/10",

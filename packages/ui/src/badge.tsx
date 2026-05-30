@@ -25,7 +25,7 @@ const badgeVariants = cva(
     variants: {
       variant: {
         // Default: neutral
-        default: "bg-white/10 text-white/60",
+        default: "bg-[var(--border-subtle)] text-[var(--text-secondary)]",
         // Semantic colors
         success: "bg-emerald-500/20 text-emerald-400",
         warning: "bg-amber-500/20 text-amber-400",

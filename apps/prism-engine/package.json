@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --port 3001",
+    "dev:local": "node ../../scripts/with-memory-limit.js next dev --port 3001",
+    "dev:doppler": "doppler run -- next dev --port 3001",
     "build": "next build",
     "start": "next start --port 3001",
     "lint": "eslint",

@@ -111,7 +111,7 @@ export default function HomePage() {
       <AnimatedHero />
 
       {/* Footer */}
-      <footer className="border-t border-white/5 relative z-10 bg-[#050505]">
+      <footer className="border-t border-[var(--border-subtle)] relative z-10 bg-[var(--bg-primary)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Brand */}
@@ -127,21 +127,21 @@ export default function HomePage() {
                   Prism Context Engine
                 </span>
               </div>
-              <p className="text-white/40 text-sm">
+              <p className="text-[var(--text-secondary)] text-sm">
                 The Context Operating System for developers who ship fast.
               </p>
             </div>
 
             {/* Product */}
             <div>
-              <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">
+              <h3 className="text-[var(--text-primary)] font-semibold mb-3 text-sm uppercase tracking-wider">
                 Product
               </h3>
               <ul className="space-y-2">
                 <li>
                   <Link
                     href="/features"
-                    className="text-white/60 hover:text-cyan-400 text-sm transition-colors"
+                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm transition-colors"
                   >
                     Features
                   </Link>
@@ -149,7 +149,7 @@ export default function HomePage() {
                 <li>
                   <Link
                     href="/pricing"
-                    className="text-white/60 hover:text-cyan-400 text-sm transition-colors"
+                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm transition-colors"
                   >
                     Pricing
                   </Link>
@@ -158,7 +158,7 @@ export default function HomePage() {
                   <Link
                     href="https://docs.syntaxure.dev"
                     target="_blank"
-                    className="text-white/60 hover:text-cyan-400 text-sm transition-colors"
+                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm transition-colors"
                   >
                     Docs
                   </Link>
@@ -168,7 +168,7 @@ export default function HomePage() {
 
             {/* Company */}
             <div>
-              <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">
+              <h3 className="text-[var(--text-primary)] font-semibold mb-3 text-sm uppercase tracking-wider">
                 Company
               </h3>
               <ul className="space-y-2">
@@ -176,7 +176,7 @@ export default function HomePage() {
                   <Link
                     href="https://www.syntaxure.dev"
                     target="_blank"
-                    className="text-white/60 hover:text-cyan-400 text-sm transition-colors"
+                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm transition-colors"
                   >
                     About Syntaxure Labs
                   </Link>
@@ -185,7 +185,7 @@ export default function HomePage() {
                   <Link
                     href="https://www.syntaxure.dev/contact"
                     target="_blank"
-                    className="text-white/60 hover:text-cyan-400 text-sm transition-colors"
+                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm transition-colors"
                   >
                     Contact
                   </Link>
@@ -195,36 +195,36 @@ export default function HomePage() {
 
             {/* CTA */}
             <div>
-              <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">
+              <h3 className="text-[var(--text-primary)] font-semibold mb-3 text-sm uppercase tracking-wider">
                 Get Started
               </h3>
-              <p className="text-white/60 text-sm mb-4">
+              <p className="text-[var(--text-secondary)] text-sm mb-4">
                 Ready to eliminate context pollution?
               </p>
               <Link
                 href="/sign-up"
-                className="inline-block glass px-6 py-2 rounded-md hover:border-cyan-500/50 transition-all text-sm font-mono uppercase tracking-wider text-white"
+                className="inline-block bg-blue-600 dark:glass !text-white dark:!text-[var(--text-primary)] px-6 py-2 rounded-md hover:bg-blue-700 dark:hover:border-cyan-500/50 transition-all text-sm font-mono uppercase tracking-wider shadow-[0_2px_8px_rgba(37,99,235,0.3)] dark:shadow-none"
               >
                 Start Free →
               </Link>
             </div>
           </div>
 
-          <div className="border-t border-white/5 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-white/30 text-xs font-mono">
+          <div className="border-t border-[var(--border-subtle)] mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+            <p className="text-[var(--text-tertiary)] text-xs font-mono">
               © {new Date().getFullYear()} Syntaxure Labs. Built with Prism
               Context Engine.
             </p>
             <div className="flex gap-6 mt-4 md:mt-0">
               <Link
                 href="/terms"
-                className="text-white/30 hover:text-white/60 text-xs transition-colors"
+                className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] text-xs transition-colors"
               >
                 Terms
               </Link>
               <Link
                 href="/privacy"
-                className="text-white/30 hover:text-white/60 text-xs transition-colors"
+                className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] text-xs transition-colors"
               >
                 Privacy
               </Link>

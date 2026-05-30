@@ -113,7 +113,7 @@ export function PricingCard({
       className={`relative flex flex-col rounded-lg border p-6 ${
         info.popular
           ? "border-cyan-500/50 bg-gradient-to-b from-cyan-500/10 to-transparent"
-          : "border-white/10 bg-white/[0.02]"
+          : "border-[var(--border-subtle)] bg-[var(--bg-secondary)]"
       }`}
     >
       {/* Popular Badge */}
@@ -128,26 +128,26 @@ export function PricingCard({
 
       {/* Header */}
       <div className="mb-6">
-        <h3 className="text-xl font-bold text-white">{info.name}</h3>
-        <p className="mt-1 text-sm text-white/60">{info.tagline}</p>
+        <h3 className="text-xl font-bold text-[var(--text-primary)]">{info.name}</h3>
+        <p className="mt-1 text-sm text-[var(--text-secondary)]">{info.tagline}</p>
       </div>
 
       {/* Pricing */}
       <div className="mb-6">
         {isFree ? (
-          <div className="text-3xl font-bold text-white">Free</div>
+          <div className="text-3xl font-bold text-[var(--text-primary)]">Free</div>
         ) : isEnterprise ? (
-          <div className="text-3xl font-bold text-white">Custom</div>
+          <div className="text-3xl font-bold text-[var(--text-primary)]">Custom</div>
         ) : prices ? (
           <>
             <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-bold text-white">
+              <span className="text-3xl font-bold text-[var(--text-primary)]">
                 ₱
                 {billing === "monthly"
                   ? prices.monthly.php.toLocaleString()
                   : Math.round(prices.annual.php / 12).toLocaleString()}
               </span>
-              <span className="text-white/60">/month</span>
+              <span className="text-[var(--text-secondary)]">/month</span>
             </div>
             {billing === "annual" && (
               <p className="mt-1 text-sm text-emerald-400">
@@ -161,13 +161,13 @@ export function PricingCard({
 
       {/* Billing Toggle (for non-free tiers) */}
       {prices && (
-        <div className="mb-6 flex rounded-md border border-white/10 p-1">
+        <div className="mb-6 flex rounded-md border border-[var(--border-subtle)] p-1">
           <button
             onClick={() => setBilling("monthly")}
             className={`flex-1 rounded px-3 py-1.5 text-sm font-medium transition-colors ${
               billing === "monthly"
-                ? "bg-white/10 text-white"
-                : "text-white/60 hover:text-white"
+                ? "bg-[var(--bg-tertiary)] text-[var(--text-primary)]"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
             Monthly
@@ -176,8 +176,8 @@ export function PricingCard({
             onClick={() => setBilling("annual")}
             className={`flex-1 rounded px-3 py-1.5 text-sm font-medium transition-colors ${
               billing === "annual"
-                ? "bg-white/10 text-white"
-                : "text-white/60 hover:text-white"
+                ? "bg-[var(--bg-tertiary)] text-[var(--text-primary)]"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             }`}
           >
             Annual
@@ -190,7 +190,7 @@ export function PricingCard({
         {info.features.map((feature) => (
           <li
             key={feature}
-            className="flex items-start gap-2 text-sm text-white/80"
+            className="flex items-start gap-2 text-sm text-[var(--text-secondary)]"
           >
             <Check className="mt-0.5 h-4 w-4 shrink-0 text-cyan-400" />
             {feature}
@@ -204,14 +204,14 @@ export function PricingCard({
         disabled={isCurrentTier || isLoading}
         className={`w-full rounded-md py-2.5 font-medium transition-all ${
           isCurrentTier
-            ? "cursor-default border border-white/20 bg-white/5 text-white/60"
+            ? "cursor-default border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] text-[var(--text-secondary)]"
             : info.popular
               ? "bg-cyan-500 text-black hover:bg-cyan-400"
               : isFree
-                ? "border border-white/20 text-white hover:bg-white/5"
+                ? "border border-[var(--border-active)] text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]"
                 : isEnterprise
-                  ? "border border-white/20 text-white hover:bg-white/5"
-                  : "bg-white text-black hover:bg-white/90"
+                  ? "border border-[var(--border-active)] text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]"
+                  : "bg-[var(--text-primary)] text-[var(--bg-primary)] hover:opacity-90"
         } disabled:cursor-not-allowed disabled:opacity-50`}
       >
         {isLoading

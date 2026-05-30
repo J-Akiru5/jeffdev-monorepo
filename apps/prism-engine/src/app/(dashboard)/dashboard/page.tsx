@@ -126,22 +126,14 @@ export default async function DashboardPage() {
     <div className="relative space-y-8">
       {/* Hero Section */}
       <div className="relative z-10 pt-4">
-        <div className="inline-flex items-center gap-2 rounded border border-cyan-500/30 bg-black/50 px-3 py-1.5 mb-6 shadow-[inset_0_0_10px_rgba(6,182,212,0.1)]">
-          <span className="font-mono text-[11px] text-white/50 tracking-wider">
-            STATUS:
-          </span>
-          <span className="text-cyan-400 animate-pulse">●</span>
-          <span className="text-xs font-mono font-medium text-cyan-400 uppercase tracking-wider">
-            ONLINE
-          </span>
-        </div>
+
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-2">
+            <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-primary)] tracking-tight mb-2">
               Dashboard
             </h1>
-            <p className="text-lg text-white/60 max-w-xl">
+            <p className="text-lg text-[var(--text-secondary)] max-w-xl">
               {greetingMsg}
             </p>
           </div>
@@ -212,30 +204,30 @@ export default async function DashboardPage() {
                   >
                     <GlassPanel
                       hoverEffect
-                      className="h-full p-5 flex flex-col justify-between group backdrop-blur-2xl shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] border-white/5 active:scale-[0.98] transition-all"
+                      className="h-full p-5 flex flex-col justify-between group backdrop-blur-2xl shadow-[inset_0_1px_0_0_var(--border-subtle)] border border-[var(--border-subtle)] active:scale-[0.98] transition-all"
                     >
                       <div>
                         <div className="flex items-center justify-between mb-3">
-                          <div className="flex h-8 w-8 items-center justify-center rounded bg-white/5 text-white/40 group-hover:text-white transition-colors">
+                          <div className="flex h-8 w-8 items-center justify-center rounded bg-[var(--border-subtle)] text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)] transition-colors">
                             <FolderKanban className="h-4 w-4" />
                           </div>
                           <Badge variant="default" className="text-[10px]">
                             Active
                           </Badge>
                         </div>
-                        <h3 className="font-medium text-white group-hover:text-cyan-400 transition-colors">
+                        <h3 className="font-medium text-[var(--text-primary)] group-hover:text-cyan-500 transition-colors">
                           {project.name}
                         </h3>
-                        <p className="text-xs text-white/40 mt-1 line-clamp-2">
+                        <p className="text-xs text-[var(--text-tertiary)] mt-1 line-clamp-2">
                           {(project.description) || "No description provided."}
                         </p>
                       </div>
 
-                      <div className="mt-4 pt-4 border-t border-white/5 flex items-center justify-between">
-                        <span className="text-[10px] font-mono text-white/30">
+                      <div className="mt-4 pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between">
+                        <span className="text-[10px] font-mono text-[var(--text-quiet)]">
                           {(project.stack?.split(",")[0]) || "Next.js"}
                         </span>
-                        <span className="text-[10px] text-white/30">
+                        <span className="text-[10px] text-[var(--text-quiet)]">
                           {new Date(
                             (project.updatedAt) || new Date().toISOString(),
                           ).toLocaleDateString()}
@@ -246,12 +238,12 @@ export default async function DashboardPage() {
                 ))}
               </div>
             ) : (
-              <GlassPanel className="p-12 flex flex-col items-center justify-center text-center border-dashed border-white/10 mt-4 backdrop-blur-2xl">
-                <div className="h-12 w-12 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                  <FolderKanban className="h-6 w-6 text-white/20" />
+              <GlassPanel className="p-12 flex flex-col items-center justify-center text-center border-dashed border-[var(--border-subtle)] mt-4 backdrop-blur-2xl">
+                <div className="h-12 w-12 rounded-full bg-[var(--border-subtle)] flex items-center justify-center mb-4 mx-auto">
+                  <FolderKanban className="h-6 w-6 text-[var(--text-quiet)]" />
                 </div>
-                <h3 className="text-white font-medium">No projects yet</h3>
-                <p className="text-white/40 text-sm mt-1 max-w-xs mx-auto">
+                <h3 className="text-[var(--text-primary)] font-medium">No projects yet</h3>
+                <p className="text-[var(--text-tertiary)] text-sm mt-1 max-w-xs mx-auto">
                   Create your first project to start tracking context rules and architecture.
                 </p>
                 <Button variant="primary" size="sm" className="mt-4 active:scale-[0.97] transition-transform" asChild>
@@ -270,43 +262,43 @@ export default async function DashboardPage() {
           />
           <Link
             href="/projects/new"
-            className="block group relative overflow-hidden rounded-xl border border-white/10 bg-[#0a0a0a] p-6 transition-all hover:border-cyan-500/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] active:scale-[0.97]"
+            className="block group relative overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 transition-all hover:border-blue-500/50 dark:hover:border-cyan-500/50 hover:shadow-[0_0_20px_rgba(37,99,235,0.15)] dark:hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] active:scale-[0.97]"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 dark:from-cyan-500/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
             <div className="flex items-start justify-between relative z-10">
               <div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 mb-4 shadow-[inset_0_0_10px_rgba(6,182,212,0.1)]">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10 dark:bg-cyan-500/10 border border-blue-500/20 dark:border-cyan-500/20 text-blue-600 dark:text-cyan-500 mb-4 shadow-[inset_0_0_10px_rgba(37,99,235,0.1)] dark:shadow-[inset_0_0_10px_rgba(6,182,212,0.1)]">
                   <FolderKanban className="h-5 w-5" />
                 </div>
-                <h3 className="text-lg font-semibold text-white">
+                <h3 className="text-lg font-semibold text-[var(--text-primary)]">
                   Create Project
                 </h3>
-                <p className="text-sm text-white/50 mt-1">
+                <p className="text-sm text-[var(--text-secondary)] mt-1">
                   Initialize a new context environment.
                 </p>
               </div>
-              <ArrowRight className="h-5 w-5 text-white/20 group-hover:text-cyan-400 transition-colors" />
+              <ArrowRight className="h-5 w-5 text-[var(--text-quiet)] group-hover:text-cyan-500 transition-colors" />
             </div>
           </Link>
 
           <Link
             href="/brand/new"
-            className="block group relative overflow-hidden rounded-xl border border-white/10 bg-[#0a0a0a] p-6 transition-all hover:border-purple-500/50 hover:shadow-[0_0_20px_rgba(139,92,246,0.15)] active:scale-[0.97]"
+            className="block group relative overflow-hidden rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 transition-all hover:border-purple-500/50 hover:shadow-[0_0_20px_rgba(139,92,246,0.15)] active:scale-[0.97]"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
             <div className="flex items-start justify-between relative z-10">
               <div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400 mb-4 shadow-[inset_0_0_10px_rgba(139,92,246,0.1)]">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-500 mb-4 shadow-[inset_0_0_10px_rgba(139,92,246,0.1)]">
                   <Palette className="h-5 w-5" />
                 </div>
-                <h3 className="text-lg font-semibold text-white">
+                <h3 className="text-lg font-semibold text-[var(--text-primary)]">
                   Brand Profile
                 </h3>
-                <p className="text-sm text-white/50 mt-1">
+                <p className="text-sm text-[var(--text-secondary)] mt-1">
                   Define visual guidelines for AI.
                 </p>
               </div>
-              <ArrowRight className="h-5 w-5 text-white/20 group-hover:text-purple-400 transition-colors" />
+              <ArrowRight className="h-5 w-5 text-[var(--text-quiet)] group-hover:text-purple-500 transition-colors" />
             </div>
           </Link>
         </div>

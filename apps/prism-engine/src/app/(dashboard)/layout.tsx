@@ -11,6 +11,7 @@ import DashboardShell from "@/components/layout/dashboard-shell";
  * ----------------
  * Server component: fetches auth + subscription data, then hands off
  * to the client DashboardShell for all navigation / layout rendering.
+ * Cache busted for Next.js 16
  */
 export default async function DashboardLayout({
   children,

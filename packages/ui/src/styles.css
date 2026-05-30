@@ -45,7 +45,10 @@
   --glass-edge-glow: rgba(6, 182, 212, 0.08);
 }
 
-.theme-light {
+.theme-light,
+[data-theme="theme-light"],
+[data-theme="light"],
+html.light {
   color-scheme: light;
 
   /* Canvas */

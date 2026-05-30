@@ -34,9 +34,9 @@ export function ComponentTabs({
   });
 
   return (
-    <div className="rounded-lg border border-white/10 bg-white/[0.02] overflow-hidden">
+    <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] overflow-hidden">
       {/* Tab Header */}
-      <div className="flex items-center justify-between border-b border-white/10 bg-white/5">
+      <div className="flex items-center justify-between border-b border-[var(--border-subtle)] bg-[var(--bg-tertiary)]">
         <div className="flex">
           {availableTabs.map((tab) => {
             const Icon = tab.icon;
@@ -51,7 +51,7 @@ export function ComponentTabs({
                   ${
                     isActive
                       ? "text-cyan-400 border-b-2 border-cyan-400 -mb-px"
-                      : "text-white/50 hover:text-white/80"
+                      : "text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
                   }
                 `}
               >
@@ -66,7 +66,7 @@ export function ComponentTabs({
         {collapsible && (
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-3 text-white/40 hover:text-white transition-colors"
+            className="p-3 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
           >
             {isCollapsed ? (
               <ChevronDown className="h-4 w-4" />
