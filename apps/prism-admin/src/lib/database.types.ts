@@ -50,6 +50,9 @@ export interface Database {
       subscriptions: ToGenericTable<SubscriptionRow>;
       pricing_plans: ToGenericTable<PricingPlanRow>;
       pricing_faqs: ToGenericTable<PricingFAQRow>;
+      product_templates: ToGenericTable<ProductTemplateRow>;
+      contract_terms: ToGenericTable<ContractTermRow>;
+      customization_services: ToGenericTable<CustomizationServiceRow>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -371,6 +374,74 @@ export interface PricingFAQRow {
   question: string;
   answer: string;
   sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Product Templates ──
+
+export interface ProductTemplateRow {
+  id: string;
+  name: string;
+  slug: string;
+  category: "template" | "boilerplate" | "addon";
+  tagline: string | null;
+  description: string | null;
+  short_description: string | null;
+  base_price_monthly_php: number | null;
+  base_price_monthly_usd: number | null;
+  base_price_annual_php: number | null;
+  base_price_annual_usd: number | null;
+  features: unknown;
+  tech_stack: unknown;
+  demo_url: string | null;
+  repo_url: string | null;
+  documentation_url: string | null;
+  icon: string | null;
+  image_url: string | null;
+  highlighted: boolean;
+  sort_order: number;
+  status: "draft" | "active" | "archived";
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Contract Terms ──
+
+export interface ContractTermRow {
+  id: string;
+  template_id: string;
+  term_months: number;
+  billing_cycle: "monthly" | "annual";
+  price_php: number;
+  price_usd: number;
+  discount_percent: number;
+  includes: unknown;
+  extension_enabled: boolean;
+  extension_max_years: number;
+  extension_rate_increase_percent: number;
+  highlighted: boolean;
+  sort_order: number;
+  status: "active" | "inactive";
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Customization Services ──
+
+export interface CustomizationServiceRow {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  pricing_model: "fixed" | "hourly" | "project";
+  estimated_range_min_php: number | null;
+  estimated_range_max_php: number | null;
+  estimated_range_min_usd: number | null;
+  estimated_range_max_usd: number | null;
+  turnaround_days: number | null;
+  sort_order: number;
+  status: "active" | "inactive";
   created_at: string;
   updated_at: string;
 }

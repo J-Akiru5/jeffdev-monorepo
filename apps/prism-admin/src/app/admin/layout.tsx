@@ -28,6 +28,8 @@ import {
   KeyRound,
   PlusCircle,
   ClipboardList,
+  Package,
+  Wrench,
 } from "lucide-react";
 
 /**
@@ -121,6 +123,18 @@ export default async function AdminLayout({
           </NavItem>
           <NavItem href="/admin/pricing" icon={DollarSign}>
             Pricing
+          </NavItem>
+
+          <div className="px-3 mt-4 mb-2">
+            <span className="text-[10px] font-medium text-white/30 uppercase tracking-wider">
+              Products
+            </span>
+          </div>
+          <NavItem href="/admin/products" icon={Package}>
+            Product Templates
+          </NavItem>
+          <NavItem href="/admin/customization-services" icon={Wrench}>
+            Customization
           </NavItem>
 
           <div className="px-3 mt-4 mb-2">
