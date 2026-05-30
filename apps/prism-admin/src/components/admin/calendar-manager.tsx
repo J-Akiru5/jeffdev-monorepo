@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2, X } from "lucide-react";
+import { Plus, Pencil, Trash2, X, MapPin } from "lucide-react";
 import {
   createEvent,
   updateEvent,
@@ -16,6 +16,8 @@ interface CalendarEvent {
   start_time: string;
   end_time: string;
   event_type: string;
+  location?: string | null;
+  project_id?: string | null;
 }
 
 interface Props {
@@ -42,6 +44,7 @@ function emptyForm(): EventInput {
     start_time: start.toISOString().slice(0, 16),
     end_time: end.toISOString().slice(0, 16),
     event_type: "meeting",
+    location: null,
   };
 }
 
@@ -66,6 +69,7 @@ export function CalendarManager({ initialData }: Props) {
       start_time: event.start_time.slice(0, 16),
       end_time: event.end_time.slice(0, 16),
       event_type: event.event_type as EventInput["event_type"],
+      location: event.location ?? null,
     });
     setShowForm(true);
   }
@@ -146,6 +150,15 @@ export function CalendarManager({ initialData }: Props) {
               className="w-full rounded-lg border border-white/[0.08] bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/10"
             />
           </div>
+          <div>
+            <label className="block text-sm text-white/60 mb-1.5">Location</label>
+            <input
+              value={form.location || ""}
+              onChange={(e) => setForm((f) => ({ ...f, location: e.target.value || null }))}
+              className="w-full rounded-lg border border-white/[0.08] bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-white/10"
+              placeholder="Office, Zoom, etc."
+            />
+          </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="block text-sm text-white/60 mb-1.5">Start Time</label>
@@ -219,6 +232,12 @@ export function CalendarManager({ initialData }: Props) {
                   <div className="text-sm font-medium text-white">{event.title}</div>
                   {event.description && (
                     <p className="text-xs text-white/40 mt-0.5">{event.description}</p>
+                  )}
+                  {event.location && (
+                    <p className="text-xs text-white/30 mt-0.5 flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {event.location}
+                    </p>
                   )}
                   <p className="text-[10px] text-white/30 mt-0.5 font-mono">
                     {new Date(event.start_time).toLocaleDateString("en-US", {
