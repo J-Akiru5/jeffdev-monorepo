@@ -100,7 +100,7 @@ export default function SettingsPage() {
           <div className="flex-1">
             <h2 className="text-lg font-medium text-white">Profile</h2>
             <p className="text-sm text-white/50 mt-1">
-              Your profile information is managed through Clerk.
+              Your profile information is managed through Supabase.
             </p>
 
             <div className="mt-4 space-y-3">
@@ -130,7 +130,7 @@ export default function SettingsPage() {
             <div className="mt-6">
               <Button variant="secondary" size="sm" asChild>
                 <a
-                  href="https://accounts.prism.syntaxure.dev/user"
+                  href="https://supabase.com/dashboard"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2"

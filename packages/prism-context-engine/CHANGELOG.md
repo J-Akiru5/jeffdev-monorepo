@@ -2,6 +2,41 @@
 
 All notable changes to the Prism CLI will be documented in this file.
 
+## [1.1.2] - 2026-05-30
+
+### 🐛 Bug Fixes
+
+- **Fixed `import.meta.dirname` crash on Node 20** — replaced with `fileURLToPath` + `dirname` polyfill for compatibility with Node 20 LTS
+- **Synced Commander version string** — `prism --version` now correctly shows the package version instead of stale `1.0.3`
+- Fixed MCP Server README Quick Start commands referencing wrong package name
+- Fixed stale Clerk references in Engine settings page
+
+### ✨ Improvements
+
+- Added MIT LICENSE file for npm publishing
+- Added `.gitignore` to `apps/prism-mcp-server/` with stale artifact patterns
+- Renamed package directory from `prism-cli` to `prism-context-engine` for consistency with npm package name
+- Updated CI workflow and AGENTS.md to reflect new directory name
+- Created reusable `ComingSoon` component for unfinished features
+- Replaced AI Skill Generator `alert()` stub with ComingSoon page
+- Updated PayPal checkout route to show "coming soon" message instead of error
+- Cleaned stale compiled artifacts from `apps/prism-mcp-server/src/lib/`
+- Updated MCP server `tsconfig.json` to exclude test files from build output
+- Cleaned dead `VideoTranscriptSchema` import from integration test
+- Removed unused `eventsource` and `@types/eventsource` dependencies
+
+### 🧪 Testing
+
+- Added 14 new tests for `serve.ts` covering full server decision logic, lite server startup, and edge cases
+- Total CLI tests: 44 passing (up from 26)
+- MCP Server tests: 132 passing (cleaned dead tests)
+
+---
+
+## [1.1.1] - 2026-05-30
+
+---
+
 ## [1.1.0] - 2026-05-19
 
 ### ✨ New Commands

@@ -39,11 +39,7 @@ export const Button: FC<ButtonProps> = ({
   onClick,
 }) => {
   return (
-    <button
-      className={`btn btn-${variant} btn-${size}`}
-      disabled={disabled}
-      onClick={onClick}
-    >
+    <button className={`btn btn-${variant} btn-${size}`} disabled={disabled} onClick={onClick}>
       {children}
     </button>
   );

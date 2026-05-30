@@ -8,15 +8,15 @@
 
 ## Key Commands
 
-| Command                                 | Description                          |
-| --------------------------------------- | ------------------------------------ |
-| `pnpm install`                          | Install all workspace deps           |
+| Command                                    | Description                                           |
+| ------------------------------------------ | ----------------------------------------------------- |
+| `pnpm install`                             | Install all workspace deps                            |
 | `doppler run -- turbo dev --concurrency=2` | Start up to 2 apps concurrently (secrets via Doppler) |
-| `doppler run -- turbo build`               | Build all apps/packages              |
-| `turbo run lint`                        | ESLint all workspaces                |
-| `turbo run check-types`                 | TypeScript check all workspaces      |
-| `turbo run test`                        | Run all tests                        |
-| `prettier --write \"**/*.{ts,tsx,md}\"` | Format code                          |
+| `doppler run -- turbo build`               | Build all apps/packages                               |
+| `turbo run lint`                           | ESLint all workspaces                                 |
+| `turbo run check-types`                    | TypeScript check all workspaces                       |
+| `turbo run test`                           | Run all tests                                         |
+| `prettier --write \"**/*.{ts,tsx,md}\"`    | Format code                                           |
 
 CI order: `check-types` → `lint` → `test` → `build`. Run in that sequence before pushing.
 
@@ -50,7 +50,7 @@ CI order: `check-types` → `lint` → `test` → `build`. Run in that sequence 
 ## Testing
 
 - **Unit tests:** Vitest. **E2E:** Playwright.
-- MCP server must be built before CLI tests: `pnpm --filter prism-context-engine run build`.
+- MCP server must be built before CLI tests: `pnpm --filter prism-mcp-server run build`.
 - DB integration tests skip if `MONGODB_URI` not set (`.skipIf` pattern).
 - Focused test: `pnpm --filter <package> run test` (e.g., `pnpm --filter prism-mcp-server run test`).
 

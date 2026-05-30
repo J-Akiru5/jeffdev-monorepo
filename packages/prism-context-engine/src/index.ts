@@ -69,7 +69,7 @@ const program = new Command();
 program
   .name("prism")
   .description("Prism Context Engine CLI - Context Governance for LLMs")
-  .version("1.0.3");
+  .version("1.1.2");
 
 program
   .command("login")

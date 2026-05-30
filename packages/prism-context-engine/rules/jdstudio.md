@@ -56,9 +56,7 @@ The JDStudio design system embodies the "Void" aesthetic - a universe of #050505
 ```jsx
 <button className="group relative overflow-hidden rounded-md border border-white/10 bg-black/20 px-6 py-2 transition-all hover:border-white/20 active:scale-95">
   <div className="absolute inset-0 -z-10 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 opacity-0 transition-opacity group-hover:opacity-100" />
-  <span className="font-mono text-sm uppercase tracking-wider text-white">
-    Execute_
-  </span>
+  <span className="font-mono text-sm uppercase tracking-wider text-white">Execute_</span>
 </button>
 ```
 

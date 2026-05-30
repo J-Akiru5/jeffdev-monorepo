@@ -125,7 +125,7 @@ export async function sync(options?: {
   ).start();
 
   try {
-    let synced = { rules: 0, projects: 0, brands: 0, components: 0 };
+    const synced = { rules: 0, projects: 0, brands: 0, components: 0 };
 
     if (!existsSync(DATA_DIR)) mkdirSync(DATA_DIR, { recursive: true });
 

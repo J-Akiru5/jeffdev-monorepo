@@ -71,13 +71,13 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // PRODUCTION: Redirect to PayPal (TODO: implement full flow)
+  // PRODUCTION: Payment integration coming soon
   const url = new URL("/subscription", request.url);
   url.searchParams.set("checkout", tier);
   url.searchParams.set("status", "pending");
   url.searchParams.set(
     "message",
-    "PayPal checkout not yet configured. Contact support.",
+    "Payment integration is coming soon. Enjoy Pro features free during the beta period.",
   );
 
   return NextResponse.redirect(url);

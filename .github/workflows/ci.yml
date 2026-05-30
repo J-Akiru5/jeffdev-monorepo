@@ -126,7 +126,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [prism-cli, prism-mcp-server]
+        package: [prism-context-engine, prism-mcp-server]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -149,10 +149,10 @@ jobs:
           key: turbo-${{ github.sha }}
       - run: pnpm install --frozen-lockfile --prefer-offline
 
-      # prism-cli depends on prism-context-engine — build it first
-      - name: Build prism-context-engine (prism-cli dependency)
-        if: matrix.package == 'prism-cli'
-        run: pnpm --filter prism-context-engine run build
+      # prism-context-engine depends on prism-mcp-server — build it first
+      - name: Build prism-mcp-server (prism-context-engine dependency)
+        if: matrix.package == 'prism-context-engine'
+        run: pnpm --filter prism-mcp-server run build
 
       - name: Run tests
         run: pnpm --filter ${{ matrix.package }} run test -- --reporter=verbose

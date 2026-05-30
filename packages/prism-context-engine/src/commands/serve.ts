@@ -28,15 +28,19 @@ import {
   InitializeRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { spawnSync, spawn, type ChildProcess } from "child_process";
-import { join } from "path";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import { homedir } from "os";
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from "fs";
 import { randomUUID } from "crypto";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const PRISM_DIR = join(homedir(), ".prism");
 const RULES_CACHE = join(PRISM_DIR, "rules", "rules.json");
 const MCP_SERVER_SCRIPT = join(
-  import.meta.dirname,
+  __dirname,
   "..",
   "..",
   "..",
@@ -49,7 +53,7 @@ const MCP_SERVER_SCRIPT = join(
 
 // Try to find the built JS version first
 const MCP_SERVER_BUILT = join(
-  import.meta.dirname,
+  __dirname,
   "..",
   "..",
   "..",
@@ -65,7 +69,7 @@ function loadEnvFile(): void {
   const envPaths = [
     join(homedir(), ".prism", ".env"), // user-local
     join(process.cwd(), ".env"), // project-local
-    join(import.meta.dirname, "..", "..", "..", "..", ".env"), // monorepo root
+    join(__dirname, "..", "..", "..", "..", ".env"), // monorepo root
   ];
   for (const envPath of envPaths) {
     if (!existsSync(envPath)) continue;
@@ -151,7 +155,7 @@ async function tryFullServer(): Promise<ChildProcess | null> {
     // Find tsx CLI
     const tsxPaths = [
       join(
-        import.meta.dirname,
+        __dirname,
         "..",
         "..",
         "..",
@@ -165,7 +169,7 @@ async function tryFullServer(): Promise<ChildProcess | null> {
         "cli.mjs",
       ),
       join(
-        import.meta.dirname,
+        __dirname,
         "..",
         "..",
         "..",
@@ -197,7 +201,7 @@ async function tryFullServer(): Promise<ChildProcess | null> {
       stdio: ["pipe", "pipe", "pipe"],
       env: { ...process.env },
       cwd: join(
-        import.meta.dirname,
+        __dirname,
         "..",
         "..",
         "..",

@@ -88,8 +88,8 @@ export async function kitchenAnalyze(options: AnalyzeOptions): Promise<void> {
     allRelevant.length - Math.floor(budget / 100),
   );
 
-  let summarized: string[] = [];
-  let kept: string[] = [];
+  const summarized: string[] = [];
+  const kept: string[] = [];
   let runningBudget = budget;
 
   for (const section of allRelevant) {
@@ -268,8 +268,8 @@ export async function kitchenTrim(options: TrimOptions): Promise<void> {
   }));
   tokenCounts.sort((a, b) => a.tokens - b.tokens);
 
-  let kept: string[] = [];
-  let removed: string[] = [];
+  const kept: string[] = [];
+  const removed: string[] = [];
   let running = 0;
 
   for (const item of tokenCounts) {

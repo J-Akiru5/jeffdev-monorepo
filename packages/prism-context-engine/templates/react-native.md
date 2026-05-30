@@ -20,13 +20,7 @@ src/
 ## Component Pattern
 
 ```tsx
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  type ViewStyle,
-} from "react-native";
+import { View, Text, StyleSheet, Pressable, type ViewStyle } from "react-native";
 
 interface ButtonProps {
   title: string;
@@ -126,10 +120,7 @@ const styles = StyleSheet.create({
 ### ScrollView
 
 ```tsx
-<ScrollView
-  contentContainerStyle={styles.scrollContent}
-  showsVerticalScrollIndicator={false}
->
+<ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
   {/* Content */}
 </ScrollView>
 ```

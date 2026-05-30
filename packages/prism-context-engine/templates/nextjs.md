@@ -67,9 +67,7 @@ export function Counter({ initialCount = 0 }: CounterProps) {
 ```tsx
 // Runs on server - no loading states needed
 async function ProductPage({ params }: { params: { id: string } }) {
-  const product = await fetch(`/api/products/${params.id}`).then((r) =>
-    r.json(),
-  );
+  const product = await fetch(`/api/products/${params.id}`).then((r) => r.json());
 
   return <ProductDetails product={product} />;
 }
@@ -86,10 +84,7 @@ export function SaveButton({ onSave }: { onSave: () => Promise<void> }) {
   const [isPending, startTransition] = useTransition();
 
   return (
-    <button
-      disabled={isPending}
-      onClick={() => startTransition(() => onSave())}
-    >
+    <button disabled={isPending} onClick={() => startTransition(() => onSave())}>
       {isPending ? "Saving..." : "Save"}
     </button>
   );
@@ -173,13 +168,7 @@ export default function Loading() {
 // app/dashboard/error.tsx
 ("use client");
 
-export default function Error({
-  error,
-  reset,
-}: {
-  error: Error;
-  reset: () => void;
-}) {
+export default function Error({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div>
       <h2>Something went wrong!</h2>
