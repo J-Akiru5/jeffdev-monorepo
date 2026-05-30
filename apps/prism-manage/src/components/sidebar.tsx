@@ -40,8 +40,9 @@ import {
 import { useTheme } from "next-themes";
 import { useProjects } from "@/contexts/project-context";
 import { useWorkspaceStore } from "@/stores/workspace-store";
-import { RealtimeClock } from "@/components/realtime-clock";
+import { RealtimeClock } from "@syntaxure/ui";
 import { PERSONAL_LISTS } from "@/lib/schemas";
+import { getDepartmentColor } from "@/lib/constants";
 import type { Department } from "@/lib/schemas";
 
 interface NavItem {
@@ -74,18 +75,6 @@ function getPersonalListIcon(name: string) {
     "SineAI Guild": Bot,
   };
   return iconMap[name] || FolderKanban;
-}
-
-/** Map department name to a color */
-function getDepartmentColor(name: string): string {
-  const colorMap: Record<string, string> = {
-    Executive: "#8b5cf6",
-    Engineering: "#06b6d4",
-    Operations: "#f59e0b",
-    Marketing: "#10b981",
-    Product: "#3b82f6",
-  };
-  return colorMap[name] || "var(--color-cyan)";
 }
 
 /** Generate a unique id for new lists */

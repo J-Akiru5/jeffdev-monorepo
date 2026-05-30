@@ -15,24 +15,12 @@ import {
   Layers,
 } from "lucide-react";
 import Link from "next/link";
+import {
+  DEPARTMENT_COLORS,
+  DEPARTMENT_DESCRIPTIONS,
+} from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
-
-const DEPARTMENT_COLORS: Record<string, string> = {
-  Executive: "#8b5cf6",
-  Engineering: "#06b6d4",
-  Operations: "#f59e0b",
-  Marketing: "#10b981",
-  Product: "#3b82f6",
-};
-
-const DEPARTMENT_DESCRIPTIONS: Record<string, string> = {
-  Executive: "Strategy, vision & leadership",
-  Engineering: "Building Prism and core infrastructure",
-  Operations: "Agency ops, CRM & client delivery",
-  Marketing: "GTM, content & brand strategy",
-  Product: "Product design, UX & roadmap",
-};
 
 export default async function HQLandingPage() {
   const supabase = await createClient();

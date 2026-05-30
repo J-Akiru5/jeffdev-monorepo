@@ -4,21 +4,22 @@
 
 /*
  * ============================================
- * TRACKER APP - PERSONAL DESIGN SYSTEM
+ * PRISM MANAGE — APP DESIGN TOKENS
  * ============================================
- * Dark-first with light mode support via data-theme="theme-light".
+ * Extends @syntaxure/ui/styles.css with app-specific tokens.
+ * Light mode via html[data-theme="theme-light"] (next-themes).
  */
 
 /* ----------------------------------------
-   CSS CUSTOM PROPERTIES (Design Tokens)
+   CSS CUSTOM PROPERTIES (App Tokens)
    ---------------------------------------- */
 :root {
-  /* Canvas (Backgrounds) */
+  /* Canvas (Backgrounds) — deeper void than shared default */
   --color-surface: #050505;
   --color-elevated: #0a0a0a;
   --color-overlay: rgba(255, 255, 255, 0.02);
-  --color-glass: rgba(10, 10, 10, 0.6);
-  --color-glass-heavy: rgba(10, 10, 10, 0.85);
+
+  /* Glass Opacity Scale — granular steps for sidebar/panels */
   --color-glass-subtle: rgba(255, 255, 255, 0.02);
   --color-glass-04: rgba(255, 255, 255, 0.04);
   --color-glass-05: rgba(255, 255, 255, 0.05);
@@ -28,19 +29,18 @@
   --color-glass-30: rgba(255, 255, 255, 0.30);
   --color-glass-60: rgba(0, 0, 0, 0.60);
 
-  /* Accents (Holographic) */
-  --color-cyan: #06b6d4;
-  --color-purple: #8b5cf6;
-  --color-emerald: #10b981;
+  /* Border Aliases */
+  --color-border: var(--border-subtle);
+  --color-border-active: var(--border-active);
+  --color-border-glow: var(--border-glow);
 
-  /* Borders */
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-active: rgba(255, 255, 255, 0.15);
-  --border-glow: rgba(255, 255, 255, 0.25);
-
-  /* Typography */
-  --tracking-tight: -0.02em;
-  --tracking-mono: -0.01em;
+  /* Semantic Text Colors (dark mode defaults) */
+  --color-text-primary: #ededed;
+  --color-text-secondary: rgba(255, 255, 255, 0.70);
+  --color-text-tertiary: rgba(255, 255, 255, 0.50);
+  --color-text-muted: rgba(255, 255, 255, 0.40);
+  --color-text-quiet: rgba(255, 255, 255, 0.30);
+  --color-text-faint: rgba(255, 255, 255, 0.20);
 }
 
 /* ── Light Mode ── */
@@ -48,8 +48,7 @@ html[data-theme="theme-light"] {
   --color-surface: #f5f5f0;
   --color-elevated: #ffffff;
   --color-overlay: rgba(0, 0, 0, 0.02);
-  --color-glass: rgba(255, 255, 255, 0.6);
-  --color-glass-heavy: rgba(255, 255, 255, 0.85);
+
   --color-glass-subtle: rgba(0, 0, 0, 0.02);
   --color-glass-04: rgba(0, 0, 0, 0.04);
   --color-glass-05: rgba(0, 0, 0, 0.05);
@@ -79,19 +78,6 @@ html[data-theme="theme-light"] {
 /* ── Legacy: keep bg-void as alias during migration ── */
 :root {
   --color-void: var(--color-surface);
-
-  /* Border CSS variable aliases */
-  --color-border: var(--border-subtle);
-  --color-border-active: var(--border-active);
-  --color-border-glow: var(--border-glow);
-  
-  /* Semantic text colors (dark mode defaults) */
-  --color-text-primary: #ededed;
-  --color-text-secondary: rgba(255, 255, 255, 0.70);
-  --color-text-tertiary: rgba(255, 255, 255, 0.50);
-  --color-text-muted: rgba(255, 255, 255, 0.40);
-  --color-text-quiet: rgba(255, 255, 255, 0.30);
-  --color-text-faint: rgba(255, 255, 255, 0.20);
 }
 
 /* ----------------------------------------
@@ -103,8 +89,6 @@ html[data-theme="theme-light"] {
   --color-elevated: var(--color-elevated);
   --color-overlay: var(--color-overlay);
   --color-void: var(--color-void);
-  --color-glass: var(--color-glass);
-  --color-glass-heavy: var(--color-glass-heavy);
   --color-glass-subtle: var(--color-glass-subtle);
   --color-glass-04: var(--color-glass-04);
   --color-glass-05: var(--color-glass-05);
@@ -128,37 +112,18 @@ html[data-theme="theme-light"] {
   --color-cyan-accent: var(--color-cyan);
   --color-purple-accent: var(--color-purple);
   --color-emerald-accent: var(--color-emerald);
-
-  /* Fonts (mapped from next/font CSS variables) */
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-mono), ui-monospace, monospace;
 }
 
 /* ----------------------------------------
    GLOBAL BASE STYLES
    ---------------------------------------- */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: auto;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color-scheme: dark;
-}
-
 html[data-theme="theme-light"] {
   color-scheme: light;
 }
 
 body {
   background: var(--color-surface);
-  color: #ededed;
-  font-family: var(--font-sans);
-  line-height: 1.6;
+  color: var(--color-text-primary);
   overflow-x: hidden;
 }
 
@@ -167,91 +132,11 @@ html[data-theme="theme-light"] body {
 }
 
 /* ----------------------------------------
-   PERFORMANCE
+   GLASS MORPHISM — App-Specific Variants
+   (base .glass and .glass-heavy from @syntaxure/ui)
    ---------------------------------------- */
-.gpu {
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
-  will-change: transform;
-}
-
-.lazy-section {
-  content-visibility: auto;
-  contain-intrinsic-size: 1px 3000px;
-}
-
-/* ----------------------------------------
-   REDUCED MOTION
-   ---------------------------------------- */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-
-  .animate-fade-in,
-  .animate-pulse-glow {
-    animation: none !important;
-  }
-}
-
-/* ----------------------------------------
-   SELECTION & FOCUS STATES
-   ---------------------------------------- */
-::selection {
-  background: rgba(6, 182, 212, 0.3);
-  color: white;
-}
-
-:focus-visible {
-  outline: 2px solid var(--color-cyan);
-  outline-offset: 2px;
-}
-
-/* ----------------------------------------
-   SCROLLBAR STYLING (Webkit)
-   ---------------------------------------- */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-surface);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--border-active);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--border-glow);
-}
-
-/* ----------------------------------------
-   GLASS MORPHISM UTILITIES
-   ---------------------------------------- */
-.glass {
-  background: var(--color-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border-subtle);
-}
-
 .glass-subtle {
   background: var(--color-glass-subtle);
-}
-
-.glass-heavy {
-  background: var(--color-glass-heavy);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-active);
 }
 
 /* ----------------------------------------
@@ -259,54 +144,6 @@ html[data-theme="theme-light"] body {
    ---------------------------------------- */
 .overlay {
   background: var(--color-overlay);
-}
-
-/* ----------------------------------------
-   TYPOGRAPHY UTILITIES
-   ---------------------------------------- */
-.text-gradient-cyan {
-  background: linear-gradient(135deg, var(--color-cyan), #67e8f9);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.text-gradient-holographic {
-  background: linear-gradient(135deg, var(--color-cyan), var(--color-purple));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* ----------------------------------------
-   ANIMATIONS
-   ---------------------------------------- */
-@keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pulse-glow {
-  0%, 100% {
-    opacity: 0.4;
-  }
-  50% {
-    opacity: 0.8;
-  }
-}
-
-.animate-fade-in {
-  animation: fade-in 0.6s ease-out forwards;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
 }
 
 /* ----------------------------------------
