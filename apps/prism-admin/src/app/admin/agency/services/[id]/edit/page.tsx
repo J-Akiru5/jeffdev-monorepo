@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { ServiceForm } from "@/components/agency/service-form";
-import { deserializeDescription } from "@/app/actions/agency-services";
+import { deserializeDescription } from "@/lib/services-utils";
 
 interface Props {
   params: Promise<{

@@ -1,11 +1,12 @@
 /**
  * Maya Webhook Handler
  *
- * Handles Maya payment events:
- * - checkout.completed: One-time payment success (annual prepay)
- * - subscription.activated: Subscription started (monthly recurring)
- * - subscription.cancelled: Subscription cancelled
- * - subscription.payment.failed: Payment failed
+ * POST /api/webhooks/maya
+ * Handles Maya payment events with:
+ * - Cryptographic signature verification
+ * - Idempotency (dedup via webhook_events table)
+ * - Payment receipt emails
+ * - Audit trail logging
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -18,6 +19,96 @@ import {
 } from "@/lib/maya";
 
 // =============================================================================
+// Idempotency Helpers
+// =============================================================================
+
+async function isEventProcessed(
+  provider: string,
+  eventId: string,
+): Promise<boolean> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
+    const { data } = await supabase
+      .from("webhook_events")
+      .select("id")
+      .eq("provider", provider)
+      .eq("event_id", eventId)
+      .single();
+    return !!data;
+  } catch {
+    return false;
+  }
+}
+
+async function markEventProcessing(
+  provider: string,
+  eventId: string,
+  eventType: string,
+  payload: unknown,
+): Promise<void> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
+    await supabase.from("webhook_events").upsert(
+      {
+        provider,
+        event_id: eventId,
+        event_type: eventType,
+        payload,
+        status: "processing",
+        created_at: new Date().toISOString(),
+      },
+      { onConflict: "provider,event_id" },
+    );
+  } catch (error) {
+    console.error("[webhook] Failed to mark event processing:", error);
+  }
+}
+
+async function markEventCompleted(
+  provider: string,
+  eventId: string,
+): Promise<void> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
+    await supabase
+      .from("webhook_events")
+      .update({
+        status: "completed",
+        processed_at: new Date().toISOString(),
+      })
+      .eq("provider", provider)
+      .eq("event_id", eventId);
+  } catch (error) {
+    console.error("[webhook] Failed to mark event completed:", error);
+  }
+}
+
+async function markEventFailed(
+  provider: string,
+  eventId: string,
+  errorMsg: string,
+): Promise<void> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
+    await supabase
+      .from("webhook_events")
+      .update({
+        status: "failed",
+        error: errorMsg,
+        processed_at: new Date().toISOString(),
+      })
+      .eq("provider", provider)
+      .eq("event_id", eventId);
+  } catch (error) {
+    console.error("[webhook] Failed to mark event failed:", error);
+  }
+}
+
+// =============================================================================
 // POST Handler
 // =============================================================================
 
@@ -26,7 +117,7 @@ export async function POST(request: NextRequest) {
     const body = await request.text();
     const signature = request.headers.get("maya-signature") || "";
 
-    // Verify webhook signature
+    // 1. Verify webhook signature
     if (!verifyMayaWebhook(body, signature)) {
       console.error("[MAYA WEBHOOK] Invalid signature");
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
@@ -35,28 +126,48 @@ export async function POST(request: NextRequest) {
     const payload = parseMayaWebhook(body);
     const eventType = payload.eventType;
     const resource = payload.resource;
+    const eventId = resource.id;
 
-    console.log(`[MAYA WEBHOOK] Event: ${eventType}, ID: ${resource.id}`);
+    console.log(`[MAYA WEBHOOK] Event: ${eventType}, ID: ${eventId}`);
+
+    // 2. Check idempotency
+    if (await isEventProcessed("maya", eventId)) {
+      console.log(`[MAYA WEBHOOK] Duplicate event ${eventId}, skipping`);
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+
+    // 3. Mark as processing
+    await markEventProcessing("maya", eventId, eventType, payload);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const supabase = getAdminClient() as any;
 
-    switch (eventType) {
-      case "CHECKOUT.SUCCESSFUL":
-      case "CHECKOUT.FAILED": {
-        await handleCheckoutEvent(supabase, resource, eventType);
-        break;
+    // 4. Process event
+    try {
+      switch (eventType) {
+        case "CHECKOUT.SUCCESSFUL":
+        case "CHECKOUT.FAILED": {
+          await handleCheckoutEvent(supabase, resource, eventType);
+          break;
+        }
+
+        case "SUBSCRIPTION.ACTIVATED":
+        case "SUBSCRIPTION.CANCELLED":
+        case "SUBSCRIPTION.PAYMENT.FAILED": {
+          await handleSubscriptionEvent(supabase, resource, eventType);
+          break;
+        }
+
+        default:
+          console.log(`[MAYA WEBHOOK] Unhandled event type: ${eventType}`);
       }
 
-      case "SUBSCRIPTION.ACTIVATED":
-      case "SUBSCRIPTION.CANCELLED":
-      case "SUBSCRIPTION.PAYMENT.FAILED": {
-        await handleSubscriptionEvent(supabase, resource, eventType);
-        break;
-      }
-
-      default:
-        console.log(`[MAYA WEBHOOK] Unhandled event type: ${eventType}`);
+      // 5. Mark as completed
+      await markEventCompleted("maya", eventId);
+    } catch (error) {
+      const errMsg = error instanceof Error ? error.message : "Unknown error";
+      await markEventFailed("maya", eventId, errMsg);
+      throw error;
     }
 
     return NextResponse.json({ received: true });
@@ -189,7 +300,7 @@ async function sendPaymentConfirmationEmail(
 
   await sendEmail({
     to: contract.client_email,
-    subject: `✅ Payment Confirmed - ${templateName}`,
+    subject: `Payment Confirmed - ${templateName}`,
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #10b981;">Payment Confirmed!</h2>
@@ -198,6 +309,7 @@ async function sendPaymentConfirmationEmail(
           <p><strong>Product:</strong> ${templateName}</p>
           <p><strong>Plan:</strong> ${termLabel}</p>
           <p><strong>Amount:</strong> ₱${contract.amount.toLocaleString()}/${contract.billing_cycle === "monthly" ? "mo" : "yr"}</p>
+          <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
         </div>
         <p>We'll send you onboarding instructions shortly.</p>
       </div>
@@ -218,7 +330,7 @@ async function sendPaymentFailureEmail(referenceId: string) {
 
   await sendEmail({
     to: contract.client_email,
-    subject: "⚠️ Payment Failed - Action Required",
+    subject: "Payment Failed - Action Required",
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #ef4444;">Payment Failed</h2>
@@ -246,7 +358,7 @@ async function sendCancellationEmail(subscriptionId: string) {
 
   await sendEmail({
     to: contract.client_email,
-    subject: "📋 Subscription Cancelled",
+    subject: "Subscription Cancelled",
     html: `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
         <h2>Subscription Cancelled</h2>

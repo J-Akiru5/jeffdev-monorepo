@@ -79,7 +79,11 @@
     "SUPPORT_EMAIL",
     "VERCEL_ENV",
     "BASE_URL",
-    "npm_package_version"
+    "npm_package_version",
+    "DATABASE_PASSWORD",
+    "NPM_TOKEN",
+    "UPSTASH_REDIS_REST_TOKEN",
+    "UPSTASH_REDIS_REST_URL"
   ],
   "tasks": {
     "build": {

@@ -2,7 +2,8 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { ArrowLeft, Plus, Edit2, Trash2, ShieldAlert } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { deserializeDescription, deleteAgencyService } from "@/app/actions/agency-services";
+import { deleteAgencyService } from "@/app/actions/agency-services";
+import { deserializeDescription } from "@/lib/services-utils";
 import { revalidatePath } from "next/cache";
 
 export default async function ServicesPage() {
