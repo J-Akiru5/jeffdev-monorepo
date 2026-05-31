@@ -98,7 +98,7 @@ export default function ProductDetailContent({
   );
   const [needsCustomization, setNeedsCustomization] = useState(false);
 
-  const catConfig = categoryConfig[template.category] || categoryConfig.template;
+  const catConfig = (categoryConfig[template.category] || categoryConfig.template)!;
 
   const formatPrice = (php: number, usd: number) => {
     return `₱${php.toLocaleString()} / $${usd.toLocaleString()}`;

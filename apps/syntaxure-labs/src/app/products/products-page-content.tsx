@@ -162,7 +162,7 @@ export default function ProductsPageContent({
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {filteredTemplates.map((template) => {
-                const catConfig = categoryConfig[template.category] || categoryConfig.template;
+                const catConfig = (categoryConfig[template.category] || categoryConfig.template)!;
                 const lowestPrice = getLowestPrice(template.id);
 
                 return (

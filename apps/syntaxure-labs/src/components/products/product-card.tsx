@@ -57,7 +57,7 @@ export function ProductCard({
   highlighted,
   lowestPrice,
 }: ProductCardProps) {
-  const catConfig = categoryConfig[category] || categoryConfig.template;
+  const catConfig = (categoryConfig[category] || categoryConfig.template)!;
 
   const formatPrice = (php: number, usd: number) => {
     return `₱${php.toLocaleString()} / $${usd.toLocaleString()}`;

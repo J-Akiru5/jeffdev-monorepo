@@ -13,7 +13,7 @@ import { Footer } from "@/components/layout/footer";
 function SuccessContent({
   searchParams,
 }: {
-  searchParams: Promise<{ ref?: string }>;
+  searchParams: { ref?: string };
 }) {
   return (
     <main className="flex min-h-screen items-center justify-center px-6 pt-24">

@@ -117,7 +117,7 @@ export function ProductComparison({
           {templates.map((template) => {
             const isSelected = selectedIds.includes(template.id);
             const catConfig =
-              categoryConfig[template.category] || categoryConfig.template;
+              (categoryConfig[template.category] || categoryConfig.template)!;
 
             return (
               <button
@@ -154,7 +154,7 @@ export function ProductComparison({
                 </th>
                 {selectedTemplates.map((template) => {
                   const catConfig =
-                    categoryConfig[template.category] || categoryConfig.template;
+                    (categoryConfig[template.category] || categoryConfig.template)!;
                   return (
                     <th
                       key={template.id}
