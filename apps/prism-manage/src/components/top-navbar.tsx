@@ -23,7 +23,8 @@ import {
   type CommandPaletteSection,
 } from "@syntaxure/ui";
 import { ManageShortcutsProvider } from "@/components/keyboard-shortcuts-provider";
-import { MANAGE_HELP_SHORTCUTS } from "@/lib/keyboard-shortcuts";
+import { MANAGE_HELP_SHORTCUTS, MODE_TOGGLE_SHORTCUT } from "@/lib/keyboard-shortcuts";
+import { useManageModeStore, type ManageMode } from "@/stores/manage-mode-store";
 import {
   Plus,
   Bell,
@@ -32,11 +33,13 @@ import {
   Box,
   Sparkles,
   Building2,
+  Settings,
   User,
   CheckSquare,
   Calendar as CalendarIcon,
   LayoutGrid,
   Keyboard,
+  GitBranch,
 } from "lucide-react";
 import { WorkspaceSwitcher } from "@/components/workspace-switcher";
 import { useWorkspaceStore } from "@/stores/workspace-store";
@@ -144,6 +147,9 @@ export function TopNavbar() {
   const openHelp = useCallback(() => setHelpOpen(true), []);
   const closeHelp = useCallback(() => setHelpOpen(false), []);
 
+  const manageMode = useManageModeStore((s) => s.mode);
+  const toggleManageMode = useManageModeStore((s) => s.toggleMode);
+
   // ── Build command palette sections ──
 
   const workspaceItems = workspaces.map((ws) => ({
@@ -214,10 +220,64 @@ export function TopNavbar() {
     },
   ];
 
+  const SectionDot = ({ className }: { className?: string }) => (
+    <span className={`h-3 w-3 rounded-full ${className ?? ""}`} />
+  );
+
   const paletteSections: CommandPaletteSection[] = [
-    { id: "workspaces", label: "Workspaces", items: workspaceItems, iconColor: "text-cyan-400" },
-    { id: "views", label: "Views", items: viewItems, iconColor: "text-purple-400" },
-    { id: "actions", label: "Quick Actions", items: actionItems, iconColor: "text-emerald-400" },
+    {
+      id: "general",
+      label: "General",
+      icon: () => <SectionDot className="bg-[var(--text-tertiary)]" />,
+      iconColor: "text-[var(--text-tertiary)]",
+      keywords: ["shared", "common"],
+      items: [
+        {
+          id: "nav-dashboard",
+          label: "Dashboard",
+          description: "Executive overview & KPIs",
+          icon: LayoutDashboard,
+          action: () => {
+            router.push("/dashboard");
+            closePalette();
+          },
+        },
+        {
+          id: "nav-settings",
+          label: "Settings",
+          description: "Account & preferences",
+          icon: Settings,
+          action: () => {
+            router.push("/settings");
+            closePalette();
+          },
+        },
+      ],
+    },
+    {
+      id: "workspaces",
+      label: "Workspaces",
+      icon: () => <SectionDot className="bg-cyan-400" />,
+      keywords: ["switch", "personal", "team"],
+      items: workspaceItems,
+      iconColor: "text-cyan-400",
+    },
+    {
+      id: "views",
+      label: manageMode === "focus" ? "Views" : "Explore",
+      icon: () => <SectionDot className="bg-purple-400" />,
+      keywords: manageMode === "focus" ? ["tasks", "calendar", "kanban"] : ["departments", "projects", "marketing"],
+      items: viewItems,
+      iconColor: "text-purple-400",
+    },
+    {
+      id: "actions",
+      label: "Quick Actions",
+      icon: () => <SectionDot className="bg-emerald-400" />,
+      keywords: ["create", "new", "add"],
+      items: actionItems,
+      iconColor: "text-emerald-400",
+    },
   ];
 
   return (
@@ -228,6 +288,7 @@ export function TopNavbar() {
       }}
       onCommandPalette={openPalette}
       onShowHelp={openHelp}
+      onToggleMode={toggleManageMode}
     >
       <ManageShortcutsProvider>
         <AppTopNavbar
@@ -237,7 +298,23 @@ export function TopNavbar() {
           onToggleTheme={() => setTheme(theme === "dark" || !theme ? "theme-light" : "dark")}
           searchPlaceholder="Search tasks, projects..."
           onSearchClick={openPalette}
-          leftSlot={<WorkspaceSwitcher />}
+          leftSlot={
+            <div className="flex items-center gap-1">
+              <button
+                onClick={toggleManageMode}
+                title={`Switch to ${manageMode === "focus" ? "Workspace" : "Focus"} mode (⌘⇧M)`}
+                className={`flex h-7 items-center gap-1.5 rounded-md px-2 text-[11px] font-medium transition-colors ${
+                  manageMode === "focus"
+                    ? "text-purple-400/70 hover:text-purple-400 hover:bg-purple-400/10"
+                    : "text-amber-400/70 hover:text-amber-400 hover:bg-amber-400/10"
+                }`}
+              >
+                <GitBranch className="h-3 w-3" />
+                <span className="hidden sm:inline capitalize">{manageMode}</span>
+              </button>
+              <WorkspaceSwitcher />
+            </div>
+          }
           rightExtra={
             <div className="flex items-center gap-1">
               <HelpButton onClick={openHelp} />
@@ -258,7 +335,7 @@ export function TopNavbar() {
           open={helpOpen}
           onClose={closeHelp}
           title="Manage Shortcuts"
-          appShortcuts={MANAGE_HELP_SHORTCUTS}
+          appShortcuts={[...MANAGE_HELP_SHORTCUTS, MODE_TOGGLE_SHORTCUT]}
         />
       </ManageShortcutsProvider>
     </KeyboardShortcutsProvider>

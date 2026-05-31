@@ -43,6 +43,16 @@ export const MANAGE_HELP_SHORTCUTS: ShortcutsHelpShortcut[] = [
   { key: "4", meta: true, ctrl: true, description: "Go to Kanban", category: "Manage" },
 ];
 
+/** Shortcut shown in the keyboard help dialog for the mode toggle */
+export const MODE_TOGGLE_SHORTCUT: ShortcutsHelpShortcut = {
+  key: "m",
+  meta: true,
+  shift: true,
+  ctrl: true,
+  description: "Toggle mode (Focus / Workspace)",
+  category: "Manage",
+};
+
 export function getShortcutDisplay(shortcut: KeyboardShortcut): string {
   const isMac = typeof navigator !== "undefined" && navigator.platform.includes("Mac");
   const mod = isMac ? "\u2318" : "Ctrl";

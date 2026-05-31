@@ -278,10 +278,15 @@ export default function DashboardShell({
 
   // ── Engine command palette sections ──
 
+  const SectionDot = ({ className }: { className?: string }) => (
+    <span className={`h-3 w-3 rounded-full ${className ?? ""}`} />
+  );
+
   const engineCommands: CommandPaletteSection[] = [
     {
       id: "nav",
       label: "Navigate",
+      icon: () => <SectionDot className="bg-[var(--text-tertiary)]" />,
       items: NAV.filter((n) => n.href).map((item) => ({
         id: item.label.toLowerCase().replace(/\s+/g, "-"),
         label: item.label,

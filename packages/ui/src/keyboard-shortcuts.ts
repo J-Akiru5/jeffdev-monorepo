@@ -64,12 +64,20 @@ export const SHORTCUT_HELP: KeyboardShortcutDef = {
   description: "Keyboard shortcuts help",
 };
 
+export const SHORTCUT_TOGGLE_MODE: KeyboardShortcutDef = {
+  key: "m",
+  meta: true,
+  shift: true,
+  description: "Toggle sidebar mode",
+};
+
 /** All standard shortcuts, in registration order (first-match wins) */
 export const ALL_SHORTCUTS: KeyboardShortcutDef[] = [
   SHORTCUT_SEARCH,
   SHORTCUT_SIDEBAR,
   SHORTCUT_COMMAND_PALETTE,
   SHORTCUT_HELP,
+  SHORTCUT_TOGGLE_MODE,
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

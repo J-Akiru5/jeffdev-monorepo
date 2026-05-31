@@ -31,6 +31,7 @@ import {
   SHORTCUT_SIDEBAR,
   SHORTCUT_COMMAND_PALETTE,
   SHORTCUT_HELP,
+  SHORTCUT_TOGGLE_MODE,
   matchesShortcut,
 } from "./keyboard-shortcuts";
 
@@ -48,6 +49,9 @@ interface KeyboardShortcutsProviderProps {
 
   /** Called when ⌘⇧/ is pressed — typically opens keyboard shortcuts help */
   onShowHelp?: () => void;
+
+  /** Called when ⌘⇧M is pressed — typically toggles sidebar mode (manage/agency) */
+  onToggleMode?: () => void;
 }
 
 export function KeyboardShortcutsProvider({
@@ -56,6 +60,7 @@ export function KeyboardShortcutsProvider({
   onToggleSidebar,
   onCommandPalette,
   onShowHelp,
+  onToggleMode,
 }: KeyboardShortcutsProviderProps) {
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -96,11 +101,18 @@ export function KeyboardShortcutsProvider({
         onShowHelp();
         return;
       }
+
+      // ⌘⇧M → Toggle sidebar mode
+      if (matchesShortcut(e, SHORTCUT_TOGGLE_MODE) && onToggleMode) {
+        e.preventDefault();
+        onToggleMode();
+        return;
+      }
     }
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [onSearch, onToggleSidebar, onCommandPalette, onShowHelp]);
+  }, [onSearch, onToggleSidebar, onCommandPalette, onShowHelp, onToggleMode]);
 
   return <>{children}</>;
 }

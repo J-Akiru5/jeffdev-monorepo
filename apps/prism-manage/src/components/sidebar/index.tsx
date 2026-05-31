@@ -28,7 +28,8 @@ import {
   Plus,
 } from "lucide-react";
 import { KeyboardShortcutsHelp } from "@syntaxure/ui";
-import { MANAGE_HELP_SHORTCUTS } from "@/lib/keyboard-shortcuts";
+import { MANAGE_HELP_SHORTCUTS, MODE_TOGGLE_SHORTCUT } from "@/lib/keyboard-shortcuts";
+import { useManageModeStore } from "@/stores/manage-mode-store";
 import { useProjects } from "@/contexts/project-context";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { PERSONAL_LISTS } from "@/lib/schemas";
@@ -87,6 +88,8 @@ export function Sidebar() {
   const userRole = useWorkspaceStore((s) => s.userRole);
   const userDepartmentId = useWorkspaceStore((s) => s.userDepartmentId);
   const cLevelTitle = useWorkspaceStore((s) => s.cLevelTitle);
+
+  const manageMode = useManageModeStore((s) => s.mode);
 
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId);
   const isSyntaxureLabs = activeWorkspace?.name === "Syntaxure Labs" || activeWorkspace?.name === "Syntaxure Labs, Inc.";
@@ -189,42 +192,46 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-4">
-        {/* Quick Filters */}
-        <SidebarSection title="Quick Access" collapsed={collapsed}>
-          {quickFilters.map((item) => (
-            <SidebarNavItem
-              key={item.href}
-              label={item.label}
-              href={item.href}
-              icon={item.icon}
-              active={isActive(item.href)}
-              collapsed={collapsed}
-            />
-          ))}
-        </SidebarSection>
+        {/* Quick Filters — Focus mode */}
+        {manageMode === "focus" && (
+          <SidebarSection title="Quick Access" collapsed={collapsed}>
+            {quickFilters.map((item) => (
+              <SidebarNavItem
+                key={item.href}
+                label={item.label}
+                href={item.href}
+                icon={item.icon}
+                active={isActive(item.href)}
+                collapsed={collapsed}
+              />
+            ))}
+          </SidebarSection>
+        )}
 
-        {/* Views */}
-        <SidebarSection title="Views" collapsed={collapsed}>
-          {views.map((item) => (
-            <SidebarNavItem
-              key={item.href}
-              label={item.label}
-              href={item.href}
-              icon={item.icon}
-              active={isActive(item.href)}
-              collapsed={collapsed}
-            />
-          ))}
-          {isMarketingMember && (
-            <SidebarNavItem
-              label={marketingItem.label}
-              href={marketingItem.href}
-              icon={marketingItem.icon}
-              active={isActive(marketingItem.href)}
-              collapsed={collapsed}
-            />
-          )}
-        </SidebarSection>
+        {/* Views — Focus mode */}
+        {manageMode === "focus" && (
+          <SidebarSection title="Views" collapsed={collapsed}>
+            {views.map((item) => (
+              <SidebarNavItem
+                key={item.href}
+                label={item.label}
+                href={item.href}
+                icon={item.icon}
+                active={isActive(item.href)}
+                collapsed={collapsed}
+              />
+            ))}
+            {isMarketingMember && (
+              <SidebarNavItem
+                label={marketingItem.label}
+                href={marketingItem.href}
+                icon={marketingItem.icon}
+                active={isActive(marketingItem.href)}
+                collapsed={collapsed}
+              />
+            )}
+          </SidebarSection>
+        )}
 
         {/* Personal Lists */}
         {(isPersonal || !activeWorkspace) && (
@@ -295,6 +302,23 @@ export function Sidebar() {
             {renderProjectLists()}
           </SidebarSection>
         )}
+
+        {/* Mode indicator in sidebar footer */}
+        <div className="border-t border-white/[0.06] px-4 py-3">
+          <button
+            onClick={() => useManageModeStore.getState().toggleMode()}
+            className="flex w-full items-center gap-2 text-[11px] text-[var(--text-tertiary)] transition-colors hover:text-[var(--text-primary)]"
+            title={`Switch to ${manageMode === "focus" ? "Workspace" : "Focus"} mode (⌘⇧M)`}
+          >
+            <span
+              className={`h-2 w-2 rounded-full ${
+                manageMode === "focus" ? "bg-purple-400" : "bg-amber-400"
+              }`}
+            />
+            <span className="capitalize">{manageMode} mode</span>
+            <span className="text-[10px] text-[var(--text-tertiary)]/50">⌘⇧M</span>
+          </button>
+        </div>
       </nav>
 
       {/* Bottom Section */}
@@ -305,7 +329,7 @@ export function Sidebar() {
         open={helpOpen}
         onClose={() => setHelpOpen(false)}
         title="Manage Shortcuts"
-        appShortcuts={MANAGE_HELP_SHORTCUTS}
+        appShortcuts={[...MANAGE_HELP_SHORTCUTS, MODE_TOGGLE_SHORTCUT]}
       />
     </aside>
   );
