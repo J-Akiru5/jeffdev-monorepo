@@ -14,7 +14,12 @@ fi
 #    (replaces deprecated turbo-ignore package)
 echo "Checking for changes in apps/syntaxure-labs and its workspace dependencies..."
 
-BASE="${VERCEL_GIT_PREVIOUS_DEPLOY_SHA:-HEAD^1}"
+if [ -z "$VERCEL_GIT_PREVIOUS_DEPLOY_SHA" ]; then
+  echo "⚠️  VERCEL_GIT_PREVIOUS_DEPLOY_SHA is not set (e.g. first deployment) — proceeding with build to be safe."
+  exit 1;
+fi
+
+BASE="$VERCEL_GIT_PREVIOUS_DEPLOY_SHA"
 
 # Run turbo dry-run to detect changes; if turbo itself fails, proceed with build (fail-safe)
 OUTPUT=$(npx -y turbo@^2.7.2 run build --filter="syntaxure-labs...[${BASE}]" --dry=json 2>&1) || {
