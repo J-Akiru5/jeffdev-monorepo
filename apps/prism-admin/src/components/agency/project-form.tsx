@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ImageUpload } from "@syntaxure/ui";
+import { uploadToStorage } from "@/app/actions/storage";
 import { createAgencyProject, updateAgencyProject } from "@/app/actions/agency-projects";
 import type { ProjectFormData } from "@/app/actions/agency-projects";
 
@@ -35,6 +37,7 @@ export function ProjectForm({ mode, defaultValues }: Props) {
     deadline: defaultValues?.deadline || "",
     budget: defaultValues?.budget ?? undefined,
     published: defaultValues?.published || false,
+    image: defaultValues?.image || null,
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -49,7 +52,7 @@ export function ProjectForm({ mode, defaultValues }: Props) {
       results: defaultValues?.results || [],
       technologies: defaultValues?.technologies || [],
       testimonial: defaultValues?.testimonial || null,
-      image: defaultValues?.image || null,
+      image: form.image || null,
       featured: defaultValues?.featured || false,
       published: form.published,
       order: defaultValues?.order || 0,
@@ -223,6 +226,25 @@ export function ProjectForm({ mode, defaultValues }: Props) {
               If enabled, this project will be listed publicly on the main Syntaxure Labs `/work` page.
             </p>
           </div>
+        </div>
+
+        <div className="rounded-lg border border-white/5 bg-white/[0.02] p-6 space-y-4">
+          <h3 className="text-sm font-medium text-white/80">Cover Image</h3>
+          <ImageUpload
+            currentImage={form.image}
+            onUpload={async (file) => {
+              const result = await uploadToStorage(file, "projects");
+              if (result.success && result.url) {
+                setForm((f) => ({ ...f, image: result.url! }));
+                return { url: result.url };
+              }
+              return { url: "", error: result.error };
+            }}
+            onRemove={async () => {
+              setForm((f) => ({ ...f, image: null }));
+              return { success: true };
+            }}
+          />
         </div>
       </div>
 

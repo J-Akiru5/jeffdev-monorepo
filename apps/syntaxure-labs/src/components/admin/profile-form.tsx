@@ -9,7 +9,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Camera,
   Loader2,
   Save,
   ExternalLink,
@@ -21,6 +20,8 @@ import {
   GithubIcon as Github,
   TwitterIcon as Twitter,
 } from "@/components/icons/brand-icons";
+import { ImageUpload } from "@syntaxure/ui";
+import { uploadFile } from "@/app/actions/upload";
 import { updateUserProfile, checkUsernameAvailable } from "@/app/actions/users";
 import type { UserProfile } from "@/types/user";
 import { toast } from "sonner";
@@ -118,31 +119,25 @@ export function ProfileForm({ profile }: ProfileFormProps) {
     }
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const handleImageUpload = async (file: File): Promise<{ url: string; error?: string }> => {
     const toastId = toast.loading("Uploading image...");
 
     try {
-      // Create FormData
       const formData = new FormData();
       formData.append("file", file);
-
-      // Upload via Server Action (Proxy to bypass CORS)
-      const { uploadFile } = await import("@/app/actions/upload");
       const result = await uploadFile(formData);
 
-      if (!result.success || !result.url) {
-        throw new Error(result.error || "Upload failed");
+      if (result.success && result.url) {
+        setFormData((prev) => ({ ...prev, photoURL: result.url! }));
+        toast.success("Image uploaded successfully", { id: toastId });
+        return { url: result.url };
       }
 
-      // Update State
-      setFormData((prev) => ({ ...prev, photoURL: result.url! }));
-      toast.success("Image uploaded successfully", { id: toastId });
+      throw new Error(result.error || "Upload failed");
     } catch (error) {
       console.error(error);
       toast.error("Failed to upload image", { id: toastId });
+      return { url: "", error: error instanceof Error ? error.message : "Upload failed" };
     }
   };
 
@@ -171,36 +166,21 @@ export function ProfileForm({ profile }: ProfileFormProps) {
         <SetupGuide profile={profile} />
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Profile Photo */}
-          <div className="flex items-center gap-6">
-            <div className="relative">
-              <div className="h-24 w-24 rounded-full bg-white/10 overflow-hidden border border-white/10">
-                {formData.photoURL ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={formData.photoURL}
-                    alt={formData.displayName}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="h-full w-full flex items-center justify-center text-3xl font-bold text-white/40">
-                    {formData.displayName?.charAt(0) || "?"}
-                  </div>
-                )}
-              </div>
-              <label
-                className="absolute -bottom-1 -right-1 rounded-full bg-cyan-500 p-2 text-white shadow-lg transition-transform hover:scale-110 cursor-pointer"
-                title="Upload Photo"
-              >
-                <Camera className="h-4 w-4" />
-                <input
-                  type="file"
-                  accept="image/png, image/jpeg, image/webp"
-                  className="hidden"
-                  onChange={handleImageUpload}
-                />
-              </label>
+          <div className="flex items-start gap-6">
+            <div className="w-48 shrink-0">
+              <ImageUpload
+                currentImage={formData.photoURL || null}
+                onUpload={handleImageUpload}
+                onRemove={async () => {
+                  setFormData((prev) => ({ ...prev, photoURL: "" }));
+                  return { success: true };
+                }}
+                label=""
+                previewHeight="h-24"
+                hint="PNG, JPG or WebP"
+              />
             </div>
-            <div>
+            <div className="pt-2">
               <h3 className="font-medium text-white">
                 {formData.displayName || "Your Name"}
               </h3>

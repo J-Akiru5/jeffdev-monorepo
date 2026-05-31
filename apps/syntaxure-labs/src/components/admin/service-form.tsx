@@ -2,9 +2,11 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Save, ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { Loader2, Save, ArrowLeft, Plus, Trash2, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { ImageUpload } from "@syntaxure/ui";
+import { uploadFile } from "@/app/actions/upload";
 import { createService, updateService } from "@/app/actions/services";
 import type { Service, PricingTier, ServiceTierPricing } from "@/types/services";
 
@@ -37,6 +39,7 @@ export function ServiceForm({ mode, initialData }: ServiceFormProps) {
   const [pricing, setPricing] = useState<ServiceTierPricing[]>(
     initialData?.pricing ?? [defaultPricing]
   );
+  const [image, setImage] = useState<string | undefined>(initialData?.image);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +50,7 @@ export function ServiceForm({ mode, initialData }: ServiceFormProps) {
         tagline,
         description,
         icon,
+        image: image ?? undefined,
         status,
         highlights: highlights.filter(Boolean),
         pricing: pricing.map((p) => ({
@@ -190,6 +194,32 @@ export function ServiceForm({ mode, initialData }: ServiceFormProps) {
               placeholder="Full description of the service..."
             />
           </div>
+        </section>
+
+        {/* Cover Image */}
+        <section className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
+          <h2 className="mb-4 font-semibold text-white">
+            <ImageIcon className="mr-2 inline h-4 w-4" />
+            Cover Image
+          </h2>
+          <ImageUpload
+            currentImage={image}
+            onUpload={async (file) => {
+              const formData = new FormData();
+              formData.append("file", file);
+              const result = await uploadFile(formData);
+              if (result.success && result.url) {
+                setImage(result.url);
+                return { url: result.url };
+              }
+              return { url: "", error: result.error };
+            }}
+            onRemove={async () => {
+              setImage(undefined);
+              return { success: true };
+            }}
+            label="Service Cover Image"
+          />
         </section>
 
         {/* Highlights */}

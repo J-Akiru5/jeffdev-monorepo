@@ -12,8 +12,9 @@ import { useRouter } from "next/navigation";
 import { Plus, Trash2, Loader2, Save, ArrowLeft, X } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { ImageUpload } from "@syntaxure/ui";
+import { uploadFile } from "@/app/actions/upload";
 import { createProject, updateProject } from "@/app/actions/projects";
-import { CaseStudyImageUpload } from "./case-study-image-upload";
 import type { FirestoreProject } from "@/types/supabase";
 import type { UserProfile } from "@/types/user";
 
@@ -674,9 +675,23 @@ export function ProjectForm({ mode, initialData, users }: Props) {
         <div className="space-y-6">
           {/* Image Upload */}
           <div className="rounded-md border border-white/[0.08] bg-white/[0.02] p-6">
-            <CaseStudyImageUpload
+            <ImageUpload
               currentImage={formData.image}
-              onImageChange={(url) => updateField("image", url)}
+              onUpload={async (file) => {
+                const formData = new FormData();
+                formData.append("file", file);
+                const result = await uploadFile(formData);
+                if (result.success && result.url) {
+                  updateField("image", result.url);
+                  return { url: result.url };
+                }
+                return { url: "", error: result.error };
+              }}
+              onRemove={async () => {
+                updateField("image", null);
+                return { success: true };
+              }}
+              label="Cover Image"
             />
           </div>
 

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ImageUpload } from "@syntaxure/ui";
+import { uploadToStorage } from "@/app/actions/storage";
 import { createAgencyService, updateAgencyService } from "@/app/actions/agency-services";
 import type { ServiceFormData } from "@/app/actions/agency-services";
 
@@ -178,16 +180,22 @@ export function ServiceForm({ mode, serviceId, defaultValues }: Props) {
           </div>
         </div>
 
-        <div>
-          <label className="block text-xs text-white/50 mb-1">Cover Image URL</label>
-          <input
-            type="url"
-            value={form.coverImage}
-            onChange={(e) => setForm((f) => ({ ...f, coverImage: e.target.value }))}
-            className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-cyan-500/50 font-mono"
-            placeholder="https://example.com/images/cover.jpg"
-          />
-        </div>
+        <ImageUpload
+          currentImage={form.coverImage || null}
+          onUpload={async (file) => {
+            const result = await uploadToStorage(file, "services");
+            if (result.success && result.url) {
+              setForm((f) => ({ ...f, coverImage: result.url! }));
+              return { url: result.url };
+            }
+            return { url: "", error: result.error };
+          }}
+          onRemove={async () => {
+            setForm((f) => ({ ...f, coverImage: "" }));
+            return { success: true };
+          }}
+          label="Cover Image"
+        />
       </div>
 
       <div className="flex items-center gap-3">

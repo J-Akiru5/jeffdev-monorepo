@@ -13,6 +13,7 @@
     "./data-table": "./src/data-table.tsx",
     "./chat-assistant": "./src/chat-assistant.tsx",
     "./page-container": "./src/page-container.tsx",
+    "./image-upload": "./src/image-upload.tsx",
     "./styles.css": "./src/styles.css"
   },
   "scripts": {

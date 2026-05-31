@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ImageUpload } from "@syntaxure/ui";
 import { updateAgencyUserProfile } from "@/app/actions/agency-users";
+import { uploadToStorage } from "@/app/actions/storage";
 import type { UserProfile } from "@/app/actions/agency-users";
 
 /**
  * Profile Form Component
  * -----------------------
- * Edit user profile settings.
+ * Edit user profile settings with avatar upload.
  */
 
 interface Props {
@@ -29,6 +31,7 @@ export function ProfileForm({ profile, uid }: Props) {
     title: profile?.title || "",
     location: profile?.location || "",
     timezone: profile?.timezone || "UTC",
+    photoURL: profile?.photoURL || "",
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -59,6 +62,28 @@ export function ProfileForm({ profile, uid }: Props) {
           Profile updated successfully
         </div>
       )}
+
+      {/* Avatar Upload */}
+      <div className="rounded-lg border border-white/5 bg-white/[0.02] p-6 space-y-4">
+        <h3 className="text-sm font-medium text-white/80">Profile Photo</h3>
+        <ImageUpload
+          currentImage={form.photoURL || null}
+          onUpload={async (file) => {
+            const result = await uploadToStorage(file, "avatars");
+            if (result.success && result.url) {
+              setForm((f) => ({ ...f, photoURL: result.url! }));
+              return { url: result.url };
+            }
+            return { url: "", error: result.error };
+          }}
+          onRemove={async () => {
+            setForm((f) => ({ ...f, photoURL: "" }));
+            return { success: true };
+          }}
+          label="Upload Photo"
+          previewHeight="h-40"
+        />
+      </div>
 
       <div className="rounded-lg border border-white/5 bg-white/[0.02] p-6 space-y-4">
         <h3 className="text-sm font-medium text-white/80">Personal Info</h3>
