@@ -65,6 +65,9 @@ importers:
 
   apps/prism-admin:
     dependencies:
+      "@google/generative-ai":
+        specifier: ^0.24.1
+        version: 0.24.1
       "@supabase/ssr":
         specifier: ^0.10.0
         version: 0.10.3(@supabase/supabase-js@2.106.1)
@@ -5647,7 +5650,6 @@ packages:
         integrity: sha512-YYTXSFulfwytnjAPlw8QHncHJmlvFKtczb8InXaAx9Q0LbfDnfEYDE55omerIJKihhmU61Ft+cAOSzQVaBUmeA==,
       }
     engines: { node: ^10 || ^12 || >=14 }
-    hasBin: true
     peerDependencies:
       postcss: ^8.1.0
 
@@ -7192,7 +7194,6 @@ packages:
       {
         integrity: sha512-82GZUjRS0p/jganf6q1rEO25VSoHH0hKPCTrgillPjdI/3bgBhAE1QzHrHTizjpRvy6pGAvKjDJtk2pF9NDq8w==,
       }
-    hasBin: true
     peerDependencies:
       eslint: ">=7.0.0"
 
@@ -7341,7 +7342,6 @@ packages:
         integrity: sha512-LEyamqS7W5HB3ujJyvi0HQK/dtVINZvd5mAAp9eT5S/ujByGjiZLCzPcHVzuXbpJDJF/cxwHlfceVUDZ2lnSTw==,
       }
     engines: { node: ^18.18.0 || ^20.9.0 || >=21.1.0 }
-    hasBin: true
     peerDependencies:
       jiti: "*"
     peerDependenciesMeta:
@@ -10171,7 +10171,6 @@ packages:
         integrity: sha512-gKSecROqisnV7Buen5BfjmXAm7Xlpx9o2ueVQRo5DxQcjC8d330dOM1xiGWc2k3Dcnz0In3VybyRPOsudwgiqQ==,
       }
     engines: { node: ">=20.9.0" }
-    hasBin: true
     peerDependencies:
       "@opentelemetry/api": ^1.1.0
       "@playwright/test": ^1.51.1
@@ -10389,7 +10388,6 @@ packages:
       {
         integrity: sha512-fZ1uBqjFUjXzbGc35fFtYKEOxd20kd9fDpFeqWtsOZWiubY8CZ1NAlXHW3iathaFvqmNtCWMIsosCuyeI7Joxg==,
       }
-    hasBin: true
     peerDependencies:
       ws: ^8.18.0
       zod: ^3.25 || ^4.0
@@ -12397,7 +12395,6 @@ packages:
       {
         integrity: sha512-f0FFpIdcHgn8zcPSbf1dRevwt047YMnaiJM3u2w2RewrB+fob/zePZcrOyQoLMMO7aBIddLcQIEK5dYjkLnGrQ==,
       }
-    hasBin: true
     peerDependencies:
       "@swc/core": ">=1.2.50"
       "@swc/wasm": ">=1.2.50"
@@ -12698,7 +12695,6 @@ packages:
       {
         integrity: sha512-Js0m9cx+qOgDxo0eMiFGEueWztz+d4+M3rGlmKPT+T4IS/jP4ylw3Nwpu6cpTTP8R1MAC1kF4VbdLt3ARf209w==,
       }
-    hasBin: true
     peerDependencies:
       browserslist: ">= 4.21.0"
 
@@ -12803,7 +12799,6 @@ packages:
         integrity: sha512-w+N7Hifpc3gRjZ63vYBXA56dvvRlNWRczTdmCBBa+CotUzAPf5b7YMdMR/8CQoeYE5LX3W4wj6RYTgonm1b9DA==,
       }
     engines: { node: ^20.19.0 || >=22.12.0 }
-    hasBin: true
     peerDependencies:
       "@types/node": ^20.19.0 || >=22.12.0
       jiti: ">=1.21.0"
@@ -12846,7 +12841,6 @@ packages:
         integrity: sha512-FQMeF0DJdWY0iOnbv466n/0BudNdKj1l5jYgl5JVTwjSsZSlqyXFt/9+1sEyhR6CLowbZpV7O1sCHrzBhucKKg==,
       }
     engines: { node: ^20.0.0 || ^22.0.0 || >=24.0.0 }
-    hasBin: true
     peerDependencies:
       "@edge-runtime/vm": "*"
       "@opentelemetry/api": ^1.9.0
