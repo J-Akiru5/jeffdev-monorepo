@@ -18,6 +18,8 @@ interface Project {
   taskCount: number;
   completedCount: number;
   createdAt: string;
+  published: boolean;
+  publishedSiteUrl?: string | null;
 }
 
 interface Workspace {
@@ -40,6 +42,8 @@ export function ProjectsManager({ initialProjects }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editColor, setEditColor] = useState("");
+  const [editPublished, setEditPublished] = useState(false);
+  const [editPublishedSiteUrl, setEditPublishedSiteUrl] = useState("");
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -64,6 +68,8 @@ export function ProjectsManager({ initialProjects }: Props) {
     setEditingId(p.id);
     setEditName(p.name);
     setEditColor(p.color ?? COLORS[0]!);
+    setEditPublished(p.published ?? false);
+    setEditPublishedSiteUrl(p.publishedSiteUrl ?? "");
     setShowForm(true);
   }
 
@@ -92,13 +98,21 @@ export function ProjectsManager({ initialProjects }: Props) {
     const result = await adminUpdateProject(editingId, {
       name: editName.trim(),
       color: editColor,
+      published: editPublished,
+      publishedSiteUrl: editPublished ? editPublishedSiteUrl || null : null,
     });
 
     if (result.success) {
       setProjects((prev) =>
         prev.map((p) =>
           p.id === editingId
-            ? { ...p, name: editName.trim(), color: editColor }
+            ? {
+                ...p,
+                name: editName.trim(),
+                color: editColor,
+                published: editPublished,
+                publishedSiteUrl: editPublished ? editPublishedSiteUrl || null : null,
+              }
             : p,
         ),
       );
@@ -186,6 +200,52 @@ export function ProjectsManager({ initialProjects }: Props) {
                   ))}
                 </div>
               </div>
+
+              {/* Published Toggle */}
+              <div>
+                <label className="block text-sm text-white/60 mb-1.5">Visibility</label>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setEditPublished((v) => !v)}
+                    className={`relative h-6 w-11 rounded-full transition-colors ${
+                      editPublished ? "bg-emerald-500" : "bg-white/10"
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                        editPublished ? "translate-x-5" : ""
+                      }`}
+                    />
+                  </button>
+                  <span className="text-sm text-white/60">
+                    {editPublished
+                      ? "Published — visible on Syntaxure Labs"
+                      : "Draft — hidden from public"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Published Site URL — only when published */}
+              {editPublished && (
+                <div>
+                  <label className="block text-sm text-white/60 mb-1.5">
+                    Published Site URL
+                  </label>
+                  <input
+                    type="url"
+                    value={editPublishedSiteUrl}
+                    onChange={(e) => setEditPublishedSiteUrl(e.target.value)}
+                    placeholder="https://clientsite.com"
+                    className="w-full rounded-lg border border-white/[0.08] bg-white/5 px-3 py-2
+                               text-sm text-white placeholder:text-white/20 font-mono
+                               focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+                  />
+                  <p className="mt-1 text-xs text-white/30">
+                    The live URL of the delivered product. Shown as a CTA on the case study page.
+                  </p>
+                </div>
+              )}
               <div className="flex gap-3">
                 <button
                   onClick={handleUpdate}
@@ -281,11 +341,29 @@ export function ProjectsManager({ initialProjects }: Props) {
                   style={{ backgroundColor: p.color || "#6366f1" }}
                 />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="text-sm font-medium text-white">{p.name}</h3>
                     <span className="text-[10px] text-white/30 font-mono bg-white/5 px-1.5 py-0.5 rounded">
                       {p.workspaceName}
                     </span>
+                    {p.published && (
+                      <span className="px-1.5 py-0.5 rounded text-[9px] font-mono uppercase
+                                       bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                        live
+                      </span>
+                    )}
+                    {p.publishedSiteUrl && (
+                      <a
+                        href={p.publishedSiteUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-[10px] font-mono text-emerald-400/60 hover:text-emerald-400
+                                   underline underline-offset-2 transition-colors"
+                      >
+                        {p.publishedSiteUrl.replace(/^https?:\/\//, "").split("/")[0]}
+                      </a>
+                    )}
                   </div>
                   <div className="flex items-center gap-3 mt-1 text-xs text-white/40">
                     <span className="flex items-center gap-1">

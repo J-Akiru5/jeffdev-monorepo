@@ -55,6 +55,9 @@ export interface DataProject {
   milestones?: unknown[];
   created_at?: string;
   updated_at?: string;
+  publishedSiteUrl?: string | null; // Live URL of the delivered product
+  user_id?: string;
+  client_email?: string;
 }
 
 export interface DataQuote {
@@ -192,6 +195,7 @@ export async function getProjects(): Promise<DataProject[]> {
             paidAmount: p.budget_spent ? Number(p.budget_spent) : undefined,
             assignedPartner: p.metadata?.assignedPartner || undefined,
             assignedEmployees: p.metadata?.assignedEmployees || [],
+            publishedSiteUrl: p.published_site_url ?? null,
             user_id: p.user_id,
             client_email: p.client_email,
             created_at: p.created_at,
@@ -249,7 +253,8 @@ export async function getProjectBySlug(
       paidAmount: data.budget_spent ? Number(data.budget_spent) : undefined,
       assignedPartner: data.metadata?.assignedPartner || undefined,
       assignedEmployees: data.metadata?.assignedEmployees || [],
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      publishedSiteUrl: data.published_site_url ?? null,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       milestones: (data.milestones || []).map((m: any) => ({
         id: m.id,
         title: m.title,

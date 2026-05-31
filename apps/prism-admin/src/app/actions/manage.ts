@@ -196,6 +196,8 @@ interface EnrichedProject {
   taskCount: number;
   completedCount: number;
   createdAt: string;
+  published: boolean;
+  publishedSiteUrl: string | null;
 }
 
 export async function getAllProjects(): Promise<EnrichedProject[]> {
@@ -231,6 +233,8 @@ export async function getAllProjects(): Promise<EnrichedProject[]> {
           taskCount: count || 0,
           completedCount: completedCount || 0,
           createdAt: p.created_at,
+          published: (p as unknown as Record<string, unknown>).published === true,
+          publishedSiteUrl: ((p as unknown as Record<string, unknown>).published_site_url as string | null) ?? null,
         };
       }),
     );
@@ -274,18 +278,27 @@ export async function adminCreateProject(input: {
 
 export async function adminUpdateProject(
   id: string,
-  input: { name?: string; color?: string },
+  input: {
+    name?: string;
+    color?: string;
+    published?: boolean;
+    publishedSiteUrl?: string | null;
+  },
 ) {
   try {
     const admin = getAdminClient();
     const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
     if (input.name !== undefined) updates.name = input.name;
     if (input.color !== undefined) updates.color = input.color;
+    if (input.published !== undefined) updates.published = input.published;
+    if (input.publishedSiteUrl !== undefined)
+      updates.published_site_url = input.publishedSiteUrl ?? null;
 
     const { error } = await admin.from("projects").update(updates).eq("id", id);
 
     if (error) throw error;
 
+    revalidatePath("/admin/manage-projects");
     revalidatePath("/admin/projects");
     return { success: true };
   } catch (error) {

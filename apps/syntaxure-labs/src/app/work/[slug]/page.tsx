@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowUpRight, Quote } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, ExternalLink, Quote } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { CTASection } from "@/components/sections/cta-section";
@@ -116,6 +116,24 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               <p className="mt-6 text-xl leading-relaxed text-white/60">
                 {activeProject.description}
               </p>
+
+              {/* Live Site CTA — only shown when publishedSiteUrl is set */}
+              {(activeProject as { publishedSiteUrl?: string | null }).publishedSiteUrl && (
+                <div className="mt-8">
+                  <a
+                    href={(activeProject as { publishedSiteUrl?: string | null }).publishedSiteUrl!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-md border border-emerald-500/40
+                               bg-emerald-500/10 px-5 py-2.5 font-mono text-xs uppercase tracking-wider
+                               text-emerald-400 backdrop-blur-md transition-all
+                               hover:border-emerald-400 hover:bg-emerald-500/20 hover:text-white"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    Visit Live Site
+                  </a>
+                </div>
+              )}
             </div>
 
             {/* Results Banner */}
