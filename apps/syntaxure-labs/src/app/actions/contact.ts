@@ -3,8 +3,9 @@
  * ---------------------------
  * Handles contact form submissions:
  * 1. Validates input with Zod
- * 2. Saves to Supabase
- * 3. Sends email notification to contact@syntaxure.dev
+ * 2. Rate limits (1 submission per email per 5 minutes)
+ * 3. Saves to Supabase
+ * 4. Sends email notification to contact@syntaxure.dev
  */
 
 "use server";
@@ -22,10 +23,42 @@ const contactSchema = z.object({
 
 export type ContactFormData = z.infer<typeof contactSchema>;
 
+// Simple in-memory rate limiter: 1 submission per email per 5 minutes
+const rateLimitMap = new Map<string, number>();
+const RATE_LIMIT_MS = 5 * 60 * 1000; // 5 minutes
+
+function isRateLimited(email: string): boolean {
+  const now = Date.now();
+  const lastSubmission = rateLimitMap.get(email);
+  if (lastSubmission && now - lastSubmission < RATE_LIMIT_MS) {
+    return true;
+  }
+  rateLimitMap.set(email, now);
+  return false;
+}
+
+// Clean up old entries every 10 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [email, timestamp] of rateLimitMap.entries()) {
+    if (now - timestamp > RATE_LIMIT_MS * 2) {
+      rateLimitMap.delete(email);
+    }
+  }
+}, 10 * 60 * 1000);
+
 export async function submitContactForm(data: ContactFormData) {
   try {
     // Validate input
     const validated = contactSchema.parse(data);
+
+    // Rate limit check
+    if (isRateLimited(validated.email)) {
+      return {
+        success: false,
+        message: "Too many submissions. Please wait 5 minutes before trying again.",
+      };
+    }
 
     // Save to Supabase
     const supabase = getAdminClient();

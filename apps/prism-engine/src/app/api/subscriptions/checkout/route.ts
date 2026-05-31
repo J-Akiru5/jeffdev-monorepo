@@ -53,10 +53,6 @@ export async function GET(request: NextRequest) {
         { upsert: true },
       );
 
-      console.log(
-        `[DEV MODE] Activated ${tier} subscription for user ${userId}`,
-      );
-
       // Redirect to subscription page with success message
       const url = new URL("/subscription", request.url);
       url.searchParams.set("checkout", tier);

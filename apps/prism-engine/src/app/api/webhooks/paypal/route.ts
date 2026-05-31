@@ -94,8 +94,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
-    console.log(`[paypal-webhook] Event: ${event_type} for user ${userId}`);
-
     switch (event_type) {
       case "BILLING.SUBSCRIPTION.ACTIVATED":
         await handleSubscriptionActivated(userId, resource);
@@ -112,8 +110,6 @@ export async function POST(request: NextRequest) {
       case "BILLING.SUBSCRIPTION.PAYMENT.FAILED":
         await handlePaymentFailed(userId);
         break;
-      default:
-        console.log(`[paypal-webhook] Unhandled: ${event_type}`);
     }
 
     return NextResponse.json({ received: true });
@@ -155,8 +151,6 @@ async function handleSubscriptionActivated(
     },
     { upsert: true },
   );
-
-  console.log(`[paypal-webhook] Activated ${tier} for ${userId}`);
 }
 
 async function handleSubscriptionCancelled(userId: string) {
@@ -165,7 +159,6 @@ async function handleSubscriptionCancelled(userId: string) {
     { userId },
     { $set: { status: "cancelled", updatedAt: new Date() } },
   );
-  console.log(`[paypal-webhook] Cancelled subscription for ${userId}`);
 }
 
 async function handleSubscriptionSuspended(userId: string) {
@@ -174,7 +167,6 @@ async function handleSubscriptionSuspended(userId: string) {
     { userId },
     { $set: { status: "past_due", updatedAt: new Date() } },
   );
-  console.log(`[paypal-webhook] Suspended subscription for ${userId}`);
 }
 
 async function handlePaymentCompleted(userId: string) {
@@ -194,8 +186,6 @@ async function handlePaymentCompleted(userId: string) {
     },
     { upsert: true },
   );
-
-  console.log(`[paypal-webhook] Reset usage counters for ${userId}`);
 }
 
 async function handlePaymentFailed(userId: string) {
@@ -230,8 +220,6 @@ async function handlePaymentFailed(userId: string) {
       console.error("[paypal-webhook] Email notification failed:", error);
     }
   }
-
-  console.log(`[paypal-webhook] Payment failed for ${userId}`);
 }
 
 function getTierFromPlanId(planId?: string): "pro" | "team" | "enterprise" {
