@@ -4,12 +4,15 @@
  * AppTopNavbar
  * ------------
  * Shared top navigation bar for all Syntaxure apps.
+ * Styled using CSS custom properties (Engine design tokens) for
+ * consistent theming across light/dark mode.
  *
  * Provides:
  *   - Syntaxure Labs branding (logo)
  *   - App switcher dropdown (switch between Labs / Manage / Admin / Engine)
  *   - Left slot for app-specific extras (e.g. workspace switcher)
  *   - Center slot for search / command palette
+ *   - Inline theme toggle (sun/moon icon)
  *   - Right slot for notifications, account dropdown, quick actions
  *
  * Each app customises via props; the layout and look stay consistent.
@@ -21,6 +24,8 @@
  *       { label: "Manage", href: "http://localhost:3007", shortLabel: "Mgmt", icon: <LayoutDashboard /> },
  *       { label: "Admin",  href: "http://localhost:3004", shortLabel: "Admin", icon: <Shield /> },
  *     ]}
+ *     theme={theme as "dark" | "light"}
+ *     onToggleTheme={() => setTheme(...)}
  *     onSearchClick={openPalette}
  *     notifications={<NotificationBell />}
  *     accountDropdown={<AccountDropdown ... />}
@@ -32,7 +37,7 @@ import Link from "next/link";
 import { cn } from "./utils";
 import { SyntaxureLogo } from "./logo";
 import { RealtimeClock } from "./realtime-clock";
-import { Search, ChevronDown, ExternalLink, Menu, X } from "lucide-react";
+import { Search, ChevronDown, ExternalLink, Menu, X, Sun, Moon } from "lucide-react";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -54,6 +59,12 @@ export interface AppTopNavbarProps {
   appIcon?: ReactNode;
   /** Current app href for the app switcher current indicator */
   currentAppHref?: string;
+
+  // ── Theme Toggle (inline, Engine-style) ──
+  /** Current theme for the inline toggle icon */
+  theme?: "dark" | "light";
+  /** Called when the inline theme toggle is clicked */
+  onToggleTheme?: () => void;
 
   // ── Search ──
   /** Show the search bar (default: true) */
@@ -120,7 +131,7 @@ function AppSwitcher({
         onClick={() => setOpen(!open)}
         className={cn(
           "flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm transition-colors",
-          "text-white/70 hover:bg-white/5 hover:text-white",
+          "text-[var(--text-secondary)] hover:bg-[var(--border-subtle)] hover:text-[var(--text-primary)]",
         )}
         aria-label="Switch app"
         aria-expanded={open}
@@ -142,8 +153,8 @@ function AppSwitcher({
           {/* Backdrop for mobile */}
           <div className="fixed inset-0 z-40 md:hidden" onClick={() => setOpen(false)} />
 
-          <div className="absolute left-0 top-full z-50 mt-1.5 w-52 origin-top-left rounded-xl border border-white/10 bg-[#0a0a0a]/95 backdrop-blur-xl py-1 shadow-2xl shadow-black/50">
-            <p className="px-3 pb-1 pt-1.5 text-[10px] font-mono uppercase tracking-wider text-white/30">
+          <div className="absolute left-0 top-full z-50 mt-1.5 w-52 origin-top-left rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)]/95 backdrop-blur-xl py-1 shadow-2xl shadow-black/50">
+            <p className="px-3 pb-1 pt-1.5 text-[10px] font-mono uppercase tracking-wider text-[var(--text-tertiary)]">
               Switch App
             </p>
             {appLinks.map((link) => (
@@ -154,14 +165,14 @@ function AppSwitcher({
                 className={cn(
                   "flex items-center gap-2.5 rounded-md px-3 py-2 text-sm transition-colors",
                   link.label === appName
-                    ? "bg-white/5 text-white"
-                    : "text-white/50 hover:bg-white/5 hover:text-white",
+                    ? "bg-[var(--border-subtle)] text-[var(--text-primary)]"
+                    : "text-[var(--text-secondary)] hover:bg-[var(--border-subtle)] hover:text-[var(--text-primary)]",
                 )}
               >
                 {link.icon || <ExternalLink className="h-3.5 w-3.5" />}
                 <span className="flex-1">{link.label}</span>
                 {link.shortLabel && (
-                  <span className="text-[10px] font-mono uppercase text-white/30">
+                  <span className="text-[10px] font-mono uppercase text-[var(--text-tertiary)]">
                     {link.shortLabel}
                   </span>
                 )}
@@ -174,12 +185,38 @@ function AppSwitcher({
   );
 }
 
+// ─── Inline Theme Toggle (Engine-style) ──────────────────────────────────────
+
+function InlineThemeToggle({
+  theme,
+  onToggle,
+}: {
+  theme?: "dark" | "light";
+  onToggle?: () => void;
+}) {
+  if (!onToggle) return null;
+
+  const isDark = theme !== "light";
+
+  return (
+    <button
+      onClick={onToggle}
+      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-subtle)] transition-colors"
+    >
+      {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+    </button>
+  );
+}
+
 // ─── Main Component ──────────────────────────────────────────────────────────
 
 export function AppTopNavbar({
   appName,
   appLinks,
   appIcon,
+  theme,
+  onToggleTheme,
   showSearch = true,
   searchPlaceholder = "Search...",
   searchShortcut = "⌘K",
@@ -200,7 +237,7 @@ export function AppTopNavbar({
     <header
       className={cn(
         "fixed top-0 left-0 right-0 z-50 h-14 border-b backdrop-blur-xl",
-        "border-white/[0.06] bg-[#0a0a0a]/80",
+        "border-[var(--border-subtle)] bg-[var(--bg-primary)]/80",
         className,
       )}
     >
@@ -215,13 +252,13 @@ export function AppTopNavbar({
           {/* Syntaxure Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <SyntaxureLogo className="h-7 w-7" />
-            <span className="hidden text-sm font-semibold text-white sm:inline">
+            <span className="hidden text-sm font-semibold text-[var(--text-primary)] sm:inline">
               Syntaxure
             </span>
           </Link>
 
           {/* Divider */}
-          <div className="hidden h-5 w-px bg-white/[0.08] sm:block" />
+          <div className="hidden h-5 w-px bg-[var(--border-subtle)] sm:block" />
 
           {/* App Switcher */}
           <AppSwitcher
@@ -233,7 +270,7 @@ export function AppTopNavbar({
           {/* Extra left content (workspace switcher etc.) */}
           {leftSlot && (
             <>
-              <div className="hidden h-5 w-px bg-white/[0.06] sm:block" />
+              <div className="hidden h-5 w-px bg-[var(--border-subtle)] sm:block" />
               <div className="hidden sm:block">{leftSlot}</div>
             </>
           )}
@@ -245,14 +282,14 @@ export function AppTopNavbar({
             centerSlot
           ) : showSearch && onSearchClick ? (
             <div className="relative w-full max-w-md">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-tertiary)]" />
               <button
                 onClick={onSearchClick}
-                className="w-full cursor-pointer rounded-lg border border-white/[0.08] bg-white/[0.04] py-2 pl-9 pr-16 text-left text-sm text-white/40 transition-all hover:border-white/[0.14] hover:bg-white/[0.06]"
+                className="w-full cursor-pointer rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/40 py-2 pl-9 pr-16 text-left text-sm text-[var(--text-tertiary)] transition-all hover:border-[var(--border-active)] hover:bg-[var(--bg-tertiary)]/60"
               >
                 <span>{searchPlaceholder}</span>
               </button>
-              <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border border-white/[0.08] bg-white/[0.06] px-1.5 py-0.5 font-mono text-[10px] text-white/40">
+              <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/40 px-1.5 py-0.5 font-mono text-[10px] text-[var(--text-tertiary)]">
                 {searchShortcut}
               </kbd>
             </div>
@@ -269,6 +306,9 @@ export function AppTopNavbar({
             <RealtimeClock />
           )}
 
+          {/* Inline Theme Toggle (Engine-style) */}
+          <InlineThemeToggle theme={theme} onToggle={onToggleTheme} />
+
           {/* Notifications */}
           {notifications}
 
@@ -278,7 +318,7 @@ export function AppTopNavbar({
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="ml-1 flex h-8 w-8 items-center justify-center rounded-lg text-white/50 transition-colors hover:bg-white/5 hover:text-white md:hidden"
+            className="ml-1 flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-tertiary)] transition-colors hover:bg-[var(--border-subtle)] hover:text-[var(--text-primary)] md:hidden"
             aria-label="Toggle menu"
           >
             {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -288,7 +328,7 @@ export function AppTopNavbar({
 
       {/* ── Mobile Menu ── */}
       {mobileOpen && (
-        <div className="border-t border-white/[0.06] bg-[#0a0a0a]/95 backdrop-blur-xl md:hidden">
+        <div className="border-t border-[var(--border-subtle)] bg-[var(--bg-secondary)]/95 backdrop-blur-xl md:hidden">
           <div className="space-y-1 px-4 py-3">
             {/* Search on mobile */}
             {showSearch && onSearchClick && (
@@ -297,7 +337,7 @@ export function AppTopNavbar({
                   setMobileOpen(false);
                   onSearchClick();
                 }}
-                className="flex w-full items-center gap-2.5 rounded-lg border border-white/[0.08] bg-white/[0.04] px-3 py-2.5 text-sm text-white/40 transition-colors hover:border-white/[0.14]"
+                className="flex w-full items-center gap-2.5 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/40 px-3 py-2.5 text-sm text-[var(--text-tertiary)] transition-colors hover:border-[var(--border-active)]"
               >
                 <Search className="h-4 w-4" />
                 <span>{searchPlaceholder}</span>
@@ -306,7 +346,7 @@ export function AppTopNavbar({
 
             {/* Mobile app links */}
             <div className="pt-2">
-              <p className="px-1 pb-1 text-[10px] font-mono uppercase tracking-wider text-white/30">
+              <p className="px-1 pb-1 text-[10px] font-mono uppercase tracking-wider text-[var(--text-tertiary)]">
                 Apps
               </p>
               {appLinks.map((link) => (
@@ -317,14 +357,14 @@ export function AppTopNavbar({
                   className={cn(
                     "flex items-center gap-2.5 rounded-md px-2 py-2.5 text-sm transition-colors",
                     link.label === appName
-                      ? "bg-white/5 text-white"
-                      : "text-white/50 hover:bg-white/5 hover:text-white",
+                      ? "bg-[var(--border-subtle)] text-[var(--text-primary)]"
+                      : "text-[var(--text-secondary)] hover:bg-[var(--border-subtle)] hover:text-[var(--text-primary)]",
                   )}
                 >
                   {link.icon || <ExternalLink className="h-4 w-4" />}
                   <span className="flex-1">{link.label}</span>
                   {link.shortLabel && (
-                    <span className="text-[10px] font-mono uppercase text-white/30">
+                    <span className="text-[10px] font-mono uppercase text-[var(--text-tertiary)]">
                       {link.shortLabel}
                     </span>
                   )}

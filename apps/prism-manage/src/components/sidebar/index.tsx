@@ -27,6 +27,8 @@ import {
   ChevronRight,
   Plus,
 } from "lucide-react";
+import { KeyboardShortcutsHelp } from "@syntaxure/ui";
+import { MANAGE_HELP_SHORTCUTS } from "@/lib/keyboard-shortcuts";
 import { useProjects } from "@/contexts/project-context";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { PERSONAL_LISTS } from "@/lib/schemas";
@@ -76,6 +78,7 @@ function generateId(): string {
 export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const { projects, addProject, updateProject, setActiveProjectId } = useProjects();
 
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
@@ -295,7 +298,15 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom Section */}
-      <SidebarBottom collapsed={collapsed} />
+      <SidebarBottom collapsed={collapsed} onHelpClick={() => setHelpOpen(true)} />
+
+      {/* Keyboard Shortcuts Help Dialog */}
+      <KeyboardShortcutsHelp
+        open={helpOpen}
+        onClose={() => setHelpOpen(false)}
+        title="Manage Shortcuts"
+        appShortcuts={MANAGE_HELP_SHORTCUTS}
+      />
     </aside>
   );
 }

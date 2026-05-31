@@ -25,9 +25,9 @@
  *   └───────────────────────────────────────────────────┘
  */
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -37,6 +37,7 @@ import {
   Settings,
   Library,
   Plug,
+  Search,
   BarChart2,
   Crown,
   ArrowUpRight,
@@ -44,16 +45,27 @@ import {
   ChevronRight,
   ChevronDown,
   Home,
-  Sun,
-  Moon,
   Bell,
   Plus,
+  Box,
+  Sun,
+  Moon,
+  Shield,
+  Keyboard,
 } from "lucide-react";
+import {
+  AppTopNavbar,
+  GridBackground,
+  KeyboardShortcutsProvider,
+  CommandPalette,
+  KeyboardShortcutsHelp,
+  type AppNavLink,
+  type CommandPaletteSection,
+} from "@syntaxure/ui";
 import { useTheme } from "next-themes";
 import { BetaBadge } from "@/components/beta-badge";
 import SignOutButton from "@/components/auth/sign-out-button";
 import { AccountDropdownWrapper } from "@/components/auth/account-dropdown-wrapper";
-import { GridBackground } from "@syntaxure/ui";
 
 /* ── Types ────────────────────────────────────────────────────────── */
 
@@ -107,13 +119,14 @@ const MOBILE_NAV: NavDef[] = [
   { href: "/settings", icon: Settings, label: "Settings" },
 ];
 
-const SIDEBAR_EXPANDED = 240;
+const SIDEBAR_MIN = 180;
+const SIDEBAR_MAX = 480;
 const SIDEBAR_COLLAPSED = 64;
 const TOPBAR_H = 56; // 56px = h-14
 
-/* ── Icon-only theme toggle ───────────────────────────────────────── */
+/* ── Mobile-only theme toggle ────────────────────────────────────── */
 
-function ThemeToggleIcon({ className = "" }: { className?: string }) {
+function ThemeToggleMobile({ className = "" }: { className?: string }) {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -130,6 +143,35 @@ function ThemeToggleIcon({ className = "" }: { className?: string }) {
   );
 }
 
+/* ── Cross-app nav links ──────────────────────────────────────────── */
+
+const engineAppLinks: AppNavLink[] = [
+  {
+    label: "Engine",
+    href: process.env.NEXT_PUBLIC_PRISM_URL || "http://localhost:3001",
+    shortLabel: "Engine",
+    icon: <Box className="h-3.5 w-3.5" />,
+  },
+  {
+    label: "Manage",
+    href: process.env.NEXT_PUBLIC_MANAGE_URL || "http://localhost:3007",
+    shortLabel: "Mgmt",
+    icon: <LayoutDashboard className="h-3.5 w-3.5" />,
+  },
+  {
+    label: "Admin",
+    href: process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3004",
+    shortLabel: "Admin",
+    icon: <Shield className="h-3.5 w-3.5" />,
+  },
+  {
+    label: "Labs",
+    href: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+    shortLabel: "Labs",
+    icon: <Sparkles className="h-3.5 w-3.5" />,
+  },
+];
+
 /* ── Shell ────────────────────────────────────────────────────────── */
 
 export default function DashboardShell({
@@ -140,8 +182,15 @@ export default function DashboardShell({
   userInfo: UserInfo;
 }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [customWidth, setCustomWidth] = useState<number>(240);
+  const [isDragging, setIsDragging] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const dragWidthRef = useRef(240);
   const pathname = usePathname();
+  const router = useRouter();
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const checkDesktop = () => setIsDesktop(window.innerWidth >= 768);
@@ -151,6 +200,14 @@ export default function DashboardShell({
     try {
       const v = localStorage.getItem("prism-sidebar-collapsed");
       if (v !== null) setCollapsed(JSON.parse(v));
+    } catch {}
+    try {
+      const w = localStorage.getItem("prism-sidebar-width");
+      if (w !== null) {
+        const parsed = JSON.parse(w);
+        setCustomWidth(parsed);
+        dragWidthRef.current = parsed;
+      }
     } catch {}
 
     return () => window.removeEventListener("resize", checkDesktop);
@@ -174,14 +231,115 @@ export default function DashboardShell({
     [pathname]
   );
 
-  const sbw = collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_EXPANDED;
+  const sbw = collapsed ? SIDEBAR_COLLAPSED : customWidth;
 
-  /* Shared transition value */
-  const sidebarTransition = "width 300ms ease-in-out";
-  const contentTransition = "margin-left 300ms ease-in-out, left 300ms ease-in-out";
+  /* Shared transition value — disabled during drag for smooth real-time resize */
+  const sidebarTransition = isDragging
+    ? "none"
+    : "width 300ms ease-in-out";
+  const contentTransition = isDragging
+    ? "none"
+    : "margin-left 300ms ease-in-out, left 300ms ease-in-out";
+
+  const openPalette = useCallback(() => setPaletteOpen(true), []);
+  const closePalette = useCallback(() => setPaletteOpen(false), []);
+  const openHelp = useCallback(() => setHelpOpen(true), []);
+  const closeHelp = useCallback(() => setHelpOpen(false), []);
+
+  // ── Sidebar resize handler ──
+  const handleResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+
+    let currentWidth = dragWidthRef.current;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      currentWidth = Math.max(SIDEBAR_MIN, Math.min(SIDEBAR_MAX, moveEvent.clientX));
+      setCustomWidth(currentWidth);
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      dragWidthRef.current = currentWidth;
+      try {
+        localStorage.setItem("prism-sidebar-width", JSON.stringify(currentWidth));
+      } catch {}
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  }, []);
+
+  // ── Engine command palette sections ──
+
+  const engineCommands: CommandPaletteSection[] = [
+    {
+      id: "nav",
+      label: "Navigate",
+      items: NAV.filter((n) => n.href).map((item) => ({
+        id: item.label.toLowerCase().replace(/\s+/g, "-"),
+        label: item.label,
+        icon: (item.icon || LayoutDashboard) as React.ComponentType<{ className?: string }>,
+        action: () => {
+          if (item.href) {
+            router.push(item.href);
+          }
+          closePalette();
+        },
+      })),
+    },
+  ];
 
   return (
+    <KeyboardShortcutsProvider
+      onSearch={openPalette}
+      onToggleSidebar={toggle}
+      onCommandPalette={openPalette}
+      onShowHelp={openHelp}
+    >
     <div className="relative flex min-h-screen bg-[var(--bg-primary)]">
+      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          FULL-WIDTH TOP NAVBAR (desktop only — shared AppTopNavbar)
+          Mobile has its own header below.
+      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      <AppTopNavbar
+        appName="Engine"
+        appLinks={engineAppLinks}
+        appIcon={
+          <div className="flex h-5 w-5 items-center justify-center rounded bg-gradient-to-br from-cyan-500/20 to-violet-500/20">
+            <Sparkles className="h-3 w-3 text-cyan-400" />
+          </div>
+        }
+        onSearchClick={openPalette}
+        searchPlaceholder="Search pages, projects..."
+        theme={theme === "light" ? "light" : "dark"}
+        onToggleTheme={() => setTheme(theme === "light" ? "dark" : "light")}
+        rightExtra={
+          <Link
+            href="/projects/new"
+            className="flex items-center gap-1.5 h-8 rounded-md bg-blue-600 hover:bg-blue-700 dark:bg-cyan-500 dark:hover:bg-cyan-400 active:scale-95 px-4 text-xs font-semibold !text-white transition-all whitespace-nowrap shadow-[0_2px_8px_rgba(37,99,235,0.3)] dark:shadow-none dark:!text-black"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            New Project
+          </Link>
+        }
+        notifications={
+          <button
+            title="Notifications"
+            className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-subtle)] transition-colors"
+          >
+            <Bell className="h-4 w-4" />
+          </button>
+        }
+        accountDropdown={<AccountDropdownWrapper />}
+        className="hidden md:flex"
+      />
       <GridBackground variant="neon" />
 
       {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -189,7 +347,7 @@ export default function DashboardShell({
       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <aside
         style={{ width: sbw, transition: sidebarTransition }}
-        className="hidden md:flex fixed left-0 top-0 h-full z-40 flex-col border-r border-[var(--border-subtle)] bg-[var(--bg-primary)] overflow-hidden"
+        className="hidden md:flex fixed left-0 top-14 bottom-0 z-40 flex-col border-r border-[var(--border-subtle)] bg-[var(--bg-primary)] overflow-hidden relative"
       >
         {/* ── Logo header ── */}
         {collapsed ? (
@@ -284,6 +442,14 @@ export default function DashboardShell({
               >
                 {userInfo.userInitial}
               </div>
+              {/* Keyboard shortcuts help */}
+              <button
+                onClick={openHelp}
+                title="Keyboard Shortcuts (⌘⇧/)"
+                className="flex h-9 w-9 items-center justify-center rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-subtle)] transition-colors"
+              >
+                <Keyboard className="h-4 w-4" />
+              </button>
             </div>
           ) : (
             <div className="p-3 space-y-2">
@@ -340,49 +506,33 @@ export default function DashboardShell({
                 </div>
                 <SignOutButton />
               </div>
+
+              {/* Keyboard shortcuts help */}
+              <button
+                onClick={openHelp}
+                className="flex w-full items-center gap-2 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/40 px-3 py-2 text-xs text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-subtle)] transition-colors"
+              >
+                <Keyboard className="h-3.5 w-3.5" />
+                <span className="flex-1 text-left">Keyboard Shortcuts</span>
+                <kbd className="rounded border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/40 px-1.5 py-0.5 font-mono text-[9px]">
+                  ⌘⇧/
+                </kbd>
+              </button>
             </div>
           )}
         </div>
+
+        {/* ── Resize handle (only when expanded) ── */}
+        {!collapsed && (
+          <div
+            onMouseDown={handleResizeStart}
+            className="absolute right-0 top-0 bottom-0 w-[10px] cursor-col-resize group z-50"
+          >
+            {/* Visible strip at the right edge */}
+            <div className="absolute inset-y-0 right-0 w-[3px] bg-transparent transition-colors group-hover:bg-cyan-500/30 group-active:bg-cyan-500/50" />
+          </div>
+        )}
       </aside>
-
-      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          DESKTOP INNER TOP BAR
-          Lives inside the content column; left edge tracks sidebar width.
-      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-      <header
-        className="hidden md:flex fixed top-0 right-0 z-50 items-center justify-end gap-1 border-b border-[var(--border-subtle)] bg-[var(--bg-primary)]/90 backdrop-blur-xl px-4"
-        style={{
-          left: isDesktop ? sbw : 0,
-          height: TOPBAR_H,
-          transition: contentTransition,
-        }}
-      >
-        {/* New Project CTA */}
-        <Link
-          href="/projects/new"
-          className="flex items-center gap-1.5 h-8 rounded-md bg-blue-600 hover:bg-blue-700 dark:bg-cyan-500 dark:hover:bg-cyan-400 active:scale-95 px-4 text-xs font-semibold !text-white transition-all whitespace-nowrap mr-2 shadow-[0_2px_8px_rgba(37,99,235,0.3)] dark:shadow-none dark:!text-black"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          New Project
-        </Link>
-
-        {/* Bell */}
-        <button
-          title="Notifications"
-          className="flex h-9 w-9 items-center justify-center rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-subtle)] transition-colors"
-        >
-          <Bell className="h-4 w-4" />
-        </button>
-
-        {/* Theme toggle */}
-        <ThemeToggleIcon />
-
-        {/* Divider */}
-        <div className="h-5 w-px bg-[var(--border-subtle)] mx-2" />
-
-        {/* Account */}
-        <AccountDropdownWrapper />
-      </header>
 
       {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           MOBILE FULL-WIDTH TOP HEADER
@@ -398,7 +548,16 @@ export default function DashboardShell({
           <BetaBadge />
         </Link>
         <div className="flex items-center gap-1">
-          <ThemeToggleIcon />
+          {/* Mobile search — opens command palette */}
+          <button
+            onClick={openPalette}
+            title="Search"
+            className="flex h-9 w-9 items-center justify-center rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-subtle)] transition-colors"
+          >
+            <Search className="h-4 w-4" />
+          </button>
+          {/* Inline theme toggle for mobile (AppTopNavbar handles desktop) */}
+          <ThemeToggleMobile />
           <AccountDropdownWrapper />
         </div>
       </header>
@@ -452,7 +611,22 @@ export default function DashboardShell({
           />
         ))}
       </nav>
+
+      {/* ── Shared Command Palette ── */}
+      <CommandPalette
+        open={paletteOpen}
+        onClose={closePalette}
+        sections={engineCommands}
+        placeholder="Search pages, projects..."
+      />
+
+      {/* ── Keyboard Shortcuts Help ── */}
+      <KeyboardShortcutsHelp
+        open={helpOpen}
+        onClose={closeHelp}
+      />
     </div>
+    </KeyboardShortcutsProvider>
   );
 }
 

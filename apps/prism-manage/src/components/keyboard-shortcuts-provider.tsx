@@ -1,21 +1,24 @@
 "use client";
 
 /**
- * Keyboard Shortcuts Provider
- * ---------------------------
- * Registers global keyboard shortcuts and dispatches navigation actions.
+ * Keyboard Shortcuts Provider (Manage-specific extras)
+ * -----------------------------------------------------
+ * Handles app-specific shortcuts NOT covered by the shared system:
+ *   ⌘N → New Task
+ *   ⌘1 → Dashboard, ⌘2 → Tasks, ⌘3 → Calendar, ⌘4 → Kanban
+ *
+ * The universal shortcuts (⌘K, ⌘B, ⌘/) are handled by the shared
+ * KeyboardShortcutsProvider from @syntaxure/ui.
  */
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { KEYBOARD_SHORTCUTS } from "@/lib/keyboard-shortcuts";
 
-export function KeyboardShortcutsProvider({
+export function ManageShortcutsProvider({
   children,
-  onCommandPaletteToggle,
 }: {
   children: React.ReactNode;
-  onCommandPaletteToggle?: () => void;
 }) {
   const router = useRouter();
 
@@ -32,14 +35,8 @@ export function KeyboardShortcutsProvider({
           e.preventDefault();
 
           switch (shortcut.action) {
-            case "command-palette":
-              onCommandPaletteToggle?.();
-              break;
             case "new-task":
               router.push("/tasks/new");
-              break;
-            case "toggle-sidebar":
-              document.dispatchEvent(new CustomEvent("toggle-sidebar"));
               break;
             case "go-dashboard":
               router.push("/dashboard");
@@ -61,7 +58,7 @@ export function KeyboardShortcutsProvider({
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [router, onCommandPaletteToggle]);
+  }, [router]);
 
   return <>{children}</>;
 }

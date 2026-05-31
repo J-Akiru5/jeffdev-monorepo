@@ -8,11 +8,22 @@
  * notifications, quick-add, and account dropdown.
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
-import { AppTopNavbar, AccountDropdown, useAuth, type AppNavLink } from "@syntaxure/ui";
+import {
+  AppTopNavbar,
+  AccountDropdown,
+  useAuth,
+  KeyboardShortcutsProvider,
+  CommandPalette,
+  KeyboardShortcutsHelp,
+  type AppNavLink,
+  type CommandPaletteSection,
+} from "@syntaxure/ui";
+import { ManageShortcutsProvider } from "@/components/keyboard-shortcuts-provider";
+import { MANAGE_HELP_SHORTCUTS } from "@/lib/keyboard-shortcuts";
 import {
   Plus,
   Bell,
@@ -20,14 +31,19 @@ import {
   Shield,
   Box,
   Sparkles,
+  Building2,
+  User,
+  CheckSquare,
+  Calendar as CalendarIcon,
+  LayoutGrid,
+  Keyboard,
 } from "lucide-react";
-import { CommandPalette } from "@/components/command-palette";
 import { WorkspaceSwitcher } from "@/components/workspace-switcher";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 
 function AccountMenu() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
 
   async function handleSignOut() {
     await signOut();
@@ -48,8 +64,6 @@ function AccountMenu() {
       displayName={user?.full_name}
       role={user?.role}
       settingsHref="/settings"
-      theme={theme as "dark" | "light" | undefined}
-      onToggleTheme={() => setTheme(theme === "dark" ? "theme-light" : "dark")}
       onSignOut={handleSignOut}
     />
   );
@@ -62,6 +76,18 @@ function NotificationBell() {
       title="Notifications (coming soon)"
     >
       <Bell className="h-4 w-4" />
+    </button>
+  );
+}
+
+function HelpButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      title="Keyboard Shortcuts (⌘⇧/)"
+      className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-subtle)] transition-colors"
+    >
+      <Keyboard className="h-4 w-4" />
     </button>
   );
 }
@@ -107,34 +133,134 @@ const appNavLinks: AppNavLink[] = [
 
 export function TopNavbar() {
   const [paletteOpen, setPaletteOpen] = useState(false);
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setPaletteOpen((prev) => !prev);
-      }
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, []);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
+  const router = useRouter();
+  const workspaces = useWorkspaceStore((s) => s.workspaces);
+  const setActiveWorkspace = useWorkspaceStore((s) => s.setActiveWorkspace);
 
   const openPalette = useCallback(() => setPaletteOpen(true), []);
   const closePalette = useCallback(() => setPaletteOpen(false), []);
+  const openHelp = useCallback(() => setHelpOpen(true), []);
+  const closeHelp = useCallback(() => setHelpOpen(false), []);
+
+  // ── Build command palette sections ──
+
+  const workspaceItems = workspaces.map((ws) => ({
+    id: `ws-${ws.id}`,
+    label: ws.name,
+    description: ws.name === "Personal" ? "Personal tasks & lists" : "Workspace tasks & departments",
+    icon: ws.name === "Personal" ? User : Building2,
+    action: () => {
+      setActiveWorkspace(ws.id);
+      router.push("/tasks");
+      closePalette();
+    },
+  }));
+
+  const viewItems = [
+    {
+      id: "view-dashboard",
+      label: "Dashboard",
+      description: "Executive overview & KPIs",
+      icon: LayoutDashboard,
+      action: () => {
+        router.push("/dashboard");
+        closePalette();
+      },
+    },
+    {
+      id: "view-tasks",
+      label: "Tasks",
+      description: "View all tasks",
+      icon: CheckSquare,
+      action: () => {
+        router.push("/tasks");
+        closePalette();
+      },
+    },
+    {
+      id: "view-calendar",
+      label: "Calendar",
+      description: "Calendar view",
+      icon: CalendarIcon,
+      action: () => {
+        router.push("/calendar");
+        closePalette();
+      },
+    },
+    {
+      id: "view-kanban",
+      label: "Kanban",
+      description: "Kanban board view",
+      icon: LayoutGrid,
+      action: () => {
+        router.push("/kanban");
+        closePalette();
+      },
+    },
+  ];
+
+  const actionItems = [
+    {
+      id: "action-create-task",
+      label: "Create Task",
+      description: "Open the task creation page",
+      icon: Plus,
+      action: () => {
+        router.push("/tasks/new");
+        closePalette();
+      },
+    },
+  ];
+
+  const paletteSections: CommandPaletteSection[] = [
+    { id: "workspaces", label: "Workspaces", items: workspaceItems, iconColor: "text-cyan-400" },
+    { id: "views", label: "Views", items: viewItems, iconColor: "text-purple-400" },
+    { id: "actions", label: "Quick Actions", items: actionItems, iconColor: "text-emerald-400" },
+  ];
 
   return (
-    <>
-      <AppTopNavbar
-        appName="Manage"
-        appLinks={appNavLinks}
-        searchPlaceholder="Search tasks, projects..."
-        onSearchClick={openPalette}
-        leftSlot={<WorkspaceSwitcher />}
-        rightExtra={<QuickAddButton />}
-        notifications={<NotificationBell />}
-        accountDropdown={<AccountMenu />}
-      />
-      <CommandPalette open={paletteOpen} onClose={closePalette} />
-    </>
+    <KeyboardShortcutsProvider
+      onSearch={openPalette}
+      onToggleSidebar={() => {
+        document.dispatchEvent(new CustomEvent("toggle-sidebar"));
+      }}
+      onCommandPalette={openPalette}
+      onShowHelp={openHelp}
+    >
+      <ManageShortcutsProvider>
+        <AppTopNavbar
+          appName="Manage"
+          appLinks={appNavLinks}
+          theme={(theme === "theme-light" ? "light" : "dark") as "dark" | "light" | undefined}
+          onToggleTheme={() => setTheme(theme === "dark" || !theme ? "theme-light" : "dark")}
+          searchPlaceholder="Search tasks, projects..."
+          onSearchClick={openPalette}
+          leftSlot={<WorkspaceSwitcher />}
+          rightExtra={
+            <div className="flex items-center gap-1">
+              <HelpButton onClick={openHelp} />
+              <QuickAddButton />
+            </div>
+          }
+          notifications={<NotificationBell />}
+          accountDropdown={<AccountMenu />}
+        />
+        <CommandPalette
+          open={paletteOpen}
+          onClose={closePalette}
+          sections={paletteSections}
+          placeholder="Search workspaces, views, actions..."
+        />
+
+        <KeyboardShortcutsHelp
+          open={helpOpen}
+          onClose={closeHelp}
+          title="Manage Shortcuts"
+          appShortcuts={MANAGE_HELP_SHORTCUTS}
+        />
+      </ManageShortcutsProvider>
+    </KeyboardShortcutsProvider>
   );
 }
