@@ -20,7 +20,11 @@ import {
   Star,
   Settings,
   LogOut,
+  Keyboard,
 } from "lucide-react";
+import { KeyboardShortcutsHelp } from "@syntaxure/ui";
+import { MANAGE_HELP_SHORTCUTS, MODE_TOGGLE_SHORTCUT } from "@/lib/keyboard-shortcuts";
+import { useManageModeStore } from "@/stores/manage-mode-store";
 import { motion, AnimatePresence } from "framer-motion";
 import { useProjects } from "@/contexts/project-context";
 import { useWorkspaceStore } from "@/stores/workspace-store";
@@ -52,6 +56,7 @@ function SignOutButton() {
 export function MobileNav() {
   const pathname = usePathname();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const { projects, setActiveProjectId, activeProjectId } = useProjects();
 
   // Workspace state
@@ -61,6 +66,8 @@ export function MobileNav() {
   const userRole = useWorkspaceStore((s) => s.userRole);
   const userDepartmentId = useWorkspaceStore((s) => s.userDepartmentId);
   const cLevelTitle = useWorkspaceStore((s) => s.cLevelTitle);
+
+  const manageMode = useManageModeStore((s) => s.mode);
 
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId);
   const isSyntaxureLabs = activeWorkspace?.name === "Syntaxure Labs" || activeWorkspace?.name === "Syntaxure Labs, Inc.";
@@ -132,6 +139,16 @@ export function MobileNav() {
           </Link>
         )}
 
+        {/* Keyboard Shortcuts Help */}
+        <button
+          onClick={() => setHelpOpen(true)}
+          className="flex flex-col items-center justify-center gap-1 rounded-md p-2 text-white/40 hover:text-white transition-all"
+          title="Keyboard Shortcuts (⌘⇧/)"
+        >
+          <Keyboard className="h-5 w-5" />
+          <span className="text-[10px] font-medium">Help</span>
+        </button>
+
         {/* Lists Button */}
         <button
           onClick={() => setIsDrawerOpen(!isDrawerOpen)}
@@ -146,7 +163,13 @@ export function MobileNav() {
           )}
           <span className="text-[10px] font-medium">Lists</span>
         </button>
-      </div>
+      </div>      {/* Keyboard Shortcuts Help Dialog */}
+      <KeyboardShortcutsHelp
+        open={helpOpen}
+        onClose={() => setHelpOpen(false)}
+        title="Manage Shortcuts"
+        appShortcuts={[...MANAGE_HELP_SHORTCUTS, MODE_TOGGLE_SHORTCUT]}
+      />
 
       {/* Slide-up Drawer */}
       <AnimatePresence>
@@ -174,30 +197,32 @@ export function MobileNav() {
                 <div className="h-1 w-12 rounded-full bg-white/20" />
               </div>
 
-              {/* Quick Filters */}
-              <div className="mb-6">
-                <h3 className="mb-3 px-2 font-mono text-xs uppercase tracking-wider text-white/30">
-                  Quick Access
-                </h3>
-                <div className="grid grid-cols-2 gap-3">
-                  <Link
-                    href="/tasks"
-                    onClick={() => setIsDrawerOpen(false)}
-                    className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-white/50 transition-all active:scale-95 hover:bg-white/[0.04] hover:text-white/80"
-                  >
-                    <CheckSquare className="h-5 w-5 text-cyan-400/80" />
-                    <span className="text-sm font-medium">All Tasks</span>
-                  </Link>
-                  <Link
-                    href="/tasks?filter=starred"
-                    onClick={() => setIsDrawerOpen(false)}
-                    className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-white/50 transition-all active:scale-95 hover:bg-white/[0.04] hover:text-white/80"
-                  >
-                    <Star className="h-5 w-5 text-yellow-500/80" />
-                    <span className="text-sm font-medium">Starred</span>
-                  </Link>
+              {/* Quick Filters — Focus mode only */}
+              {manageMode === "focus" && (
+                <div className="mb-6">
+                  <h3 className="mb-3 px-2 font-mono text-xs uppercase tracking-wider text-white/30">
+                    Quick Access
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Link
+                      href="/tasks"
+                      onClick={() => setIsDrawerOpen(false)}
+                      className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-white/50 transition-all active:scale-95 hover:bg-white/[0.04] hover:text-white/80"
+                    >
+                      <CheckSquare className="h-5 w-5 text-cyan-400/80" />
+                      <span className="text-sm font-medium">All Tasks</span>
+                    </Link>
+                    <Link
+                      href="/tasks?filter=starred"
+                      onClick={() => setIsDrawerOpen(false)}
+                      className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-white/50 transition-all active:scale-95 hover:bg-white/[0.04] hover:text-white/80"
+                    >
+                      <Star className="h-5 w-5 text-yellow-500/80" />
+                      <span className="text-sm font-medium">Starred</span>
+                    </Link>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Workspace Sections */}
               {/* ── Personal Lists ── */}

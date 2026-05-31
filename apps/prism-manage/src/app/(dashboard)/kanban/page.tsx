@@ -4,9 +4,11 @@
  * Kanban Page
  * -----------
  * Drag-and-drop kanban board for visual task management with Supabase persistence.
+ * Optimized for drag performance: task cards are memoized so only the dragged card
+ * re-renders on drag start/end.
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback, memo } from "react";
 import { useProjects } from "@/contexts/project-context";
 import { GripVertical, Plus } from "lucide-react";
 import { updateTaskStatus, createTask } from "@/app/actions/tasks";
@@ -29,6 +31,81 @@ const columns: { id: KanbanColumn; title: string; color: string }[] = [
   { id: "approved", title: "Approved", color: "#10b981" },
 ];
 
+// ─── Memoized Task Card ────────────────────────────────────────
+
+interface KanbanTaskCardProps {
+  task: KanbanTask;
+  projectMap: Record<string, { name: string; color: string }>;
+  isDragged: boolean;
+  isSyntaxureLabs: boolean;
+  cpoUserId: string | null;
+  onDragStart: (id: string) => void;
+}
+
+/**
+ * Individual kanban card wrapped in React.memo.
+ * Only re-renders when its own props change (e.g. isDragged flips for this card),
+ * preventing the full column re-render during drag.
+ */
+const KanbanTaskCard = memo(function KanbanTaskCard({
+  task,
+  projectMap,
+  isDragged,
+  isSyntaxureLabs,
+  cpoUserId,
+  onDragStart,
+}: KanbanTaskCardProps) {
+  const typeConfig = getTaskTypeConfig(task.taskType);
+  const project = projectMap[task.projectId];
+
+  return (
+    <div
+      draggable
+      onDragStart={() => onDragStart(task.id)}
+      className={`cursor-grab rounded-lg border border-glass-05 bg-glass-04 p-3 transition-all hover:border-glass-10 active:cursor-grabbing ${
+        isDragged ? "opacity-50" : ""
+      }`}
+    >
+      <div className="flex items-start gap-2">
+        <GripVertical className="mt-0.5 h-4 w-4 flex-shrink-0 text-text-faint" />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span className="flex-shrink-0 text-xs">{typeConfig.icon}</span>
+            <p className="text-sm text-white">{task.title}</p>
+          </div>
+          <div className="mt-2 flex items-center gap-2">
+            {project && (
+              <>
+                <span
+                  className="h-2 w-2 rounded-full"
+                  style={{ backgroundColor: project.color }}
+                />
+                <span className="text-[11px] text-white/40">{project.name}</span>
+              </>
+            )}
+            {task.priority === "high" && (
+              <span className="text-[10px] text-red-400">High</span>
+            )}
+            {isSyntaxureLabs && (
+              hasCpoReviewTag(task) || isAssignedToCpo(task, cpoUserId)
+            ) && (
+              <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-purple-500/15 px-2 py-0.5 text-[10px] font-medium text-purple-400">
+                <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                </svg>
+                CPO Review
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+// ─── Page Component ────────────────────────────────────────────
+
 export default function KanbanPage() {
   const { projects, activeProjectId } = useProjects();
   const userRole = useWorkspaceStore((s) => s.userRole);
@@ -39,10 +116,24 @@ export default function KanbanPage() {
   const syntaxureWorkspaceId = workspaces.find(
     (w) => w.name === "Syntaxure Labs" || w.name === "Syntaxure Labs, Inc."
   )?.id;
-  const isSyntaxureLabs = syntaxureWorkspaceId && activeWorkspaceId === syntaxureWorkspaceId;
+  const isSyntaxureLabs = !!(syntaxureWorkspaceId && activeWorkspaceId === syntaxureWorkspaceId);
   const [tasks, setTasks] = useState<KanbanTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [draggedTask, setDraggedTask] = useState<string | null>(null);
+
+  // Stable drag-start handler — setter is guaranteed stable by React
+  const handleDragStart = useCallback((taskId: string) => {
+    setDraggedTask(taskId);
+  }, []);
+
+  // Pre-compute project lookup map so KanbanTaskCard receives stable references
+  const projectMap = useMemo(() => {
+    const map: Record<string, { name: string; color: string }> = {};
+    for (const p of projects) {
+      map[p.id] = { name: p.name, color: p.color || "var(--color-cyan)" };
+    }
+    return map;
+  }, [projects]);
 
   // Fetch tasks from Supabase
   useEffect(() => {
@@ -89,13 +180,25 @@ export default function KanbanPage() {
     loadTasks();
   }, []);
 
-  const filteredTasks = activeProjectId
-    ? tasks.filter((t) => t.projectId === activeProjectId)
-    : tasks;
+  const filteredTasks = useMemo(
+    () =>
+      activeProjectId
+        ? tasks.filter((t) => t.projectId === activeProjectId)
+        : tasks,
+    [tasks, activeProjectId],
+  );
 
-  const handleDragStart = (taskId: string) => {
-    setDraggedTask(taskId);
-  };
+  // Group tasks by column — avoids 5× filter calls per render
+  const tasksByColumn = useMemo(() => {
+    const map: Record<string, KanbanTask[]> = {};
+    for (const col of columns) {
+      map[col.id] = [];
+    }
+    for (const task of filteredTasks) {
+      map[task.column]!.push(task);
+    }
+    return map;
+  }, [filteredTasks]);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -150,7 +253,7 @@ export default function KanbanPage() {
     setDraggedTask(null);
   };
 
-  const handleAddTask = async (column: KanbanColumn) => {
+  const handleAddTask = useCallback(async (column: KanbanColumn) => {
     const title = prompt("Task title:");
     if (!title) return;
 
@@ -176,11 +279,7 @@ export default function KanbanPage() {
     } catch {
       toast.error("Failed to create task");
     }
-  };
-
-  const getTasksByColumn = (columnId: KanbanColumn) => {
-    return filteredTasks.filter((t) => t.column === columnId);
-  };
+  }, [activeProjectId, projects, tasks]);
 
   if (loading) {
     return (
@@ -202,104 +301,110 @@ export default function KanbanPage() {
         </p>
       </div>
 
-      {/* Kanban Columns */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
-        {columns.map((column) => (
-          <div
-            key={column.id}
-            className="min-h-[400px] rounded-xl border border-border glass-subtle p-4"
-            onDragOver={handleDragOver}
-            onDrop={() => handleDrop(column.id)}
-          >
-            {/* Column Header */}
-            <div className="mb-4 flex items-center gap-2">
-              <span
-                className="h-2 w-2 rounded-full"
-                style={{ backgroundColor: column.color }}
-              />
-              <h2 className="text-sm font-semibold text-white">
-                {column.title}
-              </h2>
-              <span className="ml-auto font-mono text-xs text-white/30">
-                {getTasksByColumn(column.id).length}
-              </span>
-            </div>
+      {/* Kanban Columns — horizontal scroll on mobile, grid on desktop */}
+      <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory md:hidden">
+        {columns.map((column) => {
+          const columnTasks = tasksByColumn[column.id]!;
+          return (
+            <div
+              key={column.id}
+              className="min-w-[80vw] max-w-[80vw] flex-shrink-0 snap-center rounded-xl border border-border glass-subtle p-4"
+              onDragOver={handleDragOver}
+              onDrop={() => handleDrop(column.id)}
+            >
+              {/* Column Header */}
+              <div className="mb-4 flex items-center gap-2">
+                <span
+                  className="h-2 w-2 rounded-full"
+                  style={{ backgroundColor: column.color }}
+                />
+                <h2 className="text-sm font-semibold text-white">
+                  {column.title}
+                </h2>
+                <span className="ml-auto font-mono text-xs text-white/30">
+                  {columnTasks.length}
+                </span>
+              </div>
 
-            {/* Tasks */}
-            <div className="space-y-2">
-              {getTasksByColumn(column.id).map((task) => {
-                const project = projects.find((p) => p.id === task.projectId);
-                const typeConfig = getTaskTypeConfig(task.taskType);
-
-                return (
-                  <div
+              {/* Tasks */}
+              <div className="space-y-2">
+                {columnTasks.map((task) => (
+                  <KanbanTaskCard
                     key={task.id}
-                    draggable
-                    onDragStart={() => handleDragStart(task.id)}
-                    className={`cursor-grab rounded-lg border border-glass-05 bg-glass-04 p-3 transition-all hover:border-glass-10 active:cursor-grabbing ${
-                      draggedTask === task.id ? "opacity-50" : ""
-                    }`}
-                  >
-                    <div className="flex items-start gap-2">
-                      <GripVertical className="mt-0.5 h-4 w-4 flex-shrink-0 text-text-faint" />
-                      <div className="min-w-0 flex-1">
-                        {/* Type icon + Title */}
-                        <div className="flex items-center gap-2">
-                          <span className="flex-shrink-0 text-xs">
-                            {typeConfig.icon}
-                          </span>
-                          <p className="text-sm text-white">{task.title}</p>
-                        </div>
-                        <div className="mt-2 flex items-center gap-2">
-                          {project && (
-                            <>
-                              <span
-                                className="h-2 w-2 rounded-full"
-                                style={{
-                                  backgroundColor: project.color || "var(--color-cyan)",
-                                }}
-                              />
-                              <span className="text-[11px] text-white/40">
-                                {project.name}
-                              </span>
-                            </>
-                          )}
-                          {/* Priority indicator */}
-                          {task.priority === "high" && (
-                            <span className="text-[10px] text-red-400">
-                              High
-                            </span>
-                          )}
-                          {/* CPO Review badge */}
-                          {isSyntaxureLabs && (
-                            hasCpoReviewTag(task) || isAssignedToCpo(task, cpoUserId)
-                          ) && (
-                            <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-purple-500/15 px-2 py-0.5 text-[10px] font-medium text-purple-400">
-                              <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M12 20h9" />
-                                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-                              </svg>
-                              CPO Review
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+                    task={task}
+                    projectMap={projectMap}
+                    isDragged={draggedTask === task.id}
+                    isSyntaxureLabs={isSyntaxureLabs}
+                    cpoUserId={cpoUserId}
+                    onDragStart={handleDragStart}
+                  />
+                ))}
 
-              {/* Add Task Button */}
-              <button
-                onClick={() => handleAddTask(column.id)}
-                className="flex w-full items-center gap-2 rounded-lg border border-dashed border-border p-3 text-sm text-white/30 transition-colors hover:border-border-active hover:text-white/50"
-              >
-                <Plus className="h-4 w-4" />
-                Add task
-              </button>
+                {/* Add Task Button */}
+                <button
+                  onClick={() => handleAddTask(column.id)}
+                  className="flex w-full items-center gap-2 rounded-lg border border-dashed border-border p-3 text-sm text-white/30 transition-colors hover:border-border-active hover:text-white/50"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add task
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
+      </div>
+
+      {/* Desktop grid */}
+      <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-5 gap-4">
+        {columns.map((column) => {
+          const columnTasks = tasksByColumn[column.id]!;
+          return (
+            <div
+              key={column.id}
+              className="min-h-[400px] rounded-xl border border-border glass-subtle p-4"
+              onDragOver={handleDragOver}
+              onDrop={() => handleDrop(column.id)}
+            >
+              {/* Column Header */}
+              <div className="mb-4 flex items-center gap-2">
+                <span
+                  className="h-2 w-2 rounded-full"
+                  style={{ backgroundColor: column.color }}
+                />
+                <h2 className="text-sm font-semibold text-white">
+                  {column.title}
+                </h2>
+                <span className="ml-auto font-mono text-xs text-white/30">
+                  {columnTasks.length}
+                </span>
+              </div>
+
+              {/* Tasks */}
+              <div className="space-y-2">
+                {columnTasks.map((task) => (
+                  <KanbanTaskCard
+                    key={task.id}
+                    task={task}
+                    projectMap={projectMap}
+                    isDragged={draggedTask === task.id}
+                    isSyntaxureLabs={isSyntaxureLabs}
+                    cpoUserId={cpoUserId}
+                    onDragStart={handleDragStart}
+                  />
+                ))}
+
+                {/* Add Task Button */}
+                <button
+                  onClick={() => handleAddTask(column.id)}
+                  className="flex w-full items-center gap-2 rounded-lg border border-dashed border-border p-3 text-sm text-white/30 transition-colors hover:border-border-active hover:text-white/50"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add task
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

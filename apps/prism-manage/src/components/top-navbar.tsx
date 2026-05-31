@@ -8,11 +8,23 @@
  * notifications, quick-add, and account dropdown.
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
-import { AppTopNavbar, AccountDropdown, useAuth, type AppNavLink } from "@syntaxure/ui";
+import {
+  AppTopNavbar,
+  AccountDropdown,
+  useAuth,
+  KeyboardShortcutsProvider,
+  CommandPalette,
+  KeyboardShortcutsHelp,
+  type AppNavLink,
+  type CommandPaletteSection,
+} from "@syntaxure/ui";
+import { ManageShortcutsProvider } from "@/components/keyboard-shortcuts-provider";
+import { MANAGE_HELP_SHORTCUTS, MODE_TOGGLE_SHORTCUT } from "@/lib/keyboard-shortcuts";
+import { useManageModeStore, type ManageMode } from "@/stores/manage-mode-store";
 import {
   Plus,
   Bell,
@@ -20,14 +32,21 @@ import {
   Shield,
   Box,
   Sparkles,
+  Building2,
+  Settings,
+  User,
+  CheckSquare,
+  Calendar as CalendarIcon,
+  LayoutGrid,
+  Keyboard,
+  GitBranch,
 } from "lucide-react";
-import { CommandPalette } from "@/components/command-palette";
 import { WorkspaceSwitcher } from "@/components/workspace-switcher";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 
 function AccountMenu() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
 
   async function handleSignOut() {
     await signOut();
@@ -48,8 +67,6 @@ function AccountMenu() {
       displayName={user?.full_name}
       role={user?.role}
       settingsHref="/settings"
-      theme={theme as "dark" | "light" | undefined}
-      onToggleTheme={() => setTheme(theme === "dark" ? "theme-light" : "dark")}
       onSignOut={handleSignOut}
     />
   );
@@ -62,6 +79,18 @@ function NotificationBell() {
       title="Notifications (coming soon)"
     >
       <Bell className="h-4 w-4" />
+    </button>
+  );
+}
+
+function HelpButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      title="Keyboard Shortcuts (⌘⇧/)"
+      className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-subtle)] transition-colors"
+    >
+      <Keyboard className="h-4 w-4" />
     </button>
   );
 }
@@ -107,34 +136,245 @@ const appNavLinks: AppNavLink[] = [
 
 export function TopNavbar() {
   const [paletteOpen, setPaletteOpen] = useState(false);
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setPaletteOpen((prev) => !prev);
-      }
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, []);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
+  const router = useRouter();
+  const workspaces = useWorkspaceStore((s) => s.workspaces);
+  const setActiveWorkspace = useWorkspaceStore((s) => s.setActiveWorkspace);
 
   const openPalette = useCallback(() => setPaletteOpen(true), []);
   const closePalette = useCallback(() => setPaletteOpen(false), []);
+  const openHelp = useCallback(() => setHelpOpen(true), []);
+  const closeHelp = useCallback(() => setHelpOpen(false), []);
+
+  const manageMode = useManageModeStore((s) => s.mode);
+  const toggleManageMode = useManageModeStore((s) => s.toggleMode);
+
+  // ── Build command palette sections (memoized) ──
+
+  const workspaceItems = useMemo(
+    () =>
+      workspaces.map((ws) => ({
+        id: `ws-${ws.id}`,
+        label: ws.name,
+        description:
+          ws.name === "Personal"
+            ? "Personal tasks & lists"
+            : "Workspace tasks & departments",
+        icon: ws.name === "Personal" ? User : Building2,
+        action: () => {
+          setActiveWorkspace(ws.id);
+          router.push("/tasks");
+          closePalette();
+        },
+      })),
+    [workspaces, setActiveWorkspace, router, closePalette],
+  );
+
+  const viewItems = useMemo(
+    () => [
+      {
+        id: "view-dashboard",
+        label: "Dashboard",
+        description: "Executive overview & KPIs",
+        icon: LayoutDashboard,
+        action: () => {
+          router.push("/dashboard");
+          closePalette();
+        },
+      },
+      {
+        id: "view-tasks",
+        label: "Tasks",
+        description: "View all tasks",
+        icon: CheckSquare,
+        action: () => {
+          router.push("/tasks");
+          closePalette();
+        },
+      },
+      {
+        id: "view-calendar",
+        label: "Calendar",
+        description: "Calendar view",
+        icon: CalendarIcon,
+        action: () => {
+          router.push("/calendar");
+          closePalette();
+        },
+      },
+      {
+        id: "view-kanban",
+        label: "Kanban",
+        description: "Kanban board view",
+        icon: LayoutGrid,
+        action: () => {
+          router.push("/kanban");
+          closePalette();
+        },
+      },
+    ],
+    [router, closePalette],
+  );
+
+  const actionItems = useMemo(
+    () => [
+      {
+        id: "action-create-task",
+        label: "Create Task",
+        description: "Open the task creation page",
+        icon: Plus,
+        action: () => {
+          router.push("/tasks/new");
+          closePalette();
+        },
+      },
+    ],
+    [router, closePalette],
+  );
+
+  const paletteSections: CommandPaletteSection[] = useMemo(
+    () => [
+      {
+        id: "general",
+        label: "General",
+        icon: ({ className }: { className?: string }) => (
+          <span
+            className={`h-3 w-3 rounded-full bg-[var(--text-tertiary)] ${className ?? ""}`}
+          />
+        ),
+        iconColor: "text-[var(--text-tertiary)]",
+        keywords: ["shared", "common"],
+        items: [
+          {
+            id: "nav-dashboard",
+            label: "Dashboard",
+            description: "Executive overview & KPIs",
+            icon: LayoutDashboard,
+            action: () => {
+              router.push("/dashboard");
+              closePalette();
+            },
+          },
+          {
+            id: "nav-settings",
+            label: "Settings",
+            description: "Account & preferences",
+            icon: Settings,
+            action: () => {
+              router.push("/settings");
+              closePalette();
+            },
+          },
+        ],
+      },
+      {
+        id: "workspaces",
+        label: "Workspaces",
+        icon: ({ className }: { className?: string }) => (
+          <span
+            className={`h-3 w-3 rounded-full bg-cyan-400 ${className ?? ""}`}
+          />
+        ),
+        keywords: ["switch", "personal", "team"],
+        items: workspaceItems,
+        iconColor: "text-cyan-400",
+      },
+      {
+        id: "views",
+        label: manageMode === "focus" ? "Views" : "Explore",
+        icon: ({ className }: { className?: string }) => (
+          <span
+            className={`h-3 w-3 rounded-full bg-purple-400 ${className ?? ""}`}
+          />
+        ),
+        keywords:
+          manageMode === "focus"
+            ? ["tasks", "calendar", "kanban"]
+            : ["departments", "projects", "marketing"],
+        items: viewItems,
+        iconColor: "text-purple-400",
+      },
+      {
+        id: "actions",
+        label: "Quick Actions",
+        icon: ({ className }: { className?: string }) => (
+          <span
+            className={`h-3 w-3 rounded-full bg-emerald-400 ${className ?? ""}`}
+          />
+        ),
+        keywords: ["create", "new", "add"],
+        items: actionItems,
+        iconColor: "text-emerald-400",
+      },
+    ],
+    [workspaceItems, viewItems, actionItems, manageMode, router, closePalette],
+  );
 
   return (
-    <>
-      <AppTopNavbar
-        appName="Manage"
-        appLinks={appNavLinks}
-        searchPlaceholder="Search tasks, projects..."
-        onSearchClick={openPalette}
-        leftSlot={<WorkspaceSwitcher />}
-        rightExtra={<QuickAddButton />}
-        notifications={<NotificationBell />}
-        accountDropdown={<AccountMenu />}
-      />
-      <CommandPalette open={paletteOpen} onClose={closePalette} />
-    </>
+    <div data-tour="top-navbar">
+      <KeyboardShortcutsProvider
+      onSearch={openPalette}
+      onToggleSidebar={() => {
+        document.dispatchEvent(new CustomEvent("toggle-sidebar"));
+      }}
+      onCommandPalette={openPalette}
+      onShowHelp={openHelp}
+      onToggleMode={toggleManageMode}
+    >
+      <ManageShortcutsProvider>
+        <AppTopNavbar
+          appName="Manage"
+          appLinks={appNavLinks}
+          theme={(theme === "theme-light" ? "light" : "dark") as "dark" | "light" | undefined}
+          onToggleTheme={() => setTheme(theme === "dark" || !theme ? "theme-light" : "dark")}
+          searchPlaceholder="Search tasks, projects..."
+          onSearchClick={openPalette}
+          leftSlot={
+            <div className="flex items-center gap-1">
+              <button
+                onClick={toggleManageMode}
+                title={`Switch to ${manageMode === "focus" ? "Workspace" : "Focus"} mode (⌘⇧M)`}
+                className={`flex h-7 items-center gap-1.5 rounded-md px-2 text-[11px] font-medium transition-colors ${
+                  manageMode === "focus"
+                    ? "text-purple-400/70 hover:text-purple-400 hover:bg-purple-400/10"
+                    : "text-amber-400/70 hover:text-amber-400 hover:bg-amber-400/10"
+                }`}
+              >
+                <GitBranch className="h-3 w-3" />
+                <span className="hidden sm:inline capitalize">{manageMode}</span>
+              </button>
+              <div data-tour="workspace-switcher">
+                <WorkspaceSwitcher />
+              </div>
+            </div>
+          }
+          rightExtra={
+            <div className="flex items-center gap-1">
+              <HelpButton onClick={openHelp} />
+              <div data-tour="quick-add-task">
+                <QuickAddButton />
+              </div>
+            </div>
+          }
+          notifications={<NotificationBell />}
+          accountDropdown={<AccountMenu />}
+        />
+        <CommandPalette
+          open={paletteOpen}
+          onClose={closePalette}
+          sections={paletteSections}
+          placeholder="Search workspaces, views, actions..."
+        />
+
+        <KeyboardShortcutsHelp
+          open={helpOpen}
+          onClose={closeHelp}
+          title="Manage Shortcuts"
+          appShortcuts={[...MANAGE_HELP_SHORTCUTS, MODE_TOGGLE_SHORTCUT]}
+        />
+      </ManageShortcutsProvider>
+    </KeyboardShortcutsProvider>
+      </div>
   );
 }

@@ -62,3 +62,29 @@ export { useDebouncedValue } from "./use-debounced-value";
 export { useActionFeedback, type ActionState } from "./use-action-feedback";
 export { PageContainer, type PageContainerProps } from "./page-container";
 
+// Keyboard Shortcuts
+export {
+  KeyboardShortcutsProvider,
+} from "./keyboard-shortcuts-provider";
+export {
+  CommandPalette,
+  type CommandPaletteProps,
+  type CommandPaletteSection,
+  type CommandPaletteItem,
+} from "./command-palette";
+export {
+  KeyboardShortcutsHelp,
+  type KeyboardShortcutsHelpProps,
+  type ShortcutsHelpShortcut,
+} from "./keyboard-shortcuts-help";
+export {
+  getShortcutLabel,
+  matchesShortcut,
+  SHORTCUT_SEARCH,
+  SHORTCUT_SIDEBAR,
+  SHORTCUT_COMMAND_PALETTE,
+  SHORTCUT_HELP,
+  SHORTCUT_TOGGLE_MODE,
+  type KeyboardShortcutDef,
+} from "./keyboard-shortcuts";
+

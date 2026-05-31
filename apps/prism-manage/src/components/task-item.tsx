@@ -8,14 +8,16 @@
  * for quick visual scanning of task types.
  */
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import {
   Star,
   MoreVertical,
   Calendar as CalendarIcon,
   Trash2,
   User,
+  AlertTriangle,
 } from "lucide-react";
+import { ConfirmDialog } from "@syntaxure/ui";
 import type { Task } from "@/lib/schemas";
 import { getTaskTypeConfig } from "@/lib/task-types";
 
@@ -27,7 +29,7 @@ interface TaskItemProps {
   onClick?: (id: string) => void;
 }
 
-export function TaskItem({
+export const TaskItem = memo(function TaskItem({
   task,
   onToggleComplete,
   onToggleStar,
@@ -35,13 +37,25 @@ export function TaskItem({
   onClick,
 }: TaskItemProps) {
   const [showMenu, setShowMenu] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const typeConfig = getTaskTypeConfig(task.taskType);
   const isCompleted = task.status === "approved";
   const isInProgress = task.status === "in_progress";
 
   return (
-    <div
-      className={`group flex items-start gap-3 rounded-lg border border-white/[0.06] glass-subtle p-3 transition-all hover:border-white/[0.10] hover:bg-glass-04 ${
+    <>
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title={`Delete "${task.title}"?`}
+        description="This task will be permanently deleted for all workspace members."
+        confirmLabel="Delete"
+        confirmVariant="danger"
+        icon={AlertTriangle}
+        onConfirm={() => onDelete?.(task.id)}
+      />
+      <div
+        className={`group flex items-start gap-3 rounded-lg border border-white/[0.06] glass-subtle p-3 transition-all hover:border-white/[0.10] hover:bg-glass-04 ${
         isCompleted ? "opacity-50" : ""
       } ${isInProgress ? "border-l-2 border-l-blue-500/40" : ""}`}
     >
@@ -142,8 +156,8 @@ export function TaskItem({
         </div>
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+      {/* Actions — always visible on mobile, hover-reveal on desktop */}
+      <div className="flex items-center gap-1 max-sm:opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
         {/* Star */}
         <button
           onClick={() => onToggleStar?.(task.id)}
@@ -190,7 +204,7 @@ export function TaskItem({
                 </button>
                 <button
                   onClick={() => {
-                    onDelete?.(task.id);
+                    setShowDeleteDialog(true);
                     setShowMenu(false);
                   }}
                   className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-white/[0.04]"
@@ -204,5 +218,7 @@ export function TaskItem({
         </div>
       </div>
     </div>
+    </>
   );
 }
+);

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
 import { ThemeWrapper } from "@/components/admin/theme-wrapper";
+import { ChatAssistant } from "@syntaxure/ui/chat-assistant";
 import { ThemeBootstrap } from "@/components/admin/theme-bootstrap";
 import "./globals.css";
 
@@ -88,6 +89,16 @@ export default function RootLayout({
                 color: "#fff",
               },
             }}
+          />
+          <ChatAssistant
+            apiEndpoint="/api/assistant"
+            title="Prism Admin Assistant"
+            welcomeMessage="Ask me anything about Prism Admin — users, subscriptions, analytics, and configurations."
+            suggestions={[
+              "How do I manage user subscriptions?",
+              "How does the analytics dashboard work?",
+              "How do I manage agency services?",
+            ]}
           />
         </body>
       </html>

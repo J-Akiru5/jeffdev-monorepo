@@ -9,6 +9,7 @@ import { Calendar, RefreshCw, Bell } from "lucide-react";
 import { ThemeSection } from "@/components/settings/theme-section";
 import { ProfileSection } from "@/components/settings/profile-section";
 import { WorkspaceMembersSettings } from "@/components/settings/workspace-members";
+import { AuditTrailSection } from "@/components/settings/audit-trail";
 import { getWorkspaceMembers } from "@/app/actions/workspace";
 import { disconnectCalendar } from "@/app/actions/calendar";
 
@@ -109,6 +110,9 @@ export default async function SettingsPage() {
             currentUserId={user?.id || ""}
           />
         )}
+
+        {/* Audit Trail (only shown for founders in Workspace mode) */}
+        {syntaxureWorkspaceId && <AuditTrailSection />}
 
         {/* Appearance */}
         <ThemeSection />

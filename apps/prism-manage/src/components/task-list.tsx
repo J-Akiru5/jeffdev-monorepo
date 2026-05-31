@@ -5,8 +5,11 @@
  * -------------------
  * Container for displaying tasks grouped by project.
  * Shows incomplete and completed (collapsible) sections.
+ * Incomplete tasks are virtualized for performance with large datasets.
  */
 
+import { useMemo, useRef, memo } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { TaskItem } from "./task-item";
 import { AddTaskInput } from "./add-task-input";
 import type { Task, Project } from "@/lib/schemas";
@@ -22,7 +25,7 @@ interface TaskListProps {
   onTaskClick?: (id: string) => void;
 }
 
-export function TaskList({
+export const TaskList = memo(function TaskList({
   tasks,
   project,
   onToggleComplete,
@@ -32,8 +35,24 @@ export function TaskList({
   onExpand,
   onTaskClick,
 }: TaskListProps) {
-  const incompleteTasks = tasks.filter((t) => t.status !== "approved");
-  const completedTasks = tasks.filter((t) => t.status === "approved");
+  const incompleteTasks = useMemo(
+    () => tasks.filter((t) => t.status !== "approved"),
+    [tasks],
+  );
+  const completedTasks = useMemo(
+    () => tasks.filter((t) => t.status === "approved"),
+    [tasks],
+  );
+
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const rowVirtualizer = useVirtualizer({
+    count: incompleteTasks.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 52,
+    measureElement: (element) => element.getBoundingClientRect().height,
+    overscan: 5,
+  });
 
   return (
     <div className="space-y-4">
@@ -56,18 +75,49 @@ export function TaskList({
         onExpand={onExpand}
       />
 
-      {/* Incomplete Tasks */}
-      <div className="space-y-2">
-        {incompleteTasks.map((task) => (
-          <TaskItem
-            key={task.id}
-            task={task}
-            onToggleComplete={onToggleComplete}
-            onToggleStar={onToggleStar}
-            onDelete={onDelete}
-            onClick={onTaskClick}
-          />
-        ))}
+      {/* Incomplete Tasks (Virtualized) */}
+      <div
+        ref={parentRef}
+        className="overflow-auto"
+        style={{
+          maxHeight: incompleteTasks.length > 20 ? "60vh" : "none",
+          contain: incompleteTasks.length > 20 ? "strict" : "layout paint",
+        }}
+      >
+        <div
+          style={{
+            height: `${rowVirtualizer.getTotalSize()}px`,
+            position: "relative",
+            width: "100%",
+          }}
+        >
+          {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+            const task = incompleteTasks[virtualRow.index];
+            if (!task) return null;
+            return (
+              <div
+                key={virtualRow.key}
+                data-index={virtualRow.index}
+                ref={rowVirtualizer.measureElement}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+              >
+                <TaskItem
+                  task={task}
+                  onToggleComplete={onToggleComplete}
+                  onToggleStar={onToggleStar}
+                  onDelete={onDelete}
+                  onClick={onTaskClick}
+                />
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Completed Tasks (Collapsed) */}
@@ -107,4 +157,4 @@ export function TaskList({
       )}
     </div>
   );
-}
+});

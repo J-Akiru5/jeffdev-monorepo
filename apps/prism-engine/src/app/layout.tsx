@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
 import { ThemeWrapper } from "@/components/theme-wrapper";
+import { ChatAssistant } from "@syntaxure/ui/chat-assistant";
 import { ThemeBootstrap } from "@/components/theme-bootstrap";
 import { AuthWrapper } from "@/components/auth/auth-wrapper";
 import "./globals.css";
@@ -93,6 +94,16 @@ export default function RootLayout({
               color: "#fff",
             },
           }}
+        />
+        <ChatAssistant
+          apiEndpoint="/api/assistant"
+          title="Prism Context Engine Assistant"
+          welcomeMessage="Ask me anything about Prism Context Engine — features, integrations, MCP setup, and more."
+          suggestions={[
+            "How do I set up MCP with Cursor?",
+            "What is Context Governance?",
+            "How do I extract rules from a video?",
+          ]}
         />
       </body>
     </html>

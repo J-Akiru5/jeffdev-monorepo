@@ -1,7 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
+import { ConfirmDialog } from "@syntaxure/ui";
 import { useProjects } from "@/contexts/project-context";
+import { logAuditEvent } from "@/lib/audit";
 
 interface SidebarProjectItemProps {
   project: {
@@ -33,11 +36,17 @@ export function SidebarProjectItem({
   onSelect,
 }: SidebarProjectItemProps) {
   const { removeProject } = useProjects();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const handleDelete = () => {
-    if (confirm(`Delete "${project.name}"? Tasks in this list won't be deleted.`)) {
-      removeProject(project.id);
-    }
+    removeProject(project.id);
+    logAuditEvent({
+      action: "DELETE",
+      resource: "projects",
+      resourceId: project.id,
+      details: { name: project.name },
+    });
+    setShowDeleteDialog(false);
   };
 
   if (editing && !collapsed) {
@@ -80,7 +89,17 @@ export function SidebarProjectItem({
   }
 
   return (
-    <li className="group relative">
+    <>
+      <ConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        title={`Delete "${project.name}"?`}
+        description="Tasks in this list won't be deleted."
+        confirmLabel="Delete"
+        confirmVariant="danger"
+        onConfirm={handleDelete}
+      />
+      <li className="group relative">
       <button
         onClick={onSelect}
         className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-all ${
@@ -110,7 +129,7 @@ export function SidebarProjectItem({
               <Pencil className="h-3 w-3" />
             </button>
             <button
-              onClick={handleDelete}
+              onClick={() => setShowDeleteDialog(true)}
               className="rounded p-0.5 text-white/40 hover:text-red-400"
               title="Delete"
             >
@@ -120,5 +139,6 @@ export function SidebarProjectItem({
         )}
       </button>
     </li>
+    </>
   );
 }
