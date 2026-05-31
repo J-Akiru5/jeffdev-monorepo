@@ -35,6 +35,7 @@ import {
   ClipboardList,
   Package,
   Wrench,
+  Briefcase,
   type LucideIcon,
 } from "lucide-react";
 
@@ -151,8 +152,8 @@ function AgencyNav() {
       <NavItem href="/admin/agency/dashboard" icon={LayoutDashboard}>
         Dashboard
       </NavItem>
-      <NavItem href="/admin/agency/projects" icon={FolderKanban}>
-        Projects
+      <NavItem href="/admin/agency/works" icon={Briefcase}>
+        Works
       </NavItem>
       <NavItem href="/admin/agency/quotes" icon={Mail}>
         Quotes
@@ -177,9 +178,6 @@ function AgencyNav() {
       </NavItem>
       <NavItem href="/admin/agency/services" icon={Wrench}>
         Services Catalog
-      </NavItem>
-      <NavItem href="/admin/agency/case-studies" icon={FileText}>
-        Case Studies
       </NavItem>
       <NavItem href="/admin/agency/feedback" icon={Mail}>
         Feedback

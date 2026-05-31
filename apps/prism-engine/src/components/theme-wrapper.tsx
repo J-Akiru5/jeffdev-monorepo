@@ -17,7 +17,7 @@ import type { ReactNode } from "react";
 export function ThemeWrapper({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider
-      attribute="class"
+      attribute="data-theme"
       defaultTheme="dark"
       enableSystem={true}
       value={{ dark: "dark", light: "theme-light" }}

@@ -77,7 +77,7 @@ export default function RootLayout({
         <head>
           <ThemeBootstrap />
         </head>
-        <body className="antialiased bg-[#030303] text-white min-h-screen">
+        <body className="antialiased bg-void text-white min-h-screen">
           <ThemeWrapper>{children}</ThemeWrapper>
           <Toaster
             theme="dark"

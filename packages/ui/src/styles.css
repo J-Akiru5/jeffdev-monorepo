@@ -512,6 +512,15 @@ body {
   color: #6d28d9;
 }
 
+/* Hover state overrides for accent colors */
+.theme-light .hover\:text-cyan-400:hover {
+  color: #0f5f75;
+}
+
+.theme-light .hover\:text-red-400:hover {
+  color: #dc2626;
+}
+
 /* Emerald — 400 (#34d399) → 700 (#047857) */
 .theme-light .text-emerald-400 {
   color: #047857;

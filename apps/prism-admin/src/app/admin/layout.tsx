@@ -47,7 +47,7 @@ export default async function AdminLayout({
   const isFounder = role === "founder";
 
   return (
-    <div className="min-h-screen bg-[#030303]">
+    <div className="min-h-screen bg-void">
       {/* Shared Top Navbar (all screen sizes) */}
       <AdminTopNavbar />
 
