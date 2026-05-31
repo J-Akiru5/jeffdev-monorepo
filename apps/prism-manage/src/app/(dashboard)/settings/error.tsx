@@ -13,16 +13,16 @@ export default function SettingsError({
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10">
           <span className="text-2xl text-red-400">!</span>
         </div>
-        <h2 className="mb-2 text-xl font-semibold text-text-primary">
+        <h2 className="mb-2 text-xl font-semibold text-white">
           Something went wrong
         </h2>
-        <p className="mb-6 text-sm text-text-muted">
+        <p className="mb-6 text-sm text-white/40">
           {error.message ||
             "An unexpected error occurred while loading settings."}
         </p>
         <button
           onClick={reset}
-          className="inline-flex items-center gap-2 rounded-xl border border-glass-10 bg-elevated/50 px-5 py-2.5 text-sm font-medium text-text-primary transition-all hover:bg-elevated hover:shadow-lg"
+          className="inline-flex items-center gap-2 rounded-xl border border-glass-10 bg-elevated/50 px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-elevated hover:shadow-lg"
         >
           Try again
         </button>

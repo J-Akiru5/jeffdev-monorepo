@@ -138,8 +138,8 @@ export default function CalendarPage() {
     <div className="mx-auto max-w-6xl">
       {/* Page Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-text-primary">Calendar</h1>
-        <p className="mt-1 text-sm text-text-muted">
+        <h1 className="text-2xl font-bold text-white">Calendar</h1>
+        <p className="mt-1 text-sm text-white/40">
           View your tasks and events in calendar format
         </p>
       </div>
@@ -169,10 +169,10 @@ export default function CalendarPage() {
       {/* Sync Status */}
       <div className="mt-6 flex items-center justify-between rounded-lg border border-border glass-subtle p-4">
         <div>
-          <h3 className="text-sm font-medium text-text-primary">
+          <h3 className="text-sm font-medium text-white">
             Google Calendar Sync
           </h3>
-          <p className="text-xs text-text-muted">
+          <p className="text-xs text-white/40">
             {syncing ? "Syncing..." : "Connect to sync your events"}
           </p>
         </div>
@@ -186,7 +186,7 @@ export default function CalendarPage() {
           <button
             onClick={handleSync}
             disabled={syncing}
-            className="rounded-lg border border-white/10 bg-glass-04 px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-glass-08 disabled:opacity-50"
+            className="rounded-lg border border-white/10 bg-glass-04 px-4 py-2 text-sm font-medium text-white/70 transition-colors hover:bg-glass-08 disabled:opacity-50"
           >
             {syncing ? "Syncing..." : "Sync Now"}
           </button>

@@ -80,8 +80,8 @@ export default async function SettingsPage() {
     <div className="mx-auto max-w-2xl">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-text-primary">Settings</h1>
-        <p className="mt-1 text-sm text-text-muted">
+        <h1 className="text-2xl font-bold text-white">Settings</h1>
+        <p className="mt-1 text-sm text-white/40">
           Manage your tracker preferences and workspace
         </p>
       </div>
@@ -120,10 +120,10 @@ export default async function SettingsPage() {
               <Calendar className="h-6 w-6 text-cyan-400" />
             </div>
             <div className="flex-1">
-              <h2 className="text-lg font-semibold text-text-primary">
+              <h2 className="text-lg font-semibold text-white">
                 Google Calendar
               </h2>
-              <p className="mt-1 text-sm text-text-muted">
+              <p className="mt-1 text-sm text-white/40">
                 Connect your Google Calendar to sync events and tasks.
               </p>
 
@@ -174,14 +174,14 @@ export default async function SettingsPage() {
               <RefreshCw className="h-6 w-6 text-purple-400" />
             </div>
             <div className="flex-1">
-              <h2 className="text-lg font-semibold text-text-primary">Sync Options</h2>
-              <p className="mt-1 text-sm text-text-muted">
+              <h2 className="text-lg font-semibold text-white">Sync Options</h2>
+              <p className="mt-1 text-sm text-white/40">
                 Configure how tasks sync with your calendar.
               </p>
 
               <div className="mt-4 space-y-4">
                 <label className="flex items-center justify-between">
-                  <span className="text-sm text-text-secondary">
+                  <span className="text-sm text-white/70">
                     Auto-sync tasks with due dates
                   </span>
                   <input
@@ -191,7 +191,7 @@ export default async function SettingsPage() {
                   />
                 </label>
                 <label className="flex items-center justify-between">
-                  <span className="text-sm text-text-secondary">
+                  <span className="text-sm text-white/70">
                     Create calendar events for new tasks
                   </span>
                   <input
@@ -201,7 +201,7 @@ export default async function SettingsPage() {
                   />
                 </label>
                 <label className="flex items-center justify-between">
-                  <span className="text-sm text-text-secondary">
+                  <span className="text-sm text-white/70">
                     Import calendar events as tasks
                   </span>
                   <input
@@ -221,16 +221,16 @@ export default async function SettingsPage() {
               <Bell className="h-6 w-6 text-emerald-400" />
             </div>
             <div className="flex-1">
-              <h2 className="text-lg font-semibold text-text-primary">
+              <h2 className="text-lg font-semibold text-white">
                 Notifications
               </h2>
-              <p className="mt-1 text-sm text-text-muted">
+              <p className="mt-1 text-sm text-white/40">
                 Configure task reminders and alerts.
               </p>
 
               <div className="mt-4 space-y-4">
                 <label className="flex items-center justify-between">
-                  <span className="text-sm text-text-secondary">
+                  <span className="text-sm text-white/70">
                     Due date reminders
                   </span>
                   <input
@@ -240,7 +240,7 @@ export default async function SettingsPage() {
                   />
                 </label>
                 <label className="flex items-center justify-between">
-                  <span className="text-sm text-text-secondary">
+                  <span className="text-sm text-white/70">
                     Daily task summary
                   </span>
                   <input

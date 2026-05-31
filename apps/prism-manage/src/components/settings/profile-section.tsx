@@ -307,16 +307,16 @@ export function ProfileSection({
   // ── Render ──
 
   return (
-    <section className="rounded-xl border border-glass-10 glass-subtle p-6">
+    <section className="rounded-xl border border-white/[0.10] glass-subtle p-6">
       <div className="flex items-start gap-4">
-        <div className="rounded-lg bg-glass-10 p-3">
-          <User className="h-6 w-6 text-text-secondary" />
+        <div className="rounded-lg bg-white/[0.10] p-3">
+          <User className="h-6 w-6 text-white/70" />
         </div>
         <div className="flex-1 space-y-8">
           {/* ── Header ── */}
           <div>
-            <h2 className="text-lg font-semibold text-text-primary">Account</h2>
-            <p className="mt-1 text-sm text-text-muted">
+            <h2 className="text-lg font-semibold text-white">Account</h2>
+            <p className="mt-1 text-sm text-white/40">
               Manage your profile details, password, and role settings.
             </p>
           </div>
@@ -325,13 +325,13 @@ export function ProfileSection({
              SECTION 1: AVATAR
              ═══════════════════════════════════════════════════════════════ */}
           <div>
-            <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-text-muted">
+            <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/40">
               Profile Photo
             </label>
             <div className="flex items-center gap-5">
               {/* Avatar preview */}
               <div className="relative">
-                <div className="h-20 w-20 overflow-hidden rounded-full border-2 border-glass-20 bg-glass-10">
+                <div className="h-20 w-20 overflow-hidden rounded-full border-2 border-glass-20 bg-white/[0.10]">
                   {avatarPreview ? (
                     <img
                       src={avatarPreview}
@@ -340,7 +340,7 @@ export function ProfileSection({
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center">
-                      <User className="h-8 w-8 text-text-muted" />
+                      <User className="h-8 w-8 text-white/40" />
                     </div>
                   )}
                 </div>
@@ -380,13 +380,13 @@ export function ProfileSection({
                 {avatarPreview && (
                   <button
                     onClick={handleAvatarRemove}
-                    className="flex items-center gap-1.5 text-xs text-text-muted transition-colors hover:text-red-400"
+                    className="flex items-center gap-1.5 text-xs text-white/40 transition-colors hover:text-red-400"
                   >
                     <X className="h-3.5 w-3.5" />
                     Remove photo
                   </button>
                 )}
-                <p className="text-[10px] text-text-quiet">PNG, JPG or WebP. Max 2MB.</p>
+                <p className="text-[10px] text-white/30">PNG, JPG or WebP. Max 2MB.</p>
               </div>
             </div>
             {avatarError && (
@@ -402,11 +402,11 @@ export function ProfileSection({
              ═══════════════════════════════════════════════════════════════ */}
           <div className="space-y-4">
             <div>
-              <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-text-muted">
+              <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-white/40">
                 Email Address
               </label>
-              <p className="text-sm text-text-secondary">{userEmail}</p>
-              <p className="mt-0.5 text-[10px] text-text-quiet">
+              <p className="text-sm text-white/70">{userEmail}</p>
+              <p className="mt-0.5 text-[10px] text-white/30">
                 Email cannot be changed here. Contact support for email updates.
               </p>
             </div>
@@ -414,7 +414,7 @@ export function ProfileSection({
             <div>
               <label
                 htmlFor="profile-name"
-                className="mb-1 block text-xs font-medium uppercase tracking-wider text-text-muted"
+                className="mb-1 block text-xs font-medium uppercase tracking-wider text-white/40"
               >
                 Full Name
               </label>
@@ -423,7 +423,7 @@ export function ProfileSection({
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full rounded-lg border border-glass-10 bg-glass-04 px-3 py-2 text-sm text-text-primary outline-none transition-colors placeholder:text-text-quiet focus:border-cyan-500/50"
+                className="w-full rounded-lg border border-white/[0.10] bg-glass-04 px-3 py-2 text-sm text-white outline-none transition-colors placeholder:text-white/30 focus:border-cyan-500/50"
                 placeholder="Your name"
               />
             </div>
@@ -431,7 +431,7 @@ export function ProfileSection({
             <div>
               <label
                 htmlFor="profile-bio"
-                className="mb-1 block text-xs font-medium uppercase tracking-wider text-text-muted"
+                className="mb-1 block text-xs font-medium uppercase tracking-wider text-white/40"
               >
                 Bio
               </label>
@@ -440,7 +440,7 @@ export function ProfileSection({
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 rows={3}
-                className="w-full resize-none rounded-lg border border-glass-10 bg-glass-04 px-3 py-2 text-sm text-text-primary outline-none transition-colors placeholder:text-text-quiet focus:border-cyan-500/50"
+                className="w-full resize-none rounded-lg border border-white/[0.10] bg-glass-04 px-3 py-2 text-sm text-white outline-none transition-colors placeholder:text-white/30 focus:border-cyan-500/50"
                 placeholder="A short description about yourself"
               />
             </div>
@@ -449,7 +449,7 @@ export function ProfileSection({
               <div>
                 <label
                   htmlFor="profile-company"
-                  className="mb-1 block text-xs font-medium uppercase tracking-wider text-text-muted"
+                  className="mb-1 block text-xs font-medium uppercase tracking-wider text-white/40"
                 >
                   <Building2 className="mr-1 inline h-3 w-3" />
                   Company
@@ -459,7 +459,7 @@ export function ProfileSection({
                   type="text"
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
-                  className="w-full rounded-lg border border-glass-10 bg-glass-04 px-3 py-2 text-sm text-text-primary outline-none transition-colors placeholder:text-text-quiet focus:border-cyan-500/50"
+                  className="w-full rounded-lg border border-white/[0.10] bg-glass-04 px-3 py-2 text-sm text-white outline-none transition-colors placeholder:text-white/30 focus:border-cyan-500/50"
                   placeholder="Company name"
                 />
               </div>
@@ -467,7 +467,7 @@ export function ProfileSection({
               <div>
                 <label
                   htmlFor="profile-phone"
-                  className="mb-1 block text-xs font-medium uppercase tracking-wider text-text-muted"
+                  className="mb-1 block text-xs font-medium uppercase tracking-wider text-white/40"
                 >
                   <Phone className="mr-1 inline h-3 w-3" />
                   Phone
@@ -477,7 +477,7 @@ export function ProfileSection({
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full rounded-lg border border-glass-10 bg-glass-04 px-3 py-2 text-sm text-text-primary outline-none transition-colors placeholder:text-text-quiet focus:border-cyan-500/50"
+                  className="w-full rounded-lg border border-white/[0.10] bg-glass-04 px-3 py-2 text-sm text-white outline-none transition-colors placeholder:text-white/30 focus:border-cyan-500/50"
                   placeholder="+1 (555) 000-0000"
                 />
               </div>
@@ -486,7 +486,7 @@ export function ProfileSection({
             <div>
               <label
                 htmlFor="profile-tz"
-                className="mb-1 block text-xs font-medium uppercase tracking-wider text-text-muted"
+                className="mb-1 block text-xs font-medium uppercase tracking-wider text-white/40"
               >
                 <Globe className="mr-1 inline h-3 w-3" />
                 Timezone
@@ -495,7 +495,7 @@ export function ProfileSection({
                 id="profile-tz"
                 value={timezone}
                 onChange={(e) => setTimezone(e.target.value)}
-                className="w-full appearance-none rounded-lg border border-glass-10 bg-glass-04 px-3 py-2 text-sm text-text-primary outline-none transition-colors focus:border-cyan-500/50"
+                className="w-full appearance-none rounded-lg border border-white/[0.10] bg-glass-04 px-3 py-2 text-sm text-white outline-none transition-colors focus:border-cyan-500/50"
               >
                 {TIMEZONES.map((tz) => (
                   <option key={tz} value={tz}>
@@ -539,14 +539,14 @@ export function ProfileSection({
           {/* ═══════════════════════════════════════════════════════════════
              SECTION 3: CHANGE PASSWORD
              ═══════════════════════════════════════════════════════════════ */}
-          <div className="border-t border-glass-10 pt-6">
+          <div className="border-t border-white/[0.10] pt-6">
             <div className="flex items-start gap-3">
               <div className="rounded-lg bg-amber-500/10 p-2.5">
                 <Lock className="h-5 w-5 text-amber-400" />
               </div>
               <div className="flex-1">
-                <h3 className="text-base font-semibold text-text-primary">Change Password</h3>
-                <p className="mt-1 text-sm text-text-muted">
+                <h3 className="text-base font-semibold text-white">Change Password</h3>
+                <p className="mt-1 text-sm text-white/40">
                   Update your password. You&apos;ll need to enter your current password to make changes.
                 </p>
 
@@ -555,7 +555,7 @@ export function ProfileSection({
                   <div>
                     <label
                       htmlFor="current-pw"
-                      className="mb-1 block text-xs font-medium uppercase tracking-wider text-text-muted"
+                      className="mb-1 block text-xs font-medium uppercase tracking-wider text-white/40"
                     >
                       Current Password
                     </label>
@@ -565,13 +565,13 @@ export function ProfileSection({
                         type={showCurrentPw ? "text" : "password"}
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
-                        className="w-full rounded-lg border border-glass-10 bg-glass-04 px-3 py-2 pr-9 text-sm text-text-primary outline-none transition-colors focus:border-cyan-500/50"
+                        className="w-full rounded-lg border border-white/[0.10] bg-glass-04 px-3 py-2 pr-9 text-sm text-white outline-none transition-colors focus:border-cyan-500/50"
                         placeholder="••••••••"
                       />
                       <button
                         type="button"
                         onClick={() => setShowCurrentPw(!showCurrentPw)}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
                       >
                         {showCurrentPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
@@ -582,7 +582,7 @@ export function ProfileSection({
                   <div>
                     <label
                       htmlFor="new-pw"
-                      className="mb-1 block text-xs font-medium uppercase tracking-wider text-text-muted"
+                      className="mb-1 block text-xs font-medium uppercase tracking-wider text-white/40"
                     >
                       New Password
                     </label>
@@ -592,13 +592,13 @@ export function ProfileSection({
                         type={showNewPw ? "text" : "password"}
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="w-full rounded-lg border border-glass-10 bg-glass-04 px-3 py-2 pr-9 text-sm text-text-primary outline-none transition-colors focus:border-cyan-500/50"
+                        className="w-full rounded-lg border border-white/[0.10] bg-glass-04 px-3 py-2 pr-9 text-sm text-white outline-none transition-colors focus:border-cyan-500/50"
                         placeholder="••••••••"
                       />
                       <button
                         type="button"
                         onClick={() => setShowNewPw(!showNewPw)}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-secondary"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70"
                       >
                         {showNewPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
@@ -607,10 +607,10 @@ export function ProfileSection({
                     {/* Password strength */}
                     {newPassword && (
                       <div className="mt-2 space-y-1">
-                        <div className="flex items-center justify-between text-[10px] font-mono text-text-muted">
+                        <div className="flex items-center justify-between text-[10px] font-mono text-white/40">
                           <span>Strength: {pwStrength.label}</span>
                         </div>
-                        <div className="h-1 w-full overflow-hidden rounded-full bg-glass-10">
+                        <div className="h-1 w-full overflow-hidden rounded-full bg-white/[0.10]">
                           <div
                             className={`h-full ${pwStrength.color} transition-all duration-300`}
                             style={{ width: `${(pwStrength.score / 4) * 100}%` }}
@@ -624,7 +624,7 @@ export function ProfileSection({
                   <div>
                     <label
                       htmlFor="confirm-pw"
-                      className="mb-1 block text-xs font-medium uppercase tracking-wider text-text-muted"
+                      className="mb-1 block text-xs font-medium uppercase tracking-wider text-white/40"
                     >
                       Confirm New Password
                     </label>
@@ -633,12 +633,12 @@ export function ProfileSection({
                       type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className={`w-full rounded-lg border bg-glass-04 px-3 py-2 text-sm text-text-primary outline-none transition-colors ${
+                      className={`w-full rounded-lg border bg-glass-04 px-3 py-2 text-sm text-white outline-none transition-colors ${
                         confirmPassword && !passwordsMatch
                           ? "border-red-500/50"
                           : confirmPassword && passwordsMatch
                             ? "border-emerald-500/50"
-                            : "border-glass-10"
+                            : "border-white/[0.10]"
                       } focus:border-cyan-500/50`}
                       placeholder="••••••••"
                     />
@@ -690,21 +690,21 @@ export function ProfileSection({
           {/* ═══════════════════════════════════════════════════════════════
              SECTION 4: ROLE & C-LEVEL TITLE
              ═══════════════════════════════════════════════════════════════ */}
-          <div className="border-t border-glass-10 pt-6">
+          <div className="border-t border-white/[0.10] pt-6">
             <div className="flex items-start gap-3">
               <div className="rounded-lg bg-purple-500/10 p-2.5">
                 <Shield className="h-5 w-5 text-purple-400" />
               </div>
               <div className="flex-1">
-                <h3 className="text-base font-semibold text-text-primary">Role & Permissions</h3>
-                <p className="mt-1 text-sm text-text-muted">
+                <h3 className="text-base font-semibold text-white">Role & Permissions</h3>
+                <p className="mt-1 text-sm text-white/40">
                   Your current role and permissions within the Syntaxure Labs workspace.
                 </p>
 
                 <div className="mt-4 space-y-4">
                   {/* Role badge */}
                   <div>
-                    <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-text-muted">
+                    <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-white/40">
                       Current Role
                     </label>
                     <span
@@ -722,7 +722,7 @@ export function ProfileSection({
                       {isFounder ? "Founder" : "Employee"}
                     </span>
                     {isFounder && (
-                      <p className="mt-1 text-[10px] text-text-quiet">
+                      <p className="mt-1 text-[10px] text-white/30">
                         Founders have full access to all departments, members, and settings.
                       </p>
                     )}
@@ -731,13 +731,13 @@ export function ProfileSection({
                   {/* C-Level Title Editor — founder only */}
                   {isFounder && (
                     <div>
-                      <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-text-muted">
+                      <label className="mb-1 block text-xs font-medium uppercase tracking-wider text-white/40">
                         C-Level Title
                       </label>
-                      <p className="mb-3 text-xs text-text-tertiary">
+                      <p className="mb-3 text-xs text-white/50">
                         Refine your founder permissions. This scopes your sidebar and
                         member management to a specific department. Set to{" "}
-                        <strong className="text-text-secondary">none</strong> for
+                        <strong className="text-white/70">none</strong> for
                         unrestricted access.
                       </p>
 
@@ -748,15 +748,15 @@ export function ProfileSection({
                           className={`flex items-center gap-3 rounded-lg border px-4 py-3 text-left text-sm transition-all ${
                             selected === null
                               ? "border-cyan-500/40 bg-cyan-500/10 text-cyan-400"
-                              : "border-glass-10 text-text-tertiary hover:border-border-active hover:text-text-secondary"
+                              : "border-white/[0.10] text-white/50 hover:border-border-active hover:text-white/70"
                           }`}
                         >
-                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-glass-10 text-xs font-bold text-text-muted">
+                          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/[0.10] text-xs font-bold text-white/40">
                             —
                           </span>
                           <div>
                             <span className="font-medium">None</span>
-                            <p className="text-[11px] text-text-quiet">
+                            <p className="text-[11px] text-white/30">
                               Full founder access
                             </p>
                           </div>
@@ -769,21 +769,21 @@ export function ProfileSection({
                             className={`flex items-center gap-3 rounded-lg border px-4 py-3 text-left text-sm transition-all ${
                               selected === opt.value
                                 ? "border-cyan-500/40 bg-cyan-500/10 text-cyan-400"
-                                : "border-glass-10 text-text-tertiary hover:border-border-active hover:text-text-secondary"
+                                : "border-white/[0.10] text-white/50 hover:border-border-active hover:text-white/70"
                             }`}
                           >
                             <span
                               className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${
                                 selected === opt.value
                                   ? "bg-cyan-500/20 text-cyan-400"
-                                  : "bg-glass-10 text-text-muted"
+                                  : "bg-white/[0.10] text-white/40"
                               }`}
                             >
                               {opt.label.slice(0, 2)}
                             </span>
                             <div>
                               <span className="font-medium">{opt.label}</span>
-                              <p className="text-[11px] text-text-quiet">
+                              <p className="text-[11px] text-white/30">
                                 {opt.description}
                               </p>
                             </div>
@@ -830,14 +830,14 @@ export function ProfileSection({
           {/* ═══════════════════════════════════════════════════════════════
              SECTION 5: CROSS-APP ACCESS
              ═══════════════════════════════════════════════════════════════ */}
-          <div className="border-t border-glass-10 pt-6">
+          <div className="border-t border-white/[0.10] pt-6">
             <div className="flex items-start gap-3">
               <div className="rounded-lg bg-blue-500/10 p-2.5">
                 <ExternalLink className="h-5 w-5 text-blue-400" />
               </div>
               <div className="flex-1">
-                <h3 className="text-base font-semibold text-text-primary">Cross-App Access</h3>
-                <p className="mt-1 text-sm text-text-muted">
+                <h3 className="text-base font-semibold text-white">Cross-App Access</h3>
+                <p className="mt-1 text-sm text-white/40">
                   Your account is shared across all Syntaxure apps. Jump between them
                   without signing in again.
                 </p>
@@ -846,56 +846,56 @@ export function ProfileSection({
                   {/* Prism Manage */}
                   <a
                     href={`${process.env.NEXT_PUBLIC_MANAGE_URL || "http://localhost:3007"}/settings`}
-                    className="flex items-center gap-3 rounded-lg border border-glass-10 bg-glass-04 px-4 py-3 text-sm transition-all hover:border-cyan-500/30 hover:bg-black/30"
+                    className="flex items-center gap-3 rounded-lg border border-white/[0.10] bg-glass-04 px-4 py-3 text-sm transition-all hover:border-cyan-500/30 hover:bg-black/30"
                   >
                     <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/10 text-xs font-bold text-cyan-400">
                       M
                     </span>
                     <div>
-                      <span className="font-medium text-text-secondary">Manage</span>
-                      <p className="text-[10px] text-text-quiet">Task management</p>
+                      <span className="font-medium text-white/70">Manage</span>
+                      <p className="text-[10px] text-white/30">Task management</p>
                     </div>
                   </a>
 
                   {/* Prism Admin */}
                   <a
                     href={`${process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3004"}/admin`}
-                    className="flex items-center gap-3 rounded-lg border border-glass-10 bg-glass-04 px-4 py-3 text-sm transition-all hover:border-purple-500/30 hover:bg-black/30"
+                    className="flex items-center gap-3 rounded-lg border border-white/[0.10] bg-glass-04 px-4 py-3 text-sm transition-all hover:border-purple-500/30 hover:bg-black/30"
                   >
                     <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/10 text-xs font-bold text-purple-400">
                       A
                     </span>
                     <div>
-                      <span className="font-medium text-text-secondary">Admin</span>
-                      <p className="text-[10px] text-text-quiet">Platform admin</p>
+                      <span className="font-medium text-white/70">Admin</span>
+                      <p className="text-[10px] text-white/30">Platform admin</p>
                     </div>
                   </a>
 
                   {/* Prism Engine */}
                   <a
                     href={`${process.env.NEXT_PUBLIC_PRISM_URL || "http://localhost:3001"}/dashboard`}
-                    className="flex items-center gap-3 rounded-lg border border-glass-10 bg-glass-04 px-4 py-3 text-sm transition-all hover:border-emerald-500/30 hover:bg-black/30"
+                    className="flex items-center gap-3 rounded-lg border border-white/[0.10] bg-glass-04 px-4 py-3 text-sm transition-all hover:border-emerald-500/30 hover:bg-black/30"
                   >
                     <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-xs font-bold text-emerald-400">
                       E
                     </span>
                     <div>
-                      <span className="font-medium text-text-secondary">Engine</span>
-                      <p className="text-[10px] text-text-quiet">Prism product</p>
+                      <span className="font-medium text-white/70">Engine</span>
+                      <p className="text-[10px] text-white/30">Prism product</p>
                     </div>
                   </a>
 
                   {/* Syntaxure Labs */}
                   <a
                     href={`${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/admin/profile`}
-                    className="flex items-center gap-3 rounded-lg border border-glass-10 bg-glass-04 px-4 py-3 text-sm transition-all hover:border-amber-500/30 hover:bg-black/30"
+                    className="flex items-center gap-3 rounded-lg border border-white/[0.10] bg-glass-04 px-4 py-3 text-sm transition-all hover:border-amber-500/30 hover:bg-black/30"
                   >
                     <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 text-xs font-bold text-amber-400">
                       S
                     </span>
                     <div>
-                      <span className="font-medium text-text-secondary">Labs</span>
-                      <p className="text-[10px] text-text-quiet">Company site</p>
+                      <span className="font-medium text-white/70">Labs</span>
+                      <p className="text-[10px] text-white/30">Company site</p>
                     </div>
                   </a>
                 </div>
@@ -973,7 +973,7 @@ function DevSessionBridge() {
       <p className="text-xs font-medium uppercase tracking-wider text-amber-400">
         Dev Auth Bridge
       </p>
-      <p className="mt-1 text-[11px] text-text-quiet">
+      <p className="mt-1 text-[11px] text-white/30">
         Localhost cookies don&apos;t share across ports. Export your session from one
         app and import it into another.
       </p>
@@ -981,7 +981,7 @@ function DevSessionBridge() {
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <button
           onClick={handleExport}
-          className="flex items-center gap-1.5 rounded-md border border-glass-10 bg-glass-04 px-3 py-1.5 text-xs text-text-secondary transition-colors hover:border-amber-500/30 hover:text-amber-400"
+          className="flex items-center gap-1.5 rounded-md border border-white/[0.10] bg-glass-04 px-3 py-1.5 text-xs text-white/70 transition-colors hover:border-amber-500/30 hover:text-amber-400"
         >
           {copied ? (
             <>
@@ -998,7 +998,7 @@ function DevSessionBridge() {
 
         <button
           onClick={() => setImportState({ show: true })}
-          className="flex items-center gap-1.5 rounded-md border border-glass-10 bg-glass-04 px-3 py-1.5 text-xs text-text-secondary transition-colors hover:border-amber-500/30 hover:text-amber-400"
+          className="flex items-center gap-1.5 rounded-md border border-white/[0.10] bg-glass-04 px-3 py-1.5 text-xs text-white/70 transition-colors hover:border-amber-500/30 hover:text-amber-400"
         >
           <ClipboardPaste className="h-3.5 w-3.5" />
           Import Session
@@ -1012,7 +1012,7 @@ function DevSessionBridge() {
             onChange={(e) => setPasteValue(e.target.value)}
             placeholder='{"access_token": "...", "refresh_token": "..."}'
             rows={3}
-            className="w-full resize-none rounded-lg border border-glass-10 bg-glass-04 px-3 py-2 font-mono text-[11px] text-text-primary outline-none transition-colors placeholder:text-text-quiet focus:border-amber-500/50"
+            className="w-full resize-none rounded-lg border border-white/[0.10] bg-glass-04 px-3 py-2 font-mono text-[11px] text-white outline-none transition-colors placeholder:text-white/30 focus:border-amber-500/50"
           />
           <div className="flex items-center gap-2">
             <button
@@ -1031,7 +1031,7 @@ function DevSessionBridge() {
             </button>
             <button
               onClick={() => setImportState({ show: false })}
-              className="text-[11px] text-text-muted hover:text-text-secondary"
+              className="text-[11px] text-white/40 hover:text-white/70"
             >
               Cancel
             </button>

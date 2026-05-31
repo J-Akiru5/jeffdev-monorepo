@@ -98,26 +98,26 @@ export function WorkspaceMembersSettings({
   };
 
   return (
-    <section className="rounded-xl border border-glass-10 glass-subtle p-6">
+    <section className="rounded-xl border border-white/[0.10] glass-subtle p-6">
       <div className="flex items-start gap-4">
         <div className="rounded-lg bg-purple-500/10 p-3">
           <Users className="h-6 w-6 text-purple-400" />
         </div>
         <div className="flex-1">
-          <h2 className="text-lg font-semibold text-text-primary">Workspace Members</h2>
-          <p className="mt-1 text-sm text-text-muted">
+          <h2 className="text-lg font-semibold text-white">Workspace Members</h2>
+          <p className="mt-1 text-sm text-white/40">
             Manage roles and department assignments
             {!isFounder && <span className="block mt-1 italic">(Only founders can edit members)</span>}
           </p>
 
           {isCLevelScoped && cLevelDeptName && (
-            <p className="mt-2 text-xs text-text-tertiary">
-              Showing members in <strong className="text-text-secondary">{cLevelDeptName}</strong> (your C-Level scope).
+            <p className="mt-2 text-xs text-white/50">
+              Showing members in <strong className="text-white/70">{cLevelDeptName}</strong> (your C-Level scope).
             </p>
           )}
 
           {filteredMembers.length === 0 ? (
-            <p className="mt-4 text-sm text-text-tertiary">No members found.</p>
+            <p className="mt-4 text-sm text-white/50">No members found.</p>
           ) : (
             <div className="mt-4 space-y-2">
               {filteredMembers.map((member) => {
@@ -128,12 +128,12 @@ export function WorkspaceMembersSettings({
                 return (
                   <div
                     key={member.userId}
-                    className={`flex items-center justify-between rounded-lg border border-glass-10 px-4 py-3 transition-all ${
-                      isCurrentUser ? "border-cyan-500/20 bg-cyan-500/5" : "bg-elevated/30"
+                    className={`flex items-center justify-between rounded-lg border border-white/[0.10] px-4 py-3 transition-all ${
+                      isCurrentUser ? "border-cyan-500/20 bg-cyan-500/5" : "bg-white/[0.02]"
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-glass-10 text-xs font-medium text-text-secondary">
+                      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/[0.10] text-xs font-medium text-white/70">
                         {member.avatarUrl ? (
                           <img
                             src={member.avatarUrl}
@@ -145,15 +145,15 @@ export function WorkspaceMembersSettings({
                         )}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-text-primary truncate">
+                        <p className="text-sm font-medium text-white truncate">
                           {member.name}
                           {isCurrentUser && (
-                            <span className="ml-2 text-[10px] text-text-muted font-mono uppercase">
+                            <span className="ml-2 text-[10px] text-white/40 font-mono uppercase">
                               You
                             </span>
                           )}
                         </p>
-                        <p className="text-xs text-text-muted truncate">{member.email}</p>
+                        <p className="text-xs text-white/40 truncate">{member.email}</p>
                       </div>
                     </div>
 
@@ -177,7 +177,7 @@ export function WorkspaceMembersSettings({
                             <option value="employee">Employee</option>
                           </select>
                           {isLoadingRole && (
-                            <Loader2 className="pointer-events-none absolute right-1 top-1/2 h-3 w-3 -translate-y-1/2 animate-spin text-text-muted" />
+                            <Loader2 className="pointer-events-none absolute right-1 top-1/2 h-3 w-3 -translate-y-1/2 animate-spin text-white/40" />
                           )}
                         </div>
                       ) : (
@@ -210,7 +210,7 @@ export function WorkspaceMembersSettings({
                               );
                             }}
                             disabled={isLoadingDept}
-                            className="appearance-none rounded-md border border-glass-10 bg-elevated/50 px-2 py-1 text-xs text-text-muted focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+                            className="appearance-none rounded-md border border-white/[0.10] bg-white/[0.02] px-2 py-1 text-xs text-white/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
                           >
                             <option value="">No dept.</option>
                             {departments.map((d) => (
@@ -220,7 +220,7 @@ export function WorkspaceMembersSettings({
                             ))}
                           </select>
                           {isLoadingDept && (
-                            <Loader2 className="pointer-events-none absolute right-1 top-1/2 h-3 w-3 -translate-y-1/2 animate-spin text-text-muted" />
+                            <Loader2 className="pointer-events-none absolute right-1 top-1/2 h-3 w-3 -translate-y-1/2 animate-spin text-white/40" />
                           )}
                         </div>
                       )}
@@ -230,7 +230,7 @@ export function WorkspaceMembersSettings({
                         <button
                           onClick={() => handleRemoveMember(member.userId, member.name)}
                           disabled={loadingMap[`remove-${member.userId}`]}
-                          className="rounded-md p-1.5 text-text-muted transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:opacity-50"
+                          className="rounded-md p-1.5 text-white/40 transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:opacity-50"
                           title="Remove from workspace"
                         >
                           {loadingMap[`remove-${member.userId}`] ? (

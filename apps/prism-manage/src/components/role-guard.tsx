@@ -107,9 +107,9 @@ export function RoleGuard({
   if (!authorized) {
     return redirectOnDeny ? null : (
       <div className="flex flex-col items-center justify-center py-20">
-        <ShieldAlert className="h-12 w-12 text-text-quiet mb-4" />
-        <h2 className="text-lg font-semibold text-text-primary">Access Denied</h2>
-        <p className="mt-1 text-sm text-text-muted">
+        <ShieldAlert className="h-12 w-12 text-white/30 mb-4" />
+        <h2 className="text-lg font-semibold text-white">Access Denied</h2>
+        <p className="mt-1 text-sm text-white/40">
           You don&apos;t have access to the {department} dashboard.
         </p>
       </div>

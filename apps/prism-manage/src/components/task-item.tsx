@@ -41,7 +41,7 @@ export function TaskItem({
 
   return (
     <div
-      className={`group flex items-start gap-3 rounded-lg border border-glass-05 glass-subtle p-3 transition-all hover:border-glass-10 hover:bg-glass-04 ${
+      className={`group flex items-start gap-3 rounded-lg border border-white/[0.06] glass-subtle p-3 transition-all hover:border-white/[0.10] hover:bg-glass-04 ${
         isCompleted ? "opacity-50" : ""
       } ${isInProgress ? "border-l-2 border-l-blue-500/40" : ""}`}
     >
@@ -89,7 +89,7 @@ export function TaskItem({
         >
           <p
             className={`text-sm ${
-              isCompleted ? "text-text-tertiary line-through" : "text-text-primary"
+              isCompleted ? "text-white/50 line-through" : "text-white"
             }`}
           >
             {task.title}
@@ -97,7 +97,7 @@ export function TaskItem({
         </button>
 
         {/* Meta Info Row */}
-        <div className="mt-1 flex items-center gap-2 text-[11px] text-text-muted">
+        <div className="mt-1 flex items-center gap-2 text-[11px] text-white/40">
           {/* Task type label (visible on hover / when space allows) */}
           <span
             className="hidden items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium sm:inline-flex"
@@ -135,7 +135,7 @@ export function TaskItem({
 
           {/* Description preview */}
           {task.description && !task.dueDate && (
-            <span className="max-w-[150px] truncate text-text-quiet">
+            <span className="max-w-[150px] truncate text-white/30">
               {task.description}
             </span>
           )}
@@ -150,7 +150,7 @@ export function TaskItem({
           className={`rounded p-1 transition-colors ${
             task.isStarred
               ? "text-yellow-400 hover:text-yellow-300"
-              : "text-text-quiet hover:text-yellow-400"
+              : "text-white/30 hover:text-yellow-400"
           }`}
         >
           <Star
@@ -166,7 +166,7 @@ export function TaskItem({
               e.stopPropagation();
               setShowMenu(!showMenu);
             }}
-            className="rounded p-1 text-text-quiet transition-colors hover:text-text-primary"
+            className="rounded p-1 text-white/30 transition-colors hover:text-white"
           >
             <MoreVertical className="h-4 w-4" />
           </button>
@@ -178,13 +178,13 @@ export function TaskItem({
                 className="fixed inset-0 z-10"
                 onClick={() => setShowMenu(false)}
               />
-              <div className="absolute right-0 top-full z-20 mt-1 w-32 rounded-lg border border-glass-10 bg-elevated py-1 shadow-xl">
+              <div className="absolute right-0 top-full z-20 mt-1 w-32 rounded-lg border border-white/[0.10] bg-[#0a0a0a] py-1 shadow-xl">
                 <button
                   onClick={() => {
                     onClick?.(task.id);
                     setShowMenu(false);
                   }}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-text-tertiary hover:bg-glass-05 hover:text-text-primary"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-white/50 hover:bg-white/[0.04] hover:text-white"
                 >
                   Edit
                 </button>
@@ -193,7 +193,7 @@ export function TaskItem({
                     onDelete?.(task.id);
                     setShowMenu(false);
                   }}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-glass-05"
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-white/[0.04]"
                 >
                   <Trash2 className="h-4 w-4" />
                   Delete

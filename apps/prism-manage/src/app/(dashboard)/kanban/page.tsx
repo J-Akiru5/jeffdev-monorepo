@@ -196,8 +196,8 @@ export default function KanbanPage() {
     <div className="mx-auto max-w-7xl">
       {/* Page Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-text-primary">Kanban Board</h1>
-        <p className="mt-1 text-sm text-text-muted">
+        <h1 className="text-2xl font-bold text-white">Kanban Board</h1>
+        <p className="mt-1 text-sm text-white/40">
           Drag and drop tasks between columns
         </p>
       </div>
@@ -217,10 +217,10 @@ export default function KanbanPage() {
                 className="h-2 w-2 rounded-full"
                 style={{ backgroundColor: column.color }}
               />
-              <h2 className="text-sm font-semibold text-text-primary">
+              <h2 className="text-sm font-semibold text-white">
                 {column.title}
               </h2>
-              <span className="ml-auto font-mono text-xs text-text-quiet">
+              <span className="ml-auto font-mono text-xs text-white/30">
                 {getTasksByColumn(column.id).length}
               </span>
             </div>
@@ -248,7 +248,7 @@ export default function KanbanPage() {
                           <span className="flex-shrink-0 text-xs">
                             {typeConfig.icon}
                           </span>
-                          <p className="text-sm text-text-primary">{task.title}</p>
+                          <p className="text-sm text-white">{task.title}</p>
                         </div>
                         <div className="mt-2 flex items-center gap-2">
                           {project && (
@@ -259,7 +259,7 @@ export default function KanbanPage() {
                                   backgroundColor: project.color || "var(--color-cyan)",
                                 }}
                               />
-                              <span className="text-[11px] text-text-muted">
+                              <span className="text-[11px] text-white/40">
                                 {project.name}
                               </span>
                             </>
@@ -292,7 +292,7 @@ export default function KanbanPage() {
               {/* Add Task Button */}
               <button
                 onClick={() => handleAddTask(column.id)}
-                className="flex w-full items-center gap-2 rounded-lg border border-dashed border-border p-3 text-sm text-text-quiet transition-colors hover:border-border-active hover:text-text-tertiary"
+                className="flex w-full items-center gap-2 rounded-lg border border-dashed border-border p-3 text-sm text-white/30 transition-colors hover:border-border-active hover:text-white/50"
               >
                 <Plus className="h-4 w-4" />
                 Add task

@@ -215,8 +215,8 @@ export function TaskSheet({
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
             className={`${
               isIntercepted
-                ? "fixed inset-y-0 right-0 z-50 w-full max-w-[640px] border-l border-border bg-elevated shadow-2xl"
-                : "relative w-full max-w-2xl rounded-xl border border-border bg-elevated shadow-2xl"
+                ? "fixed inset-y-0 right-0 z-50 w-full max-w-[640px] border-l border-border bg-[#0a0a0a] shadow-2xl"
+                : "relative w-full max-w-2xl rounded-xl border border-border bg-[#0a0a0a] shadow-2xl"
             } max-h-screen overflow-hidden sm:max-h-none`}
           >
             <div className="flex h-full flex-col">
@@ -237,7 +237,7 @@ export function TaskSheet({
                         value: dept.id,
                         label: dept.name,
                       }))}
-                      buttonClassName="h-9 rounded-lg border border-border bg-glass-04 text-xs text-text-secondary hover:border-border-active hover:bg-black/30 focus:border-cyan-500/50 py-1.5 px-3 min-w-[130px]"
+                      buttonClassName="h-9 rounded-lg border border-border bg-glass-04 text-xs text-white/70 hover:border-border-active hover:bg-black/30 focus:border-cyan-500/50 py-1.5 px-3 min-w-[130px]"
                       optionsClassName="min-w-[150px]"
                     />
                   )}
@@ -255,7 +255,7 @@ export function TaskSheet({
                       value: p.id,
                       label: p.name,
                     }))}
-                    buttonClassName="h-9 rounded-lg border border-border bg-glass-04 text-xs text-text-secondary hover:border-border-active hover:bg-black/30 focus:border-cyan-500/50 py-1.5 px-3 min-w-[130px]"
+                    buttonClassName="h-9 rounded-lg border border-border bg-glass-04 text-xs text-white/70 hover:border-border-active hover:bg-black/30 focus:border-cyan-500/50 py-1.5 px-3 min-w-[130px]"
                     optionsClassName="min-w-[150px]"
                   />
                 </div>
@@ -274,7 +274,7 @@ export function TaskSheet({
                   </button>
                   <button
                     onClick={onClose}
-                    className="rounded-lg p-2 text-text-muted transition-colors hover:bg-glass-05 hover:text-text-primary"
+                    className="rounded-lg p-2 text-white/40 transition-colors hover:bg-white/[0.04] hover:text-white"
                   >
                     <X className="h-5 w-5" />
                   </button>
@@ -297,13 +297,13 @@ export function TaskSheet({
                       onFocus={(e) => autoExpand(e.target)}
                       placeholder="Task title..."
                       rows={1}
-                      className="w-full resize-none bg-transparent text-2xl font-bold text-text-primary placeholder:text-text-faint focus:outline-none"
+                      className="w-full resize-none bg-transparent text-2xl font-bold text-white placeholder:text-text-faint focus:outline-none"
                     />
                   </div>
 
                   {/* Type Selector */}
                   <div>
-                    <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-text-muted">
+                    <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/40">
                       Type
                     </label>
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -321,7 +321,7 @@ export function TaskSheet({
                             className={`flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 text-xs transition-all ${
                               isActive
                                 ? "border-transparent shadow-sm"
-                                : "border-border glass-subtle text-text-tertiary hover:border-border-active hover:text-text-secondary"
+                                : "border-border glass-subtle text-white/50 hover:border-border-active hover:text-white/70"
                             }`}
                             style={
                               isActive
@@ -345,7 +345,7 @@ export function TaskSheet({
 
                   {/* Description */}
                   <div>
-                    <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-text-muted">
+                    <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/40">
                       Description
                     </label>
                     <textarea
@@ -359,19 +359,19 @@ export function TaskSheet({
                       }}
                       placeholder="Add reproduction steps, acceptance criteria, or error logs..."
                       rows={4}
-                      className="w-full resize-none rounded-xl border border-border glass-subtle px-4 py-3 text-sm text-text-secondary placeholder:text-text-faint focus:border-cyan-500/30 focus:outline-none"
+                      className="w-full resize-none rounded-xl border border-border glass-subtle px-4 py-3 text-sm text-white/70 placeholder:text-text-faint focus:border-cyan-500/30 focus:outline-none"
                     />
                   </div>
 
                   {/* ── Metadata Grid ── */}
                   <div>
-                    <label className="mb-3 block text-xs font-medium uppercase tracking-wider text-text-muted">
+                    <label className="mb-3 block text-xs font-medium uppercase tracking-wider text-white/40">
                       Details
                     </label>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       {/* Status (RBAC-aware) */}
                       <div>
-                        <label className="mb-1.5 block text-[11px] text-text-muted">
+                        <label className="mb-1.5 block text-[11px] text-white/40">
                           Status
                           {isEmployee && (
                             <span className="ml-1.5 text-[10px] text-amber-400/60">
@@ -412,7 +412,7 @@ export function TaskSheet({
 
                       {/* Priority */}
                       <div>
-                        <label className="mb-1.5 block text-[11px] text-text-muted">
+                        <label className="mb-1.5 block text-[11px] text-white/40">
                           Priority
                         </label>
                         <Select
@@ -439,11 +439,11 @@ export function TaskSheet({
 
                       {/* Due Date */}
                       <div>
-                        <label className="mb-1.5 block text-[11px] text-text-muted">
+                        <label className="mb-1.5 block text-[11px] text-white/40">
                           Due Date
                         </label>
                         <div className="relative">
-                          <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-quiet" />
+                          <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
                           <input
                             type="date"
                             value={data.dueDate}
@@ -453,18 +453,18 @@ export function TaskSheet({
                                 dueDate: e.target.value,
                               }))
                             }
-                            className="w-full appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2.5 pl-10 text-sm text-text-secondary outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
+                            className="w-full appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2.5 pl-10 text-sm text-white/70 outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
                           />
                         </div>
                       </div>
 
                       {/* Due Time */}
                       <div>
-                        <label className="mb-1.5 block text-[11px] text-text-muted">
+                        <label className="mb-1.5 block text-[11px] text-white/40">
                           Due Time
                         </label>
                         <div className="relative">
-                          <Clock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-quiet" />
+                          <Clock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
                           <input
                             type="time"
                             value={data.dueTime}
@@ -474,18 +474,18 @@ export function TaskSheet({
                                 dueTime: e.target.value,
                               }))
                             }
-                            className="w-full appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2.5 pl-10 text-sm text-text-secondary outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
+                            className="w-full appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2.5 pl-10 text-sm text-white/70 outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
                           />
                         </div>
                       </div>
 
                       {/* Assignee */}
                       <div>
-                        <label className="mb-1.5 block text-[11px] text-text-muted">
+                        <label className="mb-1.5 block text-[11px] text-white/40">
                           Assignee
                         </label>
                         <div className="relative">
-                          <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-quiet" />
+                          <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
                           <input
                             type="text"
                             value={data.assignedTo}
@@ -496,18 +496,18 @@ export function TaskSheet({
                               }))
                             }
                             placeholder="User ID"
-                            className="w-full rounded-lg border border-border bg-glass-04 px-3 py-2.5 pl-10 text-sm text-text-secondary outline-none transition-colors placeholder:text-text-faint hover:border-border-active focus:border-cyan-500/50"
+                            className="w-full rounded-lg border border-border bg-glass-04 px-3 py-2.5 pl-10 text-sm text-white/70 outline-none transition-colors placeholder:text-text-faint hover:border-border-active focus:border-cyan-500/50"
                           />
                         </div>
                       </div>
 
                       {/* Tags */}
                       <div>
-                        <label className="mb-1.5 block text-[11px] text-text-muted">
+                        <label className="mb-1.5 block text-[11px] text-white/40">
                           Tags
                         </label>
                         <div className="relative">
-                          <Tag className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-quiet" />
+                          <Tag className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
                           <input
                             type="text"
                             value={tagInput}
@@ -520,7 +520,7 @@ export function TaskSheet({
                             }}
                             onBlur={addTag}
                             placeholder="Add tag..."
-                            className="w-full rounded-lg border border-border bg-glass-04 px-3 py-2.5 pl-10 text-sm text-text-secondary outline-none transition-colors placeholder:text-text-faint hover:border-border-active focus:border-cyan-500/50"
+                            className="w-full rounded-lg border border-border bg-glass-04 px-3 py-2.5 pl-10 text-sm text-white/70 outline-none transition-colors placeholder:text-text-faint hover:border-border-active focus:border-cyan-500/50"
                           />
                         </div>
                         {data.tags.length > 0 && (
@@ -528,12 +528,12 @@ export function TaskSheet({
                             {data.tags.map((tag) => (
                               <span
                                 key={tag}
-                                className="inline-flex items-center gap-1 rounded-full border border-border bg-glass-04 px-2.5 py-1 text-[11px] text-text-tertiary"
+                                className="inline-flex items-center gap-1 rounded-full border border-border bg-glass-04 px-2.5 py-1 text-[11px] text-white/50"
                               >
                                 {tag}
                                 <button
                                   onClick={() => removeTag(tag)}
-                                  className="ml-0.5 text-text-quiet hover:text-text-tertiary"
+                                  className="ml-0.5 text-white/30 hover:text-white/50"
                                 >
                                   <X className="h-3 w-3" />
                                 </button>
@@ -547,7 +547,7 @@ export function TaskSheet({
 
                   {/* Notes */}
                   <div>
-                    <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-text-muted">
+                    <label className="mb-2 block text-xs font-medium uppercase tracking-wider text-white/40">
                       Internal Notes
                     </label>
                     <textarea
@@ -558,7 +558,7 @@ export function TaskSheet({
                       }}
                       placeholder="Add internal notes..."
                       rows={2}
-                      className="w-full resize-none rounded-xl border border-border glass-subtle px-4 py-3 text-sm text-text-tertiary placeholder:text-text-faint focus:border-cyan-500/30 focus:outline-none"
+                      className="w-full resize-none rounded-xl border border-border glass-subtle px-4 py-3 text-sm text-white/50 placeholder:text-text-faint focus:border-cyan-500/30 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -566,7 +566,7 @@ export function TaskSheet({
 
               {/* ── Footer ── */}
               <div className="border-t border-border px-6 py-3">
-                <p className="text-xs text-text-quiet">
+                <p className="text-xs text-white/30">
                   <kbd className="rounded border border-border bg-glass-04 px-1.5 py-0.5 font-mono text-[11px]">
                     ⌘⏎
                   </kbd>{" "}

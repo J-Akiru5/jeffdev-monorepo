@@ -47,8 +47,8 @@ export default async function ProfilePage() {
     <div className="mx-auto max-w-2xl">
       {/* Page Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-text-primary">Profile</h1>
-        <p className="mt-1 text-sm text-text-muted">
+        <h1 className="text-2xl font-bold text-white">Profile</h1>
+        <p className="mt-1 text-sm text-white/40">
           Manage your account details, password, and avatar
         </p>
       </div>

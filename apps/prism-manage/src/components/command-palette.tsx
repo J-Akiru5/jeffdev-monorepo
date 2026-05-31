@@ -245,10 +245,10 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
             transition={{ duration: 0.15, ease: "easeOut" }}
             className="fixed left-1/2 top-[15%] z-[61] w-full max-w-lg -translate-x-1/2"
           >
-            <div className="overflow-hidden rounded-2xl border border-border bg-elevated shadow-2xl shadow-black/40">
+            <div className="overflow-hidden rounded-2xl border border-border bg-[#0a0a0a] shadow-2xl shadow-black/40">
               {/* Search Input */}
               <div className="flex items-center border-b border-border px-4">
-                <Search className="h-4 w-4 text-text-muted" />
+                <Search className="h-4 w-4 text-white/40" />
                 <input
                   ref={inputRef}
                   type="text"
@@ -259,9 +259,9 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                   }}
                   onKeyDown={handleKeyDown}
                   placeholder="Search workspaces, views, actions..."
-                  className="flex-1 bg-transparent px-3 py-3.5 text-sm text-text-primary placeholder:text-text-muted outline-none"
+                  className="flex-1 bg-transparent px-3 py-3.5 text-sm text-white placeholder:text-white/40 outline-none"
                 />
-                <kbd className="rounded border border-border bg-glass-08 px-1.5 py-0.5 font-mono text-[10px] text-text-muted">
+                <kbd className="rounded border border-border bg-white/[0.08] px-1.5 py-0.5 font-mono text-[10px] text-white/40">
                   ESC
                 </kbd>
               </div>
@@ -270,8 +270,8 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
               <div className="max-h-[320px] overflow-y-auto py-2">
                 {!hasResults && (
                   <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
-                    <Command className="h-8 w-8 text-text-quiet" />
-                    <p className="text-sm text-text-muted">
+                    <Command className="h-8 w-8 text-white/30" />
+                    <p className="text-sm text-white/40">
                       No results for &ldquo;{query}&rdquo;
                     </p>
                   </div>
@@ -285,7 +285,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                       <div key={section.id}>
                         {/* Section header */}
                         <div className="px-4 py-2">
-                          <h3 className="font-mono text-[10px] uppercase tracking-wider text-text-quiet">
+                          <h3 className="font-mono text-[10px] uppercase tracking-wider text-white/30">
                             {section.label}
                           </h3>
                         </div>
@@ -304,8 +304,8 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                               onMouseEnter={() => setSelectedIndex(flatIndex)}
                               className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors ${
                                 isSelected
-                                  ? "bg-cyan-500/10 text-text-primary"
-                                  : "text-text-tertiary hover:bg-glass-05 hover:text-text-primary"
+                                  ? "bg-cyan-500/10 text-white"
+                                  : "text-white/50 hover:bg-white/[0.04] hover:text-white"
                               }`}
                             >
                               <Icon
@@ -320,13 +320,13 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                               <div className="flex-1 truncate">
                                 <span className="font-medium">{item.label}</span>
                                 {item.description && (
-                                  <span className="ml-2 text-[11px] text-text-muted">
+                                  <span className="ml-2 text-[11px] text-white/40">
                                     {item.description}
                                   </span>
                                 )}
                               </div>
                               {isSelected && (
-                                <kbd className="rounded border border-border bg-glass-08 px-1.5 py-0.5 font-mono text-[10px] text-text-muted">
+                                <kbd className="rounded border border-border bg-white/[0.08] px-1.5 py-0.5 font-mono text-[10px] text-white/40">
                                   ↵
                                 </kbd>
                               )}
@@ -341,16 +341,16 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
 
               {/* Footer */}
               <div className="flex items-center gap-4 border-t border-border px-4 py-2">
-                <div className="flex items-center gap-1.5 text-[10px] text-text-quiet">
-                  <kbd className="rounded border border-border bg-glass-08 px-1.5 py-0.5 font-mono">↑↓</kbd>
+                <div className="flex items-center gap-1.5 text-[10px] text-white/30">
+                  <kbd className="rounded border border-border bg-white/[0.08] px-1.5 py-0.5 font-mono">↑↓</kbd>
                   <span>Navigate</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-[10px] text-text-quiet">
-                  <kbd className="rounded border border-border bg-glass-08 px-1.5 py-0.5 font-mono">↵</kbd>
+                <div className="flex items-center gap-1.5 text-[10px] text-white/30">
+                  <kbd className="rounded border border-border bg-white/[0.08] px-1.5 py-0.5 font-mono">↵</kbd>
                   <span>Select</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-[10px] text-text-quiet">
-                  <kbd className="rounded border border-border bg-glass-08 px-1.5 py-0.5 font-mono">Esc</kbd>
+                <div className="flex items-center gap-1.5 text-[10px] text-white/30">
+                  <kbd className="rounded border border-border bg-white/[0.08] px-1.5 py-0.5 font-mono">Esc</kbd>
                   <span>Close</span>
                 </div>
               </div>

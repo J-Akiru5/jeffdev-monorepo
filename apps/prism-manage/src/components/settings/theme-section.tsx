@@ -69,8 +69,8 @@ export function ThemeSection() {
         </div>
         <div className="flex-1 space-y-6">
           <div>
-            <h2 className="text-lg font-semibold text-text-primary">Appearance</h2>
-            <p className="mt-1 text-sm text-text-muted">
+            <h2 className="text-lg font-semibold text-white">Appearance</h2>
+            <p className="mt-1 text-sm text-white/40">
               Choose between dark, light, or system theme
             </p>
 
@@ -85,7 +85,7 @@ export function ThemeSection() {
                     className={`flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-3 text-sm font-medium transition-all ${
                       active
                         ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-400"
-                        : "border-border text-text-tertiary hover:border-border-active hover:text-text-secondary"
+                        : "border-border text-white/50 hover:border-border-active hover:text-white/70"
                     }`}
                   >
                     <Icon className="h-4 w-4" />
@@ -101,10 +101,10 @@ export function ThemeSection() {
             <div className="flex items-start gap-3">
               <Globe className="mt-0.5 h-4 w-4 text-cyan-400" />
               <div className="flex-1">
-                <h3 className="text-sm font-medium text-text-primary">
+                <h3 className="text-sm font-medium text-white">
                   Cross-App Theme Default
                 </h3>
-                <p className="mt-0.5 text-xs text-text-muted">
+                <p className="mt-0.5 text-xs text-white/40">
                   Set the current theme as the default for all Syntaxure apps
                   (Admin, Engine, Labs). Each app will use this theme on first
                   visit or when you sign in on a new device.
@@ -131,9 +131,9 @@ export function ThemeSection() {
                   </button>
 
                   {defaultTheme && (
-                    <span className="text-[11px] text-text-muted">
+                    <span className="text-[11px] text-white/40">
                       Current default:{" "}
-                      <span className="font-mono text-text-secondary">
+                      <span className="font-mono text-white/70">
                         {defaultTheme}
                       </span>
                     </span>
