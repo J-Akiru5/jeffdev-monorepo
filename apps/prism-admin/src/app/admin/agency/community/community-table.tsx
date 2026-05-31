@@ -2,16 +2,19 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
-  Users,
   Search,
   Trash2,
   MessageSquare,
   User,
   Filter,
+  Edit,
+  Mail,
 } from "lucide-react";
 import { cn } from "@syntaxure/ui";
 import { deleteCommunityMember, CommunityMember } from "@/app/actions/community";
+import { InviteMemberModal } from "@/components/community/invite-member-modal";
 
 const roleColors: Record<string, { bg: string; text: string; label: string }> = {
   developer: {
@@ -51,6 +54,7 @@ export function CommunityTable({ members }: { members: CommunityMember[] }) {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRole, setSelectedRole] = useState<string>("all");
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
 
   const handleDelete = async (id: string, name: string) => {
     if (!confirm(`Are you sure you want to remove ${name} from the community?`)) return;
@@ -64,7 +68,6 @@ export function CommunityTable({ members }: { members: CommunityMember[] }) {
     }
   };
 
-  // Filtering logic
   const filteredMembers = members.filter((member) => {
     const matchesSearch =
       member.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -79,20 +82,10 @@ export function CommunityTable({ members }: { members: CommunityMember[] }) {
     return matchesSearch && matchesRole;
   });
 
-  if (members.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center rounded-md border border-white/[0.06] bg-white/[0.02] py-16">
-        <Users className="h-10 w-10 text-white/20" />
-        <p className="mt-4 text-sm text-white/40">No registered community members yet.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
-      {/* Controls: Search & Filters */}
+      {/* Controls */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        {/* Search */}
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
           <input
@@ -103,8 +96,6 @@ export function CommunityTable({ members }: { members: CommunityMember[] }) {
             className="w-full rounded-md border border-white/5 bg-white/[0.02] pl-10 pr-4 py-2 text-sm text-white placeholder:text-white/30 focus:border-amber-500/40 focus:bg-white/[0.04] focus:outline-none transition-all"
           />
         </div>
-
-        {/* Role Selector Filter */}
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-white/40" />
           <select
@@ -120,10 +111,17 @@ export function CommunityTable({ members }: { members: CommunityMember[] }) {
             <option value="researcher" className="bg-[#0f0f0f]">Researcher</option>
             <option value="other" className="bg-[#0f0f0f]">Other</option>
           </select>
+          <button
+            onClick={() => setInviteModalOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/70 hover:bg-white/10 transition-colors"
+          >
+            <Mail className="h-3.5 w-3.5" />
+            Invite
+          </button>
         </div>
       </div>
 
-      {/* Table grid */}
+      {/* Table */}
       <div className="overflow-x-auto rounded-md border border-white/[0.06]">
         <table className="w-full">
           <thead>
@@ -152,17 +150,16 @@ export function CommunityTable({ members }: { members: CommunityMember[] }) {
             {filteredMembers.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-4 py-8 text-center text-sm text-white/20 font-mono">
-                  No matching results found.
+                  {members.length === 0
+                    ? "No registered community members yet."
+                    : "No matching results found."}
                 </td>
               </tr>
             ) : (
               filteredMembers.map((member) => {
                 const roleConfig = (roleColors[member.primary_role || "other"] || roleColors.other) as { bg: string; text: string; label: string };
                 return (
-                  <tr
-                    key={member.id}
-                    className="transition-colors hover:bg-white/[0.02]"
-                  >
+                  <tr key={member.id} className="transition-colors hover:bg-white/[0.02]">
                     {/* Member Info */}
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
@@ -241,13 +238,21 @@ export function CommunityTable({ members }: { members: CommunityMember[] }) {
 
                     {/* Actions */}
                     <td className="px-4 py-3 text-right">
-                      <button
-                        onClick={() => handleDelete(member.id, member.full_name)}
-                        disabled={deleting === member.id}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 text-white/40 hover:text-red-400 hover:border-red-500/30 transition-colors disabled:opacity-30"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
+                      <div className="flex items-center justify-end gap-1">
+                        <Link
+                          href={`/admin/agency/community/members/${member.id}/edit`}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 text-white/40 hover:text-cyan-400 hover:border-cyan-500/30 transition-colors"
+                        >
+                          <Edit className="h-3.5 w-3.5" />
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(member.id, member.full_name)}
+                          disabled={deleting === member.id}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 text-white/40 hover:text-red-400 hover:border-red-500/30 transition-colors disabled:opacity-30"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -256,6 +261,9 @@ export function CommunityTable({ members }: { members: CommunityMember[] }) {
           </tbody>
         </table>
       </div>
+
+      {/* Invite Modal */}
+      <InviteMemberModal open={inviteModalOpen} onClose={() => setInviteModalOpen(false)} />
     </div>
   );
 }

@@ -118,7 +118,7 @@ export function AccountDropdown({
           <div
             className={cn(
               "absolute right-0 top-full z-[200] mt-1.5 w-64 origin-top-right",
-              "rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] backdrop-blur-xl",
+              "rounded-xl glass-heavy",
               "shadow-2xl shadow-black/50 py-1",
             )}
           >

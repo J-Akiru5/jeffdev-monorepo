@@ -8,10 +8,8 @@
  * ("manage" vs "agency") from the admin-sidebar-store.
  */
 
+import { useState, useEffect, type ReactNode } from "react";
 import Link from "next/link";
-import { ThemeToggle } from "@/components/admin/theme-toggle";
-import { AdminSidebarHelpButton } from "@/components/admin/sidebar-help-button";
-import { AccountDropdownWrapper } from "@/components/auth/account-dropdown-wrapper";
 import { useAdminSidebarStore } from "@/stores/admin-sidebar-store";
 import {
   LayoutDashboard,
@@ -39,7 +37,6 @@ import {
   Wrench,
   type LucideIcon,
 } from "lucide-react";
-import type { ReactNode } from "react";
 
 function NavItem({
   href,
@@ -219,6 +216,46 @@ function AgencyNav() {
   );
 }
 
+function SidebarFooterClock() {
+  const [time, setTime] = useState("");
+  const [dateStr, setDateStr] = useState("");
+
+  useEffect(() => {
+    function update() {
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2, "0");
+      const mm = String(now.getMinutes()).padStart(2, "0");
+      const ss = String(now.getSeconds()).padStart(2, "0");
+      setTime(`${hh}:${mm}:${ss}`);
+
+      const options: Intl.DateTimeFormatOptions = {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      };
+      setDateStr(now.toLocaleDateString("en-US", options));
+    }
+
+    update();
+    const id = setInterval(update, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  if (!time) return null;
+
+  return (
+    <div className="flex flex-col items-center justify-center py-2 px-3 rounded-md bg-white/[0.02] border border-white/[0.06] text-center select-none">
+      <span className="font-mono text-base font-semibold tracking-wider text-amber-400">
+        {time}
+      </span>
+      <span className="text-[10px] font-medium text-white/50 uppercase tracking-wider mt-0.5">
+        {dateStr}
+      </span>
+    </div>
+  );
+}
+
 interface AdminSidebarProps {
   isFounder: boolean;
 }
@@ -259,11 +296,17 @@ export function AdminSidebar({ isFounder }: AdminSidebarProps) {
         )}
       </nav>
 
-      {/* User & Theme */}
-      <div className="border-t border-white/5 p-3 space-y-1">
-        <ThemeToggle />
-        <AdminSidebarHelpButton />
-        <AccountDropdownWrapper />
+      {/* Clock, Date and Settings */}
+      <div className="border-t border-white/5 p-3 space-y-3">
+        <SidebarFooterClock />
+        <Link
+          href="/admin/settings"
+          className="group flex items-center gap-3 px-3 py-2 rounded-md text-sm text-white/70 transition-all hover:bg-white/5 hover:text-white"
+        >
+          <Settings className="h-4 w-4 text-white/70 transition-colors group-hover:text-amber-400" />
+          <span className="flex-1">Settings</span>
+          <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-60 transition-opacity" />
+        </Link>
       </div>
     </aside>
   );

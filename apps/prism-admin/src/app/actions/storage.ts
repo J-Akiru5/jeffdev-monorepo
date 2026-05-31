@@ -11,7 +11,7 @@ import { getAdminClient } from "@/lib/supabase/admin";
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/svg+xml"];
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
-type BucketName = "services" | "works_catalog";
+type BucketName = "services" | "works_catalog" | "community_posts";
 
 /**
  * Upload a file to a Supabase Storage bucket

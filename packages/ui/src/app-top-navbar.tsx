@@ -54,7 +54,7 @@ export interface AppTopNavbarProps {
   /** Name of the current app (e.g. "Prism Manage", "Admin") */
   appName: string;
   /** Cross-app quick links (shown in the app switcher dropdown) */
-  appLinks: AppNavLink[];
+  appLinks?: AppNavLink[];
   /** Optional app icon override (defaults to a small diamond badge) */
   appIcon?: ReactNode;
   /** Current app href for the app switcher current indicator */
@@ -107,23 +107,33 @@ export interface AppTopNavbarProps {
 
 function AppSwitcher({
   appName,
-  appLinks,
+  appLinks = [],
   appIcon,
 }: {
   appName: string;
-  appLinks: AppNavLink[];
+  appLinks?: AppNavLink[];
   appIcon?: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (appLinks.length === 0) return;
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, []);
+  }, [appLinks]);
+
+  if (appLinks.length === 0) {
+    return (
+      <div className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm text-[var(--text-primary)]">
+        {appIcon}
+        <span className="font-semibold">{appName}</span>
+      </div>
+    );
+  }
 
   return (
     <div className="relative" ref={ref}>
@@ -213,7 +223,7 @@ function InlineThemeToggle({
 
 export function AppTopNavbar({
   appName,
-  appLinks,
+  appLinks = [],
   appIcon,
   theme,
   onToggleTheme,

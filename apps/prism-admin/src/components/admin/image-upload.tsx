@@ -16,7 +16,7 @@ import { uploadToStorage, deleteFromStorage } from "@/app/actions/storage";
 // =============================================================================
 
 interface ImageUploadProps {
-  bucket: "services" | "works_catalog";
+  bucket: "services" | "works_catalog" | "community_posts";
   currentUrl?: string | null;
   onUpload: (url: string) => void;
   onDelete?: () => void;
