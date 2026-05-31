@@ -10,11 +10,7 @@ import { Footer } from "@/components/layout/footer";
  * Displayed after successful Maya checkout or subscription approval.
  */
 
-function SuccessContent({
-  searchParams,
-}: {
-  searchParams: { ref?: string };
-}) {
+function SuccessContent({ ref }: { ref?: string }) {
   return (
     <main className="flex min-h-screen items-center justify-center px-6 pt-24">
       <div className="max-w-md text-center">
@@ -66,7 +62,7 @@ export default async function MayaSuccessPage({
           <div className="text-white/40">Loading...</div>
         </main>
       }>
-        <SuccessContent searchParams={params} />
+        <SuccessContent ref={params.ref} />
       </Suspense>
       <Footer />
     </>

@@ -20,7 +20,10 @@ import {
   Star,
   Settings,
   LogOut,
+  Keyboard,
 } from "lucide-react";
+import { KeyboardShortcutsHelp } from "@syntaxure/ui";
+import { MANAGE_HELP_SHORTCUTS } from "@/lib/keyboard-shortcuts";
 import { motion, AnimatePresence } from "framer-motion";
 import { useProjects } from "@/contexts/project-context";
 import { useWorkspaceStore } from "@/stores/workspace-store";
@@ -52,6 +55,7 @@ function SignOutButton() {
 export function MobileNav() {
   const pathname = usePathname();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const { projects, setActiveProjectId, activeProjectId } = useProjects();
 
   // Workspace state
@@ -132,6 +136,16 @@ export function MobileNav() {
           </Link>
         )}
 
+        {/* Keyboard Shortcuts Help */}
+        <button
+          onClick={() => setHelpOpen(true)}
+          className="flex flex-col items-center justify-center gap-1 rounded-md p-2 text-white/40 hover:text-white transition-all"
+          title="Keyboard Shortcuts (⌘⇧/)"
+        >
+          <Keyboard className="h-5 w-5" />
+          <span className="text-[10px] font-medium">Help</span>
+        </button>
+
         {/* Lists Button */}
         <button
           onClick={() => setIsDrawerOpen(!isDrawerOpen)}
@@ -147,6 +161,14 @@ export function MobileNav() {
           <span className="text-[10px] font-medium">Lists</span>
         </button>
       </div>
+
+      {/* Keyboard Shortcuts Help Dialog */}
+      <KeyboardShortcutsHelp
+        open={helpOpen}
+        onClose={() => setHelpOpen(false)}
+        title="Manage Shortcuts"
+        appShortcuts={MANAGE_HELP_SHORTCUTS}
+      />
 
       {/* Slide-up Drawer */}
       <AnimatePresence>

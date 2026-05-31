@@ -6,6 +6,8 @@ import { AccountDropdownWrapper } from "@/components/auth/account-dropdown-wrapp
 import { ThemeToggle } from "@/components/admin/theme-toggle";
 import { AdminErrorBoundary } from "@/components/admin/error-boundary-wrapper";
 import { AdminTopNavbar } from "./top-navbar";
+import { AdminMobileHelpButton } from "@/components/admin/mobile-help-button";
+import { AdminSidebarHelpButton } from "@/components/admin/sidebar-help-button";
 import {
   LayoutDashboard,
   Users,
@@ -235,6 +237,7 @@ export default async function AdminLayout({
         {/* User & Theme */}
         <div className="border-t border-white/5 p-3 space-y-1">
           <ThemeToggle />
+          <AdminSidebarHelpButton />
           <AccountDropdownWrapper />
         </div>
       </aside>
@@ -267,6 +270,7 @@ export default async function AdminLayout({
           </Link>
         </div>
         <MobileNavItem href="/admin/users" icon={Users} label="Engine" />
+        <AdminMobileHelpButton />
         <MobileNavItem
           href="/admin/agency/calendar"
           icon={Calendar}

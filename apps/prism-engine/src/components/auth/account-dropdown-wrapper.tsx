@@ -6,13 +6,14 @@
  * Client component wrapper that wires prism-engine's auth data into
  * the shared AccountDropdown from @syntaxure/ui.
  * Uses the shared useAuth() hook for all auth state.
+ *
+ * Note: Theme toggle has been moved to the shared AppTopNavbar's
+ * inline toggle; no longer passed through AccountDropdown.
  */
 
 import { useAuth, AccountDropdown } from "@syntaxure/ui";
 import { LayoutDashboard, User, Sparkles, Shield } from "lucide-react";
 import Link from "next/link";
-import { useTheme } from "next-themes";
-import { useRouter } from "next/navigation";
 
 /** Cross-app links shown as extra actions in the dropdown */
 function AppLinks({ role }: { role?: string }) {
@@ -66,7 +67,6 @@ function AppLinks({ role }: { role?: string }) {
 
 export function AccountDropdownWrapper() {
   const { user, loading, signOut } = useAuth();
-  const router = useRouter();
 
   const handleSignOut = async () => {
     // Clear session in background
@@ -76,8 +76,6 @@ export function AccountDropdownWrapper() {
   };
 
   const initials = (user?.full_name?.charAt(0) || user?.email?.charAt(0) || "U").toUpperCase();
-
-  const { theme, setTheme } = useTheme();
 
   if (loading) {
     return (
@@ -92,8 +90,6 @@ export function AccountDropdownWrapper() {
       displayName={user?.full_name || "User"}
       role={user?.role || undefined}
       settingsHref="/settings"
-      theme={theme === "light" ? "light" : "dark"}
-      onToggleTheme={() => setTheme(theme === "light" ? "dark" : "light")}
       extraActions={<AppLinks role={user?.role} />}
       onSignOut={handleSignOut}
     />

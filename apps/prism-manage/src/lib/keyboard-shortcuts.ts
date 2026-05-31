@@ -17,12 +17,8 @@ export interface KeyboardShortcut {
 }
 
 export const KEYBOARD_SHORTCUTS: KeyboardShortcut[] = [
-  { key: "k", meta: true, description: "Command Palette", action: "command-palette" },
-  { key: "k", ctrl: true, description: "Command Palette", action: "command-palette" },
   { key: "n", meta: true, description: "New Task", action: "new-task" },
   { key: "n", ctrl: true, description: "New Task", action: "new-task" },
-  { key: "/", meta: true, description: "Toggle Sidebar", action: "toggle-sidebar" },
-  { key: "/", ctrl: true, description: "Toggle Sidebar", action: "toggle-sidebar" },
   { key: "1", meta: true, description: "Dashboard", action: "go-dashboard" },
   { key: "1", ctrl: true, description: "Dashboard", action: "go-dashboard" },
   { key: "2", meta: true, description: "Tasks", action: "go-tasks" },
@@ -31,6 +27,20 @@ export const KEYBOARD_SHORTCUTS: KeyboardShortcut[] = [
   { key: "3", ctrl: true, description: "Calendar", action: "go-calendar" },
   { key: "4", meta: true, description: "Kanban", action: "go-kanban" },
   { key: "4", ctrl: true, description: "Kanban", action: "go-kanban" },
+];
+
+import type { ShortcutsHelpShortcut } from "@syntaxure/ui";
+
+/**
+ * App-specific shortcuts shown in the keyboard shortcuts help dialog.
+ * Shared between the desktop TopNavbar and the mobile MobileNav.
+ */
+export const MANAGE_HELP_SHORTCUTS: ShortcutsHelpShortcut[] = [
+  { key: "n", meta: true, ctrl: true, description: "New Task", category: "Manage" },
+  { key: "1", meta: true, ctrl: true, description: "Go to Dashboard", category: "Manage" },
+  { key: "2", meta: true, ctrl: true, description: "Go to Tasks", category: "Manage" },
+  { key: "3", meta: true, ctrl: true, description: "Go to Calendar", category: "Manage" },
+  { key: "4", meta: true, ctrl: true, description: "Go to Kanban", category: "Manage" },
 ];
 
 export function getShortcutDisplay(shortcut: KeyboardShortcut): string {

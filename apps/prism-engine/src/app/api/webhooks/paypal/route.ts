@@ -2,7 +2,11 @@
  * PayPal Webhook Handler
  *
  * POST /api/webhooks/paypal
- * Handles PayPal subscription events with signature verification
+ * Handles PayPal subscription events with:
+ * - Cryptographic signature verification
+ * - Idempotency (dedup via webhook_events table)
+ * - Payment receipt emails
+ * - Audit trail logging
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -15,6 +19,10 @@ const PAYPAL_API_URL =
   process.env.PAYPAL_MODE === "live"
     ? "https://api-m.paypal.com"
     : "https://api-m.sandbox.paypal.com";
+
+// =============================================================================
+// Webhook Signature Verification
+// =============================================================================
 
 async function verifyPayPalWebhook(
   request: NextRequest,
@@ -62,7 +70,91 @@ async function verifyPayPalWebhook(
   }
 }
 
+// =============================================================================
+// Idempotency Check
+// =============================================================================
+
+async function isEventProcessed(
+  provider: string,
+  eventId: string,
+): Promise<boolean> {
+  try {
+    const { getCollection } = await import("@syntaxure-labs/db");
+    const events = await getCollection("webhook_events");
+    const existing = await events.findOne({ provider, eventId });
+    return !!existing;
+  } catch {
+    return false;
+  }
+}
+
+async function markEventProcessing(
+  provider: string,
+  eventId: string,
+  eventType: string,
+  payload: unknown,
+): Promise<void> {
+  try {
+    const { getCollection } = await import("@syntaxure-labs/db");
+    const events = await getCollection("webhook_events");
+    await events.updateOne(
+      { provider, eventId },
+      {
+        $set: {
+          provider,
+          eventId,
+          eventType,
+          payload,
+          status: "processing",
+          createdAt: new Date(),
+        },
+      },
+      { upsert: true },
+    );
+  } catch (error) {
+    console.error("[webhook] Failed to mark event processing:", error);
+  }
+}
+
+async function markEventCompleted(
+  provider: string,
+  eventId: string,
+): Promise<void> {
+  try {
+    const { getCollection } = await import("@syntaxure-labs/db");
+    const events = await getCollection("webhook_events");
+    await events.updateOne(
+      { provider, eventId },
+      { $set: { status: "completed", processedAt: new Date() } },
+    );
+  } catch (error) {
+    console.error("[webhook] Failed to mark event completed:", error);
+  }
+}
+
+async function markEventFailed(
+  provider: string,
+  eventId: string,
+  error: string,
+): Promise<void> {
+  try {
+    const { getCollection } = await import("@syntaxure-labs/db");
+    const events = await getCollection("webhook_events");
+    await events.updateOne(
+      { provider, eventId },
+      { $set: { status: "failed", error, processedAt: new Date() } },
+    );
+  } catch (err) {
+    console.error("[webhook] Failed to mark event failed:", err);
+  }
+}
+
+// =============================================================================
+// Types
+// =============================================================================
+
 type PayPalEvent = {
+  id: string;
   event_type: string;
   resource: {
     id: string;
@@ -72,44 +164,75 @@ type PayPalEvent = {
     billing_info?: {
       next_billing_time: string;
     };
+    amount?: {
+      total: string;
+      currency: string;
+    };
   };
 };
+
+// =============================================================================
+// POST Handler
+// =============================================================================
 
 export async function POST(request: NextRequest) {
   try {
     const rawBody = await request.text();
     const body: PayPalEvent = JSON.parse(rawBody);
+    const eventId = body.id;
+    const eventType = body.event_type;
 
+    // 1. Verify signature
     const isValid = await verifyPayPalWebhook(request, rawBody);
     if (!isValid) {
       console.error("[paypal-webhook] Signature verification failed");
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
-    const { event_type, resource } = body;
+    // 2. Check idempotency
+    if (await isEventProcessed("paypal", eventId)) {
+      console.log(`[paypal-webhook] Duplicate event ${eventId}, skipping`);
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+
+    // 3. Mark as processing
+    await markEventProcessing("paypal", eventId, eventType, body);
+
+    const { resource } = body;
     const userId = resource.custom_id;
 
     if (!userId) {
       console.error("[paypal-webhook] No userId in payload");
+      await markEventCompleted("paypal", eventId);
       return NextResponse.json({ received: true });
     }
 
-    switch (event_type) {
-      case "BILLING.SUBSCRIPTION.ACTIVATED":
-        await handleSubscriptionActivated(userId, resource);
-        break;
-      case "BILLING.SUBSCRIPTION.CANCELLED":
-        await handleSubscriptionCancelled(userId);
-        break;
-      case "BILLING.SUBSCRIPTION.SUSPENDED":
-        await handleSubscriptionSuspended(userId);
-        break;
-      case "PAYMENT.SALE.COMPLETED":
-        await handlePaymentCompleted(userId);
-        break;
-      case "BILLING.SUBSCRIPTION.PAYMENT.FAILED":
-        await handlePaymentFailed(userId);
-        break;
+    // 4. Process event
+    try {
+      switch (eventType) {
+        case "BILLING.SUBSCRIPTION.ACTIVATED":
+          await handleSubscriptionActivated(userId, resource);
+          break;
+        case "BILLING.SUBSCRIPTION.CANCELLED":
+          await handleSubscriptionCancelled(userId);
+          break;
+        case "BILLING.SUBSCRIPTION.SUSPENDED":
+          await handleSubscriptionSuspended(userId);
+          break;
+        case "PAYMENT.SALE.COMPLETED":
+          await handlePaymentCompleted(userId, resource);
+          break;
+        case "BILLING.SUBSCRIPTION.PAYMENT.FAILED":
+          await handlePaymentFailed(userId);
+          break;
+      }
+
+      // 5. Mark as completed
+      await markEventCompleted("paypal", eventId);
+    } catch (error) {
+      const errMsg = error instanceof Error ? error.message : "Unknown error";
+      await markEventFailed("paypal", eventId, errMsg);
+      throw error;
     }
 
     return NextResponse.json({ received: true });
@@ -121,6 +244,91 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// =============================================================================
+// Email Helpers
+// =============================================================================
+
+async function getUserEmail(userId: string): Promise<string | null> {
+  try {
+    // Try Supabase auth lookup
+    const { createClient } = await import("@supabase/supabase-js");
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL || "",
+      process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+    );
+    const { data } = await supabase.auth.admin.getUserById(userId);
+    return data?.user?.email || null;
+  } catch {
+    return null;
+  }
+}
+
+async function sendReceiptEmail(
+  email: string,
+  amount: string,
+  currency: string,
+  tier: string,
+) {
+  if (!process.env.RESEND_API_KEY) return;
+
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: "Prism <billing@prism.syntaxure.dev>",
+      to: email,
+      subject: `Payment Confirmed — Prism ${tier.charAt(0).toUpperCase() + tier.slice(1)}`,
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #10b981;">Payment Confirmed!</h2>
+          <p>Thank you for your subscription. Your payment has been processed successfully.</p>
+          <div style="background: #f3f4f6; padding: 16px; border-radius: 8px; margin: 16px 0;">
+            <p style="margin: 4px 0;"><strong>Plan:</strong> ${tier.charAt(0).toUpperCase() + tier.slice(1)}</p>
+            <p style="margin: 4px 0;"><strong>Amount:</strong> ${currency} ${amount}</p>
+            <p style="margin: 4px 0;"><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+          </div>
+          <p>You can manage your subscription anytime from your dashboard.</p>
+          <a href="${process.env.NEXT_PUBLIC_PRISM_URL || "https://prism.syntaxure.dev"}/dashboard"
+             style="display: inline-block; background: #06b6d4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 16px;">
+            Go to Dashboard
+          </a>
+        </div>
+      `,
+    });
+  } catch (error) {
+    console.error("[paypal-webhook] Receipt email failed:", error);
+  }
+}
+
+async function sendPaymentFailureEmail(email: string) {
+  if (!process.env.RESEND_API_KEY) return;
+
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: "Prism <billing@prism.syntaxure.dev>",
+      to: email,
+      subject: "Payment Failed — Action Required",
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #ef4444;">Payment Failed</h2>
+          <p>We were unable to process your subscription payment.</p>
+          <p>Please update your payment method to avoid service interruption.</p>
+          <a href="${process.env.NEXT_PUBLIC_PRISM_URL || "https://prism.syntaxure.dev"}/subscription"
+             style="display: inline-block; background: #f59e0b; color: black; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 16px;">
+            Update Payment Method
+          </a>
+        </div>
+      `,
+    });
+  } catch (error) {
+    console.error("[paypal-webhook] Failure email failed:", error);
+  }
+}
+
+// =============================================================================
+// Event Handlers
+// =============================================================================
 
 async function handleSubscriptionActivated(
   userId: string,
@@ -151,6 +359,17 @@ async function handleSubscriptionActivated(
     },
     { upsert: true },
   );
+
+  // Send receipt email
+  const email = await getUserEmail(userId);
+  if (email) {
+    await sendReceiptEmail(
+      email,
+      resource.amount?.total || "0",
+      resource.amount?.currency || "USD",
+      tier,
+    );
+  }
 }
 
 async function handleSubscriptionCancelled(userId: string) {
@@ -169,7 +388,10 @@ async function handleSubscriptionSuspended(userId: string) {
   );
 }
 
-async function handlePaymentCompleted(userId: string) {
+async function handlePaymentCompleted(
+  userId: string,
+  resource: PayPalEvent["resource"],
+) {
   const usage = await getCollection("usage");
   const now = new Date();
   const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -195,30 +417,10 @@ async function handlePaymentFailed(userId: string) {
     { $set: { status: "past_due", updatedAt: new Date() } },
   );
 
-  if (process.env.RESEND_API_KEY) {
-    try {
-      // Look up user email from Supabase Auth
-      let recipientEmail = userId;
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-      if (supabaseUrl && supabaseServiceKey) {
-        const supabase = createClient(supabaseUrl, supabaseServiceKey);
-        const { data: user } = await supabase.auth.admin.getUserById(userId);
-        if (user?.user?.email) {
-          recipientEmail = user.user.email;
-        }
-      }
-
-      const resend = new Resend(process.env.RESEND_API_KEY);
-      await resend.emails.send({
-        from: "Prism <billing@prism.syntaxure.dev>",
-        to: recipientEmail,
-        subject: "Payment Failed — Prism Subscription",
-        html: `<p>Your Prism subscription payment failed. Please update your payment method.</p>`,
-      });
-    } catch (error) {
-      console.error("[paypal-webhook] Email notification failed:", error);
-    }
+  // Send failure email to actual email address
+  const email = await getUserEmail(userId);
+  if (email) {
+    await sendPaymentFailureEmail(email);
   }
 }
 
