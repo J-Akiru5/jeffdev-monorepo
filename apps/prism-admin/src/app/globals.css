@@ -1,4 +1,12 @@
 @import "tailwindcss";
+@source "../../../../../packages/ui/src/**/*.tsx";
+@source "../../../../../packages/ui/src/**/*.ts";
+@source "../../../../packages/ui/src/**/*.tsx";
+@source "../../../../packages/ui/src/**/*.ts";
+@source "../../../packages/ui/src/**/*.tsx";
+@source "../../../packages/ui/src/**/*.ts";
+@source "../../packages/ui/src/**/*.tsx";
+@source "../../packages/ui/src/**/*.ts";
 @import "@syntaxure/ui/styles.css";
 
 /*

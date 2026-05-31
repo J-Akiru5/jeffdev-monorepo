@@ -22,8 +22,7 @@ DROP POLICY IF EXISTS "Users can update own projects" ON storage.objects;
 DROP POLICY IF EXISTS "Users can delete own projects" ON storage.objects;
 DROP POLICY IF EXISTS "Admins can manage all projects" ON storage.objects;
 
--- 3. Enable RLS on storage.objects (idempotent)
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+-- 3. RLS is already enabled by default on storage.objects in Supabase
 
 -- 4. RLS: Anyone can view projects (public bucket)
 CREATE POLICY "Anyone can view projects" ON storage.objects

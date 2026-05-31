@@ -150,12 +150,7 @@ function AppSwitcher({
           {appIcon}
           <span className="font-medium">{appName}</span>
         </span>
-        <ChevronDown
-          className={cn(
-            "h-3 w-3 transition-transform",
-            open && "rotate-180",
-          )}
-        />
+        <ChevronDown className={cn("h-3 w-3 transition-transform", open && "rotate-180")} />
       </button>
 
       {open && (
@@ -251,12 +246,7 @@ export function AppTopNavbar({
         className,
       )}
     >
-      <div
-        className={cn(
-          "mx-auto flex h-full items-center justify-between px-4",
-          innerClassName,
-        )}
-      >
+      <div className={cn("mx-auto flex h-full items-center justify-between px-4", innerClassName)}>
         {/* ── Left Zone: Brand + App Switcher + Extra ── */}
         <div className="flex items-center gap-3">
           {/* Syntaxure Logo */}
@@ -271,11 +261,7 @@ export function AppTopNavbar({
           <div className="hidden h-5 w-px bg-[var(--border-subtle)] sm:block" />
 
           {/* App Switcher */}
-          <AppSwitcher
-            appName={appName}
-            appLinks={appLinks}
-            appIcon={appIcon}
-          />
+          <AppSwitcher appName={appName} appLinks={appLinks} appIcon={appIcon} />
 
           {/* Extra left content (workspace switcher etc.) */}
           {leftSlot && (
@@ -291,17 +277,19 @@ export function AppTopNavbar({
           {centerSlot ? (
             centerSlot
           ) : showSearch && onSearchClick ? (
-            <div className="relative w-full max-w-md">
+            <div className="relative w-full max-w-sm">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--text-tertiary)]" />
               <button
                 onClick={onSearchClick}
-                className="w-full cursor-pointer rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/40 py-2 pl-9 pr-16 text-left text-sm text-[var(--text-tertiary)] transition-all hover:border-[var(--border-active)] hover:bg-[var(--bg-tertiary)]/60"
+                className={cn(
+                  "flex h-9 w-full cursor-pointer items-center justify-between rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/30 pl-9 pr-2 text-left text-sm text-[var(--text-tertiary)] transition-all hover:border-[var(--border-active)] hover:bg-[var(--bg-tertiary)]/50 focus:outline-none focus:ring-1 focus:ring-[var(--border-glow)]",
+                )}
               >
-                <span>{searchPlaceholder}</span>
+                <span className="truncate pr-4">{searchPlaceholder}</span>
+                <kbd className="pointer-events-none flex h-5 select-none items-center gap-0.5 rounded border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-1.5 font-mono text-[10px] font-medium text-[var(--text-tertiary)]">
+                  {searchShortcut}
+                </kbd>
               </button>
-              <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]/40 px-1.5 py-0.5 font-mono text-[10px] text-[var(--text-tertiary)]">
-                {searchShortcut}
-              </kbd>
             </div>
           ) : null}
         </div>
@@ -312,9 +300,7 @@ export function AppTopNavbar({
           {rightExtra}
 
           {/* Realtime Clock */}
-          {showClock && (
-            <RealtimeClock />
-          )}
+          {showClock && <RealtimeClock />}
 
           {/* Inline Theme Toggle (Engine-style) */}
           <InlineThemeToggle theme={theme} onToggle={onToggleTheme} />

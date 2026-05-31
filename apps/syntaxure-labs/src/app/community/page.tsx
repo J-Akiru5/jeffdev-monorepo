@@ -8,23 +8,24 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { ReleaseTimeline } from "@/components/sections/release-timeline";
+import { CommunityTabs } from "@/components/sections/community-tabs";
 import { createClient } from "@/lib/supabase/server";
+import { getPublishedCommunityPosts } from "@/app/actions/community";
 import type { Metadata } from "next";
 import type { Release } from "@/types/database";
 
 /**
  * Community Page
  * --------------
- * Showcases Syntaxure Labs releases and community updates.
- * Hybrid layout: featured releases as hero cards + chronological changelog timeline.
+ * Showcases Syntaxure Labs releases, community updates, and discussions.
+ * Hybrid layout: featured releases as hero cards + chronological changelog timeline + discussions feed.
  * Dark stealth-luxury aesthetic matching the Syntaxure Labs design system.
  */
 
 export const metadata: Metadata = {
   title: "Community",
   description:
-    "Stay up to date with the latest Syntaxure Labs releases, tools, and platform updates. Follow our changelog and see what we are building.",
+    "Stay up to date with the latest Syntaxure Labs releases, tools, and platform updates. Join discussions, share your projects, and connect with the community.",
 };
 
 export const dynamic = "force-dynamic";
@@ -32,6 +33,8 @@ export const dynamic = "force-dynamic";
 export default async function CommunityPage() {
   let featuredReleases: Release[] = [];
   let recentReleases: Release[] = [];
+  let communityPosts: Awaited<ReturnType<typeof getPublishedCommunityPosts>> =
+    [];
 
   try {
     const supabase = await createClient();
@@ -57,6 +60,15 @@ export default async function CommunityPage() {
   } catch (error) {
     console.error("[community] Failed to fetch releases:", error);
   }
+
+  // Fetch published community posts
+  try {
+    communityPosts = await getPublishedCommunityPosts();
+  } catch (error) {
+    console.error("[community] Failed to fetch community posts:", error);
+  }
+
+  const totalPosts = featuredReleases.length + recentReleases.length;
 
   return (
     <>
@@ -84,7 +96,8 @@ export default async function CommunityPage() {
               <p className="mt-4 text-lg text-white/60">
                 Follow our journey. Every release, update, and tool we ship is
                 documented here — from major platform launches to the smallest
-                quality-of-life patches.
+                quality-of-life patches. Join the conversation, share your
+                projects, and connect with the community.
               </p>
             </div>
 
@@ -93,7 +106,7 @@ export default async function CommunityPage() {
               <div className="rounded-md border border-white/[0.06] bg-white/[0.02] p-4">
                 <Users className="h-5 w-5 text-cyan-400" />
                 <div className="mt-3 text-2xl font-bold text-white">
-                  {featuredReleases.length + recentReleases.length}
+                  {totalPosts}
                 </div>
                 <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-white/40">
                   Total Releases
@@ -120,21 +133,21 @@ export default async function CommunityPage() {
               <div className="rounded-md border border-white/[0.06] bg-white/[0.02] p-4">
                 <ArrowUpRight className="h-5 w-5 text-amber-400" />
                 <div className="mt-3 text-2xl font-bold text-white">
-                  {recentReleases.filter((r) => r.type === "tool").length}
+                  {communityPosts.length}
                 </div>
                 <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-white/40">
-                  Tools
+                  Discussions
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Releases Timeline */}
+        {/* Tabbed Content: Changelog + Discussions */}
         <section className="px-6 pb-24 lg:px-8">
           <div className="mx-auto max-w-5xl">
-            <ReleaseTimeline
-              featured={featuredReleases.map((r) => ({
+            <CommunityTabs
+              featuredReleases={featuredReleases.map((r) => ({
                 id: r.id,
                 title: r.title,
                 version: r.version,
@@ -156,6 +169,7 @@ export default async function CommunityPage() {
                 tags: r.tags,
                 is_featured: r.is_featured,
               }))}
+              posts={communityPosts}
             />
           </div>
         </section>
@@ -170,7 +184,7 @@ export default async function CommunityPage() {
               Get notified about new releases, beta programs, and exclusive
               tools before anyone else.
             </p>
-            <div className="mt-8 flex justify-center">
+            <div className="mt-8 flex justify-center gap-4">
               <Link
                 href="/community/register"
                 className="group relative inline-flex items-center gap-2 overflow-hidden rounded-md border border-cyan-500/50 bg-cyan-500/10 px-6 py-3.5 font-mono text-sm uppercase tracking-wider text-white backdrop-blur-md transition-all hover:border-cyan-400 hover:bg-cyan-500/20 hover:shadow-[0_0_30px_rgba(6,182,212,0.25)]"

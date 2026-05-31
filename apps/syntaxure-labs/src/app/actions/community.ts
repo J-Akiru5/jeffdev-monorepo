@@ -7,6 +7,40 @@ import {
   communityWelcomeEmail,
   communityAdminNotification,
 } from "@/lib/emails/community-emails";
+import type { CommunityPost, CommunityMember } from "@/types/database";
+
+// =============================================================================
+// PUBLIC: Fetch published community posts
+// =============================================================================
+
+export interface CommunityPostWithAuthor extends CommunityPost {
+  author: CommunityMember | null;
+}
+
+export async function getPublishedCommunityPosts(): Promise<CommunityPostWithAuthor[]> {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const supabase = getAdminClient() as any;
+
+    const { data, error } = await supabase
+      .from("community_posts")
+      .select("*, author:community_members(*)")
+      .eq("is_published", true)
+      .order("is_pinned", { ascending: false })
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    return (data ?? []) as CommunityPostWithAuthor[];
+  } catch (error) {
+    console.error("[community] getPublishedCommunityPosts error:", error);
+    return [];
+  }
+}
+
+// =============================================================================
+// REGISTRATION
+// =============================================================================
 
 const registrationSchema = z.object({
   email: z.string().email("Please enter a valid email address"),

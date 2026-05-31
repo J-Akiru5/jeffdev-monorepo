@@ -988,3 +988,28 @@ export type UserToken = Database["public"]["Tables"]["user_tokens"]["Row"];
 export type AuditLog = Database["public"]["Tables"]["audit_logs"]["Row"];
 export type SitePage = Database["public"]["Tables"]["site_pages"]["Row"];
 export type Release = Database["public"]["Tables"]["releases"]["Row"];
+export type CommunityMember = {
+  id: string;
+  email: string;
+  full_name: string;
+  github_username: string | null;
+  discord_handle: string | null;
+  primary_role: string | null;
+  interests: string | null;
+  created_at: string;
+  updated_at: string;
+};
+export type CommunityPost = {
+  id: string;
+  title: string;
+  body: string;
+  image_url: string | null;
+  category: "discussion" | "showcase" | "question";
+  tags: string[];
+  author_id: string | null;
+  is_pinned: boolean;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+  author?: CommunityMember | null;
+};
