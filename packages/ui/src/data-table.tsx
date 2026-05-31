@@ -3,7 +3,8 @@
 /**
  * @component DataTable
  * @description Reusable data table with TanStack Table.
- * Features: sorting, pagination, search filter, row click, row selection, CSV export, loading skeleton.
+ * Features: sorting, pagination, search filter, row click, row selection, CSV export,
+ * loading skeleton, and a list/grid view toggle (grid/card view default on mobile).
  *
  * @example
  * <DataTable
@@ -26,9 +27,11 @@ import {
   type SortingState,
   type ColumnFiltersState,
   type RowSelectionState,
+  type Row,
 } from "@tanstack/react-table";
 import { useState, useCallback, useEffect } from "react";
-import { ChevronLeft,
+import {
+  ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
@@ -36,12 +39,16 @@ import { ChevronLeft,
   Download,
   Check,
   Square,
+  LayoutGrid,
+  Table2,
 } from "lucide-react";
 import { cn } from "./utils";
 import { SkeletonTable } from "./skeleton";
 
 /** Accessible focus styles for interactive table rows */
 const rowFocusClasses = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-500/50";
+
+type ViewMode = "table" | "grid";
 
 interface DataTableProps<TData> {
   /** Column definitions */
@@ -68,6 +75,17 @@ interface DataTableProps<TData> {
   isLoading?: boolean;
   /** Number of skeleton rows to show */
   skeletonRows?: number;
+  /**
+   * View mode: "table" (traditional), "grid" (card layout).
+   * Defaults to "grid" on mobile, "table" on desktop.
+   * Pass "table" to force table always, or "grid" to force grid always.
+   */
+  defaultViewMode?: ViewMode;
+  /**
+   * Hide the view toggle button.
+   * Useful when you want to force a specific view without showing the toggle.
+   */
+  hideViewToggle?: boolean;
 }
 
 export function DataTable<TData>({
@@ -83,7 +101,21 @@ export function DataTable<TData>({
   exportFileName = "export",
   isLoading,
   skeletonRows = 5,
+  defaultViewMode,
+  hideViewToggle,
 }: DataTableProps<TData>) {
+  // Determine default view mode based on screen size
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    defaultViewMode ?? "table",
+  );
+  // On mount, check if we should default to grid on mobile
+  useEffect(() => {
+    if (defaultViewMode) return;
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) {
+      setViewMode("grid");
+    }
+  }, [defaultViewMode]);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -217,7 +249,7 @@ export function DataTable<TData>({
 
   return (
     <div className={cn("space-y-4", className)}>
-      {/* Toolbar: Search + Export */}
+      {/* Toolbar: Search + View Toggle + Export */}
       <div className="flex items-center gap-4">
         {searchKey && (
           <div className="flex-1">
@@ -238,6 +270,28 @@ export function DataTable<TData>({
             </span>
           )}
 
+          {/* View Toggle */}
+          {!hideViewToggle && (
+            <button
+              onClick={() =>
+                setViewMode((v) => (v === "table" ? "grid" : "table"))
+              }
+              className="flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-2 text-xs text-white/50 transition-colors hover:border-white/20 hover:text-white"
+              title={
+                viewMode === "table" ? "Switch to card view" : "Switch to table view"
+              }
+            >
+              {viewMode === "table" ? (
+                <LayoutGrid className="h-3.5 w-3.5" />
+              ) : (
+                <Table2 className="h-3.5 w-3.5" />
+              )}
+              <span className="hidden sm:inline">
+                {viewMode === "table" ? "Grid" : "Table"}
+              </span>
+            </button>
+          )}
+
           {enableExport && data.length > 0 && (
             <button
               onClick={handleExport}
@@ -251,7 +305,8 @@ export function DataTable<TData>({
         </div>
       </div>
 
-      {/* Table */}
+      {/* Table View */}
+      {viewMode === "table" ? (
       <div className="overflow-hidden rounded-md border border-white/8 bg-white/[0.02]">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[800px]">
@@ -362,6 +417,25 @@ export function DataTable<TData>({
           </table>
         </div>
       </div>
+      ) : (
+        /* Grid / Card View */
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {table.getRowModel().rows.length === 0 ? (
+            <div className="col-span-full rounded-md border border-white/8 bg-white/[0.02] p-8 text-center text-sm text-white/30">
+              No results found
+            </div>
+          ) : (
+            table.getRowModel().rows.map((row) => (
+              <DataCard
+                key={row.id}
+                row={row}
+                onRowClick={onRowClick}
+                enableRowSelection={enableRowSelection}
+              />
+            ))
+          )}
+        </div>
+      )}
 
       {/* Pagination */}
       <div className="flex items-center justify-between">
@@ -395,6 +469,103 @@ export function DataTable<TData>({
             <ChevronsRight className="h-4 w-4" />
           </PaginationButton>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── DataCard ─────────────────────────────────────────────────
+
+interface DataCardProps<TData> {
+  row: Row<TData>;
+  onRowClick?: (row: TData) => void;
+  enableRowSelection?: boolean;
+}
+
+/**
+ * Card view for a single row of data.
+ * Renders visible cells in a stacked card layout.
+ */
+function DataCard<TData>({
+  row,
+  onRowClick,
+  enableRowSelection,
+}: DataCardProps<TData>) {
+  const cells = row.getVisibleCells().filter(
+    (cell) => cell.column.id !== "select",
+  );
+
+  return (
+    <div
+      tabIndex={onRowClick ? 0 : undefined}
+      role={onRowClick ? "button" : undefined}
+      className={cn(
+        "rounded-md border border-white/8 bg-white/[0.02] p-4 transition-all hover:border-white/[0.14] hover:bg-white/[0.04]",
+        onRowClick && "cursor-pointer",
+        row.getIsSelected() && "ring-1 ring-amber-500/40 bg-amber-500/[0.03]",
+      )}
+      onClick={() => onRowClick?.(row.original)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          onRowClick?.(row.original);
+        }
+      }}
+    >
+      {/* Selection indicator */}
+      {enableRowSelection && (
+        <div className="mb-2 flex items-center gap-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              row.toggleSelected();
+            }}
+            className="flex items-center justify-center"
+            aria-label={row.getIsSelected() ? "Deselect row" : "Select row"}
+          >
+            {row.getIsSelected() ? (
+              <Check className="h-3.5 w-3.5 text-amber-400" />
+            ) : (
+              <Square className="h-3.5 w-3.5 text-white/20 hover:text-white/40" />
+            )}
+          </button>
+          {row.getIsSelected() && (
+            <span className="text-[10px] text-amber-400/60 font-mono">
+              Selected
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Cells stacked vertically */}
+      <div className="space-y-2">
+        {cells.map((cell, idx) => {
+          const headerText =
+            typeof cell.column.columnDef.header === "string"
+              ? cell.column.columnDef.header
+              : (cell.column.id as string) || "";
+          const isFirst = idx === 0;
+
+          return (
+            <div key={cell.id}>
+              {isFirst ? (
+                // First cell = card title
+                <div className="font-medium text-white text-sm">
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] uppercase tracking-wider text-white/40 flex-shrink-0">
+                    {headerText}
+                  </span>
+                  <span className="text-xs text-white/70 text-right truncate">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </span>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

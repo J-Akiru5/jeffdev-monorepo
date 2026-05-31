@@ -116,7 +116,7 @@ export default async function HQLandingPage() {
         </div>
 
         {/* Stats Row */}
-        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div data-tour="dashboard-stats" className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
           {stats.map((stat) => {
             const Icon = stat.icon;
             return (
@@ -140,7 +140,7 @@ export default async function HQLandingPage() {
       </div>
 
       {/* Departments Grid */}
-      <section>
+      <section data-tour="dashboard-departments">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-sm font-mono uppercase tracking-wider text-white/30">
             Departments

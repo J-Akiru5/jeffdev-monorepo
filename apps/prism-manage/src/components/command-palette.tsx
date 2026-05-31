@@ -12,7 +12,7 @@
  *   - Quick Actions (create task)
  */
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -80,129 +80,137 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
     return () => document.removeEventListener("keydown", handler);
   }, [open, onClose]);
 
-  // ── Build Items ──
+  // ── Build Items (memoized) ──
 
-  const workspaceItems: PaletteItem[] = workspaces.map((ws) => ({
-    id: `ws-${ws.id}`,
-    label: ws.name,
-    description: ws.name === "Personal" ? "Personal tasks & lists" : "Workspace tasks & departments",
-    icon: ws.name === "Personal" ? User : Building2,
-    section: "workspaces" as const,
-    action: () => {
-      setActiveWorkspace(ws.id);
-      router.push("/tasks");
-      onClose();
-    },
-  }));
+  const workspaceItems: PaletteItem[] = useMemo(
+    () =>
+      workspaces.map((ws) => ({
+        id: `ws-${ws.id}`,
+        label: ws.name,
+        description:
+          ws.name === "Personal"
+            ? "Personal tasks & lists"
+            : "Workspace tasks & departments",
+        icon: ws.name === "Personal" ? User : Building2,
+        section: "workspaces" as const,
+        action: () => {
+          setActiveWorkspace(ws.id);
+          router.push("/tasks");
+          onClose();
+        },
+      })),
+    [workspaces, setActiveWorkspace, router, onClose],
+  );
 
-  const viewItems: PaletteItem[] = [
-    {
-      id: "view-dashboard",
-      label: "Dashboard",
-      description: "Executive overview & KPIs",
-      icon: LayoutDashboard,
-      section: "views",
-      action: () => {
-        router.push("/dashboard");
-        onClose();
+  const viewItems: PaletteItem[] = useMemo(
+    () => [
+      {
+        id: "view-dashboard",
+        label: "Dashboard",
+        description: "Executive overview & KPIs",
+        icon: LayoutDashboard,
+        section: "views",
+        action: () => {
+          router.push("/dashboard");
+          onClose();
+        },
       },
-    },
-    {
-      id: "view-tasks",
-      label: "Tasks",
-      description: "View all tasks",
-      icon: CheckSquare,
-      section: "views",
-      action: () => {
-        router.push("/tasks");
-        onClose();
+      {
+        id: "view-tasks",
+        label: "Tasks",
+        description: "View all tasks",
+        icon: CheckSquare,
+        section: "views",
+        action: () => {
+          router.push("/tasks");
+          onClose();
+        },
       },
-    },
-    {
-      id: "view-calendar",
-      label: "Calendar",
-      description: "Calendar view",
-      icon: Calendar,
-      section: "views",
-      action: () => {
-        router.push("/calendar");
-        onClose();
+      {
+        id: "view-calendar",
+        label: "Calendar",
+        description: "Calendar view",
+        icon: Calendar,
+        section: "views",
+        action: () => {
+          router.push("/calendar");
+          onClose();
+        },
       },
-    },
-    {
-      id: "view-kanban",
-      label: "Kanban",
-      description: "Kanban board view",
-      icon: LayoutGrid,
-      section: "views",
-      action: () => {
-        router.push("/kanban");
-        onClose();
+      {
+        id: "view-kanban",
+        label: "Kanban",
+        description: "Kanban board view",
+        icon: LayoutGrid,
+        section: "views",
+        action: () => {
+          router.push("/kanban");
+          onClose();
+        },
       },
-    },
-  ];
+    ],
+    [router, onClose],
+  );
 
-  const actionItems: PaletteItem[] = [
-    {
-      id: "action-create-task",
-      label: "Create Task",
-      description: "Open the task creation slide-over",
-      icon: Plus,
-      section: "actions",
-      action: () => {
-        router.push("/tasks/new");
-        onClose();
+  const actionItems: PaletteItem[] = useMemo(
+    () => [
+      {
+        id: "action-create-task",
+        label: "Create Task",
+        description: "Open the task creation slide-over",
+        icon: Plus,
+        section: "actions",
+        action: () => {
+          router.push("/tasks/new");
+          onClose();
+        },
       },
-    },
-  ];
+    ],
+    [router, onClose],
+  );
 
-  // ── Combine with section metadata for rendering ──
+  // ── Squash items into flat array for efficient filtering (memoized) ──
+  const allItems = useMemo(
+    () => [...workspaceItems, ...viewItems, ...actionItems],
+    [workspaceItems, viewItems, actionItems],
+  );
 
-  const sections: {
-    id: string;
-    label: string;
-    items: PaletteItem[];
-    show: boolean;
-  }[] = [
-    { id: "workspaces", label: "Workspaces", items: workspaceItems, show: true },
-    { id: "views", label: "Views", items: viewItems, show: true },
-    { id: "actions", label: "Quick Actions", items: actionItems, show: true },
-  ];
+  const sections = useMemo(
+    () => [
+      { id: "workspaces", label: "Workspaces", items: workspaceItems },
+      { id: "views", label: "Views", items: viewItems },
+      { id: "actions", label: "Quick Actions", items: actionItems },
+    ],
+    [workspaceItems, viewItems, actionItems],
+  );
 
-  // ── Filter & flat index mapping ──
-
-  const flatItems = sections.flatMap((s) => s.items);
-
-  const filtered = flatItems.filter((item) => {
-    if (!query.trim()) return true;
+  // ── Filter — single pass through flat list, memoized per query ──
+  const filtered = useMemo(() => {
+    if (!query.trim()) return allItems;
     const q = query.toLowerCase();
-    return (
-      item.label.toLowerCase().includes(q) ||
-      (item.description || "").toLowerCase().includes(q)
+    return allItems.filter(
+      (item) =>
+        item.label.toLowerCase().includes(q) ||
+        (item.description || "").toLowerCase().includes(q),
     );
-  });
+  }, [allItems, query]);
 
-  const filteredSections = sections
-    .map((s) => ({
-      ...s,
-      items: s.items.filter((item) => {
-        if (!query.trim()) return true;
-        const q = query.toLowerCase();
-        return (
-          item.label.toLowerCase().includes(q) ||
-          (item.description || "").toLowerCase().includes(q)
+  // ── Build section groupings from pre-filtered flat list ──
+  const filteredSections = useMemo(() => {
+    if (!query.trim())
+      return sections.map((s) => ({ ...s, show: s.items.length > 0 }));
+    const q = query.toLowerCase();
+    return sections
+      .map((s) => {
+        const matching = s.items.filter(
+          (item) =>
+            item.label.toLowerCase().includes(q) ||
+            (item.description || "").toLowerCase().includes(q),
         );
-      }),
-      show: s.items.some((item) => {
-        if (!query.trim()) return true;
-        const q = query.toLowerCase();
-        return (
-          item.label.toLowerCase().includes(q) ||
-          (item.description || "").toLowerCase().includes(q)
-        );
-      }),
-    }))
-    .filter((s) => s.show);
+        return { ...s, items: matching, show: matching.length > 0 };
+      })
+      .filter((s) => s.show);
+  }, [sections, query]);
 
   const hasResults = filtered.length > 0;
 

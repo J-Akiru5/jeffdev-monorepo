@@ -7,7 +7,7 @@
  * Uses Next.js Intercepting Routes for task creation/editing via slide-over.
  */
 
-import { useState, useEffect, Suspense, useCallback } from "react";
+import { useState, useEffect, Suspense, useCallback, useMemo, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { TaskList } from "@/components/task-list";
 import { useProjects } from "@/contexts/project-context";
@@ -37,6 +37,11 @@ function TasksContent() {
   const filter = searchParams.get("filter");
   const isStarredFilter = filter === "starred";
 
+  // Keep a ref to the latest tasks so callbacks can read current state
+  // without depending on tasks (which would invalidate memo guards on every toggle).
+  const tasksRef = useRef(tasks);
+  tasksRef.current = tasks;
+
   // Load tasks from Supabase
   useEffect(() => {
     let cancelled = false;
@@ -56,28 +61,27 @@ function TasksContent() {
     };
   }, []);
 
-  // Filter tasks by active project and/or starred filter
-  let filteredTasks = activeProjectId
-    ? tasks.filter((t) => t.projectId === activeProjectId)
-    : tasks;
+  // Filter tasks by active project and/or starred filter (memoized)
+  const filteredTasks = useMemo(() => {
+    const byProject = activeProjectId
+      ? tasks.filter((t) => t.projectId === activeProjectId)
+      : tasks;
+    return isStarredFilter ? byProject.filter((t) => t.isStarred) : byProject;
+  }, [tasks, activeProjectId, isStarredFilter]);
 
-  if (isStarredFilter) {
-    filteredTasks = filteredTasks.filter((t) => t.isStarred);
-  }
-
-  // Group tasks by project
-  const tasksByProject = projects.reduce(
-    (acc, project) => {
+  // Group tasks by project (memoized)
+  const tasksByProject = useMemo(() => {
+    const map: Record<string, Task[]> = {};
+    for (const project of projects) {
       const projectTasks = filteredTasks.filter(
         (t) => t.projectId === project.id,
       );
       if (projectTasks.length > 0 || activeProjectId === project.id) {
-        acc[project.id] = projectTasks;
+        map[project.id] = projectTasks;
       }
-      return acc;
-    },
-    {} as Record<string, Task[]>,
-  );
+    }
+    return map;
+  }, [filteredTasks, projects, activeProjectId]);
 
   // ── Navigation Handlers (Intercepting Routes) ──
 
@@ -97,7 +101,7 @@ function TasksContent() {
   const handleToggleComplete = useCallback(
     async (taskId: string) => {
       try {
-        const task = tasks.find((t) => t.id === taskId);
+        const task = tasksRef.current.find((t) => t.id === taskId);
         if (!task) return;
         const completed = task.status !== "approved";
         await toggleTaskComplete(taskId, completed);
@@ -116,13 +120,13 @@ function TasksContent() {
         toast.error("Failed to update task");
       }
     },
-    [tasks],
+    [],
   );
 
   const handleToggleStar = useCallback(
     async (taskId: string) => {
       try {
-        const task = tasks.find((t) => t.id === taskId);
+        const task = tasksRef.current.find((t) => t.id === taskId);
         if (!task) return;
         await toggleTaskStar(taskId, !task.isStarred);
         setTasks((prev) =>
@@ -140,7 +144,7 @@ function TasksContent() {
         toast.error("Failed to update task");
       }
     },
-    [tasks],
+    [],
   );
 
   const handleDelete = useCallback(async (taskId: string) => {

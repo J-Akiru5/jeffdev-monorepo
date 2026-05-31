@@ -47,8 +47,12 @@ export interface CommandPaletteItem {
 export interface CommandPaletteSection {
   id: string;
   label: string;
+  /** Optional icon component shown before the section label */
+  icon?: React.ComponentType<{ className?: string }>;
   /** Optional colour class for section icons (default: "text-[var(--text-secondary)]") */
   iconColor?: string;
+  /** Optional search keywords (in addition to label), e.g. ["engine", "agency"] */
+  keywords?: string[];
   items: CommandPaletteItem[];
 }
 
@@ -96,35 +100,33 @@ export function CommandPalette({
     return () => document.removeEventListener("keydown", handler);
   }, [open, onClose]);
 
-  // ── Build flat filtered list for keyboard index ──
-
-  const flatItems = sections.flatMap((s) => s.items);
-
-  const filtered = flatItems.filter((item) => {
-    if (!query.trim()) return true;
-    const q = query.toLowerCase();
-    return (
-      item.label.toLowerCase().includes(q) ||
-      (item.description || "").toLowerCase().includes(q) ||
-      (item.keywords || []).some((k) => k.toLowerCase().includes(q))
-    );
-  });
+  // ── Filter sections (including by section label) ──
 
   const filteredSections = sections
-    .map((s) => ({
-      ...s,
-      items: s.items.filter((item) => {
-        if (!query.trim()) return true;
-        const q = query.toLowerCase();
-        return (
-          item.label.toLowerCase().includes(q) ||
-          (item.description || "").toLowerCase().includes(q) ||
-          (item.keywords || []).some((k) => k.toLowerCase().includes(q))
-        );
-      }),
-    }))
+    .map((s) => {
+      const q = query.trim().toLowerCase();
+      // Section is "search-highlighted" when the query matches its label
+      const isSearchHighlighted = !!q && (
+        s.label.toLowerCase().includes(q) ||
+        (s.keywords || []).some((k) => k.toLowerCase().includes(q))
+      );
+      return {
+        ...s,
+        isSearchHighlighted,
+        items: s.items.filter((item) => {
+          if (!q) return true;
+          return (
+            item.label.toLowerCase().includes(q) ||
+            (item.description || "").toLowerCase().includes(q) ||
+            (item.keywords || []).some((k) => k.toLowerCase().includes(q)) ||
+            isSearchHighlighted
+          );
+        }),
+      };
+    })
     .filter((s) => s.items.length > 0);
 
+  const filtered = filteredSections.flatMap((s) => s.items);
   const hasResults = filtered.length > 0;
 
   // ── Keyboard navigation ──
@@ -213,7 +215,17 @@ export function CommandPalette({
             filteredSections.map((section) => (
               <div key={section.id}>
                 {/* Section header */}
-                <div className="px-4 py-2">
+                <div className="flex items-center gap-2 px-4 py-2">
+                  {(() => {
+                    const SectionIcon = section.icon;
+                    return SectionIcon ? (
+                      <SectionIcon className={cn(
+                        "h-3 w-3",
+                        section.iconColor || "text-[var(--text-tertiary)]",
+                        section.isSearchHighlighted && "animate-pulse",
+                      )} />
+                    ) : null;
+                  })()}
                   <h3 className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]">
                     {section.label}
                   </h3>

@@ -7,7 +7,7 @@
  * and workspace-aware navigation with RBAC.
  */
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -28,7 +28,8 @@ import {
   Plus,
 } from "lucide-react";
 import { KeyboardShortcutsHelp } from "@syntaxure/ui";
-import { MANAGE_HELP_SHORTCUTS } from "@/lib/keyboard-shortcuts";
+import { MANAGE_HELP_SHORTCUTS, MODE_TOGGLE_SHORTCUT } from "@/lib/keyboard-shortcuts";
+import { useManageModeStore } from "@/stores/manage-mode-store";
 import { useProjects } from "@/contexts/project-context";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { PERSONAL_LISTS } from "@/lib/schemas";
@@ -88,6 +89,8 @@ export function Sidebar() {
   const userDepartmentId = useWorkspaceStore((s) => s.userDepartmentId);
   const cLevelTitle = useWorkspaceStore((s) => s.cLevelTitle);
 
+  const manageMode = useManageModeStore((s) => s.mode);
+
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId);
   const isSyntaxureLabs = activeWorkspace?.name === "Syntaxure Labs" || activeWorkspace?.name === "Syntaxure Labs, Inc.";
   const isPersonal = activeWorkspace?.name === "Personal";
@@ -102,26 +105,39 @@ export function Sidebar() {
   const [showNewListInput, setShowNewListInput] = useState(false);
   const [newListName, setNewListName] = useState("");
 
-  const visibleDepartments: Department[] = isFounder
-    ? cLevelDepartment
-      ? departments.filter((d) => d.name === cLevelDepartment)
-      : departments
-    : departments.filter((d) => d.id === userDepartmentId);
-
-  const marketingDept = departments.find((d) => d.name === "Marketing");
-  const isMarketingMember = !!marketingDept && (
-    cLevelTitle === "ceo" ||
-    cLevelTitle === "cmo" ||
-    (!cLevelTitle && isFounder) ||
-    userDepartmentId === marketingDept.id
+  const visibleDepartments = useMemo(
+    () =>
+      isFounder
+        ? cLevelDepartment
+          ? departments.filter((d) => d.name === cLevelDepartment)
+          : departments
+        : departments.filter((d) => d.id === userDepartmentId),
+    [isFounder, cLevelDepartment, departments, userDepartmentId],
   );
 
-  const isActive = (href: string) => {
-    if (href.includes("?")) {
-      return pathname === href.split("?")[0];
-    }
-    return pathname === href;
-  };
+  const marketingDept = useMemo(
+    () => departments.find((d) => d.name === "Marketing"),
+    [departments],
+  );
+  const isMarketingMember = useMemo(
+    () =>
+      !!marketingDept &&
+      (cLevelTitle === "ceo" ||
+        cLevelTitle === "cmo" ||
+        (!cLevelTitle && isFounder) ||
+        userDepartmentId === marketingDept.id),
+    [marketingDept, cLevelTitle, isFounder, userDepartmentId],
+  );
+
+  const isActive = useCallback(
+    (href: string) => {
+      if (href.includes("?")) {
+        return pathname === href.split("?")[0];
+      }
+      return pathname === href;
+    },
+    [pathname],
+  );
 
   const handleCreateList = () => {
     if (newListName.trim()) {
@@ -189,42 +205,48 @@ export function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-4">
-        {/* Quick Filters */}
-        <SidebarSection title="Quick Access" collapsed={collapsed}>
-          {quickFilters.map((item) => (
-            <SidebarNavItem
-              key={item.href}
-              label={item.label}
-              href={item.href}
-              icon={item.icon}
-              active={isActive(item.href)}
-              collapsed={collapsed}
-            />
-          ))}
-        </SidebarSection>
+        {/* Quick Filters — Focus mode */}
+        {manageMode === "focus" && (
+          <SidebarSection title="Quick Access" collapsed={collapsed}>
+            {quickFilters.map((item) => (
+              <SidebarNavItem
+                key={item.href}
+                label={item.label}
+                href={item.href}
+                icon={item.icon}
+                active={isActive(item.href)}
+                collapsed={collapsed}
+              />
+            ))}
+          </SidebarSection>
+        )}
 
-        {/* Views */}
-        <SidebarSection title="Views" collapsed={collapsed}>
-          {views.map((item) => (
-            <SidebarNavItem
-              key={item.href}
-              label={item.label}
-              href={item.href}
-              icon={item.icon}
-              active={isActive(item.href)}
-              collapsed={collapsed}
-            />
-          ))}
-          {isMarketingMember && (
-            <SidebarNavItem
-              label={marketingItem.label}
-              href={marketingItem.href}
-              icon={marketingItem.icon}
-              active={isActive(marketingItem.href)}
-              collapsed={collapsed}
-            />
-          )}
-        </SidebarSection>
+        {/* Views — Focus mode */}
+        {manageMode === "focus" && (
+          <div data-tour="sidebar-views">
+          <SidebarSection title="Views" collapsed={collapsed}>
+            {views.map((item) => (
+              <SidebarNavItem
+                key={item.href}
+                label={item.label}
+                href={item.href}
+                icon={item.icon}
+                active={isActive(item.href)}
+                collapsed={collapsed}
+              />
+            ))}
+            {isMarketingMember && (
+              <SidebarNavItem
+                label={marketingItem.label}
+                href={marketingItem.href}
+                icon={marketingItem.icon}
+                active={isActive(marketingItem.href)}
+                collapsed={collapsed}
+              />
+            )}
+          </SidebarSection>
+          </div>
+        )}
 
         {/* Personal Lists */}
         {(isPersonal || !activeWorkspace) && (
@@ -295,17 +317,36 @@ export function Sidebar() {
             {renderProjectLists()}
           </SidebarSection>
         )}
+
+        {/* Mode indicator in sidebar footer */}
+        <div data-tour="mode-toggle" className="border-t border-white/[0.06] px-4 py-3">
+          <button
+            onClick={() => useManageModeStore.getState().toggleMode()}
+            className="flex w-full items-center gap-2 text-[11px] text-[var(--text-tertiary)] transition-colors hover:text-[var(--text-primary)]"
+            title={`Switch to ${manageMode === "focus" ? "Workspace" : "Focus"} mode (⌘⇧M)`}
+          >
+            <span
+              className={`h-2 w-2 rounded-full ${
+                manageMode === "focus" ? "bg-purple-400" : "bg-amber-400"
+              }`}
+            />
+            <span className="capitalize">{manageMode} mode</span>
+            <span className="text-[10px] text-[var(--text-tertiary)]/50">⌘⇧M</span>
+          </button>
+        </div>
       </nav>
 
       {/* Bottom Section */}
-      <SidebarBottom collapsed={collapsed} onHelpClick={() => setHelpOpen(true)} />
+      <div data-tour="sidebar-bottom">
+        <SidebarBottom collapsed={collapsed} onHelpClick={() => setHelpOpen(true)} />
+      </div>
 
       {/* Keyboard Shortcuts Help Dialog */}
       <KeyboardShortcutsHelp
         open={helpOpen}
         onClose={() => setHelpOpen(false)}
         title="Manage Shortcuts"
-        appShortcuts={MANAGE_HELP_SHORTCUTS}
+        appShortcuts={[...MANAGE_HELP_SHORTCUTS, MODE_TOGGLE_SHORTCUT]}
       />
     </aside>
   );

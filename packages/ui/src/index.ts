@@ -84,6 +84,7 @@ export {
   SHORTCUT_SIDEBAR,
   SHORTCUT_COMMAND_PALETTE,
   SHORTCUT_HELP,
+  SHORTCUT_TOGGLE_MODE,
   type KeyboardShortcutDef,
 } from "./keyboard-shortcuts";
 

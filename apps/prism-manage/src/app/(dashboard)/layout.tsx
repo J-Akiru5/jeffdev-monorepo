@@ -5,6 +5,7 @@ import { TopNavbar } from "@/components/top-navbar";
 import { MobileNav } from "@/components/mobile-nav";
 import { ProjectProvider } from "@/contexts/project-context";
 import { WorkspaceProvider } from "@/components/workspace-provider";
+import { TourGuide } from "@/components/tour-guide";
 import { PERSONAL_LISTS } from "@/lib/schemas";
 import type { Project } from "@/lib/schemas";
 
@@ -132,6 +133,9 @@ export default async function DashboardLayout({
               {children}
             </main>
           </div>
+
+          {/* Tour Guide for new users */}
+          <TourGuide />
 
           {/* Parallel Route Slot for Slide-over modals */}
           {modal}
