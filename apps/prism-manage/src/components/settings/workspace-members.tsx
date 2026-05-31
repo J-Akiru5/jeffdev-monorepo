@@ -8,10 +8,13 @@
  * Uses server actions for all mutations.
  */
 
-import { useState, useOptimistic, startTransition } from "react";
-import { Users, Shield, ShieldOff, Trash2, Building2, UserMinus, Loader2 } from "lucide-react";
+import { useState, useOptimistic, startTransition, useMemo } from "react";
+import { Users, Shield, ShieldOff, Trash2, Building2, UserMinus, Loader2, AlertTriangle, GitBranch } from "lucide-react";
+import { ConfirmDialog } from "@syntaxure/ui";
 import { updateMemberRole, assignMemberDepartment, removeMember } from "@/app/actions/members";
 import { useWorkspaceStore } from "@/stores/workspace-store";
+import { useManageModeStore } from "@/stores/manage-mode-store";
+import { toast } from "sonner";
 
 interface Member {
   userId: string;
@@ -37,23 +40,44 @@ export function WorkspaceMembersSettings({
   const userRole = useWorkspaceStore((s) => s.userRole);
   const cLevelTitle = useWorkspaceStore((s) => s.cLevelTitle);
   const userDepartmentId = useWorkspaceStore((s) => s.userDepartmentId);
+  const manageMode = useManageModeStore((s) => s.mode);
   const isFounder = userRole === "founder";
+  const canManageMembers = isFounder && manageMode === "workspace";
   const isCLevelScoped = cLevelTitle !== null && cLevelTitle !== "ceo";
 
   // C-Level scoping: only show members in the user's department if scoped
-  const cLevelDeptName = cLevelTitle
-    ? ({ ceo: null, cto: "Engineering", cpo: "Product", coo: "Operations", cmo: "Marketing" } as const)[cLevelTitle]
-    : null;
-  const cLevelDepartmentId = cLevelDeptName
-    ? departments.find((d) => d.name === cLevelDeptName)?.id ?? null
-    : null;
+  const cLevelDeptName = useMemo(
+    () =>
+      cLevelTitle
+        ? ({ ceo: null, cto: "Engineering", cpo: "Product", coo: "Operations", cmo: "Marketing" } as const)[
+            cLevelTitle
+          ]
+        : null,
+    [cLevelTitle],
+  );
+  const cLevelDepartmentId = useMemo(
+    () =>
+      cLevelDeptName
+        ? departments.find((d) => d.name === cLevelDeptName)?.id ?? null
+        : null,
+    [cLevelDeptName, departments],
+  );
 
   const [optimisticMembers, setOptimisticMembers] = useState(members);
 
-  const filteredMembers = isCLevelScoped && cLevelDepartmentId
-    ? optimisticMembers.filter((m) => m.departmentId === cLevelDepartmentId || m.userId === currentUserId)
-    : optimisticMembers;
+  const filteredMembers = useMemo(
+    () =>
+      isCLevelScoped && cLevelDepartmentId
+        ? optimisticMembers.filter(
+            (m) =>
+              m.departmentId === cLevelDepartmentId ||
+              m.userId === currentUserId,
+          )
+        : optimisticMembers,
+    [isCLevelScoped, cLevelDepartmentId, optimisticMembers, currentUserId],
+  );
   const [loadingMap, setLoadingMap] = useState<Record<string, boolean>>({});
+  const [confirmRemove, setConfirmRemove] = useState<{ userId: string; name: string } | null>(null);
 
   const handleRoleChange = async (userId: string, newRole: "founder" | "employee") => {
     setLoadingMap((prev) => ({ ...prev, [`role-${userId}`]: true }));
@@ -64,7 +88,7 @@ export function WorkspaceMembersSettings({
       );
     });
 
-    const result = await updateMemberRole(workspaceId, userId, newRole);
+    const result = await updateMemberRole(workspaceId, userId, newRole, manageMode);
     if (result.error) {
       // Revert on error
       setOptimisticMembers(members);
@@ -74,7 +98,7 @@ export function WorkspaceMembersSettings({
 
   const handleDepartmentChange = async (userId: string, departmentId: string | null) => {
     setLoadingMap((prev) => ({ ...prev, [`dept-${userId}`]: true }));
-    const result = await assignMemberDepartment(workspaceId, userId, departmentId);
+    const result = await assignMemberDepartment(workspaceId, userId, departmentId, manageMode);
     if (result.error) {
       alert(result.error);
     }
@@ -82,23 +106,44 @@ export function WorkspaceMembersSettings({
   };
 
   const handleRemoveMember = async (userId: string, name: string) => {
-    if (!confirm(`Remove ${name} from this workspace?`)) return;
+    setConfirmRemove({ userId, name });
+  };
+
+  const executeRemoveMember = async (userId: string, name: string) => {
+    setConfirmRemove(null);
     setLoadingMap((prev) => ({ ...prev, [`remove-${userId}`]: true }));
 
     startTransition(() => {
       setOptimisticMembers((prev) => prev.filter((m) => m.userId !== userId));
     });
 
-    const result = await removeMember(workspaceId, userId);
+    const result = await removeMember(workspaceId, userId, manageMode);
     if (result.error) {
       setOptimisticMembers(members);
-      alert(result.error);
+      toast.error(result.error);
+    } else {
+      toast.success(`${name} removed from workspace`);
     }
     setLoadingMap((prev) => ({ ...prev, [`remove-${userId}`]: false }));
   };
 
   return (
-    <section className="rounded-xl border border-white/[0.10] glass-subtle p-6">
+    <>
+      <ConfirmDialog
+        open={confirmRemove !== null}
+        onOpenChange={() => setConfirmRemove(null)}
+        title={`Remove ${confirmRemove?.name || "member"}?`}
+        description="They will lose access to all workspace resources. This action cannot be undone."
+        confirmLabel="Remove"
+        confirmVariant="danger"
+        icon={AlertTriangle}
+        onConfirm={() => {
+          if (confirmRemove) {
+            executeRemoveMember(confirmRemove.userId, confirmRemove.name);
+          }
+        }}
+      />
+      <section className="rounded-xl border border-white/[0.10] glass-subtle p-6">
       <div className="flex items-start gap-4">
         <div className="rounded-lg bg-purple-500/10 p-3">
           <Users className="h-6 w-6 text-purple-400" />
@@ -107,6 +152,12 @@ export function WorkspaceMembersSettings({
           <h2 className="text-lg font-semibold text-white">Workspace Members</h2>
           <p className="mt-1 text-sm text-white/40">
             Manage roles and department assignments
+            {!canManageMembers && isFounder && (
+              <span className="block mt-1 italic text-amber-400/60">
+                <GitBranch className="inline h-3 w-3 mr-1" />
+                Switch to <strong>Workspace</strong> mode to edit members
+              </span>
+            )}
             {!isFounder && <span className="block mt-1 italic">(Only founders can edit members)</span>}
           </p>
 
@@ -128,38 +179,40 @@ export function WorkspaceMembersSettings({
                 return (
                   <div
                     key={member.userId}
-                    className={`flex items-center justify-between rounded-lg border border-white/[0.10] px-4 py-3 transition-all ${
+                    className={`rounded-lg border border-white/[0.10] px-4 py-3 transition-all ${
                       isCurrentUser ? "border-cyan-500/20 bg-cyan-500/5" : "bg-white/[0.02]"
                     }`}
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/[0.10] text-xs font-medium text-white/70">
-                        {member.avatarUrl ? (
-                          <img
-                            src={member.avatarUrl}
-                            alt={member.name}
-                            className="h-8 w-8 rounded-full object-cover"
-                          />
-                        ) : (
-                          member.name.charAt(0).toUpperCase()
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-white truncate">
-                          {member.name}
-                          {isCurrentUser && (
-                            <span className="ml-2 text-[10px] text-white/40 font-mono uppercase">
-                              You
-                            </span>
+                    {/* Member info + controls — stack vertically on small screens */}
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/[0.10] text-xs font-medium text-white/70">
+                          {member.avatarUrl ? (
+                            <img
+                              src={member.avatarUrl}
+                              alt={member.name}
+                              className="h-8 w-8 rounded-full object-cover"
+                            />
+                          ) : (
+                            member.name.charAt(0).toUpperCase()
                           )}
-                        </p>
-                        <p className="text-xs text-white/40 truncate">{member.email}</p>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-white truncate">
+                            {member.name}
+                            {isCurrentUser && (
+                              <span className="ml-2 text-[10px] text-white/40 font-mono uppercase">
+                                You
+                              </span>
+                            )}
+                          </p>
+                          <p className="text-xs text-white/40 truncate">{member.email}</p>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
                       {/* Role Badge / Changer */}
-                      {isFounder && !isCurrentUser ? (
+                      {canManageMembers && !isCurrentUser ? (
                         <div className="relative">
                           <select
                             value={member.role}
@@ -197,8 +250,8 @@ export function WorkspaceMembersSettings({
                         </span>
                       )}
 
-                      {/* Department Assignment (Founders only) */}
-                      {isFounder && !isCurrentUser && departments.length > 0 && (
+                      {/* Department Assignment (Workspace mode + Founder only) */}
+                      {canManageMembers && !isCurrentUser && departments.length > 0 && (
                         <div className="relative">
                           <select
                             value={member.departmentId || ""}
@@ -225,8 +278,8 @@ export function WorkspaceMembersSettings({
                         </div>
                       )}
 
-                      {/* Remove Button (Founders only, not yourself) */}
-                      {isFounder && !isCurrentUser && (
+                      {/* Remove Button (Workspace mode + Founder only, not yourself) */}
+                      {canManageMembers && !isCurrentUser && (
                         <button
                           onClick={() => handleRemoveMember(member.userId, member.name)}
                           disabled={loadingMap[`remove-${member.userId}`]}
@@ -241,6 +294,7 @@ export function WorkspaceMembersSettings({
                         </button>
                       )}
                     </div>
+                    </div>
                   </div>
                 );
               })}
@@ -249,5 +303,6 @@ export function WorkspaceMembersSettings({
         </div>
       </div>
     </section>
+    </>
   );
 }

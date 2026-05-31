@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "next-themes";
 import { ThemeDefaultSyncClient } from "@/components/settings/theme-default-sync-client";
+import { ChatAssistant } from "@syntaxure/ui/chat-assistant";
 import { AuthWrapper } from "@/components/providers/auth-wrapper";
 import { ThemeBootstrap } from "@/components/theme-bootstrap";
 import "./globals.css";
@@ -114,6 +115,16 @@ export default function RootLayout({
                     color: "var(--color-text, #ededed)",
                   },
                 }}
+              />
+              <ChatAssistant
+                apiEndpoint="/api/assistant"
+                title="Prism Manage Assistant"
+                welcomeMessage="Ask me anything about Prism Manage — tasks, calendars, Kanban, keyboard shortcuts, and more."
+                suggestions={[
+                  "What are the keyboard shortcuts?",
+                  "How does the Kanban board work?",
+                  "What is the difference between Focus and Workspace mode?",
+                ]}
               />
               {children}
             </AuthWrapper>

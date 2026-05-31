@@ -7,7 +7,7 @@
  * and workspace-aware navigation with RBAC.
  */
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -105,26 +105,39 @@ export function Sidebar() {
   const [showNewListInput, setShowNewListInput] = useState(false);
   const [newListName, setNewListName] = useState("");
 
-  const visibleDepartments: Department[] = isFounder
-    ? cLevelDepartment
-      ? departments.filter((d) => d.name === cLevelDepartment)
-      : departments
-    : departments.filter((d) => d.id === userDepartmentId);
-
-  const marketingDept = departments.find((d) => d.name === "Marketing");
-  const isMarketingMember = !!marketingDept && (
-    cLevelTitle === "ceo" ||
-    cLevelTitle === "cmo" ||
-    (!cLevelTitle && isFounder) ||
-    userDepartmentId === marketingDept.id
+  const visibleDepartments = useMemo(
+    () =>
+      isFounder
+        ? cLevelDepartment
+          ? departments.filter((d) => d.name === cLevelDepartment)
+          : departments
+        : departments.filter((d) => d.id === userDepartmentId),
+    [isFounder, cLevelDepartment, departments, userDepartmentId],
   );
 
-  const isActive = (href: string) => {
-    if (href.includes("?")) {
-      return pathname === href.split("?")[0];
-    }
-    return pathname === href;
-  };
+  const marketingDept = useMemo(
+    () => departments.find((d) => d.name === "Marketing"),
+    [departments],
+  );
+  const isMarketingMember = useMemo(
+    () =>
+      !!marketingDept &&
+      (cLevelTitle === "ceo" ||
+        cLevelTitle === "cmo" ||
+        (!cLevelTitle && isFounder) ||
+        userDepartmentId === marketingDept.id),
+    [marketingDept, cLevelTitle, isFounder, userDepartmentId],
+  );
+
+  const isActive = useCallback(
+    (href: string) => {
+      if (href.includes("?")) {
+        return pathname === href.split("?")[0];
+      }
+      return pathname === href;
+    },
+    [pathname],
+  );
 
   const handleCreateList = () => {
     if (newListName.trim()) {
@@ -210,6 +223,7 @@ export function Sidebar() {
 
         {/* Views — Focus mode */}
         {manageMode === "focus" && (
+          <div data-tour="sidebar-views">
           <SidebarSection title="Views" collapsed={collapsed}>
             {views.map((item) => (
               <SidebarNavItem
@@ -231,6 +245,7 @@ export function Sidebar() {
               />
             )}
           </SidebarSection>
+          </div>
         )}
 
         {/* Personal Lists */}
@@ -304,7 +319,7 @@ export function Sidebar() {
         )}
 
         {/* Mode indicator in sidebar footer */}
-        <div className="border-t border-white/[0.06] px-4 py-3">
+        <div data-tour="mode-toggle" className="border-t border-white/[0.06] px-4 py-3">
           <button
             onClick={() => useManageModeStore.getState().toggleMode()}
             className="flex w-full items-center gap-2 text-[11px] text-[var(--text-tertiary)] transition-colors hover:text-[var(--text-primary)]"
@@ -322,7 +337,9 @@ export function Sidebar() {
       </nav>
 
       {/* Bottom Section */}
-      <SidebarBottom collapsed={collapsed} onHelpClick={() => setHelpOpen(true)} />
+      <div data-tour="sidebar-bottom">
+        <SidebarBottom collapsed={collapsed} onHelpClick={() => setHelpOpen(true)} />
+      </div>
 
       {/* Keyboard Shortcuts Help Dialog */}
       <KeyboardShortcutsHelp

@@ -8,7 +8,7 @@
  * notifications, quick-add, and account dropdown.
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
@@ -150,138 +150,170 @@ export function TopNavbar() {
   const manageMode = useManageModeStore((s) => s.mode);
   const toggleManageMode = useManageModeStore((s) => s.toggleMode);
 
-  // ── Build command palette sections ──
+  // ── Build command palette sections (memoized) ──
 
-  const workspaceItems = workspaces.map((ws) => ({
-    id: `ws-${ws.id}`,
-    label: ws.name,
-    description: ws.name === "Personal" ? "Personal tasks & lists" : "Workspace tasks & departments",
-    icon: ws.name === "Personal" ? User : Building2,
-    action: () => {
-      setActiveWorkspace(ws.id);
-      router.push("/tasks");
-      closePalette();
-    },
-  }));
-
-  const viewItems = [
-    {
-      id: "view-dashboard",
-      label: "Dashboard",
-      description: "Executive overview & KPIs",
-      icon: LayoutDashboard,
-      action: () => {
-        router.push("/dashboard");
-        closePalette();
-      },
-    },
-    {
-      id: "view-tasks",
-      label: "Tasks",
-      description: "View all tasks",
-      icon: CheckSquare,
-      action: () => {
-        router.push("/tasks");
-        closePalette();
-      },
-    },
-    {
-      id: "view-calendar",
-      label: "Calendar",
-      description: "Calendar view",
-      icon: CalendarIcon,
-      action: () => {
-        router.push("/calendar");
-        closePalette();
-      },
-    },
-    {
-      id: "view-kanban",
-      label: "Kanban",
-      description: "Kanban board view",
-      icon: LayoutGrid,
-      action: () => {
-        router.push("/kanban");
-        closePalette();
-      },
-    },
-  ];
-
-  const actionItems = [
-    {
-      id: "action-create-task",
-      label: "Create Task",
-      description: "Open the task creation page",
-      icon: Plus,
-      action: () => {
-        router.push("/tasks/new");
-        closePalette();
-      },
-    },
-  ];
-
-  const SectionDot = ({ className }: { className?: string }) => (
-    <span className={`h-3 w-3 rounded-full ${className ?? ""}`} />
+  const workspaceItems = useMemo(
+    () =>
+      workspaces.map((ws) => ({
+        id: `ws-${ws.id}`,
+        label: ws.name,
+        description:
+          ws.name === "Personal"
+            ? "Personal tasks & lists"
+            : "Workspace tasks & departments",
+        icon: ws.name === "Personal" ? User : Building2,
+        action: () => {
+          setActiveWorkspace(ws.id);
+          router.push("/tasks");
+          closePalette();
+        },
+      })),
+    [workspaces, setActiveWorkspace, router, closePalette],
   );
 
-  const paletteSections: CommandPaletteSection[] = [
-    {
-      id: "general",
-      label: "General",
-      icon: () => <SectionDot className="bg-[var(--text-tertiary)]" />,
-      iconColor: "text-[var(--text-tertiary)]",
-      keywords: ["shared", "common"],
-      items: [
-        {
-          id: "nav-dashboard",
-          label: "Dashboard",
-          description: "Executive overview & KPIs",
-          icon: LayoutDashboard,
-          action: () => {
-            router.push("/dashboard");
-            closePalette();
-          },
+  const viewItems = useMemo(
+    () => [
+      {
+        id: "view-dashboard",
+        label: "Dashboard",
+        description: "Executive overview & KPIs",
+        icon: LayoutDashboard,
+        action: () => {
+          router.push("/dashboard");
+          closePalette();
         },
-        {
-          id: "nav-settings",
-          label: "Settings",
-          description: "Account & preferences",
-          icon: Settings,
-          action: () => {
-            router.push("/settings");
-            closePalette();
-          },
+      },
+      {
+        id: "view-tasks",
+        label: "Tasks",
+        description: "View all tasks",
+        icon: CheckSquare,
+        action: () => {
+          router.push("/tasks");
+          closePalette();
         },
-      ],
-    },
-    {
-      id: "workspaces",
-      label: "Workspaces",
-      icon: () => <SectionDot className="bg-cyan-400" />,
-      keywords: ["switch", "personal", "team"],
-      items: workspaceItems,
-      iconColor: "text-cyan-400",
-    },
-    {
-      id: "views",
-      label: manageMode === "focus" ? "Views" : "Explore",
-      icon: () => <SectionDot className="bg-purple-400" />,
-      keywords: manageMode === "focus" ? ["tasks", "calendar", "kanban"] : ["departments", "projects", "marketing"],
-      items: viewItems,
-      iconColor: "text-purple-400",
-    },
-    {
-      id: "actions",
-      label: "Quick Actions",
-      icon: () => <SectionDot className="bg-emerald-400" />,
-      keywords: ["create", "new", "add"],
-      items: actionItems,
-      iconColor: "text-emerald-400",
-    },
-  ];
+      },
+      {
+        id: "view-calendar",
+        label: "Calendar",
+        description: "Calendar view",
+        icon: CalendarIcon,
+        action: () => {
+          router.push("/calendar");
+          closePalette();
+        },
+      },
+      {
+        id: "view-kanban",
+        label: "Kanban",
+        description: "Kanban board view",
+        icon: LayoutGrid,
+        action: () => {
+          router.push("/kanban");
+          closePalette();
+        },
+      },
+    ],
+    [router, closePalette],
+  );
+
+  const actionItems = useMemo(
+    () => [
+      {
+        id: "action-create-task",
+        label: "Create Task",
+        description: "Open the task creation page",
+        icon: Plus,
+        action: () => {
+          router.push("/tasks/new");
+          closePalette();
+        },
+      },
+    ],
+    [router, closePalette],
+  );
+
+  const paletteSections: CommandPaletteSection[] = useMemo(
+    () => [
+      {
+        id: "general",
+        label: "General",
+        icon: ({ className }: { className?: string }) => (
+          <span
+            className={`h-3 w-3 rounded-full bg-[var(--text-tertiary)] ${className ?? ""}`}
+          />
+        ),
+        iconColor: "text-[var(--text-tertiary)]",
+        keywords: ["shared", "common"],
+        items: [
+          {
+            id: "nav-dashboard",
+            label: "Dashboard",
+            description: "Executive overview & KPIs",
+            icon: LayoutDashboard,
+            action: () => {
+              router.push("/dashboard");
+              closePalette();
+            },
+          },
+          {
+            id: "nav-settings",
+            label: "Settings",
+            description: "Account & preferences",
+            icon: Settings,
+            action: () => {
+              router.push("/settings");
+              closePalette();
+            },
+          },
+        ],
+      },
+      {
+        id: "workspaces",
+        label: "Workspaces",
+        icon: ({ className }: { className?: string }) => (
+          <span
+            className={`h-3 w-3 rounded-full bg-cyan-400 ${className ?? ""}`}
+          />
+        ),
+        keywords: ["switch", "personal", "team"],
+        items: workspaceItems,
+        iconColor: "text-cyan-400",
+      },
+      {
+        id: "views",
+        label: manageMode === "focus" ? "Views" : "Explore",
+        icon: ({ className }: { className?: string }) => (
+          <span
+            className={`h-3 w-3 rounded-full bg-purple-400 ${className ?? ""}`}
+          />
+        ),
+        keywords:
+          manageMode === "focus"
+            ? ["tasks", "calendar", "kanban"]
+            : ["departments", "projects", "marketing"],
+        items: viewItems,
+        iconColor: "text-purple-400",
+      },
+      {
+        id: "actions",
+        label: "Quick Actions",
+        icon: ({ className }: { className?: string }) => (
+          <span
+            className={`h-3 w-3 rounded-full bg-emerald-400 ${className ?? ""}`}
+          />
+        ),
+        keywords: ["create", "new", "add"],
+        items: actionItems,
+        iconColor: "text-emerald-400",
+      },
+    ],
+    [workspaceItems, viewItems, actionItems, manageMode, router, closePalette],
+  );
 
   return (
-    <KeyboardShortcutsProvider
+    <div data-tour="top-navbar">
+      <KeyboardShortcutsProvider
       onSearch={openPalette}
       onToggleSidebar={() => {
         document.dispatchEvent(new CustomEvent("toggle-sidebar"));
@@ -312,13 +344,17 @@ export function TopNavbar() {
                 <GitBranch className="h-3 w-3" />
                 <span className="hidden sm:inline capitalize">{manageMode}</span>
               </button>
-              <WorkspaceSwitcher />
+              <div data-tour="workspace-switcher">
+                <WorkspaceSwitcher />
+              </div>
             </div>
           }
           rightExtra={
             <div className="flex items-center gap-1">
               <HelpButton onClick={openHelp} />
-              <QuickAddButton />
+              <div data-tour="quick-add-task">
+                <QuickAddButton />
+              </div>
             </div>
           }
           notifications={<NotificationBell />}
@@ -339,5 +375,6 @@ export function TopNavbar() {
         />
       </ManageShortcutsProvider>
     </KeyboardShortcutsProvider>
+      </div>
   );
 }

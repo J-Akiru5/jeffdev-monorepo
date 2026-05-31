@@ -1,7 +1,31 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
+
+async function logAudit(event: {
+  action: string;
+  resource: string;
+  resourceId: string;
+  details?: Record<string, unknown>;
+}) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const supabaseAdmin = getAdminClient() as any;
+    await supabaseAdmin.from("audit_logs").insert({
+      action: event.action,
+      resource_type: event.resource,
+      resource_id: event.resourceId,
+      changes: event.details || null,
+      user_id: user?.id || null,
+      created_at: new Date().toISOString(),
+    });
+  } catch {
+    // Audit is non-critical; never throw
+  }
+}
 
 /**
  * Create a new project/list.
@@ -81,6 +105,14 @@ export async function deleteProject(projectId: string) {
       .eq("user_id", user.id);
 
     if (error) return { error: error.message };
+
+    // Fire audit asynchronously (never blocks the response)
+    logAudit({
+      action: "DELETE",
+      resource: "projects",
+      resourceId: projectId,
+      details: { deletedBy: user.id },
+    });
 
     revalidatePath("/tasks");
     return { success: true };
