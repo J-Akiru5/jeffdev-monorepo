@@ -10,7 +10,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
-import { sendEmail } from "@/lib/resend";
+import { sendEmail } from "@/lib/email";
 import {
   verifyMayaWebhook,
   parseMayaWebhook,
