@@ -19,7 +19,10 @@ export interface AuditEvent {
     | "subscriptions"
     | "users"
     | "feedback"
-    | "case_study";
+    | "case_study"
+    | "agency_availability"
+    | "contact_messages"
+    | "site_settings";
   resourceId: string;
   details?: Record<string, unknown>;
   userEmail?: string;

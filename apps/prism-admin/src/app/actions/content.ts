@@ -122,6 +122,48 @@ export async function saveAboutContent(
   }
 }
 
+// ─── Generic Page Content Helpers ──────────────────────────────────────────────
+
+export async function getPageContent(
+  slug: string,
+): Promise<{ success: boolean; data?: Record<string, any>; error?: string }> {
+  try {
+    const adminClient = getAdminClient();
+    const { data, error } = await adminClient
+      .from("site_pages")
+      .select("content")
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (error) throw error;
+    return { success: true, data: (data?.content as Record<string, any>) || {} };
+  } catch (error) {
+    console.error("[content] getPageContent error:", error);
+    return { success: false, error: "Failed to load page content" };
+  }
+}
+
+export async function savePageContent(
+  slug: string,
+  content: Record<string, any>,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const adminClient = getAdminClient();
+    const { error } = await adminClient.from("site_pages").upsert(
+      { slug, content, updated_at: new Date().toISOString() },
+      { onConflict: "slug" },
+    );
+    if (error) throw error;
+
+    revalidatePath("/admin/agency/content");
+    revalidatePath(`/admin/agency/content/${slug}`);
+    return { success: true };
+  } catch (error) {
+    console.error("[content] savePageContent error:", error);
+    return { success: false, error: "Failed to save page content" };
+  }
+}
+
 export async function getAboutContent(): Promise<AboutContent | null> {
   try {
     const adminClient = getAdminClient();

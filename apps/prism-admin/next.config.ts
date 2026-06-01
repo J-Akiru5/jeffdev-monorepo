@@ -48,6 +48,19 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "2mb",
     },
   },
+  async redirects() {
+    return [
+      // Move products/pricing under agency
+      { source: "/admin/products", destination: "/admin/agency/products", permanent: true },
+      { source: "/admin/products/:path*", destination: "/admin/agency/products/:path*", permanent: true },
+      { source: "/admin/pricing", destination: "/admin/agency/pricing", permanent: true },
+      // Clean up orphan routes
+      { source: "/admin/projects", destination: "/admin/agency/projects", permanent: true },
+      { source: "/admin/inquiries", destination: "/admin/agency/quotes", permanent: true },
+      { source: "/admin/clients", destination: "/admin/agency/projects", permanent: true },
+      { source: "/admin/customization-services", destination: "/admin/agency/services", permanent: true },
+    ];
+  },
 };
 
 export default async function config() {

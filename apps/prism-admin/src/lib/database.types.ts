@@ -54,6 +54,11 @@ export interface Database {
       contract_terms: ToGenericTable<ContractTermRow>;
       customization_services: ToGenericTable<CustomizationServiceRow>;
       services: ToGenericTable<ServiceRow>;
+      quotes: ToGenericTable<QuoteRow>;
+      contact_messages: ToGenericTable<ContactMessageRow>;
+      feedback: ToGenericTable<FeedbackRow>;
+      site_settings: ToGenericTable<SiteSettingRow>;
+      agency_availability: ToGenericTable<AgencyAvailabilityRow>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -457,6 +462,74 @@ export interface ServiceRow {
   price_min: number | null;
   price_max: number | null;
   status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Quotes ──
+
+export interface QuoteRow {
+  id: string;
+  name: string;
+  email: string;
+  company: string | null;
+  project_type: string | null;
+  title: string | null;
+  budget_range: string | null;
+  timeline: string | null;
+  message: string | null;
+  status: "new" | "reviewed" | "responded" | "accepted" | "declined";
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Contact Messages ──
+
+export interface ContactMessageRow {
+  id: string;
+  name: string;
+  email: string;
+  subject: string | null;
+  message: string | null;
+  type: string | null;
+  status: "unread" | "read" | "archived";
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Feedback ──
+
+export interface FeedbackRow {
+  id: string;
+  user_id: string | null;
+  user_name: string | null;
+  rating: number;
+  comment: string | null;
+  page_url: string | null;
+  status: "received" | "acknowledged" | "resolved" | "archived";
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Site Settings (Key-Value Store) ──
+
+export interface SiteSettingRow {
+  id: string;
+  key: string;
+  value: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Agency Availability Slots ──
+
+export interface AgencyAvailabilityRow {
+  id: string;
+  date: string;
+  start_time: string;
+  end_time: string;
+  type: "available" | "busy" | "unavailable" | "tentative";
+  note: string | null;
   created_at: string;
   updated_at: string;
 }
