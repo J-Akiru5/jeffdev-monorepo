@@ -83,14 +83,18 @@ interface AboutData {
 async function getAboutData(): Promise<AboutData> {
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("site_pages")
-      .select("content")
-      .eq("slug", "about")
-      .single();
+    // Phase 1D: Read structured sections instead of monolithic JSONB.
+    const { data: rows, error } = await supabase
+      .from("page_sections")
+      .select("section_key, content")
+      .eq("page_slug", "about")
+      .order("sort_order", { ascending: true });
 
-    if (!error && data?.content) {
-      const content = data.content as Record<string, unknown>;
+    if (!error && rows && rows.length > 0) {
+      const content: Record<string, unknown> = {};
+      for (const row of rows) {
+        content[row.section_key] = row.content;
+      }
       return {
         ...DEFAULT_ABOUT_DATA,
         ...content,

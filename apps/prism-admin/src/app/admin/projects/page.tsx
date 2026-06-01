@@ -7,7 +7,7 @@ interface Project {
   title: string;
   description: string | null;
   status: "active" | "paused" | "completed" | "archived";
-  client_name: string | null;
+  client_id: string | null;
   start_date: string | null;
   budget: number | null;
   created_at: string;
@@ -151,7 +151,7 @@ function ProjectCard({ project }: { project: Project }) {
             {project.title}
           </h3>
           <p className="text-xs text-white/40">
-            {project.client_name || "No client"}
+            {project.client_id || "No client"}
           </p>
         </div>
         <span

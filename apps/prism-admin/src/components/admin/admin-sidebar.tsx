@@ -8,7 +8,7 @@
  * ("manage" vs "agency") from the admin-sidebar-store.
  */
 
-import { useState, useEffect, type ReactNode } from "react";
+import { useState, useEffect, useCallback, type ReactNode } from "react";
 import Link from "next/link";
 import { useAdminSidebarStore } from "@/stores/admin-sidebar-store";
 import {
@@ -19,23 +19,25 @@ import {
   Settings,
   Shield,
   ChevronRight,
+  ChevronDown,
   FolderKanban,
   Mail,
   Receipt,
   Calendar,
   FileText,
-  Clock,
   Building2,
   ListTodo,
   Activity,
   UserCircle,
   MessageSquare,
   KeyRound,
-  PlusCircle,
-  ClipboardList,
   Package,
   Wrench,
   Briefcase,
+  Globe,
+  Send,
+  Star,
+  Clock,
   type LucideIcon,
 } from "lucide-react";
 
@@ -57,6 +59,33 @@ function NavItem({
       <span className="flex-1">{children}</span>
       <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity" />
     </Link>
+  );
+}
+
+function SectionGroup({
+  label,
+  children,
+  defaultOpen = true,
+}: {
+  label: string;
+  children: ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <div className="mt-3">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center gap-1.5 px-5 mb-1.5 text-[10px] font-medium text-white/30 uppercase tracking-wider hover:text-white/50 transition-colors"
+      >
+        <ChevronDown
+          className={`h-3 w-3 transition-transform ${open ? "" : "-rotate-90"}`}
+        />
+        {label}
+      </button>
+      {open && children}
+    </div>
   );
 }
 
@@ -139,74 +168,122 @@ function ManageNav({ isFounder }: { isFounder: boolean }) {
   );
 }
 
-/** Agency-mode navigation sections */
+/** Agency-mode navigation sections — restructured with grouped sections */
 function AgencyNav() {
   return (
     <>
-      {/* Agency */}
-      <div className="px-3 mt-4 mb-2">
-        <span className="text-[10px] font-medium text-white/30 uppercase tracking-wider">
-          Agency
-        </span>
-      </div>
       <NavItem href="/admin/agency/dashboard" icon={LayoutDashboard}>
         Dashboard
       </NavItem>
-      <NavItem href="/admin/agency/works" icon={Briefcase}>
-        Works
-      </NavItem>
-      <NavItem href="/admin/agency/quotes" icon={Mail}>
-        Quotes
-      </NavItem>
-      <NavItem href="/admin/agency/invoices" icon={Receipt}>
-        Invoices
-      </NavItem>
-      <NavItem href="/admin/agency/calendar" icon={Calendar}>
-        Calendar
-      </NavItem>
-      <NavItem href="/admin/agency/users" icon={Users}>
-        Team Members
-      </NavItem>
-      <NavItem href="/admin/agency/content" icon={FileText}>
-        Content
-      </NavItem>
-      <NavItem href="/admin/agency/releases" icon={FileText}>
-        Releases
-      </NavItem>
-      <NavItem href="/admin/agency/community" icon={Users}>
-        Community
-      </NavItem>
+
+      {/* Content (CMS) */}
+      <SectionGroup label="Content">
+        <NavItem href="/admin/agency/content" icon={FileText}>
+          About Page
+        </NavItem>
+        <NavItem href="/admin/agency/content/homepage" icon={Globe}>
+          Homepage
+        </NavItem>
+        <NavItem href="/admin/agency/content/features" icon={Star}>
+          Features
+        </NavItem>
+        <NavItem href="/admin/agency/content/contact" icon={Mail}>
+          Contact
+        </NavItem>
+        <NavItem href="/admin/agency/content/quote" icon={Send}>
+          Quote Form
+        </NavItem>
+        <NavItem href="/admin/agency/content/prism" icon={Shield}>
+          Prism Page
+        </NavItem>
+        <NavItem href="/admin/agency/content/legal" icon={FileText}>
+          Legal Pages
+        </NavItem>
+      </SectionGroup>
+
+      {/* Services */}
       <NavItem href="/admin/agency/services" icon={Wrench}>
-        Services Catalog
-      </NavItem>
-      <NavItem href="/admin/agency/feedback" icon={Mail}>
-        Feedback
-      </NavItem>
-      <NavItem href="/admin/agency/messages" icon={MessageSquare}>
-        Messages
+        Services
       </NavItem>
 
-      {/* Management */}
-      <div className="px-3 mt-4 mb-2">
-        <span className="text-[10px] font-medium text-white/30 uppercase tracking-wider">
-          Management
-        </span>
-      </div>
-      <NavItem href="/admin/agency/projects/new" icon={PlusCircle}>
-        New Project
-      </NavItem>
-      <NavItem href="/admin/agency/invoices/new" icon={ClipboardList}>
-        New Invoice
-      </NavItem>
-      <NavItem href="/admin/agency/profile" icon={UserCircle}>
-        Profile
-      </NavItem>
-      <NavItem href="/admin/agency/access" icon={KeyRound}>
-        Access Control
-      </NavItem>
-      <NavItem href="/admin/agency/audit" icon={Activity}>
-        Audit Log
-      </NavItem>
+      {/* Works */}
+      <SectionGroup label="Works">
+        <NavItem href="/admin/agency/projects" icon={FolderKanban}>
+          Projects
+        </NavItem>
+        <NavItem href="/admin/agency/case-studies" icon={Briefcase}>
+          Case Studies
+        </NavItem>
+      </SectionGroup>
+
+      {/* Products */}
+      <SectionGroup label="Products">
+        <NavItem href="/admin/products" icon={Package}>
+          Product Templates
+        </NavItem>
+        <NavItem href="/admin/agency/pricing" icon={DollarSign}>
+          Pricing
+        </NavItem>
+      </SectionGroup>
+
+      {/* Community */}
+      <SectionGroup label="Community">
+        <NavItem href="/admin/agency/community" icon={Users}>
+          Posts & Members
+        </NavItem>
+        <NavItem href="/admin/agency/releases" icon={FileText}>
+          Releases
+        </NavItem>
+      </SectionGroup>
+
+      {/* Inquiries */}
+      <SectionGroup label="Inquiries">
+        <NavItem href="/admin/agency/quotes" icon={Send}>
+          Quotes
+        </NavItem>
+        <NavItem href="/admin/agency/messages" icon={MessageSquare}>
+          Messages
+        </NavItem>
+        <NavItem href="/admin/agency/feedback" icon={Star}>
+          Feedback
+        </NavItem>
+      </SectionGroup>
+
+      {/* Operations */}
+      <SectionGroup label="Operations">
+        <NavItem href="/admin/agency/invoices" icon={Receipt}>
+          Invoices
+        </NavItem>
+        <NavItem href="/admin/agency/calendar" icon={Calendar}>
+          Calendar
+        </NavItem>
+        <NavItem href="/admin/agency/availability" icon={Clock}>
+          Availability
+        </NavItem>
+      </SectionGroup>
+
+      {/* Team */}
+      <SectionGroup label="Team">
+        <NavItem href="/admin/agency/users" icon={Users}>
+          Members
+        </NavItem>
+        <NavItem href="/admin/agency/access" icon={KeyRound}>
+          Access Control
+        </NavItem>
+      </SectionGroup>
+
+      {/* System */}
+      <SectionGroup label="System">
+        <NavItem href="/admin/agency/settings" icon={Settings}>
+          Settings
+        </NavItem>
+        <NavItem href="/admin/agency/profile" icon={UserCircle}>
+          Profile
+        </NavItem>
+        <NavItem href="/admin/agency/audit" icon={Activity}>
+          Audit Log
+        </NavItem>
+      </SectionGroup>
     </>
   );
 }

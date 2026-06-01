@@ -15,23 +15,41 @@
     "./schema": {
       "types": "./src/schema.ts",
       "default": "./src/schema.ts"
+    },
+    "./prisma-types": {
+      "types": "./src/prisma-types.ts",
+      "default": "./src/prisma-types.ts"
+    },
+    "./prisma": {
+      "types": "./src/prisma.ts",
+      "default": "./src/prisma.ts"
     }
   },
   "scripts": {
     "build": "tsc",
     "lint": "eslint . --max-warnings 0",
     "check-types": "tsc --noEmit",
-    "db:seed": "tsx scripts/seed.ts"
+    "db:seed": "tsx scripts/seed.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:studio": "prisma studio",
+    "prisma:pull": "prisma db pull",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
     "gremlin": "^3.8.1",
     "mongodb": "^6.15.0",
+    "pg": "^8.21.0",
+    "prisma": "^7.8.0",
     "zod": "^4.2.1"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/node": "^22.15.3",
+    "@types/pg": "^8.20.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.2"
   }

@@ -6,6 +6,65 @@ import { z } from "zod";
 import { randomBytes } from "crypto";
 
 // =============================================================================
+// TAG HELPERS (Phase 1B — junction tables)
+// =============================================================================
+
+/**
+ * Upsert tag names into the `tags` table and sync the `community_post_tags` junction.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function syncCommunityPostTags(supabase: any, postId: string, tagNames: string[]) {
+  const tagIds: string[] = [];
+  for (const name of tagNames) {
+    const trimmed = name.trim().toLowerCase();
+    if (!trimmed) continue;
+
+    // Try to find existing tag
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let { data: tag } = await (supabase as any)
+      .from("tags")
+      .select("id")
+      .eq("name", trimmed)
+      .single();
+
+    if (!tag) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: created } = await (supabase as any)
+        .from("tags")
+        .insert({ name: trimmed })
+        .select("id")
+        .single();
+      if (created) tag = created;
+    }
+
+    if (tag) tagIds.push(tag.id);
+  }
+
+  // Delete existing junction rows
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (supabase as any).from("community_post_tags").delete().eq("post_id", postId);
+
+  // Insert new junction rows
+  if (tagIds.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any).from("community_post_tags").insert(
+      tagIds.map((tagId) => ({ post_id: postId, tag_id: tagId }))
+    );
+  }
+}
+
+/**
+ * Extract tag names from the nested community_post_tags → tags join result.
+ */
+function extractTags(raw: Record<string, unknown>): string[] {
+  const junction = raw.community_post_tags as
+    | Array<{ tags: { name: string } | null }>
+    | undefined;
+  if (!junction) return [];
+  return junction.map((row) => row.tags?.name).filter(Boolean) as string[];
+}
+
+// =============================================================================
 // INTERFACES
 // =============================================================================
 
@@ -237,7 +296,7 @@ export async function getCommunityPosts(filters?: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let query = (sb() as any)
       .from("community_posts")
-      .select("*, author:community_members(*)")
+      .select("*, author:community_members(*), community_post_tags(tags(name))")
       .order("is_pinned", { ascending: false })
       .order("created_at", { ascending: false });
 
@@ -252,7 +311,11 @@ export async function getCommunityPosts(filters?: {
     const { data, error } = await query;
 
     if (error) throw error;
-    return { success: true, data: (data ?? []) as CommunityPost[] };
+    const posts = (data ?? []).map((p: Record<string, unknown>) => ({
+      ...p,
+      tags: extractTags(p),
+    })) as CommunityPost[];
+    return { success: true, data: posts };
   } catch (error) {
     console.error("[community] getCommunityPosts error:", error);
     return {
@@ -268,7 +331,7 @@ export async function getCommunityPost(id: string) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (sb() as any)
       .from("community_posts")
-      .select("*, author:community_members(*)")
+      .select("*, author:community_members(*), community_post_tags(tags(name))")
       .eq("id", id)
       .single();
 
@@ -276,7 +339,10 @@ export async function getCommunityPost(id: string) {
       if (error.code === "PGRST116") return { success: true, data: null };
       throw error;
     }
-    return { success: true, data: data as CommunityPost };
+    return {
+      success: true,
+      data: { ...data, tags: extractTags(data) } as CommunityPost,
+    };
   } catch (error) {
     console.error("[community] getCommunityPost error:", error);
     return {
@@ -307,18 +373,34 @@ export async function createCommunityPost(
         body: parsed.data.body,
         image_url: parsed.data.image_url || null,
         category: parsed.data.category,
-        tags: parsed.data.tags,
         author_id: parsed.data.author_id || null,
         is_pinned: parsed.data.is_pinned,
         is_published: parsed.data.is_published,
       })
-      .select("*, author:community_members(*)")
+      .select("id")
       .single();
 
     if (error) throw error;
 
+    // Sync tags via junction table
+    if (parsed.data.tags && parsed.data.tags.length > 0 && data) {
+      await syncCommunityPostTags(sb(), data.id, parsed.data.tags);
+    }
+
+    // Re-fetch the full post with tags for the response
+    const { data: fullPost } = await (sb() as any)
+      .from("community_posts")
+      .select("*, author:community_members(*), community_post_tags(tags(name))")
+      .eq("id", data.id)
+      .single();
+
     revalidatePath("/admin/agency/community");
-    return { success: true, data: data as CommunityPost };
+    return {
+      success: true,
+      data: fullPost
+        ? { ...fullPost, tags: extractTags(fullPost) } as CommunityPost
+        : undefined,
+    };
   } catch (error) {
     console.error("[community] createCommunityPost error:", error);
     return {
@@ -341,7 +423,6 @@ export async function updateCommunityPost(
     if (input.body !== undefined) updates.body = input.body;
     if (input.image_url !== undefined) updates.image_url = input.image_url || null;
     if (input.category !== undefined) updates.category = input.category;
-    if (input.tags !== undefined) updates.tags = input.tags;
     if (input.author_id !== undefined) updates.author_id = input.author_id || null;
     if (input.is_pinned !== undefined) updates.is_pinned = input.is_pinned;
     if (input.is_published !== undefined) updates.is_published = input.is_published;
@@ -351,13 +432,30 @@ export async function updateCommunityPost(
       .from("community_posts")
       .update(updates)
       .eq("id", id)
-      .select("*, author:community_members(*)")
+      .select("id")
       .single();
 
     if (error) throw error;
 
+    // Sync tags via junction table if provided
+    if (input.tags !== undefined && data) {
+      await syncCommunityPostTags(sb(), data.id, input.tags ?? []);
+    }
+
+    // Re-fetch the full post with tags for the response
+    const { data: fullPost } = await (sb() as any)
+      .from("community_posts")
+      .select("*, author:community_members(*), community_post_tags(tags(name))")
+      .eq("id", id)
+      .single();
+
     revalidatePath("/admin/agency/community");
-    return { success: true, data: data as CommunityPost };
+    return {
+      success: true,
+      data: fullPost
+        ? { ...fullPost, tags: extractTags(fullPost) } as CommunityPost
+        : undefined,
+    };
   } catch (error) {
     console.error("[community] updateCommunityPost error:", error);
     return {
@@ -369,6 +467,10 @@ export async function updateCommunityPost(
 
 export async function deleteCommunityPost(id: string) {
   try {
+    // Delete junction rows first (CASCADE may handle this, but be explicit)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (sb() as any).from("community_post_tags").delete().eq("post_id", id);
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (sb() as any)
       .from("community_posts")

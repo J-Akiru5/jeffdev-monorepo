@@ -88,7 +88,7 @@ export default async function AgencyProjectDetailPage({
           <div className="flex items-center gap-4 text-xs text-white/40">
             {category && <span>{category}</span>}
             <span>Slug: {project.slug}</span>
-            {project.client_name && <span>Client: {project.client_name}</span>}
+            {project.client_id && <span>Client linked</span>}
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -132,16 +132,10 @@ export default async function AgencyProjectDetailPage({
         <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4 space-y-3">
           <h3 className="text-sm font-medium text-white/80">Details</h3>
           <div className="space-y-2 text-sm">
-            {project.client_name && (
+            {project.client_id && (
               <div className="flex justify-between">
                 <span className="text-white/40">Client</span>
-                <span className="text-white/70">{project.client_name}</span>
-              </div>
-            )}
-            {project.client_email && (
-              <div className="flex justify-between">
-                <span className="text-white/40">Email</span>
-                <span className="text-white/70">{project.client_email}</span>
+                <span className="text-white/70">Linked</span>
               </div>
             )}
             {project.start_date && (

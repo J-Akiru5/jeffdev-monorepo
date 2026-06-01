@@ -1,0 +1,1192 @@
+// Prisma Schema for Syntaxure Labs Database
+// Maps to existing Supabase PostgreSQL schema
+// Provider: PostgreSQL (Supabase)
+// Updated: Phase 1 — Database Normalization (3NF)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =============================================================================
+// ENUMS
+// =============================================================================
+
+enum UserRole {
+  admin
+  manager
+  employee
+  client
+}
+
+enum UserTier {
+  free
+  pro
+  team
+  enterprise
+}
+
+enum ProjectStatus {
+  active
+  paused
+  completed
+  archived
+}
+
+enum QuoteStatus {
+  draft
+  sent
+  accepted
+  rejected
+  expired
+}
+
+enum QuoteType {
+  project
+  customization
+}
+
+enum InvoiceStatus {
+  draft
+  sent
+  paid
+  overdue
+  cancelled
+}
+
+enum CalendarEventType {
+  meeting
+  deadline
+  review
+  delivery
+  other
+}
+
+enum CaseStudyStatus {
+  draft
+  published
+  archived
+}
+
+enum SubscriptionStatus {
+  active
+  cancelled
+  suspended
+  past_due
+}
+
+enum SubscriptionPlan {
+  free
+  pro
+  team
+  enterprise
+}
+
+enum BillingCycle {
+  monthly
+  annual
+}
+
+enum NotificationType {
+  info
+  success
+  warning
+  error
+}
+
+enum InviteStatus {
+  pending
+  accepted
+  rejected
+  expired
+}
+
+enum MessageStatus {
+  received
+  read
+  responded
+}
+
+enum MessageType {
+  general
+  support
+  inquiry
+  partnership
+}
+
+enum TicketPriority {
+  low
+  medium
+  high
+  urgent
+}
+
+enum TicketStatus {
+  open
+  in_progress
+  waiting
+  resolved
+  closed
+}
+
+enum TaskStatus {
+  backlog
+  todo
+  in_progress
+  in_review
+  approved
+}
+
+enum TaskPriority {
+  low
+  medium
+  high
+}
+
+enum TaskType {
+  feature
+  nice_to_have
+  bug
+  error
+  uncategorized
+}
+
+enum TokenProvider {
+  google
+  microsoft
+  github
+  slack
+}
+
+enum ServiceStatus {
+  active
+  inactive
+  archived
+}
+
+enum ReleaseType {
+  tool
+  update
+  patch
+}
+
+enum ProductCategory {
+  template
+  boilerplate
+  addon
+}
+
+enum ProductStatus {
+  draft
+  active
+  archived
+}
+
+enum PricingPlanApp {
+  prism_engine
+  syntaxure_labs
+}
+
+enum PricingPlanType {
+  tier
+  addon
+}
+
+enum CtaVariant {
+  primary
+  secondary
+  contact
+}
+
+enum ContractStatus {
+  pending
+  active
+  cancelled
+  expired
+}
+
+enum CustomizationPricingModel {
+  fixed
+  hourly
+  project
+}
+
+enum CustomizationServiceStatus {
+  active
+  inactive
+}
+
+enum ContractTermStatus {
+  active
+  inactive
+}
+
+enum WorkspaceMemberRole {
+  founder
+  employee
+}
+
+enum CLevelTitle {
+  ceo
+  cto
+  cpo
+  coo
+  cmo
+}
+
+enum WebhookProvider {
+  paypal
+  maya
+  stripe
+}
+
+enum WebhookStatus {
+  pending
+  processing
+  completed
+  failed
+}
+
+enum WaitlistStatus {
+  pending
+  invited
+  joined
+  rejected
+}
+
+enum FeedbackStatus {
+  received
+  acknowledged
+  resolved
+}
+
+enum MilestoneStatus {
+  pending
+  in_progress
+  completed
+  blocked
+}
+
+// =============================================================================
+// TABLES
+// =============================================================================
+
+model UserProfile {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  fullName     String?  @map("full_name")
+  role         String   @default("client") @db.Text
+  tier         String   @default("free") @db.Text
+  avatarUrl    String?  @map("avatar_url") @db.Text
+  bio          String?  @db.Text
+  companyName  String?  @map("company_name") @db.Text
+  phone        String?  @db.Text
+  timezone     String   @default("UTC") @db.Text
+  preferences  Json     @default("{}")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt    DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  projects           Project[]
+  quotes             Quote[]
+  invoices           Invoice[]
+  calendarEvents     CalendarEvent[]
+  caseStudies        CaseStudy[]
+  feedbackGiven      Feedback[]
+  subscriptions      Subscription[]
+  notifications      Notification[]
+  invitesSent        Invite[]
+  messages           Message[]
+  tasksOwned         Task[]       @relation("TaskUser")
+  tasksAssigned      Task[]       @relation("TaskAssignee")
+  supportTicketsOwned   SupportTicket[] @relation("SupportTicketUser")
+  supportTicketsAssigned SupportTicket[] @relation("SupportTicketAssignee")
+  userTokens         UserToken[]
+  auditLogs          AuditLog[]
+  sitePagesUpdated   SitePage[]
+  availabilitySlotsUpdated AvailabilitySlot[]
+  workspaces         WorkspaceMember[]
+
+  @@map("user_profiles")
+}
+
+/// Single source of truth for client identity.
+/// Extracted from denormalized project/client_contracts columns in Phase 1A.
+model Client {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @db.Text
+  email     String?  @db.Text
+  company   String?  @db.Text
+  phone     String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  projects         Project[]
+  clientContracts  ClientContract[]
+
+  @@index([name])
+  @@index([email])
+  @@map("clients")
+}
+
+model Service {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @db.Text
+  description String?  @db.Text
+  category    String   @db.Text
+  priceMin    Decimal? @map("price_min") @db.Decimal(10, 2)
+  priceMax    Decimal? @map("price_max") @db.Decimal(10, 2)
+  status      String   @default("active") @db.Text
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  @@map("services")
+}
+
+model Project {
+  id              String    @id @default(uuid()) @db.Uuid
+  userId          String    @map("user_id") @db.Uuid
+  clientId        String?   @map("client_id") @db.Uuid
+  title           String    @db.Text
+  description     String?   @db.Text
+  slug            String?   @unique @db.Text
+  status          String    @default("active") @db.Text
+  startDate       DateTime? @map("start_date") @db.Date
+  endDate         DateTime? @map("end_date") @db.Date
+  budget          Decimal?  @db.Decimal(12, 2)
+  budgetSpent     Decimal?  @default(0) @map("budget_spent") @db.Decimal(12, 2)
+  metadata        Json      @default("{}")
+  published       Boolean   @default(false)
+  publishedSiteUrl String?  @map("published_site_url") @db.Text
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt       DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  user          UserProfile   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client        Client?       @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  milestones    Milestone[]
+  quotes        Quote[]
+  invoices      Invoice[]
+  calendarEvents CalendarEvent[]
+  caseStudies   CaseStudy[]
+  feedback      Feedback[]
+  tasks         Task[]
+
+  @@index([userId])
+  @@index([clientId])
+  @@index([status])
+  @@map("projects")
+}
+
+model Milestone {
+  id           String   @id @default(uuid()) @db.Uuid
+  projectId    String   @map("project_id") @db.Uuid
+  title        String   @db.Text
+  description  String?  @db.Text
+  dueDate      DateTime @map("due_date") @db.Date
+  status       String   @default("pending") @db.Text
+  deliverables String[]
+  metadata     Json     @default("{}")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt    DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("milestones")
+}
+
+model Quote {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  projectId   String?   @map("project_id") @db.Uuid
+  title       String    @db.Text
+  description String?   @db.Text
+  amount      Decimal   @db.Decimal(12, 2)
+  status      String    @default("draft") @db.Text
+  validUntil  DateTime? @map("valid_until") @db.Date
+  lineItems   Json      @default("[]")
+  metadata    Json      @default("{}")
+  quoteType   String    @default("project") @map("quote_type") @db.Text
+  templateId  String?   @map("template_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  user            UserProfile   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project         Project?      @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  template        ProductTemplate? @relation(fields: [templateId], references: [id])
+  quoteServices   QuoteService[]
+  invoices        Invoice[]
+  clientContracts ClientContract[]
+
+  @@index([quoteType])
+  @@map("quotes")
+}
+
+model Invoice {
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  quoteId       String?   @map("quote_id") @db.Uuid
+  projectId     String?   @map("project_id") @db.Uuid
+  invoiceNumber String    @unique @map("invoice_number") @db.Text
+  amount        Decimal   @db.Decimal(12, 2)
+  taxAmount     Decimal   @default(0) @map("tax_amount") @db.Decimal(12, 2)
+  totalAmount   Decimal   @map("total_amount") @db.Decimal(12, 2)
+  status        String    @default("draft") @db.Text
+  issuedDate    DateTime  @map("issued_date") @db.Date
+  dueDate       DateTime  @map("due_date") @db.Date
+  paidDate      DateTime? @map("paid_date") @db.Date
+  lineItems     Json      @default("[]")
+  notes         String?   @db.Text
+  paymentMethod String?   @map("payment_method") @db.Text
+  paymentTerms  String?   @map("payment_terms") @db.Text
+  metadata      Json      @default("{}")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  user    UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quote   Quote?      @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  project Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([status])
+  @@map("invoices")
+}
+
+model CalendarEvent {
+  id              String    @id @default(uuid()) @db.Uuid
+  userId          String    @map("user_id") @db.Uuid
+  projectId       String?   @map("project_id") @db.Uuid
+  title           String    @db.Text
+  description     String?   @db.Text
+  startTime       DateTime  @map("start_time") @db.Timestamptz()
+  endTime         DateTime  @map("end_time") @db.Timestamptz()
+  location        String?   @db.Text
+  eventType       String    @default("meeting") @map("event_type") @db.Text
+  color           String?   @db.Text
+  reminders       Json      @default("[]")
+  metadata        Json      @default("{}")
+  allDay          Boolean   @default(false) @map("all_day")
+  googleCalendarId String?  @map("google_calendar_id") @db.Text
+  syncedAt        DateTime? @map("synced_at") @db.Timestamptz()
+  linkedTaskId    String?   @map("linked_task_id") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt       DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  user       UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project    Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  linkedTask Task?       @relation(fields: [linkedTaskId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([startTime])
+  @@index([googleCalendarId])
+  @@index([linkedTaskId])
+  @@map("calendar_events")
+}
+
+model CaseStudy {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  projectId   String?   @map("project_id") @db.Uuid
+  title       String    @db.Text
+  description String?   @db.Text
+  slug        String?   @unique @db.Text
+  industry    String?   @db.Text
+  challenge   String?   @db.Text
+  solution    String?   @db.Text
+  results     String?   @db.Text
+  metrics     Json      @default("{}")
+  images      Json      @default("[]")
+  status      String    @default("draft") @db.Text
+  publishedAt DateTime? @map("published_at") @db.Timestamptz()
+  metadata    Json      @default("{}")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  user     UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project  Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  feedback Feedback[]
+
+  @@index([userId])
+  @@map("case_studies")
+}
+
+model Feedback {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  projectId   String?   @map("project_id") @db.Uuid
+  caseStudyId String?   @map("case_study_id") @db.Uuid
+  rating      Int?
+  comment     String?   @db.Text
+  category    String?   @db.Text
+  status      String    @default("received") @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  user      UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project   Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  caseStudy CaseStudy?  @relation(fields: [caseStudyId], references: [id], onDelete: SetNull)
+
+  @@map("feedback")
+}
+
+model Subscription {
+  id                   String    @id @default(uuid()) @db.Uuid
+  userId               String    @map("user_id") @db.Uuid
+  plan                 String    @db.Text
+  status               String    @default("active") @db.Text
+  billingCycle         String    @default("monthly") @map("billing_cycle") @db.Text
+  amount               Decimal   @db.Decimal(12, 2)
+  currency             String    @default("USD") @db.Text
+  currentPeriodStart   DateTime  @map("current_period_start") @db.Timestamptz()
+  currentPeriodEnd     DateTime  @map("current_period_end") @db.Timestamptz()
+  cancelAtPeriodEnd    Boolean   @default(false) @map("cancel_at_period_end")
+  cancelledAt          DateTime? @map("cancelled_at") @db.Timestamptz()
+  paymentMethodId      String?   @map("payment_method_id") @db.Text
+  metadata             Json      @default("{}")
+  paypalSubscriptionId String?   @map("paypal_subscription_id") @db.Text
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt            DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  user UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([paypalSubscriptionId])
+  @@map("subscriptions")
+}
+
+model Notification {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  title       String    @db.Text
+  message     String?   @db.Text
+  type        String    @default("info") @db.Text
+  relatedId   String?   @map("related_id") @db.Uuid
+  read        Boolean   @default(false)
+  actionUrl   String?   @map("action_url") @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  user UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([read])
+  @@map("notifications")
+}
+
+model Invite {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  email       String    @db.Text
+  role        String    @default("employee") @db.Text
+  token       String    @unique @db.Text
+  status      String    @default("pending") @db.Text
+  expiresAt   DateTime  @map("expires_at") @db.Timestamptz()
+  acceptedAt  DateTime? @map("accepted_at") @db.Timestamptz()
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  user UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("invites")
+}
+
+model Message {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String?   @map("user_id") @db.Uuid
+  name        String?   @db.Text
+  email       String    @db.Text
+  subject     String    @db.Text
+  message     String    @db.Text
+  status      String    @default("received") @db.Text
+  messageType String    @default("general") @map("message_type") @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  user UserProfile? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("messages")
+}
+
+model WaitlistEntry {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique @db.Text
+  name      String?  @db.Text
+  reason    String?  @db.Text
+  position  Int?
+  status    String   @default("pending") @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  @@map("waitlist_entries")
+}
+
+model SupportTicket {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String?   @map("user_id") @db.Uuid
+  title       String    @db.Text
+  description String?   @db.Text
+  priority    String    @default("medium") @db.Text
+  status      String    @default("open") @db.Text
+  assignedTo  String?   @map("assigned_to") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  user      UserProfile? @relation("SupportTicketUser", fields: [userId], references: [id], onDelete: SetNull)
+  assignee  UserProfile? @relation("SupportTicketAssignee", fields: [assignedTo], references: [id], onDelete: SetNull)
+  tags      SupportTicketTag[]
+
+  @@map("support_tickets")
+}
+
+model Task {
+  id              String    @id @default(uuid()) @db.Uuid
+  userId          String    @map("user_id") @db.Uuid
+  projectId       String?   @map("project_id") @db.Uuid
+  title           String    @db.Text
+  description     String?   @db.Text
+  status          String    @default("backlog") @db.Text
+  priority        String    @default("medium") @db.Text
+  assignedTo      String?   @map("assigned_to") @db.Uuid
+  dueDate         DateTime? @map("due_date") @db.Date
+  estimatedHours  Decimal?  @map("estimated_hours") @db.Decimal(10, 2)
+  actualHours     Decimal?  @map("actual_hours") @db.Decimal(10, 2)
+  googleEventId   String?   @map("google_event_id") @db.Text
+  githubIssueNumber Int?    @map("github_issue_number")
+  notes           String?   @db.Text
+  parentTaskId    String?   @map("parent_task_id") @db.Uuid
+  metadata        Json      @default("{}")
+  taskType        String    @default("uncategorized") @map("task_type") @db.Text
+  isStarred       Boolean   @default(false) @map("is_starred")
+  workspaceId     String?   @map("workspace_id") @db.Uuid
+  departmentId    String?   @map("department_id") @db.Uuid
+  pathIndex       Int       @default(0) @map("path_index")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt       DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  user         UserProfile    @relation("TaskUser", fields: [userId], references: [id], onDelete: Cascade)
+  project      Project?       @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  assignee     UserProfile?   @relation("TaskAssignee", fields: [assignedTo], references: [id], onDelete: SetNull)
+  parentTask   Task?          @relation("TaskHierarchy", fields: [parentTaskId], references: [id], onDelete: SetNull)
+  childTasks   Task[]         @relation("TaskHierarchy")
+  workspace    Workspace?     @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  department   Department?    @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  linkedEvents CalendarEvent[]
+  tags         TaskTag[]
+
+  @@index([userId])
+  @@index([assignedTo])
+  @@index([status])
+  @@index([projectId])
+  @@index([taskType])
+  @@index([isStarred])
+  @@index([workspaceId])
+  @@index([departmentId])
+  @@index([pathIndex])
+  @@map("tasks")
+}
+
+model UserToken {
+  id           String    @id @default(uuid()) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  provider     String    @db.Text
+  accessToken  String    @map("access_token") @db.Text
+  refreshToken String?   @map("refresh_token") @db.Text
+  tokenExpiry  DateTime? @map("token_expiry") @db.Timestamptz()
+  scope        String?   @db.Text
+  metadata     Json      @default("{}")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt    DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  user UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+  @@index([userId])
+  @@index([provider])
+  @@map("user_tokens")
+}
+
+model AuditLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String?  @map("user_id") @db.Uuid
+  action       String   @db.Text
+  resourceType String?  @map("resource_type") @db.Text
+  resourceId   String?  @map("resource_id") @db.Uuid
+  changes      Json     @default("{}")
+  ipAddress    String?  @map("ip_address") @db.Inet
+  userAgent    String?  @map("user_agent") @db.Text
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  // Relations
+  user UserProfile? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+/// Lightweight registry for CMS pages.
+/// Content has been normalized into page_sections (Phase 1D).
+model SitePage {
+  id        String   @id @default(uuid()) @db.Uuid
+  slug      String   @unique @db.Text
+  updatedBy String?  @map("updated_by") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  updater  UserProfile?  @relation(fields: [updatedBy], references: [id], onDelete: SetNull)
+  sections PageSection[]
+
+  @@index([slug])
+  @@map("site_pages")
+}
+
+/// Normalized page content sections.
+/// Each row is one section of a page (e.g., about page hero, founder, etc.).
+/// Replaces the monolithic JSONB blob in site_pages.content (Phase 1D).
+model PageSection {
+  id           String   @id @default(uuid()) @db.Uuid
+  pageSlug     String   @map("page_slug") @db.Text
+  sectionKey   String   @map("section_key") @db.Text
+  sectionType  String   @default("content") @map("section_type") @db.Text
+  content      Json     @default("{}")
+  sortOrder    Int      @default(0) @map("sort_order")
+  isVisible    Boolean  @default(true) @map("is_visible")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt    DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  page SitePage? @relation(fields: [pageSlug], references: [slug])
+
+  @@unique([pageSlug, sectionKey])
+  @@index([pageSlug])
+  @@index([pageSlug, sortOrder])
+  @@map("page_sections")
+}
+
+/// Tags table — single source of truth for tag names.
+/// Referenced by junction tables: task_tags, release_tags, community_post_tags, support_ticket_tags.
+model Tag {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String   @unique @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  // Relations
+  taskTags            TaskTag[]
+  releaseTags         ReleaseTag[]
+  communityPostTags   CommunityPostTag[]
+  supportTicketTags   SupportTicketTag[]
+
+  @@map("tags")
+}
+
+/// Junction: quotes ↔ customization_services
+/// Replaces the former quotes.customization_service_ids UUID[] column.
+model QuoteService {
+  quoteId   String   @map("quote_id") @db.Uuid
+  serviceId String   @map("service_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  quote   Quote              @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  service CustomizationService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@id([quoteId, serviceId])
+  @@map("quote_services")
+}
+
+/// Junction: tasks ↔ tags
+/// Replaces the former tasks.tags TEXT[] column.
+model TaskTag {
+  taskId    String   @map("task_id") @db.Uuid
+  tagId     String   @map("tag_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, tagId])
+  @@map("task_tags")
+}
+
+/// Junction: releases ↔ tags
+/// Replaces the former releases.tags TEXT[] column.
+model ReleaseTag {
+  releaseId String   @map("release_id") @db.Uuid
+  tagId     String   @map("tag_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  release Release @relation(fields: [releaseId], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([releaseId, tagId])
+  @@map("release_tags")
+}
+
+/// Junction: community_posts ↔ tags
+/// Replaces the former community_posts.tags TEXT[] column.
+model CommunityPostTag {
+  postId    String   @map("post_id") @db.Uuid
+  tagId     String   @map("tag_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag  Tag           @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@map("community_post_tags")
+}
+
+/// Junction: support_tickets ↔ tags
+/// Replaces the former support_tickets.tags TEXT[] column.
+model SupportTicketTag {
+  ticketId  String   @map("ticket_id") @db.Uuid
+  tagId     String   @map("tag_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  tag    Tag           @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([ticketId, tagId])
+  @@map("support_ticket_tags")
+}
+
+model Release {
+  id          String    @id @default(uuid()) @db.Uuid
+  title       String    @db.Text
+  version     String?   @db.Text
+  date        DateTime  @default(now()) @db.Timestamptz()
+  type        String    @default("update") @db.Text
+  description String    @db.Text
+  link        String?   @db.Text
+  isFeatured  Boolean   @default(false) @map("is_featured")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  tags ReleaseTag[]
+
+  @@index([date(sort: Desc)])
+  @@index([type])
+  @@index([isFeatured])
+  @@map("releases")
+}
+
+model AvailabilitySlot {
+  id            String   @id @default(uuid()) @db.Uuid
+  quarterLabel  String   @unique @map("quarter_label") @db.Text
+  totalSlots    Int      @default(0) @map("total_slots")
+  filledSlots   Int      @default(0) @map("filled_slots")
+  isActive      Boolean  @default(false) @map("is_active")
+  updatedBy     String?  @map("updated_by") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt     DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  updater UserProfile? @relation(fields: [updatedBy], references: [id], onDelete: SetNull)
+
+  @@index([isActive])
+  @@map("availability_slots")
+}
+
+model PricingPlan {
+  id               String   @id @default(uuid()) @db.Uuid
+  app              String   @db.Text
+  planType         String   @default("tier") @map("plan_type") @db.Text
+  name             String   @db.Text
+  tierSlug         String   @map("tier_slug") @db.Text
+  tagline          String?  @db.Text
+  description      String?  @db.Text
+  priceMonthlyPhp  Decimal? @map("price_monthly_php") @db.Decimal
+  priceMonthlyUsd  Decimal? @map("price_monthly_usd") @db.Decimal
+  priceAnnualPhp   Decimal? @map("price_annual_php") @db.Decimal
+  priceAnnualUsd   Decimal? @map("price_annual_usd") @db.Decimal
+  priceOriginalPhp Decimal? @map("price_original_php") @db.Decimal
+  priceOriginalUsd Decimal? @map("price_original_usd") @db.Decimal
+  discountLabel    String?  @map("discount_label") @db.Text
+  monthlyAddon     String?  @map("monthly_addon") @db.Text
+  features         Json     @default("[]")
+  comparisonValues Json     @default("{}") @map("comparison_values")
+  ctaLabel         String   @default("Choose plan") @map("cta_label") @db.Text
+  ctaHref          String?  @map("cta_href") @db.Text
+  ctaVariant       String   @default("secondary") @map("cta_variant") @db.Text
+  highlighted      Boolean  @default(false)
+  limitedDeal      Boolean  @default(false) @map("limited_deal")
+  sortOrder        Int      @default(0) @map("sort_order")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt        DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  @@unique([app, tierSlug])
+  @@index([app])
+  @@index([app, sortOrder])
+  @@map("pricing_plans")
+}
+
+model PricingFaq {
+  id        String   @id @default(uuid()) @db.Uuid
+  app       String   @db.Text
+  question  String   @db.Text
+  answer    String   @db.Text
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  @@index([app])
+  @@map("pricing_faqs")
+}
+
+model ProductTemplate {
+  id                    String   @id @default(uuid()) @db.Uuid
+  name                  String   @db.Text
+  slug                  String   @unique @db.Text
+  category              String   @db.Text
+  tagline               String?  @db.Text
+  description           String?  @db.Text
+  shortDescription      String?  @map("short_description") @db.Text
+  basePriceMonthlyPhp   Decimal? @map("base_price_monthly_php") @db.Decimal
+  basePriceMonthlyUsd   Decimal? @map("base_price_monthly_usd") @db.Decimal
+  basePriceAnnualPhp    Decimal? @map("base_price_annual_php") @db.Decimal
+  basePriceAnnualUsd    Decimal? @map("base_price_annual_usd") @db.Decimal
+  features              Json     @default("[]")
+  techStack             Json     @default("[]") @map("tech_stack")
+  demoUrl               String?  @map("demo_url") @db.Text
+  repoUrl               String?  @map("repo_url") @db.Text
+  documentationUrl      String?  @map("documentation_url") @db.Text
+  icon                  String?  @db.Text
+  imageUrl              String?  @map("image_url") @db.Text
+  highlighted           Boolean  @default(false)
+  sortOrder             Int      @default(0) @map("sort_order")
+  status                String   @default("draft") @db.Text
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt             DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  contractTerms   ContractTerm[]
+  quotes          Quote[]
+  clientContracts ClientContract[]
+
+  @@index([category])
+  @@index([status])
+  @@index([sortOrder])
+  @@map("product_templates")
+}
+
+model ContractTerm {
+  id                       String   @id @default(uuid()) @db.Uuid
+  templateId               String   @map("template_id") @db.Uuid
+  termMonths               Int      @default(36) @map("term_months")
+  billingCycle             String   @db.Text @map("billing_cycle")
+  pricePhp                 Decimal  @map("price_php") @db.Decimal
+  priceUsd                 Decimal  @map("price_usd") @db.Decimal
+  discountPercent          Decimal? @map("discount_percent") @db.Decimal
+  includes                 Json     @default("{}")
+  extensionEnabled         Boolean  @default(true) @map("extension_enabled")
+  extensionMaxYears        Int      @default(5) @map("extension_max_years")
+  extensionRateIncreasePercent Decimal? @default(10) @map("extension_rate_increase_percent") @db.Decimal
+  highlighted              Boolean  @default(false)
+  sortOrder                Int      @default(0) @map("sort_order")
+  status                   String   @default("active") @db.Text
+  createdAt                DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt                DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  template        ProductTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  clientContracts ClientContract[]
+
+  @@unique([templateId, termMonths, billingCycle])
+  @@index([templateId])
+  @@map("contract_terms")
+}
+
+model CustomizationService {
+  id                    String   @id @default(uuid()) @db.Uuid
+  name                  String   @db.Text
+  slug                  String   @unique @db.Text
+  description           String?  @db.Text
+  pricingModel          String   @map("pricing_model") @db.Text
+  estimatedRangeMinPhp  Decimal? @map("estimated_range_min_php") @db.Decimal
+  estimatedRangeMaxPhp  Decimal? @map("estimated_range_max_php") @db.Decimal
+  estimatedRangeMinUsd  Decimal? @map("estimated_range_min_usd") @db.Decimal
+  estimatedRangeMaxUsd  Decimal? @map("estimated_range_max_usd") @db.Decimal
+  turnaroundDays        Int?     @map("turnaround_days")
+  sortOrder             Int      @default(0) @map("sort_order")
+  status                String   @default("active") @db.Text
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt             DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  quoteServices QuoteService[]
+
+  @@index([status])
+  @@map("customization_services")
+}
+
+model ClientContract {
+  id                 String    @id @default(uuid()) @db.Uuid
+  quoteId            String?   @map("quote_id") @db.Uuid
+  templateId         String    @map("template_id") @db.Uuid
+  contractTermId     String    @map("contract_term_id") @db.Uuid
+  clientId           String?   @map("client_id") @db.Uuid
+  status             String    @default("pending") @db.Text
+  startDate          DateTime? @map("start_date") @db.Timestamptz()
+  endDate            DateTime? @map("end_date") @db.Timestamptz()
+  mayaSubscriptionId String?   @map("maya_subscription_id") @db.Text
+  mayaCheckoutId     String?   @map("maya_checkout_id") @db.Text
+  mayaCustomerId     String?   @map("maya_customer_id") @db.Text
+  billingCycle       String    @db.Text @map("billing_cycle")
+  amount             Decimal   @db.Decimal
+  currency           String    @default("PHP") @db.Text
+  metadata           Json      @default("{}")
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt          DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  quote        Quote?         @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  template     ProductTemplate @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  contractTerm ContractTerm   @relation(fields: [contractTermId], references: [id], onDelete: Restrict)
+  client       Client?        @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([templateId])
+  @@index([clientId])
+  @@index([mayaSubscriptionId])
+  @@map("client_contracts")
+}
+
+model Workspace {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique @db.Text
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  // Relations
+  members     WorkspaceMember[]
+  departments Department[]
+  tasks       Task[]
+
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  workspaceId  String    @map("workspace_id") @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  role         String    @db.Text
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  departmentId String?   @map("department_id") @db.Uuid
+  cLevelTitle  String?   @map("c_level_title") @db.Text
+
+  // Relations
+  workspace  Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user       UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+
+  @@id([workspaceId, userId])
+  @@index([userId])
+  @@index([workspaceId])
+  @@index([departmentId])
+  @@map("workspace_members")
+}
+
+model Department {
+  id          String   @id @default(uuid()) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  name        String   @db.Text
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  // Relations
+  workspace Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  members   WorkspaceMember[]
+  tasks     Task[]
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId])
+  @@map("departments")
+}
+
+model WebhookEvent {
+  id          String    @id @default(uuid()) @db.Uuid
+  provider    String    @db.Text
+  eventId     String    @map("event_id") @db.Text
+  eventType   String    @map("event_type") @db.Text
+  payload     Json      @default("{}")
+  status      String    @default("pending") @db.Text
+  error       String?   @db.Text
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  processedAt DateTime? @map("processed_at") @db.Timestamptz()
+
+  @@unique([provider, eventId])
+  @@index([provider, eventId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("webhook_events")
+}
+
+model CommunityMember {
+  id             String    @id @default(uuid()) @db.Uuid
+  email          String    @unique @db.Text
+  fullName       String    @map("full_name") @db.Text
+  githubUsername String?   @map("github_username") @db.Text
+  discordHandle  String?   @map("discord_handle") @db.Text
+  primaryRole    String?   @map("primary_role") @db.Text
+  interests      String?   @db.Text
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt      DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  posts CommunityPost[]
+
+  @@index([email])
+  @@map("community_members")
+}
+
+model CommunityPost {
+  id          String    @id @default(uuid()) @db.Uuid
+  title       String    @db.Text
+  body        String    @db.Text
+  imageUrl    String?   @map("image_url") @db.Text
+  category    String    @default("discussion") @db.Text
+  authorId    String?   @map("author_id") @db.Uuid
+  isPinned    Boolean   @default(false) @map("is_pinned")
+  isPublished Boolean   @default(true) @map("is_published")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  author CommunityMember?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  tags   CommunityPostTag[]
+
+  @@index([category])
+  @@index([authorId])
+  @@index([createdAt(sort: Desc)])
+  @@map("community_posts")
+}
+
+model CommunityInvite {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @db.Text
+  name      String   @db.Text
+  token     String   @unique @db.Text
+  accepted  Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  expiresAt DateTime @map("expires_at") @db.Timestamptz()
+
+  @@index([token])
+  @@index([email])
+  @@map("community_invites")
+}

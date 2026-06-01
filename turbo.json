@@ -83,7 +83,8 @@
     "DATABASE_PASSWORD",
     "NPM_TOKEN",
     "UPSTASH_REDIS_REST_TOKEN",
-    "UPSTASH_REDIS_REST_URL"
+    "UPSTASH_REDIS_REST_URL",
+    "DATABASE_URL"
   ],
   "tasks": {
     "build": {
@@ -96,6 +97,9 @@
         "dist/**",
         "!.next/cache/**"
       ]
+    },
+    "prisma:generate": {
+      "cache": false
     },
     "lint": {
       "dependsOn": ["^lint"]

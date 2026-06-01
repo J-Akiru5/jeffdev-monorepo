@@ -16,8 +16,15 @@ import { useInView } from "@/lib/use-in-view";
 
 export function CTA({
   availabilityText,
+  cmsCta,
 }: {
   availabilityText?: string | null;
+  cmsCta?: {
+    heading?: string;
+    description?: string;
+    buttonText?: string;
+    buttonUrl?: string;
+  };
 }) {
   const { ref: contentRef, isInView } = useInView<HTMLDivElement>({ threshold: 0.2 });
 
@@ -50,26 +57,23 @@ export function CTA({
 
             {/* Headline */}
             <h2 className="max-w-2xl text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl">
-              Ready to Build Something{" "}
-              <span className="text-gradient-holographic">Exceptional?</span>
+              {cmsCta?.heading || <>Ready to Build Something{" "}<span className="text-gradient-holographic">Exceptional?</span></>}
             </h2>
 
             {/* Subtext */}
             <p className="mt-4 max-w-xl text-white/50 md:text-lg">
-              Let&apos;s discuss your project. We&apos;ll scope it properly,
-              define milestones, and give you a fixed investment quote — no
-              surprises.
+              {cmsCta?.description || "Let's discuss your project. We'll scope it properly, define milestones, and give you a fixed investment quote — no surprises."}
             </p>
 
             {/* CTAs */}
             <div className="mt-8 flex flex-col gap-4 sm:flex-row">
               {/* Primary CTA */}
               <Link
-                href="/quote"
+                href={cmsCta?.buttonUrl || "/quote"}
                 className="group relative overflow-hidden rounded-md border border-cyan-500/50 bg-cyan-500/10 px-8 py-4 backdrop-blur-md transition-all hover:border-cyan-400 hover:bg-cyan-500/20 hover:shadow-[0_0_30px_rgba(6,182,212,0.25)]"
               >
                 <span className="relative z-10 flex items-center justify-center gap-2 font-mono text-sm uppercase tracking-wider text-white">
-                  Start_Project
+                  {cmsCta?.buttonText || "Start_Project"}
                   <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                 </span>
               </Link>

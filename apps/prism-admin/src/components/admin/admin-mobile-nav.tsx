@@ -19,6 +19,7 @@ import {
   Calendar,
   Building2,
   Package,
+  Briefcase,
   type LucideIcon,
 } from "lucide-react";
 
@@ -54,16 +55,17 @@ export function AdminMobileNav() {
 
       {mode === "agency" ? (
         <>
-          <MobileNavItem href="/admin/agency/dashboard" icon={FolderKanban} label="Agency" />
+          <MobileNavItem href="/admin/agency/projects" icon={FolderKanban} label="Works" />
           <div className="relative -top-4">
             <Link
-              href="/admin/inquiries"
+              href="/admin/agency/quotes"
               className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-500/20 border border-white/20 text-white"
             >
               <Mail className="h-5 w-5" />
             </Link>
           </div>
           <MobileNavItem href="/admin/agency/calendar" icon={Calendar} label="Calendar" />
+          <MobileNavItem href="/admin/agency/services" icon={Briefcase} label="Services" />
         </>
       ) : (
         <>
