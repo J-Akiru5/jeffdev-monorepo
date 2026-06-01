@@ -6,6 +6,7 @@
  * Donut chart showing project status distribution.
  */
 
+import { useTheme } from "next-themes";
 import {
   PieChart,
   Pie,
@@ -24,6 +25,13 @@ interface ProjectStatusChartProps {
 }
 
 export function ProjectStatusChart({ data }: ProjectStatusChartProps) {
+  const { resolvedTheme } = useTheme();
+  const isLight = resolvedTheme === "theme-light" || resolvedTheme === "light";
+  const tooltipBg = isLight ? "#ffffff" : "#0a0a0a";
+  const tooltipBorder = isLight ? "rgba(15,23,42,0.1)" : "rgba(255,255,255,0.1)";
+  const tooltipColor = isLight ? "#0b0f14" : "#fff";
+  const legendColor = isLight ? "rgba(11,15,20,0.75)" : "rgba(255,255,255,0.6)";
+
   return (
     <div className="h-48 w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -43,10 +51,10 @@ export function ProjectStatusChart({ data }: ProjectStatusChartProps) {
           </Pie>
           <Tooltip
             contentStyle={{
-              backgroundColor: "#0a0a0a",
-              border: "1px solid rgba(255,255,255,0.1)",
+              backgroundColor: tooltipBg,
+              border: `1px solid ${tooltipBorder}`,
               borderRadius: "6px",
-              color: "#fff",
+              color: tooltipColor,
             }}
           />
           <Legend
@@ -54,7 +62,7 @@ export function ProjectStatusChart({ data }: ProjectStatusChartProps) {
             align="right"
             verticalAlign="middle"
             formatter={(value) => (
-              <span className="text-sm text-white/60">{value}</span>
+              <span className="text-sm" style={{ color: legendColor }}>{value}</span>
             )}
           />
         </PieChart>

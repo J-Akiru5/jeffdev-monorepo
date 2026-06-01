@@ -101,6 +101,8 @@ export interface AppTopNavbarProps {
   className?: string;
   /** Additional classnames on the inner container */
   innerClassName?: string;
+  /** Custom inline styles on the outer <header> */
+  style?: React.CSSProperties;
 }
 
 // ─── App Switcher Dropdown ───────────────────────────────────────────────────
@@ -199,7 +201,21 @@ function InlineThemeToggle({
   theme?: "dark" | "light";
   onToggle?: () => void;
 }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   if (!onToggle) return null;
+
+  if (!mounted) {
+    return (
+      <div className="flex h-8 w-8 items-center justify-center">
+        <div className="h-4 w-4 rounded-full bg-[var(--text-tertiary)]/20 animate-pulse" />
+      </div>
+    );
+  }
 
   const isDark = theme !== "light";
 
@@ -235,11 +251,13 @@ export function AppTopNavbar({
   mobileMenu,
   className,
   innerClassName,
+  style,
 }: AppTopNavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <header
+      style={style}
       className={cn(
         "fixed top-0 left-0 right-0 z-50 h-14 border-b backdrop-blur-xl",
         "border-[var(--border-subtle)] bg-[var(--bg-primary)]/80",
@@ -273,7 +291,7 @@ export function AppTopNavbar({
         </div>
 
         {/* ── Center Zone: Search / Custom ── */}
-        <div className="hidden flex-1 justify-center md:flex lg:max-w-md xl:max-w-lg">
+        <div className="hidden flex-1 justify-center mx-4 md:flex lg:max-w-md xl:max-w-lg">
           {centerSlot ? (
             centerSlot
           ) : showSearch && onSearchClick ? (
@@ -299,17 +317,24 @@ export function AppTopNavbar({
           {/* Extra right buttons (quick-add etc.) */}
           {rightExtra}
 
-          {/* Realtime Clock */}
-          {showClock && <RealtimeClock />}
-
           {/* Inline Theme Toggle (Engine-style) */}
           <InlineThemeToggle theme={theme} onToggle={onToggleTheme} />
 
           {/* Notifications */}
           {notifications}
 
+          {/* Divider before avatar */}
+          <div className="h-5 w-px bg-[var(--border-subtle)] mx-1 hidden md:block" />
+
           {/* Account Dropdown */}
           {accountDropdown}
+
+          {/* Realtime Clock (Far Right) */}
+          {showClock && (
+            <div className="ml-2 pl-2 border-l border-[var(--border-subtle)] flex items-center">
+              <RealtimeClock />
+            </div>
+          )}
 
           {/* Mobile Menu Toggle */}
           <button

@@ -84,7 +84,8 @@
     "NPM_TOKEN",
     "UPSTASH_REDIS_REST_TOKEN",
     "UPSTASH_REDIS_REST_URL",
-    "DATABASE_URL"
+    "DATABASE_URL",
+    "COOKIE_DOMAIN"
   ],
   "tasks": {
     "build": {
@@ -97,9 +98,6 @@
         "dist/**",
         "!.next/cache/**"
       ]
-    },
-    "prisma:generate": {
-      "cache": false
     },
     "lint": {
       "dependsOn": ["^lint"]

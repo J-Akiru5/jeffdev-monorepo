@@ -16,11 +16,14 @@ export function RealtimeClock() {
   useEffect(() => {
     function update() {
       const now = new Date();
-      const hh = String(now.getHours()).padStart(2, "0");
-      const mm = String(now.getMinutes()).padStart(2, "0");
-      const ss = String(now.getSeconds()).padStart(2, "0");
-      setTime(`${hh}:${mm}`);
-      setDateTime(`${hh}:${mm}:${ss}`);
+      let h = now.getHours();
+      const m = String(now.getMinutes()).padStart(2, "0");
+      const ampm = h >= 12 ? "PM" : "AM";
+      h = h % 12;
+      h = h ? h : 12; // the hour '0' should be '12'
+      const hhStr = String(h).padStart(2, "0");
+      setTime(`${hhStr}:${m} ${ampm}`);
+      setDateTime(now.toISOString());
     }
 
     update();
@@ -33,7 +36,7 @@ export function RealtimeClock() {
   return (
     <time
       dateTime={dateTime}
-      className="hidden font-mono text-xs text-[var(--text-tertiary)] tabular-nums sm:inline"
+      className="font-mono text-xs text-[var(--text-tertiary)] tabular-nums"
     >
       {time}
     </time>

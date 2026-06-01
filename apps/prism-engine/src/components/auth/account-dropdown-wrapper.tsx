@@ -54,7 +54,7 @@ function AppLinks({ role }: { role?: string }) {
           <Link
             key={l.label}
             href={l.href}
-            className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-[var(--color-ink)] opacity-75 transition-all hover:bg-[var(--border-subtle)] hover:opacity-100"
+            className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-[var(--text-primary)] opacity-75 transition-all hover:bg-[var(--border-subtle)] hover:opacity-100"
           >
             <Icon className="h-4 w-4" />
             <span>{l.label}</span>

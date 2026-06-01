@@ -1,5 +1,40 @@
 # Changelog
 
+# 3.0.0 (2026-06-01)
+
+### Features
+
+- **Database Normalization (3NF):** Complete database schema normalization across all core tables
+  - **Phase 1A:** Extract `clients` table from denormalized `client_name`/`client_email` in projects and client_contracts
+  - **Phase 1B:** Create junction tables (`tags`, `task_tags`, `release_tags`, `community_post_tags`, `support_ticket_tags`, `quote_services`) replacing UUID[]/TEXT[] arrays with FK-enforced relationships
+  - **Phase 1C:** Drop redundant `subscriptions.user_email` (transitive dependency via user_id FK)
+  - **Phase 1D:** Normalize `site_pages.content` JSONB into structured `page_sections` table
+- **Prisma Schema:** 40+ models mapped to existing Supabase PostgreSQL schema with singleton client, config, and turbo pipeline integration
+- **Admin Consolidation:** Sidebar restructure, CRUD for quotes/messages/feedback, content editors for 6 CMS pages, settings, availability, users/access
+- **Type Safety (Phase 4):** `prisma generate` pipeline, type re-export module from `@prisma/client`
+- **Junction Table Tag Wiring:** Server actions for `task_tags`, `release_tags`, `community_post_tags` — tags upserted into `tags` table, managed via junction tables, read via PostgREST nested selects
+- **CMS Bridge Layer:** syntaxure-labs reads from `page_sections` via bridge pattern, seed script updated
+
+### Bug Fixes
+
+- Remove dropped column references (`tags` arrays, `client_name`, `user_email`, `site_pages.content`) across all server actions
+- Fix Prisma schema relation errors (back-references, FK targets)
+- Fix workspace lookup crash in prism-manage via React.cache consolidation
+- Add `DATABASE_URL` to turbo.json globalEnv for db package lint
+
+### Refactors
+
+- Merged `feature/admin-consolidation` branch into `develop` for unified admin panel
+- Content actions (`getPageContent`/`savePageContent`) rewritten to use `page_sections` instead of monolithic JSONB
+- syntaxure-labs `cms.ts` reads from `page_sections` table
+
+### Documentation
+
+- Dynamic CMS + normalization roadmap (HTML + markdown)
+- Phase 2+3 developer handoff report
+
+---
+
 # 2.0.0 (2026-05-24)
 
 ### Features
@@ -240,6 +275,7 @@ Cursor can now query architectural rules directly from the database.
 
 | Version | Date       | Highlight                                    |
 | ------- | ---------- | -------------------------------------------- |
+| 3.0.0   | 2026-06-01 | 🏗️ Database Normalization (3NF) + Admin Consolidation |
 | 2.0.0   | 2026-05-24 | 🚀 Supabase Migration + Monorepo Restructure |
 | 1.0.0   | 2026-05-22 | 🏢 JeffDev Studio Release                    |
 | 0.1.3   | 2026-01-03 | 🎨 Brand Management + Video Context Pipeline |

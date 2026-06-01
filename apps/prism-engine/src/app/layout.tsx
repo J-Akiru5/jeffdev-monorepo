@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: {
     template: "%s | Prism Context Engine",
     default:
-      "Prism Context Engine - The Context Operating System for Vibecoders",
+      "Prism Context Engine - The Context Operating System for Agentic Teams",
   },
   description:
     "Record your architecture. AI learns your rules. Deploy context directly to Cursor, Windsurf, and Claude via MCP. Eliminate context pollution.",
@@ -85,13 +85,13 @@ export default function RootLayout({
           </AuthWrapper>
         </ThemeWrapper>
         <Toaster
-          theme="dark"
+          theme="system"
           position="bottom-right"
           toastOptions={{
             style: {
-              background: "#0a0a0a",
-              border: "1px solid rgba(255,255,255,0.1)",
-              color: "#fff",
+              background: "var(--bg-primary, #0a0a0a)",
+              border: "1px solid var(--border-subtle, rgba(255,255,255,0.1))",
+              color: "var(--text-primary, #fff)",
             },
           }}
         />

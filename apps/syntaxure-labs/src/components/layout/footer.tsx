@@ -20,7 +20,7 @@ const footerLinks = {
   ],
   resources: [
     { href: DOCS_URL, label: "Documentation", external: true },
-    { href: "/community", label: "Changelog" },
+    { href: "/changelog", label: "Changelog" },
     {
       href: "https://github.com/J-Akiru5/jeffdev-monorepo",
       label: "GitHub",

@@ -160,9 +160,10 @@ function SandpackPreviewInner({
   const sanitizedCode = sanitizeForSandpack(code);
   const componentName = extractComponentName(sanitizedCode);
 
-  // Create wrapper that renders the component
+  // Create wrapper that renders the component with theme-aware styles
   const appCode = `
 import React from 'react';
+import './styles.css';
 
 // Generated Component
 ${sanitizedCode}
@@ -170,19 +171,30 @@ ${sanitizedCode}
 // Wrapper
 export default function App() {
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      backgroundColor: '#050505',
-      color: '#ffffff',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '2rem',
-      fontFamily: 'Inter, system-ui, sans-serif',
-    }}>
+    <div className="preview-wrapper">
       <${componentName} />
     </div>
   );
+}
+`;
+
+  const stylesCode = `
+.preview-wrapper {
+  min-height: 100vh;
+  background-color: #050505;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: light) {
+  .preview-wrapper {
+    background-color: #f6f7fb;
+    color: #0b0f14;
+  }
 }
 `;
 
@@ -211,6 +223,7 @@ export default function App() {
       }}
       files={{
         "/App.tsx": appCode,
+        "/styles.css": stylesCode,
       }}
       options={{
         externalResources: ["https://cdn.tailwindcss.com"],

@@ -1,6 +1,6 @@
 {
   "name": "@syntaxure-labs/db",
-  "version": "0.1.3",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "exports": {
@@ -26,7 +26,7 @@
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "lint": "eslint . --max-warnings 0",
     "check-types": "tsc --noEmit",
     "db:seed": "tsx scripts/seed.ts",

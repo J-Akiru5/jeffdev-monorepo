@@ -1,5 +1,12 @@
 # Changelog - Prism Context Engine MCP Server
 
+## 1.0.4
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @syntaxure-labs/db@1.0.0
+
 All notable changes to the Prism Context Engine MCP Server will be documented in this file.
 
 ## [1.0.3] - 2026-01-03
