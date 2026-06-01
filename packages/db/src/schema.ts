@@ -222,7 +222,7 @@ export type Stack = z.infer<typeof StackSchema>;
  */
 export const PrismProjectSchema = z.object({
   id: z.string().describe("Unique project identifier"),
-  userId: z.string().describe("Owner's Clerk user ID"),
+  userId: z.string().describe("Owner's user ID"),
   name: z.string().min(1).max(100).describe("Project name"),
   slug: z.string().describe("URL-friendly slug"),
   designSystem: DesignSystemSchema.describe("Selected design system"),
@@ -240,7 +240,7 @@ export type PrismProject = z.infer<typeof PrismProjectSchema>;
 export const ComponentSchema = z.object({
   id: z.string().describe("Unique component identifier"),
   projectId: z.string().describe("Parent project ID"),
-  userId: z.string().describe("Creator's Clerk user ID"),
+  userId: z.string().describe("Creator's user ID"),
   name: z.string().min(1).max(100).describe("Component name"),
   description: z.string().max(500).optional(),
   code: z.string().describe("Generated component code"),
@@ -290,7 +290,7 @@ export type SubscriptionStatus = z.infer<typeof SubscriptionStatusSchema>;
  */
 export const SubscriptionSchema = z.object({
   id: z.string().describe("Unique subscription identifier"),
-  userId: z.string().describe("Clerk user ID"),
+  userId: z.string().describe("User ID"),
   tier: SubscriptionTierSchema.describe("Current subscription tier"),
   status: SubscriptionStatusSchema.describe("Subscription status"),
   paypalSubscriptionId: z
@@ -310,7 +310,7 @@ export type Subscription = z.infer<typeof SubscriptionSchema>;
  */
 export const UsageSchema = z.object({
   id: z.string().describe("Unique usage record identifier"),
-  userId: z.string().describe("Clerk user ID"),
+  userId: z.string().describe("User ID"),
   month: z.string().describe("YYYY-MM format"),
   aiGenerations: z.number().default(0).describe("AI generations this month"),
   rulesCreated: z.number().default(0).describe("Rules created this month"),
@@ -328,7 +328,7 @@ export type Usage = z.infer<typeof UsageSchema>;
 export const VideoTranscriptSchema = z.object({
   id: z.string().describe("Unique transcript identifier"),
   projectId: z.string().describe("Parent project ID"),
-  userId: z.string().describe("Uploader's Clerk user ID"),
+  userId: z.string().describe("Uploader's User ID"),
   muxAssetId: z.string().describe("Mux asset ID"),
   muxPlaybackId: z.string().describe("Mux playback ID"),
   videoTitle: z.string().max(200).describe("Video title"),
@@ -380,7 +380,7 @@ export type VideoTranscript = z.infer<typeof VideoTranscriptSchema>;
  */
 export const ApiKeySchema = z.object({
   id: z.string().describe("Unique key identifier"),
-  userId: z.string().describe("Owner's Clerk user ID"),
+  userId: z.string().describe("Owner's user ID"),
   keyHash: z.string().describe("SHA-256 hash of the key (never store raw)"),
   keyPrefix: z
     .string()
