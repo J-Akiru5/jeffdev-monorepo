@@ -22,7 +22,7 @@ const highlights = [
   },
 ];
 
-export function PrismHighlight() {
+export function PrismHighlight({ cmsData }: { cmsData?: { description?: string } }) {
   const { ref: sectionRef, isInView } = useInView({ rootMargin: "-100px" });
 
   return (
@@ -46,9 +46,7 @@ export function PrismHighlight() {
               </span>
             </h2>
             <p className="mt-4 text-lg text-white/60">
-              Born from our own engineering needs. Prism is the context layer
-              your AI coding assistant has been missing — and it&apos;s built
-              with the same quality we bring to every client project.
+              {cmsData?.description || "Born from our own engineering needs. Prism is the context layer your AI coding assistant has been missing — and it's built with the same quality we bring to every client project."}
             </p>
 
             <div className="mt-8 space-y-4">

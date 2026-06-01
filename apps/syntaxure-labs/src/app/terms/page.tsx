@@ -3,13 +3,19 @@ import { ArrowLeft } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import type { Metadata } from "next";
+import { getPageContent } from "@/lib/cms";
+import { LEGAL_DEFAULTS } from "@/data/cms-defaults";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
   description: "Terms of service for Syntaxure Labs.",
 };
 
-export default function TermsPage() {
+export const revalidate = 60;
+
+export default async function TermsPage() {
+  const cms = await getPageContent("legal");
+  const lastUpdated = cms?.termsOfService?.lastUpdated || LEGAL_DEFAULTS.termsOfService.lastUpdated;
   return (
     <>
       <Header />
@@ -28,7 +34,7 @@ export default function TermsPage() {
               Terms of Service
             </h1>
             <p className="mt-2 font-mono text-xs text-white/40">
-              Last updated: December 2025
+              Last updated: {lastUpdated}
             </p>
 
             <div className="prose prose-invert mt-12 max-w-none prose-headings:font-semibold prose-headings:text-white prose-p:text-white/60 prose-strong:text-white prose-li:text-white/60">

@@ -10,12 +10,19 @@ import { AgenticProtocol } from "@/components/sections/agentic-protocol";
 import { CTASection } from "@/components/sections/cta-section";
 import { getFeaturedProjects, getServices } from "@/lib/data";
 import { services as staticServices } from "@/data/services";
+import { getPageContent } from "@/lib/cms";
+import { HOMEPAGE_DEFAULTS } from "@/data/cms-defaults";
+
+export const revalidate = 60;
 
 export default async function HomePage() {
-  const [featuredProjects, dbServices] = await Promise.all([
+  const [featuredProjects, dbServices, cms] = await Promise.all([
     getFeaturedProjects(),
     getServices(),
+    getPageContent("homepage"),
   ]);
+
+  const content = { ...HOMEPAGE_DEFAULTS, ...cms };
 
   // Use DB services if available, fallback to static data
   const services = dbServices.length > 0 ? dbServices : staticServices.map((svc, idx) => ({
@@ -34,14 +41,14 @@ export default async function HomePage() {
     <>
       <Header />
       <main>
-        <HeroSection />
+        <HeroSection cmsHero={content.hero} />
         <SocialProof />
         <Services services={services} />
         <WorksShowcase projects={featuredProjects} />
         <Features />
-        <PrismHighlight />
+        <PrismHighlight cmsData={content.prismHighlight} />
         <AgenticProtocol />
-        <CTASection />
+        <CTASection cmsCta={content.cta} />
       </main>
       <Footer />
     </>
