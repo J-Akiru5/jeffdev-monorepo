@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.4
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @syntaxure-labs/db@1.0.0
+
 All notable changes to the Prism Context Engine Dashboard will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
