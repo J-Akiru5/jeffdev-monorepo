@@ -98,9 +98,6 @@
         "!.next/cache/**"
       ]
     },
-    "prisma:generate": {
-      "cache": false
-    },
     "lint": {
       "dependsOn": ["^lint"]
     },
