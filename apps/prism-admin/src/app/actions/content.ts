@@ -119,8 +119,6 @@ export async function saveAboutContent(
       if (error) throw error;
     }
 
-    if (error) throw error;
-
     revalidatePath("/admin/agency/content");
 
     return { success: true };

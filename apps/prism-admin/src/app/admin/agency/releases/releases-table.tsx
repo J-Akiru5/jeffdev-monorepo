@@ -23,7 +23,6 @@ interface Release {
   type: "tool" | "update" | "patch";
   description: string;
   link: string | null;
-  tags: string[] | null;
   is_featured: boolean;
   created_at: string;
   updated_at: string;

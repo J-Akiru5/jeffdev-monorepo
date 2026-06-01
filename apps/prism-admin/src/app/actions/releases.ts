@@ -11,7 +11,7 @@ const releaseSchema = z.object({
   type: z.enum(["tool", "update", "patch"]),
   description: z.string().min(1, "Description is required"),
   link: z.string().nullable(),
-  tags: z.array(z.string()).nullable(),
+  tags: z.array(z.string()).nullable().optional(),
   is_featured: z.boolean().default(false),
 });
 
@@ -83,7 +83,6 @@ export async function createRelease(
         type: parsed.data.type,
         description: parsed.data.description,
         link: parsed.data.link,
-        tags: parsed.data.tags,
         is_featured: parsed.data.is_featured,
       });
 
@@ -123,7 +122,6 @@ export async function updateRelease(
         type: parsed.data.type,
         description: parsed.data.description,
         link: parsed.data.link,
-        tags: parsed.data.tags,
         is_featured: parsed.data.is_featured,
       })
       .eq("id", id);
