@@ -7,6 +7,7 @@
  * Uses Recharts for visualization.
  */
 
+import { useTheme } from "next-themes";
 import {
   LineChart,
   Line,
@@ -27,6 +28,16 @@ interface ActivityChartProps {
 }
 
 export function ActivityChart({ data }: ActivityChartProps) {
+  const { resolvedTheme } = useTheme();
+  const isLight = resolvedTheme === "theme-light" || resolvedTheme === "light";
+  const gridColor = isLight ? "rgba(15,23,42,0.08)" : "rgba(255,255,255,0.06)";
+  const tickFill = isLight ? "rgba(15,23,42,0.4)" : "rgba(255,255,255,0.4)";
+  const tickStroke = isLight ? "rgba(15,23,42,0.1)" : "rgba(255,255,255,0.1)";
+  const tooltipBg = isLight ? "#ffffff" : "#0a0a0a";
+  const tooltipBorder = isLight ? "rgba(15,23,42,0.1)" : "rgba(255,255,255,0.1)";
+  const tooltipColor = isLight ? "#0b0f14" : "#fff";
+  const legendColor = isLight ? "rgba(11,15,20,0.75)" : "rgba(255,255,255,0.6)";
+
   return (
     <div className="h-64 w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -36,28 +47,28 @@ export function ActivityChart({ data }: ActivityChartProps) {
         >
           <CartesianGrid
             strokeDasharray="3 3"
-            stroke="rgba(255,255,255,0.06)"
+            stroke={gridColor}
           />
           <XAxis
             dataKey="date"
-            tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 12 }}
-            tickLine={{ stroke: "rgba(255,255,255,0.1)" }}
-            axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+            tick={{ fill: tickFill, fontSize: 12 }}
+            tickLine={{ stroke: tickStroke }}
+            axisLine={{ stroke: tickStroke }}
           />
           <YAxis
-            tick={{ fill: "rgba(255,255,255,0.4)", fontSize: 12 }}
-            tickLine={{ stroke: "rgba(255,255,255,0.1)" }}
-            axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+            tick={{ fill: tickFill, fontSize: 12 }}
+            tickLine={{ stroke: tickStroke }}
+            axisLine={{ stroke: tickStroke }}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#0a0a0a",
-              border: "1px solid rgba(255,255,255,0.1)",
+              backgroundColor: tooltipBg,
+              border: `1px solid ${tooltipBorder}`,
               borderRadius: "6px",
-              color: "#fff",
+              color: tooltipColor,
             }}
           />
-          <Legend wrapperStyle={{ color: "rgba(255,255,255,0.6)" }} />
+          <Legend wrapperStyle={{ color: legendColor }} />
           <Line
             type="monotone"
             dataKey="quotes"

@@ -411,6 +411,10 @@ body {
   --tw-ring-color: var(--color-surface);
 }
 
+.theme-light .bg-black\/25 {
+  background-color: rgba(15, 23, 42, 0.06);
+}
+
 .theme-light .bg-black\/50 {
   background-color: rgba(255, 255, 255, 0.6);
 }
@@ -449,6 +453,81 @@ body {
 
 .theme-light .hover\:bg-black\/70:hover {
   background-color: rgba(255, 255, 255, 0.75);
+}
+
+.theme-light .hover\:bg-black\/50:hover {
+  background-color: rgba(255, 255, 255, 0.55);
+}
+
+/* Gradient edge fades — from-[#0a0a0a] used by social-proof marquee */
+.theme-light .from-\[\#0a0a0a\] {
+  --tw-gradient-from: var(--color-surface);
+}
+
+.theme-light .bg-\[\#0a0a0a\]\/85 {
+  background-color: color-mix(in srgb, var(--color-surface) 85%, transparent);
+}
+
+.theme-light .from-gray-900 {
+  --tw-gradient-from: #e4ecff;
+}
+
+.theme-light .to-black {
+  --tw-gradient-to: #ffffff;
+}
+
+/* Select option elements */
+.theme-light option {
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+}
+
+/* From-[#0d1b1e] used by tour-guide gradient */
+.theme-light .from-\[\#0d1b1e\] {
+  --tw-gradient-from: #e4ecff;
+}
+
+.theme-light .to-\[\#0a0a0a\] {
+  --tw-gradient-to: var(--color-surface);
+}
+
+/* border-white/[0.10] bracket notation */
+.theme-light .border-white\/\[0\.10\] {
+  border-color: rgba(15, 23, 42, 0.28);
+}
+
+/* bg-white/[0.01] through [0.06] bracket notation */
+.theme-light .bg-white\/\[0\.02\] {
+  background-color: rgba(15, 23, 42, 0.05);
+}
+
+.theme-light .bg-white\/\[0\.04\] {
+  background-color: rgba(15, 23, 42, 0.10);
+}
+
+/* bg-black solid — for option/select fallback */
+.theme-light select {
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+}
+
+/* border-white/[0.04] bracket */
+.theme-light .border-white\/\[0\.04\] {
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+/* from-[#0a0a0a]/80 gradient */
+.theme-light .from-\[\#0a0a0a\]\/80 {
+  --tw-gradient-from: color-mix(in srgb, var(--color-surface) 80%, transparent);
+}
+
+/* Prism page radial gradient — fades dark overlay to transparent in light */
+.theme-light .bg-\[radial-gradient\(ellipse_at_center\,_transparent_0\%\,_\#050505_80\%\)\] {
+  background: radial-gradient(ellipse at center, transparent 0%, rgba(15, 23, 42, 0.06) 80%) !important;
+}
+
+.theme-light .bg-\[radial-gradient\(ellipse_at_center\,_transparent_0\%\,_\#050505_90\%\)\] {
+  background: radial-gradient(ellipse at center, transparent 0%, rgba(15, 23, 42, 0.06) 90%) !important;
 }
 
 .theme-light .placeholder-white\/20::placeholder {

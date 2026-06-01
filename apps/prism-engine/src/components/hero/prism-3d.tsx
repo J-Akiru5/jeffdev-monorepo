@@ -13,6 +13,7 @@ import clsx from "clsx";
 interface Prism3DProps {
   className?: string;
   size?: "sm" | "md" | "lg" | "xl"; // Kept for TS compatibility with animated-hero
+  withBeam?: boolean; // Used by scene-capture
 }
 
 export function Prism3D({ className }: Prism3DProps) {

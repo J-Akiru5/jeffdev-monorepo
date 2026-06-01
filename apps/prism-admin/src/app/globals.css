@@ -65,6 +65,23 @@ body {
   line-height: 1.5;
 }
 
+html[data-theme="theme-light"] body {
+  color: #1c1917;
+}
+
+/* Admin data tables — light mode text */
+html[data-theme="theme-light"] .admin-table th {
+  color: rgba(0, 0, 0, 0.55);
+}
+
+html[data-theme="theme-light"] .admin-table tr:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+html[data-theme="theme-light"] .admin-table td {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
 /* ----------------------------------------
    PERFORMANCE: GPU Acceleration & Layout Containment
    ---------------------------------------- */

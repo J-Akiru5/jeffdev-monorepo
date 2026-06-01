@@ -77,16 +77,16 @@ export default function RootLayout({
         <head>
           <ThemeBootstrap />
         </head>
-        <body className="antialiased bg-void text-white min-h-screen">
+        <body className="antialiased bg-void text-[var(--text-primary, #e5e5e5)] min-h-screen">
           <ThemeWrapper>{children}</ThemeWrapper>
           <Toaster
-            theme="dark"
+            theme="system"
             position="bottom-right"
             toastOptions={{
               style: {
-                background: "#0a0a0a",
-                border: "1px solid rgba(255,255,255,0.1)",
-                color: "#fff",
+                background: "var(--color-surface, #080808)",
+                border: "1px solid var(--border-subtle, rgba(255,255,255,0.06))",
+                color: "var(--text-primary, #e5e5e5)",
               },
             }}
           />
