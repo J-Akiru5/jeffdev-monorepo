@@ -11,24 +11,24 @@ interface SidebarBottomProps {
 }
 
 export function SidebarBottom({ collapsed, onHelpClick }: SidebarBottomProps) {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
 
   return (
     <div className="border-t border-white/[0.06] p-3 space-y-1">
       {!collapsed && <RealtimeClock />}
       <button
-        onClick={() => setTheme(theme === "dark" || theme === "system" ? "theme-light" : "dark")}
+        onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
         className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-white/50 transition-all hover:bg-white/[0.04] hover:text-white/80 ${
           collapsed ? "justify-center" : ""
         }`}
         title={collapsed ? "Toggle theme" : undefined}
       >
-        {theme === "theme-light" ? (
+        {resolvedTheme === "theme-light" ? (
           <Moon className="h-4 w-4 flex-shrink-0" />
         ) : (
           <Sun className="h-4 w-4 flex-shrink-0" />
         )}
-        {!collapsed && <span>{theme === "theme-light" ? "Dark Mode" : "Light Mode"}</span>}
+        {!collapsed && <span>{resolvedTheme === "theme-light" ? "Dark Mode" : "Light Mode"}</span>}
       </button>
       <Link
         href="/profile"

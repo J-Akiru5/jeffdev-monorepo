@@ -99,7 +99,7 @@ const config = {
   darkMode: true,
   nextThemes: {
     defaultTheme: "system",
-    storageKey: "syntaxure-theme",
+    storageKey: "theme",
   },
   i18n: [
     { locale: "en-US", text: "English (US)" },

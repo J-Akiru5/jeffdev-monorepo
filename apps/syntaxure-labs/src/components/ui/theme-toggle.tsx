@@ -9,14 +9,14 @@ interface ThemeToggleProps {
 }
 
 export function ThemeToggle({ className }: ThemeToggleProps) {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
 
-  const isLight = theme === "theme-light";
+  const isLight = resolvedTheme === "theme-light";
 
   return (
     <button
       type="button"
-      onClick={() => setTheme(isLight ? "dark" : "theme-light")}
+      onClick={() => setTheme(isLight ? "dark" : "light")}
       className={cn(
         "group inline-flex items-center gap-2 rounded-md border px-3 py-2 text-xs uppercase tracking-wider transition-all duration-200",
         "border-white/10 bg-white/5 text-white/70",

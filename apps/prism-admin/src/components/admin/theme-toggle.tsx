@@ -12,13 +12,13 @@ import { useTheme } from "next-themes";
 import { Sun, Moon } from "lucide-react";
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
 
-  const isDark = theme !== "light";
+  const isDark = resolvedTheme === "dark";
 
   return (
     <button
-      onClick={() => setTheme(isDark ? "theme-light" : "dark")}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
       className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-white/60 transition-colors hover:bg-white/5 hover:text-white"
       title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
     >

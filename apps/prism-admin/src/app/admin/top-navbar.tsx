@@ -164,7 +164,7 @@ export function AdminTopNavbar() {
   const router = useRouter();
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const mode = useAdminSidebarStore((s) => s.mode);
   const toggleMode = useAdminSidebarStore((s) => s.toggleMode);
 
@@ -271,8 +271,8 @@ export function AdminTopNavbar() {
         searchPlaceholder={mode === "manage" ? "Search manage pages..." : "Search agency pages..."}
         onSearchClick={openPalette}
         leftSlot={<ModeDropdown />}
-        theme={(theme === "theme-light" ? "light" : "dark") as "dark" | "light" | undefined}
-        onToggleTheme={() => setTheme(theme === "dark" || !theme ? "theme-light" : "dark")}
+        theme={(resolvedTheme === "theme-light" ? "light" : "dark") as "dark" | "light" | undefined}
+        onToggleTheme={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
         showClock={false}
         rightExtra={
           <div className="flex items-center gap-1">

@@ -175,7 +175,6 @@ export function ImageUpload({
       {preview ? (
         /* ── Preview state ── */
         <div className={`relative overflow-hidden rounded-lg border border-white/10 ${previewHeight}`}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={preview}
             alt="Preview"

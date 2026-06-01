@@ -18,7 +18,7 @@ export function ThemeWrapper({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider
       attribute="data-theme"
-      defaultTheme="dark"
+      defaultTheme="system"
       enableSystem={true}
       value={{ dark: "dark", light: "theme-light" }}
     >
