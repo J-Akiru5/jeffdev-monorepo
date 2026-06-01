@@ -7,7 +7,7 @@ import { AnimatedHero } from "@/components/hero";
 const PRISM_URL = process.env.NEXT_PUBLIC_PRISM_URL || "https://prism.syntaxure.dev";
 
 export const metadata: Metadata = {
-  title: 'Prism Context Engine - The Context Operating System for Vibecoders',
+    title: 'Prism Context Engine - The Context Operating System for Agentic Teams',
   description:
     'Record your architecture. AI learns your rules. Deploy context directly to Cursor, Windsurf, and Claude via MCP. Eliminate context pollution forever.',
   keywords: [
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     'code standards enforcement',
   ],
   openGraph: {
-    title: 'Prism Context Engine - The Context Operating System for Vibecoders',
+      title: 'Prism Context Engine - The Context Operating System for Agentic Teams',
     description:
       'Record your architecture. AI learns your rules. Deploy to your IDE via MCP. Eliminate context pollution.',
     url: '/',

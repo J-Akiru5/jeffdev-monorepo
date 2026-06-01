@@ -106,7 +106,7 @@ export function AccountDropdown({
             {initials}
           </div>
         )}
-        <ChevronDown className="h-3.5 w-3.5 text-[var(--color-ink)] opacity-60" />
+        <ChevronDown className="h-3.5 w-3.5 text-[var(--text-primary)] opacity-60" />
       </button>
 
       {/* Dropdown */}
@@ -146,11 +146,11 @@ export function AccountDropdown({
                   )}
                   <div className="min-w-0 flex-1">
                     {displayName && (
-                      <p className="truncate text-sm font-medium text-[var(--color-ink)]">
+                      <p className="truncate text-sm font-medium text-[var(--text-primary)]">
                         {displayName}
                       </p>
                     )}
-                    <p className="truncate text-xs text-[var(--color-ink)] opacity-50">
+                    <p className="truncate text-xs text-[var(--text-primary)] opacity-50">
                       {email || "Signed in"}
                     </p>
                   </div>
@@ -179,11 +179,11 @@ export function AccountDropdown({
                   )}
                   <div className="min-w-0 flex-1">
                     {displayName && (
-                      <p className="truncate text-sm font-medium text-[var(--color-ink)]">
+                      <p className="truncate text-sm font-medium text-[var(--text-primary)]">
                         {displayName}
                       </p>
                     )}
-                    <p className="truncate text-xs text-[var(--color-ink)] opacity-50">
+                    <p className="truncate text-xs text-[var(--text-primary)] opacity-50">
                       {email || "Signed in"}
                     </p>
                   </div>
@@ -207,7 +207,7 @@ export function AccountDropdown({
                     onToggleTheme();
                     setOpen(false);
                   }}
-                  className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-[var(--color-ink)] opacity-75 transition-all hover:bg-[var(--border-subtle)] hover:opacity-100"
+                  className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-[var(--text-primary)] opacity-75 transition-all hover:bg-[var(--border-subtle)] hover:opacity-100"
                 >
                   {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                   <span>{isDark ? "Light Mode" : "Dark Mode"}</span>
@@ -219,7 +219,7 @@ export function AccountDropdown({
                 <Link
                   href={settingsHref}
                   onClick={() => setOpen(false)}
-                  className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-[var(--color-ink)] opacity-75 transition-all hover:bg-[var(--border-subtle)] hover:opacity-100"
+                  className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-[var(--text-primary)] opacity-75 transition-all hover:bg-[var(--border-subtle)] hover:opacity-100"
                 >
                   <Settings className="h-4 w-4" />
                   <span>Settings</span>
@@ -237,7 +237,7 @@ export function AccountDropdown({
                   onSignOut();
                   setOpen(false);
                 }}
-                className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-[var(--color-ink)] opacity-75 transition-all hover:bg-red-500/10 hover:text-red-500 hover:opacity-100"
+                className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-[var(--text-primary)] opacity-75 transition-all hover:bg-red-500/10 hover:text-red-500 hover:opacity-100"
               >
                 <LogOut className="h-4 w-4" />
                 <span>Sign Out</span>

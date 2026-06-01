@@ -61,6 +61,7 @@ import {
   KeyboardShortcutsHelp,
   type AppNavLink,
   type CommandPaletteSection,
+  useAuth,
 } from "@syntaxure/ui";
 import { useTheme } from "next-themes";
 import { BetaBadge } from "@/components/beta-badge";
@@ -191,6 +192,15 @@ export default function DashboardShell({
   const pathname = usePathname();
   const router = useRouter();
   const { theme, setTheme } = useTheme();
+  const { user } = useAuth();
+  
+  const isAdmin = user?.role === "admin" || user?.role === "founder";
+  const visibleAppLinks = engineAppLinks.filter((link) => {
+    if (link.label === "Manage" || link.label === "Admin") {
+      return isAdmin;
+    }
+    return true;
+  });
 
   useEffect(() => {
     const checkDesktop = () => setIsDesktop(window.innerWidth >= 768);
@@ -315,7 +325,7 @@ export default function DashboardShell({
       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <AppTopNavbar
         appName="Engine"
-        appLinks={engineAppLinks}
+        appLinks={visibleAppLinks}
         appIcon={
           <div className="flex h-5 w-5 items-center justify-center rounded bg-gradient-to-br from-cyan-500/20 to-violet-500/20">
             <Sparkles className="h-3 w-3 text-cyan-400" />
@@ -328,7 +338,7 @@ export default function DashboardShell({
         rightExtra={
           <Link
             href="/projects/new"
-            className="flex items-center gap-1.5 h-8 rounded-md bg-blue-600 hover:bg-blue-700 dark:bg-cyan-500 dark:hover:bg-cyan-400 active:scale-95 px-4 text-xs font-semibold !text-white transition-all whitespace-nowrap shadow-[0_2px_8px_rgba(37,99,235,0.3)] dark:shadow-none dark:!text-black"
+            className="mr-3 flex items-center gap-1.5 h-8 rounded-md bg-blue-600 hover:bg-blue-700 dark:bg-cyan-500 dark:hover:bg-cyan-400 active:scale-95 px-4 text-xs font-semibold !text-white transition-all whitespace-nowrap shadow-[0_2px_8px_rgba(37,99,235,0.3)] dark:shadow-none dark:!text-black"
           >
             <Plus className="h-3.5 w-3.5" />
             New Project
@@ -344,6 +354,7 @@ export default function DashboardShell({
         }
         accountDropdown={<AccountDropdownWrapper />}
         className="hidden md:flex"
+        style={{ left: isDesktop ? sbw : 0, transition: sidebarTransition }}
       />
       <GridBackground variant="neon" />
 
@@ -352,7 +363,7 @@ export default function DashboardShell({
       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <aside
         style={{ width: sbw, transition: sidebarTransition }}
-        className="hidden md:flex fixed left-0 top-14 bottom-0 z-40 flex-col border-r border-[var(--border-subtle)] bg-[var(--bg-primary)] overflow-hidden relative"
+        className="hidden md:flex fixed left-0 top-0 bottom-0 z-[60] flex-col border-r border-[var(--border-subtle)] bg-[var(--bg-primary)] overflow-hidden"
       >
         {/* ── Logo header ── */}
         {collapsed ? (

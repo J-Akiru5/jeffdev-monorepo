@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: {
     template: "%s | Prism Context Engine",
     default:
-      "Prism Context Engine - The Context Operating System for Vibecoders",
+      "Prism Context Engine - The Context Operating System for Agentic Teams",
   },
   description:
     "Record your architecture. AI learns your rules. Deploy context directly to Cursor, Windsurf, and Claude via MCP. Eliminate context pollution.",
