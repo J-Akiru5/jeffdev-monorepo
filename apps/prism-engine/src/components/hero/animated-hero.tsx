@@ -12,7 +12,9 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { PrismLogo3D } from "@/components/prism";
+import { Prism3D } from "./prism-3d";
+import { ScanSearch, BrainCircuit, Network, Zap, ChevronDown, ArrowRight } from "lucide-react";
+import { useAuth } from "@syntaxure/ui";
 
 // Register GSAP plugin
 if (typeof window !== "undefined") {
@@ -20,6 +22,8 @@ if (typeof window !== "undefined") {
 }
 
 export function AnimatedHero() {
+  const { user } = useAuth();
+  
   const containerRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -31,6 +35,7 @@ export function AnimatedHero() {
   const ctaRef = useRef<HTMLDivElement>(null);
   const pillsRef = useRef<HTMLDivElement>(null);
   const orbRef = useRef<HTMLDivElement>(null);
+  const scrollIndicatorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -50,6 +55,7 @@ export function AnimatedHero() {
       );
       gsap.set(badgeRef.current, { marginTop: 32, marginBottom: 32 });
       gsap.set(prismContainerRef.current, { scale: 0.5 });
+      gsap.set(scrollIndicatorRef.current, { display: "none" });
       return;
     }
 
@@ -82,7 +88,7 @@ export function AnimatedHero() {
       });
       // Badge starts below prism with top margin for spacing
       gsap.set(badgeRef.current, {
-        marginTop: 32,
+        marginTop: 112,
         marginBottom: 0,
       });
 
@@ -91,7 +97,7 @@ export function AnimatedHero() {
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top top",
-          end: "+=150%",
+          end: "+=200%",
           scrub: 1,
           pin: heroRef.current,
         },
@@ -99,6 +105,14 @@ export function AnimatedHero() {
 
       // Phase 1: Prism shrinks and moves up (0% - 15%)
       scrollTl
+        .to(
+          scrollIndicatorRef.current,
+          {
+            opacity: 0,
+            duration: 0.05,
+          },
+          0,
+        )
         .to(
           prismContainerRef.current,
           {
@@ -112,8 +126,8 @@ export function AnimatedHero() {
           badgeRef.current,
           {
             scale: 0.8,
-            marginTop: 16,
-            marginBottom: 32,
+            marginTop: 24,
+            marginBottom: 16,
             duration: 0.15,
           },
           0,
@@ -126,7 +140,7 @@ export function AnimatedHero() {
           opacity: 1,
           y: 0,
           height: "auto",
-          marginBottom: 24,
+          marginBottom: 16,
           duration: 0.15,
         },
         0.15,
@@ -139,7 +153,7 @@ export function AnimatedHero() {
           opacity: 1,
           y: 0,
           height: "auto",
-          marginBottom: 16,
+          marginBottom: 8,
           duration: 0.1,
         },
         0.3,
@@ -152,7 +166,7 @@ export function AnimatedHero() {
           opacity: 1,
           y: 0,
           height: "auto",
-          marginBottom: 40,
+          marginBottom: 24,
           duration: 0.1,
         },
         0.4,
@@ -165,13 +179,13 @@ export function AnimatedHero() {
           opacity: 1,
           y: 0,
           height: "auto",
-          marginBottom: 48,
+          marginBottom: 32,
           duration: 0.15,
         },
         0.5,
       );
 
-      // Phase 6: Pills container reveals (65% - 75%)
+      // Phase 6: Pills container reveals (50% - 60%)
       scrollTl.to(
         pillsRef.current,
         {
@@ -179,21 +193,25 @@ export function AnimatedHero() {
           height: "auto",
           duration: 0.1,
         },
-        0.65,
+        0.5,
       );
 
-      // Phase 7: Feature pills stagger reveal (75% - 100%)
+      // Phase 7: Feature pills stagger reveal (50% - 75%)
       scrollTl.to(
         pillsRef.current?.children || [],
         {
           opacity: 1,
           y: 0,
           scale: 1,
-          stagger: 0.02,
+          stagger: 0.05,
           duration: 0.25,
         },
-        0.75,
+        0.5,
       );
+
+      // Phase 8: Scroll Lock (Hold fully revealed state)
+      // This creates a "dead zone" where the user scrolls but nothing animates, locking the view.
+      scrollTl.to({}, { duration: 0.5 });
 
       // Parallax effect on orb
       gsap.to(orbRef.current, {
@@ -202,7 +220,7 @@ export function AnimatedHero() {
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top top",
-          end: "+=150%",
+          end: "+=200%",
           scrub: 2,
         },
       });
@@ -214,7 +232,7 @@ export function AnimatedHero() {
   return (
     <div ref={containerRef} className="relative">
       {/* Scroll container - height for animation */}
-      <div className="h-[250vh]">
+      <div className="h-[300vh]">
         <div
           ref={heroRef}
           className="h-screen flex items-center justify-center px-4"
@@ -233,8 +251,10 @@ export function AnimatedHero() {
             className="text-center max-w-4xl relative z-10 flex flex-col items-center"
           >
             {/* Animated Prism Logo - Starts Large & Centered */}
-            <div ref={prismContainerRef}>
-              <PrismLogo3D size="lg" className="mx-auto scale-150" />
+            <div ref={prismContainerRef} className="h-[120px] flex items-center justify-center mt-8">
+              <div className="relative pointer-events-none -translate-y-10">
+                <Prism3D className="mx-auto scale-110" />
+              </div>
             </div>
 
             {/* Version Badge */}
@@ -242,9 +262,9 @@ export function AnimatedHero() {
               ref={badgeRef}
               className="inline-flex items-center gap-3 px-6 py-3 rounded-full border border-cyan-500/30 bg-cyan-500/5 backdrop-blur-sm"
             >
-              <div className="w-3 h-3 rounded-full bg-cyan-500 animate-pulse" />
-              <span className="font-mono text-lg text-cyan-400 uppercase tracking-widest font-semibold">
-                Prism Context Engine v1.0.3
+              <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shrink-0 translate-y-[3px]" />
+              <span className="font-mono text-sm font-medium tracking-widest text-[var(--text-primary)]">
+                PRISM CONTEXT ENGINE V1.0.3
               </span>
             </div>
 
@@ -257,8 +277,8 @@ export function AnimatedHero() {
                 The Context Operating System
               </span>
               <br />
-              <span className="bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent">
-                for Vibecoders
+              <span className="bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent pb-2 inline-block">
+                for Agentic Teams
               </span>
             </h1>
 
@@ -267,7 +287,7 @@ export function AnimatedHero() {
               ref={subheadlineRef}
               className="text-[var(--text-secondary)] text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
             >
-              Record your architecture. AI learns your rules. Deploy context
+              Scan your architecture via Playwright. AI learns your rules. Deploy context
               directly to Cursor, Windsurf, and Claude via MCP.
             </p>
 
@@ -280,16 +300,15 @@ export function AnimatedHero() {
             </p>
 
             {/* CTA Buttons - Hidden Initially */}
-            <div
-              ref={ctaRef}
-              className="flex flex-col sm:flex-row gap-4 justify-center"
-            >
+            <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4 items-center justify-center mt-8 relative z-20">
               <Link
-                href="/sign-up"
-                className="group relative overflow-hidden rounded-md border border-cyan-500/30 bg-cyan-500/10 px-8 py-4 transition-all hover:border-cyan-500/50 hover:bg-cyan-500/20 active:scale-95"
+                href={user ? "/dashboard" : "/sign-up"}
+                className="group relative overflow-hidden rounded-md border border-cyan-500/30 bg-cyan-500/10 px-8 py-4 transition-all hover:border-cyan-400/50 hover:bg-cyan-500/20 active:scale-95 shadow-[0_0_20px_rgba(6,182,212,0.15)] hover:shadow-[0_0_30px_rgba(6,182,212,0.3)]"
               >
-                <span className="font-mono text-sm uppercase tracking-wider text-[var(--text-primary)] font-semibold">
-                  Start Free →
+                <div className="absolute inset-0 -z-10 bg-gradient-to-r from-cyan-500/0 via-cyan-500/10 to-purple-500/0 opacity-0 transition-opacity group-hover:opacity-100" />
+                <span className="font-mono text-sm uppercase tracking-wider text-[var(--text-primary)] font-semibold flex items-center gap-2">
+                  {user ? "Dashboard" : "Start Free"}
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </span>
               </Link>
               <Link
@@ -313,27 +332,42 @@ export function AnimatedHero() {
 
             {/* Feature Pills - Hidden Initially */}
             <div ref={pillsRef} className="flex flex-wrap gap-3 justify-center">
-              <div className="glass px-4 py-2 rounded-full">
+              <div className="glass px-4 py-2 rounded-full inline-flex items-center gap-2 border border-cyan-500/15 shadow-sm shadow-cyan-500/5 hover:border-cyan-500/30 hover:shadow-cyan-500/10 transition-all cursor-default">
+                <ScanSearch className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
                 <span className="text-xs text-[var(--text-secondary)] font-mono">
-                  📹 Video → Context
+                  Playwright Scan
                 </span>
               </div>
-              <div className="glass px-4 py-2 rounded-full">
+              <div className="glass px-4 py-2 rounded-full inline-flex items-center gap-2 border border-cyan-500/15 shadow-sm shadow-cyan-500/5 hover:border-cyan-500/30 hover:shadow-cyan-500/10 transition-all cursor-default">
+                <BrainCircuit className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
                 <span className="text-xs text-[var(--text-secondary)] font-mono">
-                  🤖 AI Rule Extraction
+                  AI Rule Extraction
                 </span>
               </div>
-              <div className="glass px-4 py-2 rounded-full">
+              <div className="glass px-4 py-2 rounded-full inline-flex items-center gap-2 border border-cyan-500/15 shadow-sm shadow-cyan-500/5 hover:border-cyan-500/30 hover:shadow-cyan-500/10 transition-all cursor-default">
+                <Network className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
                 <span className="text-xs text-[var(--text-secondary)] font-mono">
-                  🔌 MCP Protocol
+                  MCP Protocol
                 </span>
               </div>
-              <div className="glass px-4 py-2 rounded-full">
+              <div className="glass px-4 py-2 rounded-full inline-flex items-center gap-2 border border-cyan-500/15 shadow-sm shadow-cyan-500/5 hover:border-cyan-500/30 hover:shadow-cyan-500/10 transition-all cursor-default">
+                <Zap className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
                 <span className="text-xs text-[var(--text-secondary)] font-mono">
-                  ⚡ Real-time Sync
+                  Real-time Sync
                 </span>
               </div>
             </div>
+          </div>
+
+          {/* Scroll down indicator */}
+          <div 
+            ref={scrollIndicatorRef}
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center animate-bounce"
+          >
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[var(--text-tertiary)] mb-2">
+              Scroll to Discover
+            </span>
+            <ChevronDown className="w-4 h-4 text-[var(--text-tertiary)]" />
           </div>
         </div>
       </div>

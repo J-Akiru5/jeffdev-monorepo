@@ -1,7 +1,7 @@
 /**
  * Login Command
  *
- * Opens browser for Clerk authentication, receives token
+ * Opens browser for authentication, receives token
  */
 
 import ora from "ora";

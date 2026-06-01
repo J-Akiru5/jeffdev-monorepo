@@ -96,7 +96,7 @@ export type BrandSpacing = z.infer<typeof BrandSpacingSchema>;
  */
 export const PrismBrandSchema = z.object({
   id: z.string().describe("Unique brand identifier"),
-  userId: z.string().describe("Owner's Clerk user ID"),
+  userId: z.string().describe("Owner's user ID"),
 
   // Identity
   companyName: z.string().min(1).max(100).describe("Company/brand name"),

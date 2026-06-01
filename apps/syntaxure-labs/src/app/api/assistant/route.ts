@@ -38,7 +38,7 @@ You are the Syntaxure Labs System Assistant, an AI built into the Syntaxure Labs
 ## 2. Monorepo Architecture (Turborepo)
 - **apps/syntaxure-labs**: The Marketing Site & Admin (Client-facing). Port 3000. Stack: Next.js 16 + Supabase.
 - **apps/prism-engine**: The Prism Context Engine SaaS platform for Vibecoders. Port 3001. Stack: Next.js 16 + Azure Cosmos DB. Has its own AI assistant at /api/assistant covering MCP setup, video rule extraction, pricing, and integrations.
-- **apps/prism-admin**: The unified admin panel ("Mission Control") for Syntaxure Labs. Port 3004. Stack: Next.js 16 + Supabase + Clerk. Sections: Users, Subscriptions, Analytics, Agency Services, Contracts, Quotes, Projects, Workspaces, Releases, Billing, Settings. Has its own AI assistant at /api/assistant for admin operations.
+- **apps/prism-admin**: The unified admin panel ("Mission Control") for Syntaxure Labs. Port 3004. Stack: Next.js 16 + Supabase. Sections: Users, Subscriptions, Analytics, Agency Services, Contracts, Quotes, Projects, Workspaces, Releases, Billing, Settings. Has its own AI assistant at /api/assistant for admin operations.
 - **apps/prism-manage**: Personal & team project management app. Port 3007. Stack: Next.js 16 + Supabase. Features: Task list (virtualized), Kanban board, Calendar (Google Calendar sync), Marketing board with CPO review, Settings with audit trail. Has its own AI assistant at /api/assistant for task/productivity help.
 - **apps/prism-mcp-server**: Node.js + MCP SDK (The AI "Brain" Context Server). Port 3003.
 - **apps/prism-docs**: Documentation site (Nextra 4). Port 3002.

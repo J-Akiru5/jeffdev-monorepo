@@ -69,17 +69,17 @@ This monorepo powers **Syntaxure Labs** — a technology startup building high-p
 
 ## ◈ Tech Stack
 
-| Layer           | Technology                                          |
-| --------------- | --------------------------------------------------- |
-| **Framework**   | Next.js 16 (App Router)                             |
-| **UI**          | React 19, Tailwind CSS v4, Headless UI              |
-| **Database**    | Supabase (primary), Azure Cosmos DB (prism-engine)  |
-| **Auth**        | Clerk (prism-admin), Supabase Auth (remaining apps) |
-| **AI Protocol** | Model Context Protocol (MCP)                        |
-| **Secrets**     | Doppler                                             |
-| **Monorepo**    | Turborepo + pnpm workspaces                         |
-| **CI/CD**       | GitHub Actions, Vercel                              |
-| **Analytics**   | Python FastAPI, pandas, Vercel Analytics            |
+| Layer           | Technology                                         |
+| --------------- | -------------------------------------------------- |
+| **Framework**   | Next.js 16 (App Router)                            |
+| **UI**          | React 19, Tailwind CSS v4, Headless UI             |
+| **Database**    | Supabase (primary), Azure Cosmos DB (prism-engine) |
+| **Auth**        | Supabase Auth                                      |
+| **AI Protocol** | Model Context Protocol (MCP)                       |
+| **Secrets**     | Doppler                                            |
+| **Monorepo**    | Turborepo + pnpm workspaces                        |
+| **CI/CD**       | GitHub Actions, Vercel                             |
+| **Analytics**   | Python FastAPI, pandas, Vercel Analytics           |
 
 ---
 
@@ -108,7 +108,7 @@ The primary marketing site, CRM, and client-facing platform. Handles quotes, inv
 
 SaaS platform for developers to manage AI context rules. Brand management, video context pipeline, and AI component generation.
 
-**Stack**: Next.js 16, Clerk Auth, Cosmos DB, Supabase
+**Stack**: Next.js 16, Supabase Auth, Cosmos DB
 
 </td>
 </tr>
@@ -132,7 +132,7 @@ Multi-language documentation for the Prism Context Engine. Supports 8 locales wi
 
 Agency admin panel with subscription management, pricing controls, and user administration.
 
-**Stack**: Next.js 16, Clerk Auth, Supabase, PayPal
+**Stack**: Next.js 16, Supabase Auth, PayPal
 
 </td>
 </tr>

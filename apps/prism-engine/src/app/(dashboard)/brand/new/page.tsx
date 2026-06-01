@@ -156,7 +156,7 @@ export default function NewBrandPage() {
             {i < STEPS.length - 1 && (
               <div
                 className="flex-1 mx-2 md:mx-4"
-                style={{ height: "2px", backgroundColor: step > s.id ? "#3b82f6" : "#cbd5e1" }}
+                style={{ height: "2px", backgroundColor: step > s.id ? "var(--color-cyan, #3b82f6)" : "var(--border-subtle, #cbd5e1)" }}
               />
             )}
           </Fragment>
