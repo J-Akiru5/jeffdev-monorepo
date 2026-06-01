@@ -178,14 +178,9 @@ export async function POST(request: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-    const conversationHistory = allMessages
-      .slice(0, -1)
-      .map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`)
-      .join("\n\n");
-
-    const systemPrompt = `${ADMIN_CONTEXT}
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash",
+      systemInstruction: `${ADMIN_CONTEXT}
 
 ## Your Guidelines:
 1. You are the definitive guide for Prism Admin. Help admins manage users, subscriptions, analytics, and configurations.
@@ -193,16 +188,19 @@ export async function POST(request: NextRequest) {
 3. Be concise but thorough — provide actionable steps.
 4. Use markdown formatting for lists and emphasis.
 5. Be professional and helpful (like a Senior System Administrator).
-6. If you're unsure about a specific internal detail, say so rather than making up information.
+6. If you're unsure about a specific internal detail, say so rather than making up information.`,
+    });
 
-${conversationHistory ? `## Previous Conversation:\n${conversationHistory}\n` : ""}
+    const chatHistory = allMessages
+      .slice(0, -1)
+      .filter((m) => m.role === "user" || m.role === "assistant")
+      .map((m) => ({
+        role: m.role === "user" ? "user" : "model",
+        parts: [{ text: m.content }],
+      }));
 
-## User Question:
-${userQuestion}
-
-Provide a helpful, accurate response based on the admin context above.`;
-
-    const result = await model.generateContent(systemPrompt);
+    const chat = model.startChat({ history: chatHistory });
+    const result = await chat.sendMessage(userQuestion);
     const response = result.response.text();
     setCachedResponse(userQuestion, response);
 

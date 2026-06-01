@@ -72,13 +72,7 @@ export const metadata: Metadata = {
       "We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises.",
     images: [
       {
-        url: "/api/og",
-        width: 1200,
-        height: 630,
-        alt: "Syntaxure Labs",
-      },
-      {
-        url: "/favicon/og-image.png",
+        url: "/syntaxure-business-card.png",
         width: 1200,
         height: 630,
         alt: "Syntaxure Labs",
@@ -93,7 +87,7 @@ export const metadata: Metadata = {
     title: "Syntaxure Labs — Enterprise Web Development & SaaS Solutions",
     description:
       "We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises.",
-    images: ["/api/og"],
+    images: ["/syntaxure-business-card.png"],
   },
   robots: {
     index: true,
