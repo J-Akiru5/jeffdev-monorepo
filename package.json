@@ -11,7 +11,12 @@
     "test": "turbo run test",
     "clean": "node scripts/clean.js",
     "changeset": "changeset",
-    "prepare": "husky"
+    "prepare": "husky",
+    "prisma:generate": "pnpm --filter @syntaxure-labs/db run prisma:generate",
+    "prisma:studio": "pnpm --filter @syntaxure-labs/db run prisma:studio",
+    "prisma:pull": "pnpm --filter @syntaxure-labs/db run prisma:pull",
+    "prisma:migrate": "pnpm --filter @syntaxure-labs/db run prisma:migrate",
+    "prisma:deploy": "pnpm --filter @syntaxure-labs/db run prisma:deploy"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.7.0",

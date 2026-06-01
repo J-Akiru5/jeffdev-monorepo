@@ -32,7 +32,6 @@ import Link from "next/link";
 interface Subscription {
   id: string;
   user_id: string;
-  user_email?: string;
   plan?: string;
   status: string;
   amount?: number;
@@ -78,11 +77,9 @@ function SubscriptionsSearchContent({
     return initialSubs.filter((sub) => {
       const query = debouncedQuery.toLowerCase();
       if (query) {
-        const email = (sub.user_email || "").toLowerCase();
         const id = sub.id.toLowerCase();
         const userId = sub.user_id.toLowerCase();
         if (
-          !email.includes(query) &&
           !id.includes(query) &&
           !userId.includes(query)
         ) {
@@ -240,7 +237,7 @@ function SubscriptionsSearchContent({
                       href={`/admin/users/${sub.user_id}`}
                       className="text-sm text-white hover:text-amber-400 transition-colors"
                     >
-                      {sub.user_email || sub.user_id}
+                      {sub.user_id}
                     </Link>
                   </td>
                   <td className="px-4 py-3">
@@ -294,7 +291,7 @@ function SubscriptionsSearchContent({
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-white">
-                      {sub.user_email || "Unknown"}
+                      {sub.user_id}
                     </p>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs font-mono text-white/40 uppercase">

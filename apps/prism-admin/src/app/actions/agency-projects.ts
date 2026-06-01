@@ -18,6 +18,7 @@ const projectSchema = z.object({
   slug: z.string().min(1).regex(/^[a-z0-9-]+$/, "Slug must be lowercase with hyphens"),
   title: z.string().min(1).max(100),
   userId: z.string().uuid("Please select a valid client"),
+  clientId: z.string().uuid().optional().or(z.literal("")),
   client: z.string().min(1).max(100),
   clientEmail: z.string().email("Please enter a valid client email").optional().or(z.literal("")),
   category: z.string().min(1).max(50),
@@ -57,6 +58,33 @@ async function getProjectId(slug: string): Promise<string | null> {
   return data?.id || null;
 }
 
+/**
+ * Phase 1A: Resolve or create a client record and return its UUID.
+ * Deduplicates by case-insensitive name match.
+ */
+async function resolveClientId(
+  supabase: ReturnType<typeof getAdminClient>,
+  name: string,
+  email?: string | null,
+): Promise<string | null> {
+  const { data: existing } = await supabase
+    .from("clients")
+    .select("id")
+    .ilike("name", name)
+    .maybeSingle();
+
+  if (existing) return existing.id;
+
+  const { data: created, error } = await supabase
+    .from("clients")
+    .insert({ name, email: email || null })
+    .select("id")
+    .single();
+
+  if (error) throw error;
+  return created.id;
+}
+
 // ─── Projects CRUD ────────────────────────────────────────────────────────────
 
 export async function createAgencyProject(data: ProjectFormData): Promise<ActionResult> {
@@ -67,6 +95,12 @@ export async function createAgencyProject(data: ProjectFormData): Promise<Action
     const { data: existing } = await supabase.from("projects").select("id").eq("slug", validated.slug).maybeSingle();
     if (existing) return { success: false, error: "A project with this slug already exists" };
 
+    // Phase 1A: Resolve or create a client record, then link via client_id.
+    let clientId = validated.clientId || null;
+    if (!clientId && validated.client) {
+      clientId = await resolveClientId(supabase, validated.client, validated.clientEmail);
+    }
+
     const { error } = await supabase.from("projects").insert({
       user_id: validated.userId,
       slug: validated.slug,
@@ -76,8 +110,7 @@ export async function createAgencyProject(data: ProjectFormData): Promise<Action
       budget: validated.budget || null,
       start_date: validated.startDate || null,
       end_date: validated.deadline || null,
-      client_name: validated.client,
-      client_email: validated.clientEmail || null,
+      client_id: clientId,
       published: validated.published,
       metadata: {
         category: validated.category,
@@ -124,6 +157,12 @@ export async function updateAgencyProject(slug: string, data: ProjectFormData): 
       if (newSlugExists) return { success: false, error: "A project with the new slug already exists" };
     }
 
+    // Phase 1A: Resolve or create a client record, then link via client_id.
+    let clientId = validated.clientId || null;
+    if (!clientId && validated.client) {
+      clientId = await resolveClientId(supabase, validated.client, validated.clientEmail);
+    }
+
     const { error: updateError } = await supabase.from("projects").update({
       user_id: validated.userId,
       slug: validated.slug,
@@ -134,8 +173,7 @@ export async function updateAgencyProject(slug: string, data: ProjectFormData): 
       end_date: validated.deadline || null,
       budget: validated.budget !== undefined ? validated.budget.toString() : null,
       budget_spent: validated.paidAmount !== undefined ? validated.paidAmount.toString() : "0",
-      client_name: validated.client,
-      client_email: validated.clientEmail || null,
+      client_id: clientId,
       published: validated.published,
       metadata: {
         category: validated.category,

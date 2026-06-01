@@ -99,14 +99,25 @@ export async function saveAboutContent(
 
     const adminClient = getAdminClient();
 
-    const { error } = await adminClient.from("site_pages").upsert(
-      {
-        slug: "about",
-        content: parsed.data,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "slug" },
-    );
+    // Phase 1D: Write structured sections instead of monolithic JSONB.
+    // Each top-level key in the about content becomes a page_section row.
+    const slug = "about";
+    const now = new Date().toISOString();
+    const sections = Object.entries(parsed.data) as [string, unknown][];
+
+    for (const [key, value] of sections) {
+      const { error } = await adminClient.from("page_sections").upsert(
+        {
+          page_slug: slug,
+          section_key: key,
+          section_type: Array.isArray(value) ? "list" : typeof value === "object" ? "content" : "text",
+          content: value,
+          updated_at: now,
+        },
+        { onConflict: "page_slug,section_key" },
+      );
+      if (error) throw error;
+    }
 
     if (error) throw error;
 
@@ -126,18 +137,21 @@ export async function getAboutContent(): Promise<AboutContent | null> {
   try {
     const adminClient = getAdminClient();
 
-    const { data, error } = await adminClient
-      .from("site_pages")
-      .select("content")
-      .eq("slug", "about")
-      .single();
+    // Phase 1D: Reassemble about content from page_sections rows.
+    const { data: rows, error } = await adminClient
+      .from("page_sections")
+      .select("section_key, content")
+      .eq("page_slug", "about")
+      .order("sort_order", { ascending: true });
 
-    if (error) {
-      if (error.code === "PGRST116") return null;
-      throw error;
+    if (error) throw error;
+    if (!rows || rows.length === 0) return null;
+
+    const content: Record<string, unknown> = {};
+    for (const row of rows) {
+      content[row.section_key] = row.content;
     }
-
-    return (data?.content ?? null) as AboutContent | null;
+    return content as AboutContent;
   } catch (error) {
     console.error("[content] getAboutContent error:", error);
     return null;

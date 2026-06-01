@@ -189,7 +189,6 @@ async function handleSubscriptionActivated(
 ) {
   const tier = getTierFromPlanId(resource.plan_id);
   const billingCycle = getBillingCycle(resource.plan_id);
-  const subscriberEmail = resource.subscriber?.email_address;
   const nextBilling = resource.billing_info?.next_billing_time;
   const lastPayment = resource.billing_info?.last_payment?.amount?.value;
   const now = new Date();
@@ -208,7 +207,6 @@ async function handleSubscriptionActivated(
     current_period_start: now.toISOString(),
     current_period_end: periodEnd.toISOString(),
     paypal_subscription_id: resource.id,
-    user_email: subscriberEmail || null,
     updated_at: now.toISOString(),
   }, {
     onConflict: "user_id",
