@@ -11,15 +11,16 @@ import {
 import Link from "next/link";
 
 interface ClientEntry {
-  client_name: string;
-  client_email: string;
+  id: string;
+  name: string;
+  email: string | null;
   project_count: number;
   projects: Array<{ id: string; title: string }>;
 }
 
 /**
  * Clients Page
- * View agency clients from Supabase projects data
+ * View agency clients from the clients table (Phase 1A normalization).
  */
 export default async function ClientsPage() {
   const supabase = await createClient();
@@ -29,32 +30,37 @@ export default async function ClientsPage() {
 
   if (!user) return null;
 
-  // Fetch all projects with client info
-  const { data: projects } = await supabase
-    .from("projects")
-    .select("id, title, client_name, client_email")
-    .not("client_name", "is", null)
-    .order("client_name", { ascending: true });
+  // Phase 1A: Query the new clients table directly
+  const { data: clients } = await supabase
+    .from("clients")
+    .select("id, name, email")
+    .order("name", { ascending: true });
 
-  // Group by client name to get unique clients with project counts
-  const clientMap = new Map<string, ClientEntry>();
+  // Fetch project counts per client
+  const clientIds = (clients || []).map((c) => c.id);
+  const { data: projects } = clientIds.length > 0
+    ? await supabase
+        .from("projects")
+        .select("id, title, client_id")
+        .in("client_id", clientIds)
+    : { data: [] };
+
+  // Group projects by client_id
+  const projectCounts = new Map<string, Array<{ id: string; title: string }>>();
   for (const project of projects || []) {
-    const key = project.client_name?.toLowerCase() || "unknown";
-    if (clientMap.has(key)) {
-      const entry = clientMap.get(key)!;
-      entry.project_count++;
-      entry.projects.push({ id: project.id, title: project.title || "" });
-    } else {
-      clientMap.set(key, {
-        client_name: project.client_name || "Unknown",
-        client_email: project.client_email || "",
-        project_count: 1,
-        projects: [{ id: project.id, title: project.title || "" }],
-      });
-    }
+    const cid = project.client_id;
+    if (!cid) continue;
+    if (!projectCounts.has(cid)) projectCounts.set(cid, []);
+    projectCounts.get(cid)!.push({ id: project.id, title: project.title || "" });
   }
 
-  const clients = Array.from(clientMap.values());
+  const enrichedClients: ClientEntry[] = (clients || []).map((c) => ({
+    id: c.id,
+    name: c.name,
+    email: c.email,
+    project_count: projectCounts.get(c.id)?.length || 0,
+    projects: projectCounts.get(c.id) || [],
+  }));
 
   return (
     <div className="space-y-6">
@@ -63,7 +69,7 @@ export default async function ClientsPage() {
         <div>
           <h1 className="text-2xl font-bold text-white">Clients</h1>
           <p className="text-sm text-white/50">
-            {clients.length} client{clients.length !== 1 ? "s" : ""}
+            {enrichedClients.length} client{enrichedClients.length !== 1 ? "s" : ""}
           </p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-black text-sm font-medium rounded-lg transition-colors">
@@ -89,10 +95,10 @@ export default async function ClientsPage() {
       </div>
 
       {/* Clients Grid */}
-      {clients.length > 0 ? (
+      {enrichedClients.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {clients.map((client) => (
-            <ClientCard key={client.client_name} client={client} />
+          {enrichedClients.map((client) => (
+            <ClientCard key={client.id} client={client} />
           ))}
         </div>
       ) : (
@@ -116,17 +122,17 @@ export default async function ClientsPage() {
 function ClientCard({ client }: { client: ClientEntry }) {
   return (
     <Link
-      href={`/admin/projects?client=${encodeURIComponent(client.client_name)}`}
+      href={`/admin/projects?client=${encodeURIComponent(client.name)}`}
       className="group p-4 rounded-lg border border-white/5 bg-white/[0.02] hover:border-amber-500/30 hover:bg-white/[0.04] transition-all"
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-full bg-white/10 flex items-center justify-center text-sm font-medium text-white">
-            {client.client_name.charAt(0).toUpperCase()}
+            {client.name.charAt(0).toUpperCase()}
           </div>
           <div>
             <h3 className="text-sm font-medium text-white group-hover:text-amber-400 transition-colors">
-              {client.client_name}
+              {client.name}
             </h3>
           </div>
         </div>
@@ -141,10 +147,10 @@ function ClientCard({ client }: { client: ClientEntry }) {
       </div>
 
       <div className="space-y-2 text-xs">
-        {client.client_email && (
+        {client.email && (
           <div className="flex items-center gap-2 text-white/40">
             <Mail className="h-3 w-3" />
-            <span className="truncate">{client.client_email}</span>
+            <span className="truncate">{client.email}</span>
           </div>
         )}
         <div className="flex items-center gap-2 text-white/40">

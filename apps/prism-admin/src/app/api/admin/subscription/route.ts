@@ -52,7 +52,6 @@ export async function GET() {
       subscriptions: (subscriptions || []).map((sub) => ({
         id: sub.id,
         userId: sub.user_id,
-        userEmail: sub.user_email,
         tier: sub.plan,
         status: sub.status,
         amount: sub.amount,

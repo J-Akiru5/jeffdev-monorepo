@@ -41,6 +41,10 @@ import {
   DollarSign,
   Keyboard,
   ChevronDown,
+  Briefcase,
+  Calendar,
+  KeyRound,
+  Activity,
 } from "lucide-react";
 import { NotificationPopover } from "@/components/agency/notification-popover";
 import { useAdminSidebarStore, type AdminSidebarMode } from "@/stores/admin-sidebar-store";
@@ -201,18 +205,23 @@ export function AdminTopNavbar() {
 
   const agencyCommands = [
     { id: "agency-dashboard", label: "Agency Dashboard", href: "/admin/agency/dashboard", icon: LayoutDashboard, keywords: ["agency", "overview", "stats"] },
-    { id: "agency-projects", label: "Agency Projects", href: "/admin/agency/projects", icon: FolderKanban, keywords: ["agency projects", "client projects"] },
+    { id: "agency-projects", label: "Projects", href: "/admin/agency/projects", icon: FolderKanban, keywords: ["agency projects", "client projects"] },
+    { id: "agency-case-studies", label: "Case Studies", href: "/admin/agency/case-studies", icon: Briefcase, keywords: ["case studies", "portfolio"] },
+    { id: "agency-services", label: "Services", href: "/admin/agency/services", icon: Wrench, keywords: ["services", "catalog"] },
+    { id: "agency-content", label: "Content", href: "/admin/agency/content", icon: FileText, keywords: ["content", "pages", "about"] },
+    { id: "agency-content-homepage", label: "Content: Homepage", href: "/admin/agency/content/homepage", icon: FileText, keywords: ["content", "homepage", "hero"] },
     { id: "agency-quotes", label: "Quotes", href: "/admin/agency/quotes", icon: Mail, keywords: ["quotes", "estimates", "proposals"] },
-    { id: "agency-invoices", label: "Invoices", href: "/admin/agency/invoices", icon: Receipt, keywords: ["invoices", "bills"] },
-    { id: "agency-community", label: "Community", href: "/admin/agency/community", icon: Users, keywords: ["community", "members"] },
-    { id: "agency-services", label: "Services Catalog", href: "/admin/agency/services", icon: Wrench, keywords: ["services", "catalog"] },
-    { id: "agency-releases", label: "Releases", href: "/admin/agency/releases", icon: FileText, keywords: ["releases", "changelog"] },
-    { id: "agency-content", label: "Content", href: "/admin/agency/content", icon: FileText, keywords: ["content", "pages"] },
-    { id: "agency-calendar", label: "Agency Calendar", href: "/admin/agency/calendar", icon: FolderKanban, keywords: ["calendar", "schedule"] },
-    { id: "agency-users", label: "Team Members", href: "/admin/agency/users", icon: Users, keywords: ["team", "members", "staff"] },
-    { id: "agency-case-studies", label: "Case Studies", href: "/admin/agency/case-studies", icon: FileText, keywords: ["case studies", "portfolio"] },
+    { id: "agency-messages", label: "Messages", href: "/admin/agency/messages", icon: Mail, keywords: ["messages", "inbox", "contact"] },
     { id: "agency-feedback", label: "Feedback", href: "/admin/agency/feedback", icon: Mail, keywords: ["feedback", "reviews"] },
-    { id: "agency-messages", label: "Messages", href: "/admin/agency/messages", icon: FolderKanban, keywords: ["messages", "inbox"] },
+    { id: "agency-invoices", label: "Invoices", href: "/admin/agency/invoices", icon: Receipt, keywords: ["invoices", "bills"] },
+    { id: "agency-calendar", label: "Calendar", href: "/admin/agency/calendar", icon: Calendar, keywords: ["calendar", "schedule"] },
+    { id: "agency-availability", label: "Availability", href: "/admin/agency/availability", icon: Calendar, keywords: ["availability", "schedule", "hours"] },
+    { id: "agency-users", label: "Team Members", href: "/admin/agency/users", icon: Users, keywords: ["team", "members", "staff"] },
+    { id: "agency-community", label: "Community", href: "/admin/agency/community", icon: Users, keywords: ["community", "members"] },
+    { id: "agency-releases", label: "Releases", href: "/admin/agency/releases", icon: FileText, keywords: ["releases", "changelog"] },
+    { id: "agency-access", label: "Access Control", href: "/admin/agency/access", icon: KeyRound, keywords: ["access", "roles", "permissions"] },
+    { id: "agency-audit", label: "Audit Log", href: "/admin/agency/audit", icon: Activity, keywords: ["audit", "log", "history"] },
+    { id: "agency-settings", label: "Settings", href: "/admin/agency/settings", icon: Settings, keywords: ["settings", "preferences", "config"] },
   ];
 
   const modeCmds = mode === "manage" ? manageCommands : agencyCommands;

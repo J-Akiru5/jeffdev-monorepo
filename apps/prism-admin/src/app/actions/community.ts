@@ -307,7 +307,6 @@ export async function createCommunityPost(
         body: parsed.data.body,
         image_url: parsed.data.image_url || null,
         category: parsed.data.category,
-        tags: parsed.data.tags,
         author_id: parsed.data.author_id || null,
         is_pinned: parsed.data.is_pinned,
         is_published: parsed.data.is_published,
@@ -341,7 +340,8 @@ export async function updateCommunityPost(
     if (input.body !== undefined) updates.body = input.body;
     if (input.image_url !== undefined) updates.image_url = input.image_url || null;
     if (input.category !== undefined) updates.category = input.category;
-    if (input.tags !== undefined) updates.tags = input.tags;
+    // Phase 1B: tags column dropped — manage via community_post_tags junction table
+    // TODO: implement community_post_tags writes when tags UI is needed
     if (input.author_id !== undefined) updates.author_id = input.author_id || null;
     if (input.is_pinned !== undefined) updates.is_pinned = input.is_pinned;
     if (input.is_published !== undefined) updates.is_published = input.is_published;

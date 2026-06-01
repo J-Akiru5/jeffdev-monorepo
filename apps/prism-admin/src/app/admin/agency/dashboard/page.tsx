@@ -140,7 +140,7 @@ export default async function AgencyDashboardPage() {
                     {quote.title}
                   </div>
                   <div className="text-xs text-white/40">
-                    {(quote as { client_name?: string }).client_name || "Client"} &middot; $
+                    {(quote as { client_id?: string }).client_id ? "Client" : "Client"} &middot; $
                     {(quote as { amount?: number }).amount || 0}
                   </div>
                 </div>

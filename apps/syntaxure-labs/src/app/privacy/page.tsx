@@ -3,13 +3,20 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { getPageContent } from "@/lib/cms";
+import { LEGAL_DEFAULTS } from "@/data/cms-defaults";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description: "How Syntaxure Labs collects, uses, and protects your data.",
 };
 
-export default function PrivacyPolicyPage() {
+export const revalidate = 60;
+
+export default async function PrivacyPolicyPage() {
+  const cms = await getPageContent("legal");
+  const lastUpdated = cms?.privacyPolicy?.lastUpdated || LEGAL_DEFAULTS.privacyPolicy.lastUpdated;
+
   return (
     <>
       <Header />
@@ -28,7 +35,7 @@ export default function PrivacyPolicyPage() {
               Privacy Policy
             </h1>
             <p className="mt-2 font-mono text-xs text-white/40">
-              Last updated: December 2025
+              Last updated: {lastUpdated}
             </p>
 
             <div className="prose prose-invert mt-12 max-w-none prose-headings:font-semibold prose-headings:text-white prose-p:text-white/60 prose-strong:text-white prose-li:text-white/60">

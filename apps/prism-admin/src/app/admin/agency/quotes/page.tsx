@@ -1,27 +1,40 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { cookies } from "next/headers";
+import { ArrowLeft, Plus, Edit2, Trash2, Eye } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { deleteAgencyQuote } from "@/app/actions/agency-quotes";
+import { revalidatePath } from "next/cache";
 
 /**
  * Agency Quotes Page
  * ------------------
- * View all quote requests.
+ * View and manage all quote requests.
  */
 
 const statusColors: Record<string, string> = {
-  draft: "bg-white/10 text-white/60",
-  sent: "bg-cyan-500/20 text-cyan-400",
+  new: "bg-cyan-500/20 text-cyan-400",
+  reviewed: "bg-yellow-500/20 text-yellow-400",
+  responded: "bg-blue-500/20 text-blue-400",
   accepted: "bg-emerald-500/20 text-emerald-400",
-  rejected: "bg-red-500/20 text-red-400",
-  expired: "bg-yellow-500/20 text-yellow-400",
+  declined: "bg-red-500/20 text-red-400",
 };
 
 export default async function AgencyQuotesPage() {
+  await cookies();
   const supabase = await createClient();
   const { data: quotes } = await supabase
     .from("quotes")
     .select("*")
     .order("created_at", { ascending: false });
+
+  async function handleDelete(formData: FormData) {
+    "use server";
+    const id = formData.get("id") as string;
+    if (id) {
+      await deleteAgencyQuote(id);
+      revalidatePath("/admin/agency/quotes");
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -50,32 +63,68 @@ export default async function AgencyQuotesPage() {
               className="rounded-lg border border-white/5 bg-white/[0.02] p-4 hover:border-white/10 transition-all"
             >
               <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-medium text-white">
-                    {quote.title}
-                  </h3>
-                  <p className="text-xs text-white/40 mt-0.5">
-                    {(quote as { client_name?: string }).client_name || "Client"} &middot; $
-                    {(quote as { amount?: number }).amount || 0}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-sm font-medium text-white truncate">
+                      {quote.name || "Anonymous"}
+                    </h3>
+                    <span
+                      className={`rounded-sm px-2 py-0.5 text-[10px] uppercase tracking-wider flex-shrink-0 ${
+                        statusColors[quote.status] || "bg-white/10 text-white/40"
+                      }`}
+                    >
+                      {quote.status}
+                    </span>
+                  </div>
+                  <p className="text-xs text-white/40 mt-0.5 truncate">
+                    {quote.email} &middot; {quote.project_type || quote.title || "No type"}
+                    {quote.budget_range ? ` · ${quote.budget_range}` : ""}
                   </p>
+                  {quote.message && (
+                    <p className="mt-1.5 text-xs text-white/30 line-clamp-2">
+                      {quote.message}
+                    </p>
+                  )}
                 </div>
-                <span
-                  className={`rounded-sm px-2 py-0.5 text-[10px] uppercase tracking-wider ${
-                    statusColors[quote.status] || "bg-white/10 text-white/40"
-                  }`}
-                >
-                  {quote.status}
-                </span>
+
+                <div className="flex items-center gap-2 ml-4">
+                  <Link
+                    href={`/admin/agency/quotes/${quote.id}`}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-white/60 hover:bg-white/5 hover:text-white transition-colors"
+                    title="View details"
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Link>
+                  <Link
+                    href={`/admin/agency/quotes/${quote.id}/edit`}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 text-white/60 hover:bg-white/5 hover:text-white transition-colors"
+                    title="Edit"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </Link>
+                  <form
+                    action={handleDelete}
+                    onSubmit={(e) => {
+                      if (!confirm("Delete this quote? This cannot be undone.")) e.preventDefault();
+                    }}
+                  >
+                    <input type="hidden" name="id" value={quote.id} />
+                    <button
+                      type="submit"
+                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-colors"
+                      title="Delete"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </form>
+                </div>
               </div>
-              {quote.description && (
-                <p className="mt-2 text-xs text-white/30 line-clamp-2">
-                  {quote.description}
-                </p>
-              )}
             </div>
           ))
         ) : (
-          <div className="py-12 text-center text-white/30">No quotes yet</div>
+          <div className="py-12 text-center text-white/30 border border-dashed border-white/5 rounded-lg">
+            No quotes yet
+          </div>
         )}
       </div>
     </div>

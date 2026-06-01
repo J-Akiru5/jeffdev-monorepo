@@ -22,7 +22,6 @@ interface WorkItem {
   type: "project" | "case_study";
   source: "projects" | "case_studies";
   created_at: string;
-  client_name?: string | null;
   industry?: string | null;
   published_at?: string | null;
 }
@@ -218,7 +217,7 @@ export function WorksManager({ projects, caseStudies }: Props) {
                     </div>
                     <p className="text-xs text-white/40 mt-0.5 truncate">
                       {item.type === "project"
-                        ? item.client_name || "No client"
+                        ? item.description?.slice(0, 60) || "Project"
                         : item.industry || "No industry"}
                       {" · "}
                       {new Date(item.created_at).toLocaleDateString()}

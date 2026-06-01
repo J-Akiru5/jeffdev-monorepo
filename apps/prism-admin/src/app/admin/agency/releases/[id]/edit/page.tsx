@@ -28,7 +28,7 @@ export default async function EditReleasePage({
         type: release.type as "tool" | "update" | "patch",
         description: release.description,
         link: release.link ?? "",
-        tags: release.tags ?? [],
+        tags: [],
         is_featured: release.is_featured,
       }}
       isEditing

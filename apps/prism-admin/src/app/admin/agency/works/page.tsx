@@ -15,7 +15,7 @@ export default async function WorksPage() {
   const [projectsResult, caseStudiesResult] = await Promise.all([
     supabase
       .from("projects")
-      .select("id, title, slug, description, status, created_at, client_name")
+      .select("id, title, slug, description, status, created_at")
       .order("created_at", { ascending: false }),
     supabase
       .from("case_studies")
