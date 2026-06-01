@@ -15,6 +15,14 @@
     "./schema": {
       "types": "./src/schema.ts",
       "default": "./src/schema.ts"
+    },
+    "./prisma-types": {
+      "types": "./src/prisma-types.ts",
+      "default": "./src/prisma-types.ts"
+    },
+    "./prisma": {
+      "types": "./src/prisma.ts",
+      "default": "./src/prisma.ts"
     }
   },
   "scripts": {

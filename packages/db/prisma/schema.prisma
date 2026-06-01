@@ -344,9 +344,6 @@ model Service {
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt   DateTime @default(now()) @map("updated_at") @db.Timestamptz()
 
-  // Relations
-  quoteServices QuoteService[]
-
   @@map("services")
 }
 
@@ -776,6 +773,9 @@ model PageSection {
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt    DateTime @default(now()) @map("updated_at") @db.Timestamptz()
 
+  // Relations
+  page SitePage? @relation(fields: [pageSlug], references: [slug])
+
   @@unique([pageSlug, sectionKey])
   @@index([pageSlug])
   @@index([pageSlug, sortOrder])
@@ -806,7 +806,7 @@ model QuoteService {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
 
   quote   Quote              @relation(fields: [quoteId], references: [id], onDelete: Cascade)
-  service Service            @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  service CustomizationService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 
   @@id([quoteId, serviceId])
   @@map("quote_services")
