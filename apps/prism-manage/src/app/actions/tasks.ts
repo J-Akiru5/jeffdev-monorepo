@@ -29,6 +29,71 @@ async function logAudit(event: {
 import { CreateTaskSchema, UpdateTaskSchema } from "@/lib/schemas";
 import type { Task } from "@/lib/schemas";
 
+// =============================================================================
+// TAG HELPERS (Phase 1B — junction tables)
+// =============================================================================
+
+/**
+ * Upsert tag names into the `tags` table and sync the `task_tags` junction.
+ * Deletes existing junction rows for the task, then inserts fresh ones.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function syncTaskTags(supabase: any, taskId: string, tagNames: string[]) {
+  const tagIds: string[] = [];
+  for (const name of tagNames) {
+    const trimmed = name.trim().toLowerCase();
+    if (!trimmed) continue;
+
+    // Try to find existing tag
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let { data: tag } = await (supabase as any)
+      .from("tags")
+      .select("id")
+      .eq("name", trimmed)
+      .single();
+
+    if (!tag) {
+      // Create new tag
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: created } = await (supabase as any)
+        .from("tags")
+        .insert({ name: trimmed })
+        .select("id")
+        .single();
+      if (created) tag = created;
+    }
+
+    if (tag) tagIds.push(tag.id);
+  }
+
+  // Delete existing junction rows
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (supabase as any).from("task_tags").delete().eq("task_id", taskId);
+
+  // Insert new junction rows
+  if (tagIds.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any).from("task_tags").insert(
+      tagIds.map((tagId) => ({ task_id: taskId, tag_id: tagId }))
+    );
+  }
+}
+
+/**
+ * Extract tag names from the nested task_tags → tags join result.
+ */
+function extractTags(raw: Record<string, unknown>): string[] {
+  const junction = raw.task_tags as
+    | Array<{ tags: { name: string } | null }>
+    | undefined;
+  if (!junction) return [];
+  return junction.map((row) => row.tags?.name).filter(Boolean) as string[];
+}
+
+// =============================================================================
+// MAPPERS
+// =============================================================================
+
 /**
  * Map a raw Supabase row (snake_case) to the Task type (camelCase).
  */
@@ -52,7 +117,7 @@ function mapTask(raw: Record<string, unknown>): Task {
     // Metadata
     isStarred: raw.is_starred === true || raw.is_starred === "true" || false,
     assignedTo: raw.assigned_to ? String(raw.assigned_to) : undefined,
-    tags: Array.isArray(raw.tags) ? (raw.tags as string[]) : undefined,
+    tags: extractTags(raw),
 
     // Dates
     dueDate: raw.due_date ? String(raw.due_date) : undefined,
@@ -88,7 +153,7 @@ function toDbInsert(task: Partial<Task> & { user_id: string; project_id: string 
   if (task.description !== undefined) db.description = task.description;
   if (task.notes !== undefined) db.notes = task.notes;
   if (task.assignedTo !== undefined) db.assigned_to = task.assignedTo;
-  if (task.tags !== undefined) db.tags = task.tags;
+  // Phase 1B: tags are managed via task_tags junction table, not the tasks.tags column
   if (task.dueDate !== undefined) db.due_date = task.dueDate;
   if (task.dueTime !== undefined) db.due_time = task.dueTime;
   if (task.order !== undefined) db.order = task.order;
@@ -96,6 +161,10 @@ function toDbInsert(task: Partial<Task> & { user_id: string; project_id: string 
 
   return db;
 }
+
+// =============================================================================
+// ACTIONS
+// =============================================================================
 
 export async function getTasks(workspaceId?: string): Promise<Task[]> {
   try {
@@ -105,7 +174,7 @@ export async function getTasks(workspaceId?: string): Promise<Task[]> {
 
     let query = supabase
       .from("tasks")
-      .select("*")
+      .select("*, task_tags(tags(name))")
       .order("created_at", { ascending: false });
 
     // Filter by workspace if specified
@@ -183,13 +252,22 @@ export async function createTask(input: {
     description: input.description,
     notes: input.notes,
     assignedTo: input.assignedTo,
-    tags: input.tags,
     dueDate: input.dueDate,
     dueTime: input.dueTime,
   });
 
-  const { error } = await supabase.from("tasks").insert(dbRecord);
+  const { data: inserted, error } = await supabase
+    .from("tasks")
+    .insert(dbRecord)
+    .select("id")
+    .single();
   if (error) throw error;
+
+  // Sync tags via junction table
+  if (input.tags && input.tags.length > 0 && inserted) {
+    await syncTaskTags(supabase, inserted.id, input.tags);
+  }
+
   revalidatePath("/tasks");
 }
 
@@ -295,7 +373,7 @@ export async function updateTask(
   if (parsed.data.notes !== undefined) updateData.notes = parsed.data.notes;
   if (parsed.data.isStarred !== undefined) updateData.is_starred = parsed.data.isStarred;
   if (parsed.data.assignedTo !== undefined) updateData.assigned_to = parsed.data.assignedTo;
-  if (parsed.data.tags !== undefined) updateData.tags = parsed.data.tags;
+  // Phase 1B: tags are managed via task_tags junction table
   if (parsed.data.dueDate !== undefined) updateData.due_date = parsed.data.dueDate;
   if (parsed.data.dueTime !== undefined) updateData.due_time = parsed.data.dueTime;
   if (parsed.data.order !== undefined) updateData.order = parsed.data.order;
@@ -310,6 +388,12 @@ export async function updateTask(
     .eq("user_id", user.id);
 
   if (error) throw error;
+
+  // Sync tags via junction table if provided
+  if (parsed.data.tags !== undefined) {
+    await syncTaskTags(supabase, taskId, parsed.data.tags ?? []);
+  }
+
   revalidatePath("/tasks");
 }
 
@@ -326,6 +410,9 @@ export async function deleteTask(taskId: string) {
     .select("title")
     .eq("id", taskId)
     .single();
+
+  // Delete junction rows first (CASCADE may handle this, but be explicit)
+  await supabase.from("task_tags").delete().eq("task_id", taskId);
 
   const { error } = await supabase
     .from("tasks")

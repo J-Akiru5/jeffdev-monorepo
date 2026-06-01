@@ -3,8 +3,23 @@ import Link from "next/link";
 import { getReleases } from "@/app/actions/releases";
 import { ReleasesTable } from "./releases-table";
 
+interface ReleaseRow {
+  id: string;
+  title: string;
+  version: string | null;
+  date: string;
+  type: "tool" | "update" | "patch";
+  description: string;
+  link: string | null;
+  tags: string[];
+  is_featured: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export default async function ReleasesPage() {
-  const { data: releases, success } = await getReleases();
+  const { data, success } = await getReleases();
+  const releases = (data ?? []) as ReleaseRow[];
 
   return (
     <div className="space-y-8">
@@ -33,7 +48,7 @@ export default async function ReleasesPage() {
       )}
 
       {/* Releases Table */}
-      <ReleasesTable releases={releases ?? []} />
+      <ReleasesTable releases={success ? releases : []} />
     </div>
   );
 }
