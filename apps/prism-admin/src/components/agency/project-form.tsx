@@ -6,6 +6,7 @@ import { ImageUpload } from "@syntaxure/ui";
 import { uploadToStorage } from "@/app/actions/storage";
 import { createAgencyProject, updateAgencyProject } from "@/app/actions/agency-projects";
 import type { ProjectFormData } from "@/app/actions/agency-projects";
+import type { UserProfile } from "@/app/actions/agency-users";
 
 /**
  * Project Form Component
@@ -16,9 +17,10 @@ import type { ProjectFormData } from "@/app/actions/agency-projects";
 interface Props {
   mode: "create" | "edit";
   defaultValues?: Partial<ProjectFormData>;
+  users?: UserProfile[];
 }
 
-export function ProjectForm({ mode, defaultValues }: Props) {
+export function ProjectForm({ mode, defaultValues, users }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -132,6 +134,35 @@ export function ProjectForm({ mode, defaultValues }: Props) {
         <h3 className="text-sm font-medium text-white/80">Client</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="md:col-span-2">
+            <label className="block text-xs text-white/50 mb-1">Link Client Profile</label>
+            <select
+              value={form.userId}
+              onChange={(e) => {
+                const selectedUid = e.target.value;
+                const found = users?.find(u => u.uid === selectedUid);
+                setForm((f) => ({
+                  ...f,
+                  userId: selectedUid,
+                  client: found ? found.displayName : f.client,
+                  clientEmail: found ? found.email : f.clientEmail,
+                }));
+              }}
+              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500/50"
+              required
+            >
+              <option value="">-- Choose Client Profile --</option>
+              {users?.map(u => (
+                <option key={u.uid} value={u.uid}>
+                  {u.displayName} ({u.email}) - {u.role}
+                </option>
+              ))}
+            </select>
+            <p className="text-[10px] text-white/30 mt-1">
+              Select an existing client to auto-populate their details and link their UUID.
+            </p>
+          </div>
+
           <div>
             <label className="block text-xs text-white/50 mb-1">Client Name</label>
             <input

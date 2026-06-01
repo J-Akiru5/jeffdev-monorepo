@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import ProductsPageContent from "./products-page-content";
 
+export const dynamic = "force-dynamic";
+
 /**
  * Products Page
  *

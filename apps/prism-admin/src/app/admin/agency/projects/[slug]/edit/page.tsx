@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { ProjectForm } from "@/components/agency/project-form";
+import { getAgencyAllUsers } from "@/app/actions/agency-users";
 
 /**
  * Edit Agency Project Page
@@ -17,6 +18,7 @@ export default async function EditAgencyProjectPage({
 }) {
   const { slug } = await params;
   const supabase = getAdminClient() as any;
+  const users = await getAgencyAllUsers();
 
   const { data: project } = await supabase
     .from("projects")
@@ -71,7 +73,8 @@ export default async function EditAgencyProjectPage({
         <p className="mt-1 text-sm text-white/50">{project.title}</p>
       </div>
 
-      <ProjectForm mode="edit" defaultValues={defaultValues} />
+      <ProjectForm mode="edit" defaultValues={defaultValues} users={users} />
     </div>
   );
 }
+

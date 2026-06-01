@@ -48,7 +48,7 @@ export function AdminMobileNav() {
   const mode = useAdminSidebarStore((s) => s.mode);
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 h-16 border-t border-white/10 bg-[#030303]/95 backdrop-blur-lg flex items-center justify-around px-2 pb-safe">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 h-16 border-t border-white/10 bg-void/95 backdrop-blur-lg flex items-center justify-around px-2 pb-safe">
       {/* Home — always visible */}
       <MobileNavItem href="/admin/dashboard" icon={LayoutDashboard} label="Home" />
 

@@ -259,7 +259,7 @@ export function AdminSidebar({ isFounder }: AdminSidebarProps) {
   const mode = useAdminSidebarStore((s) => s.mode);
 
   return (
-    <aside className="hidden lg:flex fixed left-0 top-14 z-40 h-[calc(100vh-3.5rem)] w-60 flex-col border-r border-white/5 bg-[#030303]">
+    <aside className="hidden lg:flex fixed left-0 top-14 z-40 h-[calc(100vh-3.5rem)] w-60 flex-col border-r border-white/5 bg-void">
       {/* Logo */}
       <div className="flex h-14 items-center border-b border-white/5 px-4">
         <Link

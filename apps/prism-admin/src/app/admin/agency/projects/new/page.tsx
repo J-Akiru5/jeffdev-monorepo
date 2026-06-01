@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { ProjectForm } from "@/components/agency/project-form";
+import { getAgencyAllUsers } from "@/app/actions/agency-users";
 
 /**
  * New Agency Project Page
@@ -8,7 +9,9 @@ import { ProjectForm } from "@/components/agency/project-form";
  * Create a new agency project.
  */
 
-export default function NewAgencyProjectPage() {
+export default async function NewAgencyProjectPage() {
+  const users = await getAgencyAllUsers();
+
   return (
     <div className="space-y-6">
       <Link
@@ -24,7 +27,8 @@ export default function NewAgencyProjectPage() {
         <p className="mt-1 text-sm text-white/50">Create a new agency project</p>
       </div>
 
-      <ProjectForm mode="create" />
+      <ProjectForm mode="create" users={users} />
     </div>
   );
 }
+
