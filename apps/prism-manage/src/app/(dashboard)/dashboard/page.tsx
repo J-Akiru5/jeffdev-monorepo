@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { SyntaxureLogo, EmptyState } from "@syntaxure/ui";
+import { resolveSyntaxureWorkspace } from "@/lib/workspace";
 import {
   DEPARTMENT_COLORS,
   DEPARTMENT_DESCRIPTIONS,
@@ -24,20 +25,9 @@ import {
 export const dynamic = "force-dynamic";
 
 export default async function HQLandingPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
+  const wsData = await resolveSyntaxureWorkspace();
 
-  const { data: workspaces } = await supabase
-    .from("workspaces")
-    .select("id, name, created_at")
-    .or("name.eq.Syntaxure Labs,name.eq.Syntaxure Labs, Inc.")
-    .limit(1)
-    .single();
-
-  const syntaxureWs = workspaces as { id: string; name: string; created_at: string } | null;
-
-  if (!syntaxureWs) {
+  if (!wsData) {
     return (
       <EmptyState
         icon={Building2}
@@ -47,21 +37,16 @@ export default async function HQLandingPage() {
     );
   }
 
-  const { data: depts } = await supabase
-    .from("departments")
-    .select("*")
-    .eq("workspace_id", syntaxureWs.id)
-    .order("name", { ascending: true });
+  const supabase = await createClient();
 
-  const departments = (depts || []).map((d: Record<string, unknown>) => ({
-    id: String(d.id),
-    name: String(d.name),
-  }));
-
-  const { data: members } = await supabase
+  const { data: members, error: membersError } = await supabase
     .from("workspace_members")
     .select("role, department_id")
-    .eq("workspace_id", syntaxureWs.id);
+    .eq("workspace_id", wsData.workspaceId);
+
+  if (membersError) {
+    console.error("[Dashboard] Failed to fetch members:", membersError.message);
+  }
 
   const totalMembers = members?.length || 0;
   const deptMemberCounts: Record<string, number> = {};
@@ -72,25 +57,27 @@ export default async function HQLandingPage() {
     }
   });
 
-  const { count: taskCount } = await supabase
+  const { count: taskCount, error: taskError } = await supabase
     .from("tasks")
     .select("*", { count: "exact", head: true })
-    .eq("workspace_id", syntaxureWs.id);
+    .eq("workspace_id", wsData.workspaceId);
 
-  const { count: doneCount } = await supabase
+  if (taskError) {
+    console.error("[Dashboard] Failed to fetch task count:", taskError.message);
+  }
+
+  const { count: doneCount, error: doneError } = await supabase
     .from("tasks")
     .select("*", { count: "exact", head: true })
-    .eq("workspace_id", syntaxureWs.id)
+    .eq("workspace_id", wsData.workspaceId)
     .in("status", ["approved"]);
 
-  const { data: myMembership } = await supabase
-    .from("workspace_members")
-    .select("role")
-    .eq("workspace_id", syntaxureWs.id)
-    .eq("user_id", user.id)
-    .single();
+  if (doneError) {
+    console.error("[Dashboard] Failed to fetch done count:", doneError.message);
+  }
 
-  const isFounder = myMembership?.role === "founder";
+  const departments = wsData.departments;
+  const isFounder = wsData.userRole === "founder";
 
   const stats = [
     { label: "Departments", value: departments.length, icon: Layers, color: "text-cyan-400" },
@@ -107,7 +94,7 @@ export default async function HQLandingPage() {
           <SyntaxureLogo className="h-10 w-10 drop-shadow-[0_0_20px_rgba(6,182,212,0.15)]" />
           <div>
             <h1 className="text-2xl font-bold text-white">
-              Syntaxure Labs
+              {wsData.workspaceName}
             </h1>
             <p className="text-sm text-white/40">
               Zero-to-One Development Agency
