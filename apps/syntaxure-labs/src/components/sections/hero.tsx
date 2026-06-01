@@ -115,8 +115,15 @@ function FloatingGeometry() {
    ──────────────────────────────────────── */
 export function Hero({
   availabilityText,
+  cmsHero,
 }: {
   availabilityText?: string | null;
+  cmsHero?: {
+    tagline?: string;
+    heading1?: string;
+    heading2?: string;
+    description?: string;
+  };
 }) {
   const { ref: badgeRef, isInView: badgeInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
   const { ref: headlineRef, isInView: headlineInView } = useInView<HTMLHeadingElement>({ threshold: 0.1 });
@@ -293,8 +300,7 @@ export function Hero({
                 subtextInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
               }`}
             >
-              From zero to production. We transform complex ideas into powerful,
-              reliable software ecosystems built for scale and absolute control.
+              {cmsHero?.description || "From zero to production. We transform complex ideas into powerful, reliable software ecosystems built for scale and absolute control."}
             </p>
 
             {/* ── CTAs ── */}

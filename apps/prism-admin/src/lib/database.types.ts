@@ -6,6 +6,7 @@
  *
  * Tables are derived from supabase/migrations/20250523011807_initial_schema.sql,
  * supabase/migrations/20250601000001_workspaces_rbac.sql, and related migrations.
+ * Updated for Phase 1 DB normalization and Phase 2 admin consolidation.
  */
 
 // GenericRelationship isn't exported from @supabase/supabase-js, define locally.
@@ -43,7 +44,7 @@ export interface Database {
       notifications: ToGenericTable<NotificationRow>;
       invites: ToGenericTable<InviteRow>;
       milestones: ToGenericTable<MilestoneRow>;
-        releases: ToGenericTable<ReleaseRow>;
+      releases: ToGenericTable<ReleaseRow>;
       site_pages: ToGenericTable<SitePageRow>;
       page_sections: ToGenericTable<PageSectionRow>;
       clients: ToGenericTable<ClientRow>;
@@ -57,12 +58,19 @@ export interface Database {
       contract_terms: ToGenericTable<ContractTermRow>;
       customization_services: ToGenericTable<CustomizationServiceRow>;
       services: ToGenericTable<ServiceRow>;
+      // Phase 1 normalization — junction tables
       quote_services: ToGenericTable<QuoteServiceRow>;
       task_tags: ToGenericTable<TaskTagRow>;
       release_tags: ToGenericTable<ReleaseTagRow>;
       community_post_tags: ToGenericTable<CommunityPostTagRow>;
       support_ticket_tags: ToGenericTable<SupportTicketTagRow>;
       client_contracts: ToGenericTable<ClientContractRow>;
+      // Phase 2 admin consolidation — new tables
+      quotes: ToGenericTable<QuoteRow>;
+      contact_messages: ToGenericTable<ContactMessageRow>;
+      feedback: ToGenericTable<FeedbackRow>;
+      site_settings: ToGenericTable<SiteSettingRow>;
+      agency_availability: ToGenericTable<AgencyAvailabilityRow>;
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -469,6 +477,7 @@ export interface ServiceRow {
 // ── Phase 1 Normalization Types ──
 
 // ── Clients ──
+
 export interface ClientRow {
   id: string;
   name: string;
@@ -480,6 +489,7 @@ export interface ClientRow {
 }
 
 // ── Page Sections ──
+
 export interface PageSectionRow {
   id: string;
   page_slug: string;
@@ -493,6 +503,7 @@ export interface PageSectionRow {
 }
 
 // ── Tags ──
+
 export interface TagRow {
   id: string;
   name: string;
@@ -500,6 +511,7 @@ export interface TagRow {
 }
 
 // ── Quote Services (junction) ──
+
 export interface QuoteServiceRow {
   quote_id: string;
   service_id: string;
@@ -507,6 +519,7 @@ export interface QuoteServiceRow {
 }
 
 // ── Task Tags (junction) ──
+
 export interface TaskTagRow {
   task_id: string;
   tag_id: string;
@@ -514,6 +527,7 @@ export interface TaskTagRow {
 }
 
 // ── Release Tags (junction) ──
+
 export interface ReleaseTagRow {
   release_id: string;
   tag_id: string;
@@ -521,6 +535,7 @@ export interface ReleaseTagRow {
 }
 
 // ── Community Post Tags (junction) ──
+
 export interface CommunityPostTagRow {
   post_id: string;
   tag_id: string;
@@ -528,6 +543,7 @@ export interface CommunityPostTagRow {
 }
 
 // ── Support Ticket Tags (junction) ──
+
 export interface SupportTicketTagRow {
   ticket_id: string;
   tag_id: string;
@@ -535,6 +551,7 @@ export interface SupportTicketTagRow {
 }
 
 // ── Client Contracts ──
+
 export interface ClientContractRow {
   id: string;
   quote_id: string | null;
@@ -551,6 +568,76 @@ export interface ClientContractRow {
   amount: string;
   currency: string;
   metadata: unknown;
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Phase 2 Admin Consolidation Types ──
+
+// ── Quotes (admin CRUD) ──
+
+export interface QuoteRow {
+  id: string;
+  name: string;
+  email: string;
+  company: string | null;
+  project_type: string | null;
+  title: string | null;
+  budget_range: string | null;
+  timeline: string | null;
+  message: string | null;
+  status: "new" | "reviewed" | "responded" | "accepted" | "declined";
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Contact Messages ──
+
+export interface ContactMessageRow {
+  id: string;
+  name: string;
+  email: string;
+  subject: string | null;
+  message: string | null;
+  type: string | null;
+  status: "unread" | "read" | "archived";
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Feedback ──
+
+export interface FeedbackRow {
+  id: string;
+  user_id: string | null;
+  user_name: string | null;
+  rating: number;
+  comment: string | null;
+  page_url: string | null;
+  status: "received" | "acknowledged" | "resolved" | "archived";
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Site Settings (Key-Value Store) ──
+
+export interface SiteSettingRow {
+  id: string;
+  key: string;
+  value: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// ── Agency Availability Slots ──
+
+export interface AgencyAvailabilityRow {
+  id: string;
+  date: string;
+  start_time: string;
+  end_time: string;
+  type: "available" | "busy" | "unavailable" | "tentative";
+  note: string | null;
   created_at: string;
   updated_at: string;
 }

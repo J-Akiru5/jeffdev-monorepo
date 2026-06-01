@@ -6,6 +6,7 @@ import { MobileNav } from "@/components/mobile-nav";
 import { ProjectProvider } from "@/contexts/project-context";
 import { WorkspaceProvider } from "@/components/workspace-provider";
 import { TourGuide } from "@/components/tour-guide";
+import { resolveSyntaxureWorkspace } from "@/lib/workspace";
 import { PERSONAL_LISTS } from "@/lib/schemas";
 import type { Project } from "@/lib/schemas";
 
@@ -37,50 +38,43 @@ export default async function DashboardLayout({
 
   // ── Fetch Workspaces & RBAC data ──
 
-  // Get all workspace memberships for this user
+  // Resolve Syntaxure Labs workspace via shared cached utility
+  const syntaxureData = await resolveSyntaxureWorkspace();
+
+  // Get all workspace memberships for WorkspaceProvider (needs ALL workspaces, not just Syntaxure)
   const { data: memberships } = await supabase
     .from("workspace_members")
     .select("workspace_id, role, department_id, c_level_title, workspaces!inner(id, name, created_at)")
     .eq("user_id", user.id);
 
-  const workspaces = (memberships || []).map((m: Record<string, unknown>) => ({
-    id: (m.workspaces as Record<string, unknown>).id as string,
-    name: (m.workspaces as Record<string, unknown>).name as string,
-    createdAt: (m.workspaces as Record<string, unknown>).created_at as string,
-    role: m.role as string,
-  }));
+  const workspaces = (memberships || [])
+    .filter((m: Record<string, unknown>) => m.workspaces != null)
+    .map((m: Record<string, unknown>) => ({
+      id: (m.workspaces as Record<string, unknown>).id as string,
+      name: (m.workspaces as Record<string, unknown>).name as string,
+      createdAt: (m.workspaces as Record<string, unknown>).created_at as string,
+      role: m.role as string,
+    }));
 
-  // Default active workspace: first one found
   const activeWorkspaceId = workspaces.length > 0 ? workspaces[0]!.id : null;
 
-  // Fetch departments for Syntaxure Labs workspace
-  const syntaxureWorkspace = workspaces.find(
-    (w) => w.name === "Syntaxure Labs" || w.name === "Syntaxure Labs, Inc."
-  );
-
+  // Derive Syntaxure-specific RBAC data from memberships using resolved workspace ID
   let departments: { id: string; workspaceId: string; name: string; createdAt: string }[] = [];
   let userRole: "founder" | "employee" = "employee";
   let userDepartmentId: string | null = null;
   let cpoUserId: string | null = null;
   let cLevelTitle: "ceo" | "cto" | "cpo" | "coo" | "cmo" | null = null;
 
-  if (syntaxureWorkspace) {
-    const { data: deptData } = await supabase
-      .from("departments")
-      .select("*")
-      .eq("workspace_id", syntaxureWorkspace.id)
-      .order("name", { ascending: true });
-
-    departments = (deptData || []).map((d: Record<string, unknown>) => ({
-      id: String(d.id),
-      workspaceId: String(d.workspace_id),
-      name: String(d.name),
-      createdAt: String(d.created_at),
+  if (syntaxureData) {
+    departments = syntaxureData.departments.map((d) => ({
+      id: d.id,
+      workspaceId: syntaxureData.workspaceId,
+      name: d.name,
+      createdAt: syntaxureData.createdAt,
     }));
 
-    // Get this user's role and department assignment
     const membership = memberships?.find(
-      (m: Record<string, unknown>) => m.workspace_id === syntaxureWorkspace.id
+      (m: Record<string, unknown>) => m.workspace_id === syntaxureData.workspaceId,
     );
     userRole = (membership?.role as "founder" | "employee") || "employee";
     userDepartmentId = (membership?.department_id as string | null) || null;
@@ -92,7 +86,7 @@ export default async function DashboardLayout({
       const { data: cpoMembership } = await supabase
         .from("workspace_members")
         .select("user_id")
-        .eq("workspace_id", syntaxureWorkspace.id)
+        .eq("workspace_id", syntaxureData.workspaceId)
         .eq("department_id", productDept.id)
         .maybeSingle();
 

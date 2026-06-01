@@ -1,7 +1,21 @@
 import { CTA } from "./cta";
 import { getActiveAvailability } from "@/lib/availability";
 
-export async function CTASection() {
+interface CTASectionProps {
+  cmsCta?: {
+    heading?: string;
+    description?: string;
+    buttonText?: string;
+    buttonUrl?: string;
+  };
+}
+
+export async function CTASection({ cmsCta }: CTASectionProps) {
   const availability = await getActiveAvailability();
-  return <CTA availabilityText={availability?.ctaText ?? null} />;
+  return (
+    <CTA
+      availabilityText={availability?.ctaText ?? null}
+      cmsCta={cmsCta}
+    />
+  );
 }

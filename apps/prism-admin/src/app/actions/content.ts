@@ -105,13 +105,15 @@ export async function saveAboutContent(
     const now = new Date().toISOString();
     const sections = Object.entries(parsed.data) as [string, unknown][];
 
-    for (const [key, value] of sections) {
+    for (let i = 0; i < sections.length; i++) {
+      const [key, value] = sections[i]!;
       const { error } = await adminClient.from("page_sections").upsert(
         {
           page_slug: slug,
           section_key: key,
           section_type: Array.isArray(value) ? "list" : typeof value === "object" ? "content" : "text",
           content: value,
+          sort_order: i,
           updated_at: now,
         },
         { onConflict: "page_slug,section_key" },
@@ -128,6 +130,69 @@ export async function saveAboutContent(
       success: false,
       error: error instanceof Error ? error.message : "Failed to save content",
     };
+  }
+}
+
+// ─── Generic Page Content Helpers ──────────────────────────────────────────────
+
+export async function getPageContent(
+  slug: string,
+): Promise<{ success: boolean; data?: Record<string, any>; error?: string }> {
+  try {
+    const adminClient = getAdminClient();
+    // Phase 1D: Read from page_sections instead of site_pages.content
+    const { data: rows, error } = await adminClient
+      .from("page_sections")
+      .select("section_key, content")
+      .eq("page_slug", slug)
+      .order("sort_order", { ascending: true });
+
+    if (error) throw error;
+    if (!rows || rows.length === 0) return { success: true, data: {} };
+
+    const data: Record<string, any> = {};
+    for (const row of rows) {
+      data[row.section_key] = row.content;
+    }
+    return { success: true, data };
+  } catch (error) {
+    console.error("[content] getPageContent error:", error);
+    return { success: false, error: "Failed to load page content" };
+  }
+}
+
+export async function savePageContent(
+  slug: string,
+  content: Record<string, any>,
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const adminClient = getAdminClient();
+    const now = new Date().toISOString();
+    // Phase 1D: Write to page_sections instead of site_pages.content
+    const entries = Object.entries(content) as [string, any][];
+
+    for (let i = 0; i < entries.length; i++) {
+      const [key, value] = entries[i]!;
+      const { error } = await adminClient.from("page_sections").upsert(
+        {
+          page_slug: slug,
+          section_key: key,
+          section_type: Array.isArray(value) ? "list" : typeof value === "object" ? "content" : "text",
+          content: value,
+          sort_order: i,
+          updated_at: now,
+        },
+        { onConflict: "page_slug,section_key" },
+      );
+      if (error) throw error;
+    }
+
+    revalidatePath("/admin/agency/content");
+    revalidatePath(`/admin/agency/content/${slug}`);
+    return { success: true };
+  } catch (error) {
+    console.error("[content] savePageContent error:", error);
+    return { success: false, error: "Failed to save page content" };
   }
 }
 
