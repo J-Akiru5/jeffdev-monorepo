@@ -1,6 +1,6 @@
 /**
- * Syntaxure Labs Middleware
- * --------------------------
+ * Syntaxure Labs Proxy
+ * --------------------
  * Redirects /admin/* routes to prism-admin (https://admin.syntaxure.dev).
  * Only /admin/login is allowed through for authentication.
  */
@@ -30,7 +30,7 @@ function redirectTo(targetPath: string, request: NextRequest) {
   return NextResponse.redirect(url);
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // Normalize: strip trailing slash (except for root)

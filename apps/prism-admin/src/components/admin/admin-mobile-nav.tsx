@@ -57,7 +57,7 @@ export function AdminMobileNav() {
           <MobileNavItem href="/admin/agency/dashboard" icon={FolderKanban} label="Agency" />
           <div className="relative -top-4">
             <Link
-              href="/admin/agency/inquiries"
+              href="/admin/inquiries"
               className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-500/20 border border-white/20 text-white"
             >
               <Mail className="h-5 w-5" />

@@ -207,9 +207,6 @@ function AgencyNav() {
       <NavItem href="/admin/agency/audit" icon={Activity}>
         Audit Log
       </NavItem>
-      <NavItem href="/admin/agency/availability" icon={Clock}>
-        Availability
-      </NavItem>
     </>
   );
 }

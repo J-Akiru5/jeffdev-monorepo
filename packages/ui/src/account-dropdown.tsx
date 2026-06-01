@@ -34,6 +34,8 @@ export interface AccountDropdownProps {
   role?: string;
   /** Avatar image URL (overrides initials circle) */
   avatarUrl?: string | null;
+  /** Profile page path */
+  profileHref?: string;
   /** Settings page path */
   settingsHref: string;
   /** Whether to show the Settings link */
@@ -56,6 +58,7 @@ export function AccountDropdown({
   displayName,
   role,
   avatarUrl,
+  profileHref,
   settingsHref,
   showSettings = true,
   theme,
@@ -123,38 +126,77 @@ export function AccountDropdown({
             )}
           >
             {/* ── Header: User info ── */}
-            <div className="border-b border-[var(--border-subtle)] px-4 py-3">
-              <div className="flex items-center gap-3">
-                {avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    alt={displayName || "User"}
-                    className="h-9 w-9 rounded-full object-cover ring-2 ring-cyan-500/20"
-                  />
-                ) : (
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full border border-cyan-500/30 bg-cyan-500/20 text-sm font-semibold text-cyan-400 ring-2 ring-cyan-500/10">
-                    {initials}
+            {profileHref ? (
+              <Link
+                href={profileHref}
+                onClick={() => setOpen(false)}
+                className="block border-b border-[var(--border-subtle)] px-4 py-3 hover:bg-[var(--border-subtle)]/50 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={displayName || "User"}
+                      className="h-9 w-9 rounded-full object-cover ring-2 ring-cyan-500/20"
+                    />
+                  ) : (
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full border border-cyan-500/30 bg-cyan-500/20 text-sm font-semibold text-cyan-400 ring-2 ring-cyan-500/10">
+                      {initials}
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    {displayName && (
+                      <p className="truncate text-sm font-medium text-[var(--color-ink)]">
+                        {displayName}
+                      </p>
+                    )}
+                    <p className="truncate text-xs text-[var(--color-ink)] opacity-50">
+                      {email || "Signed in"}
+                    </p>
+                  </div>
+                </div>
+                {role && (
+                  <div className="mt-2">
+                    <span className="inline-block rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2.5 py-0.5 text-[10px] font-mono uppercase tracking-wider text-cyan-400">
+                      {role}
+                    </span>
                   </div>
                 )}
-                <div className="min-w-0 flex-1">
-                  {displayName && (
-                    <p className="truncate text-sm font-medium text-[var(--color-ink)]">
-                      {displayName}
-                    </p>
+              </Link>
+            ) : (
+              <div className="border-b border-[var(--border-subtle)] px-4 py-3">
+                <div className="flex items-center gap-3">
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={displayName || "User"}
+                      className="h-9 w-9 rounded-full object-cover ring-2 ring-cyan-500/20"
+                    />
+                  ) : (
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full border border-cyan-500/30 bg-cyan-500/20 text-sm font-semibold text-cyan-400 ring-2 ring-cyan-500/10">
+                      {initials}
+                    </div>
                   )}
-                  <p className="truncate text-xs text-[var(--color-ink)] opacity-50">
-                    {email || "Signed in"}
-                  </p>
+                  <div className="min-w-0 flex-1">
+                    {displayName && (
+                      <p className="truncate text-sm font-medium text-[var(--color-ink)]">
+                        {displayName}
+                      </p>
+                    )}
+                    <p className="truncate text-xs text-[var(--color-ink)] opacity-50">
+                      {email || "Signed in"}
+                    </p>
+                  </div>
                 </div>
+                {role && (
+                  <div className="mt-2">
+                    <span className="inline-block rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2.5 py-0.5 text-[10px] font-mono uppercase tracking-wider text-cyan-400">
+                      {role}
+                    </span>
+                  </div>
+                )}
               </div>
-              {role && (
-                <div className="mt-2">
-                  <span className="inline-block rounded-full border border-cyan-500/20 bg-cyan-500/10 px-2.5 py-0.5 text-[10px] font-mono uppercase tracking-wider text-cyan-400">
-                    {role}
-                  </span>
-                </div>
-              )}
-            </div>
+            )}
 
             {/* ── Actions ── */}
             <div className="px-2 py-1">

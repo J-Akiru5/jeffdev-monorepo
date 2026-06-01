@@ -64,7 +64,7 @@ function HelpButton({ onClick }: { onClick: () => void }) {
     <button
       onClick={onClick}
       title="Keyboard Shortcuts (⌘⇧/)"
-      className="flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-subtle)] transition-colors"
+      className="hidden md:flex h-8 w-8 items-center justify-center rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-subtle)] transition-colors"
     >
       <Keyboard className="h-4 w-4" />
     </button>
@@ -75,7 +75,7 @@ function QuickAddButton() {
   return (
     <Link
       href="/admin/products/new"
-      className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 text-white shadow-sm shadow-amber-500/20 transition-all hover:bg-amber-400 active:scale-95"
+      className="hidden md:flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 text-white shadow-sm shadow-amber-500/20 transition-all hover:bg-amber-400 active:scale-95"
       title="New product template"
     >
       <Plus className="h-4 w-4" />
@@ -273,6 +273,7 @@ export function AdminTopNavbar() {
         leftSlot={<ModeDropdown />}
         theme={(theme === "theme-light" ? "light" : "dark") as "dark" | "light" | undefined}
         onToggleTheme={() => setTheme(theme === "dark" || !theme ? "theme-light" : "dark")}
+        showClock={false}
         rightExtra={
           <div className="flex items-center gap-1">
             <HelpButton onClick={openHelp} />
@@ -289,6 +290,7 @@ export function AdminTopNavbar() {
               email={user?.email}
               displayName={user?.full_name}
               role={user?.role}
+              profileHref="/admin/agency/profile"
               settingsHref="/admin/settings"
               showSettings={user?.role === "founder"}
               onSignOut={handleSignOut}

@@ -475,6 +475,16 @@
 }
 
 /* Mobile Responsive */
+@media (max-width: 1023px) {
+  .chat-assistant-trigger {
+    bottom: 80px; /* 64px bottom nav + 16px spacing */
+  }
+  .chat-assistant-panel {
+    bottom: 148px; /* 80px trigger bottom + 56px trigger height + 12px spacing */
+    max-height: calc(100vh - 172px);
+  }
+}
+
 @media (max-width: 480px) {
   .chat-assistant-panel {
     bottom: 0;
@@ -487,7 +497,7 @@
   }
 
   .chat-assistant-trigger {
-    bottom: 16px;
+    bottom: 80px; /* Keep above bottom nav on mobile */
     right: 16px;
     width: 48px;
     height: 48px;
