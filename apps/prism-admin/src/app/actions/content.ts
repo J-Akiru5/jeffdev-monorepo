@@ -41,10 +41,43 @@ const heroSchema = z.object({
   subDescription: z.string(),
 });
 
+const missionVisionSchema = z.object({
+  executiveSummary: z.string().min(1),
+  mission: z.string().min(1),
+  vision: z.string().min(1),
+});
+
+const kwadraTbiSchema = z.object({
+  heading: z.string().min(1),
+  description: z.string().min(1),
+  badges: z.array(z.string()).min(1),
+});
+
+const founderEntrySchema = z.object({
+  name: z.string().min(1),
+  title: z.string().min(1),
+  bio: z.string().min(1),
+  image: z.string(),
+  email: z.string(),
+  location: z.string(),
+});
+
+const teamMemberSchema = z.object({
+  name: z.string().min(1),
+  title: z.string().min(1),
+  role: z.string().min(1),
+  bio: z.string().min(1),
+  image: z.string(),
+});
+
 const aboutContentSchema = z.object({
   hero: heroSchema,
   stats: z.array(statSchema).min(1),
   founder: founderSchema,
+  missionVision: missionVisionSchema,
+  kwadraTbi: kwadraTbiSchema,
+  founders: z.array(founderEntrySchema).min(1),
+  team: z.array(teamMemberSchema),
   techStack: techStackSchema,
   values: z.array(valueSchema).min(1),
   brandAssets: brandAssetsSchema,

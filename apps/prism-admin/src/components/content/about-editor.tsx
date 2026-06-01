@@ -348,6 +348,477 @@ export function AboutEditor({
         </div>
       </section>
 
+      {/* Mission & Vision Section */}
+      <section className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
+        <h2 className="font-mono text-xs uppercase tracking-wider text-amber-400/70 mb-4">
+          Mission &amp; Vision
+        </h2>
+        <div className="grid gap-4">
+          <div>
+            <label className="block text-sm text-white/60 mb-1.5">
+              Executive Summary
+            </label>
+            <textarea
+              value={content.missionVision.executiveSummary}
+              onChange={(e) =>
+                setContent((prev) => ({
+                  ...prev,
+                  missionVision: {
+                    ...prev.missionVision,
+                    executiveSummary: e.target.value,
+                  },
+                }))
+              }
+              rows={3}
+              className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-amber-500/50 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/60 mb-1.5">
+              Mission
+            </label>
+            <textarea
+              value={content.missionVision.mission}
+              onChange={(e) =>
+                setContent((prev) => ({
+                  ...prev,
+                  missionVision: {
+                    ...prev.missionVision,
+                    mission: e.target.value,
+                  },
+                }))
+              }
+              rows={3}
+              className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-amber-500/50 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/60 mb-1.5">
+              Vision
+            </label>
+            <textarea
+              value={content.missionVision.vision}
+              onChange={(e) =>
+                setContent((prev) => ({
+                  ...prev,
+                  missionVision: {
+                    ...prev.missionVision,
+                    vision: e.target.value,
+                  },
+                }))
+              }
+              rows={3}
+              className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-amber-500/50 focus:outline-none"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* KWADRA TBI Section */}
+      <section className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-mono text-xs uppercase tracking-wider text-amber-400/70">
+            KWADRA TBI
+          </h2>
+          <button
+            onClick={() =>
+              setContent((prev) => ({
+                ...prev,
+                kwadraTbi: {
+                  ...prev.kwadraTbi,
+                  badges: [...prev.kwadraTbi.badges, ""],
+                },
+              }))
+            }
+            className="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 transition-colors"
+          >
+            <Plus className="h-3 w-3" />
+            Add Badge
+          </button>
+        </div>
+        <div className="grid gap-4">
+          <div>
+            <label className="block text-sm text-white/60 mb-1.5">
+              Heading
+            </label>
+            <Input
+              value={content.kwadraTbi.heading}
+              onChange={(e) =>
+                setContent((prev) => ({
+                  ...prev,
+                  kwadraTbi: { ...prev.kwadraTbi, heading: e.target.value },
+                }))
+              }
+              className="w-full"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/60 mb-1.5">
+              Description
+            </label>
+            <textarea
+              value={content.kwadraTbi.description}
+              onChange={(e) =>
+                setContent((prev) => ({
+                  ...prev,
+                  kwadraTbi: { ...prev.kwadraTbi, description: e.target.value },
+                }))
+              }
+              rows={3}
+              className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-amber-500/50 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-white/60 mb-1.5">
+              Badges
+            </label>
+            <div className="space-y-2">
+              {content.kwadraTbi.badges.map((badge, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <Input
+                    value={badge}
+                    onChange={(e) =>
+                      setContent((prev) => {
+                        const badges = prev.kwadraTbi.badges.map((b, j) =>
+                          j === i ? e.target.value : b,
+                        );
+                        return {
+                          ...prev,
+                          kwadraTbi: { ...prev.kwadraTbi, badges },
+                        };
+                      })
+                    }
+                    className="flex-1"
+                  />
+                  <button
+                    onClick={() =>
+                      setContent((prev) => ({
+                        ...prev,
+                        kwadraTbi: {
+                          ...prev.kwadraTbi,
+                          badges: prev.kwadraTbi.badges.filter(
+                            (_, j) => j !== i,
+                          ),
+                        },
+                      }))
+                    }
+                    disabled={content.kwadraTbi.badges.length <= 1}
+                    className="flex h-10 w-10 items-center justify-center rounded-md border border-white/10 text-white/30 hover:text-red-400 hover:border-red-500/30 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Founders Section */}
+      <section className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-mono text-xs uppercase tracking-wider text-amber-400/70">
+            Founders
+          </h2>
+          <button
+            onClick={() =>
+              setContent((prev) => ({
+                ...prev,
+                founders: [
+                  ...prev.founders,
+                  {
+                    name: "",
+                    title: "",
+                    bio: "",
+                    image: "",
+                    email: "",
+                    location: "",
+                  },
+                ],
+              }))
+            }
+            className="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 transition-colors"
+          >
+            <Plus className="h-3 w-3" />
+            Add Founder
+          </button>
+        </div>
+        <div className="space-y-4">
+          {content.founders.map((founder, i) => (
+            <div
+              key={i}
+              className="rounded-md border border-white/[0.06] bg-white/[0.01] p-4"
+            >
+              <div className="flex items-start gap-3">
+                <div className="flex-1 space-y-3">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <label className="block text-xs text-white/40 mb-1">
+                        Name
+                      </label>
+                      <Input
+                        value={founder.name}
+                        onChange={(e) =>
+                          setContent((prev) => {
+                            const founders = prev.founders.map((f, j) =>
+                              j === i ? { ...f, name: e.target.value } : f,
+                            );
+                            return { ...prev, founders };
+                          })
+                        }
+                        className="w-full"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-white/40 mb-1">
+                        Title
+                      </label>
+                      <Input
+                        value={founder.title}
+                        onChange={(e) =>
+                          setContent((prev) => {
+                            const founders = prev.founders.map((f, j) =>
+                              j === i ? { ...f, title: e.target.value } : f,
+                            );
+                            return { ...prev, founders };
+                          })
+                        }
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs text-white/40 mb-1">
+                      Bio
+                    </label>
+                    <textarea
+                      value={founder.bio}
+                      onChange={(e) =>
+                        setContent((prev) => {
+                          const founders = prev.founders.map((f, j) =>
+                            j === i ? { ...f, bio: e.target.value } : f,
+                          );
+                          return { ...prev, founders };
+                        })
+                      }
+                      rows={2}
+                      className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-amber-500/50 focus:outline-none"
+                    />
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <div>
+                      <label className="block text-xs text-white/40 mb-1">
+                        Image URL
+                      </label>
+                      <Input
+                        value={founder.image}
+                        onChange={(e) =>
+                          setContent((prev) => {
+                            const founders = prev.founders.map((f, j) =>
+                              j === i ? { ...f, image: e.target.value } : f,
+                            );
+                            return { ...prev, founders };
+                          })
+                        }
+                        className="w-full"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-white/40 mb-1">
+                        Email
+                      </label>
+                      <Input
+                        value={founder.email}
+                        onChange={(e) =>
+                          setContent((prev) => {
+                            const founders = prev.founders.map((f, j) =>
+                              j === i ? { ...f, email: e.target.value } : f,
+                            );
+                            return { ...prev, founders };
+                          })
+                        }
+                        className="w-full"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-white/40 mb-1">
+                        Location
+                      </label>
+                      <Input
+                        value={founder.location}
+                        onChange={(e) =>
+                          setContent((prev) => {
+                            const founders = prev.founders.map((f, j) =>
+                              j === i ? { ...f, location: e.target.value } : f,
+                            );
+                            return { ...prev, founders };
+                          })
+                        }
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() =>
+                    setContent((prev) => ({
+                      ...prev,
+                      founders: prev.founders.filter((_, j) => j !== i),
+                    }))
+                  }
+                  disabled={content.founders.length <= 1}
+                  className="mt-1 flex h-8 w-8 items-center justify-center rounded-md border border-white/10 text-white/30 hover:text-red-400 hover:border-red-500/30 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Team Section */}
+      <section className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-mono text-xs uppercase tracking-wider text-amber-400/70">
+            Team
+          </h2>
+          <button
+            onClick={() =>
+              setContent((prev) => ({
+                ...prev,
+                team: [
+                  ...prev.team,
+                  { name: "", title: "", role: "", bio: "", image: "" },
+                ],
+              }))
+            }
+            className="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 transition-colors"
+          >
+            <Plus className="h-3 w-3" />
+            Add Team Member
+          </button>
+        </div>
+        <p className="text-xs text-white/40 mb-4">
+          Only members with real data will be shown on the public page.
+        </p>
+        <div className="space-y-4">
+          {content.team.map((member, i) => (
+            <div
+              key={i}
+              className="rounded-md border border-white/[0.06] bg-white/[0.01] p-4"
+            >
+              <div className="flex items-start gap-3">
+                <div className="flex-1 space-y-3">
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <div>
+                      <label className="block text-xs text-white/40 mb-1">
+                        Name
+                      </label>
+                      <Input
+                        value={member.name}
+                        onChange={(e) =>
+                          setContent((prev) => {
+                            const team = prev.team.map((t, j) =>
+                              j === i ? { ...t, name: e.target.value } : t,
+                            );
+                            return { ...prev, team };
+                          })
+                        }
+                        className="w-full"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-white/40 mb-1">
+                        Title
+                      </label>
+                      <Input
+                        value={member.title}
+                        onChange={(e) =>
+                          setContent((prev) => {
+                            const team = prev.team.map((t, j) =>
+                              j === i ? { ...t, title: e.target.value } : t,
+                            );
+                            return { ...prev, team };
+                          })
+                        }
+                        className="w-full"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-white/40 mb-1">
+                        Role
+                      </label>
+                      <Input
+                        value={member.role}
+                        onChange={(e) =>
+                          setContent((prev) => {
+                            const team = prev.team.map((t, j) =>
+                              j === i ? { ...t, role: e.target.value } : t,
+                            );
+                            return { ...prev, team };
+                          })
+                        }
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div>
+                      <label className="block text-xs text-white/40 mb-1">
+                        Bio
+                      </label>
+                      <textarea
+                        value={member.bio}
+                        onChange={(e) =>
+                          setContent((prev) => {
+                            const team = prev.team.map((t, j) =>
+                              j === i ? { ...t, bio: e.target.value } : t,
+                            );
+                            return { ...prev, team };
+                          })
+                        }
+                        rows={2}
+                        className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/30 focus:border-amber-500/50 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-white/40 mb-1">
+                        Image URL
+                      </label>
+                      <Input
+                        value={member.image}
+                        onChange={(e) =>
+                          setContent((prev) => {
+                            const team = prev.team.map((t, j) =>
+                              j === i ? { ...t, image: e.target.value } : t,
+                            );
+                            return { ...prev, team };
+                          })
+                        }
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() =>
+                    setContent((prev) => ({
+                      ...prev,
+                      team: prev.team.filter((_, j) => j !== i),
+                    }))
+                  }
+                  disabled={content.team.length <= 1}
+                  className="mt-1 flex h-8 w-8 items-center justify-center rounded-md border border-white/10 text-white/30 hover:text-red-400 hover:border-red-500/30 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Tech Stack Section */}
       <section className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
         <h2 className="font-mono text-xs uppercase tracking-wider text-amber-400/70 mb-4">
@@ -585,6 +1056,44 @@ const DEFAULT_ABOUT_CONTENT: AboutContent = {
     location: "Iloilo City, Philippines",
     availability: "Currently accepting new projects",
   },
+  missionVision: {
+    executiveSummary:
+      "Syntaxure Labs is a technology company building AI-powered software ecosystems, enterprise solutions, and context intelligence platforms through its flagship product, Prism Context Engine.",
+    mission:
+      "To serve as the strategic technical foundation for high-impact business concepts, transforming venture-ready ideas into sustainable, scalable software ecosystems through AI governance.",
+    vision:
+      "To serve as the foundational technological backbone of the Southeast Asian startup economy, empowering enterprises through scalable AI infrastructure and becoming the premier provider of enterprise-grade software solutions by 2030.",
+  },
+  kwadraTbi: {
+    heading: "Kwadra TBI Cohort 5",
+    description:
+      "Syntaxure Labs is proud to be part of Kwadra TBI Cohort 5 — a startup incubation program by the Iloilo Provincial Government's Kwadra Care initiative. This program supports innovation-driven startups with mentorship, funding access, and go-to-market strategy.",
+    badges: [
+      "Startup Incubation",
+      "Mentorship",
+      "Funding Access",
+      "Go-to-Market Strategy",
+    ],
+  },
+  founders: [
+    {
+      name: "Jeff Edrick Martinez",
+      title: "Lead Architect & Founder",
+      bio: "Full-stack engineer with 5+ years building production systems. Specializing in Next.js, cloud architecture, and AI integration. Previously worked on projects for education, e-commerce, and SaaS clients.",
+      image: "/profilepic.webp",
+      email: "jeff@syntaxure.dev",
+      location: "Iloilo City, Philippines",
+    },
+  ],
+  team: [
+    {
+      name: "Jeff Edrick Martinez",
+      title: "Chief Executive Officer",
+      role: "CEO",
+      bio: "Visionary leader driving the company strategy and growth.",
+      image: "/profilepic.webp",
+    },
+  ],
   techStack: {
     frontend: ["Next.js", "React", "TypeScript", "Tailwind CSS", "GSAP"],
     backend: ["Node.js", "Laravel", "PostgreSQL", "Firebase"],

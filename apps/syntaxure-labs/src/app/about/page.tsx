@@ -31,6 +31,15 @@ interface TeamMember {
   image: string;
 }
 
+interface FounderEntry {
+  name: string;
+  title: string;
+  bio: string;
+  image: string;
+  email: string;
+  location: string;
+}
+
 interface AboutData {
   hero: {
     tagline: string;
@@ -49,6 +58,17 @@ interface AboutData {
     location: string;
     availability: string;
   };
+  missionVision: {
+    executiveSummary: string;
+    mission: string;
+    vision: string;
+  };
+  kwadraTbi: {
+    heading: string;
+    description: string;
+    badges: string[];
+  };
+  founders: FounderEntry[];
   team: TeamMember[];
   techStack: Record<string, string[]>;
   values: { title: string; description: string }[];
@@ -71,7 +91,21 @@ async function getAboutData(): Promise<AboutData> {
 
     if (!error && data?.content) {
       const content = data.content as Record<string, unknown>;
-      return content as unknown as AboutData;
+      return {
+        ...DEFAULT_ABOUT_DATA,
+        ...content,
+        missionVision:
+          (content.missionVision as AboutData["missionVision"]) ??
+          DEFAULT_ABOUT_DATA.missionVision,
+        kwadraTbi:
+          (content.kwadraTbi as AboutData["kwadraTbi"]) ??
+          DEFAULT_ABOUT_DATA.kwadraTbi,
+        founders:
+          (content.founders as AboutData["founders"]) ??
+          DEFAULT_ABOUT_DATA.founders,
+        team:
+          (content.team as AboutData["team"]) ?? DEFAULT_ABOUT_DATA.team,
+      };
     }
   } catch {
     // Fall through to defaults
@@ -84,8 +118,11 @@ export default async function AboutPage() {
   const content = await getAboutData();
   const activeAvailability = await getActiveAvailability();
 
-  const { hero, stats, founder, techStack, values, brandAssets } = content;
+  const { hero, stats, founder, missionVision, kwadraTbi, founders, techStack, values, brandAssets } = content;
   const team = content.team || DEFAULT_ABOUT_DATA.team;
+  const realTeam = team.filter(
+    (m) => !m.name.includes("To Be Announced") && !m.image.includes("placeholder"),
+  );
 
   const founderAvailability =
     activeAvailability?.aboutText ?? founder.availability;
@@ -195,6 +232,114 @@ export default async function AboutPage() {
           </div>
         </section>
 
+        {/* Kwadra TBI Section */}
+        <section className="px-6 py-16 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <div className="rounded-md border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-transparent p-8 md:p-12">
+              <div className="flex flex-col items-center text-center md:flex-row md:text-left md:items-start md:gap-8">
+                <div className="shrink-0">
+                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-full border border-amber-500/30 bg-amber-500/10">
+                    <span className="text-2xl font-bold text-amber-400">TBI</span>
+                  </div>
+                </div>
+                <div className="mt-4 md:mt-0">
+                  <span className="font-mono text-xs uppercase tracking-wider text-amber-400">
+                    {"// Startup Incubator"}
+                  </span>
+                  <h2 className="mt-2 text-2xl font-bold text-white">
+                    {kwadraTbi.heading}
+                  </h2>
+                  <p className="mt-3 max-w-2xl text-white/60">
+                    {kwadraTbi.description}
+                  </p>
+                  <div className="mt-6 flex flex-wrap gap-3">
+                    {kwadraTbi.badges.map((badge) => (
+                      <span
+                        key={badge}
+                        className="rounded-sm border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-amber-400"
+                      >
+                        {badge}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Mission & Vision Section */}
+        <section className="px-6 py-16 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <h2 className="font-mono text-xs uppercase tracking-wider text-white/40">
+              {"// Mission & Vision"}
+            </h2>
+            <p className="mt-6 max-w-3xl text-lg leading-relaxed text-white/60">
+              {missionVision.executiveSummary}
+            </p>
+            <div className="mt-10 grid gap-8 md:grid-cols-2">
+              <div className="rounded-md border border-cyan-500/20 bg-gradient-to-br from-cyan-500/5 to-transparent p-8">
+                <h3 className="font-mono text-xs uppercase tracking-wider text-cyan-400">
+                  Mission
+                </h3>
+                <p className="mt-4 text-white/70">{missionVision.mission}</p>
+              </div>
+              <div className="rounded-md border border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-transparent p-8">
+                <h3 className="font-mono text-xs uppercase tracking-wider text-purple-400">
+                  Vision
+                </h3>
+                <p className="mt-4 text-white/70">{missionVision.vision}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Founders Section */}
+        <section className="px-6 py-16 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <h2 className="font-mono text-xs uppercase tracking-wider text-white/40">
+              {"// Founders"}
+            </h2>
+            <p className="mt-4 max-w-xl text-white/60">
+              The people behind Syntaxure Labs.
+            </p>
+            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {founders.map((f) => (
+                <div
+                  key={f.name}
+                  className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6"
+                >
+                  <div className="flex items-center gap-4">
+                    <Image
+                      src={f.image}
+                      alt={f.name}
+                      width={56}
+                      height={56}
+                      className="h-14 w-14 rounded-md object-cover"
+                    />
+                    <div>
+                      <h3 className="font-semibold text-white">{f.name}</h3>
+                      <p className="text-sm text-cyan-400">{f.title}</p>
+                    </div>
+                  </div>
+                  <p className="mt-4 text-sm text-white/60">{f.bio}</p>
+                  <div className="mt-4 space-y-2 border-t border-white/[0.06] pt-4">
+                    <div className="flex items-center gap-2 text-xs text-white/40">
+                      <MapPin className="h-3.5 w-3.5" /> {f.location}
+                    </div>
+                    <a
+                      href={`mailto:${f.email}`}
+                      className="flex items-center gap-2 text-xs text-white/40 hover:text-cyan-400 transition-colors"
+                    >
+                      <Mail className="h-3.5 w-3.5" /> {f.email}
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Tech Stack Section */}
         <section className="px-6 py-16 lg:px-8">
           <div className="mx-auto max-w-7xl">
@@ -229,28 +374,22 @@ export default async function AboutPage() {
         </section>
 
         {/* Team Section */}
-        <section className="px-6 py-16 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <h2 className="font-mono text-xs uppercase tracking-wider text-white/40">
-              {"// Team"}
-            </h2>
-            <p className="mt-4 max-w-xl text-white/60">
-              Meet the leadership team behind Syntaxure Labs.
-            </p>
-            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-              {team.map((member) => (
-                <div
-                  key={member.role}
-                  className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6 text-center"
-                >
-                  <div className="mx-auto h-20 w-20 rounded-full border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden">
-                    {member.image.includes("placeholder") ? (
-                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-cyan-500/20 to-purple-500/20">
-                        <span className="text-lg font-bold text-white/40">
-                          {member.role.slice(0, 2)}
-                        </span>
-                      </div>
-                    ) : (
+        {realTeam.length > 0 && (
+          <section className="px-6 py-16 lg:px-8">
+            <div className="mx-auto max-w-7xl">
+              <h2 className="font-mono text-xs uppercase tracking-wider text-white/40">
+                {"// Team"}
+              </h2>
+              <p className="mt-4 max-w-xl text-white/60">
+                Meet the leadership team behind Syntaxure Labs.
+              </p>
+              <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+                {realTeam.map((member) => (
+                  <div
+                    key={member.role}
+                    className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6 text-center"
+                  >
+                    <div className="mx-auto h-20 w-20 rounded-full border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden">
                       <Image
                         src={member.image}
                         alt={member.name}
@@ -258,66 +397,19 @@ export default async function AboutPage() {
                         height={80}
                         className="h-full w-full object-cover"
                       />
-                    )}
+                    </div>
+                    <h3 className="mt-4 font-semibold text-white">{member.name}</h3>
+                    <p className="text-sm text-cyan-400">{member.title}</p>
+                    <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-white/30">
+                      {member.role}
+                    </p>
+                    <p className="mt-3 text-xs text-white/50">{member.bio}</p>
                   </div>
-                  <h3 className="mt-4 font-semibold text-white">{member.name}</h3>
-                  <p className="text-sm text-cyan-400">{member.title}</p>
-                  <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-white/30">
-                    {member.role}
-                  </p>
-                  <p className="mt-3 text-xs text-white/50">{member.bio}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Kwadra TBI Cohort 5 Section */}
-        <section className="px-6 py-16 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <div className="rounded-md border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-transparent p-8 md:p-12">
-              <div className="flex flex-col items-center text-center md:flex-row md:text-left md:items-start md:gap-8">
-                <div className="shrink-0">
-                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-full border border-amber-500/30 bg-amber-500/10">
-                    <span className="text-2xl font-bold text-amber-400">TBI</span>
-                  </div>
-                </div>
-                <div className="mt-4 md:mt-0">
-                  <span className="font-mono text-xs uppercase tracking-wider text-amber-400">
-                    {"// Startup Incubator"}
-                  </span>
-                  <h2 className="mt-2 text-2xl font-bold text-white">
-                    Kwadra TBI Cohort 5
-                  </h2>
-                  <p className="mt-3 max-w-2xl text-white/60">
-                    Syntaxure Labs is proud to be part of Kwadra TBI Cohort 5 — a
-                    startup incubation program by the{" "}
-                    <span className="text-white/80">
-                      Iloilo Provincial Government&apos;s Kwadra Care
-                    </span>{" "}
-                    initiative. This program supports innovation-driven startups
-                    with mentorship, funding access, and go-to-market strategy.
-                  </p>
-                  <div className="mt-6 flex flex-wrap gap-3">
-                    {[
-                      "Startup Incubation",
-                      "Mentorship",
-                      "Funding Access",
-                      "GotoMarket Strategy",
-                    ].map((item) => (
-                      <span
-                        key={item}
-                        className="rounded-sm border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-amber-400"
-                      >
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Values Section */}
         <section className="px-6 py-16 lg:px-8">
@@ -409,6 +501,35 @@ const DEFAULT_ABOUT_DATA: AboutData = {
     location: "Iloilo City, Philippines",
     availability: "Currently accepting new projects",
   },
+  missionVision: {
+    executiveSummary:
+      "Syntaxure Labs is a technology company building AI-powered software ecosystems, enterprise solutions, and context intelligence platforms through its flagship product, Prism Context Engine.",
+    mission:
+      "To serve as the strategic technical foundation for high-impact business concepts, transforming venture-ready ideas into sustainable, scalable software ecosystems through AI governance.",
+    vision:
+      "To serve as the foundational technological backbone of the Southeast Asian startup economy, empowering enterprises through scalable AI infrastructure and becoming the premier provider of enterprise-grade software solutions by 2030.",
+  },
+  kwadraTbi: {
+    heading: "Kwadra TBI Cohort 5",
+    description:
+      "Syntaxure Labs is proud to be part of Kwadra TBI Cohort 5 — a startup incubation program by the Iloilo Provincial Government's Kwadra Care initiative. This program supports innovation-driven startups with mentorship, funding access, and go-to-market strategy.",
+    badges: [
+      "Startup Incubation",
+      "Mentorship",
+      "Funding Access",
+      "Go-to-Market Strategy",
+    ],
+  },
+  founders: [
+    {
+      name: "Jeff Edrick Martinez",
+      title: "Lead Architect & Founder",
+      bio: "Full-stack engineer with 5+ years building production systems. Specializing in Next.js, cloud architecture, and AI integration. Previously worked on projects for education, e-commerce, and SaaS clients.",
+      image: "/profilepic.webp",
+      email: "jeff@syntaxure.dev",
+      location: "Iloilo City, Philippines",
+    },
+  ],
   team: [
     {
       name: "Jeff Edrick Martinez",
