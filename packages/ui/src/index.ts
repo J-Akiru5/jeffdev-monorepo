@@ -31,6 +31,7 @@ export { MetricTile, type MetricTileProps } from "./metric-tile";
 export { GridBackground } from "./grid-background";
 export { SectionHeader } from "./section-header";
 export { GlassPanel } from "./glass-panel";
+export { HoverCard } from "./hover-card";
 export { SyntaxureLogo } from "./logo";
 export { Select, type SelectOption, type SelectProps } from "./select";
 export { AccountDropdown, type AccountDropdownProps } from "./account-dropdown";

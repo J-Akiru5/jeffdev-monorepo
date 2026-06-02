@@ -23,43 +23,41 @@ const highlights = [
 ];
 
 export function PrismHighlight({ cmsData }: { cmsData?: { description?: string } }) {
-  const { ref: sectionRef, isInView } = useInView({ rootMargin: "-100px" });
+  const { ref: sectionRef, isInView } = useInView({ threshold: 0.1 });
 
   return (
-    <section ref={sectionRef} className="section-padding bg-[#0a0a0a] border-y border-white/5" id="prism">
+    <section id="prism" className="py-24 md:py-32 border-y border-[var(--border-subtle)]">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+        <div className="grid items-center gap-16 lg:grid-cols-2">
+          
+          {/* ── Left Content ── */}
           <div
-            style={{
-              opacity: isInView ? 1 : 0,
-              transform: isInView ? "translateY(0)" : "translateY(15px)",
-              transition: "opacity 0.5s ease-out, transform 0.5s ease-out",
-            }}
+            ref={sectionRef}
+            className={`transition-all duration-1000 ease-out ${
+              isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+            }`}
           >
-            <span className="inline-flex items-center gap-2 rounded-full border border-purple-500/20 bg-purple-500/10 px-3 py-1 font-mono text-xs uppercase tracking-wider text-purple-400">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--text-tertiary)] shadow-sm">
               Our Flagship Product
-            </span>
-            <h2 className="mt-6 text-3xl font-bold tracking-tight text-white md:text-4xl">
-              Prism{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-purple-500">
-                Context Engine
-              </span>
+            </div>
+            <h2 className="mt-6 text-3xl font-bold tracking-tight text-[var(--text-primary)] md:text-4xl lg:text-5xl">
+              Prism Context Engine
             </h2>
-            <p className="mt-4 text-lg text-white/60">
-              {cmsData?.description || "Born from our own engineering needs. Prism is the context layer your AI coding assistant has been missing — and it's built with the same quality we bring to every client project."}
+            <p className="mt-4 text-lg text-[var(--text-secondary)] leading-relaxed max-w-xl">
+              {cmsData?.description || "Born from our own engineering needs. Prism is the context layer your AI coding assistant has been missing — and it's built with the same precision we bring to every client project."}
             </p>
 
-            <div className="mt-8 space-y-4">
+            <div className="mt-10 space-y-6">
               {highlights.map((h) => {
                 const Icon = h.icon;
                 return (
                   <div key={h.title} className="flex items-start gap-4">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/5 border border-white/10 text-cyan-400">
-                      <Icon className="h-4 w-4" strokeWidth={1.5} />
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] shadow-sm">
+                      <Icon className="h-5 w-5 text-[var(--text-primary)]" strokeWidth={1.5} />
                     </div>
                     <div>
-                      <h4 className="text-sm font-semibold text-white">{h.title}</h4>
-                      <p className="text-sm text-white/50">{h.description}</p>
+                      <h4 className="text-sm font-bold text-[var(--text-primary)]">{h.title}</h4>
+                      <p className="mt-1 text-sm text-[var(--text-secondary)] leading-relaxed">{h.description}</p>
                     </div>
                   </div>
                 );
@@ -68,54 +66,54 @@ export function PrismHighlight({ cmsData }: { cmsData?: { description?: string }
 
             <Link
               href="/prism"
-              className="group relative mt-8 inline-flex items-center gap-2 overflow-hidden rounded-md border border-cyan-500/30 bg-cyan-500/10 px-6 py-3 transition-all hover:border-cyan-500/50 hover:bg-cyan-500/20 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] active:scale-95"
+              className="mt-10 inline-flex items-center gap-2 rounded-md bg-[var(--text-primary)] px-6 py-3 font-mono text-sm font-bold uppercase tracking-wider text-[var(--bg-primary)] transition-transform hover:scale-[0.98] active:scale-95 shadow-md"
             >
-              <div className="absolute inset-0 -z-10 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 opacity-0 transition-opacity group-hover:opacity-100" />
-              <span className="relative z-10 flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-white">
-                Learn_More_About_Prism
-                <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-              </span>
+              Learn_More_About_Prism
+              <ArrowUpRight className="h-4 w-4" />
             </Link>
           </div>
 
+          {/* ── Right Content: Code Snippet ── */}
           <div
-            className="hidden lg:block"
-            style={{
-              opacity: isInView ? 1 : 0,
-              transform: isInView ? "translateY(0)" : "translateY(20px)",
-              transition: "opacity 0.6s ease-out 0.15s, transform 0.6s ease-out 0.15s",
-            }}
+            className={`hidden lg:block relative transition-all duration-1000 ease-out delay-200 ${
+              isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+            }`}
           >
-            <div className="border border-white/10 bg-white/5 rounded-xl overflow-hidden shadow-xl backdrop-blur-md">
-              <div className="flex items-center gap-2.5 px-4 py-3 border-b border-white/10 bg-white/5">
-                <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#ef4444" }} />
-                <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#eab308" }} />
-                <div className="w-2.5 h-2.5 rounded-full" style={{ background: "#22c55e" }} />
-                <span className="ml-2 font-mono text-[11px] text-white/40">
+            {/* ── Ambient Technical Glow (Cyan Only) ── */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] -z-10 blur-[80px] pointer-events-none select-none opacity-40 dark:opacity-60">
+              <div className="absolute inset-0 bg-cyan-500/30 rounded-full" />
+            </div>
+
+            <div className="relative rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] overflow-hidden shadow-sm">
+              <div className="flex items-center gap-2.5 px-4 py-3 border-b border-[var(--border-subtle)] bg-[var(--bg-primary)]">
+                <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
+                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
+                <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
+                <span className="ml-2 font-mono text-[10px] font-bold text-[var(--text-tertiary)]">
                   prism — ~/context-server
                 </span>
               </div>
-              <div className="p-5 bg-black/25 font-mono text-xs sm:text-sm leading-relaxed text-white/70">
-                <div className="mb-3 flex items-center gap-2 text-xs text-white/40">
-                  <span className="text-purple-400">$</span>
-                  <span>curl -X POST /context \</span>
+              <div className="p-6 font-mono text-xs leading-relaxed text-[var(--text-secondary)]">
+                <div className="mb-3 flex items-center gap-2">
+                  <span className="text-[var(--text-tertiary)]">$</span>
+                  <span className="text-[var(--text-primary)]">curl -X POST /context \</span>
                 </div>
-                <div className="mb-2 text-xs text-white/40">
+                <div className="mb-4 text-[var(--text-primary)]">
                   &nbsp;&nbsp;-d &apos;{`{"prompt": "build a button"}`}&apos;
                 </div>
-                <div className="h-px bg-white/5 my-3" />
-                <div className="space-y-1.5 text-xs">
-                  <div>
-                    <span className="text-cyan-400">→</span>{" "}
-                    <span className="text-white/50">Applying design tokens...</span>
+                <div className="h-px bg-[var(--border-subtle)] my-4" />
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <span className="text-[var(--text-tertiary)]">→</span>{" "}
+                    <span>Applying design tokens...</span>
                   </div>
-                  <div>
-                    <span className="text-cyan-400">→</span>{" "}
-                    <span className="text-white/50">Matching component library...</span>
+                  <div className="flex gap-2">
+                    <span className="text-[var(--text-tertiary)]">→</span>{" "}
+                    <span>Matching component library...</span>
                   </div>
-                  <div>
-                    <span className="text-emerald-400">✓</span>{" "}
-                    <span className="text-white font-semibold">
+                  <div className="flex gap-2">
+                    <span className="text-[var(--text-primary)] font-bold">✓</span>{" "}
+                    <span className="text-[var(--text-primary)] font-bold">
                       Output: Button component matches Design System v2.3
                     </span>
                   </div>
