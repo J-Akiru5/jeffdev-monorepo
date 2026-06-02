@@ -18,7 +18,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Services",
   description:
-    "Productized web development solutions for startups and enterprises. Web apps, SaaS platforms, cloud architecture, and AI integration — fixed investment, clear deliverables.",
+    "Productized base SaaS template customization solutions for startups and enterprises. Next-gen web foundations, turnkey SaaS cores, scalable deployments, and AI-native extensibility.",
 };
 
 export default async function ServicesPage() {
@@ -64,8 +64,7 @@ export default async function ServicesPage() {
                 Productized Solutions
               </h1>
               <p className="mt-4 text-lg text-white/50">
-                Clear scope. Fixed investment. No surprises. We partner with
-                ambitious businesses to build web systems that drive growth.
+                Accelerated templates. Productized customization. Predictable value. We build on our production SaaS core to launch custom products in weeks, not months.
               </p>
             </div>
           </div>
