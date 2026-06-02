@@ -7,7 +7,7 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { cn } from "@syntaxure/ui";
 
-interface ProductTemplate {
+export interface ProductTemplate {
   id: string;
   name: string;
   slug: string;
@@ -33,7 +33,7 @@ interface QuotePageProps {
 interface FormData {
   templateSelected: string;
   templateName: string;
-  customizationScope: "brand" | "api" | "features" | "full" | "";
+  customizationScope: string;
   name: string;
   email: string;
   company: string;
@@ -108,7 +108,7 @@ export function QuotePageClient({ templates, pageContent, defaults }: QuotePageP
     const result = await submitQuoteForm({
       templateSelected: data.templateSelected,
       templateName: data.templateName,
-      customizationScope: data.customizationScope,
+      customizationScope: data.customizationScope as "brand" | "api" | "features" | "full",
       name: data.name,
       email: data.email,
       company: data.company,

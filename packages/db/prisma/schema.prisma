@@ -299,7 +299,7 @@ model UserProfile {
   subscriptions      Subscription[]
   notifications      Notification[]
   invitesSent        Invite[]
-  messages           Message[]
+  contactMessages    ContactMessage[]
   tasksOwned         Task[]       @relation("TaskUser")
   tasksAssigned      Task[]       @relation("TaskAssignee")
   supportTicketsOwned   SupportTicket[] @relation("SupportTicketUser")
@@ -401,20 +401,26 @@ model Milestone {
 }
 
 model Quote {
-  id          String    @id @default(uuid()) @db.Uuid
-  userId      String    @map("user_id") @db.Uuid
-  projectId   String?   @map("project_id") @db.Uuid
-  title       String    @db.Text
-  description String?   @db.Text
-  amount      Decimal   @db.Decimal(12, 2)
-  status      String    @default("draft") @db.Text
-  validUntil  DateTime? @map("valid_until") @db.Date
-  lineItems   Json      @default("[]")
-  metadata    Json      @default("{}")
-  quoteType   String    @default("project") @map("quote_type") @db.Text
-  templateId  String?   @map("template_id") @db.Uuid
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
-  updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
+  id                   String    @id @default(uuid()) @db.Uuid
+  userId               String    @map("user_id") @db.Uuid
+  projectId            String?   @map("project_id") @db.Uuid
+  title                String    @db.Text
+  description          String?   @db.Text
+  amount               Decimal   @db.Decimal(12, 2)
+  status               String    @default("draft") @db.Text
+  validUntil           DateTime? @map("valid_until") @db.Date
+  lineItems            Json      @default("[]")
+  metadata             Json      @default("{}")
+  quoteType            String    @default("project") @map("quote_type") @db.Text
+  templateId           String?   @map("template_id") @db.Uuid
+  name                 String?   @db.Text
+  email                String?   @db.Text
+  company              String?   @db.Text
+  phone                String?   @db.Text
+  templateSelected     String?   @map("template_selected") @db.Text
+  customizationScope   String?   @map("customization_scope") @db.Text
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt            DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
 
   // Relations
   user            UserProfile   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -604,7 +610,7 @@ model Invite {
   @@map("invites")
 }
 
-model Message {
+model ContactMessage {
   id          String    @id @default(uuid()) @db.Uuid
   userId      String?   @map("user_id") @db.Uuid
   name        String?   @db.Text
@@ -613,13 +619,14 @@ model Message {
   message     String    @db.Text
   status      String    @default("received") @db.Text
   messageType String    @default("general") @map("message_type") @db.Text
+  type        String?   @db.Text
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt   DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
 
   // Relations
   user UserProfile? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  @@map("messages")
+  @@map("contact_messages")
 }
 
 model WaitlistEntry {

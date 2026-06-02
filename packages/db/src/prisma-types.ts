@@ -24,7 +24,7 @@ export type {
   Subscription,
   Notification,
   Invite,
-  Message,
+  ContactMessage,
   WaitlistEntry,
   SupportTicket,
   Task,
