@@ -80,6 +80,7 @@ export function AccountDropdownWrapper() {
       initials={initials}
       email={user?.email}
       displayName={user?.full_name || "User"}
+      avatarUrl={user?.avatar_url}
       settingsHref="/settings"
       extraActions={<AppLinks role={user?.role} />}
       onSignOut={handleSignOut}

@@ -35,6 +35,11 @@ const pages = [
         "Enterprise-grade security by default",
       ],
       cta: {
+        heading: "Ready to Build?",
+        description:
+          "Let's turn your idea into a scalable system. Fixed pricing, transparent process, and a team that cares about your success.",
+        buttonText: "Start a Project",
+        buttonUrl: "/quote",
         text: "Start a Project",
         url: "/quote",
       },

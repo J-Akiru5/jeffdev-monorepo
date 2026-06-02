@@ -66,6 +66,7 @@ function AccountMenu() {
       email={user?.email}
       displayName={user?.full_name}
       role={user?.role}
+      avatarUrl={user?.avatar_url}
       settingsHref="/settings"
       onSignOut={handleSignOut}
     />

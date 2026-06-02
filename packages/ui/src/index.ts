@@ -53,6 +53,7 @@ export { EmptyState } from "./empty-state";
 export { ConfirmDialog } from "./confirm-dialog";
 export { ErrorBoundary } from "./error-boundary";
 export { ImageUpload, type ImageUploadProps } from "./image-upload";
+export { ImageCropModal } from "./image-crop-modal";
 export {
   FeatureFlagProvider,
   useFeatureFlag,

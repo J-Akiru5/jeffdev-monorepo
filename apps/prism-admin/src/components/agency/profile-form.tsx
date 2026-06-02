@@ -82,6 +82,8 @@ export function ProfileForm({ profile, uid }: Props) {
           }}
           label="Upload Photo"
           previewHeight="h-40"
+          crop={true}
+          cropAspect={1}
         />
       </div>
 

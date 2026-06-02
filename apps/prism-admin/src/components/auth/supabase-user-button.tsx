@@ -18,6 +18,8 @@ export function SupabaseUserButton() {
   const [user, setUser] = useState<User | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [role, setRole] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [fullName, setFullName] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
@@ -34,23 +36,25 @@ export function SupabaseUserButton() {
   }, [supabase]);
 
   useEffect(() => {
-    async function getUserRole() {
+    async function getUserProfile() {
       const { data } = await supabase.auth.getUser();
       if (data.user) {
         const { data: profile } = await supabase
           .from("user_profiles")
-          .select("role")
+          .select("role, avatar_url, full_name")
           .eq("id", data.user.id)
           .single();
 
         if (profile) {
           setRole(profile.role ?? "");
+          setAvatarUrl(profile.avatar_url ?? null);
+          setFullName(profile.full_name ?? null);
         }
       }
     }
 
     if (user) {
-      getUserRole();
+      getUserProfile();
     }
   }, [user, supabase]);
 
@@ -79,7 +83,7 @@ export function SupabaseUserButton() {
   }
 
   const displayName =
-    user.user_metadata?.first_name || user.email?.split("@")[0] || "User";
+    fullName || user.user_metadata?.first_name || user.email?.split("@")[0] || "User";
   const avatar = displayName.charAt(0).toUpperCase();
 
   return (
@@ -88,9 +92,17 @@ export function SupabaseUserButton() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-white/5 transition-colors"
       >
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/20 border border-amber-500/30 text-xs font-medium text-amber-400">
-          {avatar}
-        </div>
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt={displayName}
+            className="h-8 w-8 rounded-full object-cover border border-amber-500/30"
+          />
+        ) : (
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/20 border border-amber-500/30 text-xs font-medium text-amber-400">
+            {avatar}
+          </div>
+        )}
         <div className="hidden sm:flex flex-col items-start">
           <p className="text-xs font-medium text-white">{displayName}</p>
           <p className="text-[10px] text-amber-400 font-mono uppercase">

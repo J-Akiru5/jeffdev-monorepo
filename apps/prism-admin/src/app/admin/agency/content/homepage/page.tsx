@@ -62,14 +62,25 @@ export default function HomepageEditorPage() {
           <div className="rounded-lg border border-white/5 bg-white/[0.02] p-6 space-y-4">
             <h3 className="text-sm font-medium text-white/80">Call to Action</h3>
             <ContentField
+              label="Heading"
+              value={content.cta?.heading}
+              onChange={(v) => setContent({ ...content, cta: { ...content.cta, heading: v } })}
+            />
+            <ContentField
+              label="Description"
+              value={content.cta?.description}
+              onChange={(v) => setContent({ ...content, cta: { ...content.cta, description: v } })}
+              multiline
+            />
+            <ContentField
               label="CTA Text"
-              value={content.cta?.text}
-              onChange={(v) => setContent({ ...content, cta: { ...content.cta, text: v } })}
+              value={content.cta?.buttonText || content.cta?.text}
+              onChange={(v) => setContent({ ...content, cta: { ...content.cta, buttonText: v, text: v } })}
             />
             <ContentField
               label="CTA URL"
-              value={content.cta?.url}
-              onChange={(v) => setContent({ ...content, cta: { ...content.cta, url: v } })}
+              value={content.cta?.buttonUrl || content.cta?.url}
+              onChange={(v) => setContent({ ...content, cta: { ...content.cta, buttonUrl: v, url: v } })}
             />
           </div>
         </div>

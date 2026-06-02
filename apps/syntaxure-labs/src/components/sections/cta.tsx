@@ -14,6 +14,8 @@ export function CTA({
     description?: string;
     buttonText?: string;
     buttonUrl?: string;
+    text?: string;
+    url?: string;
   };
 }) {
   const { ref: contentRef, isInView } = useInView<HTMLDivElement>({ threshold: 0.2 });
@@ -23,13 +25,14 @@ export function CTA({
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div
           ref={contentRef}
-          className={`relative overflow-hidden rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-12 md:p-16 text-center shadow-sm transition-all duration-1000 ease-out ${
+          className={`relative overflow-hidden rounded-md glass-neon p-12 md:p-16 text-center transition-all duration-1000 ease-out ${
             isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          {/* ── Ambient Technical Glow (Cyan Only) ── */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] z-0 blur-[100px] pointer-events-none select-none opacity-40 dark:opacity-60">
-            <div className="absolute inset-0 bg-cyan-500/30 rounded-full" />
+          {/* Background Accents */}
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-cyan-500/20 blur-[80px]" />
+            <div className="absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-purple-500/15 blur-[80px]" />
           </div>
 
           {/* Content */}
@@ -37,21 +40,36 @@ export function CTA({
             
             {/* Availability Badge */}
             {availabilityText && (
-              <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-4 py-1.5 shadow-sm">
-                <Zap className="h-3.5 w-3.5 text-[var(--text-primary)]" />
-                <span className="font-mono text-xs font-semibold tracking-wide text-[var(--text-secondary)]">
+              <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 shadow-sm">
+                <Zap className="h-3.5 w-3.5 text-emerald-400" />
+                <span className="font-mono text-xs text-emerald-400">
                   {availabilityText}
                 </span>
               </div>
             )}
 
             {/* Headline */}
-            <h2 className="max-w-2xl text-3xl font-bold tracking-tight text-[var(--text-primary)] md:text-4xl lg:text-5xl">
-              {cmsCta?.heading || "Ready to Build Something Exceptional?"}
+            <h2 className="max-w-2xl text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl">
+              {cmsCta?.heading ? (
+                cmsCta.heading.includes("Exceptional?") ? (
+                  <>
+                    {cmsCta.heading.split("Exceptional?")[0]}
+                    <span className="text-gradient-holographic">Exceptional?</span>
+                    {cmsCta.heading.split("Exceptional?")[1]}
+                  </>
+                ) : (
+                  cmsCta.heading
+                )
+              ) : (
+                <>
+                  Ready to Build Something{" "}
+                  <span className="text-gradient-holographic">Exceptional?</span>
+                </>
+              )}
             </h2>
 
             {/* Subtext */}
-            <p className="mt-4 max-w-xl text-[var(--text-secondary)] md:text-lg leading-relaxed">
+            <p className="mt-4 max-w-xl text-white/50 md:text-lg leading-relaxed">
               {cmsCta?.description || "Let's discuss your project. We'll scope it properly, define milestones, and give you a fixed investment quote — no surprises."}
             </p>
 
@@ -59,24 +77,26 @@ export function CTA({
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
               {/* Primary CTA */}
               <Link
-                href={cmsCta?.buttonUrl || "/quote"}
-                className="group relative flex items-center justify-center gap-2 rounded-md bg-[var(--text-primary)] px-8 py-3.5 font-mono text-sm font-bold uppercase tracking-wider text-[var(--bg-primary)] transition-transform hover:scale-[0.98] active:scale-95 shadow-md"
+                href={cmsCta?.buttonUrl || cmsCta?.url || "/quote"}
+                className="group relative overflow-hidden rounded-md border border-cyan-500/50 bg-cyan-500/10 px-8 py-3.5 backdrop-blur-md transition-all hover:border-cyan-400 hover:bg-cyan-500/20 hover:shadow-[0_0_30px_rgba(6,182,212,0.25)] hover:scale-[0.98] active:scale-95"
               >
-                {cmsCta?.buttonText || "Start_Project"}
-                <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                <span className="relative z-10 flex items-center justify-center gap-2 font-mono text-sm font-bold uppercase tracking-wider text-white">
+                  {cmsCta?.buttonText || cmsCta?.text || "Start_Project"}
+                  <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                </span>
               </Link>
 
               {/* Secondary CTA */}
               <Link
                 href="/contact"
-                className="group flex items-center justify-center gap-2 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-8 py-3.5 font-mono text-sm font-bold uppercase tracking-wider text-[var(--text-secondary)] transition-all hover:border-[var(--text-primary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] shadow-sm"
+                className="group flex items-center justify-center gap-2 rounded-md border border-white/10 bg-black/50 px-8 py-3.5 font-mono text-sm font-bold uppercase tracking-wider text-white/70 backdrop-blur-md transition-all hover:border-white/20 hover:text-white"
               >
                 Book_Call
               </Link>
             </div>
 
             {/* Trust Line */}
-            <p className="mt-8 font-mono text-[10px] font-bold uppercase tracking-widest text-[var(--text-tertiary)]">
+            <p className="mt-8 font-mono text-xs text-white/30">
               No commitment required. Free 30-minute discovery call.
             </p>
           </div>

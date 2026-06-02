@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Input } from "@syntaxure/ui";
+import { Input, ImageUpload } from "@syntaxure/ui";
 import { Save, Plus, Trash2, ArrowLeft } from "lucide-react";
 import { saveAboutContent, type AboutContent } from "@/app/actions/content";
+import { uploadToStorage } from "@/app/actions/storage";
 import Link from "next/link";
 
 export function AboutEditor({
@@ -288,18 +289,30 @@ export function AboutEditor({
             />
           </div>
           <div>
-            <label className="block text-sm text-white/60 mb-1.5">
-              Image URL
-            </label>
-            <Input
-              value={content.founder.image}
-              onChange={(e) =>
+            <ImageUpload
+              currentImage={content.founder.image || null}
+              onUpload={async (file) => {
+                const result = await uploadToStorage(file, "avatars");
+                if (result.success && result.url) {
+                  setContent((prev) => ({
+                    ...prev,
+                    founder: { ...prev.founder, image: result.url! },
+                  }));
+                  return { url: result.url };
+                }
+                return { url: "", error: result.error };
+              }}
+              onRemove={async () => {
                 setContent((prev) => ({
                   ...prev,
-                  founder: { ...prev.founder, image: e.target.value },
-                }))
-              }
-              className="w-full"
+                  founder: { ...prev.founder, image: "" },
+                }));
+                return { success: true };
+              }}
+              label="Founder Image"
+              previewHeight="h-32"
+              crop={true}
+              cropAspect={1}
             />
           </div>
           <div>
@@ -606,55 +619,71 @@ export function AboutEditor({
                     />
                   </div>
                   <div className="grid gap-3 sm:grid-cols-3">
-                    <div>
-                      <label className="block text-xs text-white/40 mb-1">
-                        Image URL
-                      </label>
-                      <Input
-                        value={founder.image}
-                        onChange={(e) =>
-                          setContent((prev) => {
-                            const founders = prev.founders.map((f, j) =>
-                              j === i ? { ...f, image: e.target.value } : f,
-                            );
-                            return { ...prev, founders };
-                          })
-                        }
-                        className="w-full"
-                      />
+                    <div className="sm:col-span-2 grid gap-3 sm:grid-cols-2">
+                      <div>
+                        <label className="block text-xs text-white/40 mb-1">
+                          Email
+                        </label>
+                        <Input
+                          value={founder.email}
+                          onChange={(e) =>
+                            setContent((prev) => {
+                              const founders = prev.founders.map((f, j) =>
+                                j === i ? { ...f, email: e.target.value } : f,
+                              );
+                              return { ...prev, founders };
+                            })
+                          }
+                          className="w-full"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-white/40 mb-1">
+                          Location
+                        </label>
+                        <Input
+                          value={founder.location}
+                          onChange={(e) =>
+                            setContent((prev) => {
+                              const founders = prev.founders.map((f, j) =>
+                                j === i ? { ...f, location: e.target.value } : f,
+                              );
+                              return { ...prev, founders };
+                            })
+                          }
+                          className="w-full"
+                        />
+                      </div>
                     </div>
                     <div>
-                      <label className="block text-xs text-white/40 mb-1">
-                        Email
-                      </label>
-                      <Input
-                        value={founder.email}
-                        onChange={(e) =>
+                      <ImageUpload
+                        currentImage={founder.image || null}
+                        onUpload={async (file) => {
+                          const result = await uploadToStorage(file, "avatars");
+                          if (result.success && result.url) {
+                            setContent((prev) => {
+                              const founders = prev.founders.map((f, j) =>
+                                j === i ? { ...f, image: result.url! } : f,
+                              );
+                              return { ...prev, founders };
+                            });
+                            return { url: result.url };
+                          }
+                          return { url: "", error: result.error };
+                        }}
+                        onRemove={async () => {
                           setContent((prev) => {
                             const founders = prev.founders.map((f, j) =>
-                              j === i ? { ...f, email: e.target.value } : f,
+                              j === i ? { ...f, image: "" } : f,
                             );
                             return { ...prev, founders };
-                          })
-                        }
-                        className="w-full"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-white/40 mb-1">
-                        Location
-                      </label>
-                      <Input
-                        value={founder.location}
-                        onChange={(e) =>
-                          setContent((prev) => {
-                            const founders = prev.founders.map((f, j) =>
-                              j === i ? { ...f, location: e.target.value } : f,
-                            );
-                            return { ...prev, founders };
-                          })
-                        }
-                        className="w-full"
+                          });
+                          return { success: true };
+                        }}
+                        label="Founder Image"
+                        previewHeight="h-32"
+                        crop={true}
+                        cropAspect={1}
                       />
                     </div>
                   </div>
@@ -783,20 +812,34 @@ export function AboutEditor({
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-white/40 mb-1">
-                        Image URL
-                      </label>
-                      <Input
-                        value={member.image}
-                        onChange={(e) =>
+                      <ImageUpload
+                        currentImage={member.image || null}
+                        onUpload={async (file) => {
+                          const result = await uploadToStorage(file, "avatars");
+                          if (result.success && result.url) {
+                            setContent((prev) => {
+                              const team = prev.team.map((t, j) =>
+                                j === i ? { ...t, image: result.url! } : t,
+                              );
+                              return { ...prev, team };
+                            });
+                            return { url: result.url };
+                          }
+                          return { url: "", error: result.error };
+                        }}
+                        onRemove={async () => {
                           setContent((prev) => {
                             const team = prev.team.map((t, j) =>
-                              j === i ? { ...t, image: e.target.value } : t,
+                              j === i ? { ...t, image: "" } : t,
                             );
                             return { ...prev, team };
-                          })
-                        }
-                        className="w-full"
+                          });
+                          return { success: true };
+                        }}
+                        label="Team Member Image"
+                        previewHeight="h-32"
+                        crop={true}
+                        cropAspect={1}
                       />
                     </div>
                   </div>
@@ -978,21 +1021,34 @@ export function AboutEditor({
             />
           </div>
           <div>
-            <label className="block text-sm text-white/60 mb-1.5">
-              Image URL
-            </label>
-            <Input
-              value={content.brandAssets.image}
-              onChange={(e) =>
+            <ImageUpload
+              currentImage={content.brandAssets.image || null}
+              onUpload={async (file) => {
+                const result = await uploadToStorage(file, "avatars");
+                if (result.success && result.url) {
+                  setContent((prev) => ({
+                    ...prev,
+                    brandAssets: {
+                      ...prev.brandAssets,
+                      image: result.url!,
+                    },
+                  }));
+                  return { url: result.url };
+                }
+                return { url: "", error: result.error };
+              }}
+              onRemove={async () => {
                 setContent((prev) => ({
                   ...prev,
                   brandAssets: {
                     ...prev.brandAssets,
-                    image: e.target.value,
+                    image: "",
                   },
-                }))
-              }
-              className="w-full"
+                }));
+                return { success: true };
+              }}
+              label="Brand Asset Image"
+              previewHeight="h-32"
             />
           </div>
           <div>

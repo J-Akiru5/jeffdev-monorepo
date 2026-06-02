@@ -16,6 +16,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import { Upload, X, Loader2, ImageIcon } from "lucide-react";
+import { ImageCropModal } from "./image-crop-modal";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -38,6 +39,10 @@ export interface ImageUploadProps {
   hint?: string;
   /** Height of the preview container. Default: "h-48". */
   previewHeight?: string;
+  /** Enable client-side image cropping before upload */
+  crop?: boolean;
+  /** Cropper aspect ratio (e.g. 1 for square, 16/9 for wide) */
+  cropAspect?: number;
 }
 
 const DEFAULT_ACCEPT = "image/jpeg,image/png,image/webp";
@@ -55,6 +60,8 @@ export function ImageUpload({
   maxSize = DEFAULT_MAX_SIZE,
   hint,
   previewHeight = "h-48",
+  crop = false,
+  cropAspect = 1,
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [removing, setRemoving] = useState(false);
@@ -62,6 +69,36 @@ export function ImageUpload({
   const [preview, setPreview] = useState<string | null>(currentImage || null);
   const [isDragActive, setIsDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [cropImageSrc, setCropImageSrc] = useState<string | null>(null);
+
+  const startCrop = useCallback((file: File) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropImageSrc(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  }, []);
+
+  const uploadFile = useCallback(
+    async (file: File) => {
+      setUploading(true);
+      setError(null);
+
+      try {
+        const result = await onUpload(file);
+        if (result.error) {
+          setError(result.error);
+        } else {
+          setPreview(result.url);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Upload failed");
+      } finally {
+        setUploading(false);
+      }
+    },
+    [onUpload],
+  );
 
   const handleFile = useCallback(
     async (file: File) => {
@@ -81,23 +118,13 @@ export function ImageUpload({
         return;
       }
 
-      setUploading(true);
-      setError(null);
-
-      try {
-        const result = await onUpload(file);
-        if (result.error) {
-          setError(result.error);
-        } else {
-          setPreview(result.url);
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Upload failed");
-      } finally {
-        setUploading(false);
+      if (crop) {
+        startCrop(file);
+      } else {
+        await uploadFile(file);
       }
     },
-    [accept, maxSize, onUpload],
+    [accept, maxSize, crop, startCrop, uploadFile],
   );
 
   const onFileChange = useCallback(
@@ -257,6 +284,18 @@ export function ImageUpload({
         <p className="mt-2 flex items-center gap-1 text-xs text-red-400">
           {error}
         </p>
+      )}
+
+      {cropImageSrc && (
+        <ImageCropModal
+          imageSrc={cropImageSrc}
+          aspect={cropAspect}
+          onCropComplete={async (croppedFile) => {
+            setCropImageSrc(null);
+            await uploadFile(croppedFile);
+          }}
+          onClose={() => setCropImageSrc(null)}
+        />
       )}
     </div>
   );

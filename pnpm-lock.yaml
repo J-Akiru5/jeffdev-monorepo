@@ -932,6 +932,9 @@ importers:
       react-dom:
         specifier: ^19.2.3
         version: 19.2.3(react@19.2.3)
+      react-easy-crop:
+        specifier: ^5.5.7
+        version: 5.5.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       react-markdown:
         specifier: ^10.1.0
         version: 10.1.0(@types/react@19.2.8)(react@19.2.3)
@@ -1640,6 +1643,7 @@ packages:
       {
         integrity: sha512-p2hoXw3Z3LQHwTeikdZNsFBOvXGqKY2hk51BBw+8NKND8eoH+8LFOtW9Z8CQKmTJ2qqGYu82ipqiyFZOTTXNfw==,
       }
+    hasBin: true
     peerDependencies:
       "@electric-sql/pglite": 0.4.1
 
@@ -5983,6 +5987,7 @@ packages:
         integrity: sha512-YYTXSFulfwytnjAPlw8QHncHJmlvFKtczb8InXaAx9Q0LbfDnfEYDE55omerIJKihhmU61Ft+cAOSzQVaBUmeA==,
       }
     engines: { node: ^10 || ^12 || >=14 }
+    hasBin: true
     peerDependencies:
       postcss: ^8.1.0
 
@@ -7624,6 +7629,7 @@ packages:
       {
         integrity: sha512-82GZUjRS0p/jganf6q1rEO25VSoHH0hKPCTrgillPjdI/3bgBhAE1QzHrHTizjpRvy6pGAvKjDJtk2pF9NDq8w==,
       }
+    hasBin: true
     peerDependencies:
       eslint: ">=7.0.0"
 
@@ -7772,6 +7778,7 @@ packages:
         integrity: sha512-LEyamqS7W5HB3ujJyvi0HQK/dtVINZvd5mAAp9eT5S/ujByGjiZLCzPcHVzuXbpJDJF/cxwHlfceVUDZ2lnSTw==,
       }
     engines: { node: ^18.18.0 || ^20.9.0 || >=21.1.0 }
+    hasBin: true
     peerDependencies:
       jiti: "*"
     peerDependenciesMeta:
@@ -10670,6 +10677,7 @@ packages:
         integrity: sha512-gKSecROqisnV7Buen5BfjmXAm7Xlpx9o2ueVQRo5DxQcjC8d330dOM1xiGWc2k3Dcnz0In3VybyRPOsudwgiqQ==,
       }
     engines: { node: ">=20.9.0" }
+    hasBin: true
     peerDependencies:
       "@opentelemetry/api": ^1.1.0
       "@playwright/test": ^1.51.1
@@ -10751,6 +10759,12 @@ packages:
     resolution:
       {
         integrity: sha512-r9KHKG2UUeB5LoTouwDzBy2VxXlHsiM6fyLQvnJa0S5hrhzqElH/CH7TUGhT1fVvIYBIKf3OpY4YJ4CK+iaqHg==,
+      }
+
+  normalize-wheel@1.0.1:
+    resolution:
+      {
+        integrity: sha512-1OnlAPZ3zgrk8B91HyRj+eVv+kS5u+Z0SCsak6Xil/kmgEia50ga7zfkumayonZrImffAxPU/5WcyGhzetHNPA==,
       }
 
   npm-package-arg@12.0.2:
@@ -10893,6 +10907,7 @@ packages:
       {
         integrity: sha512-fZ1uBqjFUjXzbGc35fFtYKEOxd20kd9fDpFeqWtsOZWiubY8CZ1NAlXHW3iathaFvqmNtCWMIsosCuyeI7Joxg==,
       }
+    hasBin: true
     peerDependencies:
       ws: ^8.18.0
       zod: ^3.25 || ^4.0
@@ -11413,6 +11428,7 @@ packages:
         integrity: sha512-yfN4yrw7HV9kEJhoy1+jgah0jafEIQsf7uWouSsM8MvJtlubsk+kM7AIBWZ8+GJl74Yj3c+nbYqBkMOxtsZ3Lw==,
       }
     engines: { node: ^20.19 || ^22.12 || >=24.0 }
+    hasBin: true
     peerDependencies:
       better-sqlite3: ">=9.0.0"
       typescript: ">=5.4.0"
@@ -11615,6 +11631,15 @@ packages:
     engines: { node: ">= 10.13" }
     peerDependencies:
       react: ">= 16.8 || 18.0.0"
+
+  react-easy-crop@5.5.7:
+    resolution:
+      {
+        integrity: sha512-kYo4NtMeXFQB7h1U+h5yhUkE46WQbQdq7if54uDlbMdZHdRgNehfvaFrXnFw5NR1PNoUOJIfTwLnWmEx/MaZnA==,
+      }
+    peerDependencies:
+      react: ">=16.4.0"
+      react-dom: ">=16.4.0"
 
   react-is@16.13.1:
     resolution:
@@ -12992,6 +13017,7 @@ packages:
       {
         integrity: sha512-f0FFpIdcHgn8zcPSbf1dRevwt047YMnaiJM3u2w2RewrB+fob/zePZcrOyQoLMMO7aBIddLcQIEK5dYjkLnGrQ==,
       }
+    hasBin: true
     peerDependencies:
       "@swc/core": ">=1.2.50"
       "@swc/wasm": ">=1.2.50"
@@ -13292,6 +13318,7 @@ packages:
       {
         integrity: sha512-Js0m9cx+qOgDxo0eMiFGEueWztz+d4+M3rGlmKPT+T4IS/jP4ylw3Nwpu6cpTTP8R1MAC1kF4VbdLt3ARf209w==,
       }
+    hasBin: true
     peerDependencies:
       browserslist: ">= 4.21.0"
 
@@ -13407,6 +13434,7 @@ packages:
         integrity: sha512-w+N7Hifpc3gRjZ63vYBXA56dvvRlNWRczTdmCBBa+CotUzAPf5b7YMdMR/8CQoeYE5LX3W4wj6RYTgonm1b9DA==,
       }
     engines: { node: ^20.19.0 || >=22.12.0 }
+    hasBin: true
     peerDependencies:
       "@types/node": ^20.19.0 || >=22.12.0
       jiti: ">=1.21.0"
@@ -13449,6 +13477,7 @@ packages:
         integrity: sha512-FQMeF0DJdWY0iOnbv466n/0BudNdKj1l5jYgl5JVTwjSsZSlqyXFt/9+1sEyhR6CLowbZpV7O1sCHrzBhucKKg==,
       }
     engines: { node: ^20.0.0 || ^22.0.0 || >=24.0.0 }
+    hasBin: true
     peerDependencies:
       "@edge-runtime/vm": "*"
       "@opentelemetry/api": ^1.9.0
@@ -20543,6 +20572,8 @@ snapshots:
     dependencies:
       svg-arc-to-cubic-bezier: 3.2.0
 
+  normalize-wheel@1.0.1: {}
+
   npm-package-arg@12.0.2:
     dependencies:
       hosted-git-info: 8.1.0
@@ -21036,6 +21067,13 @@ snapshots:
       file-selector: 2.1.2
       prop-types: 15.8.1
       react: 19.2.3
+
+  react-easy-crop@5.5.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+    dependencies:
+      normalize-wheel: 1.0.1
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+      tslib: 2.8.1
 
   react-is@16.13.1: {}
 
