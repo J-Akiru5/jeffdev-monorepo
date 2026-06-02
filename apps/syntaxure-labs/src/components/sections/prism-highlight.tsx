@@ -23,7 +23,7 @@ const highlights = [
 ];
 
 export function PrismHighlight({ cmsData }: { cmsData?: { description?: string } }) {
-  const { ref: sectionRef, isInView } = useInView({ threshold: 0.1 });
+  const { ref: sectionRef, isInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
 
   return (
     <section id="prism" className="py-24 md:py-32 border-y border-[var(--border-subtle)]">
