@@ -6,16 +6,6 @@ import { cn } from "@syntaxure/ui";
 import { useInView } from "@/lib/use-in-view";
 import type { DataService } from "@/lib/data";
 
-/**
- * Services Section
- * ----------------
- * Productized B2B service offerings with:
- * - Icon-based cards
- * - Glass morphism styling
- * - Scroll-triggered animations (CSS-based)
- * - Investment-focused language
- */
-
 const categoryIcons: Record<string, typeof Globe> = {
   web: Globe,
   saas: Cloud,
@@ -34,90 +24,86 @@ export function Services({ services: dbServices }: ServicesProps) {
   const { ref: headerRef, isInView: headerInView } = useInView<HTMLDivElement>({ threshold: 0.2 });
   const { ref: cardsRef, isInView: cardsInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
 
-  // Map DB services to display format, fallback to empty array
   const displayServices = dbServices.map((svc) => ({
     id: svc.slug,
     icon: categoryIcons[svc.icon] || Globe,
     title: svc.title,
     description: svc.description || svc.tagline,
-    features: svc.features?.slice(0, 3) || [],
+    features: svc.features?.slice(0, 4) || [],
     href: `/services/${svc.slug}`,
   }));
 
   return (
-    <section className="relative section-padding lazy-section" id="services">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        {/* Section Header */}
+    <section className="relative py-24 lg:py-32 lazy-section overflow-hidden" id="services">
+      <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
+        
+        {/* ── Section Header ── */}
         <div
           ref={headerRef}
-          className={`mx-auto max-w-2xl text-center transition-all duration-700 ${
+          className={`mx-auto max-w-2xl text-center transition-all duration-700 ease-out ${
             headerInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <span className="font-mono text-xs uppercase tracking-wider text-cyan-400">
-            {"// Services"}
+          <span className="font-mono text-xs font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
+            Productized Solutions
           </span>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
-            Productized Solutions for
-            <br />
-            <span className="text-gradient-holographic">Modern Businesses</span>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-[var(--text-primary)] md:text-4xl">
+            Built for Modern Businesses
           </h2>
-          <p className="mt-4 text-white/50">
-            We partner with ambitious startups and enterprises to build web
-            systems that drive growth. Clear scope. Fixed investment.
+          <p className="mt-4 text-[var(--text-secondary)]">
+            We partner with ambitious startups and enterprises to build high-performance web systems. Clear scope, fixed investment, premium delivery.
           </p>
         </div>
 
-        {/* Services Grid */}
+        {/* ── Bento Grid ── */}
         <div
           ref={cardsRef}
-          className={`mt-16 grid gap-6 md:grid-cols-2 transition-all duration-700 ${
+          className={`mt-16 grid gap-6 md:grid-cols-3 transition-all duration-1000 ease-out delay-200 ${
             cardsInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          {displayServices.map((service) => (
-            <Link
-              key={service.id}
-              href={service.href}
-              className={cn(
-                "group relative overflow-hidden glass-neon p-8 transition-all duration-300",
-                "hover:border-cyan-500/30 hover:bg-white/[0.04]",
-              )}
-            >
-              {/* Icon */}
-              <div className="mb-6 inline-flex rounded-md border border-white/10 bg-white/5 p-3">
-                <service.icon className="h-6 w-6 text-cyan-400" />
-              </div>
+          {displayServices.map((service, idx) => {
+            // Asymmetrical grid logic: 1st and 4th items span 2 columns on desktop
+            const isLarge = idx % 3 === 0;
 
-              {/* Content */}
-              <h3 className="text-xl font-semibold text-white">
-                {service.title}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-white/50">
-                {service.description}
-              </p>
+            return (
+              <Link
+                key={service.id}
+                href={service.href}
+                className={cn(
+                  "group relative overflow-hidden rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-8 transition-all duration-300 hover:border-[var(--text-tertiary)] hover:shadow-md",
+                  isLarge ? "md:col-span-2" : "md:col-span-1"
+                )}
+              >
+                <div className="flex flex-col h-full">
+                  <div className="mb-6 flex items-center justify-between">
+                    <div className="inline-flex rounded-md border border-[var(--border-subtle)] bg-[var(--bg-primary)] p-3 shadow-sm transition-transform duration-300 group-hover:scale-105">
+                      <service.icon className="h-5 w-5 text-[var(--text-primary)]" />
+                    </div>
+                    <ArrowUpRight className="h-5 w-5 text-[var(--text-tertiary)] transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-[var(--text-primary)]" />
+                  </div>
 
-              {/* Feature Tags */}
-              <div className="mt-6 flex flex-wrap gap-2">
-                {service.features.map((feature) => (
-                  <span
-                    key={feature}
-                    className="rounded-sm border border-white/10 bg-white/5 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-white/60"
-                  >
-                    {feature}
-                  </span>
-                ))}
-              </div>
+                  <h3 className="text-xl font-bold text-[var(--text-primary)]">
+                    {service.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-relaxed text-[var(--text-secondary)] flex-grow">
+                    {service.description}
+                  </p>
 
-              {/* Arrow indicator */}
-              <div className="absolute right-6 top-8 text-white/20 transition-all duration-300 group-hover:text-cyan-400 group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
-                <ArrowUpRight className="h-5 w-5" />
-              </div>
-
-              {/* Hover gradient accent */}
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-            </Link>
-          ))}
+                  <div className="mt-8 flex flex-wrap gap-2">
+                    {service.features.map((feature) => (
+                      <span
+                        key={feature}
+                        className="rounded-sm border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] transition-colors group-hover:border-[var(--text-tertiary)]"
+                      >
+                        {feature}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>

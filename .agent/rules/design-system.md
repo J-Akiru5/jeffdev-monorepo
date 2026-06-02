@@ -7,7 +7,7 @@ trigger: always_on
 1. CORE PHILOSOPHY ("THE ENDGAME")
    Vibe: Precision Engineering, Stealth Luxury, "Operating System" feel.
 
-The "Void" Law: The universe is #050505. There is no light mode.
+The "Dual Mode" Law: The universe supports both Light and Dark mode. Light mode must feel crisp, highly legible, and premium (like architectural blueprints). Dark mode remains the primary "Stealth Luxury" void.
 
 The "Anti-Template" Rule: If it looks like a standard Bootstrap/Material template, reject it. We build custom interfaces that feel like specialized tools.
 

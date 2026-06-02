@@ -10,13 +10,13 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useInView } from "@/lib/use-in-view";
+import { HoverCard } from "@syntaxure/ui";
 
 type Feature = {
   id: string;
   icon: LucideIcon;
   title: string;
   description: string;
-  detailed?: string;
 };
 
 const features: Feature[] = [
@@ -25,9 +25,7 @@ const features: Feature[] = [
     icon: Bot,
     title: "AI-Native Development",
     description:
-      "IDE-native agents execute with precision, context awareness, and autonomous problem-solving capability.",
-    detailed:
-      "Our development pipeline integrates AI agents directly into the IDE, giving them full workspace context to map dependencies, trace issues, and execute tasks end-to-end without human micromanagement.",
+      "IDE-native agents execute with precision, giving them full workspace context to map dependencies and solve problems.",
   },
   {
     id: "fixed-pricing",
@@ -35,8 +33,6 @@ const features: Feature[] = [
     title: "Fixed Investment Pricing",
     description:
       "Clear scope, milestone-based delivery, and fixed quotes — no surprise invoices or scope creep.",
-    detailed:
-      "Every project follows a structured Statement of Work with defined milestones, deliverables, and fixed pricing. You know exactly what you pay and when — zero billing anxiety.",
   },
   {
     id: "enterprise-security",
@@ -44,103 +40,88 @@ const features: Feature[] = [
     title: "Enterprise-Grade Security",
     description:
       "Firebase Auth, session-based RBAC, encrypted data at rest — built for compliance from day one.",
-    detailed:
-      "We implement defense-in-depth with Firebase Authentication, custom session management, role-based access controls, encrypted Firestore collections, and comprehensive audit logging for SOC 2 readiness.",
   },
   {
     id: "socratic-planning",
     icon: MessageSquare,
     title: "Socratic Planning",
     description:
-      "Zero assumptions. We ask targeted questions before writing a single line of code.",
-    detailed:
-      "Our Clarification-First Doctrine means every project starts with a structured Q&A loop. We challenge assumptions, map edge cases, and validate requirements before any engineering begins — saving weeks of rework.",
+      "Zero assumptions. We ask targeted questions before writing a single line of code, saving weeks of rework.",
   },
   {
     id: "rapid-mvp",
     icon: Zap,
     title: "Rapid MVP Delivery",
     description:
-      "From concept to working prototype in weeks, not months — validated, tested, and production-ready.",
-    detailed:
-      "Using our proprietary build sequences and pre-built architecture templates, we compress typical 3-month timelines into 2-3 weeks for functional, polished MVP launches.",
+      "Using our proprietary build sequences, we compress typical 3-month timelines into 2-3 weeks for validated launches.",
   },
   {
     id: "post-launch",
     icon: HeartHandshake,
     title: "Post-Launch Partnership",
     description:
-      "Ongoing maintenance, feature evolution, and performance monitoring — we grow with you.",
-    detailed:
-      "Every project includes a transition period and optional retainer packages covering bug fixes, performance optimization, feature iterations, and architecture evolution as your product scales.",
+      "Ongoing maintenance, feature evolution, and performance monitoring — we grow with you as your product scales.",
   },
 ];
 
 export function Features() {
   const { ref: headerRef, isInView: headerInView } = useInView<HTMLDivElement>({ threshold: 0.2 });
-  const { ref: cardsRef, isInView: cardsInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
+  const { ref: listRef, isInView: listInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
 
   return (
-    <section className="relative section-padding lazy-section" id="features">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        {/* Section Header */}
+    <section className="relative py-24 lg:py-32 lazy-section border-t border-[var(--border-subtle)]" id="features">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8 flex flex-col lg:flex-row gap-16 lg:gap-24">
+        
+        {/* ── Left Column: Section Header ── */}
         <div
           ref={headerRef}
-          className={`mx-auto max-w-2xl text-center transition-all duration-700 ${
+          className={`lg:w-1/3 transition-all duration-700 ease-out ${
             headerInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <span className="font-mono text-xs uppercase tracking-wider text-purple-400">
-            {"// Why Choose Us"}
-          </span>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
-            Built Different.{" "}
-            <span className="text-gradient-holographic">
-              Engineered Better.
+          <div className="sticky top-32">
+            <span className="font-mono text-xs font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
+              Infrastructure
             </span>
-          </h2>
-          <p className="mt-4 text-white/50">
-            Six pillars that define how we build — from AI-native workflows to
-            post-launch partnerships. No shortcuts, no compromises.
-          </p>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-[var(--text-primary)] md:text-4xl">
+              Engineered Better.
+            </h2>
+            <p className="mt-4 text-[var(--text-secondary)] leading-relaxed">
+              Six pillars that define how we build — from AI-native workflows to
+              post-launch partnerships. No shortcuts, no compromises. We build robust systems meant to scale.
+            </p>
+          </div>
         </div>
 
-        {/* Features Grid */}
+        {/* ── Right Column: Features List ── */}
         <div
-          ref={cardsRef}
-          className={`mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 transition-all duration-700 ${
-            cardsInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          ref={listRef}
+          className={`lg:w-2/3 grid gap-8 sm:grid-cols-2 transition-all duration-1000 ease-out delay-200 ${
+            listInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          {features.map((feature) => (
-            <div
+          {features.map((feature, idx) => (
+            <HoverCard
               key={feature.id}
-              className="group relative overflow-hidden glass-neon glass-shimmer rounded-lg p-6 transition-all duration-300 hover:-translate-y-1 hover:border-white/20"
+              className="rounded-md p-6 transition-all duration-300 hover:bg-[var(--bg-secondary)] border border-transparent hover:border-[var(--border-active)]"
             >
+              
               {/* Icon */}
-              <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg border border-white/10 bg-white/5 transition-all duration-300 group-hover:border-cyan-500/30 group-hover:bg-cyan-500/10 group-hover:shadow-glow-cyan">
+              <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-md border border-[var(--border-subtle)] bg-[var(--bg-primary)] shadow-sm">
                 <feature.icon
-                  className="h-6 w-6 text-white/60 transition-all duration-300 group-hover:text-cyan-400 group-hover:scale-110"
+                  className="h-5 w-5 text-[var(--text-primary)] transition-transform duration-300 group-hover:scale-110"
                   strokeWidth={1.5}
                 />
               </div>
 
               {/* Content */}
-              <h3 className="text-lg font-semibold text-white group-hover:text-cyan-50 transition-colors">
+              <h3 className="text-lg font-bold text-[var(--text-primary)]">
                 {feature.title}
               </h3>
-              <p className="mt-2 text-sm leading-relaxed text-white/50 group-hover:text-white/65 transition-colors">
+              <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
                 {feature.description}
               </p>
-
-              {/* Neon indicator dot — subtle glow accent */}
-              <div className="absolute bottom-4 right-4 flex items-center gap-1.5 opacity-0 transition-all duration-300 group-hover:opacity-100">
-                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
-                <span className="font-mono text-[9px] uppercase tracking-wider text-cyan-400/60">
-                  {feature.id}
-                </span>
-              </div>
-            </div>
+            </HoverCard>
           ))}
         </div>
       </div>
