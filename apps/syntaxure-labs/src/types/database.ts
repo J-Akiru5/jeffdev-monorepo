@@ -105,16 +105,17 @@ export type Database = {
           title: string;
           description: string | null;
           slug: string | null;
-          status: "active" | "paused" | "completed" | "archived";
+          status: string | null;
           start_date: string | null;
           end_date: string | null;
-          budget: string | null;
-          budget_spent: string;
-          client_name: string | null;
-          client_email: string | null;
+          budget: number | null;
+          budget_spent: number | null;
+          client_id: string | null;
           metadata: Json;
           created_at: string;
           updated_at: string;
+          published: boolean | null;
+          published_site_url: string | null;
         };
         Insert: {
           id?: string;
@@ -122,16 +123,17 @@ export type Database = {
           title: string;
           description?: string | null;
           slug?: string | null;
-          status?: "active" | "paused" | "completed" | "archived";
+          status?: string | null;
           start_date?: string | null;
           end_date?: string | null;
-          budget?: string | null;
-          budget_spent?: string;
-          client_name?: string | null;
-          client_email?: string | null;
+          budget?: number | null;
+          budget_spent?: number | null;
+          client_id?: string | null;
           metadata?: Json;
           created_at?: string;
           updated_at?: string;
+          published?: boolean | null;
+          published_site_url?: string | null;
         };
         Update: {
           id?: string;
@@ -139,16 +141,17 @@ export type Database = {
           title?: string;
           description?: string | null;
           slug?: string | null;
-          status?: "active" | "paused" | "completed" | "archived";
+          status?: string | null;
           start_date?: string | null;
           end_date?: string | null;
-          budget?: string | null;
-          budget_spent?: string;
-          client_name?: string | null;
-          client_email?: string | null;
+          budget?: number | null;
+          budget_spent?: number | null;
+          client_id?: string | null;
           metadata?: Json;
           created_at?: string;
           updated_at?: string;
+          published?: boolean | null;
+          published_site_url?: string | null;
         };
       };
       milestones: {
@@ -196,11 +199,19 @@ export type Database = {
           project_id: string | null;
           title: string;
           description: string | null;
-          amount: string;
-          status: "draft" | "sent" | "accepted" | "rejected" | "expired";
+          amount: number;
+          status: string;
           valid_until: string | null;
           line_items: Json;
           metadata: Json;
+          quote_type: string;
+          template_id: string | null;
+          name: string | null;
+          email: string | null;
+          company: string | null;
+          phone: string | null;
+          template_selected: string | null;
+          customization_scope: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -210,11 +221,19 @@ export type Database = {
           project_id?: string | null;
           title: string;
           description?: string | null;
-          amount: string;
-          status?: "draft" | "sent" | "accepted" | "rejected" | "expired";
+          amount: number;
+          status?: string;
           valid_until?: string | null;
           line_items?: Json;
           metadata?: Json;
+          quote_type?: string;
+          template_id?: string | null;
+          name?: string | null;
+          email?: string | null;
+          company?: string | null;
+          phone?: string | null;
+          template_selected?: string | null;
+          customization_scope?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -224,11 +243,19 @@ export type Database = {
           project_id?: string | null;
           title?: string;
           description?: string | null;
-          amount?: string;
-          status?: "draft" | "sent" | "accepted" | "rejected" | "expired";
+          amount?: number;
+          status?: string;
           valid_until?: string | null;
           line_items?: Json;
           metadata?: Json;
+          quote_type?: string;
+          template_id?: string | null;
+          name?: string | null;
+          email?: string | null;
+          company?: string | null;
+          phone?: string | null;
+          template_selected?: string | null;
+          customization_scope?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -449,10 +476,10 @@ export type Database = {
         Row: {
           id: string;
           user_id: string;
-          plan: "free" | "pro" | "enterprise";
-          status: "active" | "cancelled" | "suspended";
+          plan: "free" | "pro" | "team" | "enterprise";
+          status: "active" | "cancelled" | "suspended" | "past_due";
           billing_cycle: "monthly" | "annual";
-          amount: string;
+          amount: number;
           currency: string;
           current_period_start: string;
           current_period_end: string;
@@ -460,16 +487,17 @@ export type Database = {
           cancelled_at: string | null;
           payment_method_id: string | null;
           metadata: Json;
+          paypal_subscription_id: string | null;
           created_at: string;
           updated_at: string;
         };
         Insert: {
           id?: string;
           user_id: string;
-          plan: "free" | "pro" | "enterprise";
-          status?: "active" | "cancelled" | "suspended";
+          plan: "free" | "pro" | "team" | "enterprise";
+          status?: "active" | "cancelled" | "suspended" | "past_due";
           billing_cycle?: "monthly" | "annual";
-          amount: string;
+          amount: number;
           currency?: string;
           current_period_start: string;
           current_period_end: string;
@@ -477,16 +505,17 @@ export type Database = {
           cancelled_at?: string | null;
           payment_method_id?: string | null;
           metadata?: Json;
+          paypal_subscription_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
         Update: {
           id?: string;
           user_id?: string;
-          plan?: "free" | "pro" | "enterprise";
-          status?: "active" | "cancelled" | "suspended";
+          plan?: "free" | "pro" | "team" | "enterprise";
+          status?: "active" | "cancelled" | "suspended" | "past_due";
           billing_cycle?: "monthly" | "annual";
-          amount?: string;
+          amount?: number;
           currency?: string;
           current_period_start?: string;
           current_period_end?: string;
@@ -494,6 +523,7 @@ export type Database = {
           cancelled_at?: string | null;
           payment_method_id?: string | null;
           metadata?: Json;
+          paypal_subscription_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -574,7 +604,7 @@ export type Database = {
           updated_at?: string;
         };
       };
-      messages: {
+      contact_messages: {
         Row: {
           id: string;
           user_id: string | null;
@@ -582,8 +612,9 @@ export type Database = {
           email: string;
           subject: string;
           message: string;
-          status: "received" | "read" | "responded";
-          message_type: "general" | "support" | "inquiry" | "partnership";
+          status: string;
+          message_type: string;
+          type: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -594,8 +625,9 @@ export type Database = {
           email: string;
           subject: string;
           message: string;
-          status?: "received" | "read" | "responded";
-          message_type?: "general" | "support" | "inquiry" | "partnership";
+          status?: string;
+          message_type?: string;
+          type?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -606,8 +638,9 @@ export type Database = {
           email?: string;
           subject?: string;
           message?: string;
-          status?: "received" | "read" | "responded";
-          message_type?: "general" | "support" | "inquiry" | "partnership";
+          status?: string;
+          message_type?: string;
+          type?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -915,18 +948,24 @@ export type Database = {
           workspace_id: string;
           user_id: string;
           role: "founder" | "employee";
+          department_id: string | null;
+          c_level_title: string | null;
           created_at: string;
         };
         Insert: {
           workspace_id: string;
           user_id: string;
           role?: "founder" | "employee";
+          department_id?: string | null;
+          c_level_title?: string | null;
           created_at?: string;
         };
         Update: {
           workspace_id?: string;
           user_id?: string;
           role?: "founder" | "employee";
+          department_id?: string | null;
+          c_level_title?: string | null;
           created_at?: string;
         };
       };
@@ -978,7 +1017,7 @@ export type Feedback = Database["public"]["Tables"]["feedback"]["Row"];
 export type Subscription = Database["public"]["Tables"]["subscriptions"]["Row"];
 export type Notification = Database["public"]["Tables"]["notifications"]["Row"];
 export type Invite = Database["public"]["Tables"]["invites"]["Row"];
-export type Message = Database["public"]["Tables"]["messages"]["Row"];
+export type ContactMessage = Database["public"]["Tables"]["contact_messages"]["Row"];
 export type WaitlistEntry =
   Database["public"]["Tables"]["waitlist_entries"]["Row"];
 export type SupportTicket =
