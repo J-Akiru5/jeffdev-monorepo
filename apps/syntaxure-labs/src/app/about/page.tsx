@@ -78,6 +78,16 @@ interface AboutData {
     image: string;
     downloadUrl: string;
   };
+  sectionHeaders: {
+    founder: { cardLabel: string };
+    kwadraTbi: { label: string };
+    missionVision: { label: string; missionLabel: string; visionLabel: string };
+    founders: { label: string; subtitle: string };
+    techStack: { label: string; subtitle: string };
+    team: { label: string; subtitle: string };
+    values: { heading: string };
+    brandAssets: { heading: string };
+  };
 }
 
 async function getAboutData(): Promise<AboutData> {
@@ -109,6 +119,9 @@ async function getAboutData(): Promise<AboutData> {
           DEFAULT_ABOUT_DATA.founders,
         team:
           (content.team as AboutData["team"]) ?? DEFAULT_ABOUT_DATA.team,
+        sectionHeaders:
+          (content.sectionHeaders as AboutData["sectionHeaders"]) ??
+          DEFAULT_ABOUT_DATA.sectionHeaders,
       };
     }
   } catch {
@@ -122,7 +135,7 @@ export default async function AboutPage() {
   const content = await getAboutData();
   const activeAvailability = await getActiveAvailability();
 
-  const { hero, stats, founder, missionVision, kwadraTbi, founders, techStack, values, brandAssets } = content;
+  const { hero, stats, founder, missionVision, kwadraTbi, founders, techStack, values, brandAssets, sectionHeaders } = content;
   const team = content.team || DEFAULT_ABOUT_DATA.team;
   const realTeam = team.filter(
     (m) => !m.name.includes("To Be Announced") && !m.image.includes("placeholder"),
@@ -182,7 +195,7 @@ export default async function AboutPage() {
               {/* Right: Founder Card */}
               <div className="rounded-md border border-white/[0.08] bg-white/[0.02] p-8">
                 <div className="font-mono text-xs uppercase tracking-wider text-white/40">
-                  {"// Founder.log"}
+                  {sectionHeaders.founder.cardLabel}
                 </div>
 
                 {/* Avatar */}
@@ -248,7 +261,7 @@ export default async function AboutPage() {
                 </div>
                 <div className="mt-4 md:mt-0">
                   <span className="font-mono text-xs uppercase tracking-wider text-amber-400">
-                    {"// Startup Incubator"}
+                    {sectionHeaders.kwadraTbi.label}
                   </span>
                   <h2 className="mt-2 text-2xl font-bold text-white">
                     {kwadraTbi.heading}
@@ -276,7 +289,7 @@ export default async function AboutPage() {
         <section className="px-6 py-16 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <h2 className="font-mono text-xs uppercase tracking-wider text-white/40">
-              {"// Mission & Vision"}
+              {sectionHeaders.missionVision.label}
             </h2>
             <p className="mt-6 max-w-3xl text-lg leading-relaxed text-white/60">
               {missionVision.executiveSummary}
@@ -284,13 +297,13 @@ export default async function AboutPage() {
             <div className="mt-10 grid gap-8 md:grid-cols-2">
               <div className="rounded-md border border-cyan-500/20 bg-gradient-to-br from-cyan-500/5 to-transparent p-8">
                 <h3 className="font-mono text-xs uppercase tracking-wider text-cyan-400">
-                  Mission
+                  {sectionHeaders.missionVision.missionLabel}
                 </h3>
                 <p className="mt-4 text-white/70">{missionVision.mission}</p>
               </div>
               <div className="rounded-md border border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-transparent p-8">
                 <h3 className="font-mono text-xs uppercase tracking-wider text-purple-400">
-                  Vision
+                  {sectionHeaders.missionVision.visionLabel}
                 </h3>
                 <p className="mt-4 text-white/70">{missionVision.vision}</p>
               </div>
@@ -302,10 +315,10 @@ export default async function AboutPage() {
         <section className="px-6 py-16 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <h2 className="font-mono text-xs uppercase tracking-wider text-white/40">
-              {"// Founders"}
+              {sectionHeaders.founders.label}
             </h2>
             <p className="mt-4 max-w-xl text-white/60">
-              The people behind Syntaxure Labs.
+              {sectionHeaders.founders.subtitle}
             </p>
             <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {founders.map((f) => (
@@ -348,11 +361,10 @@ export default async function AboutPage() {
         <section className="px-6 py-16 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <h2 className="font-mono text-xs uppercase tracking-wider text-white/40">
-              {"// Tech_Stack"}
+              {sectionHeaders.techStack.label}
             </h2>
             <p className="mt-4 max-w-xl text-white/60">
-              We use modern, battle-tested technologies. No legacy frameworks,
-              no tech debt — just clean, scalable architecture.
+              {sectionHeaders.techStack.subtitle}
             </p>
 
             <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -382,10 +394,10 @@ export default async function AboutPage() {
           <section className="px-6 py-16 lg:px-8">
             <div className="mx-auto max-w-7xl">
               <h2 className="font-mono text-xs uppercase tracking-wider text-white/40">
-                {"// Team"}
+                {sectionHeaders.team.label}
               </h2>
               <p className="mt-4 max-w-xl text-white/60">
-                Meet the leadership team behind Syntaxure Labs.
+                {sectionHeaders.team.subtitle}
               </p>
               <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                 {realTeam.map((member) => (
@@ -418,7 +430,7 @@ export default async function AboutPage() {
         {/* Values Section */}
         <section className="px-6 py-16 lg:px-8">
           <div className="mx-auto max-w-7xl">
-            <h2 className="text-2xl font-bold text-white">How We Work</h2>
+            <h2 className="text-2xl font-bold text-white">{sectionHeaders.values.heading}</h2>
             <div className="mt-8 grid gap-6 md:grid-cols-3">
               {values.map((val) => (
                 <div
@@ -438,7 +450,7 @@ export default async function AboutPage() {
         {/* Brand Assets Section */}
         <section className="px-6 py-16 lg:px-8">
           <div className="mx-auto max-w-5xl">
-            <h2 className="text-2xl font-bold text-white mb-8">Brand Assets</h2>
+            <h2 className="text-2xl font-bold text-white mb-8">{sectionHeaders.brandAssets.heading}</h2>
             <div className="rounded-md border border-white/[0.06] bg-white/[0.02] p-8 md:p-12">
               <div className="flex flex-col">
                 <div className="flex-1 flex items-center justify-center rounded-lg overflow-hidden border border-white/10 bg-[#050505]">
@@ -599,5 +611,29 @@ const DEFAULT_ABOUT_DATA: AboutData = {
     description: "High-resolution PNG",
     image: "/syntaxure-business-card.png",
     downloadUrl: "/syntaxure-business-card.png",
+  },
+  sectionHeaders: {
+    founder: { cardLabel: "// Founder.log" },
+    kwadraTbi: { label: "// Startup Incubator" },
+    missionVision: {
+      label: "// Mission & Vision",
+      missionLabel: "Mission",
+      visionLabel: "Vision",
+    },
+    founders: {
+      label: "// Founders",
+      subtitle: "The people behind Syntaxure Labs.",
+    },
+    techStack: {
+      label: "// Tech_Stack",
+      subtitle:
+        "We use modern, battle-tested technologies. No legacy frameworks, no tech debt — just clean, scalable architecture.",
+    },
+    team: {
+      label: "// Team",
+      subtitle: "Meet the leadership team behind Syntaxure Labs.",
+    },
+    values: { heading: "How We Work" },
+    brandAssets: { heading: "Brand Assets" },
   },
 };

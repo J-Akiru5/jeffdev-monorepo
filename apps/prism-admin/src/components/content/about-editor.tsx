@@ -1016,6 +1016,308 @@ export function AboutEditor({
         </div>
       </section>
 
+      {/* Section Headers */}
+      <section className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
+        <h2 className="font-mono text-xs uppercase tracking-wider text-amber-400/70 mb-4">
+          Section Headers
+        </h2>
+        <p className="text-sm text-white/40 mb-6">
+          Edit decorative labels and section headings visible on the About page.
+        </p>
+        <div className="grid gap-6">
+          {/* Founder Card Label */}
+          <div>
+            <label className="block text-sm text-white/60 mb-1.5">
+              Founder Card Label
+            </label>
+            <Input
+              value={content.sectionHeaders?.founder?.cardLabel ?? "// Founder.log"}
+              onChange={(e) =>
+                setContent((prev) => ({
+                  ...prev,
+                  sectionHeaders: {
+                    ...prev.sectionHeaders,
+                    founder: { cardLabel: e.target.value },
+                  },
+                }))
+              }
+              className="w-full"
+            />
+          </div>
+
+          {/* Kwadra TBI Label */}
+          <div>
+            <label className="block text-sm text-white/60 mb-1.5">
+              Kwadra TBI Label
+            </label>
+            <Input
+              value={content.sectionHeaders?.kwadraTbi?.label ?? "// Startup Incubator"}
+              onChange={(e) =>
+                setContent((prev) => ({
+                  ...prev,
+                  sectionHeaders: {
+                    ...prev.sectionHeaders,
+                    kwadraTbi: { label: e.target.value },
+                  },
+                }))
+              }
+              className="w-full"
+            />
+          </div>
+
+          {/* Mission & Vision */}
+          <div className="grid gap-4 md:grid-cols-3">
+            <div>
+              <label className="block text-sm text-white/60 mb-1.5">
+                Mission & Vision Label
+              </label>
+              <Input
+                value={content.sectionHeaders?.missionVision?.label ?? "// Mission & Vision"}
+                onChange={(e) =>
+                  setContent((prev) => ({
+                    ...prev,
+                    sectionHeaders: {
+                      ...prev.sectionHeaders,
+                      missionVision: {
+                        ...prev.sectionHeaders?.missionVision,
+                        label: e.target.value,
+                        missionLabel: prev.sectionHeaders?.missionVision?.missionLabel ?? "Mission",
+                        visionLabel: prev.sectionHeaders?.missionVision?.visionLabel ?? "Vision",
+                      },
+                    },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-white/60 mb-1.5">
+                Mission Card Heading
+              </label>
+              <Input
+                value={content.sectionHeaders?.missionVision?.missionLabel ?? "Mission"}
+                onChange={(e) =>
+                  setContent((prev) => ({
+                    ...prev,
+                    sectionHeaders: {
+                      ...prev.sectionHeaders,
+                      missionVision: {
+                        ...prev.sectionHeaders?.missionVision,
+                        label: prev.sectionHeaders?.missionVision?.label ?? "// Mission & Vision",
+                        missionLabel: e.target.value,
+                        visionLabel: prev.sectionHeaders?.missionVision?.visionLabel ?? "Vision",
+                      },
+                    },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-white/60 mb-1.5">
+                Vision Card Heading
+              </label>
+              <Input
+                value={content.sectionHeaders?.missionVision?.visionLabel ?? "Vision"}
+                onChange={(e) =>
+                  setContent((prev) => ({
+                    ...prev,
+                    sectionHeaders: {
+                      ...prev.sectionHeaders,
+                      missionVision: {
+                        ...prev.sectionHeaders?.missionVision,
+                        label: prev.sectionHeaders?.missionVision?.label ?? "// Mission & Vision",
+                        missionLabel: prev.sectionHeaders?.missionVision?.missionLabel ?? "Mission",
+                        visionLabel: e.target.value,
+                      },
+                    },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+          </div>
+
+          {/* Founders */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="block text-sm text-white/60 mb-1.5">
+                Founders Label
+              </label>
+              <Input
+                value={content.sectionHeaders?.founders?.label ?? "// Founders"}
+                onChange={(e) =>
+                  setContent((prev) => ({
+                    ...prev,
+                    sectionHeaders: {
+                      ...prev.sectionHeaders,
+                      founders: {
+                        label: e.target.value,
+                        subtitle: prev.sectionHeaders?.founders?.subtitle ?? "The people behind Syntaxure Labs.",
+                      },
+                    },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-white/60 mb-1.5">
+                Founders Subtitle
+              </label>
+              <Input
+                value={content.sectionHeaders?.founders?.subtitle ?? "The people behind Syntaxure Labs."}
+                onChange={(e) =>
+                  setContent((prev) => ({
+                    ...prev,
+                    sectionHeaders: {
+                      ...prev.sectionHeaders,
+                      founders: {
+                        label: prev.sectionHeaders?.founders?.label ?? "// Founders",
+                        subtitle: e.target.value,
+                      },
+                    },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+          </div>
+
+          {/* Tech Stack */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="block text-sm text-white/60 mb-1.5">
+                Tech Stack Label
+              </label>
+              <Input
+                value={content.sectionHeaders?.techStack?.label ?? "// Tech_Stack"}
+                onChange={(e) =>
+                  setContent((prev) => ({
+                    ...prev,
+                    sectionHeaders: {
+                      ...prev.sectionHeaders,
+                      techStack: {
+                        label: e.target.value,
+                        subtitle: prev.sectionHeaders?.techStack?.subtitle ?? "We use modern, battle-tested technologies.",
+                      },
+                    },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-white/60 mb-1.5">
+                Tech Stack Subtitle
+              </label>
+              <Input
+                value={content.sectionHeaders?.techStack?.subtitle ?? "We use modern, battle-tested technologies."}
+                onChange={(e) =>
+                  setContent((prev) => ({
+                    ...prev,
+                    sectionHeaders: {
+                      ...prev.sectionHeaders,
+                      techStack: {
+                        label: prev.sectionHeaders?.techStack?.label ?? "// Tech_Stack",
+                        subtitle: e.target.value,
+                      },
+                    },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+          </div>
+
+          {/* Team */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="block text-sm text-white/60 mb-1.5">
+                Team Label
+              </label>
+              <Input
+                value={content.sectionHeaders?.team?.label ?? "// Team"}
+                onChange={(e) =>
+                  setContent((prev) => ({
+                    ...prev,
+                    sectionHeaders: {
+                      ...prev.sectionHeaders,
+                      team: {
+                        label: e.target.value,
+                        subtitle: prev.sectionHeaders?.team?.subtitle ?? "Meet the leadership team behind Syntaxure Labs.",
+                      },
+                    },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-white/60 mb-1.5">
+                Team Subtitle
+              </label>
+              <Input
+                value={content.sectionHeaders?.team?.subtitle ?? "Meet the leadership team behind Syntaxure Labs."}
+                onChange={(e) =>
+                  setContent((prev) => ({
+                    ...prev,
+                    sectionHeaders: {
+                      ...prev.sectionHeaders,
+                      team: {
+                        label: prev.sectionHeaders?.team?.label ?? "// Team",
+                        subtitle: e.target.value,
+                      },
+                    },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+          </div>
+
+          {/* Values & Brand Assets */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="block text-sm text-white/60 mb-1.5">
+                Values Section Heading
+              </label>
+              <Input
+                value={content.sectionHeaders?.values?.heading ?? "How We Work"}
+                onChange={(e) =>
+                  setContent((prev) => ({
+                    ...prev,
+                    sectionHeaders: {
+                      ...prev.sectionHeaders,
+                      values: { heading: e.target.value },
+                    },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-white/60 mb-1.5">
+                Brand Assets Heading
+              </label>
+              <Input
+                value={content.sectionHeaders?.brandAssets?.heading ?? "Brand Assets"}
+                onChange={(e) =>
+                  setContent((prev) => ({
+                    ...prev,
+                    sectionHeaders: {
+                      ...prev.sectionHeaders,
+                      brandAssets: { heading: e.target.value },
+                    },
+                  }))
+                }
+                className="w-full"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Bottom Save */}
       <div className="flex justify-end border-t border-white/5 pt-6">
         <button
@@ -1122,5 +1424,29 @@ const DEFAULT_ABOUT_CONTENT: AboutContent = {
     description: "High-resolution PNG",
     image: "/syntaxure-business-card.png",
     downloadUrl: "/syntaxure-business-card.png",
+  },
+  sectionHeaders: {
+    founder: { cardLabel: "// Founder.log" },
+    kwadraTbi: { label: "// Startup Incubator" },
+    missionVision: {
+      label: "// Mission & Vision",
+      missionLabel: "Mission",
+      visionLabel: "Vision",
+    },
+    founders: {
+      label: "// Founders",
+      subtitle: "The people behind Syntaxure Labs.",
+    },
+    techStack: {
+      label: "// Tech_Stack",
+      subtitle:
+        "We use modern, battle-tested technologies. No legacy frameworks, no tech debt — just clean, scalable architecture.",
+    },
+    team: {
+      label: "// Team",
+      subtitle: "Meet the leadership team behind Syntaxure Labs.",
+    },
+    values: { heading: "How We Work" },
+    brandAssets: { heading: "Brand Assets" },
   },
 };

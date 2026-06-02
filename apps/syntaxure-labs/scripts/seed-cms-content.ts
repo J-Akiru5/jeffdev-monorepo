@@ -151,6 +151,118 @@ const pages = [
       },
     },
   },
+  {
+    slug: "about",
+    content: {
+      hero: {
+        tagline: "// About.studio",
+        heading1: "We Build Systems",
+        heading2: "That Launch",
+        description:
+          "Syntaxure Labs is a new-breed development agency architecting high-performance systems for ambitious startups. We don't just write code — we partner with founders to turn 'Zero to One' ideas into scalable reality.",
+        subDescription:
+          "Est. 2025. Built on 5+ years of the founder's hands-on experience shipping production systems across SaaS, AI, and enterprise platforms. Proud member of Kwadra TBI Cohort 5.",
+      },
+      stats: [
+        { label: "Niche Focus", value: "Specialized" },
+        { label: "Founder Exp", value: "5+" },
+        { label: "Dedication", value: "100%" },
+        { label: "Infrastructure", value: "High-Avail" },
+      ],
+      founder: {
+        name: "Jeff Edrick Martinez",
+        title: "Lead Architect & Founder",
+        bio: "Full-stack engineer with 5+ years building production systems.",
+        image: "/profilepic.webp",
+        email: "jeff@syntaxure.dev",
+        location: "Iloilo City, Philippines",
+        availability: "Currently accepting new projects",
+      },
+      missionVision: {
+        executiveSummary:
+          "Syntaxure Labs is a technology company building AI-powered software ecosystems.",
+        mission:
+          "To serve as the strategic technical foundation for high-impact business concepts.",
+        vision:
+          "To serve as the foundational technological backbone of the Southeast Asian startup economy.",
+      },
+      kwadraTbi: {
+        heading: "Kwadra TBI Cohort 5",
+        description:
+          "Syntaxure Labs is proud to be part of Kwadra TBI Cohort 5.",
+        badges: ["Startup Incubation", "Mentorship", "Funding Access", "Go-to-Market Strategy"],
+      },
+      founders: [
+        {
+          name: "Jeff Edrick Martinez",
+          title: "Lead Architect & Founder",
+          bio: "Full-stack engineer with 5+ years building production systems.",
+          image: "/profilepic.webp",
+          email: "jeff@syntaxure.dev",
+          location: "Iloilo City, Philippines",
+        },
+      ],
+      team: [
+        {
+          name: "Jeff Edrick Martinez",
+          title: "Chief Executive Officer",
+          role: "CEO",
+          bio: "Visionary leader driving the company strategy and growth.",
+          image: "/profilepic.webp",
+        },
+      ],
+      techStack: {
+        frontend: ["Next.js", "React", "TypeScript", "Tailwind CSS", "GSAP"],
+        backend: ["Node.js", "Laravel", "PostgreSQL", "Firebase"],
+        cloud: ["Vercel", "AWS", "Cloudflare", "Docker"],
+        ai: ["OpenAI", "Claude", "Langchain", "Pinecone"],
+      },
+      values: [
+        {
+          title: "Clarity Over Complexity",
+          description: "We write code that's readable, maintainable, and built to last.",
+        },
+        {
+          title: "Fixed Investment, No Surprises",
+          description: "We scope properly, quote fairly, and deliver on time.",
+        },
+        {
+          title: "Partnership, Not Vendorship",
+          description: "We invest in your success.",
+        },
+      ],
+      brandAssets: {
+        title: "Digital Business Card",
+        description: "High-resolution PNG",
+        image: "/syntaxure-business-card.png",
+        downloadUrl: "/syntaxure-business-card.png",
+      },
+      sectionHeaders: {
+        founder: { cardLabel: "// Founder.log" },
+        kwadraTbi: { label: "// Startup Incubator" },
+        missionVision: {
+          label: "// Mission & Vision",
+          missionLabel: "Mission",
+          visionLabel: "Vision",
+        },
+        founders: {
+          label: "// Founders",
+          subtitle: "The people behind Syntaxure Labs.",
+        },
+        techStack: {
+          label: "// Tech_Stack",
+          subtitle:
+            "We use modern, battle-tested technologies. No legacy frameworks, no tech debt — just clean, scalable architecture.",
+        },
+        team: {
+          label: "// Team",
+          subtitle: "Meet the leadership team behind Syntaxure Labs.",
+        },
+        values: { heading: "How We Work" },
+        brandAssets: { heading: "Brand Assets" },
+      },
+    },
+  },
 ];
 
 async function seed() {

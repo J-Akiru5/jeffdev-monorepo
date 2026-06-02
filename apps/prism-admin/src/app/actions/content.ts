@@ -70,6 +70,21 @@ const teamMemberSchema = z.object({
   image: z.string(),
 });
 
+const sectionHeadersSchema = z.object({
+  founder: z.object({ cardLabel: z.string() }),
+  kwadraTbi: z.object({ label: z.string() }),
+  missionVision: z.object({
+    label: z.string(),
+    missionLabel: z.string(),
+    visionLabel: z.string(),
+  }),
+  founders: z.object({ label: z.string(), subtitle: z.string() }),
+  techStack: z.object({ label: z.string(), subtitle: z.string() }),
+  team: z.object({ label: z.string(), subtitle: z.string() }),
+  values: z.object({ heading: z.string() }),
+  brandAssets: z.object({ heading: z.string() }),
+});
+
 const aboutContentSchema = z.object({
   hero: heroSchema,
   stats: z.array(statSchema).min(1),
@@ -81,6 +96,7 @@ const aboutContentSchema = z.object({
   techStack: techStackSchema,
   values: z.array(valueSchema).min(1),
   brandAssets: brandAssetsSchema,
+  sectionHeaders: sectionHeadersSchema,
 });
 
 export type AboutContent = z.infer<typeof aboutContentSchema>;
