@@ -49,7 +49,7 @@ export function CTA({
             )}
 
             {/* Headline */}
-            <h2 className="max-w-2xl text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl">
+            <h2 className="max-w-2xl text-3xl font-bold tracking-tight text-[var(--text-primary)] md:text-4xl lg:text-5xl">
               {cmsCta?.heading ? (
                 cmsCta.heading.includes("Exceptional?") ? (
                   <>
@@ -69,7 +69,7 @@ export function CTA({
             </h2>
 
             {/* Subtext */}
-            <p className="mt-4 max-w-xl text-white/50 md:text-lg leading-relaxed">
+            <p className="mt-4 max-w-xl text-[var(--text-secondary)] md:text-lg leading-relaxed">
               {cmsCta?.description || "Let's discuss your project. We'll scope it properly, define milestones, and give you a fixed investment quote — no surprises."}
             </p>
 
@@ -89,14 +89,14 @@ export function CTA({
               {/* Secondary CTA */}
               <Link
                 href="/contact"
-                className="group flex items-center justify-center gap-2 rounded-md border border-white/10 bg-black/50 px-8 py-3.5 font-mono text-sm font-bold uppercase tracking-wider text-white/70 backdrop-blur-md transition-all hover:border-white/20 hover:text-white"
+                className="group flex items-center justify-center gap-2 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-8 py-3.5 font-mono text-sm font-bold uppercase tracking-wider text-[var(--text-secondary)] transition-all hover:border-[var(--border-active)] hover:text-[var(--text-primary)] active:scale-95"
               >
                 Book_Call
               </Link>
             </div>
 
             {/* Trust Line */}
-            <p className="mt-8 font-mono text-xs text-white/30">
+            <p className="mt-8 font-mono text-xs text-[var(--text-tertiary)]">
               No commitment required. Free 30-minute discovery call.
             </p>
           </div>
