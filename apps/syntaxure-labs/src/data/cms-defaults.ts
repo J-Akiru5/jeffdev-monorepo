@@ -37,8 +37,8 @@ export const HOMEPAGE_DEFAULTS = {
     heading: "Ready to Build?",
     description:
       "Let's turn your idea into a scalable system. Fixed pricing, transparent process, and a team that cares about your success.",
-    buttonText: "Start a Project",
-    buttonUrl: "/quote",
+    buttonText: "View Templates",
+    buttonUrl: "/services",
   },
 };
 

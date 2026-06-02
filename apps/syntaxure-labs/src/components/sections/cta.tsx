@@ -77,11 +77,11 @@ export function CTA({
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
               {/* Primary CTA */}
               <Link
-                href={cmsCta?.buttonUrl || cmsCta?.url || "/quote"}
-                className="group relative overflow-hidden rounded-md border border-cyan-500/50 bg-cyan-500/10 px-8 py-3.5 backdrop-blur-md transition-all hover:border-cyan-400 hover:bg-cyan-500/20 hover:shadow-[0_0_30px_rgba(6,182,212,0.25)] hover:scale-[0.98] active:scale-95"
+                href={cmsCta?.buttonUrl || cmsCta?.url || "/services"}
+                className="group relative overflow-hidden rounded-md border border-[var(--color-cta-primary-border)] bg-[var(--color-cta-primary-bg)] px-8 py-3.5 transition-all hover:bg-[var(--color-cta-primary-hover-bg)] hover:border-[var(--color-cta-primary-hover-border)] hover:scale-[0.98] active:scale-95 shadow-md"
               >
-                <span className="relative z-10 flex items-center justify-center gap-2 font-mono text-sm font-bold uppercase tracking-wider text-white">
-                  {cmsCta?.buttonText || cmsCta?.text || "Start_Project"}
+                <span className="relative z-10 flex items-center justify-center gap-2 font-mono text-sm font-bold uppercase tracking-wider text-[var(--color-cta-primary-text)]">
+                  {cmsCta?.buttonText || cmsCta?.text || "View_Templates"}
                   <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                 </span>
               </Link>

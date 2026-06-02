@@ -51,6 +51,13 @@
   --text-primary: var(--color-ink);
   --text-secondary: rgba(255, 255, 255, 0.6);
   --text-tertiary: rgba(255, 255, 255, 0.4);
+
+  /* Primary CTA Contrast tokens */
+  --color-cta-primary-bg: #ffffff;
+  --color-cta-primary-text: #050505;
+  --color-cta-primary-border: rgba(255, 255, 255, 0.85);
+  --color-cta-primary-hover-bg: #ededed;
+  --color-cta-primary-hover-border: #ffffff;
 }
 
 .theme-light,
@@ -91,6 +98,13 @@ html.light {
   --text-primary: var(--color-ink);
   --text-secondary: #3f3f46;
   --text-tertiary: #52525b;
+
+  /* Primary CTA Contrast tokens */
+  --color-cta-primary-bg: #0b0f14;
+  --color-cta-primary-text: #ffffff;
+  --color-cta-primary-border: rgba(15, 23, 42, 0.95);
+  --color-cta-primary-hover-bg: #1c2124;
+  --color-cta-primary-hover-border: #0b0f14;
 }
 
 /* ----------------------------------------

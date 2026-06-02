@@ -83,16 +83,15 @@ export function Hero({
 
             {/* ── CTAs ── */}
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-              {/* Ghost Glow Primary Button */}
+              {/* High Contrast Primary Button */}
               <Link
-                href="/quote"
-                className="group relative overflow-hidden rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-6 py-3 transition-all hover:border-[var(--border-active)] active:scale-95 shadow-sm flex items-center justify-center gap-2"
+                href="/services"
+                className="group relative overflow-hidden rounded-md border border-[var(--color-cta-primary-border)] bg-[var(--color-cta-primary-bg)] px-6 py-3 transition-all hover:bg-[var(--color-cta-primary-hover-bg)] hover:border-[var(--color-cta-primary-hover-border)] active:scale-95 shadow-md flex items-center justify-center gap-2"
               >
-                <div className="absolute inset-0 -z-10 bg-gradient-to-r from-cyan-500/10 to-violet-500/10 opacity-0 transition-opacity group-hover:opacity-100" />
-                <span className="font-mono text-[13px] font-semibold uppercase tracking-wider text-[var(--text-primary)]">
-                  START_PROJECT
+                <span className="font-mono text-[13px] font-bold uppercase tracking-wider text-[var(--color-cta-primary-text)]">
+                  VIEW_TEMPLATES
                 </span>
-                <ArrowUpRight className="h-4 w-4 text-[var(--text-primary)] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                <ArrowUpRight className="h-4 w-4 text-[var(--color-cta-primary-text)] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </Link>
 
               <Link
