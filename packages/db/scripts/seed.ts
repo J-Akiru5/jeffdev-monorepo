@@ -110,7 +110,7 @@ const INITIAL_RULES: Omit<SeedRule, "createdAt" | "updatedAt">[] = [
 - Validation: Zod (mandatory for all forms & APIs)
 
 ## Auth
-- Prism SaaS: Clerk
+- Prism SaaS: Supabase Auth
 - Agency Admin: Supabase Auth`,
   },
   {

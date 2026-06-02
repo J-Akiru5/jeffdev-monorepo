@@ -275,11 +275,13 @@ export function AppTopNavbar({
             </span>
           </Link>
 
-          {/* Divider */}
-          <div className="hidden h-5 w-px bg-[var(--border-subtle)] sm:block" />
-
-          {/* App Switcher */}
-          <AppSwitcher appName={appName} appLinks={appLinks} appIcon={appIcon} />
+          {/* Divider & App Switcher */}
+          {appName && (
+            <>
+              <div className="hidden h-5 w-px bg-[var(--border-subtle)] sm:block" />
+              <AppSwitcher appName={appName} appLinks={appLinks} appIcon={appIcon} />
+            </>
+          )}
 
           {/* Extra left content (workspace switcher etc.) */}
           {leftSlot && (

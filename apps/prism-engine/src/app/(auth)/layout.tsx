@@ -51,10 +51,6 @@ export default function AuthLayout({
             </div>
           </div>
         </div>
-
-        <div className="relative z-10 text-sm text-[var(--text-tertiary)]">
-          &copy; {new Date().getFullYear()} Syntaxure Labs. All rights reserved.
-        </div>
       </div>
 
       {/* Right: Auth content */}

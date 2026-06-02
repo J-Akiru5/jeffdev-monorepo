@@ -27,5 +27,9 @@ export async function GET() {
     service: "prism-engine",
     version: getVersion(),
     timestamp: new Date().toISOString(),
+    memory: {
+      heapUsed: process.memoryUsage().heapUsed,
+      heapTotal: process.memoryUsage().heapTotal,
+    },
   });
 }

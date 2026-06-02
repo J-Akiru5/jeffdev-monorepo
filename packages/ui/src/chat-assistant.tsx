@@ -129,7 +129,7 @@ export function ChatAssistant({
       {/* Floating Bubble Trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`chat-assistant-trigger ${className || ""}`}
+        className={`chat-assistant-trigger ${isOpen ? "chat-assistant-trigger-open" : ""} ${className || ""}`}
         aria-label={isOpen ? "Close assistant" : "Open assistant"}
       >
         {isOpen ? (

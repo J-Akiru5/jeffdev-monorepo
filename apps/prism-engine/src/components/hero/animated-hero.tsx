@@ -235,7 +235,7 @@ export function AnimatedHero() {
       <div className="h-[300vh]">
         <div
           ref={heroRef}
-          className="h-screen flex items-center justify-center px-4"
+          className="min-h-[100svh] md:h-screen flex items-center justify-center px-4 py-12 md:py-0"
           style={{ paddingTop: "64px" }} // Nav height offset
         >
           {/* Background Grid */}
@@ -251,19 +251,19 @@ export function AnimatedHero() {
             className="text-center max-w-4xl relative z-10 flex flex-col items-center"
           >
             {/* Animated Prism Logo - Starts Large & Centered */}
-            <div ref={prismContainerRef} className="h-[120px] flex items-center justify-center mt-8">
-              <div className="relative pointer-events-none -translate-y-10">
-                <Prism3D className="mx-auto scale-110" />
+            <div ref={prismContainerRef} className="h-[80px] md:h-[120px] flex items-center justify-center mt-2 md:mt-8">
+              <div className="relative pointer-events-none -translate-y-6 md:-translate-y-10">
+                <Prism3D className="mx-auto scale-75 md:scale-110" />
               </div>
             </div>
 
             {/* Version Badge */}
             <div
               ref={badgeRef}
-              className="inline-flex items-center gap-3 px-6 py-3 rounded-full border border-cyan-500/30 bg-cyan-500/5 backdrop-blur-sm"
+              className="inline-flex items-center gap-2 md:gap-3 px-4 py-2 md:px-6 md:py-3 rounded-full border border-cyan-500/30 bg-cyan-500/5 backdrop-blur-sm"
             >
-              <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shrink-0 translate-y-[3px]" />
-              <span className="font-mono text-sm font-medium tracking-widest text-[var(--text-primary)]">
+              <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-cyan-400 animate-pulse shrink-0 translate-y-[2px] md:translate-y-[3px]" />
+              <span className="font-mono text-[10px] md:text-sm font-medium tracking-widest text-[var(--text-primary)]">
                 PRISM CONTEXT ENGINE V1.0.3
               </span>
             </div>
@@ -271,21 +271,21 @@ export function AnimatedHero() {
             {/* Headline - Hidden Initially (height: 0) */}
             <h1
               ref={headlineRef}
-              className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight"
+              className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight"
             >
               <span className="bg-gradient-to-r from-[var(--text-primary)] to-[var(--text-secondary)] bg-clip-text text-transparent">
                 The Context Operating System
               </span>
               <br />
               <span className="bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent pb-2 inline-block">
-                for Agentic Teams
+                for Agentic Developers
               </span>
             </h1>
 
             {/* Subheadline - Hidden Initially */}
             <p
               ref={subheadlineRef}
-              className="text-[var(--text-secondary)] text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
+              className="text-[var(--text-secondary)] text-base md:text-xl max-w-2xl mx-auto leading-relaxed mt-2 md:mt-0"
             >
               Scan your architecture via Playwright. AI learns your rules. Deploy context
               directly to Cursor, Windsurf, and Claude via MCP.
@@ -294,65 +294,65 @@ export function AnimatedHero() {
             {/* Tagline - Hidden Initially */}
             <p
               ref={taglineRef}
-              className="text-cyan-400/80 text-base md:text-lg font-mono"
+              className="text-cyan-400/80 text-sm md:text-lg font-mono mt-1 md:mt-0"
             >
               Eliminate context pollution. Forever.
             </p>
 
             {/* CTA Buttons - Hidden Initially */}
-            <div ref={ctaRef} className="flex flex-col sm:flex-row gap-4 items-center justify-center mt-8 relative z-20">
+            <div ref={ctaRef} className="flex flex-col sm:flex-row gap-3 md:gap-4 items-center justify-center mt-6 md:mt-8 relative z-20 w-full sm:w-auto">
               <Link
                 href={user ? "/dashboard" : "/sign-up"}
-                className="group relative overflow-hidden rounded-md border border-cyan-500/30 bg-cyan-500/10 px-8 py-4 transition-all hover:border-cyan-400/50 hover:bg-cyan-500/20 active:scale-95 shadow-[0_0_20px_rgba(6,182,212,0.15)] hover:shadow-[0_0_30px_rgba(6,182,212,0.3)]"
+                className="w-full sm:w-auto group relative overflow-hidden rounded-md border border-cyan-500/30 bg-cyan-500/10 px-6 py-3 md:px-8 md:py-4 transition-all hover:border-cyan-400/50 hover:bg-cyan-500/20 active:scale-95 shadow-[0_0_20px_rgba(6,182,212,0.15)] hover:shadow-[0_0_30px_rgba(6,182,212,0.3)]"
               >
                 <div className="absolute inset-0 -z-10 bg-gradient-to-r from-cyan-500/0 via-cyan-500/10 to-purple-500/0 opacity-0 transition-opacity group-hover:opacity-100" />
-                <span className="font-mono text-sm uppercase tracking-wider text-[var(--text-primary)] font-semibold flex items-center gap-2">
+                <span className="font-mono text-xs md:text-sm uppercase tracking-wider text-[var(--text-primary)] font-semibold flex items-center justify-center gap-2">
                   {user ? "Dashboard" : "Start Free"}
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </span>
               </Link>
               <Link
                 href="/pricing"
-                className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-8 py-4 transition-all hover:bg-[var(--bg-tertiary)] hover:border-[var(--border-active)] active:scale-95"
+                className="w-full sm:w-auto rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-6 py-3 md:px-8 md:py-4 transition-all hover:bg-[var(--bg-tertiary)] hover:border-[var(--border-active)] active:scale-95"
               >
-                <span className="font-mono text-sm uppercase tracking-wider text-[var(--text-primary)]">
+                <span className="font-mono text-xs md:text-sm uppercase tracking-wider text-[var(--text-primary)] flex justify-center">
                   View Pricing
                 </span>
               </Link>
               <Link
                 href="https://docs.syntaxure.dev"
                 target="_blank"
-                className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-8 py-4 transition-all hover:bg-[var(--bg-tertiary)] hover:border-[var(--border-active)] active:scale-95"
+                className="w-full sm:w-auto rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-6 py-3 md:px-8 md:py-4 transition-all hover:bg-[var(--bg-tertiary)] hover:border-[var(--border-active)] active:scale-95"
               >
-                <span className="font-mono text-sm uppercase tracking-wider text-[var(--text-primary)]">
+                <span className="font-mono text-xs md:text-sm uppercase tracking-wider text-[var(--text-primary)] flex justify-center">
                   View Docs
                 </span>
               </Link>
             </div>
 
             {/* Feature Pills - Hidden Initially */}
-            <div ref={pillsRef} className="flex flex-wrap gap-3 justify-center">
-              <div className="glass px-4 py-2 rounded-full inline-flex items-center gap-2 border border-cyan-500/15 shadow-sm shadow-cyan-500/5 hover:border-cyan-500/30 hover:shadow-cyan-500/10 transition-all cursor-default">
+            <div ref={pillsRef} className="flex flex-wrap gap-2 md:gap-3 justify-center mt-4 md:mt-0">
+              <div className="glass px-3 py-1.5 md:px-4 md:py-2 rounded-full inline-flex items-center gap-1.5 md:gap-2 border border-cyan-500/15 shadow-sm shadow-cyan-500/5 hover:border-cyan-500/30 hover:shadow-cyan-500/10 transition-all cursor-default">
                 <ScanSearch className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
-                <span className="text-xs text-[var(--text-secondary)] font-mono">
+                <span className="text-[10px] md:text-xs text-[var(--text-secondary)] font-mono">
                   Playwright Scan
                 </span>
               </div>
-              <div className="glass px-4 py-2 rounded-full inline-flex items-center gap-2 border border-cyan-500/15 shadow-sm shadow-cyan-500/5 hover:border-cyan-500/30 hover:shadow-cyan-500/10 transition-all cursor-default">
-                <BrainCircuit className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
-                <span className="text-xs text-[var(--text-secondary)] font-mono">
+              <div className="glass px-3 py-1.5 md:px-4 md:py-2 rounded-full inline-flex items-center gap-1.5 md:gap-2 border border-cyan-500/15 shadow-sm shadow-cyan-500/5 hover:border-cyan-500/30 hover:shadow-cyan-500/10 transition-all cursor-default">
+                <BrainCircuit className="w-3 h-3 md:w-3.5 md:h-3.5 text-[var(--text-secondary)]" />
+                <span className="text-[10px] md:text-xs text-[var(--text-secondary)] font-mono">
                   AI Rule Extraction
                 </span>
               </div>
-              <div className="glass px-4 py-2 rounded-full inline-flex items-center gap-2 border border-cyan-500/15 shadow-sm shadow-cyan-500/5 hover:border-cyan-500/30 hover:shadow-cyan-500/10 transition-all cursor-default">
-                <Network className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
-                <span className="text-xs text-[var(--text-secondary)] font-mono">
+              <div className="glass px-3 py-1.5 md:px-4 md:py-2 rounded-full inline-flex items-center gap-1.5 md:gap-2 border border-cyan-500/15 shadow-sm shadow-cyan-500/5 hover:border-cyan-500/30 hover:shadow-cyan-500/10 transition-all cursor-default">
+                <Network className="w-3 h-3 md:w-3.5 md:h-3.5 text-[var(--text-secondary)]" />
+                <span className="text-[10px] md:text-xs text-[var(--text-secondary)] font-mono">
                   MCP Protocol
                 </span>
               </div>
-              <div className="glass px-4 py-2 rounded-full inline-flex items-center gap-2 border border-cyan-500/15 shadow-sm shadow-cyan-500/5 hover:border-cyan-500/30 hover:shadow-cyan-500/10 transition-all cursor-default">
-                <Zap className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
-                <span className="text-xs text-[var(--text-secondary)] font-mono">
+              <div className="glass px-3 py-1.5 md:px-4 md:py-2 rounded-full inline-flex items-center gap-1.5 md:gap-2 border border-cyan-500/15 shadow-sm shadow-cyan-500/5 hover:border-cyan-500/30 hover:shadow-cyan-500/10 transition-all cursor-default">
+                <Zap className="w-3 h-3 md:w-3.5 md:h-3.5 text-[var(--text-secondary)]" />
+                <span className="text-[10px] md:text-xs text-[var(--text-secondary)] font-mono">
                   Real-time Sync
                 </span>
               </div>

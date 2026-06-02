@@ -19,11 +19,6 @@ import Link from "next/link";
 function AppLinks({ role }: { role?: string }) {
   const links = [
     {
-      label: "Engine",
-      href: process.env.NEXT_PUBLIC_PRISM_URL || "http://localhost:3001",
-      icon: Shield,
-    },
-    {
       label: "Manage",
       href: process.env.NEXT_PUBLIC_MANAGE_URL || "http://localhost:3007",
       icon: LayoutDashboard,
@@ -35,15 +30,12 @@ function AppLinks({ role }: { role?: string }) {
       icon: User,
       adminOnly: true,
     },
-    {
-      label: "Labs",
-      href: process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
-      icon: Sparkles,
-    },
   ];
 
   const isAdmin = role === "admin" || role === "founder";
   const visibleLinks = links.filter((l) => !(l as any).adminOnly || isAdmin);
+
+  if (visibleLinks.length === 0) return null;
 
   return (
     <>
@@ -88,7 +80,6 @@ export function AccountDropdownWrapper() {
       initials={initials}
       email={user?.email}
       displayName={user?.full_name || "User"}
-      role={user?.role || undefined}
       settingsHref="/settings"
       extraActions={<AppLinks role={user?.role} />}
       onSignOut={handleSignOut}

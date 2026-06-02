@@ -35,25 +35,32 @@
   transform: scale(0.98);
 }
 
+@media (max-width: 768px) {
+  .chat-assistant-trigger-open {
+    display: none !important;
+  }
+}
+
+
 /* Chat Panel */
 .chat-assistant-panel {
   position: fixed;
-  bottom: 96px;
+  bottom: 24px;
   right: 24px;
   width: 400px;
   max-width: calc(100vw - 48px);
   height: 600px;
-  max-height: calc(100vh - 120px);
-  background: rgba(5, 5, 5, 0.95);
+  max-height: calc(100vh - 48px);
+  background: var(--bg-secondary);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(38, 38, 38, 0.8);
+  border: 1px solid var(--border-subtle);
   border-radius: 16px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   box-shadow: 
-    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 20px 60px rgba(0, 0, 0, 0.2),
     0 0 40px rgba(6, 182, 212, 0.1);
   z-index: 9998;
   animation: slideUp 0.2s ease;
@@ -76,8 +83,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  border-bottom: 1px solid rgba(38, 38, 38, 0.8);
-  background: rgba(26, 26, 26, 0.5);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-primary);
 }
 
 .chat-assistant-header-title {
@@ -86,11 +93,11 @@
   gap: 10px;
   font-weight: 600;
   font-size: 15px;
-  color: #ffffff;
+  color: var(--text-primary);
 }
 
 .chat-assistant-header-title svg {
-  color: #06b6d4;
+  color: var(--color-cyan);
 }
 
 .chat-assistant-header-actions {
@@ -109,14 +116,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #a1a1a1;
+  color: var(--text-secondary);
   transition: all 0.15s ease;
 }
 
 .chat-assistant-clear-btn:hover,
 .chat-assistant-close-btn:hover {
-  background: rgba(38, 38, 38, 0.8);
-  color: #ffffff;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
 /* Messages Container */
@@ -175,13 +182,13 @@
 .chat-assistant-welcome h3 {
   font-size: 18px;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--text-primary);
   margin: 0 0 8px 0;
 }
 
 .chat-assistant-welcome p {
   font-size: 14px;
-  color: #a1a1a1;
+  color: var(--text-secondary);
   margin: 0 0 24px 0;
 }
 
@@ -194,10 +201,10 @@
 
 .chat-assistant-suggestions button {
   padding: 12px 16px;
-  background: rgba(26, 26, 26, 0.8);
-  border: 1px solid rgba(38, 38, 38, 0.8);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 13px;
   text-align: left;
   cursor: pointer;
@@ -205,8 +212,8 @@
 }
 
 .chat-assistant-suggestions button:hover {
-  background: rgba(38, 38, 38, 0.8);
-  border-color: rgba(6, 182, 212, 0.3);
+  background: var(--bg-secondary);
+  border-color: var(--border-active);
 }
 
 /* Message Bubble */
@@ -262,13 +269,13 @@
 .chat-assistant-message-user .chat-assistant-message-content p {
   margin: 0;
   font-size: 14px;
-  color: #ffffff;
+  color: var(--text-primary);
   line-height: 1.5;
 }
 
 .chat-assistant-message-assistant .chat-assistant-message-content {
   font-size: 14px;
-  color: #e5e5e5;
+  color: var(--text-secondary);
   line-height: 1.6;
 }
 
@@ -294,7 +301,7 @@
 .chat-assistant-message-assistant .chat-assistant-message-content h2,
 .chat-assistant-message-assistant .chat-assistant-message-content h3,
 .chat-assistant-message-assistant .chat-assistant-message-content h4 {
-  color: #ffffff;
+  color: var(--text-primary);
   margin: 16px 0 8px 0;
   font-weight: 600;
 }
@@ -317,7 +324,7 @@
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
   background: rgba(6, 182, 212, 0.1);
-  color: #06b6d4;
+  color: var(--color-cyan);
   padding: 2px 6px;
   border-radius: 4px;
 }
@@ -326,8 +333,8 @@
 .chat-assistant-code-block {
   font-family: 'JetBrains Mono', monospace;
   font-size: 13px;
-  background: rgba(26, 26, 26, 0.8);
-  border: 1px solid rgba(38, 38, 38, 0.8);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 12px 16px;
   overflow-x: auto;
@@ -335,7 +342,7 @@
 }
 
 .chat-assistant-code-block code {
-  color: #e5e5e5;
+  color: var(--text-secondary);
 }
 
 /* Links */
@@ -407,8 +414,8 @@
   display: flex;
   gap: 12px;
   padding: 16px 20px;
-  border-top: 1px solid rgba(38, 38, 38, 0.8);
-  background: rgba(26, 26, 26, 0.5);
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-primary);
 }
 
 .chat-assistant-input {
@@ -416,10 +423,10 @@
   min-height: 40px;
   max-height: 120px;
   padding: 10px 16px;
-  background: rgba(26, 26, 26, 0.8);
-  border: 1px solid rgba(38, 38, 38, 0.8);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
   border-radius: 12px;
-  color: #ffffff;
+  color: var(--text-primary);
   font-size: 14px;
   font-family: inherit;
   resize: none;
@@ -428,12 +435,12 @@
 }
 
 .chat-assistant-input::placeholder {
-  color: #6b6b6b;
+  color: var(--text-tertiary);
 }
 
 .chat-assistant-input:focus {
-  border-color: rgba(6, 182, 212, 0.5);
-  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.1);
+  border-color: var(--border-active);
+  box-shadow: 0 0 0 2px var(--border-subtle);
 }
 
 .chat-assistant-input:disabled {
@@ -470,18 +477,24 @@
   padding: 8px 20px 12px;
   text-align: center;
   font-size: 11px;
-  color: #6b6b6b;
-  background: rgba(26, 26, 26, 0.5);
+  color: var(--text-tertiary);
+  background: var(--bg-primary);
+}
+
+/* Hide trigger globally when chat is open */
+.chat-assistant-trigger.chat-assistant-trigger-open {
+  display: none;
 }
 
 /* Mobile Responsive */
 @media (max-width: 1023px) {
   .chat-assistant-trigger {
-    bottom: 80px; /* 64px bottom nav + 16px spacing */
+    bottom: 24px;
+    right: 24px;
   }
   .chat-assistant-panel {
-    bottom: 148px; /* 80px trigger bottom + 56px trigger height + 12px spacing */
-    max-height: calc(100vh - 172px);
+    bottom: 96px;
+    max-height: calc(100vh - 120px);
   }
 }
 
@@ -497,7 +510,7 @@
   }
 
   .chat-assistant-trigger {
-    bottom: 80px; /* Keep above bottom nav on mobile */
+    bottom: 16px;
     right: 16px;
     width: 48px;
     height: 48px;

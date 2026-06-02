@@ -28,7 +28,7 @@
   "scripts": {
     "build": "prisma generate && tsc",
     "lint": "eslint . --max-warnings 0",
-    "check-types": "tsc --noEmit",
+    "check-types": "prisma generate && tsc --noEmit",
     "db:seed": "tsx scripts/seed.ts",
     "prisma:generate": "prisma generate",
     "prisma:studio": "prisma studio",

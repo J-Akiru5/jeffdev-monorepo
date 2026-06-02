@@ -84,8 +84,8 @@ Prism Admin is the unified admin panel ("Mission Control") for Syntaxure Labs pr
 
 ## System Architecture
 - **App URL**: admin.syntaxure.dev (port 3004 local)
-- **Stack**: Next.js 16 + Supabase + Clerk
-- **Auth**: Clerk (admin users only)
+- **Stack**: Next.js 16 + Supabase
+- **Auth**: Supabase Auth (admin users only)
 - **Database**: Supabase (PostgreSQL) for all admin data
 - **UI**: Shared components from @syntaxure/ui
 - **Theme**: Dark mode only, "void" aesthetic (#050505 background)

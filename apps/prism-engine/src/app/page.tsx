@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { ArrowRight } from "lucide-react";
 import { PublicNav } from "@/components/layout/public-nav";
 import { AnimatedHero } from "@/components/hero";
 
 const PRISM_URL = process.env.NEXT_PUBLIC_PRISM_URL || "https://prism.syntaxure.dev";
 
 export const metadata: Metadata = {
-    title: 'Prism Context Engine - The Context Operating System for Agentic Teams',
+    title: 'Prism Context Engine - The Context Operating System for Agentic Developers',
   description:
     'Record your architecture. AI learns your rules. Deploy context directly to Cursor, Windsurf, and Claude via MCP. Eliminate context pollution forever.',
   keywords: [
@@ -24,7 +25,7 @@ export const metadata: Metadata = {
     'code standards enforcement',
   ],
   openGraph: {
-      title: 'Prism Context Engine - The Context Operating System for Agentic Teams',
+      title: 'Prism Context Engine - The Context Operating System for Agentic Developers',
     description:
       'Record your architecture. AI learns your rules. Deploy to your IDE via MCP. Eliminate context pollution.',
     url: '/',
@@ -195,9 +196,11 @@ export default function HomePage() {
               </p>
               <Link
                 href="/sign-up"
-                className="inline-block bg-blue-600 dark:glass !text-white dark:!text-[var(--text-primary)] px-6 py-2 rounded-md hover:bg-blue-700 dark:hover:border-cyan-500/50 transition-all text-sm font-mono uppercase tracking-wider shadow-[0_2px_8px_rgba(37,99,235,0.3)] dark:shadow-none"
+                className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-md bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-3 font-mono text-sm font-semibold tracking-wider !text-white transition-all hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] active:scale-95"
               >
-                Start Free →
+                <span className="relative z-10 uppercase">Start Free</span>
+                <ArrowRight className="relative z-10 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                <div className="absolute inset-0 -z-0 bg-gradient-to-r from-cyan-500 to-blue-600 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
               </Link>
             </div>
           </div>
