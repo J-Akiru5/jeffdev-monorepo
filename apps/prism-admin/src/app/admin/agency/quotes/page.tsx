@@ -77,12 +77,12 @@ export default async function AgencyQuotesPage() {
                     </span>
                   </div>
                   <p className="text-xs text-white/40 mt-0.5 truncate">
-                    {quote.email} &middot; {quote.project_type || quote.title || "No type"}
-                    {quote.budget_range ? ` · ${quote.budget_range}` : ""}
+                    {String(quote.email || "")} &middot; {String(quote.template_selected || quote.title || "No type")}
+                    {quote.customization_scope ? ` · ${String(quote.customization_scope)}` : ""}
                   </p>
-                  {quote.message && (
+                  {quote.description && (
                     <p className="mt-1.5 text-xs text-white/30 line-clamp-2">
-                      {quote.message}
+                      {String(quote.description)}
                     </p>
                   )}
                 </div>

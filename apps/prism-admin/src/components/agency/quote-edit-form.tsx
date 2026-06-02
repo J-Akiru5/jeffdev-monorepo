@@ -18,16 +18,23 @@ const STATUSES = [
   { value: "declined", label: "Declined" },
 ] as const;
 
+const SCOPE_LABELS: Record<string, string> = {
+  brand: "Basic Brand/UI Tweaks",
+  api: "Custom API Integrations",
+  features: "New Features on Top",
+  full: "Full Custom Build",
+};
+
 interface QuoteEditFormProps {
   quoteId: string;
   defaultValues: {
     name: string;
     email: string;
     company: string;
-    projectType: string;
-    budgetRange: string;
-    timeline: string;
-    message: string;
+    templateSelected: string;
+    customizationScope: string;
+    phone: string;
+    requirements: string;
     status: string;
   };
 }
@@ -47,11 +54,11 @@ export function QuoteEditForm({ quoteId, defaultValues }: QuoteEditFormProps) {
       name: form.name,
       email: form.email,
       company: form.company,
-      projectType: form.projectType,
-      budgetRange: form.budgetRange,
-      timeline: form.timeline,
-      message: form.message,
-      status: form.status as any,
+      template_selected: form.templateSelected,
+      customization_scope: form.customizationScope,
+      phone: form.phone,
+      description: form.requirements,
+      status: form.status,
     });
 
     if (result.success) {
@@ -115,7 +122,7 @@ export function QuoteEditForm({ quoteId, defaultValues }: QuoteEditFormProps) {
               required
             />
           </div>
-          <div className="md:col-span-2">
+          <div>
             <label className="block text-xs text-white/50 mb-1">Company</label>
             <input
               value={form.company}
@@ -123,43 +130,48 @@ export function QuoteEditForm({ quoteId, defaultValues }: QuoteEditFormProps) {
               className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-cyan-500/50"
             />
           </div>
+          <div>
+            <label className="block text-xs text-white/50 mb-1">Phone</label>
+            <input
+              value={form.phone}
+              onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
+              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-cyan-500/50"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Project Details */}
+      {/* Template & Scope */}
       <div className="rounded-lg border border-white/5 bg-white/[0.02] p-6 space-y-4">
-        <h3 className="text-sm font-medium text-white/80">Project Details</h3>
+        <h3 className="text-sm font-medium text-white/80">Template & Scope</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs text-white/50 mb-1">Project Type</label>
+            <label className="block text-xs text-white/50 mb-1">Selected Template</label>
             <input
-              value={form.projectType}
-              onChange={(e) => setForm((f) => ({ ...f, projectType: e.target.value }))}
+              value={form.templateSelected}
+              onChange={(e) => setForm((f) => ({ ...f, templateSelected: e.target.value }))}
               className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-cyan-500/50"
             />
           </div>
           <div>
-            <label className="block text-xs text-white/50 mb-1">Budget Range</label>
-            <input
-              value={form.budgetRange}
-              onChange={(e) => setForm((f) => ({ ...f, budgetRange: e.target.value }))}
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-cyan-500/50"
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-white/50 mb-1">Timeline</label>
-            <input
-              value={form.timeline}
-              onChange={(e) => setForm((f) => ({ ...f, timeline: e.target.value }))}
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-cyan-500/50"
-            />
+            <label className="block text-xs text-white/50 mb-1">Customization Scope</label>
+            <select
+              value={form.customizationScope}
+              onChange={(e) => setForm((f) => ({ ...f, customizationScope: e.target.value }))}
+              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:outline-none focus:border-cyan-500/50"
+            >
+              <option value="">Select scope...</option>
+              {Object.entries(SCOPE_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
           </div>
         </div>
         <div>
-          <label className="block text-xs text-white/50 mb-1">Message</label>
+          <label className="block text-xs text-white/50 mb-1">Requirements</label>
           <textarea
-            value={form.message}
-            onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
+            value={form.requirements}
+            onChange={(e) => setForm((f) => ({ ...f, requirements: e.target.value }))}
             rows={4}
             className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-cyan-500/50 resize-none"
           />

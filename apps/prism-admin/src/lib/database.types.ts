@@ -583,29 +583,39 @@ export interface ClientContractRow {
 
 export interface QuoteRow {
   id: string;
-  name: string;
-  email: string;
+  user_id: string | null;
+  project_id: string | null;
+  title: string;
+  description: string | null;
+  amount: number;
+  status: string;
+  valid_until: string | null;
+  line_items: unknown[] | null;
+  metadata: Record<string, unknown> | null;
+  quote_type: string | null;
+  template_id: string | null;
+  name: string | null;
+  email: string | null;
   company: string | null;
-  project_type: string | null;
-  title: string | null;
-  budget_range: string | null;
-  timeline: string | null;
-  message: string | null;
-  status: "new" | "reviewed" | "responded" | "accepted" | "declined";
+  phone: string | null;
+  template_selected: string | null;
+  customization_scope: string | null;
   created_at: string;
   updated_at: string;
 }
 
-// ── Contact Messages ──
+// ── Contact Messages (renamed from messages) ──
 
 export interface ContactMessageRow {
   id: string;
-  name: string;
+  user_id: string | null;
+  name: string | null;
   email: string;
-  subject: string | null;
-  message: string | null;
+  subject: string;
+  message: string;
+  status: string;
+  message_type: string | null;
   type: string | null;
-  status: "unread" | "read" | "archived";
   created_at: string;
   updated_at: string;
 }
@@ -614,12 +624,13 @@ export interface ContactMessageRow {
 
 export interface FeedbackRow {
   id: string;
-  user_id: string | null;
-  user_name: string | null;
-  rating: number;
+  user_id: string;
+  project_id: string | null;
+  case_study_id: string | null;
+  rating: number | null;
   comment: string | null;
-  page_url: string | null;
-  status: "received" | "acknowledged" | "resolved" | "archived";
+  category: string | null;
+  status: string;
   created_at: string;
   updated_at: string;
 }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Edit2, Trash2 } from "lucide-react";
+import { ArrowLeft, Edit2, Trash2, ExternalLink } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { deleteAgencyQuote } from "@/app/actions/agency-quotes";
 import { revalidatePath } from "next/cache";
@@ -17,6 +17,17 @@ const statusColors: Record<string, string> = {
   responded: "bg-blue-500/20 text-blue-400",
   accepted: "bg-emerald-500/20 text-emerald-400",
   declined: "bg-red-500/20 text-red-400",
+  draft: "bg-white/10 text-white/40",
+  sent: "bg-blue-500/20 text-blue-400",
+  rejected: "bg-red-500/20 text-red-400",
+  expired: "bg-white/10 text-white/30",
+};
+
+const scopeLabels: Record<string, string> = {
+  brand: "Basic Brand/UI Tweaks",
+  api: "Custom API Integrations",
+  features: "New Features on Top",
+  full: "Full Custom Build",
 };
 
 interface Props {
@@ -35,6 +46,17 @@ export default async function QuoteDetailPage({ params }: Props) {
 
   if (error || !quote) {
     notFound();
+  }
+
+  // Fetch template name if template_selected is a UUID
+  let templateName = quote.template_selected;
+  if (quote.template_selected && quote.template_selected !== "custom") {
+    const { data: template } = await supabase
+      .from("product_templates")
+      .select("name")
+      .eq("slug", quote.template_selected)
+      .maybeSingle();
+    if (template) templateName = template.name;
   }
 
   async function handleDelete() {
@@ -111,32 +133,49 @@ export default async function QuoteDetailPage({ params }: Props) {
               <label className="block text-xs text-white/40 mb-1">Company</label>
               <p className="text-sm text-white">{quote.company || "—"}</p>
             </div>
+            {quote.phone && (
+              <div>
+                <label className="block text-xs text-white/40 mb-1">Phone</label>
+                <p className="text-sm text-white">{quote.phone}</p>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="rounded-lg border border-white/5 bg-white/[0.02] p-6 space-y-4">
-          <h3 className="text-sm font-medium text-white/80">Project Details</h3>
+          <h3 className="text-sm font-medium text-white/80">Template & Scope</h3>
           <div className="space-y-3">
             <div>
-              <label className="block text-xs text-white/40 mb-1">Project Type</label>
-              <p className="text-sm text-white">{quote.project_type || quote.title || "—"}</p>
+              <label className="block text-xs text-white/40 mb-1">Selected Template</label>
+              <p className="text-sm text-white">{templateName || "—"}</p>
             </div>
             <div>
-              <label className="block text-xs text-white/40 mb-1">Budget Range</label>
-              <p className="text-sm text-white">{quote.budget_range || "—"}</p>
-            </div>
-            <div>
-              <label className="block text-xs text-white/40 mb-1">Timeline</label>
-              <p className="text-sm text-white">{quote.timeline || "—"}</p>
+              <label className="block text-xs text-white/40 mb-1">Customization Scope</label>
+              <p className="text-sm text-white">
+                {quote.customization_scope
+                  ? scopeLabels[quote.customization_scope] || quote.customization_scope
+                  : "—"}
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      {quote.message && (
+      {/* Requirements */}
+      {quote.description && (
         <div className="rounded-lg border border-white/5 bg-white/[0.02] p-6 space-y-4">
-          <h3 className="text-sm font-medium text-white/80">Message</h3>
-          <p className="text-sm text-white/70 whitespace-pre-wrap">{quote.message}</p>
+          <h3 className="text-sm font-medium text-white/80">Customization Requirements</h3>
+          <p className="text-sm text-white/70 whitespace-pre-wrap">{quote.description}</p>
+        </div>
+      )}
+
+      {/* Metadata */}
+      {quote.metadata && Object.keys(quote.metadata as object).length > 0 && (
+        <div className="rounded-lg border border-white/5 bg-white/[0.02] p-6 space-y-4">
+          <h3 className="text-sm font-medium text-white/80">Additional Metadata</h3>
+          <pre className="text-xs text-white/50 font-mono overflow-auto">
+            {JSON.stringify(quote.metadata, null, 2)}
+          </pre>
         </div>
       )}
     </div>

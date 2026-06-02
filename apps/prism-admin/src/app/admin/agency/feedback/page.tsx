@@ -37,7 +37,7 @@ export default async function AgencyFeedbackPage() {
   }
 
   const avgRating = feedback && feedback.length > 0
-    ? (feedback.reduce((sum: number, f: any) => sum + (f.rating || 0), 0) / feedback.length).toFixed(1)
+    ? (feedback.reduce((sum: number, f: { rating?: number | null }) => sum + (f.rating || 0), 0) / feedback.length).toFixed(1)
     : "—";
 
   return (
@@ -70,14 +70,11 @@ export default async function AgencyFeedbackPage() {
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star
                         key={i}
-                        className={`h-3 w-3 ${i < item.rating ? "text-yellow-400 fill-yellow-400" : "text-white/20"}`}
+                        className={`h-3 w-3 ${i < (item.rating || 0) ? "text-yellow-400 fill-yellow-400" : "text-white/20"}`}
                       />
                     ))}
-                    <span className="ml-1 text-xs text-white/40">{item.rating}/5</span>
+                    <span className="ml-1 text-xs text-white/40">{item.rating || 0}/5</span>
                   </div>
-                  {item.user_name && (
-                    <p className="mt-1 text-xs text-white/50">by {item.user_name}</p>
-                  )}
                 </div>
                 <span
                   className={`rounded-sm px-2 py-0.5 text-[10px] uppercase tracking-wider ${
@@ -90,11 +87,11 @@ export default async function AgencyFeedbackPage() {
               {item.comment && (
                 <p className="mt-2 text-sm text-white/70">{item.comment}</p>
               )}
-              {item.page_url && (
-                <p className="mt-1 text-[10px] text-white/30">Page: {item.page_url}</p>
+              {item.category && (
+                <p className="mt-1 text-[10px] text-white/30">Category: {item.category}</p>
               )}
               <div className="mt-3 flex items-center gap-2">
-                {["received", "acknowledged", "resolved"].map((s) => (
+                {["received", "acknowledged", "resolved", "archived"].map((s) => (
                   <form key={s} action={handleStatus.bind(null, item.id, s)}>
                     <button
                       type="submit"

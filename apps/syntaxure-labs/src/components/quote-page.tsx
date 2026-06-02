@@ -2,65 +2,101 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Loader2, Package, Palette, Code, Layers, Wrench } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
-import { PriceRangeDisplay } from "@/components/ui/price-display";
 import { cn } from "@syntaxure/ui";
 
+interface ProductTemplate {
+  id: string;
+  name: string;
+  slug: string;
+  tagline: string | null;
+  short_description: string | null;
+  icon: string | null;
+  base_price_monthly_php: number | null;
+  base_price_monthly_usd: number | null;
+  features: unknown[];
+  tech_stack: string[];
+}
+
 interface QuotePageProps {
+  templates: ProductTemplate[];
   pageContent?: {
-    projectTypes?: { id: string; label: string; description: string }[];
-    budgetRanges?: { id: string; minPhp: number; maxPhp: number | null; description: string }[];
-    timelines?: { id: string; label: string; description: string }[];
     successMessage?: string;
   };
   defaults: {
-    projectTypes: { id: string; label: string; description: string }[];
-    budgetRanges: { id: string; minPhp: number; maxPhp: number | null; description: string }[];
-    timelines: { id: string; label: string; description: string }[];
     successMessage: string;
   };
 }
 
 interface FormData {
-  projectType: string;
-  budget: string;
-  timeline: string;
+  templateSelected: string;
+  templateName: string;
+  customizationScope: "brand" | "api" | "features" | "full" | "";
   name: string;
   email: string;
   company: string;
-  details: string;
+  phone: string;
+  requirements: string;
 }
 
-export function QuotePageClient({ pageContent, defaults }: QuotePageProps) {
+const scopeOptions = [
+  {
+    id: "brand",
+    label: "Basic Brand/UI Tweaks",
+    description: "Colors, fonts, logos, and basic styling changes",
+    icon: Palette,
+  },
+  {
+    id: "api",
+    label: "Custom API Integrations",
+    description: "Connect third-party services, webhooks, and data pipelines",
+    icon: Code,
+  },
+  {
+    id: "features",
+    label: "New Features on Top",
+    description: "Build additional functionality on the base template",
+    icon: Layers,
+  },
+  {
+    id: "full",
+    label: "Full Custom Build",
+    description: "Complete customization with new pages, flows, and integrations",
+    icon: Wrench,
+  },
+];
+
+export function QuotePageClient({ templates, pageContent, defaults }: QuotePageProps) {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<FormData>({
-    projectType: "",
-    budget: "",
-    timeline: "",
+    templateSelected: "",
+    templateName: "",
+    customizationScope: "",
     name: "",
     email: "",
     company: "",
-    details: "",
+    phone: "",
+    requirements: "",
   });
-
-  const projectTypes = pageContent?.projectTypes?.length ? pageContent.projectTypes : defaults.projectTypes;
-  const budgetRanges = pageContent?.budgetRanges?.length ? pageContent.budgetRanges : defaults.budgetRanges;
-  const timelines = pageContent?.timelines?.length ? pageContent.timelines : defaults.timelines;
 
   const updateData = (field: keyof FormData, value: string) => {
     setData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const selectTemplate = (slug: string, name: string) => {
+    setData((prev) => ({ ...prev, templateSelected: slug, templateName: name }));
+  };
+
   const canProceed = () => {
-    if (step === 1) return data.projectType !== "";
-    if (step === 2) return data.budget !== "" && data.timeline !== "";
+    if (step === 1) return data.templateSelected !== "";
+    if (step === 2) return data.customizationScope !== "";
     if (step === 3)
-      return data.name !== "" && data.email !== "" && data.details.length >= 20;
+      return data.name !== "" && data.email !== "" && data.requirements.length >= 20;
     return false;
   };
 
@@ -69,8 +105,16 @@ export function QuotePageClient({ pageContent, defaults }: QuotePageProps) {
     setError(null);
 
     const { submitQuoteForm } = await import("@/app/actions/quote");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await submitQuoteForm(data as any);
+    const result = await submitQuoteForm({
+      templateSelected: data.templateSelected,
+      templateName: data.templateName,
+      customizationScope: data.customizationScope,
+      name: data.name,
+      email: data.email,
+      company: data.company,
+      phone: data.phone,
+      requirements: data.requirements,
+    });
 
     setIsSubmitting(false);
 
@@ -116,7 +160,7 @@ export function QuotePageClient({ pageContent, defaults }: QuotePageProps) {
       <Header />
       <main className="pt-24">
         <section className="px-6 py-16 lg:px-8">
-          <div className="mx-auto max-w-2xl">
+          <div className="mx-auto max-w-3xl">
             {/* Progress */}
             <div className="mb-12">
               <div className="flex items-center justify-between">
@@ -144,8 +188,8 @@ export function QuotePageClient({ pageContent, defaults }: QuotePageProps) {
                 ))}
               </div>
               <div className="mt-4 flex justify-between font-mono text-[10px] uppercase tracking-wider text-white/40">
-                <span>Project</span>
-                <span>Budget</span>
+                <span>Template</span>
+                <span>Scope</span>
                 <span>Contact</span>
               </div>
             </div>
@@ -157,116 +201,140 @@ export function QuotePageClient({ pageContent, defaults }: QuotePageProps) {
               </div>
             )}
 
-            {/* Step 1: Project Type */}
+            {/* Step 1: Template Selection */}
             {step === 1 && (
               <div>
                 <h1 className="text-2xl font-bold text-white">
-                  What type of project?
+                  Select Your Base Template
                 </h1>
                 <p className="mt-2 text-white/50">
-                  Select the option that best describes your project.
+                  Choose the SaaS template that closest matches your vision. We&apos;ll customize it from there.
                 </p>
-                <div className="mt-8 space-y-3">
-                  {projectTypes.map((type) => (
+                <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                  {templates.map((template) => (
                     <button
-                      key={type.id}
-                      onClick={() => updateData("projectType", type.id)}
+                      key={template.id}
+                      onClick={() => selectTemplate(template.slug, template.name)}
                       className={cn(
-                        "w-full rounded-md border p-4 text-left transition-all",
-                        data.projectType === type.id
+                        "rounded-md border p-5 text-left transition-all",
+                        data.templateSelected === template.slug
                           ? "border-cyan-500/50 bg-cyan-500/10"
-                          : "border-white/10 bg-white/2 hover:border-white/20",
+                          : "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]",
                       )}
                     >
-                      <div className="font-semibold text-white">
-                        {type.label}
-                      </div>
-                      <div className="mt-0.5 text-sm text-white/50">
-                        {type.description}
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/5">
+                          <Package className="h-5 w-5 text-cyan-400" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-semibold text-white">
+                            {template.name}
+                          </div>
+                          <div className="mt-0.5 text-sm text-white/50 line-clamp-2">
+                            {template.tagline || template.short_description || "SaaS template"}
+                          </div>
+                          {template.base_price_monthly_php && (
+                            <div className="mt-2 font-mono text-xs text-cyan-400">
+                              ₱{template.base_price_monthly_php.toLocaleString()}/mo base
+                            </div>
+                          )}
+                          {template.tech_stack && template.tech_stack.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-1">
+                              {template.tech_stack.slice(0, 4).map((tech) => (
+                                <span
+                                  key={tech}
+                                  className="rounded border border-white/10 bg-white/5 px-1.5 py-0.5 text-[10px] text-white/40"
+                                >
+                                  {tech}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </button>
                   ))}
+
+                  {/* Custom option */}
+                  <button
+                    onClick={() => selectTemplate("custom", "Custom / Other")}
+                    className={cn(
+                      "rounded-md border p-5 text-left transition-all",
+                      data.templateSelected === "custom"
+                        ? "border-cyan-500/50 bg-cyan-500/10"
+                        : "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]",
+                    )}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/5">
+                        <Wrench className="h-5 w-5 text-purple-400" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-white">
+                          Custom / Other
+                        </div>
+                        <div className="mt-0.5 text-sm text-white/50">
+                          Don&apos;t see your template? Describe what you need.
+                        </div>
+                      </div>
+                    </div>
+                  </button>
                 </div>
               </div>
             )}
 
-            {/* Step 2: Budget & Timeline */}
+            {/* Step 2: Customization Scope */}
             {step === 2 && (
               <div>
                 <h1 className="text-2xl font-bold text-white">
-                  Budget & Timeline
+                  Customization Scope
                 </h1>
                 <p className="mt-2 text-white/50">
-                  Help us understand your constraints.
+                  What level of customization do you need for{" "}
+                  <span className="text-cyan-400">{data.templateName}</span>?
                 </p>
-
-                <div className="mt-8">
-                  <h3 className="font-mono text-xs uppercase tracking-wider text-white/40">
-                    Investment Range
-                  </h3>
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    {budgetRanges.map((range) => (
+                <div className="mt-8 space-y-3">
+                  {scopeOptions.map((scope) => {
+                    const Icon = scope.icon;
+                    return (
                       <button
-                        key={range.id}
-                        onClick={() => updateData("budget", range.id)}
+                        key={scope.id}
+                        onClick={() => updateData("customizationScope", scope.id)}
                         className={cn(
-                          "rounded-md border p-4 text-left transition-all",
-                          data.budget === range.id
+                          "w-full rounded-md border p-5 text-left transition-all",
+                          data.customizationScope === scope.id
                             ? "border-cyan-500/50 bg-cyan-500/10"
-                            : "border-white/10 bg-white/2 hover:border-white/20",
+                            : "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]",
                         )}
                       >
-                        <div className="font-semibold text-white">
-                          <PriceRangeDisplay
-                            minPhp={range.minPhp}
-                            maxPhp={range.maxPhp}
-                          />
-                        </div>
-                        <div className="mt-0.5 text-sm text-white/50">
-                          {range.description}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-8">
-                  <h3 className="font-mono text-xs uppercase tracking-wider text-white/40">
-                    Timeline
-                  </h3>
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    {timelines.map((tl) => (
-                      <button
-                        key={tl.id}
-                        onClick={() => updateData("timeline", tl.id)}
-                        className={cn(
-                          "rounded-md border p-4 text-left transition-all",
-                          data.timeline === tl.id
-                            ? "border-cyan-500/50 bg-cyan-500/10"
-                            : "border-white/10 bg-white/2 hover:border-white/20",
-                        )}
-                      >
-                        <div className="font-semibold text-white">
-                          {tl.label}
-                        </div>
-                        <div className="mt-0.5 text-sm text-white/50">
-                          {tl.description}
+                        <div className="flex items-start gap-4">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/5">
+                            <Icon className="h-5 w-5 text-cyan-400" />
+                          </div>
+                          <div>
+                            <div className="font-semibold text-white">
+                              {scope.label}
+                            </div>
+                            <div className="mt-0.5 text-sm text-white/50">
+                              {scope.description}
+                            </div>
+                          </div>
                         </div>
                       </button>
-                    ))}
-                  </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
 
-            {/* Step 3: Contact Info */}
+            {/* Step 3: Contact Info & Requirements */}
             {step === 3 && (
               <div>
                 <h1 className="text-2xl font-bold text-white">
-                  Your Contact Info
+                  Contact & Requirements
                 </h1>
                 <p className="mt-2 text-white/50">
-                  Tell us about yourself and your project.
+                  Tell us about yourself and your specific customization requirements.
                 </p>
 
                 <div className="mt-8 space-y-6">
@@ -297,30 +365,44 @@ export function QuotePageClient({ pageContent, defaults }: QuotePageProps) {
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block font-mono text-xs uppercase tracking-wider text-white/40">
-                      Email *
-                    </label>
-                    <input
-                      type="email"
-                      value={data.email}
-                      onChange={(e) => updateData("email", e.target.value)}
-                      className="mt-2 w-full rounded-md border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
-                      placeholder="you@company.com"
-                    />
+                  <div className="grid gap-6 sm:grid-cols-2">
+                    <div>
+                      <label className="block font-mono text-xs uppercase tracking-wider text-white/40">
+                        Email *
+                      </label>
+                      <input
+                        type="email"
+                        value={data.email}
+                        onChange={(e) => updateData("email", e.target.value)}
+                        className="mt-2 w-full rounded-md border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
+                        placeholder="you@company.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-mono text-xs uppercase tracking-wider text-white/40">
+                        Phone
+                      </label>
+                      <input
+                        type="tel"
+                        value={data.phone}
+                        onChange={(e) => updateData("phone", e.target.value)}
+                        className="mt-2 w-full rounded-md border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
+                        placeholder="+63 xxx xxx xxxx (optional)"
+                      />
+                    </div>
                   </div>
 
                   <div>
                     <label className="block font-mono text-xs uppercase tracking-wider text-white/40">
-                      Project Details *{" "}
+                      Specific Customization Requirements *{" "}
                       <span className="text-white/20">(min 20 chars)</span>
                     </label>
                     <textarea
-                      value={data.details}
-                      onChange={(e) => updateData("details", e.target.value)}
+                      value={data.requirements}
+                      onChange={(e) => updateData("requirements", e.target.value)}
                       rows={5}
                       className="mt-2 w-full resize-none rounded-md border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none"
-                      placeholder="Describe your project, goals, and any specific requirements..."
+                      placeholder="Describe what you need customized: specific pages, integrations, branding changes, new features..."
                     />
                   </div>
                 </div>

@@ -15,11 +15,11 @@ const quoteSchema = z.object({
   name: z.string().min(1).max(100),
   email: z.string().email().max(200),
   company: z.string().max(100).optional().default(""),
-  projectType: z.string().min(1).max(50),
-  budgetRange: z.string().max(50).optional().default(""),
-  timeline: z.string().max(50).optional().default(""),
-  message: z.string().max(5000).optional().default(""),
-  status: z.enum(["new", "reviewed", "responded", "accepted", "declined"]).default("new"),
+  phone: z.string().max(50).optional().default(""),
+  template_selected: z.string().max(100).optional().default(""),
+  customization_scope: z.string().max(50).optional().default(""),
+  description: z.string().max(5000).optional().default(""),
+  status: z.string().default("new"),
 });
 
 export type QuoteFormData = z.infer<typeof quoteSchema>;
@@ -29,7 +29,7 @@ interface ActionResult {
   error?: string;
 }
 
-export async function getAgencyQuotes(): Promise<{ success: boolean; data?: any[]; error?: string }> {
+export async function getAgencyQuotes(): Promise<{ success: boolean; data?: unknown[]; error?: string }> {
   try {
     const supabase = getAdminClient();
     const { data, error } = await supabase
@@ -44,7 +44,7 @@ export async function getAgencyQuotes(): Promise<{ success: boolean; data?: any[
   }
 }
 
-export async function getAgencyQuote(id: string): Promise<any | null> {
+export async function getAgencyQuote(id: string): Promise<unknown | null> {
   try {
     const supabase = getAdminClient();
     const { data, error } = await supabase
@@ -70,10 +70,10 @@ export async function updateAgencyQuote(id: string, data: Partial<QuoteFormData>
     if (data.name !== undefined) updatePayload.name = data.name;
     if (data.email !== undefined) updatePayload.email = data.email;
     if (data.company !== undefined) updatePayload.company = data.company;
-    if (data.projectType !== undefined) updatePayload.project_type = data.projectType;
-    if (data.budgetRange !== undefined) updatePayload.budget_range = data.budgetRange;
-    if (data.timeline !== undefined) updatePayload.timeline = data.timeline;
-    if (data.message !== undefined) updatePayload.message = data.message;
+    if (data.phone !== undefined) updatePayload.phone = data.phone;
+    if (data.template_selected !== undefined) updatePayload.template_selected = data.template_selected;
+    if (data.customization_scope !== undefined) updatePayload.customization_scope = data.customization_scope;
+    if (data.description !== undefined) updatePayload.description = data.description;
     if (data.status !== undefined) updatePayload.status = data.status;
 
     const { error } = await supabase.from("quotes").update(updatePayload).eq("id", id);
@@ -93,7 +93,7 @@ export async function updateQuoteStatus(id: string, status: string): Promise<Act
     const supabase = getAdminClient();
     const { error } = await supabase
       .from("quotes")
-      .update({ status: status as "new" | "reviewed" | "responded" | "accepted" | "declined", updated_at: new Date().toISOString() })
+      .update({ status, updated_at: new Date().toISOString() })
       .eq("id", id);
     if (error) throw error;
 

@@ -110,29 +110,8 @@ export const CONTACT_DEFAULTS = {
 };
 
 export const QUOTE_DEFAULTS = {
-  title: "What type of project?",
-  subtitle: "Select the option that best describes your project.",
-  projectTypes: [
-    { id: "web", label: "Web Application", description: "Marketing sites, portals, dashboards" },
-    { id: "saas", label: "SaaS Platform", description: "Multi-tenant, subscription-based" },
-    { id: "mobile", label: "Mobile App", description: "iOS, Android, or cross-platform" },
-    { id: "ai", label: "AI Integration", description: "Chatbots, automation, ML features" },
-    { id: "other", label: "Other", description: "Custom project or consultation" },
-  ],
-  budgetRanges: [
-    { id: "50k-100k", minPhp: 50000, maxPhp: 100000, description: "Small projects, MVPs" },
-    { id: "100k-250k", minPhp: 100000, maxPhp: 250000, description: "Medium complexity apps" },
-    { id: "250k-500k", minPhp: 250000, maxPhp: 500000, description: "Full-featured platforms" },
-    { id: "500k+", minPhp: 500000, maxPhp: null, description: "Enterprise solutions" },
-  ],
-  timelines: [
-    { id: "1-2-weeks", label: "1-2 Weeks", description: "Rush / Small scope" },
-    { id: "1-month", label: "1 Month", description: "Standard project" },
-    { id: "2-3-months", label: "2-3 Months", description: "Complex platform" },
-    { id: "flexible", label: "Flexible", description: "No strict deadline" },
-  ],
   successMessage:
-    "Thank you for your interest. We'll review your project details and get back to you within 24 hours with a custom quote.",
+    "Thank you for your interest. We'll review your customization requirements and get back to you within 24 hours with a custom quote.",
 };
 
 export const PRISM_DEFAULTS = {

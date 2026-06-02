@@ -144,17 +144,15 @@ export function quoteEmailTemplate(data: {
   name: string;
   email: string;
   company?: string;
-  projectType: string;
-  budget: string;
-  timeline: string;
-  details: string;
+  templateName: string;
+  scope: string;
+  requirements: string;
 }) {
-  const projectTypes: Record<string, string> = {
-    web: "Web Application",
-    saas: "SaaS Platform",
-    mobile: "Mobile App",
-    ai: "AI Integration",
-    other: "Other/Custom",
+  const scopeLabels: Record<string, string> = {
+    brand: "Basic Brand/UI Tweaks",
+    api: "Custom API Integrations",
+    features: "New Features on Top",
+    full: "Full Custom Build",
   };
 
   return `
@@ -195,29 +193,23 @@ export function quoteEmailTemplate(data: {
     </div>
     
     <div style="background: white; padding: 25px; border-radius: 6px; margin-bottom: 20px;">
-      <h2 style="margin: 0 0 20px 0; color: #333; font-size: 18px; font-weight: 600;">Project Details</h2>
+      <h2 style="margin: 0 0 20px 0; color: #333; font-size: 18px; font-weight: 600;">Template & Scope</h2>
       
       <table style="width: 100%; border-collapse: collapse;">
         <tr>
-          <td style="padding: 10px 0; border-bottom: 1px solid #eee; width: 120px; font-weight: 600; color: #666;">Type:</td>
-          <td style="padding: 10px 0; border-bottom: 1px solid #eee;">${
-            projectTypes[data.projectType] || data.projectType
-          }</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #eee; width: 120px; font-weight: 600; color: #666;">Template:</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #eee;">${data.templateName}</td>
         </tr>
         <tr>
-          <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: 600; color: #666;">Budget:</td>
-          <td style="padding: 10px 0; border-bottom: 1px solid #eee;">${data.budget}</td>
-        </tr>
-        <tr>
-          <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: 600; color: #666;">Timeline:</td>
-          <td style="padding: 10px 0; border-bottom: 1px solid #eee;">${data.timeline}</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: 600; color: #666;">Scope:</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #eee;">${scopeLabels[data.scope] || data.scope}</td>
         </tr>
       </table>
     </div>
     
     <div style="background: white; padding: 25px; border-radius: 6px; margin-bottom: 20px;">
-      <h2 style="margin: 0 0 15px 0; color: #333; font-size: 18px; font-weight: 600;">Project Description</h2>
-      <p style="margin: 0; white-space: pre-wrap; color: #555;">${data.details}</p>
+      <h2 style="margin: 0 0 15px 0; color: #333; font-size: 18px; font-weight: 600;">Customization Requirements</h2>
+      <p style="margin: 0; white-space: pre-wrap; color: #555;">${data.requirements}</p>
     </div>
     
     <div style="margin-top: 20px; padding: 15px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 4px;">

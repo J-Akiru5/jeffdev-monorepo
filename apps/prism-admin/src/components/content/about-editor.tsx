@@ -1,11 +1,73 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input, ImageUpload } from "@syntaxure/ui";
-import { Save, Plus, Trash2, ArrowLeft } from "lucide-react";
+import { Save, Plus, Trash2, ArrowLeft, LayoutList, LayoutGrid } from "lucide-react";
 import { saveAboutContent, type AboutContent } from "@/app/actions/content";
 import { uploadToStorage } from "@/app/actions/storage";
 import Link from "next/link";
+
+const SECTIONS = [
+  { id: "hero", label: "Hero" },
+  { id: "stats", label: "Stats" },
+  { id: "founder-card", label: "Founder" },
+  { id: "mission-vision", label: "Mission" },
+  { id: "kwadra-tbi", label: "KWADRA" },
+  { id: "founders", label: "Founders" },
+  { id: "team", label: "Team" },
+  { id: "tech-stack", label: "Tech" },
+  { id: "values", label: "Values" },
+  { id: "brand-assets", label: "Brand" },
+  { id: "section-headers", label: "Headers" },
+];
+
+function SectionNav() {
+  const [active, setActive] = useState("hero");
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActive(entry.target.id);
+          }
+        }
+      },
+      { rootMargin: "-80px 0px -60% 0px", threshold: 0.1 },
+    );
+
+    for (const s of SECTIONS) {
+      const el = document.getElementById(s.id);
+      if (el) observer.observe(el);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  return (
+    <div className="sticky top-0 z-30 -mx-6 mb-6 border-b border-white/[0.06] bg-[var(--bg-primary)] px-6 py-2 backdrop-blur-sm">
+      <div className="flex gap-1 overflow-x-auto scrollbar-none">
+        {SECTIONS.map((s) => (
+          <button
+            key={s.id}
+            onClick={() => scrollTo(s.id)}
+            className={`shrink-0 rounded-md px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider transition-colors ${
+              active === s.id
+                ? "bg-amber-500/20 text-amber-400"
+                : "text-white/40 hover:text-white/60 hover:bg-white/5"
+            }`}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function AboutEditor({
   initialContent,
@@ -20,6 +82,7 @@ export function AboutEditor({
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const [foundersView, setFoundersView] = useState<"list" | "grid">("list");
 
   const handleSave = async () => {
     setSaving(true);
@@ -81,8 +144,10 @@ export function AboutEditor({
         </div>
       )}
 
+      <SectionNav />
+
       {/* Hero Section */}
-      <section className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
+      <section id="hero" className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
         <h2 className="font-mono text-xs uppercase tracking-wider text-amber-400/70 mb-4">
           Hero Section
         </h2>
@@ -170,7 +235,7 @@ export function AboutEditor({
       </section>
 
       {/* Stats Section */}
-      <section className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
+      <section id="stats" className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-mono text-xs uppercase tracking-wider text-amber-400/70">
             Stats
@@ -243,7 +308,7 @@ export function AboutEditor({
       </section>
 
       {/* Founder Section */}
-      <section className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
+      <section id="founder-card" className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
         <h2 className="font-mono text-xs uppercase tracking-wider text-amber-400/70 mb-4">
           Founder Card
         </h2>
@@ -362,7 +427,7 @@ export function AboutEditor({
       </section>
 
       {/* Mission & Vision Section */}
-      <section className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
+      <section id="mission-vision" className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
         <h2 className="font-mono text-xs uppercase tracking-wider text-amber-400/70 mb-4">
           Mission &amp; Vision
         </h2>
@@ -428,7 +493,7 @@ export function AboutEditor({
       </section>
 
       {/* KWADRA TBI Section */}
-      <section className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
+      <section id="kwadra-tbi" className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-mono text-xs uppercase tracking-wider text-amber-400/70">
             KWADRA TBI
@@ -528,38 +593,128 @@ export function AboutEditor({
       </section>
 
       {/* Founders Section */}
-      <section className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
+      <section id="founders" className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-mono text-xs uppercase tracking-wider text-amber-400/70">
             Founders
           </h2>
-          <button
-            onClick={() =>
-              setContent((prev) => ({
-                ...prev,
-                founders: [
-                  ...prev.founders,
-                  {
-                    name: "",
-                    title: "",
-                    bio: "",
-                    image: "",
-                    email: "",
-                    location: "",
-                  },
-                ],
-              }))
-            }
-            className="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 transition-colors"
-          >
-            <Plus className="h-3 w-3" />
-            Add Founder
-          </button>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center rounded-md border border-white/10 bg-white/5">
+              <button
+                onClick={() => setFoundersView("list")}
+                className={`flex h-7 w-7 items-center justify-center rounded-l-md transition-colors ${
+                  foundersView === "list"
+                    ? "bg-amber-500/20 text-amber-400"
+                    : "text-white/40 hover:text-white/60"
+                }`}
+                title="List view"
+              >
+                <LayoutList className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={() => setFoundersView("grid")}
+                className={`flex h-7 w-7 items-center justify-center rounded-r-md transition-colors ${
+                  foundersView === "grid"
+                    ? "bg-amber-500/20 text-amber-400"
+                    : "text-white/40 hover:text-white/60"
+                }`}
+                title="Grid view"
+              >
+                <LayoutGrid className="h-3.5 w-3.5" />
+              </button>
+            </div>
+            <button
+              onClick={() =>
+                setContent((prev) => ({
+                  ...prev,
+                  founders: [
+                    ...prev.founders,
+                    {
+                      name: "",
+                      title: "",
+                      bio: "",
+                      image: "",
+                      email: "",
+                      location: "",
+                    },
+                  ],
+                }))
+              }
+              className="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 transition-colors"
+            >
+              <Plus className="h-3 w-3" />
+              Add Founder
+            </button>
+          </div>
         </div>
-        <div className="space-y-4">
+
+        {/* List View */}
+        {foundersView === "list" && (
+          <div className="space-y-2">
+            {content.founders.map((founder, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-3 rounded-md border border-white/[0.06] bg-white/[0.01] p-3 hover:border-white/10 transition-colors"
+              >
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-medium text-white overflow-hidden">
+                  {founder.image ? (
+                    <img src={founder.image} alt={founder.name} className="h-full w-full object-cover" />
+                  ) : (
+                    founder.name?.charAt(0)?.toUpperCase() || "?"
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-white truncate">
+                    {founder.name || "Untitled Founder"}
+                  </div>
+                  <div className="text-xs text-white/40 truncate">
+                    {founder.title || "No title"}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => {
+                      const el = document.getElementById(`founder-detail-${i}`);
+                      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }}
+                    className="rounded p-1.5 text-white/40 hover:text-amber-400 hover:bg-white/5 transition-colors"
+                    title="Edit"
+                  >
+                    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() =>
+                      setContent((prev) => ({
+                        ...prev,
+                        founders: prev.founders.filter((_, j) => j !== i),
+                      }))
+                    }
+                    className="rounded p-1.5 text-white/40 hover:text-red-400 hover:bg-white/5 transition-colors"
+                    title="Delete"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+            {content.founders.length === 0 && (
+              <div className="py-8 text-center text-sm text-white/30">
+                No founders added yet. Click &quot;Add Founder&quot; to get started.
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Grid View (original detail cards) */}
+        {foundersView === "grid" && (
+          <div className="space-y-4">
           {content.founders.map((founder, i) => (
             <div
               key={i}
+              id={`founder-detail-${i}`}
               className="rounded-md border border-white/[0.06] bg-white/[0.01] p-4"
             >
               <div className="flex items-start gap-3">
@@ -703,11 +858,12 @@ export function AboutEditor({
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        )}
       </section>
 
       {/* Team Section */}
-      <section className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
+      <section id="team" className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-mono text-xs uppercase tracking-wider text-amber-400/70">
             Team
@@ -863,7 +1019,7 @@ export function AboutEditor({
       </section>
 
       {/* Tech Stack Section */}
-      <section className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
+      <section id="tech-stack" className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
         <h2 className="font-mono text-xs uppercase tracking-wider text-amber-400/70 mb-4">
           Tech Stack
         </h2>
@@ -898,7 +1054,7 @@ export function AboutEditor({
       </section>
 
       {/* Values Section */}
-      <section className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
+      <section id="values" className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-mono text-xs uppercase tracking-wider text-amber-400/70">
             Values
@@ -979,7 +1135,7 @@ export function AboutEditor({
       </section>
 
       {/* Brand Assets Section */}
-      <section className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
+      <section id="brand-assets" className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
         <h2 className="font-mono text-xs uppercase tracking-wider text-amber-400/70 mb-4">
           Brand Assets
         </h2>
@@ -1073,7 +1229,7 @@ export function AboutEditor({
       </section>
 
       {/* Section Headers */}
-      <section className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
+      <section id="section-headers" className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6">
         <h2 className="font-mono text-xs uppercase tracking-wider text-amber-400/70 mb-4">
           Section Headers
         </h2>

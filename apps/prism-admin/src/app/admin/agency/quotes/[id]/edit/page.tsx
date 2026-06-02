@@ -29,14 +29,14 @@ export default async function QuoteEditPage({ params }: Props) {
   }
 
   const defaultValues = {
-    name: quote.name || "",
-    email: quote.email || "",
-    company: quote.company || "",
-    projectType: quote.project_type || quote.title || "",
-    budgetRange: quote.budget_range || "",
-    timeline: quote.timeline || "",
-    message: quote.message || "",
-    status: quote.status || "new",
+    name: String(quote.name || ""),
+    email: String(quote.email || ""),
+    company: String(quote.company || ""),
+    templateSelected: String(quote.template_selected || ""),
+    customizationScope: String(quote.customization_scope || ""),
+    phone: String(quote.phone || ""),
+    requirements: String(quote.description || ""),
+    status: String(quote.status || "new"),
   };
 
   return (

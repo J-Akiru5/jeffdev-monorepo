@@ -1,7 +1,7 @@
 /**
  * Quote Form Server Action
  * -------------------------
- * Handles multi-step quote form submissions:
+ * Handles multi-step quote form submissions for SaaS template customization:
  * 1. Validates all steps with Zod
  * 2. Saves to Supabase
  * 3. Sends email notification to hire@syntaxure.dev
@@ -14,24 +14,21 @@ import { sendEmail, quoteEmailTemplate, EMAIL_ADDRESSES } from "@/lib/email";
 import { generateQuoteRef } from "@/lib/ref-generator";
 
 const quoteSchema = z.object({
-  // Step 1: Project Type
-  projectType: z.enum(["web", "saas", "mobile", "ai", "other"], {
-    message: "Please select a project type",
+  // Step 1: Template Selection
+  templateSelected: z.string().min(1, "Please select a template"),
+  templateName: z.string().min(1, "Template name is required"),
+
+  // Step 2: Customization Scope
+  customizationScope: z.enum(["brand", "api", "features", "full"], {
+    message: "Please select a customization scope",
   }),
 
-  // Step 2: Budget & Timeline
-  budget: z.enum(["50k-100k", "100k-250k", "250k-500k", "500k+"], {
-    message: "Please select a budget range",
-  }),
-  timeline: z.enum(["1-2-weeks", "1-month", "2-3-months", "flexible"], {
-    message: "Please select a timeline",
-  }),
-
-  // Step 3: Contact Info
+  // Step 3: Contact Info & Requirements
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   company: z.string().optional(),
-  details: z
+  phone: z.string().optional(),
+  requirements: z
     .string()
     .min(20, "Please provide at least 20 characters of detail"),
 });
@@ -56,19 +53,24 @@ export async function submitQuoteForm(data: QuoteFormData) {
         {
           user_id: "",
           project_id: null,
-          title: validated.name,
-          description: validated.details,
-          amount: "0",
-          status: "draft" as const,
+          title: `${validated.name} - ${validated.templateName}`,
+          description: validated.requirements,
+          amount: 0,
+          status: "new",
           valid_until: null,
           line_items: [],
           metadata: {
-            projectType: validated.projectType,
-            budget: validated.budget,
-            timeline: validated.timeline,
-            company: validated.company,
+            templateId: validated.templateSelected,
+            templateName: validated.templateName,
+            scope: validated.customizationScope,
             refNo,
           },
+          name: validated.name,
+          email: validated.email,
+          company: validated.company || null,
+          phone: validated.phone || null,
+          template_selected: validated.templateSelected,
+          customization_scope: validated.customizationScope,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
@@ -80,8 +82,15 @@ export async function submitQuoteForm(data: QuoteFormData) {
     // Send email notification
     await sendEmail({
       to: EMAIL_ADDRESSES.hire,
-      subject: `🎯 New Quote Request: ${validated.projectType.toUpperCase()} - ${validated.budget}`,
-      html: quoteEmailTemplate(validated),
+      subject: `🎯 New Quote Request: ${validated.templateName} - ${validated.customizationScope}`,
+      html: quoteEmailTemplate({
+        name: validated.name,
+        email: validated.email,
+        company: validated.company,
+        templateName: validated.templateName,
+        scope: validated.customizationScope,
+        requirements: validated.requirements,
+      }),
       replyTo: validated.email,
     });
 
@@ -115,7 +124,7 @@ export async function submitQuoteForm(data: QuoteFormData) {
  */
 export async function updateQuoteStatus(
   quoteId: string,
-  status: "draft" | "sent" | "accepted" | "rejected" | "expired",
+  status: string,
 ) {
   try {
     const { logAuditEvent } = await import("@/lib/audit");
@@ -155,7 +164,7 @@ export async function updateQuoteStatus(
     });
 
     const { revalidatePath } = await import("next/cache");
-    revalidatePath("/admin/quotes");
+    revalidatePath("/admin/agency/quotes");
 
     return { success: true };
   } catch (error) {
