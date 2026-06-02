@@ -24,6 +24,8 @@
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.47.0",
     "@syntaxure/ui": "workspace:*",
+    "@syntaxure/supabase": "workspace:*",
+    "@syntaxure/redis": "workspace:*",
     "@tanstack/react-virtual": "^3.13.26",
     "clsx": "^2.1.1",
     "driver.js": "^1.4.0",

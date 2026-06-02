@@ -1,108 +1,84 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+
+// Mock @syntaxure/redis before importing the module under test
+vi.mock("@syntaxure/redis", () => {
+  let counter = 0;
+
+  return {
+    checkRateLimit: vi.fn(async (key: string, _context: string, tier: string = "free") => {
+      counter++;
+      const limits: Record<string, number> = {
+        free: 20,
+        strict: 10,
+        default: 60,
+        pro: 120,
+        team: 300,
+        enterprise: 1000,
+      };
+      const max = limits[tier] ?? 20;
+      const remaining = Math.max(0, max - counter);
+      return {
+        allowed: counter <= max,
+        limit: max,
+        remaining,
+        reset: Date.now() + 60_000,
+      };
+    }),
+    getRateLimitHeaders: vi.fn((result: { limit: number; remaining: number; reset: number }) => ({
+      "X-RateLimit-Limit": String(result.limit),
+      "X-RateLimit-Remaining": String(result.remaining),
+      "X-RateLimit-Reset": String(Math.ceil(result.reset / 1000)),
+    })),
+  };
+});
+
 import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 
-// Use unique keys per test to avoid shared state between tests
-let testCounter = 0;
-function uniqueKey(): string {
-  testCounter++;
-  return `test_user_${testCounter}`;
-}
-
-describe("checkRateLimit", () => {
+describe("checkRateLimit (Upstash-backed)", () => {
   beforeEach(() => {
-    vi.useFakeTimers();
+    vi.clearAllMocks();
   });
 
-  it("allows requests within limit", () => {
-    const key = uniqueKey();
-    const result = checkRateLimit(key, "free");
+  it("allows requests within limit", async () => {
+    const result = await checkRateLimit("user_1", "free");
     expect(result.allowed).toBe(true);
-    expect(result.remaining).toBe(19); // free = 20 max - 1 used
+    expect(result.limit).toBe(20);
+    expect(result.remaining).toBeGreaterThanOrEqual(0);
   });
 
-  it("tracks remaining quota correctly", () => {
-    const key = uniqueKey();
-    const limit = 20; // free tier maxRequests
-
-    // Use all but one
-    for (let i = 0; i < limit - 1; i++) {
-      checkRateLimit(key, "free");
-    }
-
-    const result = checkRateLimit(key, "free");
-    expect(result.allowed).toBe(true);
-    expect(result.remaining).toBe(0);
+  it("returns proper structure", async () => {
+    const result = await checkRateLimit("user_2", "pro");
+    expect(result).toHaveProperty("allowed");
+    expect(result).toHaveProperty("limit");
+    expect(result).toHaveProperty("remaining");
+    expect(result).toHaveProperty("reset");
+    expect(result.limit).toBe(120);
   });
 
-  it("blocks requests when limit exceeded", () => {
-    const key = uniqueKey();
-    const limit = 20; // free tier maxRequests
-
-    // Use all requests
-    for (let i = 0; i < limit; i++) {
-      checkRateLimit(key, "free");
-    }
-
-    const result = checkRateLimit(key, "free");
-    expect(result.allowed).toBe(false);
-    expect(result.remaining).toBe(0);
+  it("defaults to free tier", async () => {
+    const result = await checkRateLimit("user_3");
+    expect(result.limit).toBe(20);
   });
 
-  it("refreshes after the time window", () => {
-    const key = uniqueKey();
-    const limit = 20;
-
-    // Exhaust quota
-    for (let i = 0; i < limit; i++) {
-      checkRateLimit(key, "free");
-    }
-
-    // Advance time beyond 60s window
-    vi.advanceTimersByTime(60_001);
-
-    const result = checkRateLimit(key, "free");
-    expect(result.allowed).toBe(true);
-  });
-
-  it("returns proper remaining count", () => {
-    const key = uniqueKey();
-    // Use 10 requests
-    for (let i = 0; i < 10; i++) {
-      checkRateLimit(key, "free");
-    }
-
-    const result = checkRateLimit(key, "free");
-    expect(result.allowed).toBe(true);
-    expect(result.remaining).toBe(9); // 20 - 10 - 1 = 9
-  });
-
-  it("strict tier has lower limit than default", () => {
-    const strictKey = uniqueKey();
-    const defaultKey = uniqueKey();
-
-    for (let i = 0; i < 10; i++) {
-      checkRateLimit(strictKey, "strict");
-      checkRateLimit(defaultKey, "default");
-    }
-
-    const strictResult = checkRateLimit(strictKey, "strict");
-    const defaultResult = checkRateLimit(defaultKey, "default");
-
-    // strict has 10 max, default has 60 max
-    expect(strictResult.remaining).toBeLessThan(defaultResult.remaining);
+  it("delegates to @syntaxure/redis checkRateLimit", async () => {
+    const { checkRateLimit: mockCheck } = await import("@syntaxure/redis");
+    await checkRateLimit("user_4", "team");
+    expect(mockCheck).toHaveBeenCalledWith("user_4", "api", "team");
   });
 });
 
 describe("getRateLimitHeaders", () => {
-  it("returns headers object", () => {
-    const headers = getRateLimitHeaders("test_user", "free");
+  it("returns headers object", async () => {
+    const result = await checkRateLimit("header_user", "free");
+    const headers = getRateLimitHeaders(result);
     expect(headers).toHaveProperty("X-RateLimit-Limit");
     expect(headers).toHaveProperty("X-RateLimit-Remaining");
     expect(headers).toHaveProperty("X-RateLimit-Reset");
   });
 
-  it("returns numeric header values", () => {
-    const headers = getRateLimitHeaders("test_user", "pro");
+  it("returns numeric header values", async () => {
+    const result = await checkRateLimit("header_user_2", "pro");
+    const headers = getRateLimitHeaders(result);
     expect(Number(headers["X-RateLimit-Limit"])).toBeGreaterThan(0);
     expect(Number(headers["X-RateLimit-Remaining"])).toBeGreaterThanOrEqual(0);
     expect(Number(headers["X-RateLimit-Reset"])).toBeGreaterThan(0);

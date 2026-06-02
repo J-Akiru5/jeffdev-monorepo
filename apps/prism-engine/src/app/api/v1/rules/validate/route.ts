@@ -15,8 +15,9 @@ export async function POST(request: NextRequest) {
   const auth = await authenticate(request);
   if (auth instanceof Response) return auth;
 
-  const rl = checkRateLimit(`validate:${auth.userId}`, auth.tier);
-  if (!rl.allowed) return errorResponse("Rate limit exceeded", 429);
+  const rl = await checkRateLimit(`validate:${auth.userId}`, auth.tier);
+  if (!rl.allowed)
+    return errorResponse("Rate limit exceeded", 429, getRateLimitHeaders(rl));
 
   let body: unknown;
   try {
@@ -95,7 +96,7 @@ export async function POST(request: NextRequest) {
     context,
   });
   Object.entries(
-    getRateLimitHeaders(`validate:${auth.userId}`, auth.tier),
+    getRateLimitHeaders(rl),
   ).forEach(([k, v]) => response.headers.set(k, v));
   return response;
 }

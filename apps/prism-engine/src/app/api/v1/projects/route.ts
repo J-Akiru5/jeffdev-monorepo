@@ -31,8 +31,9 @@ export async function GET(request: NextRequest) {
   const auth = await authenticate(request);
   if (auth instanceof Response) return auth;
 
-  const rl = checkRateLimit(`projects:list:${auth.userId}`, auth.tier);
-  if (!rl.allowed) return errorResponse("Rate limit exceeded", 429);
+  const rl = await checkRateLimit(`projects:list:${auth.userId}`, auth.tier);
+  if (!rl.allowed)
+    return errorResponse("Rate limit exceeded", 429, getRateLimitHeaders(rl));
 
   const { searchParams } = new URL(request.url);
   const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
@@ -109,7 +110,7 @@ export async function GET(request: NextRequest) {
     totalPages: Math.ceil(total / limit),
   });
   Object.entries(
-    getRateLimitHeaders(`projects:list:${auth.userId}`, auth.tier),
+    getRateLimitHeaders(rl),
   ).forEach(([k, v]) => response.headers.set(k, v));
   return response;
 }
@@ -118,8 +119,9 @@ export async function POST(request: NextRequest) {
   const auth = await authenticate(request);
   if (auth instanceof Response) return auth;
 
-  const rl = checkRateLimit(`projects:create:${auth.userId}`, auth.tier);
-  if (!rl.allowed) return errorResponse("Rate limit exceeded", 429);
+  const rl = await checkRateLimit(`projects:create:${auth.userId}`, auth.tier);
+  if (!rl.allowed)
+    return errorResponse("Rate limit exceeded", 429, getRateLimitHeaders(rl));
 
   let body: unknown;
   try {
@@ -161,7 +163,7 @@ export async function POST(request: NextRequest) {
     { created: true },
   );
   Object.entries(
-    getRateLimitHeaders(`projects:create:${auth.userId}`, auth.tier),
+    getRateLimitHeaders(rl),
   ).forEach(([k, v]) => response.headers.set(k, v));
   return response;
 }

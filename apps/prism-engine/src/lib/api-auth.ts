@@ -59,8 +59,15 @@ export async function authenticate(
   return { userId: user.id, tier, source: "supabase" };
 }
 
-export function errorResponse(message: string, status: number = 400) {
-  return NextResponse.json({ error: message }, { status });
+export function errorResponse(
+  message: string,
+  status: number = 400,
+  headers?: Record<string, string>,
+) {
+  return NextResponse.json(
+    { error: message },
+    { status, ...(headers ? { headers } : {}) },
+  );
 }
 
 export function successResponse(data: unknown, meta?: Record<string, unknown>) {

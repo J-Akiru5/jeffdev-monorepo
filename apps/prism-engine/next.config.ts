@@ -1,4 +1,4 @@
-import { withSentryConfig } from "@sentry/nextjs";
+import { withSentry } from "@syntaxure/sentry-config";
 import type { NextConfig } from "next";
 import fs from "fs";
 import path from "path";
@@ -110,15 +110,7 @@ const nextConfig: NextConfig = {
 };
 
 export default async function config() {
-  const configWithSentry = withSentryConfig(nextConfig, {
-    org: process.env.SENTRY_ORG || "jeffdev",
-    project: process.env.SENTRY_PROJECT || "prism-engine",
-    silent: !process.env.CI,
-    widenClientFileUpload: false,
-    reactComponentAnnotation: { enabled: true },
-    tunnelRoute: "/monitoring",
-    disableLogger: true,
-  });
+  const configWithSentry = withSentry(nextConfig, "prism-engine");
 
   if (process.env.ANALYZE === "true") {
     const withBundleAnalyzer = (await import("@next/bundle-analyzer")).default;

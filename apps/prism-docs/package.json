@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@syntaxure/ui": "workspace:*",
+    "@syntaxure/sentry-config": "workspace:*",
+    "@syntaxure/redis": "workspace:*",
     "@google/generative-ai": "^0.24.1",
     "@sentry/nextjs": "^10.53.1",
     "lucide-react": "^1.17.0",

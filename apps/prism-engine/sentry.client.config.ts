@@ -1,9 +1,8 @@
 import * as Sentry from "@sentry/nextjs";
+import { createSentryConfig } from "@syntaxure/sentry-config";
 
 Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN || process.env.SENTRY_DSN || "",
-  environment: process.env.NODE_ENV || "development",
-  tracesSampleRate: process.env.NODE_ENV === "production" ? 0.25 : 0.0,
+  ...createSentryConfig("prism-engine", { tracesSampleRate: 0.25 }),
   replaysOnErrorSampleRate: 1.0,
   integrations: [
     Sentry.replayIntegration({
