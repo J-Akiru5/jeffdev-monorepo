@@ -51,8 +51,8 @@ export interface AppNavLink {
 }
 
 export interface AppTopNavbarProps {
-  /** Name of the current app (e.g. "Prism Manage", "Admin") */
-  appName: string;
+  /** Name of the current app (e.g. "Prism Manage", "Admin") — omit to hide app switcher */
+  appName?: string;
   /** Cross-app quick links (shown in the app switcher dropdown) */
   appLinks?: AppNavLink[];
   /** Optional app icon override (defaults to a small diamond badge) */

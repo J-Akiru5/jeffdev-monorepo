@@ -28,7 +28,7 @@ export function StatusBarFooter() {
             setMemPct(Math.round((data.memory.heapUsed / data.memory.heapTotal) * 100));
           }
         }
-      } catch (err) {
+      } catch {
         if (isMounted) setStatus("Offline");
       }
     }
