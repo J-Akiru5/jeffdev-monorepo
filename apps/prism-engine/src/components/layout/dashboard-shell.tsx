@@ -45,6 +45,7 @@ import {
   ChevronRight,
   ChevronDown,
   Home,
+  Globe,
   Bell,
   Plus,
   Box,
@@ -324,25 +325,27 @@ export default function DashboardShell({
           Mobile has its own header below.
       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <AppTopNavbar
-        appName="Engine"
-        appLinks={visibleAppLinks}
-        appIcon={
-          <div className="flex h-5 w-5 items-center justify-center rounded bg-gradient-to-br from-cyan-500/20 to-violet-500/20">
-            <Sparkles className="h-3 w-3 text-cyan-400" />
-          </div>
-        }
         onSearchClick={openPalette}
         searchPlaceholder="Search pages, projects..."
         theme={theme === "light" ? "light" : "dark"}
         onToggleTheme={() => setTheme(theme === "light" ? "dark" : "light")}
         rightExtra={
-          <Link
-            href="/projects/new"
-            className="mr-3 flex items-center gap-1.5 h-8 rounded-md bg-blue-600 hover:bg-blue-700 dark:bg-cyan-500 dark:hover:bg-cyan-400 active:scale-95 px-4 text-xs font-semibold !text-white transition-all whitespace-nowrap shadow-[0_2px_8px_rgba(37,99,235,0.3)] dark:shadow-none dark:!text-black"
-          >
-            <Plus className="h-3.5 w-3.5" />
-            New Project
-          </Link>
+          <div className="flex items-center gap-3 mr-1">
+            <Link
+              href="/"
+              className="hidden md:flex items-center gap-1.5 text-xs font-medium text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              <Globe className="h-3.5 w-3.5" />
+              View Site
+            </Link>
+            <Link
+              href="/projects/new"
+              className="flex items-center gap-1.5 h-8 rounded-md bg-blue-600 hover:bg-blue-700 dark:bg-cyan-500 dark:hover:bg-cyan-400 active:scale-95 px-4 text-xs font-semibold !text-white transition-all whitespace-nowrap shadow-[0_2px_8px_rgba(37,99,235,0.3)] dark:shadow-none dark:!text-black"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              New Project
+            </Link>
+          </div>
         }
         notifications={
           <button
@@ -353,17 +356,15 @@ export default function DashboardShell({
           </button>
         }
         accountDropdown={<AccountDropdownWrapper />}
-        className="hidden md:flex"
-        style={{ left: isDesktop ? sbw : 0, transition: sidebarTransition }}
       />
       <GridBackground variant="neon" />
 
       {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          DESKTOP SIDEBAR — full height, left edge
+          DESKTOP SIDEBAR — full height below topbar, left edge
       ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <aside
-        style={{ width: sbw, transition: sidebarTransition }}
-        className="hidden md:flex fixed left-0 top-0 bottom-0 z-[60] flex-col border-r border-[var(--border-subtle)] bg-[var(--bg-primary)] overflow-hidden"
+        style={{ width: sbw, transition: sidebarTransition, top: TOPBAR_H }}
+        className="hidden md:flex fixed left-0 bottom-0 z-[40] flex-col border-r border-[var(--border-subtle)] bg-[var(--bg-primary)] overflow-hidden"
       >
         {/* ── Logo header ── */}
         {collapsed ? (
@@ -405,7 +406,7 @@ export default function DashboardShell({
             <button
               onClick={toggle}
               aria-label="Collapse sidebar"
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-subtle)] transition-colors"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--border-subtle)] transition-colors mt-0.5"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>

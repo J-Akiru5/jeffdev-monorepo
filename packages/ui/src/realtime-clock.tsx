@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
  * Uses a compact monospace style to sit discreetly in the top navbar.
  */
 
-export function RealtimeClock() {
+export function RealtimeClock({ className }: { className?: string }) {
   const [time, setTime] = useState("");
   const [dateTime, setDateTime] = useState("");
 
@@ -36,7 +36,7 @@ export function RealtimeClock() {
   return (
     <time
       dateTime={dateTime}
-      className="font-mono text-xs text-[var(--text-tertiary)] tabular-nums"
+      className={className || "font-mono text-xs text-[var(--text-tertiary)] tabular-nums"}
     >
       {time}
     </time>

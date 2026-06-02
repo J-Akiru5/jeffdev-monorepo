@@ -37,6 +37,7 @@ export { AccountDropdown, type AccountDropdownProps } from "./account-dropdown";
 export { AppTopNavbar, type AppNavLink, type AppTopNavbarProps } from "./app-top-navbar";
 export { RealtimeClock } from "./realtime-clock";
 export { ThemeDefaultSync } from "./theme-default-sync";
+export { StatusBarFooter } from "./status-bar-footer";
 export { ProfileEditor, type ProfileEditorProps, type ProfileEditorData } from "./profile-editor";
 export { AuthProvider, useAuth, type AuthProfile, type AuthContextValue } from "./auth-provider";
 export {

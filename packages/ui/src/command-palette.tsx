@@ -187,7 +187,8 @@ export function CommandPalette({
             }}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
-            className="flex-1 bg-transparent py-3.5 text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
+            className="flex-1 bg-transparent py-3.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-tertiary)]"
+            style={{ outline: "none", boxShadow: "none", border: "none" }}
             autoComplete="off"
             spellCheck={false}
           />
