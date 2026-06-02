@@ -106,7 +106,7 @@ Site URL: https://syntaxurelabs.com    (Primary — syntaxure-labs domain)
 Redirect URLs:
   https://syntaxurelabs.com/**
   https://admin.jeffdev.studio/**
-  https://prism.jeffdev.studio/**
+  https://prism.syntaxure.dev/**
   http://localhost:3000/**
   http://localhost:3001/**
   http://localhost:3004/**
@@ -679,7 +679,7 @@ Settings → Branches → Add rule → `main`:
 | App | Domain |
 |-----|--------|
 | syntaxure-labs | `syntaxurelabs.com` or `jeffdev.studio` |
-| prism-engine | `prism.jeffdev.studio` or `prismengine.io` |
+| prism-engine | `prism.syntaxure.dev` or `prismengine.io` |
 | prism-docs | `docs.jeffdev.studio` |
 | prism-admin | `admin.jeffdev.studio` |
 | prism-manage | `manage.jeffdev.studio` or `app.jeffdev.studio` |
@@ -703,7 +703,7 @@ After domains are decided, update Supabase (see §1.5):
 ```
 Redirect URLs:
   https://syntaxurelabs.com/**
-  https://prism.jeffdev.studio/**
+  https://prism.syntaxure.dev/**
   https://admin.jeffdev.studio/**
   https://docs.jeffdev.studio/**
   https://manage.jeffdev.studio/**
@@ -734,8 +734,8 @@ Reset your Syntaxure Labs password
 <h2>Reset your password</h2>
 
 <p>
-  We've upgraded our platform. As part of this update, you need to set a new
-  password for your account.
+  We've upgraded our platform. As part of this update, you need to set a new password for your
+  account.
 </p>
 
 <p>Click the button below to set your password:</p>
@@ -752,14 +752,11 @@ Reset your Syntaxure Labs password
 <p>Or copy this link:</p>
 <p style="color: #6b7280;">{{ .ConfirmationURL }}</p>
 
-<hr
-  style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 30px 0;"
-/>
+<hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 30px 0;" />
 
 <p style="color: #6b7280; font-size: 13px;">
-  This reset was triggered by our platform migration. Your data is safe and your
-  previous information has been preserved. If you did not expect this email, you
-  can safely ignore it.
+  This reset was triggered by our platform migration. Your data is safe and your previous
+  information has been preserved. If you did not expect this email, you can safely ignore it.
 </p>
 
 <p style="color: #6b7280; font-size: 13px;">— The Syntaxure Labs Team</p>

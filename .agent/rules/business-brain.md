@@ -29,7 +29,7 @@ The Pitch: "We don't just build your app; we install the Infrastructure so you c
 
 Revenue Logic: Funds the R&D for Prism. 100% of Agency profit goes into Prism runway.
 
-Engine B: The Product (prism.jeffdev.studio)
+Engine B: The Product (prism.syntaxure.dev)
 Role: The "Scale" & "Asset."
 
 Strategy: "Context-as-a-Service." We sell the rules, not the hosting.

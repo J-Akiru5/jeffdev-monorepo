@@ -150,7 +150,7 @@ IDE → stdio → prism serve → spawns prism-mcp-server --standalone → Cosmo
 **Cloud-hosted path (Pro users):**
 
 ```
-IDE → HTTPS → prism.jeffdev.studio/api/mcp/stdio → Cosmos DB
+IDE → HTTPS → prism.syntaxure.dev/api/mcp/stdio → Cosmos DB
 ```
 
 **NEVER use `prism connect` for IDE integration.** `prism serve` is the canonical command.
@@ -315,18 +315,18 @@ extensions/
 
 ## Environment Variables (Root `.env`, Doppler-managed)
 
-| Variable                 | Purpose                                                 |
-| ------------------------ | ------------------------------------------------------- |
-| `MONGODB_URI`            | Cosmos DB connection string                             |
-| `COSMOS_DATABASE_NAME`   | Database name (default: `prism`)                        |
-| `GEMINI_API_KEY`         | Google Gemini API key (primary AI)                      |
-| `GEMINI_MODEL`           | Chat model (default: `gemini-3.5-flash`)                |
-| `GEMINI_EMBEDDING_MODEL` | Embedding model (default: `gemini-embedding-2`)         |
-| `AI_PROVIDER`            | `gemini` (default) or `azure`                           |
-| `AZURE_OPENAI_ENDPOINT`  | Azure fallback endpoint (optional)                      |
-| `AZURE_OPENAI_API_KEY`   | Azure fallback key (optional)                           |
-| `PRISM_API_KEY`          | User's API key for MCP server auth (set in IDE config)  |
-| `PRISM_API_URL`          | Dashboard URL (default: `https://prism.jeffdev.studio`) |
+| Variable                 | Purpose                                                |
+| ------------------------ | ------------------------------------------------------ |
+| `MONGODB_URI`            | Cosmos DB connection string                            |
+| `COSMOS_DATABASE_NAME`   | Database name (default: `prism`)                       |
+| `GEMINI_API_KEY`         | Google Gemini API key (primary AI)                     |
+| `GEMINI_MODEL`           | Chat model (default: `gemini-3.5-flash`)               |
+| `GEMINI_EMBEDDING_MODEL` | Embedding model (default: `gemini-embedding-2`)        |
+| `AI_PROVIDER`            | `gemini` (default) or `azure`                          |
+| `AZURE_OPENAI_ENDPOINT`  | Azure fallback endpoint (optional)                     |
+| `AZURE_OPENAI_API_KEY`   | Azure fallback key (optional)                          |
+| `PRISM_API_KEY`          | User's API key for MCP server auth (set in IDE config) |
+| `PRISM_API_URL`          | Dashboard URL (default: `https://prism.syntaxure.dev`) |
 
 ---
 

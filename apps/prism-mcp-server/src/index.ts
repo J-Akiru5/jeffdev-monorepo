@@ -78,7 +78,7 @@ const SERVER_VERSION = "1.0.0";
 // API Key Authentication
 const PRISM_API_KEY = process.env.PRISM_API_KEY;
 const PRISM_API_URL =
-  process.env.PRISM_API_URL || "https://prism.jeffdev.studio";
+  process.env.PRISM_API_URL || "https://prism.syntaxure.dev";
 
 // Cached auth state
 let authenticatedUserId: string | null = null;

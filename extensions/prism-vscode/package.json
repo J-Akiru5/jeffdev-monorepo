@@ -113,11 +113,11 @@
         "prism.token": {
           "type": "string",
           "default": "",
-          "description": "Prism API token. Get it from prism.jeffdev.studio/settings"
+          "description": "Prism API token. Get it from prism.syntaxure.dev/settings"
         },
         "prism.apiUrl": {
           "type": "string",
-          "default": "https://prism.jeffdev.studio",
+          "default": "https://prism.syntaxure.dev",
           "description": "Prism API URL"
         },
         "prism.autoConnect": {

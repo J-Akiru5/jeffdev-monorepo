@@ -27,7 +27,7 @@ Syntaxure Labs (primary brand)
     └── Joularix Solar
 ```
 
-**Domains:** jeffdev.studio (agency), prism.jeffdev.studio (product), docs.jeffdev.studio (docs)
+**Domains:** jeffdev.studio (agency), prism.syntaxure.dev (product), docs.jeffdev.studio (docs)
 
 ---
 
@@ -123,7 +123,7 @@ Syntaxure Labs (primary brand)
 | Testimonials       | Beta user quotes (placeholder until real)                    | Medium   | Mark              |
 | Media kit          | Logos, brand guidelines, bios for press                      | Low      | Karl (CPO)        |
 
-### Prism Landing (prism.jeffdev.studio) — Pre-SEC
+### Prism Landing (prism.syntaxure.dev) — Pre-SEC
 
 | Section                 | Details                                                             |
 | ----------------------- | ------------------------------------------------------------------- |
@@ -247,6 +247,6 @@ Syntaxure Labs (primary brand)
 2. Write matching Twitter thread: "Here's why your AI coding assistant is costing you $150/month in wasted tokens (and how we're fixing it)"
 3. Pin both posts.
 4. DM 10 dev friends/followers to share.
-5. Create the waitlist landing page at prism.jeffdev.studio.
+5. Create the waitlist landing page at prism.syntaxure.dev.
 
 **Why now:** 3-6 months before SEC is not a problem — it's free audience-building time. By the time you can accept money, you'll have 500-1,000+ people who already want to pay.

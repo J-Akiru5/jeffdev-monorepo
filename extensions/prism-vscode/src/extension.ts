@@ -77,7 +77,7 @@ function getConfig() {
   const config = vscode.workspace.getConfiguration("prism");
   return {
     token: config.get<string>("token") || process.env.PRISM_TOKEN || "",
-    apiUrl: config.get<string>("apiUrl") || "https://prism.jeffdev.studio",
+    apiUrl: config.get<string>("apiUrl") || "https://prism.syntaxure.dev",
   };
 }
 
@@ -133,13 +133,13 @@ async function apiDelete(path: string): Promise<boolean> {
 async function connect(): Promise<void> {
   const config = vscode.workspace.getConfiguration("prism");
   let token = config.get<string>("token") || process.env.PRISM_TOKEN || "";
-  const apiUrl = config.get<string>("apiUrl") || "https://prism.jeffdev.studio";
+  const apiUrl = config.get<string>("apiUrl") || "https://prism.syntaxure.dev";
 
   if (!token) {
     const input = await vscode.window.showInputBox({
       prompt: "Enter your Prism API token",
       password: true,
-      placeHolder: "Get your token at prism.jeffdev.studio/settings",
+      placeHolder: "Get your token at prism.syntaxure.dev/settings",
       ignoreFocusOut: true,
     });
     if (!input) return;

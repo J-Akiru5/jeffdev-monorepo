@@ -6,15 +6,15 @@
 
 ## Overview: Apps to Deploy
 
-| App                  | Subdomain              | Port | Type                | Vercel?                  |
-| -------------------- | ---------------------- | ---- | ------------------- | ------------------------ |
-| **syntaxure-labs**   | `jeffdev.studio`       | 3000 | Next.js 16          | ✅ Yes                   |
-| **prism-engine**     | `prism.jeffdev.studio` | 3001 | Next.js 16 + Sentry | ✅ Yes                   |
-| **prism-docs**       | `docs.jeffdev.studio`  | 3002 | Nextra 4 + Sentry   | ✅ Yes                   |
-| **prism-admin**      | (TBD)                  | 3004 | Next.js 16          | ✅ Yes                   |
-| **prism-manage**     | (TBD)                  | 3007 | Next.js 16          | ✅ Yes                   |
-| **prism-mcp-server** | N/A                    | 3003 | Node.js MCP SDK     | ❌ Use Railway/Fly.io/VM |
-| **prism-analytics**  | N/A                    | 8000 | Python FastAPI      | ❌ Use Docker host       |
+| App                  | Subdomain             | Port | Type                | Vercel?                  |
+| -------------------- | --------------------- | ---- | ------------------- | ------------------------ |
+| **syntaxure-labs**   | `jeffdev.studio`      | 3000 | Next.js 16          | ✅ Yes                   |
+| **prism-engine**     | `prism.syntaxure.dev` | 3001 | Next.js 16 + Sentry | ✅ Yes                   |
+| **prism-docs**       | `docs.jeffdev.studio` | 3002 | Nextra 4 + Sentry   | ✅ Yes                   |
+| **prism-admin**      | (TBD)                 | 3004 | Next.js 16          | ✅ Yes                   |
+| **prism-manage**     | (TBD)                 | 3007 | Next.js 16          | ✅ Yes                   |
+| **prism-mcp-server** | N/A                   | 3003 | Node.js MCP SDK     | ❌ Use Railway/Fly.io/VM |
+| **prism-analytics**  | N/A                   | 8000 | Python FastAPI      | ❌ Use Docker host       |
 
 ---
 
@@ -87,7 +87,7 @@
 
 ---
 
-## 2️⃣ prism-engine → `prism.jeffdev.studio`
+## 2️⃣ prism-engine → `prism.syntaxure.dev`
 
 ### Vercel Settings
 
@@ -102,12 +102,12 @@
 
 #### Public (`NEXT_PUBLIC_`)
 
-| Variable                        | Description                    | Source             |
-| ------------------------------- | ------------------------------ | ------------------ |
-| `NEXT_PUBLIC_PRISM_URL`         | `https://prism.jeffdev.studio` | You set            |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Supabase project URL           | Supabase Dashboard |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key       | Supabase Dashboard |
-| `NEXT_PUBLIC_SENTRY_DSN`        | Sentry public DSN              | Sentry Dashboard   |
+| Variable                        | Description                   | Source             |
+| ------------------------------- | ----------------------------- | ------------------ |
+| `NEXT_PUBLIC_PRISM_URL`         | `https://prism.syntaxure.dev` | You set            |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Supabase project URL          | Supabase Dashboard |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key      | Supabase Dashboard |
+| `NEXT_PUBLIC_SENTRY_DSN`        | Sentry public DSN             | Sentry Dashboard   |
 
 #### Private
 
@@ -283,7 +283,7 @@
 | `AZURE_OPENAI_EMBEDDING_DEPLOYMENT` | Embedding model name                                         | Azure Portal |
 | `GEMINI_MODEL`                      | Gemini model name (fallback)                                 | You set      |
 | `PRISM_API_KEY`                     | 🔒 API key — **must match** `prism-engine`'s `PRISM_API_KEY` | You generate |
-| `PRISM_API_URL`                     | Prism Engine URL (e.g. `https://prism.jeffdev.studio`)       | You set      |
+| `PRISM_API_URL`                     | Prism Engine URL (e.g. `https://prism.syntaxure.dev`)        | You set      |
 | `USE_GREMLIN_RANKING`               | `true`/`false` — Gremlin graph ranking                       | You set      |
 
 ### Dependencies (key)
@@ -371,7 +371,7 @@ Then populate each with the env vars listed above.
 | Domain                      | Target App     | Vercel Project   |
 | --------------------------- | -------------- | ---------------- |
 | `jeffdev.studio`            | syntaxure-labs | `syntaxure-labs` |
-| `prism.jeffdev.studio`      | prism-engine   | `prism-engine`   |
+| `prism.syntaxure.dev`       | prism-engine   | `prism-engine`   |
 | `docs.jeffdev.studio`       | prism-docs     | `prism-docs`     |
 | `admin.jeffdev.studio` (?)  | prism-admin    | `prism-admin`    |
 | `manage.jeffdev.studio` (?) | prism-manage   | `prism-manage`   |

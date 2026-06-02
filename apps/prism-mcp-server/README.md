@@ -51,18 +51,18 @@ npx prism-git-hook
 
 ## Environment Variables
 
-| Variable                 | Required        | Default                        | Description                       |
-| ------------------------ | --------------- | ------------------------------ | --------------------------------- |
-| `MONGODB_URI`            | Yes             | —                              | Azure Cosmos DB connection string |
-| `COSMOS_DATABASE_NAME`   | No              | `prism`                        | Database name                     |
-| `PRISM_API_KEY`          | No              | —                              | API key for subscription auth     |
-| `PRISM_API_URL`          | No              | `https://prism.jeffdev.studio` | Prism API endpoint                |
-| `GOOGLE_GEMINI_API_KEY`  | For AI features | —                              | Gemini API key                    |
-| `GEMINI_MODEL`           | No              | `gemini-3.5-flash`             | Chat model                        |
-| `GEMINI_EMBEDDING_MODEL` | No              | `gemini-embedding-2`           | Embedding model                   |
-| `AI_PROVIDER`            | No              | `gemini`                       | Set to `azure` for Azure OpenAI   |
-| `USE_GREMLIN_RANKING`    | No              | `false`                        | Enable graph-based rule ranking   |
-| `PRISM_GATEWAY_PORT`     | No              | `3003`                         | REST gateway port                 |
+| Variable                 | Required        | Default                       | Description                       |
+| ------------------------ | --------------- | ----------------------------- | --------------------------------- |
+| `MONGODB_URI`            | Yes             | —                             | Azure Cosmos DB connection string |
+| `COSMOS_DATABASE_NAME`   | No              | `prism`                       | Database name                     |
+| `PRISM_API_KEY`          | No              | —                             | API key for subscription auth     |
+| `PRISM_API_URL`          | No              | `https://prism.syntaxure.dev` | Prism API endpoint                |
+| `GOOGLE_GEMINI_API_KEY`  | For AI features | —                             | Gemini API key                    |
+| `GEMINI_MODEL`           | No              | `gemini-3.5-flash`            | Chat model                        |
+| `GEMINI_EMBEDDING_MODEL` | No              | `gemini-embedding-2`          | Embedding model                   |
+| `AI_PROVIDER`            | No              | `gemini`                      | Set to `azure` for Azure OpenAI   |
+| `USE_GREMLIN_RANKING`    | No              | `false`                       | Enable graph-based rule ranking   |
+| `PRISM_GATEWAY_PORT`     | No              | `3003`                        | REST gateway port                 |
 
 ## MCP Tools (16)
 

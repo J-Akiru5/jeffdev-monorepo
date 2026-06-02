@@ -30,7 +30,7 @@
 - [ ] **[P1-MEDIUM] [Mark]** Add team headshots to About page
 - [ ] **[P1-LOW] [Karl (CPO)]** Create media kit page with logos, brand colors, bios for press
 
-### Prism Landing (prism.jeffdev.studio) — Waitlist Mode
+### Prism Landing (prism.syntaxure.dev) — Waitlist Mode
 
 - [ ] **[P1-HIGH] [Karl (CPO) + Lou]** Design and build waitlist landing page with Founding Member CTA
 - [ ] **[P1-HIGH] [Jeff + Lou]** Write Founding Member offer copy: "$9/mo lifetime (50% off)"

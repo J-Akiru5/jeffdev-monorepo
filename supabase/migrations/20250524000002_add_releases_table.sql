@@ -51,7 +51,7 @@ INSERT INTO releases (title, version, date, type, description, link, tags, is_fe
     NOW() - INTERVAL '2 days',
     'tool',
     'Major update to the Prism Context Engine with enhanced memory persistence, improved token optimization, and a new CLI-based agent management system. This release introduces parallel agent execution and smarter context pruning.',
-    'https://prism.jeffdev.studio',
+    'https://prism.syntaxure.dev/',
     ARRAY['prism', 'cli', 'agents', 'memory'],
     TRUE
   ),
@@ -71,7 +71,7 @@ INSERT INTO releases (title, version, date, type, description, link, tags, is_fe
     NOW() - INTERVAL '14 days',
     'update',
     'Beta release of the Model Context Protocol server. Supports stdio transport, tool discovery, and resource management for AI agent integration.',
-    'https://prism.jeffdev.studio',
+    'https://prism.syntaxure.dev/',
     ARRAY['mcp', 'ai', 'server'],
     FALSE
   ),

@@ -10,7 +10,7 @@ description: How to get a Prism API Key and connect the MCP server to your code 
 
 > **Free plan:** You can create rules manually in the dashboard and export them as `.cursorrules` or `rules.md`. API keys for live MCP/IDE sync require a **Pro plan**.
 
-1. Go to **https://prism.jeffdev.studio** and sign in (or sign up)
+1. Go to **https://prism.syntaxure.dev** and sign in (or sign up)
 2. Click **Settings** in the sidebar
 3. Scroll to **API Keys**
 4. Click **"Generate Key"**

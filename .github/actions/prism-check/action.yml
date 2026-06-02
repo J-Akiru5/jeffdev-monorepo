@@ -1,25 +1,25 @@
-name: 'Prism Code Review'
-description: 'Check PR code against Prism architectural rules'
-author: 'JeffDev Studio'
+name: "Prism Code Review"
+description: "Check PR code against Prism architectural rules"
+author: "JeffDev Studio"
 
 inputs:
   api-key:
-    description: 'Prism API key'
+    description: "Prism API key"
     required: true
   api-url:
-    description: 'Prism API URL'
+    description: "Prism API URL"
     required: false
-    default: 'https://prism.jeffdev.studio'
+    default: "https://prism.syntaxure.dev"
   project-id:
-    description: 'Project ID in Prism'
+    description: "Project ID in Prism"
     required: true
   fail-on-violation:
-    description: 'Fail the check if violations are found'
+    description: "Fail the check if violations are found"
     required: false
-    default: 'false'
+    default: "false"
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - uses: actions/checkout@v4
       with:
@@ -29,7 +29,7 @@ runs:
       id: changed-files
       uses: tj-actions/changed-files@v45
       with:
-        separator: ','
+        separator: ","
 
     - name: Run Prism code review
       id: prism-review
@@ -90,7 +90,7 @@ runs:
           const violations = parseInt('${{ steps.prism-review.outputs.violations }}');
           const report = `${{ steps.prism-review.outputs.report }}`;
 
-          const body = `## 🔍 Prism Code Review\n\n### Found **${violations}** violation(s)\n\n${report}\n\n---\n_Powered by [Prism Context Engine](https://prism.jeffdev.studio)_`;
+          const body = `## 🔍 Prism Code Review\n\n### Found **${violations}** violation(s)\n\n${report}\n\n---\n_Powered by [Prism Context Engine](https://prism.syntaxure.dev)_`;
 
           await github.rest.issues.createComment({
             issue_number: context.issue.number,

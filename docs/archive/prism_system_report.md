@@ -28,7 +28,7 @@ Lou's documentation is **excellent and accurate**. The system architecture is so
 | 9 MCP Tools                                          | ✅ All 9 registered in [index.ts](file:///c:/dev/Next%20Js/jeffdev-monorepo/apps/prism-mcp-server/src/index.ts#L253-L516)                                     | ✅ Confirmed             |
 | Offline fallback cache                               | ✅ Full LRU cache in [cache.ts](file:///c:/dev/Next%20Js/jeffdev-monorepo/apps/prism-mcp-server/src/middleware/cache.ts) (memory+disk, 50MB limit, 30min TTL) | ✅ Confirmed             |
 | Cosmos DB connection                                 | ✅ Singleton in [index.ts](file:///c:/dev/Next%20Js/jeffdev-monorepo/apps/prism-mcp-server/src/index.ts#L116-L139)                                            | ⚠️ No reconnection logic |
-| API Key auth                                         | ✅ Validates against `prism.jeffdev.studio/api/api-keys/verify`                                                                                               | ✅ Confirmed             |
+| API Key auth                                         | ✅ Validates against `prism.syntaxure.dev/api/api-keys/verify`                                                                                                | ✅ Confirmed             |
 | Smart selection (semantic ranking)                   | ✅ Full implementation in [smart-select.ts](file:///c:/dev/Next%20Js/jeffdev-monorepo/apps/prism-mcp-server/src/middleware/smart-select.ts)                   | ⚠️ Broken import         |
 
 ---
@@ -157,7 +157,7 @@ But [PHASE2_COMPLETE.md](file:///c:/dev/Next%20Js/jeffdev-monorepo/apps/prism-mc
 | 5   | Deploy dashboard to Vercel                   | **Jeff** | 🟡 Medium — Doppler secrets needed | 🔴 Blocking go-live      |
 | 6   | Deploy docs to Vercel                        | **Jeff** | 🟢 Easy — Nextra standard deploy   | 🟡 Important             |
 | 7   | Configure Doppler secrets for Vercel         | **Jeff** | 🟡 Medium — already has Doppler    | 🔴 Blocking deploy       |
-| 8   | Set DNS for prism.jeffdev.studio             | **Jeff** | 🟢 Easy — DNS records              | 🟡 Important             |
+| 8   | Set DNS for prism.syntaxure.dev              | **Jeff** | 🟢 Easy — DNS records              | 🟡 Important             |
 | 9   | End-to-end smoke test (CLI → MCP → DB → IDE) | **Both** | 🟡 Medium                          | 🔴 Must do before launch |
 
 ---
@@ -317,13 +317,13 @@ Doppler secrets need to be injected into Vercel for deployment. Required vars:
 **Sprint:** Sprint 2
 
 **Description:**
-Deploy `apps/prism-dashboard` to Vercel at `prism.jeffdev.studio`.
+Deploy `apps/prism-dashboard` to Vercel at `prism.syntaxure.dev`.
 
 **Depends on:** Issue 6 (Doppler secrets)
 
 **Acceptance Criteria:**
 
-- [ ] https://prism.jeffdev.studio loads
+- [ ] https://prism.syntaxure.dev loads
 - [ ] Sign up/login works via Clerk
 - [ ] API key generation works
 
@@ -336,7 +336,7 @@ Deploy `apps/prism-dashboard` to Vercel at `prism.jeffdev.studio`.
 **Sprint:** Sprint 2
 
 **Description:**
-Deploy `apps/prism-docs` (Nextra 4) to Vercel at `docs.prism.jeffdev.studio`.
+Deploy `apps/prism-docs` (Nextra 4) to Vercel at `docs.prism.syntaxure.dev`.
 
 **Acceptance Criteria:**
 
@@ -345,14 +345,14 @@ Deploy `apps/prism-docs` (Nextra 4) to Vercel at `docs.prism.jeffdev.studio`.
 
 ---
 
-#### Issue 9: `[INFRA] Configure DNS for prism.jeffdev.studio`
+#### Issue 9: `[INFRA] Configure DNS for prism.syntaxure.dev`
 
 **Labels:** `infrastructure`, `priority:medium`  
 **Assignee:** `J-Akiru5` (Jeff)  
 **Sprint:** Sprint 2
 
 **Description:**
-Point `prism.jeffdev.studio` and `docs.prism.jeffdev.studio` to Vercel via DNS.
+Point `prism.syntaxure.dev` and `docs.prism.syntaxure.dev` to Vercel via DNS.
 
 **Acceptance Criteria:**
 
@@ -474,7 +474,7 @@ doppler secrets --project prism
 
 # 2. Set up Vercel project for prism-dashboard
 # 3. Configure Doppler → Vercel integration
-# 4. Set DNS records for prism.jeffdev.studio
+# 4. Set DNS records for prism.syntaxure.dev
 ```
 
 ---

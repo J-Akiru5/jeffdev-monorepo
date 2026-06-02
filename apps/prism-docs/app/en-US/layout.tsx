@@ -313,7 +313,7 @@ export default async function RootLayout({
                       <ul className="space-y-3">
                         <li key="dash">
                           <a
-                            href="https://prism.jeffdev.studio"
+                            href="https://prism.syntaxure.dev"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-white/70 hover:text-cyan-400 text-sm transition-colors"
@@ -323,7 +323,7 @@ export default async function RootLayout({
                         </li>
                         <li key="price">
                           <a
-                            href="https://prism.jeffdev.studio/pricing"
+                            href="https://prism.syntaxure.dev/pricing"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-white/70 hover:text-cyan-400 text-sm transition-colors"
@@ -360,7 +360,7 @@ export default async function RootLayout({
                         started.
                       </p>
                       <a
-                        href="https://prism.jeffdev.studio/sign-up"
+                        href="https://prism.syntaxure.dev/sign-up"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 border border-white/20 px-5 py-2.5 text-sm font-medium text-white hover:border-cyan-500/50 hover:text-cyan-400 transition-all"
@@ -376,7 +376,7 @@ export default async function RootLayout({
                   <div className="max-w-7xl mx-auto px-6 lg:px-8 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
                     <div className="flex items-center gap-6 text-xs">
                       <a
-                        href="https://prism.jeffdev.studio/terms"
+                        href="https://prism.syntaxure.dev/terms"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-white/40 hover:text-white/60 transition-colors"
@@ -384,7 +384,7 @@ export default async function RootLayout({
                         Terms of Service
                       </a>
                       <a
-                        href="https://prism.jeffdev.studio/privacy"
+                        href="https://prism.syntaxure.dev/privacy"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-white/40 hover:text-white/60 transition-colors"

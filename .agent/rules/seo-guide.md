@@ -16,7 +16,7 @@ _Goal: We do not compete for "Freelancer" keywords. We compete for "Architecture
 - _Good:_ "Enterprise Systems Architecture // JeffDev Studio"
 - _Bad:_ "Web Design Services - JeffDev"
 
-- **Prism SaaS (`prism.jeffdev.studio`):**
+- **Prism SaaS (`prism.syntaxure.dev`):**
 - _Template:_ `%s | Prism Context Engine`
 - _Voice:_ Technical, Tool-focused.
 - _Good:_ "Context Governance for LLMs | Prism Context Engine"

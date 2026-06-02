@@ -15,7 +15,7 @@ import { homedir } from "os";
 import { createInterface } from "readline";
 
 const PRISM_API_URL =
-  process.env.PRISM_API_URL || "https://prism.jeffdev.studio";
+  process.env.PRISM_API_URL || "https://prism.syntaxure.dev";
 const CONFIG_DIR = join(homedir(), ".prism");
 const TOKEN_FILE = join(CONFIG_DIR, "token");
 
@@ -56,7 +56,7 @@ export async function connect(opts?: ConnectOptions): Promise<void> {
     console.log("  1. Run: prism login");
     console.log("  2. Set PRISM_TOKEN environment variable");
     console.log(
-      "  3. Get your token from: https://prism.jeffdev.studio/settings\n",
+      "  3. Get your token from: https://prism.syntaxure.dev/settings\n",
     );
 
     token = (await promptForToken()) ?? undefined;

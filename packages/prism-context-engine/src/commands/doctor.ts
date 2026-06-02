@@ -26,7 +26,7 @@ import { getApiOptions } from "../api.js";
 import { loadConfig } from "../config.js";
 
 const PRISM_DIR = join(homedir(), ".prism");
-const PRISM_API_URL = "https://prism.jeffdev.studio";
+const PRISM_API_URL = "https://prism.syntaxure.dev";
 
 type CheckStatus = "pass" | "warn" | "fail" | "skip";
 

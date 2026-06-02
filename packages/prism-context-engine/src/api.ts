@@ -11,7 +11,7 @@ export function getApiOptions(): ApiOptions {
   const apiUrl =
     process.env.PRISM_API_URL ||
     config.apiUrl ||
-    "https://prism.jeffdev.studio";
+    "https://prism.syntaxure.dev";
   return { token, apiUrl };
 }
 

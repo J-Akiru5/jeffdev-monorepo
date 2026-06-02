@@ -317,7 +317,7 @@ PAYPAL_WEBHOOK_ID=<your-paypal-webhook-id>
 
 # URLs
 NEXT_PUBLIC_ADMIN_URL=https://admin.jeffdev.studio
-NEXT_PUBLIC_DASHBOARD_URL=https://prism.jeffdev.studio
+NEXT_PUBLIC_DASHBOARD_URL=https://prism.syntaxure.dev
 ```
 
 ---
@@ -342,7 +342,7 @@ NEXT_PUBLIC_DASHBOARD_URL=https://prism.jeffdev.studio
 - **Environment:** Link Doppler integration
 
 ### Domain
-- Primary: `admin.jeffdev.studio` or `admin.prism.jeffdev.studio`
+- Primary: `admin.jeffdev.studio` or `admin.prism.syntaxure.dev`
 
 ---
 
