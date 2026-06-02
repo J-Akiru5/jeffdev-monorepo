@@ -45,52 +45,58 @@ export const HOMEPAGE_DEFAULTS = {
 export const FEATURES_DEFAULTS = {
   title: "Why Syntaxure Labs",
   subtitle:
-    "We don't just write code — we build systems with a philosophy. Here's what makes Syntaxure Labs unlike any agency you've worked with.",
+    "Our Production Core. Six architectural pillars engineered into our base SaaS templates, giving you a production-ready foundation that we customize to your exact business logic without the custom-build timeline.",
   features: [
     {
-      id: "ai-native",
-      title: "AI-Native Development",
+      id: "multi-tenant",
+      title: "Multi-Tenant Architecture",
       description:
-        "Our development pipeline integrates AI agents directly into the IDE, giving them full workspace context to map dependencies, trace issues, and execute tasks end-to-end without human micromanagement.",
+        "Built for Scale. Every template features a fully-baked multi-tenant architecture with robust organization isolation, team workspaces, and scalable database indexing right out of the box.",
+      icon: "layers",
     },
     {
-      id: "fixed-pricing",
-      title: "Fixed Investment Pricing",
+      id: "ready-security",
+      title: "Ready-to-Ship Security",
       description:
-        "Every project follows a structured Statement of Work with defined milestones, deliverables, and fixed pricing. No hourly billing, no scope creep invoices, no financial anxiety.",
+        "Turnkey Compliance. Production-grade authentication, role-based access control (RBAC), and encrypted data handling are natively integrated into the core boilerplate.",
+      icon: "shield",
     },
     {
-      id: "enterprise-security",
-      title: "Enterprise-Grade Security",
+      id: "template-delivery",
+      title: "Template-Accelerated Delivery",
       description:
-        "Defense-in-depth with Firebase Authentication, custom session management, role-based access controls, encrypted Firestore collections, and comprehensive audit logging.",
+        "Zero to Launch in Weeks. Because we skip the repetitive boilerplate phase and start directly with a production-ready SaaS template, your custom deployment takes weeks, not months.",
+      icon: "zap",
     },
     {
-      id: "socratic-planning",
-      title: "Socratic Planning",
+      id: "ai-extensibility",
+      title: "AI-Native Extensibility",
       description:
-        "Our Clarification-First Doctrine means every project starts with a structured Q&A loop. We challenge assumptions, map edge cases, surface hidden requirements, and validate the full scope before any engineering begins.",
+        "AI-Ready Foundations. Our core architecture is built to cleanly integrate AI native workflows, vector search, and automated pipeline contexts, making it simple to inject intelligence into your custom features.",
+      icon: "bot",
     },
     {
-      id: "rapid-mvp",
-      title: "Rapid MVP Delivery",
+      id: "productized-customization",
+      title: "Productized Customization",
       description:
-        "Using proprietary build sequences and pre-built architecture templates, we compress typical 3-month development timelines into 2-3 weeks for functional, polished MVP launches.",
+        "Predictable Value Tiers. No ambiguous agency estimates. Choose your base SaaS template and pick exactly the custom modules and integrations you need with transparent, predictable pricing.",
+      icon: "sliders",
     },
     {
-      id: "post-launch",
-      title: "Post-Launch Partnership",
+      id: "continuous-evolution",
+      title: "Continuous Evolution",
       description:
-        "Every project includes a transition period with documentation handoff and knowledge transfer. Optional retainer packages cover bug fixes, performance optimization, feature iterations, and architecture evolution.",
+        "CI/CD Enabled Growth. Our decoupled template infrastructure allows us to seamlessly deploy feature upgrades, maintain dependency security, and scale your application as your user base expands.",
+      icon: "refresh-cw",
     },
   ],
   comparison: [
-    { aspect: "Pricing", traditional: "Hourly billing, scope creep", syntaxure: "Fixed project investment" },
-    { aspect: "Planning", traditional: "Vague requirements, assumptions", syntaxure: "Socratic Q&A, zero assumptions" },
-    { aspect: "Security", traditional: "Basic auth, no RBAC", syntaxure: "Defense-in-depth, audit-ready" },
-    { aspect: "AI Usage", traditional: "Copy-paste from ChatGPT", syntaxure: "IDE-native agents with full context" },
-    { aspect: "Timeline", traditional: "3-6 months for MVP", syntaxure: "2-3 weeks for MVP" },
-    { aspect: "Post-Launch", traditional: "Handoff and goodbye", syntaxure: "Retainer partnership, growth roadmap" },
+    { aspect: "Architecture", traditional: "Custom process discovery & boilerplate setup", syntaxure: "Built-in Multi-Tenancy & organization isolation" },
+    { aspect: "Security", traditional: "Building compliance and security from day one", syntaxure: "Pre-integrated Turnkey Security & session RBAC" },
+    { aspect: "Pricing", traditional: "Hourly billing or milestone project estimates", syntaxure: "Productized Customization Modules & flat-rate tiers" },
+    { aspect: "AI Capabilities", traditional: "Manual coding or basic copy-paste assistant tools", syntaxure: "Infrastructure built to support local and cloud AI pipelines" },
+    { aspect: "Time to Launch", traditional: "3-6 months starting from empty workspace", syntaxure: "Zero to launch in weeks using production SaaS core" },
+    { aspect: "Growth Strategy", traditional: "One-off project handoff or expensive retainers", syntaxure: "CI/CD enabled template upgrades & decoupled scaling" },
   ],
 };
 

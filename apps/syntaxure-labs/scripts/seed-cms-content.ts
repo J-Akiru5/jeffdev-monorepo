@@ -50,43 +50,43 @@ const pages = [
     content: {
       title: "Why Syntaxure Labs",
       subtitle:
-        "We don't just write code — we build systems with a philosophy. Here's what makes Syntaxure Labs unlike any agency you've worked with.",
+        "Our Production Core. Six architectural pillars engineered into our base SaaS templates, giving you a production-ready foundation that we customize to your exact business logic without the custom-build timeline.",
       features: [
         {
-          title: "AI-Native Development",
+          title: "Multi-Tenant Architecture",
           description:
-            "Our development pipeline integrates AI agents directly into the IDE, giving them full workspace context to map dependencies, trace issues, and execute tasks end-to-end without human micromanagement.",
-          icon: "bot",
+            "Built for Scale. Every template features a fully-baked multi-tenant architecture with robust organization isolation, team workspaces, and scalable database indexing right out of the box.",
+          icon: "layers",
         },
         {
-          title: "Fixed Investment Pricing",
+          title: "Ready-to-Ship Security",
           description:
-            "Every project follows a structured Statement of Work with defined milestones, deliverables, and fixed pricing. No hourly billing, no scope creep invoices, no financial anxiety.",
-          icon: "piggy-bank",
-        },
-        {
-          title: "Enterprise-Grade Security",
-          description:
-            "Defense-in-depth with Firebase Authentication, custom session management, role-based access controls, encrypted Firestore collections, and comprehensive audit logging.",
+            "Turnkey Compliance. Production-grade authentication, role-based access control (RBAC), and encrypted data handling are natively integrated into the core boilerplate.",
           icon: "shield",
         },
         {
-          title: "Socratic Planning",
+          title: "Template-Accelerated Delivery",
           description:
-            "Our Clarification-First Doctrine means every project starts with a structured Q&A loop. We challenge assumptions, map edge cases, surface hidden requirements, and validate the full scope before any engineering begins.",
-          icon: "message-square",
-        },
-        {
-          title: "Rapid MVP Delivery",
-          description:
-            "Using proprietary build sequences and pre-built architecture templates, we compress typical 3-month development timelines into 2-3 weeks for functional, polished MVP launches.",
+            "Zero to Launch in Weeks. Because we skip the repetitive boilerplate phase and start directly with a production-ready SaaS template, your custom deployment takes weeks, not months.",
           icon: "zap",
         },
         {
-          title: "Post-Launch Partnership",
+          title: "AI-Native Extensibility",
           description:
-            "Every project includes a transition period with documentation handoff and knowledge transfer. Optional retainer packages cover bug fixes, performance optimization, feature iterations, and architecture evolution.",
-          icon: "heart-handshake",
+            "AI-Ready Foundations. Our core architecture is built to cleanly integrate AI native workflows, vector search, and automated pipeline contexts, making it simple to inject intelligence into your custom features.",
+          icon: "bot",
+        },
+        {
+          title: "Productized Customization",
+          description:
+            "Predictable Value Tiers. No ambiguous agency estimates. Choose your base SaaS template and pick exactly the custom modules and integrations you need with transparent, predictable pricing.",
+          icon: "sliders",
+        },
+        {
+          title: "Continuous Evolution",
+          description:
+            "CI/CD Enabled Growth. Our decoupled template infrastructure allows us to seamlessly deploy feature upgrades, maintain dependency security, and scale your application as your user base expands.",
+          icon: "refresh-cw",
         },
       ],
     },

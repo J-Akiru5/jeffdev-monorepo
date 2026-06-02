@@ -1,12 +1,12 @@
 "use client";
 
 import {
-  Bot,
-  PiggyBank,
+  Layers,
   Shield,
-  MessageSquare,
   Zap,
-  HeartHandshake,
+  Bot,
+  Sliders,
+  RefreshCw,
   type LucideIcon,
 } from "lucide-react";
 import { useInView } from "@/lib/use-in-view";
@@ -21,46 +21,46 @@ type Feature = {
 
 const features: Feature[] = [
   {
-    id: "ai-native",
-    icon: Bot,
-    title: "AI-Native Development",
+    id: "multi-tenant",
+    icon: Layers,
+    title: "Multi-Tenant Architecture",
     description:
-      "IDE-native agents execute with precision, giving them full workspace context to map dependencies and solve problems.",
+      "Built for Scale. Every template features a fully-baked multi-tenant architecture with robust organization isolation, team workspaces, and scalable database indexing right out of the box.",
   },
   {
-    id: "fixed-pricing",
-    icon: PiggyBank,
-    title: "Fixed Investment Pricing",
-    description:
-      "Clear scope, milestone-based delivery, and fixed quotes — no surprise invoices or scope creep.",
-  },
-  {
-    id: "enterprise-security",
+    id: "ready-security",
     icon: Shield,
-    title: "Enterprise-Grade Security",
+    title: "Ready-to-Ship Security",
     description:
-      "Firebase Auth, session-based RBAC, encrypted data at rest — built for compliance from day one.",
+      "Turnkey Compliance. Production-grade authentication, role-based access control (RBAC), and encrypted data handling are natively integrated into the core boilerplate.",
   },
   {
-    id: "socratic-planning",
-    icon: MessageSquare,
-    title: "Socratic Planning",
-    description:
-      "Zero assumptions. We ask targeted questions before writing a single line of code, saving weeks of rework.",
-  },
-  {
-    id: "rapid-mvp",
+    id: "template-delivery",
     icon: Zap,
-    title: "Rapid MVP Delivery",
+    title: "Template-Accelerated Delivery",
     description:
-      "Using our proprietary build sequences, we compress typical 3-month timelines into 2-3 weeks for validated launches.",
+      "Zero to Launch in Weeks. Because we skip the repetitive boilerplate phase and start directly with a production-ready SaaS template, your custom deployment takes weeks, not months.",
   },
   {
-    id: "post-launch",
-    icon: HeartHandshake,
-    title: "Post-Launch Partnership",
+    id: "ai-extensibility",
+    icon: Bot,
+    title: "AI-Native Extensibility",
     description:
-      "Ongoing maintenance, feature evolution, and performance monitoring — we grow with you as your product scales.",
+      "AI-Ready Foundations. Our core architecture is built to cleanly integrate AI native workflows, vector search, and automated pipeline contexts, making it simple to inject intelligence into your custom features.",
+  },
+  {
+    id: "productized-customization",
+    icon: Sliders,
+    title: "Productized Customization",
+    description:
+      "Predictable Value Tiers. No ambiguous agency estimates. Choose your base SaaS template and pick exactly the custom modules and integrations you need with transparent, predictable pricing.",
+  },
+  {
+    id: "continuous-evolution",
+    icon: RefreshCw,
+    title: "Continuous Evolution",
+    description:
+      "CI/CD Enabled Growth. Our decoupled template infrastructure allows us to seamlessly deploy feature upgrades, maintain dependency security, and scale your application as your user base expands.",
   },
 ];
 
@@ -87,8 +87,7 @@ export function Features() {
               Engineered Better.
             </h2>
             <p className="mt-4 text-[var(--text-secondary)] leading-relaxed">
-              Six pillars that define how we build — from AI-native workflows to
-              post-launch partnerships. No shortcuts, no compromises. We build robust systems meant to scale.
+              Our Production Core. Six architectural pillars engineered into our base SaaS templates, giving you a production-ready foundation that we customize to your exact business logic without the custom-build timeline.
             </p>
           </div>
         </div>

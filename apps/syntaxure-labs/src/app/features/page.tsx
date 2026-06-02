@@ -10,7 +10,7 @@ import { FEATURES_DEFAULTS } from "@/data/cms-defaults";
 export const metadata: Metadata = {
   title: "Why Syntaxure Labs",
   description:
-    "Six pillars that define how we build software — AI-native development, fixed pricing, enterprise security, Socratic planning, rapid MVPs, and post-launch partnership.",
+    "Six architectural pillars engineered into our base SaaS templates — multi-tenancy, ready-to-ship security, template-accelerated delivery, AI-native extensibility, productized customization, and continuous evolution.",
 };
 
 export const revalidate = 60;
