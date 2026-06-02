@@ -78,9 +78,8 @@ export {
   type KeyboardShortcutsHelpProps,
   type ShortcutsHelpShortcut,
 } from "./keyboard-shortcuts-help";
-export {
-  getShortcutLabel,
-  matchesShortcut,
+
+export { getShortcutLabel, matchesShortcut,
   SHORTCUT_SEARCH,
   SHORTCUT_SIDEBAR,
   SHORTCUT_COMMAND_PALETTE,

@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import {
+  checkRateLimit,
+  getRateLimitHeaders,
+  getCachedResponse,
+  cacheResponse,
+} from "@syntaxure/redis";
 
 export const runtime = "edge";
-
-// Rate limiting store (in-memory)
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
-
-// Response cache
-const responseCache = new Map<string, { response: string; timestamp: number }>();
-
-const RATE_LIMIT_MAX = 20;
-const RATE_LIMIT_WINDOW = 60 * 1000;
-const CACHE_TTL = 5 * 60 * 1000;
 
 const MANAGE_CONTEXT = `
 # Prism Manage — Knowledge Base
@@ -105,44 +101,12 @@ function getClientIP(request: NextRequest): string {
   return "unknown";
 }
 
-function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
-  const now = Date.now();
-  const record = rateLimitStore.get(ip);
-  if (!record || now > record.resetTime) {
-    rateLimitStore.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
-    return { allowed: true, remaining: RATE_LIMIT_MAX - 1 };
-  }
-  if (record.count >= RATE_LIMIT_MAX) return { allowed: false, remaining: 0 };
-  record.count++;
-  return { allowed: true, remaining: RATE_LIMIT_MAX - record.count };
-}
-
-function getCachedResponse(question: string): string | null {
-  const cacheKey = question.toLowerCase().trim();
-  const cached = responseCache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) return cached.response;
-  if (cached) responseCache.delete(cacheKey);
-  return null;
-}
-
-function setCachedResponse(question: string, response: string): void {
-  const cacheKey = question.toLowerCase().trim();
-  responseCache.set(cacheKey, { response, timestamp: Date.now() });
-  if (responseCache.size > 1000) {
-    const entries = Array.from(responseCache.entries());
-    const now = Date.now();
-    entries.forEach(([key, value]) => {
-      if (now - value.timestamp > CACHE_TTL) responseCache.delete(key);
-    });
-  }
-}
-
 export async function POST(request: NextRequest) {
   try {
     const clientIP = getClientIP(request);
-    const { allowed, remaining } = checkRateLimit(clientIP);
-    if (!allowed) {
-      return NextResponse.json({ error: "Rate limit exceeded. Please wait a moment before trying again." }, { status: 429 });
+    const rlResult = await checkRateLimit(clientIP, "assistant");
+    if (!rlResult.allowed) {
+      return NextResponse.json({ error: "Rate limit exceeded. Please wait a moment before trying again." }, { status: 429, headers: getRateLimitHeaders(rlResult) });
     }
 
     const body = await request.json();
@@ -163,10 +127,11 @@ export async function POST(request: NextRequest) {
     }
 
     const userQuestion = lastMessage.content;
-    const cachedResponse = getCachedResponse(userQuestion);
+    const cacheKey = `assistant:manage:${userQuestion.toLowerCase().trim()}`;
+    const cachedResponse = await getCachedResponse(cacheKey);
     if (cachedResponse) {
       return NextResponse.json({ response: cachedResponse, cached: true }, {
-        headers: { "X-RateLimit-Remaining": String(remaining), "X-Cache": "HIT" },
+        headers: { ...getRateLimitHeaders(rlResult), "X-Cache": "HIT" },
       });
     }
 
@@ -202,10 +167,10 @@ Provide a helpful, accurate response based on the manage app context above.`;
 
     const result = await model.generateContent(systemPrompt);
     const response = result.response.text();
-    setCachedResponse(userQuestion, response);
+    await cacheResponse(cacheKey, response, 300);
 
     return NextResponse.json({ response, cached: false }, {
-      headers: { "X-RateLimit-Remaining": String(remaining), "X-Cache": "MISS" },
+      headers: { ...getRateLimitHeaders(rlResult), "X-Cache": "MISS" },
     });
   } catch (error) {
     console.error("Manage assistant error:", error);

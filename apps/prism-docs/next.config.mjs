@@ -1,5 +1,6 @@
 /* global process */
 import nextra from 'nextra'
+import { withSentry } from "@syntaxure/sentry-config";
 
 const withNextra = nextra({
   defaultShowCopyCode: true,
@@ -8,7 +9,6 @@ const withNextra = nextra({
   }
 })
 
-/** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
   reactStrictMode: true,
@@ -19,12 +19,15 @@ const nextConfig = {
   }
 }
 
-const finalConfig = withNextra(nextConfig)
+const nextraConfig = withNextra(nextConfig)
 
 export default async function config() {
+  const configWithSentry = withSentry(nextraConfig, "prism-docs", {
+    tracesSampleRate: 0.1,
+  });
   if (process.env.ANALYZE === 'true') {
     const withBundleAnalyzer = (await import('@next/bundle-analyzer')).default;
-    return withBundleAnalyzer()(finalConfig);
+    return withBundleAnalyzer()(configWithSentry);
   }
-  return finalConfig;
+  return configWithSentry;
 }

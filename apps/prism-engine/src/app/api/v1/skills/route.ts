@@ -35,9 +35,9 @@ export async function GET(request: NextRequest) {
   const auth = await authenticate(request);
   if (auth instanceof Response) return auth;
 
-  const rl = checkRateLimit(`skills:list:${auth.userId}`, auth.tier);
+  const rl = await checkRateLimit(`skills:list:${auth.userId}`, auth.tier);
   if (!rl.allowed) {
-    return errorResponse("Rate limit exceeded", 429);
+    return errorResponse("Rate limit exceeded", 429, getRateLimitHeaders(rl));
   }
 
   const { searchParams } = new URL(request.url);
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
   );
 
   Object.entries(
-    getRateLimitHeaders(`skills:list:${auth.userId}`, auth.tier),
+    getRateLimitHeaders(rl),
   ).forEach(([k, v]) => response.headers.set(k, v));
   response.headers.set("Cache-Control", "public, max-age=1800");
   response.headers.set("X-Cache-TTL", "1800");
@@ -101,8 +101,9 @@ export async function POST(request: NextRequest) {
   const auth = await authenticate(request);
   if (auth instanceof Response) return auth;
 
-  const rl = checkRateLimit(`skills:create:${auth.userId}`, auth.tier);
-  if (!rl.allowed) return errorResponse("Rate limit exceeded", 429);
+  const rl = await checkRateLimit(`skills:create:${auth.userId}`, auth.tier);
+  if (!rl.allowed)
+    return errorResponse("Rate limit exceeded", 429, getRateLimitHeaders(rl));
 
   let body: unknown;
   try {
@@ -135,7 +136,7 @@ export async function POST(request: NextRequest) {
     { created: true },
   );
   Object.entries(
-    getRateLimitHeaders(`skills:create:${auth.userId}`, auth.tier),
+    getRateLimitHeaders(rl),
   ).forEach(([k, v]) => response.headers.set(k, v));
   return response;
 }

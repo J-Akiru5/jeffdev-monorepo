@@ -1,23 +1,23 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
-  "globalEnv": [
-    "NODE_ENV",
-    "CI"
-  ],
+  "globalEnv": ["NODE_ENV", "CI"],
   "remoteCache": {
     "signature": true
   },
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**", "package.json", "tsconfig.json", "next.config.*", "postcss.config.*", "tailwind.config.*", ".env*"],
-      "outputs": [
-        ".next/**",
-        "!.next/cache/**",
-        ".next/standalone/**",
-        "dist/**"
+      "inputs": [
+        "src/**",
+        "package.json",
+        "tsconfig.json",
+        "next.config.*",
+        "postcss.config.*",
+        "tailwind.config.*",
+        ".env*"
       ],
+      "outputs": [".next/**", "!.next/cache/**", ".next/standalone/**", "dist/**"],
       "env": [
         "NEXT_PUBLIC_*",
         "SUPABASE_*",
@@ -37,7 +37,9 @@
         "VERCEL_ENV",
         "BASE_URL",
         "DOPPLER_*",
-        "NODE_OPTIONS"
+        "NODE_OPTIONS",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN"
       ]
     },
     "lint": {
@@ -51,7 +53,9 @@
         "NODE_OPTIONS",
         "N8N_WEBHOOK_URL",
         "MONGODB_URI",
-        "COSMOS_*"
+        "COSMOS_*",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN"
       ]
     },
     "check-types": {
@@ -61,7 +65,9 @@
       "env": [
         "NODE_OPTIONS",
         "SUPABASE_*",
-        "DATABASE_URL"
+        "DATABASE_URL",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN"
       ]
     },
     "test": {
@@ -72,7 +78,9 @@
         "MONGODB_URI",
         "DATABASE_URL",
         "SUPABASE_*",
-        "NODE_OPTIONS"
+        "NODE_OPTIONS",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN"
       ]
     },
     "dev": {
@@ -94,7 +102,9 @@
         "SESSION_SECRET",
         "COOKIE_DOMAIN",
         "NODE_OPTIONS",
-        "DOPPLER_*"
+        "DOPPLER_*",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN"
       ]
     }
   }

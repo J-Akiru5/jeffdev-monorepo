@@ -26,6 +26,8 @@
     "@supabase/ssr": "^0.4.1",
     "@supabase/supabase-js": "^2.47.0",
     "@syntaxure/ui": "workspace:*",
+    "@syntaxure/supabase": "workspace:*",
+    "@syntaxure/redis": "workspace:*",
     "@tanstack/react-query": "^5.90.14",
     "@tanstack/react-table": "^8.21.3",
     "@vercel/analytics": "^1.6.1",
