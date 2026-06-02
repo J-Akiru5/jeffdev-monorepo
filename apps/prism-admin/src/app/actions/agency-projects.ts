@@ -171,8 +171,8 @@ export async function updateAgencyProject(slug: string, data: ProjectFormData): 
       status: validated.status,
       start_date: validated.startDate || null,
       end_date: validated.deadline || null,
-      budget: validated.budget !== undefined ? validated.budget.toString() : null,
-      budget_spent: validated.paidAmount !== undefined ? validated.paidAmount.toString() : "0",
+      budget: validated.budget ?? null,
+      budget_spent: validated.paidAmount ?? 0,
       client_id: clientId,
       published: validated.published,
       metadata: {

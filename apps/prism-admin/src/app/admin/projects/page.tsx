@@ -6,8 +6,9 @@ interface Project {
   id: string;
   title: string;
   description: string | null;
-  status: "active" | "paused" | "completed" | "archived";
-  client_id: string | null;
+  status: string | null;
+  client_name: string | null;
+  client_email: string | null;
   start_date: string | null;
   budget: number | null;
   created_at: string;
@@ -151,11 +152,11 @@ function ProjectCard({ project }: { project: Project }) {
             {project.title}
           </h3>
           <p className="text-xs text-white/40">
-            {project.client_id || "No client"}
+            {project.client_name || "No client"}
           </p>
         </div>
         <span
-          className={`text-[10px] font-mono uppercase px-2 py-1 rounded ${statusColor[project.status] || "text-white/50 bg-white/5"}`}
+          className={`text-[10px] font-mono uppercase px-2 py-1 rounded ${statusColor[project.status ?? "active"] || "text-white/50 bg-white/5"}`}
         >
           {project.status}
         </span>

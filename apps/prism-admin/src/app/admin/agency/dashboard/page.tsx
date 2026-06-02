@@ -37,7 +37,7 @@ export default async function AgencyDashboardPage() {
       .select("*")
       .order("created_at", { ascending: false }),
     supabase
-      .from("messages")
+      .from("contact_messages")
       .select("*")
       .order("created_at", { ascending: false }),
     supabase
@@ -57,10 +57,10 @@ export default async function AgencyDashboardPage() {
   ]);
 
   const newQuotes =
-    quotes?.filter((q) => q.status === "received" || q.status === "new")
+    quotes?.filter((q) => q.status === "new" || q.status === "reviewed")
       .length || 0;
   const newMessages =
-    messages?.filter((m) => m.status === "received").length || 0;
+    messages?.filter((m) => m.status === "unread").length || 0;
   const activeProjects =
     projects?.filter((p) => p.status === "active").length || 0;
   const totalProjects = projects?.length || 0;
@@ -146,7 +146,7 @@ export default async function AgencyDashboardPage() {
                 </div>
                 <span
                   className={`rounded-sm px-2 py-0.5 text-[10px] uppercase tracking-wider ${
-                    quote.status === "sent"
+                    quote.status === "responded"
                       ? "bg-cyan-500/10 text-cyan-400"
                       : quote.status === "accepted"
                         ? "bg-emerald-500/10 text-emerald-400"

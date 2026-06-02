@@ -25,6 +25,7 @@ export default async function WorksPage() {
 
   const projects = (projectsResult.data || []).map((p) => ({
     ...p,
+    status: p.status ?? "active",
     type: "project" as const,
     source: "projects" as const,
   }));

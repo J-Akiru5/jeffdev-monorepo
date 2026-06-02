@@ -44,7 +44,7 @@ export function SupabaseUserButton() {
           .single();
 
         if (profile) {
-          setRole(profile.role);
+          setRole(profile.role ?? "");
         }
       }
     }

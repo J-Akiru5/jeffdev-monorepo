@@ -53,7 +53,7 @@ export default async function AgencyInvoicesPage() {
                     {inv.invoice_number}
                   </p>
                   <p className="text-sm text-white mt-0.5">
-                    {inv.amount > 0
+                    {Number(inv.amount) > 0
                       ? `$${Number(inv.amount).toLocaleString()}`
                       : "No amount"}
                   </p>

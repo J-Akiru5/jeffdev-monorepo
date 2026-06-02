@@ -26,11 +26,22 @@ export default async function AgencyProjectDetailPage({
   const { slug } = await params;
   const supabase = await createClient();
 
-  const { data: project } = await supabase
+  const { data: projectData } = await supabase
     .from("projects")
-    .select("*, milestones(*)")
+    .select("*")
     .eq("slug", slug)
     .single();
+
+  if (!projectData) notFound();
+
+  // Fetch milestones separately to avoid join type issues
+  const { data: milestones } = await supabase
+    .from("milestones")
+    .select("*")
+    .eq("project_id", projectData.id)
+    .order("sort_order", { ascending: true });
+
+  const project = { ...projectData, milestones: milestones ?? [] };
 
   if (!project) notFound();
 
@@ -45,6 +56,7 @@ export default async function AgencyProjectDetailPage({
 
   async function handleTogglePublish() {
     "use server";
+    if (!project?.slug) return;
     const { toggleAgencyProjectPublish } = await import("@/app/actions/agency-projects");
     await toggleAgencyProjectPublish(project.slug, !isPublished);
   }
@@ -76,7 +88,7 @@ export default async function AgencyProjectDetailPage({
             </span>
             <span
               className={`rounded-sm px-2 py-0.5 text-[10px] uppercase tracking-wider ${
-                statusColors[project.status] || statusColors.pending
+                statusColors[project.status ?? "active"] || statusColors.pending
               }`}
             >
               {project.status}
@@ -88,7 +100,7 @@ export default async function AgencyProjectDetailPage({
           <div className="flex items-center gap-4 text-xs text-white/40">
             {category && <span>{category}</span>}
             <span>Slug: {project.slug}</span>
-            {project.client_id && <span>Client linked</span>}
+            {project.client_name && <span>Client linked</span>}
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -132,10 +144,10 @@ export default async function AgencyProjectDetailPage({
         <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4 space-y-3">
           <h3 className="text-sm font-medium text-white/80">Details</h3>
           <div className="space-y-2 text-sm">
-            {project.client_id && (
+            {project.client_name && (
               <div className="flex justify-between">
                 <span className="text-white/40">Client</span>
-                <span className="text-white/70">Linked</span>
+                <span className="text-white/70">{project.client_name}</span>
               </div>
             )}
             {project.start_date && (

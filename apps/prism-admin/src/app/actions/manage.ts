@@ -96,9 +96,9 @@ export async function getWorkspaceDetail(workspaceId: string) {
       })),
       projects: (projects || []).map((p) => ({
         id: p.id,
-        name: p.name,
-        color: p.color,
-        icon: p.icon,
+        name: p.title,
+        color: null,
+        icon: null,
         createdAt: p.created_at,
       })),
     };
@@ -226,15 +226,15 @@ export async function getAllProjects(): Promise<EnrichedProject[]> {
 
         return {
           id: p.id,
-          name: p.name,
-          color: p.color ?? undefined,
+          name: p.title,
+          color: undefined,
           workspaceName: p.workspaces?.name ?? "",
-          workspaceId: p.workspace_id ?? "",
+          workspaceId: "",
           taskCount: count || 0,
           completedCount: completedCount || 0,
           createdAt: p.created_at,
-          published: (p as unknown as Record<string, unknown>).published === true,
-          publishedSiteUrl: ((p as unknown as Record<string, unknown>).published_site_url as string | null) ?? null,
+          published: p.published === true,
+          publishedSiteUrl: p.published_site_url ?? null,
         };
       }),
     );

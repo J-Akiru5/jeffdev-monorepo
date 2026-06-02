@@ -12,7 +12,7 @@ import {
 interface CaseStudy {
   id: string;
   title: string;
-  slug: string;
+  slug: string | null;
   description?: string | null;
   status: string;
 }
@@ -45,7 +45,7 @@ export function CaseStudiesManager({ initialData }: Props) {
     setEditing(item);
     setForm({
       title: item.title,
-      slug: item.slug,
+      slug: item.slug ?? "",
       description: item.description ?? null,
       status: item.status as "draft" | "published",
     });

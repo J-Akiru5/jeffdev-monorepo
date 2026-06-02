@@ -47,10 +47,7 @@ export default async function WorkspaceDetailPage({
                 key={p.id}
                 className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/70"
               >
-                <span
-                  className="h-2.5 w-2.5 rounded-full"
-                  style={{ backgroundColor: p.color || "#6366f1" }}
-                />
+                <span className="h-2.5 w-2.5 rounded-full bg-cyan-500" />
                 {p.name}
               </span>
             ))}

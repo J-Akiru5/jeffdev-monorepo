@@ -34,7 +34,7 @@ interface Subscription {
   user_id: string;
   plan?: string;
   status: string;
-  amount?: number;
+  amount?: number | string;
   current_period_end?: string;
   created_at?: string;
 }

@@ -15,7 +15,8 @@ export async function GET() {
 
   const projectStatuses: Record<string, number> = {};
   for (const p of projects || []) {
-    projectStatuses[p.status] = (projectStatuses[p.status] || 0) + 1;
+    const key = p.status ?? "unknown";
+    projectStatuses[key] = (projectStatuses[key] || 0) + 1;
   }
 
   // Monthly revenue (from invoices)

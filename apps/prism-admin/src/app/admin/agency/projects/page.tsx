@@ -64,7 +64,7 @@ export default async function AgencyProjectsPage() {
                       {project.title}
                     </h3>
                     <p className="text-xs text-white/40 mt-0.5">
-                      {(project as { client_id?: string }).client_id ? "Client linked" : "No client"}{" "}
+                      {project.client_name ? "Client linked" : "No client"}{" "}
                       {project.start_date ? `· ${project.start_date}` : ""}
                     </p>
                   </div>
@@ -80,7 +80,7 @@ export default async function AgencyProjectsPage() {
                     </span>
                     <span
                       className={`rounded-sm px-2 py-0.5 text-[10px] uppercase font-mono tracking-wider ${
-                        statusColors[project.status] || statusColors.archived
+                        statusColors[project.status ?? "active"] || statusColors.archived
                       }`}
                     >
                       {project.status}

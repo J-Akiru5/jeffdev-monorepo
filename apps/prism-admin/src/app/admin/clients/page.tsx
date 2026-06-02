@@ -36,30 +36,30 @@ export default async function ClientsPage() {
     .select("id, name, email")
     .order("name", { ascending: true });
 
-  // Fetch project counts per client
-  const clientIds = (clients || []).map((c) => c.id);
-  const { data: projects } = clientIds.length > 0
+  // Fetch project counts per client (using client_name since projects table is denormalized)
+  const clientNames = (clients || []).map((c) => c.name);
+  const { data: projects } = clientNames.length > 0
     ? await supabase
         .from("projects")
-        .select("id, title, client_id")
-        .in("client_id", clientIds)
+        .select("id, title, client_name")
+        .in("client_name", clientNames)
     : { data: [] };
 
-  // Group projects by client_id
+  // Group projects by client_name
   const projectCounts = new Map<string, Array<{ id: string; title: string }>>();
   for (const project of projects || []) {
-    const cid = project.client_id;
-    if (!cid) continue;
-    if (!projectCounts.has(cid)) projectCounts.set(cid, []);
-    projectCounts.get(cid)!.push({ id: project.id, title: project.title || "" });
+    const cname = project.client_name;
+    if (!cname) continue;
+    if (!projectCounts.has(cname)) projectCounts.set(cname, []);
+    projectCounts.get(cname)!.push({ id: project.id, title: project.title || "" });
   }
 
   const enrichedClients: ClientEntry[] = (clients || []).map((c) => ({
     id: c.id,
     name: c.name,
     email: c.email,
-    project_count: projectCounts.get(c.id)?.length || 0,
-    projects: projectCounts.get(c.id) || [],
+    project_count: projectCounts.get(c.name)?.length || 0,
+    projects: projectCounts.get(c.name) || [],
   }));
 
   return (

@@ -174,17 +174,22 @@ export interface WorkspaceMemberRow {
 
 export interface ProjectRow {
   id: string;
-  user_id: string | null;
-  workspace_id: string | null;
-  name: string;
-  color: string | null;
-  icon: string | null;
-  slug: string | null;
+  user_id: string;
+  title: string;
   description: string | null;
-  status: string;
-  order: number;
+  slug: string | null;
+  status: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  budget: number | null;
+  budget_spent: number | null;
+  client_name: string | null;
+  client_email: string | null;
+  metadata: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
+  published: boolean | null;
+  published_site_url: string | null;
 }
 
 // ── Tasks ──
