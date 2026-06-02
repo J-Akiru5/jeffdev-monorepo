@@ -10,11 +10,27 @@ import {
 import type { CommunityPost, CommunityMember } from "@/types/database";
 
 // =============================================================================
+// TAG HELPERS (Phase 1B — junction tables)
+// =============================================================================
+
+/**
+ * Extract tag names from the nested community_post_tags → tags join result.
+ */
+function extractTags(raw: Record<string, unknown>): string[] {
+  const junction = raw.community_post_tags as
+    | Array<{ tags: { name: string } | null }>
+    | undefined;
+  if (!junction) return [];
+  return junction.map((row) => row.tags?.name).filter(Boolean) as string[];
+}
+
+// =============================================================================
 // PUBLIC: Fetch published community posts
 // =============================================================================
 
 export interface CommunityPostWithAuthor extends CommunityPost {
   author: CommunityMember | null;
+  tags: string[];
 }
 
 export async function getPublishedCommunityPosts(): Promise<CommunityPostWithAuthor[]> {
@@ -24,17 +40,23 @@ export async function getPublishedCommunityPosts(): Promise<CommunityPostWithAut
 
     const { data, error } = await supabase
       .from("community_posts")
-      .select("*, author:community_members(*)")
+      .select("*, author:community_members(*), community_post_tags(tags(name))")
       .eq("is_published", true)
       .order("is_pinned", { ascending: false })
       .order("created_at", { ascending: false });
 
     if (error) throw error;
 
-    return (data ?? []) as CommunityPostWithAuthor[];
+    // Extract tags from junction table and map to expected shape
+    const posts = (data ?? []).map((row: Record<string, unknown>) => ({
+      ...row,
+      tags: extractTags(row),
+    })) as CommunityPostWithAuthor[];
+
+    return posts;
   } catch (error) {
     console.error("[community] getPublishedCommunityPosts error:", error);
-    return [];
+    throw new Error("Failed to load community posts. Please try again later.");
   }
 }
 

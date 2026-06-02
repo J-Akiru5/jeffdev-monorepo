@@ -5,6 +5,8 @@ import { Footer } from "@/components/layout/footer";
 import type { Metadata } from "next";
 import { getPageContent } from "@/lib/cms";
 import { LEGAL_DEFAULTS } from "@/data/cms-defaults";
+import { MarkdownRenderer } from "@/components/ui/markdown-renderer";
+import { CmsFallbackIndicator } from "@/components/ui/cms-fallback-indicator";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
@@ -15,7 +17,10 @@ export const revalidate = 60;
 
 export default async function TermsPage() {
   const cms = await getPageContent("legal");
+  const isCmsLoaded = !!cms?.termsOfService;
   const lastUpdated = cms?.termsOfService?.lastUpdated || LEGAL_DEFAULTS.termsOfService.lastUpdated;
+  const content = cms?.termsOfService?.content || LEGAL_DEFAULTS.termsOfService.content;
+
   return (
     <>
       <Header />
@@ -37,87 +42,9 @@ export default async function TermsPage() {
               Last updated: {lastUpdated}
             </p>
 
-            <div className="prose prose-invert mt-12 max-w-none prose-headings:font-semibold prose-headings:text-white prose-p:text-white/60 prose-strong:text-white prose-li:text-white/60">
-              <h2>1. Services</h2>
-              <p>
-                Syntaxure Labs (&ldquo;we,&rdquo; &ldquo;us,&rdquo; or
-                &ldquo;our&rdquo;) provides web development, software
-                engineering, and related consulting services. All projects are
-                governed by individual project agreements that specify scope,
-                deliverables, timelines, and payment terms.
-              </p>
-              <p>
-                No uptime or availability SLA is provided unless explicitly
-                stated in a signed project agreement. Any performance or
-                uptime references on our website or marketing materials are
-                architectural targets and not contractual guarantees.
-              </p>
+            {!isCmsLoaded && <CmsFallbackIndicator pageSlug="legal" />}
 
-              <h2>2. Project Agreements</h2>
-              <p>
-                Before commencing any project, both parties must agree to a
-                written project proposal or contract that outlines:
-              </p>
-              <ul>
-                <li>Scope of work and deliverables</li>
-                <li>Project timeline and milestones</li>
-                <li>Investment amount and payment schedule</li>
-                <li>Revision and change request policies</li>
-              </ul>
-
-              <h2>3. Payment Terms</h2>
-              <p>Unless otherwise specified in the project agreement:</p>
-              <ul>
-                <li>50% deposit required before project commencement</li>
-                <li>Remaining balance due upon project completion</li>
-                <li>Late payments may incur a 2% monthly fee</li>
-              </ul>
-
-              <h2>4. Intellectual Property</h2>
-              <p>
-                Upon full payment, the client receives full ownership of all
-                custom code and assets created specifically for their project.
-                We retain the right to use generic, reusable components and to
-                showcase the project in our portfolio.
-              </p>
-
-              <h2>5. Confidentiality</h2>
-              <p>
-                We will not disclose any confidential information shared during
-                the course of the project without written consent, except as
-                required by law.
-              </p>
-
-              <h2>6. Limitation of Liability</h2>
-              <p>
-                Our liability is limited to the total amount paid for the
-                project. We are not liable for indirect, incidental, or
-                consequential damages arising from the use of deliverables.
-              </p>
-
-              <h2>7. Termination</h2>
-              <p>
-                Either party may terminate a project with 14 days written
-                notice. Upon termination, the client shall pay for all work
-                completed up to the termination date.
-              </p>
-
-              <h2>8. Governing Law</h2>
-              <p>
-                These terms are governed by the laws of the Republic of the
-                Philippines. Any disputes shall be resolved in the courts of
-                Iloilo City.
-              </p>
-
-              <h2>Contact</h2>
-              <p>
-                For questions about these terms, contact us at{" "}
-                <a href="mailto:legal@syntaxure.dev" className="text-cyan-400">
-                  legal@syntaxure.dev
-                </a>
-                .
-              </p>
-            </div>
+            <MarkdownRenderer content={content} />
           </div>
         </section>
       </main>
