@@ -31,6 +31,7 @@ CI order: `check-types` → `lint` → `test` → `build`. Run in that sequence 
 | `apps/prism-mcp-server` | —    | Node.js + MCP SDK (stdio transport) |
 | `apps/syntaxure-labs`   | 3000 | Next.js 16 + Supabase               |
 | `apps/prism-analytics`  | 8000 | Python FastAPI + Supabase + pandas  |
+| `apps/syntaxure-pm`     | 3008 | Next.js 16 + Supabase (docs + PM)   |
 
 ## Architecture Rules
 

@@ -715,6 +715,85 @@ importers:
         specifier: ^4.0.16
         version: 4.0.17(@opentelemetry/api@1.9.1)(@types/node@22.19.7)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.9.0)
 
+  apps/syntaxure-pm:
+    dependencies:
+      "@supabase/ssr":
+        specifier: ^0.10.0
+        version: 0.10.3(@supabase/supabase-js@2.106.1)
+      "@supabase/supabase-js":
+        specifier: ^2.47.0
+        version: 2.106.1
+      "@syntaxure/redis":
+        specifier: workspace:*
+        version: link:../../packages/redis
+      "@syntaxure/supabase":
+        specifier: workspace:*
+        version: link:../../packages/supabase
+      "@syntaxure/ui":
+        specifier: workspace:*
+        version: link:../../packages/ui
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      framer-motion:
+        specifier: ^12.23.26
+        version: 12.26.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      lucide-react:
+        specifier: ^1.17.0
+        version: 1.17.0(react@19.2.3)
+      next:
+        specifier: 16.1.4
+        version: 16.1.4(@babel/core@7.28.6)(@opentelemetry/api@1.9.1)(@playwright/test@1.57.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      react:
+        specifier: ^19.2.3
+        version: 19.2.3
+      react-dom:
+        specifier: ^19.2.3
+        version: 19.2.3(react@19.2.3)
+      sonner:
+        specifier: ^2.0.7
+        version: 2.0.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      tailwind-merge:
+        specifier: ^3.4.0
+        version: 3.4.0
+      zod:
+        specifier: ^4.2.1
+        version: 4.3.5
+    devDependencies:
+      "@repo/eslint-config":
+        specifier: workspace:*
+        version: link:../../packages/eslint-config
+      "@repo/typescript-config":
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
+      "@tailwindcss/postcss":
+        specifier: ^4.1.18
+        version: 4.1.18
+      "@types/node":
+        specifier: ^22.15.3
+        version: 22.19.7
+      "@types/react":
+        specifier: ^19.2.2
+        version: 19.2.8
+      "@types/react-dom":
+        specifier: ^19.2.2
+        version: 19.2.2(@types/react@19.2.8)
+      eslint:
+        specifier: ^9.39.1
+        version: 9.39.2(jiti@2.6.1)
+      eslint-config-next:
+        specifier: 16.1.4
+        version: 16.1.4(@typescript-eslint/parser@8.53.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      tailwindcss:
+        specifier: ^4.1.18
+        version: 4.1.18
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.16
+        version: 4.0.17(@opentelemetry/api@1.9.1)(@types/node@22.19.7)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.9.0)
+
   extensions/prism-vscode:
     dependencies:
       "@modelcontextprotocol/sdk":
