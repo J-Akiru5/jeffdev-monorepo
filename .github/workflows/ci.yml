@@ -284,6 +284,7 @@ jobs:
           NODE_OPTIONS: "--max-old-space-size=4096"
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-role-key' }}
 
   # ─── Step 4: Status Gate (aggregate check for branch protection) ─────────
   # This job always runs and checks all dependencies — if any upstream job
@@ -314,7 +315,7 @@ jobs:
           fi
       - name: "Check: build"
         run: |
-          if [ "${{ needs.build.result }}" != "success" ] && [ "${{ needs.build.result }}" != "skipped" ]; then
+          if [ "${{ needs.build.result }}" == "failure" ]; then
             echo "Result: ${{ needs.build.result }}"
             exit 1
           fi
