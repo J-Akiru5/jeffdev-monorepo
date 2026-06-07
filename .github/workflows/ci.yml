@@ -159,20 +159,95 @@ jobs:
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI || '' }}
 
+  # ─── Step 2d: Detect Changed Apps ─────────────────────────────────────────
+  detect-changes:
+    name: Detect Changed Apps
+    needs: install
+    runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.changes.outputs.apps }}
+      syntaxure-labs: ${{ steps.changes.outputs.syntaxure-labs }}
+      prism-engine: ${{ steps.changes.outputs.prism-engine }}
+      prism-admin: ${{ steps.changes.outputs.prism-admin }}
+      prism-manage: ${{ steps.changes.outputs.prism-manage }}
+      prism-docs: ${{ steps.changes.outputs.prism-docs }}
+      prism-mcp-server: ${{ steps.changes.outputs.prism-mcp-server }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files_yaml: |
+            syntaxure-labs:
+              - apps/syntaxure-labs/**
+              - packages/ui/**
+              - packages/supabase/**
+              - supabase/migrations/**
+            prism-engine:
+              - apps/prism-engine/**
+              - packages/**
+              - supabase/migrations/**
+            prism-admin:
+              - apps/prism-admin/**
+              - packages/**
+              - supabase/migrations/**
+            prism-manage:
+              - apps/prism-manage/**
+              - packages/**
+              - supabase/migrations/**
+            prism-docs:
+              - apps/prism-docs/**
+              - packages/**
+            prism-mcp-server:
+              - apps/prism-mcp-server/**
+              - packages/**
+      - name: Set app flags
+        id: changes
+        run: |
+          echo "syntaxure-labs=${{ steps.changed-files.outputs.syntaxure-labs_any_changed }}" >> "$GITHUB_OUTPUT"
+          echo "prism-engine=${{ steps.changed-files.outputs.prism-engine_any_changed }}" >> "$GITHUB_OUTPUT"
+          echo "prism-admin=${{ steps.changed-files.outputs.prism-admin_any_changed }}" >> "$GITHUB_OUTPUT"
+          echo "prism-manage=${{ steps.changed-files.outputs.prism-manage_any_changed }}" >> "$GITHUB_OUTPUT"
+          echo "prism-docs=${{ steps.changed-files.outputs.prism-docs_any_changed }}" >> "$GITHUB_OUTPUT"
+          echo "prism-mcp-server=${{ steps.changed-files.outputs.prism-mcp-server_any_changed }}" >> "$GITHUB_OUTPUT"
+
+          # Build apps list for matrix
+          apps=""
+          if [ "${{ steps.changed-files.outputs.syntaxure-labs_any_changed }}" == "true" ]; then
+            apps="syntaxure-labs"
+          fi
+          if [ "${{ steps.changed-files.outputs.prism-engine_any_changed }}" == "true" ]; then
+            apps="$apps,prism-engine"
+          fi
+          if [ "${{ steps.changed-files.outputs.prism-admin_any_changed }}" == "true" ]; then
+            apps="$apps,prism-admin"
+          fi
+          if [ "${{ steps.changed-files.outputs.prism-manage_any_changed }}" == "true" ]; then
+            apps="$apps,prism-manage"
+          fi
+          if [ "${{ steps.changed-files.outputs.prism-docs_any_changed }}" == "true" ]; then
+            apps="$apps,prism-docs"
+          fi
+          if [ "${{ steps.changed-files.outputs.prism-mcp-server_any_changed }}" == "true" ]; then
+            apps="$apps,prism-mcp-server"
+          fi
+
+          # Remove leading comma
+          apps=$(echo "$apps" | sed 's/^,//')
+          echo "apps=[$apps]" >> "$GITHUB_OUTPUT"
+
   # ─── Step 3: Build (gated on typecheck + lint + test passing) ────────────
   build:
     name: Build (${{ matrix.app }})
-    needs: [typecheck, lint, test]
+    needs: [typecheck, lint, test, detect-changes]
+    if: needs.detect-changes.outputs.apps != '[]'
     strategy:
       fail-fast: false
       matrix:
-        app:
-          - prism-engine
-          - prism-admin
-          - prism-manage
-          - syntaxure-labs
-          - prism-docs
-          - prism-mcp-server
+        app: ${{ fromJson(needs.detect-changes.outputs.apps) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -205,7 +280,7 @@ jobs:
   # failed or was skipped, this fails so the PR cannot merge.
   ci-status:
     name: CI Status (typecheck, lint, test, build)
-    needs: [typecheck, lint, test, build]
+    needs: [typecheck, lint, test, detect-changes, build]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -229,7 +304,7 @@ jobs:
           fi
       - name: "Check: build"
         run: |
-          if [ "${{ needs.build.result }}" != "success" ]; then
+          if [ "${{ needs.build.result }}" != "success" ] && [ "${{ needs.build.result }}" != "skipped" ]; then
             echo "Result: ${{ needs.build.result }}"
             exit 1
           fi
