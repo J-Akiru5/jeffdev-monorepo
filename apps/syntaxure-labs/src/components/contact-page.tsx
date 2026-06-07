@@ -7,6 +7,7 @@ import {
   ArrowUpRight,
   Mail,
   MapPin,
+  Phone,
   Send,
   Loader2,
 } from "lucide-react";
@@ -93,6 +94,13 @@ export function ContactPageClient({ pageContent }: ContactPageProps) {
                   >
                     <Mail className="h-5 w-5" />
                     {email}
+                  </a>
+                  <a
+                    href="tel:+639705762593"
+                    className="flex items-center gap-3 text-white/70 transition-colors hover:text-cyan-400"
+                  >
+                    <Phone className="h-5 w-5" />
+                    +63 970 576 2593
                   </a>
                   <div className="flex items-center gap-3 text-white/50">
                     <MapPin className="h-5 w-5" />

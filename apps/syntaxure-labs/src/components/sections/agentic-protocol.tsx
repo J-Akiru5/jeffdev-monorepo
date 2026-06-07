@@ -32,52 +32,52 @@ const pillars: ProtocolPillar[] = [
   {
     id: "autonomy",
     numeral: "I",
-    title: "Autonomous Solver Paradigm",
+    title: "We Solve Problems End-to-End",
     description:
-      "Agents map the full workspace, trace dependencies, and execute tasks end to end.",
+      "From planning to launch, we handle every part of the build so nothing falls through the cracks.",
     points: [
-      "Contextual autonomy",
-      "Execution over suggestion",
-      "Agnostic integration",
+      "Full project ownership",
+      "One team from start to finish",
+      "Works with your existing tools",
     ],
     icon: Sparkles,
   },
   {
     id: "clarification",
     numeral: "II",
-    title: "Clarification-First Doctrine",
+    title: "Total Alignment",
     description:
-      "Zero-assumption execution requires a Socratic Q & A loop before building.",
+      "We validate requirements and map out the blueprint clearly upfront, ensuring no wasted development hours or surprise revisions later.",
     points: [
-      "Stop on ambiguity",
-      "Ask targeted questions",
-      "Measure twice, code once",
+      "Clear requirements first",
+      "No guesswork",
+      "Saves time and budget",
     ],
     icon: Shield,
   },
   {
     id: "sequence",
     numeral: "III",
-    title: "Hierarchical Build Sequence",
+    title: "We Build in the Right Order",
     description:
-      "Form follows foundation with data, security, logic, then interface.",
+      "We start with the foundation, then security, then features — so everything is solid and reliable.",
     points: [
-      "Schema defines truth",
-      "Security gates access",
-      "UI reflects validated logic",
+      "Data structure first",
+      "Security built in",
+      "Clean, tested code",
     ],
     icon: Database,
   },
   {
     id: "hitl",
     numeral: "IV",
-    title: "Continuous Review and HITL",
+    title: "You Stay in Control",
     description:
-      "Human review gates each phase and keeps every decision traceable.",
+      "You review and approve each phase before we move forward — no surprises.",
     points: [
-      "Stage-gated commits",
-      "Traceable logic notes",
-      "Human approval to proceed",
+      "Checkpoints at every step",
+      "Transparent progress",
+      "Your approval required",
     ],
     icon: Code,
   },
@@ -85,27 +85,27 @@ const pillars: ProtocolPillar[] = [
 
 const buildSequence: BuildPhase[] = [
   {
-    phase: "Phase 1",
-    title: "Data Layer",
-    description: "Define entities, relationships, constraints, and indexing.",
+    phase: "Step 1",
+    title: "Structure the Foundation",
+    description: "We set up your data structure and core systems first.",
     icon: Database,
   },
   {
-    phase: "Phase 2",
-    title: "Security Layer",
-    description: "Auth, sessions, and RBAC before any public endpoints.",
+    phase: "Step 2",
+    title: "Add Security",
+    description: "Login, permissions, and data protection come next.",
     icon: Shield,
   },
   {
-    phase: "Phase 3",
-    title: "Logic and API",
-    description: "Server logic, routes, and data mutations with validation.",
+    phase: "Step 3",
+    title: "Build the Features",
+    description: "We develop the actual functionality your users will interact with.",
     icon: Code,
   },
   {
-    phase: "Phase 4",
-    title: "Interface Layer",
-    description: "UI binds to state once the core system is proven.",
+    phase: "Step 4",
+    title: "Design the Interface",
+    description: "The visual layer is built last, once everything underneath works perfectly.",
     icon: Palette,
   },
 ];
@@ -128,18 +128,16 @@ export function AgenticProtocol() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3 py-1 mb-4 shadow-sm">
             <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
-              Agentic.Protocol // Manifesto
+              How We Work
             </span>
           </div>
 
           <h2 className="text-3xl font-bold tracking-tight text-[var(--text-primary)] md:text-4xl lg:text-5xl">
-            The Syntaxure Labs <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-purple-500">Agentic Protocol</span>
+            Our Development<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-purple-500">Process</span>
           </h2>
           <p className="mt-6 text-[var(--text-secondary)] md:text-lg leading-relaxed max-w-2xl">
-            A manifesto for autonomous, AI-native engineering. Built for
-            IDE-native agents that execute with precision, clarity, and
-            uncompromising human oversight.
+            A clear, step-by-step approach to building your project — with your approval at every stage.
           </p>
         </div>
 
@@ -192,28 +190,28 @@ export function AgenticProtocol() {
             {/* Left Side: Context */}
             <div>
               <div className="font-mono text-xs font-bold uppercase text-[var(--text-tertiary)] mb-4 tracking-wider">
-                Hierarchical Build Sequence
+                Our Build Sequence
               </div>
               <h3 className="text-2xl font-bold text-[var(--text-primary)] mb-4 tracking-tight">
-                Form follows foundation.
+                We build in the right order.
               </h3>
               <p className="text-[var(--text-secondary)] leading-relaxed mb-8">
                 Each phase locks in before the next begins, keeping the system
-                coherent and technical debt-free. We enforce this sequence via our custom IDE protocols.
+                solid and reliable. You approve each step before we move forward.
               </p>
               
               <div className="space-y-3 border-l-2 border-[var(--border-subtle)] pl-4">
                 <div className="text-sm font-medium text-[var(--text-secondary)]">
                   <span className="text-[var(--text-primary)] font-bold mr-2">1.</span>
-                  Agents halt on ambiguity.
+                  We stop and ask when requirements are unclear.
                 </div>
                 <div className="text-sm font-medium text-[var(--text-secondary)]">
                   <span className="text-[var(--text-primary)] font-bold mr-2">2.</span>
-                  Socratic Q&A resolves blockers.
+                  Clear communication removes blockers quickly.
                 </div>
                 <div className="text-sm font-medium text-[var(--text-secondary)]">
                   <span className="text-[var(--text-primary)] font-bold mr-2">3.</span>
-                  HITL gates enabled for commits.
+                  You approve each phase before we continue.
                 </div>
               </div>
             </div>

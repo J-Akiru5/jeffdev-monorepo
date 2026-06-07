@@ -45,13 +45,13 @@ export function Services({ services: dbServices }: ServicesProps) {
           }`}
         >
           <span className="font-mono text-xs font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
-            Productized Solutions
+            What We Offer
           </span>
           <h2 className="mt-3 text-3xl font-bold tracking-tight text-[var(--text-primary)] md:text-4xl">
-            Built for Modern Businesses
+            Our Services
           </h2>
           <p className="mt-4 text-[var(--text-secondary)]">
-            We partner with ambitious startups and enterprises to build high-performance web systems. Clear scope, fixed investment, premium delivery.
+            Fixed-scope, premium digital products delivered without the typical agency friction. Pick a service, and we'll handle the rest.
           </p>
         </div>
 

@@ -64,21 +64,21 @@ export function Hero({
               <div className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-1 shadow-sm">
                 <ShieldCheck className="h-3.5 w-3.5 text-cyan-500" />
                 <span className="font-mono text-[11px] text-[var(--text-secondary)] font-medium tracking-wide">
-                  ENTERPRISE-GRADE ARCHITECTURE
+                  TRUSTED BY GROWING BUSINESSES
                 </span>
               </div>
             </div>
 
             {/* ── Headline ── */}
             <h1 className="text-4xl font-bold tracking-tight text-[var(--text-primary)] sm:text-5xl lg:text-6xl leading-[1.15]">
-              Innovating Digital Solutions,<br />
-              <span className="text-[var(--text-secondary)]">Engineering with Precision:</span><br />
-              <span className="bg-gradient-to-r from-cyan-500 to-violet-500 bg-clip-text text-transparent">Governance over Generation.</span>
+              We Build Websites & Apps<br />
+              <span className="text-[var(--text-secondary)]">That Grow With Your Business</span><br />
+              <span className="bg-gradient-to-r from-cyan-500 to-violet-500 bg-clip-text text-transparent">Engineering with Precision.</span>
             </h1>
 
             {/* ── Subtext ── */}
             <p className="mx-auto lg:mx-0 mt-6 max-w-[540px] text-base sm:text-lg leading-relaxed text-[var(--text-secondary)] font-medium">
-              {cmsHero?.description || "Syntaxure Labs is a new-breed development agency architecting high-performance systems for ambitious startups. We partner with founders to turn ideas into scalable reality."}
+              {cmsHero?.description || "We build fast, reliable websites and apps for growing companies. From idea to launch, we handle the tech so you can focus on your business."}
             </p>
 
             {/* ── CTAs ── */}
@@ -89,7 +89,7 @@ export function Hero({
                 className="group relative overflow-hidden rounded-md border border-[var(--color-cta-primary-border)] bg-[var(--color-cta-primary-bg)] px-6 py-3 transition-all hover:bg-[var(--color-cta-primary-hover-bg)] hover:border-[var(--color-cta-primary-hover-border)] active:scale-95 shadow-md flex items-center justify-center gap-2"
               >
                 <span className="font-mono text-[13px] font-bold uppercase tracking-wider text-[var(--color-cta-primary-text)]">
-                  VIEW_TEMPLATES
+                  SEE_OUR_SERVICES
                 </span>
                 <ArrowUpRight className="h-4 w-4 text-[var(--color-cta-primary-text)] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </Link>
@@ -98,7 +98,7 @@ export function Hero({
                 href="/work"
                 className="group flex items-center justify-center gap-2 rounded-md border border-transparent px-6 py-3 font-mono text-[13px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] transition-all hover:text-[var(--text-primary)] active:scale-95"
               >
-                VIEW_WORK
+                VIEW_OUR_WORK
               </Link>
             </div>
           </div>
@@ -129,7 +129,7 @@ export function Hero({
                     WebkitMaskImage: "radial-gradient(circle, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 80%)",
                   }}
                 >
-                  {"SYNTAXURE LABS ENGINEERING WITH PRECISION GOVERNANCE OVER GENERATION INNOVATING DIGITAL SOLUTIONS FOR A SMARTER TOMORROW ".repeat(150)}
+                  {"SYNTAXURE LABS WE BUILD WEBSITES AND APPS THAT GROW WITH YOUR BUSINESS ENGINEERING WITH PRECISION FAST RELIABLE SCALABLE ".repeat(150)}
                 </div>
              </div>
           </div>

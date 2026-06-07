@@ -23,44 +23,44 @@ const features: Feature[] = [
   {
     id: "multi-tenant",
     icon: Layers,
-    title: "Multi-Tenant Architecture",
+    title: "Built for Many Users",
     description:
-      "Built for Scale. Every template features a fully-baked multi-tenant architecture with robust organization isolation, team workspaces, and scalable database indexing right out of the box.",
+      "Your app can handle thousands of users at once, with separate accounts and data for each team.",
   },
   {
     id: "ready-security",
     icon: Shield,
-    title: "Ready-to-Ship Security",
+    title: "Secure from Day One",
     description:
-      "Turnkey Compliance. Production-grade authentication, role-based access control (RBAC), and encrypted data handling are natively integrated into the core boilerplate.",
+      "Login, passwords, and data protection are built in — no extra setup needed.",
   },
   {
     id: "template-delivery",
     icon: Zap,
-    title: "Template-Accelerated Delivery",
+    title: "Fast Delivery",
     description:
-      "Zero to Launch in Weeks. Because we skip the repetitive boilerplate phase and start directly with a production-ready SaaS template, your custom deployment takes weeks, not months.",
+      "We use ready-made building blocks so your project launches in weeks, not months.",
   },
   {
     id: "ai-extensibility",
     icon: Bot,
-    title: "AI-Native Extensibility",
+    title: "Built for AI",
     description:
-      "AI-Ready Foundations. Our core architecture is built to cleanly integrate AI native workflows, vector search, and automated pipeline contexts, making it simple to inject intelligence into your custom features.",
+      "Skip the refitting. We build your app from day one to integrate smart features, automation, and custom AI models seamlessly as your business grows.",
   },
   {
     id: "productized-customization",
     icon: Sliders,
-    title: "Productized Customization",
+    title: "Clear Pricing",
     description:
-      "Predictable Value Tiers. No ambiguous agency estimates. Choose your base SaaS template and pick exactly the custom modules and integrations you need with transparent, predictable pricing.",
+      "Pick your plan and add features — no surprise costs.",
   },
   {
     id: "continuous-evolution",
     icon: RefreshCw,
-    title: "Continuous Evolution",
+    title: "Always Improving",
     description:
-      "CI/CD Enabled Growth. Our decoupled template infrastructure allows us to seamlessly deploy feature upgrades, maintain dependency security, and scale your application as your user base expands.",
+      "We keep your app updated, secure, and running smoothly as you grow.",
   },
 ];
 
@@ -81,13 +81,13 @@ export function Features() {
         >
           <div className="sticky top-32">
             <span className="font-mono text-xs font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
-              Infrastructure
+              Why Choose Us
             </span>
             <h2 className="mt-4 text-3xl font-bold tracking-tight text-[var(--text-primary)] md:text-4xl">
-              Engineered Better.
+              Built to Last.
             </h2>
             <p className="mt-4 text-[var(--text-secondary)] leading-relaxed">
-              Our Production Core. Six architectural pillars engineered into our base SaaS templates, giving you a production-ready foundation that we customize to your exact business logic without the custom-build timeline.
+              Six core strengths built into every project we deliver — giving you a solid foundation that's customized to your business without the months-long timeline.
             </p>
           </div>
         </div>

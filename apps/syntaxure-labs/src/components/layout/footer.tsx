@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mail, MapPin, ArrowUpRight, BookOpen } from "lucide-react";
+import { Mail, MapPin, ArrowUpRight, BookOpen, Phone } from "lucide-react";
 import { GithubIcon as Github } from "@/components/icons/brand-icons";
 import { SyntaxureLogo } from "@syntaxure/ui";
 
@@ -63,6 +63,13 @@ export function Footer() {
               >
                 <Mail className="h-4 w-4" />
                 hello@syntaxure.dev
+              </a>
+              <a
+                href="tel:+639705762593"
+                className="flex items-center gap-2 text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+              >
+                <Phone className="h-4 w-4" />
+                +63 970 576 2593
               </a>
               <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
                 <MapPin className="h-4 w-4" />
