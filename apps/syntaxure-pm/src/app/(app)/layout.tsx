@@ -1,4 +1,4 @@
-import { createServer } from "@/lib/supabase";
+import { createClient as createServer } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/sidebar";
 import { TopNav } from "@/components/top-nav";

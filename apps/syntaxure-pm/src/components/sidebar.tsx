@@ -35,6 +35,9 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname();
 
+  const isActive = (href: string) =>
+    pathname === href || (href !== "/" && pathname.startsWith(href + "/"));
+
   return (
     <aside className="flex h-full w-64 flex-col border-r border-white/[0.06] bg-black/20">
       <div className="flex h-14 items-center gap-2 border-b border-white/[0.06] px-4">
@@ -60,7 +63,7 @@ export function Sidebar() {
                       href={child.href}
                       className={clsx(
                         "flex items-center rounded-md px-3 py-2 text-sm transition-colors",
-                        pathname === child.href
+                        isActive(child.href)
                           ? "sidebar-active bg-violet-500/10 text-violet-400"
                           : "text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
                       )}
@@ -76,7 +79,7 @@ export function Sidebar() {
                 href={item.href}
                 className={clsx(
                   "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
-                  pathname === item.href
+                  isActive(item.href)
                     ? "sidebar-active bg-violet-500/10 text-violet-400"
                     : "text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
                 )}
@@ -92,7 +95,12 @@ export function Sidebar() {
       <div className="border-t border-white/[0.06] p-4">
         <Link
           href="/settings"
-          className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-zinc-400 transition-colors hover:bg-white/[0.04] hover:text-zinc-200"
+          className={clsx(
+            "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+            isActive("/settings")
+              ? "sidebar-active bg-violet-500/10 text-violet-400"
+              : "text-zinc-400 hover:bg-white/[0.04] hover:text-zinc-200"
+          )}
         >
           <Settings className="h-4 w-4" />
           Settings

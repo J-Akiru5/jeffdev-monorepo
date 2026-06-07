@@ -1,4 +1,4 @@
-import { createServer } from "@/lib/supabase";
+import { createClient as createServer } from "@/lib/supabase/server";
 import Link from "next/link";
 import {
   CheckSquare,

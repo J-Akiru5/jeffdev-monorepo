@@ -1,6 +1,6 @@
 "use server";
 
-import { createServer } from "@/lib/supabase";
+import { createClient as createServer } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 export interface TaskFormData {
