@@ -13,7 +13,7 @@ async function logAudit(event: {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    const supabaseAdmin = getAdminClient() as any;
+    const supabaseAdmin = getAdminClient();
     await supabaseAdmin.from("audit_logs").insert({
       action: event.action,
       resource_type: event.resource,

@@ -169,6 +169,7 @@ function TasksContent() {
   }, []);
 
   const handleExpand = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     (_title: string, _projectId: string) => {
       router.push("/tasks/new");
     },

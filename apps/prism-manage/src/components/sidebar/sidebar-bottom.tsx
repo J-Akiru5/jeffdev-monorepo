@@ -11,7 +11,7 @@ interface SidebarBottomProps {
 }
 
 export function SidebarBottom({ collapsed, onHelpClick }: SidebarBottomProps) {
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
 
   return (
     <div className="border-t border-white/[0.06] p-3 space-y-1">

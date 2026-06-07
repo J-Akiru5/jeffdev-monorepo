@@ -39,7 +39,10 @@
         "DOPPLER_*",
         "NODE_OPTIONS",
         "UPSTASH_REDIS_REST_URL",
-        "UPSTASH_REDIS_REST_TOKEN"
+        "UPSTASH_REDIS_REST_TOKEN",
+        "GITHUB_PAT",
+        "GITHUB_MARKETING_REPO_OWNER",
+        "GITHUB_MARKETING_REPO_NAME"
       ]
     },
     "lint": {
@@ -55,7 +58,10 @@
         "MONGODB_URI",
         "COSMOS_*",
         "UPSTASH_REDIS_REST_URL",
-        "UPSTASH_REDIS_REST_TOKEN"
+        "UPSTASH_REDIS_REST_TOKEN",
+        "GITHUB_PAT",
+        "GITHUB_MARKETING_REPO_OWNER",
+        "GITHUB_MARKETING_REPO_NAME"
       ]
     },
     "check-types": {
@@ -104,7 +110,10 @@
         "NODE_OPTIONS",
         "DOPPLER_*",
         "UPSTASH_REDIS_REST_URL",
-        "UPSTASH_REDIS_REST_TOKEN"
+        "UPSTASH_REDIS_REST_TOKEN",
+        "GITHUB_PAT",
+        "GITHUB_MARKETING_REPO_OWNER",
+        "GITHUB_MARKETING_REPO_NAME"
       ]
     }
   }

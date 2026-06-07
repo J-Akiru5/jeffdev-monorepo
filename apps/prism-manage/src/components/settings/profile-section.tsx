@@ -8,6 +8,7 @@
  */
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import {
   User,
   Shield,
@@ -333,9 +334,12 @@ export function ProfileSection({
               <div className="relative">
                 <div className="h-20 w-20 overflow-hidden rounded-full border-2 border-glass-20 bg-white/[0.10]">
                   {avatarPreview ? (
-                    <img
+                    <Image
                       src={avatarPreview}
                       alt="Profile"
+                      width={80}
+                      height={80}
+                      unoptimized
                       className="h-full w-full object-cover"
                     />
                   ) : (

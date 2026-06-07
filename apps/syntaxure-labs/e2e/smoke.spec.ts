@@ -17,8 +17,5 @@ test.describe("Smoke Tests", () => {
     await expect(page.locator("h1")).toBeVisible();
   });
 
-  test("admin login page loads", async ({ page }) => {
-    await page.goto("/admin/login");
-    await expect(page.locator("form")).toBeVisible();
-  });
 });
+

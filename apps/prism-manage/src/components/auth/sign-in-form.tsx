@@ -170,8 +170,8 @@ export function SignInForm() {
         setOauthLoading(null);
       }
       // Redirect happens — no need to reset state
-    } catch (err: any) {
-      toast.error(err.message || "OAuth sign-in failed");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "OAuth sign-in failed");
       setOauthLoading(null);
     }
   }
@@ -198,8 +198,8 @@ export function SignInForm() {
       toast.success("Welcome to Syntaxure Labs!");
       router.push("/tasks");
       router.refresh();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to complete registration");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to complete registration");
       setLoading(false);
     }
   }
@@ -297,8 +297,8 @@ export function SignInForm() {
           );
         }
       }
-    } catch (err: any) {
-      toast.error(err.message || "An unexpected error occurred");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "An unexpected error occurred");
     } finally {
       setLoading(false);
     }

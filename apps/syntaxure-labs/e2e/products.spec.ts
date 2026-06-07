@@ -6,6 +6,8 @@
 
 import { test, expect } from "@playwright/test";
 
+test.skip(!process.env.NEXT_PUBLIC_SUPABASE_URL, "Skipping products tests because NEXT_PUBLIC_SUPABASE_URL is not configured.");
+
 test.describe("Product Catalog", () => {
   test("products page loads with all products", async ({ page }) => {
     await page.goto("/products");

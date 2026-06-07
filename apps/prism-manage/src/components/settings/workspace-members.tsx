@@ -8,8 +8,9 @@
  * Uses server actions for all mutations.
  */
 
-import { useState, useOptimistic, startTransition, useMemo } from "react";
-import { Users, Shield, ShieldOff, Trash2, Building2, UserMinus, Loader2, AlertTriangle, GitBranch } from "lucide-react";
+import { useState, startTransition, useMemo } from "react";
+import Image from "next/image";
+import { Users, Shield, ShieldOff, UserMinus, Loader2, AlertTriangle, GitBranch } from "lucide-react";
 import { ConfirmDialog } from "@syntaxure/ui";
 import { updateMemberRole, assignMemberDepartment, removeMember } from "@/app/actions/members";
 import { useWorkspaceStore } from "@/stores/workspace-store";
@@ -39,7 +40,6 @@ export function WorkspaceMembersSettings({
   const departments = useWorkspaceStore((s) => s.departments);
   const userRole = useWorkspaceStore((s) => s.userRole);
   const cLevelTitle = useWorkspaceStore((s) => s.cLevelTitle);
-  const userDepartmentId = useWorkspaceStore((s) => s.userDepartmentId);
   const manageMode = useManageModeStore((s) => s.mode);
   const isFounder = userRole === "founder";
   const canManageMembers = isFounder && manageMode === "workspace";
@@ -188,9 +188,12 @@ export function WorkspaceMembersSettings({
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-white/[0.10] text-xs font-medium text-white/70">
                           {member.avatarUrl ? (
-                            <img
+                            <Image
                               src={member.avatarUrl}
                               alt={member.name}
+                              width={32}
+                              height={32}
+                              unoptimized
                               className="h-8 w-8 rounded-full object-cover"
                             />
                           ) : (

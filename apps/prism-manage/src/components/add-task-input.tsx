@@ -11,7 +11,6 @@
 
 import { useState, useRef, KeyboardEvent } from "react";
 import { Plus, Maximize2 } from "lucide-react";
-import { TASK_TYPES } from "@/lib/task-types";
 import { getTaskTypeConfig } from "@/lib/task-types";
 import type { TaskTypeKey } from "@/lib/task-types";
 

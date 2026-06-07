@@ -9,6 +9,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Badge, ProgressBar } from "@syntaxure/ui";
 
 interface Task {
   id: string;
@@ -26,11 +27,11 @@ interface TaskCardProps {
   onEdit: () => void;
 }
 
-const priorityColors: Record<string, string> = {
-  low: "badge-info",
-  medium: "badge-warning",
-  high: "badge-error",
-  critical: "badge-error",
+const priorityVariant: Record<string, "info" | "warning" | "danger"> = {
+  low: "info",
+  medium: "warning",
+  high: "danger",
+  critical: "danger",
 };
 
 export function TaskCard({ task, onEdit }: TaskCardProps) {
@@ -96,12 +97,10 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
       )}
 
       <div className="mb-2 flex flex-wrap gap-1.5">
-        <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${priorityColors[task.priority] || "badge-info"}`}>
+        <Badge variant={priorityVariant[task.priority] || "default"}>
           {task.priority}
-        </span>
-        <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] text-zinc-400">
-          {task.category}
-        </span>
+        </Badge>
+        <Badge>{task.category}</Badge>
       </div>
 
       {task.deadline && (
@@ -126,12 +125,7 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
             </span>
             <span>{progress}%</span>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/[0.06]">
-            <div
-              className="progress-bar h-full"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
+          <ProgressBar value={progress} size="sm" showLabel={false} />
           <div className="space-y-1">
             {checklist.map((item) => (
               <label

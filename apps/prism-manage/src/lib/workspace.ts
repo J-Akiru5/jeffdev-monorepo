@@ -61,7 +61,7 @@ export const resolveSyntaxureWorkspace = cache(async (): Promise<ResolvedWorkspa
     workspaceId: ws.id as string,
     workspaceName: ws.name as string,
     createdAt: ws.created_at as string,
-    departments: (deptData || []).map((d: any) => ({
+    departments: (deptData || []).map((d: Record<string, unknown>) => ({
       id: String(d.id),
       name: String(d.name),
     })),
