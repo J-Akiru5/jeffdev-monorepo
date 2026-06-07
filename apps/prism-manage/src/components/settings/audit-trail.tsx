@@ -12,7 +12,6 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   History,
   Shield,
-  ShieldOff,
   Trash2,
   Edit3,
   PlusCircle,

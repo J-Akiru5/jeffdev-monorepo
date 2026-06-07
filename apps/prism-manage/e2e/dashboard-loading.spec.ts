@@ -9,11 +9,11 @@ import { test, expect } from "@playwright/test";
 
 const DASHBOARD_ROUTES = [
   { path: "/dashboard", name: "dashboard root", skeleton: ".animate-pulse" },
-  { path: "/dashboard/tasks", name: "tasks", skeleton: ".animate-pulse" },
-  { path: "/dashboard/kanban", name: "kanban", skeleton: ".animate-pulse" },
-  { path: "/dashboard/calendar", name: "calendar", skeleton: ".animate-pulse" },
-  { path: "/dashboard/settings", name: "settings", skeleton: ".animate-pulse" },
-  { path: "/dashboard/marketing", name: "marketing", skeleton: ".animate-pulse" },
+  { path: "/tasks", name: "tasks", skeleton: ".animate-pulse" },
+  { path: "/kanban", name: "kanban", skeleton: ".animate-pulse" },
+  { path: "/calendar", name: "calendar", skeleton: ".animate-pulse" },
+  { path: "/settings", name: "settings", skeleton: ".animate-pulse" },
+  { path: "/marketing", name: "marketing", skeleton: ".animate-pulse" },
 ] as const;
 
 test.describe("Dashboard Loading States", () => {

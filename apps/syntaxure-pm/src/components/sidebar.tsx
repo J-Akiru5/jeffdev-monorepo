@@ -7,9 +7,6 @@ import {
   LayoutDashboard,
   FileText,
   CheckSquare,
-  Database,
-  Package,
-  Layers,
   Settings,
 } from "lucide-react";
 
@@ -24,12 +21,10 @@ const navItems = [
       { href: "/docs/apps", label: "Apps" },
       { href: "/docs/packages", label: "Packages" },
       { href: "/docs/database", label: "Database" },
+      { href: "/docs/database/schema", label: "Schema Explorer" },
       { href: "/docs/workflows", label: "Workflows" },
     ],
   },
-  { href: "/docs/database/schema", label: "Schema Explorer", icon: Database },
-  { href: "/docs/packages", label: "Packages", icon: Package },
-  { href: "/docs/apps", label: "All Apps", icon: Layers },
 ];
 
 export function Sidebar() {

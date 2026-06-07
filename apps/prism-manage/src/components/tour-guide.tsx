@@ -24,26 +24,6 @@ export function TourGuide() {
   // Only show the tour card on the dashboard page, where most tour targets exist
   const isDashboard = pathname === "/dashboard";
 
-  useEffect(() => {
-    const completed = localStorage.getItem(STORAGE_KEY);
-    const pendingTour = sessionStorage.getItem("pending_tour");
-
-    if (pendingTour && isDashboard) {
-      // User clicked "Start Tour" from another page and was redirected here
-      sessionStorage.removeItem("pending_tour");
-      // Use small delay to let the dashboard page fully render
-      const timer = setTimeout(() => {
-        startTour();
-      }, 800);
-      return () => clearTimeout(timer);
-    }
-
-    if (!completed && isDashboard) {
-      const timer = setTimeout(() => setIsVisible(true), 500);
-      return () => clearTimeout(timer);
-    }
-  }, [isDashboard]);
-
   const startTour = useCallback(() => {
     // Navigate to dashboard first if not already there, then start tour
     if (pathname !== "/dashboard") {
@@ -144,7 +124,27 @@ export function TourGuide() {
     driverObj.drive();
     setIsVisible(false);
     localStorage.setItem(STORAGE_KEY, "true");
-  }, []);
+  }, [pathname, router]);
+
+  useEffect(() => {
+    const completed = localStorage.getItem(STORAGE_KEY);
+    const pendingTour = sessionStorage.getItem("pending_tour");
+
+    if (pendingTour && isDashboard) {
+      // User clicked "Start Tour" from another page and was redirected here
+      sessionStorage.removeItem("pending_tour");
+      // Use small delay to let the dashboard page fully render
+      const timer = setTimeout(() => {
+        startTour();
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+
+    if (!completed && isDashboard) {
+      const timer = setTimeout(() => setIsVisible(true), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isDashboard, startTour]);
 
   const dismissTour = useCallback(() => {
     setIsVisible(false);

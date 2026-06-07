@@ -9,7 +9,7 @@
  * On hard navigation/refresh, it falls back to the full page at /tasks/new.
  */
 
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { TaskSheet } from "@/components/task-sheet";
 import type { TaskSheetData } from "@/components/task-sheet";

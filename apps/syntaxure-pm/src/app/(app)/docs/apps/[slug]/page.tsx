@@ -12,6 +12,7 @@ const appDocs: Record<
     endpoints?: { path: string; method: string; description: string }[];
     envVars?: { name: string; description: string }[];
     testing: string;
+    knownIssues?: string[];
   }
 > = {
   "prism-engine": {
@@ -181,18 +182,49 @@ const appDocs: Record<
       "Task management with Kanban boards",
       "Calendar views with FullCalendar",
       "GitHub integration via Octokit",
-      "Google Calendar sync",
-      "Workspace and department management",
+      "Google Calendar sync (stubbed — not yet functional)",
+      "Workspace and department management with RBAC",
+      "Dual-mode operation (Focus / Workspace)",
+      "Marketing dashboard with KPI tracking",
       "Audit logging",
       "Guided tours via driver.js",
       "Virtual scrolling for large datasets",
+      "Command palette (Cmd+K)",
+      "AI assistant (Gemini 2.5 Flash)",
     ],
     keyFiles: [
-      { path: "src/app/actions/", purpose: "Server actions (tasks, workspace, calendar)" },
-      { path: "src/app/api/", purpose: "API routes (tasks, calendar auth, GitHub sync)" },
-      { path: "src/components/", purpose: "UI components (Kanban, calendar, forms)" },
+      { path: "src/app/actions/", purpose: "Server actions (tasks, workspace, calendar, marketing)" },
+      { path: "src/app/api/", purpose: "API routes (tasks, assistant)" },
+      { path: "src/components/", purpose: "UI components (Kanban, calendar, forms, sidebar)" },
+      { path: "src/stores/", purpose: "Zustand stores (workspace, project, manage-mode)" },
+      { path: "src/lib/schemas.ts", purpose: "Zod schemas for all data types" },
+      { path: "src/proxy.ts", purpose: "Middleware proxy (ORPHANED — see known issues)" },
     ],
-    testing: "Vitest + Playwright",
+    endpoints: [
+      { path: "/api/tasks", method: "GET", description: "List tasks" },
+      { path: "/api/assistant", method: "POST", description: "Gemini AI assistant (edge runtime)" },
+      { path: "/api/workspace/update-c-level-title", method: "POST", description: "Update C-Level title" },
+    ],
+    envVars: [
+      { name: "NEXT_PUBLIC_SUPABASE_URL", description: "Supabase project URL" },
+      { name: "NEXT_PUBLIC_SUPABASE_ANON_KEY", description: "Supabase anonymous key" },
+      { name: "SUPABASE_SERVICE_ROLE_KEY", description: "Supabase service role key" },
+      { name: "GEMINI_API_KEY", description: "Google Gemini API key (AI assistant)" },
+      { name: "GITHUB_PAT", description: "GitHub personal access token (marketing sync)" },
+      { name: "UPSTASH_REDIS_REST_URL", description: "Upstash Redis URL (rate limiting)" },
+      { name: "UPSTASH_REDIS_REST_TOKEN", description: "Upstash Redis token" },
+    ],
+    testing: "Vitest (1 dummy test) + Playwright (2 specs, broken route prefixes)",
+    knownIssues: [
+      "No middleware.ts — proxy.ts is orphaned, Supabase session refresh never runs",
+      "Missing API routes: /api/calendar/auth, /api/github/sync, /api/marketing/team, /api/auth/bridge/*",
+      "Google Calendar OAuth is stubbed (buttons exist, endpoints don't)",
+      "GitHub sync button calls nonexistent /api/github/sync route",
+      "E2E tests use wrong route prefixes (/dashboard/tasks vs /tasks) and npm instead of pnpm",
+      "33 lint warnings (unused imports, any types, hooks deps, <img> vs <Image />)",
+      "Local command-palette.tsx (371 lines) is dead code — only @syntaxure/ui CommandPalette is used",
+      "turbo.json missing GITHUB_PAT, GITHUB_MARKETING_REPO_OWNER, GITHUB_MARKETING_REPO_NAME env vars",
+    ],
   },
   "syntaxure-labs": {
     title: "syntaxure-labs",
@@ -363,6 +395,25 @@ export default async function AppDocPage({
         <h2 className="mb-2 text-lg font-semibold text-white">Testing</h2>
         <p className="text-sm text-zinc-300">{doc.testing}</p>
       </section>
+
+      {doc.knownIssues && doc.knownIssues.length > 0 && (
+        <section className="glass border-red-500/20 p-6">
+          <h2 className="mb-4 text-lg font-semibold text-red-400">
+            Known Issues
+          </h2>
+          <ul className="space-y-2">
+            {doc.knownIssues.map((issue) => (
+              <li
+                key={issue}
+                className="flex items-start gap-2 text-sm text-zinc-300"
+              >
+                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />
+                {issue}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

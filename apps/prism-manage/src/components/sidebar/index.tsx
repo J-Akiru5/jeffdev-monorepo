@@ -7,8 +7,7 @@
  * and workspace-aware navigation with RBAC.
  */
 
-import { useState, useRef, useEffect, useMemo, useCallback } from "react";
-import Link from "next/link";
+import { useState, useMemo, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import {
   CheckSquare,
@@ -39,7 +38,6 @@ import { SidebarInlineInput } from "./sidebar-inline-input";
 import { SidebarProjectItem } from "./sidebar-project-item";
 import { SidebarDepartments } from "./sidebar-departments";
 import { SidebarBottom } from "./sidebar-bottom";
-import type { Department } from "@/lib/schemas";
 
 interface NavItem {
   label: string;

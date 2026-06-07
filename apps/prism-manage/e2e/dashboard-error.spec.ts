@@ -17,11 +17,11 @@ import { test, expect } from "@playwright/test";
 
 const DASHBOARD_ROUTES = [
   "/dashboard",
-  "/dashboard/tasks",
-  "/dashboard/kanban",
-  "/dashboard/calendar",
-  "/dashboard/settings",
-  "/dashboard/marketing",
+  "/tasks",
+  "/kanban",
+  "/calendar",
+  "/settings",
+  "/marketing",
 ] as const;
 
 test.describe("Dashboard Error States", () => {

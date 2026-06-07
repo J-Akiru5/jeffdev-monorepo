@@ -24,7 +24,7 @@ import {
 } from "@syntaxure/ui";
 import { ManageShortcutsProvider } from "@/components/keyboard-shortcuts-provider";
 import { MANAGE_HELP_SHORTCUTS, MODE_TOGGLE_SHORTCUT } from "@/lib/keyboard-shortcuts";
-import { useManageModeStore, type ManageMode } from "@/stores/manage-mode-store";
+import { useManageModeStore } from "@/stores/manage-mode-store";
 import {
   Plus,
   Bell,
