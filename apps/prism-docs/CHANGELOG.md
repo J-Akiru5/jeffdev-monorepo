@@ -1,5 +1,12 @@
 # Changelog - Prism Context Engine Docs
 
+## 1.0.4
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @syntaxure/ui@0.2.0
+
 All notable changes to the Prism Context Engine documentation site will be documented in this file.
 
 ## [1.0.3] - 2026-01-03
