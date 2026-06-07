@@ -162,7 +162,7 @@ export function ChatAssistant({
 
       {/* Chat Panel */}
       {isOpen && (
-        <div className="chat-assistant-panel">
+        <div className="chat-assistant-panel" onWheel={(e) => e.stopPropagation()} onTouchMove={(e) => e.stopPropagation()}>
           {/* Header */}
           <div className="chat-assistant-header">
             <div className="chat-assistant-header-title">

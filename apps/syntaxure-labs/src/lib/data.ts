@@ -57,7 +57,6 @@ export interface DataProject {
   updated_at?: string;
   publishedSiteUrl?: string | null; // Live URL of the delivered product
   user_id?: string;
-  client_email?: string;
 }
 
 export interface DataQuote {
@@ -93,7 +92,7 @@ export async function getServices(): Promise<DataService[]> {
     return [];
   }
   try {
-    const supabase = await getAdminClient();
+    const supabase = getAdminClient();
     const { data, error } = await supabase
       .from("services")
       .select("*")
@@ -157,7 +156,7 @@ export async function getProjects(): Promise<DataProject[]> {
     return [];
   }
   try {
-    const supabase = await getAdminClient();
+    const supabase = getAdminClient();
     const { data, error } = await supabase
       .from("projects")
       .select("*")
@@ -175,7 +174,7 @@ export async function getProjects(): Promise<DataProject[]> {
             slug: p.slug || p.id,
             refNo: undefined,
             title: p.title || "",
-            client: p.client_name || "",
+            client: p.client_id || "",
             category: p.metadata?.category || "",
             tagline: p.description?.slice(0, 120) || "",
             description: p.description || "",
@@ -197,7 +196,6 @@ export async function getProjects(): Promise<DataProject[]> {
             assignedEmployees: p.metadata?.assignedEmployees || [],
             publishedSiteUrl: p.published_site_url ?? null,
             user_id: p.user_id,
-            client_email: p.client_email,
             created_at: p.created_at,
             updated_at: p.updated_at,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -233,7 +231,7 @@ export async function getProjectBySlug(
       slug: data.slug || data.id,
       refNo: undefined,
       title: data.title || "",
-      client: data.client_name || "",
+      client: data.client_id || "",
       category: data.metadata?.category || "",
       tagline: data.description?.slice(0, 120) || "",
       description: data.description || "",
@@ -265,7 +263,6 @@ export async function getProjectBySlug(
         order: m.metadata?.order || 0,
       })),
       user_id: data.user_id,
-      client_email: data.client_email,
       created_at: data.created_at,
       updated_at: data.updated_at,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -281,7 +278,7 @@ export async function getProjectBySlug(
 // =============================================================================
 export async function getQuotes(limit = 50): Promise<DataQuote[]> {
   try {
-    const supabase = await getAdminClient();
+    const supabase = getAdminClient();
     const { data, error } = await supabase
       .from("quotes")
       .select("*")
@@ -300,7 +297,7 @@ export async function getQuotes(limit = 50): Promise<DataQuote[]> {
       email: q.metadata?.email || "",
       company: q.metadata?.company,
       details: q.description || "",
-      status: q.status || "new",
+      status: q.status || "draft",
       created_at: q.created_at,
       updated_at: q.updated_at,
     }));
@@ -315,7 +312,7 @@ export async function getQuotes(limit = 50): Promise<DataQuote[]> {
 // =============================================================================
 export async function getMessages(limit = 50): Promise<DataMessage[]> {
   try {
-    const supabase = await getAdminClient();
+    const supabase = getAdminClient();
     const { data, error } = await supabase
       .from("messages")
       .select("*")

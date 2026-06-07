@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X, ArrowUpRight, Sparkles } from "lucide-react";
 import { cn } from "@syntaxure/ui";
 import { SyntaxureLogo } from "@syntaxure/ui";
@@ -16,6 +17,7 @@ interface NavLink {
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   const navLinks: NavLink[] = [
     {
@@ -60,26 +62,36 @@ export function Header() {
           </Link>
 
           <div className="hidden items-center gap-1 md:flex">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "relative px-4 py-2 text-sm font-medium transition-colors",
-                  link.highlight
-                    ? "flex items-center gap-1.5 text-[var(--text-primary)] font-bold hover:opacity-80"
-                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]",
-                )}
-              >
-                {link.highlight && <Sparkles className="h-3.5 w-3.5" />}
-                {link.label}
-                {link.highlight && (
-                  <span className="ml-1 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase text-[var(--text-secondary)] shadow-sm">
-                    Waitlist
-                  </span>
-                )}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isActive =
+                pathname === link.href ||
+                (link.href !== "/" && pathname.startsWith(link.href));
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "relative px-4 py-2 text-sm font-medium transition-colors",
+                    link.highlight
+                      ? "flex items-center gap-1.5 text-[var(--text-primary)] font-bold hover:opacity-80"
+                      : isActive
+                        ? "text-[var(--text-primary)]"
+                        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]",
+                  )}
+                >
+                  {link.highlight && <Sparkles className="h-3.5 w-3.5" />}
+                  {link.label}
+                  {link.highlight && (
+                    <span className="ml-1 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase text-[var(--text-secondary)] shadow-sm">
+                      Waitlist
+                    </span>
+                  )}
+                  {isActive && !link.highlight && (
+                    <span className="absolute bottom-0 left-1/2 h-0.5 w-6 -translate-x-1/2 rounded-full bg-cyan-500" />
+                  )}
+                </Link>
+              );
+            })}
           </div>
 
           <div className="flex items-center gap-3">
@@ -116,27 +128,34 @@ export function Header() {
         )}
       >
         <div className="space-y-1 px-6 py-4">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className={cn(
-                "block rounded-md px-4 py-3 text-sm font-medium transition-colors hover:bg-[var(--bg-primary)]",
-                link.highlight
-                  ? "flex items-center gap-2 text-[var(--text-primary)] font-bold"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]",
-              )}
-            >
-              {link.highlight && <Sparkles className="h-4 w-4" />}
-              {link.label}
-              {link.highlight && (
-                <span className="ml-auto rounded-sm bg-[var(--bg-primary)] border border-[var(--border-subtle)] px-2 py-0.5 font-mono text-[10px] font-bold uppercase text-[var(--text-secondary)] shadow-sm">
-                  Waitlist
-                </span>
-              )}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const isActive =
+              pathname === link.href ||
+              (link.href !== "/" && pathname.startsWith(link.href));
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={cn(
+                  "block rounded-md px-4 py-3 text-sm font-medium transition-colors hover:bg-[var(--bg-primary)]",
+                  link.highlight
+                    ? "flex items-center gap-2 text-[var(--text-primary)] font-bold"
+                    : isActive
+                      ? "text-[var(--text-primary)] bg-[var(--bg-primary)]"
+                      : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]",
+                )}
+              >
+                {link.highlight && <Sparkles className="h-4 w-4" />}
+                {link.label}
+                {link.highlight && (
+                  <span className="ml-auto rounded-sm bg-[var(--bg-primary)] border border-[var(--border-subtle)] px-2 py-0.5 font-mono text-[10px] font-bold uppercase text-[var(--text-secondary)] shadow-sm">
+                    Waitlist
+                  </span>
+                )}
+              </Link>
+            );
+          })}
           <div className="flex justify-center py-2">
             <ThemeToggle className="w-full justify-center" />
           </div>

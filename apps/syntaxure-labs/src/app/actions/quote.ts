@@ -47,30 +47,32 @@ export async function submitQuoteForm(data: QuoteFormData) {
     const supabase = getAdminClient() as any;
 
     // Save to Supabase
+    // NOTE: name/email/company/phone are stored in metadata (no dedicated columns in quotes table)
+    // user_id is NULL for public (unauthenticated) quote requests
+    // status starts as 'draft' (the only valid values: draft/sent/accepted/rejected/expired)
     const { data: result, error } = await supabase
       .from("quotes")
       .insert([
         {
-          user_id: "",
+          user_id: null,
           project_id: null,
           title: `${validated.name} - ${validated.templateName}`,
           description: validated.requirements,
           amount: 0,
-          status: "new",
+          status: "draft",
           valid_until: null,
           line_items: [],
+          quote_type: "template",
           metadata: {
+            refNo,
+            name: validated.name,
+            email: validated.email,
+            company: validated.company || null,
+            phone: validated.phone || null,
             templateId: validated.templateSelected,
             templateName: validated.templateName,
             scope: validated.customizationScope,
-            refNo,
           },
-          name: validated.name,
-          email: validated.email,
-          company: validated.company || null,
-          phone: validated.phone || null,
-          template_selected: validated.templateSelected,
-          customization_scope: validated.customizationScope,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
@@ -164,7 +166,7 @@ export async function updateQuoteStatus(
     });
 
     const { revalidatePath } = await import("next/cache");
-    revalidatePath("/admin/agency/quotes");
+    revalidatePath("/admin/quotes");
 
     return { success: true };
   } catch (error) {

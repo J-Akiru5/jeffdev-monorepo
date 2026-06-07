@@ -17,15 +17,21 @@ export default async function QuotePage() {
   const cms = await getPageContent("quote");
 
   // Fetch active product templates for the selection step
-  const { data: templates } = await supabase
-    .from("product_templates")
-    .select("id, name, slug, tagline, short_description, icon, base_price_monthly_php, base_price_monthly_usd, features, tech_stack")
-    .eq("status", "active")
-    .order("sort_order", { ascending: true });
+  let templates: unknown[] = [];
+  try {
+    const { data } = await supabase
+      .from("product_templates")
+      .select("id, name, slug, tagline, short_description, icon, base_price_monthly_php, base_price_monthly_usd, features, tech_stack")
+      .eq("status", "active")
+      .order("sort_order", { ascending: true });
+    templates = data || [];
+  } catch (error) {
+    console.error("[QUOTE PAGE] Failed to fetch templates:", error);
+  }
 
   return (
     <QuotePageClient
-      templates={(templates as unknown as import("@/components/quote-page").ProductTemplate[]) || []}
+      templates={(templates as import("@/components/quote-page").ProductTemplate[]) || []}
       pageContent={cms || undefined}
       defaults={QUOTE_DEFAULTS}
     />
