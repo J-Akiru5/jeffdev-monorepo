@@ -93,7 +93,7 @@ export default async function AgencyDashboardPage() {
           title="Messages"
           value={messages?.length || 0}
           badge={newMessages > 0 ? `${newMessages} unread` : undefined}
-          href="/admin/agency/quotes"
+          href="/admin/agency/messages"
           icon={Mail}
           color="cyan"
         />

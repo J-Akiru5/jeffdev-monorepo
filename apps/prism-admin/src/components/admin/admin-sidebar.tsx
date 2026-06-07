@@ -199,6 +199,9 @@ function AgencyNav() {
         <NavItem href="/admin/agency/content/legal" icon={FileText}>
           Legal Pages
         </NavItem>
+        <NavItem href="/admin/agency/blog" icon={FileText}>
+          Blog
+        </NavItem>
       </SectionGroup>
 
       {/* Services */}

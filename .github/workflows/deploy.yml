@@ -27,6 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       syntaxure-labs: ${{ steps.changes.outputs.syntaxure-labs }}
+      syntaxure-pm: ${{ steps.changes.outputs.syntaxure-pm }}
       prism-engine: ${{ steps.changes.outputs.prism-engine }}
       prism-admin: ${{ steps.changes.outputs.prism-admin }}
       prism-manage: ${{ steps.changes.outputs.prism-manage }}
@@ -43,6 +44,11 @@ jobs:
           files_yaml: |
             syntaxure-labs:
               - apps/syntaxure-labs/**
+              - packages/ui/**
+              - packages/supabase/**
+              - supabase/migrations/**
+            syntaxure-pm:
+              - apps/syntaxure-pm/**
               - packages/ui/**
               - packages/supabase/**
               - supabase/migrations/**
@@ -68,6 +74,7 @@ jobs:
         id: changes
         run: |
           echo "syntaxure-labs=${{ steps.changed-files.outputs.syntaxure-labs_any_changed }}" >> "$GITHUB_OUTPUT"
+          echo "syntaxure-pm=${{ steps.changed-files.outputs.syntaxure-pm_any_changed }}" >> "$GITHUB_OUTPUT"
           echo "prism-engine=${{ steps.changed-files.outputs.prism-engine_any_changed }}" >> "$GITHUB_OUTPUT"
           echo "prism-admin=${{ steps.changed-files.outputs.prism-admin_any_changed }}" >> "$GITHUB_OUTPUT"
           echo "prism-manage=${{ steps.changed-files.outputs.prism-manage_any_changed }}" >> "$GITHUB_OUTPUT"
@@ -106,7 +113,39 @@ jobs:
           working-directory: apps/syntaxure-labs
           vercel-args: "--prod"
 
-  # ─── Step 3: Deploy prism-engine ─────────────────────────────────────────
+  # ─── Step 3: Deploy syntaxure-pm ─────────────────────────────────────────
+  deploy-syntaxure-pm:
+    name: Deploy syntaxure-pm
+    needs: detect-changes
+    if: needs.detect-changes.outputs.syntaxure-pm == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build syntaxure-pm
+        run: pnpm --filter syntaxure-pm run build
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_SYNTAXURE_PM_PROJECT_ID }}
+          working-directory: apps/syntaxure-pm
+          vercel-args: "--prod"
+
+  # ─── Step 4: Deploy prism-engine ─────────────────────────────────────────
   deploy-prism-engine:
     name: Deploy prism-engine
     needs: detect-changes

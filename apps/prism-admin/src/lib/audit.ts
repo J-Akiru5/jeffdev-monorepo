@@ -22,7 +22,8 @@ export interface AuditEvent {
     | "case_study"
     | "agency_availability"
     | "contact_messages"
-    | "site_settings";
+    | "site_settings"
+    | "blog_posts";
   resourceId: string;
   details?: Record<string, unknown>;
   userEmail?: string;

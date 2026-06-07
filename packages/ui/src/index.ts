@@ -61,6 +61,16 @@ export {
   type FeatureFlags,
 } from "./feature-flags";
 
+// Charts
+export { ActivityChart } from "./charts/activity-chart";
+export { ProjectStatusChart } from "./charts/project-status-chart";
+export { RevenueChart } from "./charts/revenue-chart";
+export { DashboardCharts } from "./dashboard-charts";
+
+// Filters & Legends
+export { StatusFilter } from "./status-filter";
+export { CalendarLegend } from "./calendar-legend";
+
 // Hooks
 export { useDebouncedValue } from "./use-debounced-value";
 export { useActionFeedback, type ActionState } from "./use-action-feedback";

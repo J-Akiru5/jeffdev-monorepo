@@ -290,10 +290,10 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
             <Text style={styles.invoiceTitle}>INVOICE</Text>
             <Text style={styles.invoiceNumber}>{invoice.refNo}</Text>
             <Text style={styles.invoiceDate}>
-              Issued: {formatDate(invoice.issueDate)}
+              Issued: {formatDate(invoice.issueDate || invoice.created_at)}
             </Text>
             <Text style={styles.invoiceDate}>
-              Due: {formatDate(invoice.dueDate)}
+              Due: {formatDate(invoice.dueDate || "")}
             </Text>
           </View>
         </View>

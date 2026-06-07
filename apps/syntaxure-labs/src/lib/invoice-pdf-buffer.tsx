@@ -324,13 +324,13 @@ function InvoicePDFDocument({ invoice }: { invoice: Invoice }) {
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Issue Date</Text>
                 <Text style={styles.metaValue}>
-                  {formatDate(invoice.issueDate)}
+                  {formatDate(invoice.issueDate || invoice.created_at)}
                 </Text>
               </View>
               <View style={styles.metaRow}>
                 <Text style={styles.metaLabel}>Due Date</Text>
                 <Text style={[styles.metaValue, { color: "#0f172a" }]}>
-                  {formatDate(invoice.dueDate)}
+                  {formatDate(invoice.dueDate || "")}
                 </Text>
               </View>
             </View>

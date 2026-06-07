@@ -68,7 +68,7 @@ export default async function PublicPaymentPage({
     );
   }
 
-  const statusInfo = statusMessages[invoice.status];
+  const statusInfo = statusMessages[invoice.status as InvoiceStatus] || statusMessages.sent;
 
   return (
     <div className="min-h-screen bg-void px-4 py-12">
@@ -117,7 +117,7 @@ export default async function PublicPaymentPage({
                 <span className="text-white">
                   <PriceDisplay
                     amount={item.amount}
-                    sourceCurrency={invoice.currency}
+                    sourceCurrency={invoice.currency as "USD" | "PHP"}
                   />
                 </span>
               </div>
@@ -132,7 +132,7 @@ export default async function PublicPaymentPage({
               <span>Subtotal</span>
               <PriceDisplay
                 amount={invoice.subtotal}
-                sourceCurrency={invoice.currency}
+                sourceCurrency={invoice.currency as "USD" | "PHP"}
               />
             </div>
             {invoice.tax && invoice.tax > 0 && (
@@ -140,7 +140,7 @@ export default async function PublicPaymentPage({
                 <span>Tax</span>
                 <PriceDisplay
                   amount={invoice.tax}
-                  sourceCurrency={invoice.currency}
+                  sourceCurrency={invoice.currency as "USD" | "PHP"}
                 />
               </div>
             )}
@@ -151,7 +151,7 @@ export default async function PublicPaymentPage({
                   -
                   <PriceDisplay
                     amount={invoice.discount}
-                    sourceCurrency={invoice.currency}
+                    sourceCurrency={invoice.currency as "USD" | "PHP"}
                   />
                 </div>
               </div>
@@ -161,7 +161,7 @@ export default async function PublicPaymentPage({
               <span className="text-white">
                 <PriceDisplay
                   amount={invoice.total}
-                  sourceCurrency={invoice.currency}
+                  sourceCurrency={invoice.currency as "USD" | "PHP"}
                 />
               </span>
             </div>
@@ -172,7 +172,7 @@ export default async function PublicPaymentPage({
                   -
                   <PriceDisplay
                     amount={invoice.paidAmount}
-                    sourceCurrency={invoice.currency}
+                    sourceCurrency={invoice.currency as "USD" | "PHP"}
                   />
                 </div>
               </div>
@@ -186,7 +186,7 @@ export default async function PublicPaymentPage({
               >
                 <PriceDisplay
                   amount={invoice.balanceDue}
-                  sourceCurrency={invoice.currency}
+                  sourceCurrency={invoice.currency as "USD" | "PHP"}
                 />
               </span>
             </div>
@@ -205,7 +205,7 @@ export default async function PublicPaymentPage({
 
         {/* Footer */}
         <div className="mt-8 text-center text-xs text-white/30">
-          <p>Due Date: {new Date(invoice.dueDate).toLocaleDateString()}</p>
+          <p>Due Date: {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : "N/A"}</p>
           <p className="mt-2">
             Questions? Contact us at{" "}
             <a

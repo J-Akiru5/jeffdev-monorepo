@@ -102,7 +102,7 @@ export function PaymentButton({ invoice, onSuccess }: PaymentButtonProps) {
             createOrder={async () => {
               setError(null);
               const result = await createPayPalOrder(
-                invoice.refNo,
+                invoice.refNo || invoice.ref_no,
                 parseFloat(amount),
               );
               if (result.success && result.orderId) {
@@ -114,7 +114,7 @@ export function PaymentButton({ invoice, onSuccess }: PaymentButtonProps) {
             onApprove={async (data) => {
               const result = await capturePayPalOrder(
                 data.orderID,
-                invoice.refNo,
+                invoice.refNo || invoice.ref_no,
               );
               if (result.success) {
                 onSuccess();

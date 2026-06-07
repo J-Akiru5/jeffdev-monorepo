@@ -167,6 +167,7 @@ jobs:
     outputs:
       apps: ${{ steps.changes.outputs.apps }}
       syntaxure-labs: ${{ steps.changes.outputs.syntaxure-labs }}
+      syntaxure-pm: ${{ steps.changes.outputs.syntaxure-pm }}
       prism-engine: ${{ steps.changes.outputs.prism-engine }}
       prism-admin: ${{ steps.changes.outputs.prism-admin }}
       prism-manage: ${{ steps.changes.outputs.prism-manage }}
@@ -183,6 +184,11 @@ jobs:
           files_yaml: |
             syntaxure-labs:
               - apps/syntaxure-labs/**
+              - packages/ui/**
+              - packages/supabase/**
+              - supabase/migrations/**
+            syntaxure-pm:
+              - apps/syntaxure-pm/**
               - packages/ui/**
               - packages/supabase/**
               - supabase/migrations/**
@@ -208,6 +214,7 @@ jobs:
         id: changes
         run: |
           echo "syntaxure-labs=${{ steps.changed-files.outputs.syntaxure-labs_any_changed }}" >> "$GITHUB_OUTPUT"
+          echo "syntaxure-pm=${{ steps.changed-files.outputs.syntaxure-pm_any_changed }}" >> "$GITHUB_OUTPUT"
           echo "prism-engine=${{ steps.changed-files.outputs.prism-engine_any_changed }}" >> "$GITHUB_OUTPUT"
           echo "prism-admin=${{ steps.changed-files.outputs.prism-admin_any_changed }}" >> "$GITHUB_OUTPUT"
           echo "prism-manage=${{ steps.changed-files.outputs.prism-manage_any_changed }}" >> "$GITHUB_OUTPUT"
@@ -218,6 +225,9 @@ jobs:
           apps=""
           if [ "${{ steps.changed-files.outputs.syntaxure-labs_any_changed }}" == "true" ]; then
             apps="syntaxure-labs"
+          fi
+          if [ "${{ steps.changed-files.outputs.syntaxure-pm_any_changed }}" == "true" ]; then
+            apps="$apps,syntaxure-pm"
           fi
           if [ "${{ steps.changed-files.outputs.prism-engine_any_changed }}" == "true" ]; then
             apps="$apps,prism-engine"
