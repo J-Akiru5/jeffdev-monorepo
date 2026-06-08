@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>COO Operations Hub + BMC — Implementation Tracker</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: rgba(255,255,255,0.02);
+    --surface-hover: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.06);
+    --border-hover: rgba(255,255,255,0.12);
+    --text: #ffffff;
+    --text-secondary: rgba(255,255,255,0.6);
+    --text-tertiary: rgba(255,255,255,0.4);
+    --text-muted: rgba(255,255,255,0.3);
+    --cyan: #06b6d4;
+    --cyan-dim: rgba(6,182,212,0.15);
+    --purple: #a855f7;
+    --purple-dim: rgba(168,85,247,0.15);
+    --emerald: #10b981;
+    --emerald-dim: rgba(16,185,129,0.15);
+    --amber: #f59e0b;
+    --amber-dim: rgba(245,158,11,0.15);
+    --rose: #f43f5e;
+    --rose-dim: rgba(244,63,94,0.15);
+    --radius: 12px;
+    --glass-bg: rgba(255,255,255,0.02);
+    --glass-border: rgba(255,255,255,0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  /* ─── Header ─── */
+  .header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+  }
+  .header p {
+    color: var(--text-tertiary);
+    font-size: 0.9rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .header .meta {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    margin-top: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+  .header .meta span { display: flex; align-items: center; gap: 0.3rem; }
+
+  /* ─── Stats Dashboard ─── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+  .stat-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    transition: all 0.2s;
+  }
+  .stat-card:hover { border-color: var(--border-hover); background: var(--surface-hover); }
+  .stat-card .stat-label {
+    font-size: 0.7rem;
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+  .stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+  }
+  .stat-card .stat-sub {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    margin-top: 0.25rem;
+  }
+
+  /* ─── Overall Progress ─── */
+  .progress-overview {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  .progress-header h2 {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+  .progress-header .pct {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--cyan);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .progress-bar-track {
+    height: 8px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--cyan), var(--purple));
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .phase-progress-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+  }
+  .phase-progress-row .phase-name {
+    width: 140px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .phase-progress-row .mini-bar {
+    flex: 1;
+    height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .phase-progress-row .mini-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.4s;
+  }
+  .phase-progress-row .phase-pct {
+    width: 40px;
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+  }
+
+  /* ─── Phase Section ─── */
+  .phase-section {
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--glass-bg);
+  }
+  .phase-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+  }
+  .phase-header:hover { background: var(--surface-hover); }
+  .phase-header .phase-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .phase-header .phase-number {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .phase-header h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+  .phase-header .phase-tag {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .phase-header .chevron {
+    color: var(--text-muted);
+    transition: transform 0.3s;
+    font-size: 1.2rem;
+  }
+  .phase-header.open .chevron { transform: rotate(180deg); }
+  .phase-body {
+    display: none;
+    padding: 0 1.25rem 1.25rem;
+  }
+  .phase-body.open { display: block; }
+
+  /* ─── Task Item ─── */
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+  }
+  .task-item:hover { background: var(--surface-hover); border-color: var(--border); }
+  .task-item.done { opacity: 0.5; }
+  .task-item.done .task-title { text-decoration: line-through; }
+
+  .task-checkbox {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    min-width: 18px;
+    border: 2px solid var(--text-muted);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    margin-top: 2px;
+  }
+  .task-checkbox:checked {
+    background: var(--emerald);
+    border-color: var(--emerald);
+  }
+  .task-checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .task-checkbox:hover { border-color: var(--cyan); }
+
+  .task-content { flex: 1; }
+  .task-title {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 0.25rem;
+  }
+  .task-desc {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    line-height: 1.5;
+  }
+  .task-file {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.7rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--cyan);
+    background: var(--cyan-dim);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    margin-top: 0.35rem;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .task-file:hover { background: rgba(6,182,212,0.25); }
+  .task-time {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+
+  /* ─── Info Box ─── */
+  .info-box {
+    background: var(--cyan-dim);
+    border: 1px solid rgba(6,182,212,0.2);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+  .info-box strong { color: var(--cyan); }
+  .info-box.warning {
+    background: var(--amber-dim);
+    border-color: rgba(245,158,11,0.2);
+  }
+  .info-box.warning strong { color: var(--amber); }
+  .info-box.success {
+    background: var(--emerald-dim);
+    border-color: rgba(16,185,129,0.2);
+  }
+  .info-box.success strong { color: var(--emerald); }
+
+  /* ─── Code Block ─── */
+  .code-block {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 0.75rem 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    overflow-x: auto;
+    line-height: 1.7;
+  }
+  .code-block .comment { color: var(--text-muted); }
+  .code-block .keyword { color: var(--purple); }
+  .code-block .string { color: var(--emerald); }
+
+  /* ─── Badge ─── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.65rem;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .badge-new { background: var(--cyan-dim); color: var(--cyan); }
+  .badge-modify { background: var(--amber-dim); color: var(--amber); }
+  .badge-sql { background: var(--purple-dim); color: var(--purple); }
+  .badge-ts { background: var(--emerald-dim); color: var(--emerald); }
+  .badge-tsx { background: var(--rose-dim); color: var(--rose); }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 640px) {
+    .container { padding: 1rem; }
+    .header h1 { font-size: 1.5rem; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .phase-header { flex-wrap: wrap; gap: 0.5rem; }
+    .task-item { flex-direction: column; }
+    .task-time { align-self: flex-end; }
+  }
+
+  /* ─── Animation ─── */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .phase-section { animation: fadeIn 0.4s ease both; }
+  .phase-section:nth-child(2) { animation-delay: 0.05s; }
+  .phase-section:nth-child(3) { animation-delay: 0.1s; }
+  .phase-section:nth-child(4) { animation-delay: 0.15s; }
+  .phase-section:nth-child(5) { animation-delay: 0.2s; }
+  .phase-section:nth-child(6) { animation-delay: 0.25s; }
+  .phase-section:nth-child(7) { animation-delay: 0.3s; }
+
+  /* ─── Reset Button ─── */
+  .reset-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .reset-btn:hover { border-color: var(--rose); color: var(--rose); }
+
+  /* ─── Scrollbar ─── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+  /* ─── Print ─── */
+  @media print {
+    body { background: white; color: black; }
+    .phase-body { display: block !important; }
+    .task-checkbox { border-color: #999; }
+    .task-checkbox:checked::after { color: black; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ─── Header ─── -->
+  <header class="header">
+    <h1>COO Operations Hub + Business Model Canvas</h1>
+    <p>Step-by-step implementation tracker for building the Operations dashboard and BMC page in Prism Manage. Check off tasks as you complete them — progress saves automatically.</p>
+    <div class="meta">
+      <span>Owner: Hazel (COO)</span>
+      <span>Approver: Jeff (CEO)</span>
+      <span>App: prism-manage (port 3007)</span>
+      <span>Stack: Next.js 16 + Supabase + Zustand</span>
+    </div>
+  </header>
+
+  <!-- ─── Stats Dashboard ─── -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total Tasks</div>
+      <div class="stat-value" id="stat-total">0</div>
+      <div class="stat-sub">across 7 phases</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Completed</div>
+      <div class="stat-value" style="color: var(--emerald);" id="stat-done">0</div>
+      <div class="stat-sub" id="stat-done-sub">0% done</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Remaining</div>
+      <div class="stat-value" style="color: var(--amber);" id="stat-remaining">0</div>
+      <div class="stat-sub">tasks to go</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Est. Time Left</div>
+      <div class="stat-value" style="color: var(--purple);" id="stat-time">0h</div>
+      <div class="stat-sub">approximate</div>
+    </div>
+  </div>
+
+  <!-- ─── Overall Progress ─── -->
+  <div class="progress-overview">
+    <div class="progress-header">
+      <h2>Overall Progress</h2>
+      <span class="pct" id="overall-pct">0%</span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="overall-bar" style="width: 0%"></div>
+    </div>
+    <div id="phase-progress-rows"></div>
+    <div style="margin-top: 1rem; text-align: right;">
+      <button class="reset-btn" onclick="resetProgress()">Reset All Progress</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PHASE 1: DATABASE SETUP                     -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="phase-section" data-phase="phase-1">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <div class="phase-title">
+        <span class="phase-number" style="background: var(--cyan-dim); color: var(--cyan);">1</span>
+        <div>
+          <h3>Database Setup</h3>
+          <span style="font-size: 0.7rem; color: var(--text-muted);">Create 3 Supabase tables with RLS policies</span>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <span class="phase-tag" style="background: var(--purple-dim); color: var(--purple);">SQL</span>
+        <span class="chevron">▾</span>
+      </div>
+    </div>
+    <div class="phase-body">
+      <div class="info-box">
+        <strong>What are we doing?</strong> We're creating 3 new tables in Supabase (our database) to store milestones, business model canvas data, and infrastructure costs. Think of tables like Excel sheets — each one holds a specific type of data.
+      </div>
+      <div class="info-box warning">
+        <strong>Where to run this:</strong> Go to <a href="https://supabase.com/dashboard" style="color: var(--amber);">supabase.com/dashboard</a> → select your project → click "SQL Editor" in the left sidebar → paste each SQL block and click "Run".
+      </div>
+
+      <div class="task-item" data-task="p1-1">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Create the <code>milestones</code> table</div>
+          <div class="task-desc">This table stores project milestones — things like "Complete MVP", "Launch beta", etc. Each milestone has a status (pending, in progress, completed, blocked) and a due date.</div>
+          <div class="code-block">
+<span class="comment">-- Run this in Supabase SQL Editor</span>
+<span class="keyword">CREATE TABLE IF NOT EXISTS</span> milestones (
+  id            <span class="keyword">text PRIMARY KEY</span>,
+  workspace_id  <span class="keyword">text NOT NULL REFERENCES</span> workspaces(id) <span class="keyword">ON DELETE CASCADE</span>,
+  department_id <span class="keyword">text REFERENCES</span> departments(id) <span class="keyword">ON DELETE SET NULL</span>,
+  title         <span class="keyword">text NOT NULL</span>,
+  description   <span class="keyword">text</span>,
+  due_date      <span class="keyword">date</span>,
+  status        <span class="keyword">text NOT NULL DEFAULT</span> <span class="string">'pending'</span>
+                <span class="keyword">CHECK</span> (status <span class="keyword">IN</span> (<span class="string">'pending'</span>, <span class="string">'in_progress'</span>, <span class="string">'completed'</span>, <span class="string">'blocked'</span>)),
+  deliverables  <span class="keyword">text</span>[] <span class="keyword">DEFAULT</span> <span class="string">'{}'</span>,
+  created_at    <span class="keyword">timestamptz NOT NULL DEFAULT</span> now(),
+  updated_at    <span class="keyword">timestamptz NOT NULL DEFAULT</span> now()
+);
+
+<span class="keyword">CREATE INDEX</span> idx_milestones_workspace <span class="keyword">ON</span> milestones(workspace_id);
+<span class="keyword">CREATE INDEX</span> idx_milestones_status <span class="keyword">ON</span> milestones(workspace_id, status);
+
+<span class="keyword">ALTER TABLE</span> milestones <span class="keyword">ENABLE ROW LEVEL SECURITY</span>;
+
+<span class="keyword">CREATE POLICY</span> <span class="string">"Authenticated can read milestones"</span>
+  <span class="keyword">ON</span> milestones <span class="keyword">FOR SELECT USING</span> (auth.role() = <span class="string">'authenticated'</span>);
+
+<span class="keyword">CREATE POLICY</span> <span class="string">"Founders can insert milestones"</span>
+  <span class="keyword">ON</span> milestones <span class="keyword">FOR INSERT WITH CHECK</span> (auth.role() = <span class="string">'authenticated'</span>);
+
+<span class="keyword">CREATE POLICY</span> <span class="string">"Founders can update milestones"</span>
+  <span class="keyword">ON</span> milestones <span class="keyword">FOR UPDATE USING</span> (auth.role() = <span class="string">'authenticated'</span>);
+
+<span class="keyword">CREATE POLICY</span> <span class="string">"Founders can delete milestones"</span>
+  <span class="keyword">ON</span> milestones <span class="keyword">FOR DELETE USING</span> (auth.role() = <span class="string">'authenticated'</span>);
+          </div>
+          <span class="badge badge-sql">SQL</span>
+        </div>
+        <span class="task-time">~3 min</span>
+      </div>
+
+      <div class="task-item" data-task="p1-2">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Create the <code>bmc_sections</code> table</div>
+          <div class="task-desc">This table stores the 9 blocks of the Business Model Canvas. Each block (like "Key Partners" or "Revenue Streams") stores markdown content that the COO can edit.</div>
+          <div class="code-block">
+<span class="keyword">CREATE TABLE IF NOT EXISTS</span> bmc_sections (
+  id           <span class="keyword">text PRIMARY KEY</span>,
+  workspace_id <span class="keyword">text NOT NULL REFERENCES</span> workspaces(id) <span class="keyword">ON DELETE CASCADE</span>,
+  block        <span class="keyword">text NOT NULL</span>
+               <span class="keyword">CHECK</span> (block <span class="keyword">IN</span> (
+                 <span class="string">'key_partners'</span>, <span class="string">'key_activities'</span>, <span class="string">'key_resources'</span>,
+                 <span class="string">'value_propositions'</span>, <span class="string">'customer_relationships'</span>,
+                 <span class="string">'channels'</span>, <span class="string">'customer_segments'</span>,
+                 <span class="string">'cost_structure'</span>, <span class="string">'revenue_streams'</span>
+               )),
+  content      <span class="keyword">text DEFAULT</span> <span class="string">''</span>,
+  updated_by   <span class="keyword">uuid REFERENCES</span> auth.users(id),
+  updated_at   <span class="keyword">timestamptz NOT NULL DEFAULT</span> now(),
+  <span class="keyword">UNIQUE</span>(workspace_id, block)
+);
+
+<span class="keyword">CREATE INDEX</span> idx_bmc_workspace <span class="keyword">ON</span> bmc_sections(workspace_id);
+
+<span class="keyword">ALTER TABLE</span> bmc_sections <span class="keyword">ENABLE ROW LEVEL SECURITY</span>;
+
+<span class="keyword">CREATE POLICY</span> <span class="string">"Authenticated can read BMC"</span>
+  <span class="keyword">ON</span> bmc_sections <span class="keyword">FOR SELECT USING</span> (auth.role() = <span class="string">'authenticated'</span>);
+
+<span class="keyword">CREATE POLICY</span> <span class="string">"Founders can upsert BMC"</span>
+  <span class="keyword">ON</span> bmc_sections <span class="keyword">FOR INSERT WITH CHECK</span> (auth.role() = <span class="string">'authenticated'</span>);
+
+<span class="keyword">CREATE POLICY</span> <span class="string">"Founders can update BMC"</span>
+  <span class="keyword">ON</span> bmc_sections <span class="keyword">FOR UPDATE USING</span> (auth.role() = <span class="string">'authenticated'</span>);
+          </div>
+          <span class="badge badge-sql">SQL</span>
+        </div>
+        <span class="task-time">~3 min</span>
+      </div>
+
+      <div class="task-item" data-task="p1-3">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Create the <code>infrastructure_costs</code> table</div>
+          <div class="task-desc">This table tracks monthly costs for services like Vercel, Supabase, OpenAI, etc. The COO enters these manually to monitor budget vs. actual spending.</div>
+          <div class="code-block">
+<span class="keyword">CREATE TABLE IF NOT EXISTS</span> infrastructure_costs (
+  id             <span class="keyword">text PRIMARY KEY</span>,
+  workspace_id   <span class="keyword">text NOT NULL REFERENCES</span> workspaces(id) <span class="keyword">ON DELETE CASCADE</span>,
+  service_name   <span class="keyword">text NOT NULL</span>,
+  category       <span class="keyword">text NOT NULL DEFAULT</span> <span class="string">'other'</span>
+                 <span class="keyword">CHECK</span> (category <span class="keyword">IN</span> (
+                   <span class="string">'hosting'</span>, <span class="string">'database'</span>, <span class="string">'ai_api'</span>, <span class="string">'dev_tools'</span>, <span class="string">'other'</span>
+                 )),
+  monthly_budget <span class="keyword">numeric</span>(10,2) <span class="keyword">DEFAULT</span> 0,
+  actual_spend   <span class="keyword">numeric</span>(10,2) <span class="keyword">DEFAULT</span> 0,
+  period         <span class="keyword">text NOT NULL</span>,
+  notes          <span class="keyword">text</span>,
+  created_at     <span class="keyword">timestamptz NOT NULL DEFAULT</span> now(),
+  updated_at     <span class="keyword">timestamptz NOT NULL DEFAULT</span> now()
+);
+
+<span class="keyword">CREATE INDEX</span> idx_costs_workspace_period
+  <span class="keyword">ON</span> infrastructure_costs(workspace_id, period);
+
+<span class="keyword">ALTER TABLE</span> infrastructure_costs <span class="keyword">ENABLE ROW LEVEL SECURITY</span>;
+
+<span class="keyword">CREATE POLICY</span> <span class="string">"Authenticated can read costs"</span>
+  <span class="keyword">ON</span> infrastructure_costs <span class="keyword">FOR SELECT USING</span> (auth.role() = <span class="string">'authenticated'</span>);
+
+<span class="keyword">CREATE POLICY</span> <span class="string">"Founders can manage costs"</span>
+  <span class="keyword">ON</span> infrastructure_costs <span class="keyword">FOR ALL USING</span> (auth.role() = <span class="string">'authenticated'</span>);
+          </div>
+          <span class="badge badge-sql">SQL</span>
+        </div>
+        <span class="task-time">~3 min</span>
+      </div>
+
+      <div class="task-item" data-task="p1-4">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Verify all 3 tables exist in Supabase</div>
+          <div class="task-desc">Go to Table Editor in Supabase dashboard. You should see: <code>milestones</code>, <code>bmc_sections</code>, <code>infrastructure_costs</code>. Click each one and verify the columns match the SQL above.</div>
+          <span class="badge badge-sql">VERIFY</span>
+        </div>
+        <span class="task-time">~2 min</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PHASE 2: ZOD SCHEMAS                        -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="phase-section" data-phase="phase-2">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <div class="phase-title">
+        <span class="phase-number" style="background: var(--emerald-dim); color: var(--emerald);">2</span>
+        <div>
+          <h3>Zod Schemas</h3>
+          <span style="font-size: 0.7rem; color: var(--text-muted);">Define data shapes and validation rules</span>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <span class="phase-tag" style="background: var(--emerald-dim); color: var(--emerald);">TypeScript</span>
+        <span class="chevron">▾</span>
+      </div>
+    </div>
+    <div class="phase-body">
+      <div class="info-box">
+        <strong>What are Zod schemas?</strong> They're like blueprints that define what our data looks like. If someone tries to save data that doesn't match the blueprint (like a missing required field), Zod catches the error before it reaches the database. This keeps our data clean and consistent.
+      </div>
+
+      <div class="task-item" data-task="p2-1">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Open <code>src/lib/schemas.ts</code></div>
+          <div class="task-desc">This is the single source of truth for all data shapes in prism-manage. We'll add our new schemas at the end of the file.</div>
+          <span class="badge badge-modify">MODIFY</span>
+          <span class="task-file">src/lib/schemas.ts</span>
+        </div>
+        <span class="task-time">~1 min</span>
+      </div>
+
+      <div class="task-item" data-task="p2-2">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Add Milestone schemas (status enum + CRUD schemas)</div>
+          <div class="task-desc">Add at the end of <code>schemas.ts</code>. This defines the milestone data shape: what fields exist, what types they are, and which are required vs optional.</div>
+          <div class="code-block">
+<span class="comment">// ──────────────────────────────────────────────</span>
+<span class="comment">// Milestone Schema</span>
+<span class="comment">// ──────────────────────────────────────────────</span>
+<span class="keyword">export const</span> MilestoneStatusEnum = z.enum([<span class="string">"pending"</span>, <span class="string">"in_progress"</span>, <span class="string">"completed"</span>, <span class="string">"blocked"</span>]);
+<span class="keyword">export type</span> MilestoneStatus = z.infer&lt;<span class="keyword">typeof</span> MilestoneStatusEnum&gt;;
+
+<span class="keyword">export const</span> MilestoneSchema = z.object({
+  id: z.string(),
+  workspaceId: z.string(),
+  departmentId: z.string().nullable().optional(),
+  title: z.string().min(1).max(300),
+  description: z.string().optional(),
+  dueDate: z.string().optional(),
+  status: MilestoneStatusEnum.default(<span class="string">"pending"</span>),
+  deliverables: z.array(z.string()).default([]),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+<span class="keyword">export type</span> Milestone = z.infer&lt;<span class="keyword">typeof</span> MilestoneSchema&gt;;
+
+<span class="keyword">export const</span> CreateMilestoneSchema = MilestoneSchema.omit({
+  id: <span class="keyword">true</span>, createdAt: <span class="keyword">true</span>, updatedAt: <span class="keyword">true</span>,
+});
+<span class="keyword">export type</span> CreateMilestoneInput = z.infer&lt;<span class="keyword">typeof</span> CreateMilestoneSchema&gt;;
+
+<span class="keyword">export const</span> UpdateMilestoneSchema = MilestoneSchema.partial().pick({
+  title: <span class="keyword">true</span>, description: <span class="keyword">true</span>, dueDate: <span class="keyword">true</span>,
+  status: <span class="keyword">true</span>, deliverables: <span class="keyword">true</span>, departmentId: <span class="keyword">true</span>,
+});
+<span class="keyword">export type</span> UpdateMilestoneInput = z.infer&lt;<span class="keyword">typeof</span> UpdateMilestoneSchema&gt;;
+          </div>
+          <span class="badge badge-ts">TypeScript</span>
+          <span class="task-file">src/lib/schemas.ts</span>
+        </div>
+        <span class="task-time">~5 min</span>
+      </div>
+
+      <div class="task-item" data-task="p2-3">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Add Business Model Canvas schemas (block enum + section schema)</div>
+          <div class="task-desc">This defines the 9 BMC blocks and the shape of each canvas section. The <code>BMC_BLOCKS</code> constant provides metadata (label, description) for rendering.</div>
+          <div class="code-block">
+<span class="comment">// ──────────────────────────────────────────────</span>
+<span class="comment">// Business Model Canvas Schema</span>
+<span class="comment">// ──────────────────────────────────────────────</span>
+<span class="keyword">export const</span> BmcBlockEnum = z.enum([
+  <span class="string">"key_partners"</span>, <span class="string">"key_activities"</span>, <span class="string">"key_resources"</span>,
+  <span class="string">"value_propositions"</span>, <span class="string">"customer_relationships"</span>,
+  <span class="string">"channels"</span>, <span class="string">"customer_segments"</span>,
+  <span class="string">"cost_structure"</span>, <span class="string">"revenue_streams"</span>,
+]);
+<span class="keyword">export type</span> BmcBlock = z.infer&lt;<span class="keyword">typeof</span> BmcBlockEnum&gt;;
+
+<span class="keyword">export const</span> BmcSectionSchema = z.object({
+  id: z.string(),
+  workspaceId: z.string(),
+  block: BmcBlockEnum,
+  content: z.string().default(<span class="string">""</span>),
+  updatedBy: z.string().optional(),
+  updatedAt: z.string(),
+});
+<span class="keyword">export type</span> BmcSection = z.infer&lt;<span class="keyword">typeof</span> BmcSectionSchema&gt;;
+
+<span class="keyword">export const</span> UpdateBmcSectionSchema = z.object({
+  block: BmcBlockEnum,
+  content: z.string(),
+});
+<span class="keyword">export type</span> UpdateBmcSectionInput = z.infer&lt;<span class="keyword">typeof</span> UpdateBmcSectionSchema&gt;;
+
+<span class="comment">// Metadata for rendering the canvas grid</span>
+<span class="keyword">export const</span> BMC_BLOCKS = [
+  { key: <span class="string">"key_partners"</span>,           label: <span class="string">"Key Partners"</span>,            description: <span class="string">"Who are your key partners and suppliers?"</span> },
+  { key: <span class="string">"key_activities"</span>,         label: <span class="string">"Key Activities"</span>,          description: <span class="string">"What key activities does your value proposition require?"</span> },
+  { key: <span class="string">"key_resources"</span>,          label: <span class="string">"Key Resources"</span>,           description: <span class="string">"What key resources does your value proposition require?"</span> },
+  { key: <span class="string">"value_propositions"</span>,     label: <span class="string">"Value Propositions"</span>,      description: <span class="string">"What value do you deliver to the customer?"</span> },
+  { key: <span class="string">"customer_relationships"</span>, label: <span class="string">"Customer Relationships"</span>,  description: <span class="string">"What type of relationship does each segment expect?"</span> },
+  { key: <span class="string">"channels"</span>,               label: <span class="string">"Channels"</span>,                description: <span class="string">"Through which channels do you reach your customers?"</span> },
+  { key: <span class="string">"customer_segments"</span>,      label: <span class="string">"Customer Segments"</span>,       description: <span class="string">"For whom are you creating value?"</span> },
+  { key: <span class="string">"cost_structure"</span>,         label: <span class="string">"Cost Structure"</span>,          description: <span class="string">"What are the most important costs in your business?"</span> },
+  { key: <span class="string">"revenue_streams"</span>,        label: <span class="string">"Revenue Streams"</span>,         description: <span class="string">"For what value are your customers willing to pay?"</span> },
+];
+          </div>
+          <span class="badge badge-ts">TypeScript</span>
+          <span class="task-file">src/lib/schemas.ts</span>
+        </div>
+        <span class="task-time">~5 min</span>
+      </div>
+
+      <div class="task-item" data-task="p2-4">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Add Infrastructure Cost schemas</div>
+          <div class="task-desc">Defines the shape of cost tracking entries. Categories: hosting, database, ai_api, dev_tools, other.</div>
+          <div class="code-block">
+<span class="comment">// ──────────────────────────────────────────────</span>
+<span class="comment">// Infrastructure Cost Schema</span>
+<span class="comment">// ──────────────────────────────────────────────</span>
+<span class="keyword">export const</span> CostCategoryEnum = z.enum([<span class="string">"hosting"</span>, <span class="string">"database"</span>, <span class="string">"ai_api"</span>, <span class="string">"dev_tools"</span>, <span class="string">"other"</span>]);
+<span class="keyword">export type</span> CostCategory = z.infer&lt;<span class="keyword">typeof</span> CostCategoryEnum&gt;;
+
+<span class="keyword">export const</span> InfrastructureCostSchema = z.object({
+  id: z.string(),
+  workspaceId: z.string(),
+  serviceName: z.string().min(1).max(200),
+  category: CostCategoryEnum.default(<span class="string">"other"</span>),
+  monthlyBudget: z.number().default(0),
+  actualSpend: z.number().default(0),
+  period: z.string(),
+  notes: z.string().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+<span class="keyword">export type</span> InfrastructureCost = z.infer&lt;<span class="keyword">typeof</span> InfrastructureCostSchema&gt;;
+
+<span class="keyword">export const</span> CreateInfrastructureCostSchema = InfrastructureCostSchema.omit({
+  id: <span class="keyword">true</span>, createdAt: <span class="keyword">true</span>, updatedAt: <span class="keyword">true</span>,
+});
+<span class="keyword">export type</span> CreateInfrastructureCostInput = z.infer&lt;<span class="keyword">typeof</span> CreateInfrastructureCostSchema&gt;;
+          </div>
+          <span class="badge badge-ts">TypeScript</span>
+          <span class="task-file">src/lib/schemas.ts</span>
+        </div>
+        <span class="task-time">~3 min</span>
+      </div>
+
+      <div class="task-item" data-task="p2-5">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Verify no TypeScript errors</div>
+          <div class="task-desc">Run the type checker to make sure all schemas are valid.</div>
+          <div class="code-block">
+<span class="comment"># From the monorepo root:</span>
+pnpm --filter prism-manage run build
+<span class="comment"># Or just type-check:</span>
+npx tsc --noEmit --project apps/prism-manage/tsconfig.json
+          </div>
+          <span class="badge badge-ts">VERIFY</span>
+        </div>
+        <span class="task-time">~2 min</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PHASE 3: SERVER ACTIONS                     -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="phase-section" data-phase="phase-3">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <div class="phase-title">
+        <span class="phase-number" style="background: var(--amber-dim); color: var(--amber);">3</span>
+        <div>
+          <h3>Server Actions</h3>
+          <span style="font-size: 0.7rem; color: var(--text-muted);">Create CRUD functions for each new table</span>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <span class="phase-tag" style="background: var(--emerald-dim); color: var(--emerald);">TypeScript</span>
+        <span class="chevron">▾</span>
+      </div>
+    </div>
+    <div class="phase-body">
+      <div class="info-box">
+        <strong>What are server actions?</strong> They're functions that run on the server (not in the browser). When a user clicks a button or submits a form, the browser calls these functions to create, read, update, or delete data in Supabase. They always start with <code>"use server"</code> at the top.
+      </div>
+
+      <div class="task-item" data-task="p3-1">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Create <code>src/app/actions/milestones.ts</code></div>
+          <div class="task-desc">This file contains 5 functions: <code>getMilestones</code> (read all), <code>getMilestoneStats</code> (counts by status), <code>createMilestone</code> (add new), <code>updateMilestone</code> (edit), <code>deleteMilestone</code> (remove). See the full code in the implementation plan.</div>
+          <span class="badge badge-new">NEW FILE</span>
+          <span class="task-file">src/app/actions/milestones.ts</span>
+        </div>
+        <span class="task-time">~15 min</span>
+      </div>
+
+      <div class="task-item" data-task="p3-2">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Create <code>src/app/actions/bmc.ts</code></div>
+          <div class="task-desc">This file contains 3 functions: <code>getBmcSections</code> (read all 9 blocks), <code>upsertBmcSection</code> (save one block), <code>seedBmcData</code> (pre-fill with Syntaxure Labs data). The seed function populates real business data like pricing tiers, value propositions, and channels.</div>
+          <span class="badge badge-new">NEW FILE</span>
+          <span class="task-file">src/app/actions/bmc.ts</span>
+        </div>
+        <span class="task-time">~20 min</span>
+      </div>
+
+      <div class="task-item" data-task="p3-3">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Create <code>src/app/actions/infrastructure-costs.ts</code></div>
+          <div class="task-desc">This file contains 4 functions: <code>getInfrastructureCosts</code> (read, optionally by period), <code>getCostSummary</code> (totals by category), <code>upsertInfrastructureCost</code> (create/update), <code>deleteInfrastructureCost</code> (remove).</div>
+          <span class="badge badge-new">NEW FILE</span>
+          <span class="task-file">src/app/actions/infrastructure-costs.ts</span>
+        </div>
+        <span class="task-time">~15 min</span>
+      </div>
+
+      <div class="task-item" data-task="p3-4">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Verify all actions compile without errors</div>
+          <div class="code-block">
+pnpm --filter prism-manage run build
+<span class="comment"># Should compile without errors. Warnings are OK.</span>
+          </div>
+          <span class="badge badge-ts">VERIFY</span>
+        </div>
+        <span class="task-time">~2 min</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PHASE 4: OPERATIONS HUB                     -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="phase-section" data-phase="phase-4">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <div class="phase-title">
+        <span class="phase-number" style="background: var(--purple-dim); color: var(--purple);">4</span>
+        <div>
+          <h3>Operations Hub Page</h3>
+          <span style="font-size: 0.7rem; color: var(--text-muted);">Build the /operations dashboard and milestone management</span>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <span class="phase-tag" style="background: var(--rose-dim); color: var(--rose);">React</span>
+        <span class="chevron">▾</span>
+      </div>
+    </div>
+    <div class="phase-body">
+      <div class="info-box">
+        <strong>What is the Operations Hub?</strong> It's a dashboard page at <code>/operations</code> that shows the COO everything they need: task completion rates, upcoming milestones, team resource allocation, and infrastructure costs. It's wrapped in a <code>RoleGuard</code> so only COO and CEO can access it.
+      </div>
+
+      <div class="task-item" data-task="p4-1">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Create the operations folder structure</div>
+          <div class="task-desc">Create these files in <code>src/app/(dashboard)/operations/</code>:</div>
+          <div class="code-block">
+src/app/(dashboard)/operations/
+├── page.tsx                    <span class="comment"># Main hub page (server component)</span>
+├── loading.tsx                 <span class="comment"># Skeleton loader while page loads</span>
+├── error.tsx                   <span class="comment"># Error boundary if something fails</span>
+├── milestone-status-badge.tsx  <span class="comment"># Status badge component</span>
+└── milestones/
+    └── page.tsx                <span class="comment"># Full milestone CRUD page</span>
+          </div>
+          <span class="badge badge-new">NEW FILES</span>
+        </div>
+        <span class="task-time">~2 min</span>
+      </div>
+
+      <div class="task-item" data-task="p4-2">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Build the main Operations hub page</div>
+          <div class="task-desc">This is a server component that fetches milestones, task stats, and cost data in parallel. It renders 4 summary cards (completion rate, active milestones, blocked items, monthly spend) plus 4 content sections (milestones, task throughput, resource allocation, infrastructure costs).</div>
+          <span class="badge badge-tsx">TSX</span>
+          <span class="task-file">src/app/(dashboard)/operations/page.tsx</span>
+        </div>
+        <span class="task-time">~30 min</span>
+      </div>
+
+      <div class="task-item" data-task="p4-3">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Create loading and error components</div>
+          <div class="task-desc">Simple skeleton loader and error boundary. Copy the pattern from <code>src/app/(dashboard)/marketing/loading.tsx</code> and <code>error.tsx</code>.</div>
+          <span class="badge badge-tsx">TSX</span>
+        </div>
+        <span class="task-time">~5 min</span>
+      </div>
+
+      <div class="task-item" data-task="p4-4">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Build the Milestone Status Badge component</div>
+          <div class="task-desc">A small component that renders a colored badge based on milestone status: pending (gray), in_progress (cyan), completed (emerald), blocked (rose).</div>
+          <span class="badge badge-tsx">TSX</span>
+          <span class="task-file">src/app/(dashboard)/operations/milestone-status-badge.tsx</span>
+        </div>
+        <span class="task-time">~5 min</span>
+      </div>
+
+      <div class="task-item" data-task="p4-5">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Build the Milestones management page</div>
+          <div class="task-desc">Full CRUD page at <code>/operations/milestones</code>. Shows all milestones in a list with inline status toggles, add form, and delete button. Uses the server actions from Phase 3.</div>
+          <span class="badge badge-tsx">TSX</span>
+          <span class="task-file">src/app/(dashboard)/operations/milestones/page.tsx</span>
+        </div>
+        <span class="task-time">~25 min</span>
+      </div>
+
+      <div class="task-item" data-task="p4-6">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Test the Operations hub in the browser</div>
+          <div class="task-desc">Start the dev server and navigate to <code>http://localhost:3007/operations</code>. Verify: summary cards render, milestones section shows (empty is OK), cost section shows. Test adding a milestone.</div>
+          <div class="code-block">
+pnpm --filter prism-manage run dev
+<span class="comment"># Open http://localhost:3007/operations</span>
+          </div>
+          <span class="badge badge-tsx">TEST</span>
+        </div>
+        <span class="task-time">~5 min</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PHASE 5: BUSINESS MODEL CANVAS              -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="phase-section" data-phase="phase-5">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <div class="phase-title">
+        <span class="phase-number" style="background: var(--rose-dim); color: var(--rose);">5</span>
+        <div>
+          <h3>Business Model Canvas Page</h3>
+          <span style="font-size: 0.7rem; color: var(--text-muted);">Build the /bmc page with 9-block grid and inline editing</span>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <span class="phase-tag" style="background: var(--rose-dim); color: var(--rose);">React</span>
+        <span class="chevron">▾</span>
+      </div>
+    </div>
+    <div class="phase-body">
+      <div class="info-box">
+        <strong>What is the Business Model Canvas?</strong> It's a strategic management tool created by Alexander Osterwalder. It has 9 building blocks that describe how a business creates, delivers, and captures value. The classic layout is a grid with 9 boxes. Our version renders this grid with editable content in each block.
+      </div>
+
+      <div class="task-item" data-task="p5-1">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Create the BMC component folder</div>
+          <div class="code-block">
+src/components/bmc/
+├── bmc-block.tsx     <span class="comment"># Single editable canvas block</span>
+├── bmc-grid.tsx      <span class="comment"># 9-block CSS grid layout</span>
+└── seed-bmc-button.tsx <span class="comment"># Button to seed initial data</span>
+          </div>
+          <span class="badge badge-new">NEW FILES</span>
+        </div>
+        <span class="task-time">~1 min</span>
+      </div>
+
+      <div class="task-item" data-task="p5-2">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Build the <code>BmcBlock</code> component</div>
+          <div class="task-desc">A client component that renders a single BMC block. Shows markdown preview by default. Click to edit (textarea). COO and CEO can edit; others see read-only. Saves via <code>upsertBmcSection</code> server action.</div>
+          <span class="badge badge-tsx">TSX</span>
+          <span class="task-file">src/components/bmc/bmc-block.tsx</span>
+        </div>
+        <span class="task-time">~20 min</span>
+      </div>
+
+      <div class="task-item" data-task="p5-3">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Build the <code>BmcGrid</code> component</div>
+          <div class="task-desc">CSS Grid layout that arranges 9 blocks in the classic Osterwalder pattern. Uses the <code>BMC_BLOCKS</code> constant for block metadata. The grid has a specific layout: Partners (left), Activities+Resources (left-center), Value Prop (center), Relationships+Channels (right-center), Segments (right), Cost+Revenue (bottom spanning).</div>
+          <span class="badge badge-tsx">TSX</span>
+          <span class="task-file">src/components/bmc/bmc-grid.tsx</span>
+        </div>
+        <span class="task-time">~15 min</span>
+      </div>
+
+      <div class="task-item" data-task="p5-4">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Build the <code>SeedBmcButton</code> component</div>
+          <div class="task-desc">A client component with a button that calls the <code>seedBmcData</code> server action. Shows a confirmation dialog before seeding. Only visible when the canvas is empty.</div>
+          <span class="badge badge-tsx">TSX</span>
+          <span class="task-file">src/components/bmc/seed-bmc-button.tsx</span>
+        </div>
+        <span class="task-time">~10 min</span>
+      </div>
+
+      <div class="task-item" data-task="p5-5">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Create the BMC page</div>
+          <div class="task-desc">Server component at <code>/bmc</code>. Fetches BMC sections, shows seed button if empty, renders <code>BmcGrid</code> if data exists. Wrapped in <code>RoleGuard</code> for Operations department access.</div>
+          <span class="badge badge-tsx">TSX</span>
+          <span class="task-file">src/app/(dashboard)/bmc/page.tsx</span>
+        </div>
+        <span class="task-time">~10 min</span>
+      </div>
+
+      <div class="task-item" data-task="p5-6">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Test the BMC page end-to-end</div>
+          <div class="task-desc">Navigate to <code>http://localhost:3007/bmc</code>. Click "Seed Template". Verify all 9 blocks populate with Syntaxure Labs data. Test editing a block. Test that non-COO users see read-only mode.</div>
+          <div class="code-block">
+<span class="comment"># Open http://localhost:3007/bmc</span>
+<span class="comment"># 1. Click "Seed Template" button</span>
+<span class="comment"># 2. Verify all 9 blocks have content</span>
+<span class="comment"># 3. Click a block to edit, change text, save</span>
+<span class="comment"># 4. Refresh page — changes should persist</span>
+          </div>
+          <span class="badge badge-tsx">TEST</span>
+        </div>
+        <span class="task-time">~5 min</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PHASE 6: NAVIGATION & PERMISSIONS           -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="phase-section" data-phase="phase-6">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <div class="phase-title">
+        <span class="phase-number" style="background: var(--cyan-dim); color: var(--cyan);">6</span>
+        <div>
+          <h3>Navigation & Permissions</h3>
+          <span style="font-size: 0.7rem; color: var(--text-muted);">Wire up sidebar links, permissions, and dashboard quick actions</span>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <span class="phase-tag" style="background: var(--amber-dim); color: var(--amber);">Modify</span>
+        <span class="chevron">▾</span>
+      </div>
+    </div>
+    <div class="phase-body">
+      <div class="info-box">
+        <strong>What's happening here?</strong> We're adding the new pages to the sidebar navigation so users can find them, and updating the permission system so only the right people can access them.
+      </div>
+
+      <div class="task-item" data-task="p6-1">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Add Operations and BMC to sidebar navigation</div>
+          <div class="task-desc">In <code>src/components/sidebar/index.tsx</code>, add two new nav items that are only visible in workspace mode for COO/CEO users.</div>
+          <span class="badge badge-modify">MODIFY</span>
+          <span class="task-file">src/components/sidebar/index.tsx</span>
+        </div>
+        <span class="task-time">~10 min</span>
+      </div>
+
+      <div class="task-item" data-task="p6-2">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Update mode permissions</div>
+          <div class="task-desc">In <code>src/lib/mode-permissions.ts</code>, add <code>"operations"</code> and <code>"bmc"</code> to the <code>ManageFeature</code> type and the permission matrix.</div>
+          <span class="badge badge-modify">MODIFY</span>
+          <span class="task-file">src/lib/mode-permissions.ts</span>
+        </div>
+        <span class="task-time">~5 min</span>
+      </div>
+
+      <div class="task-item" data-task="p6-3">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Add quick actions to Dashboard HQ</div>
+          <div class="task-desc">In <code>src/app/(dashboard)/dashboard/page.tsx</code>, add "Operations Hub" and "Business Canvas" links in the Quick Actions section, visible to founders.</div>
+          <span class="badge badge-modify">MODIFY</span>
+          <span class="task-file">src/app/(dashboard)/dashboard/page.tsx</span>
+        </div>
+        <span class="task-time">~5 min</span>
+      </div>
+
+      <div class="task-item" data-task="p6-4">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Verify RBAC works correctly</div>
+          <div class="task-desc">Test with different user roles: COO should see Operations + BMC in sidebar. CEO should see both. CTO/CPO/CMO should NOT see Operations. Employees should see neither. Navigate directly to <code>/operations</code> as a non-COO — should redirect to dashboard.</div>
+          <span class="badge badge-tsx">TEST</span>
+        </div>
+        <span class="task-time">~10 min</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- PHASE 7: FINAL VERIFICATION                 -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="phase-section" data-phase="phase-7">
+    <div class="phase-header" onclick="togglePhase(this)">
+      <div class="phase-title">
+        <span class="phase-number" style="background: var(--emerald-dim); color: var(--emerald);">7</span>
+        <div>
+          <h3>Final Verification & Deploy</h3>
+          <span style="font-size: 0.7rem; color: var(--text-muted);">Full build check, E2E test, and production deploy</span>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <span class="phase-tag" style="background: var(--emerald-dim); color: var(--emerald);">Verify</span>
+        <span class="chevron">▾</span>
+      </div>
+    </div>
+    <div class="phase-body">
+      <div class="task-item" data-task="p7-1">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Run full build for prism-manage</div>
+          <div class="code-block">
+pnpm --filter prism-manage run build
+<span class="comment"># Should complete with 0 errors</span>
+          </div>
+          <span class="badge badge-ts">BUILD</span>
+        </div>
+        <span class="task-time">~3 min</span>
+      </div>
+
+      <div class="task-item" data-task="p7-2">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Run linting</div>
+          <div class="code-block">
+turbo run lint --filter=prism-manage
+<span class="comment"># Fix any warnings or errors</span>
+          </div>
+          <span class="badge badge-ts">LINT</span>
+        </div>
+        <span class="task-time">~2 min</span>
+      </div>
+
+      <div class="task-item" data-task="p7-3">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Manual smoke test — all pages</div>
+          <div class="task-desc">Visit each page and verify it loads without errors:</div>
+          <div class="code-block">
+<span class="comment"># Checklist:</span>
+□ http://localhost:3007/dashboard     <span class="comment"># HQ page loads</span>
+□ http://localhost:3007/operations    <span class="comment"># Ops hub loads, stats show</span>
+□ http://localhost:3007/operations/milestones <span class="comment"># Milestone CRUD works</span>
+□ http://localhost:3007/bmc           <span class="comment"># Canvas loads, seed works</span>
+□ http://localhost:3007/tasks         <span class="comment"># Existing tasks still work</span>
+□ http://localhost:3007/kanban        <span class="comment"># Kanban still works</span>
+□ http://localhost:3007/marketing     <span class="comment"># Marketing still works</span>
+          </div>
+          <span class="badge badge-tsx">TEST</span>
+        </div>
+        <span class="task-time">~10 min</span>
+      </div>
+
+      <div class="task-item" data-task="p7-4">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Run type checking across entire monorepo</div>
+          <div class="code-block">
+turbo run check-types
+<span class="comment"># Ensures no type errors in any workspace</span>
+          </div>
+          <span class="badge badge-ts">TYPECHECK</span>
+        </div>
+        <span class="task-time">~2 min</span>
+      </div>
+
+      <div class="task-item" data-task="p7-5">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title">Deploy to production</div>
+          <div class="task-desc">Push to main branch. Vercel will auto-deploy. Verify the production URL works.</div>
+          <div class="code-block">
+git add .
+git commit -m <span class="string">"feat(prism-manage): add operations hub + business model canvas"</span>
+git push origin main
+<span class="comment"># Verify on Vercel dashboard that deployment succeeds</span>
+          </div>
+          <span class="badge badge-ts">DEPLOY</span>
+        </div>
+        <span class="task-time">~5 min</span>
+      </div>
+
+      <div class="task-item" data-task="p7-6">
+        <input type="checkbox" class="task-checkbox" />
+        <div class="task-content">
+          <div class="task-title" style="color: var(--emerald); font-weight: 700;">Done! Notify the team.</div>
+          <div class="task-desc">Let Hazel (COO) and Jeff (CEO) know the Operations Hub and Business Model Canvas are live. Share the production URLs.</div>
+          <span class="badge" style="background: var(--emerald-dim); color: var(--emerald);">COMPLETE</span>
+        </div>
+        <span class="task-time">~1 min</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Footer ─── -->
+  <footer style="text-align: center; padding: 2rem 0; color: var(--text-muted); font-size: 0.75rem; border-top: 1px solid var(--border); margin-top: 2rem;">
+    <p>Progress saves automatically to your browser's local storage.</p>
+    <p style="margin-top: 0.5rem;">Syntaxure Labs — Zero to One Development Agency</p>
+  </footer>
+
+</div>
+
+<script>
+  // ─── Storage Key ───
+  const STORAGE_KEY = 'coo-tracker-progress';
+
+  // ─── Phase Definitions ───
+  const phases = [
+    { id: 'phase-1', name: 'Database Setup', color: 'var(--cyan)' },
+    { id: 'phase-2', name: 'Zod Schemas', color: 'var(--emerald)' },
+    { id: 'phase-3', name: 'Server Actions', color: 'var(--amber)' },
+    { id: 'phase-4', name: 'Operations Hub', color: 'var(--purple)' },
+    { id: 'phase-5', name: 'BMC Page', color: 'var(--rose)' },
+    { id: 'phase-6', name: 'Navigation', color: 'var(--cyan)' },
+    { id: 'phase-7', name: 'Deploy', color: 'var(--emerald)' },
+  ];
+
+  // ─── Load saved progress ───
+  function loadProgress() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : {};
+    } catch { return {}; }
+  }
+
+  function saveProgress(data) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch {}
+  }
+
+  // ─── Toggle checkbox ───
+  function handleCheckbox(taskId, checked) {
+    const progress = loadProgress();
+    if (checked) {
+      progress[taskId] = Date.now();
+    } else {
+      delete progress[taskId];
+    }
+    saveProgress(progress);
+    updateUI();
+  }
+
+  // ─── Toggle phase collapse ───
+  function togglePhase(header) {
+    header.classList.toggle('open');
+    const body = header.nextElementSibling;
+    body.classList.toggle('open');
+  }
+
+  // ─── Reset all progress ───
+  function resetProgress() {
+    if (confirm('Reset all progress? This cannot be undone.')) {
+      localStorage.removeItem(STORAGE_KEY);
+      document.querySelectorAll('.task-checkbox').forEach(cb => {
+        cb.checked = false;
+        cb.closest('.task-item').classList.remove('done');
+      });
+      updateUI();
+    }
+  }
+
+  // ─── Update all UI elements ───
+  function updateUI() {
+    const progress = loadProgress();
+    const allTasks = document.querySelectorAll('.task-item[data-task]');
+    const total = allTasks.length;
+    let done = 0;
+    const phaseCounts = {};
+
+    // Init phase counts
+    phases.forEach(p => { phaseCounts[p.id] = { total: 0, done: 0 }; });
+
+    allTasks.forEach(item => {
+      const taskId = item.dataset.task;
+      const phaseEl = item.closest('.phase-section');
+      const phaseId = phaseEl?.dataset.phase;
+
+      if (phaseId && phaseCounts[phaseId]) {
+        phaseCounts[phaseId].total++;
+      }
+
+      if (progress[taskId]) {
+        done++;
+        item.classList.add('done');
+        const cb = item.querySelector('.task-checkbox');
+        if (cb) cb.checked = true;
+        if (phaseId && phaseCounts[phaseId]) {
+          phaseCounts[phaseId].done++;
+        }
+      } else {
+        item.classList.remove('done');
+      }
+    });
+
+    const remaining = total - done;
+    const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+    // Update stats
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-done').textContent = done;
+    document.getElementById('stat-done-sub').textContent = `${pct}% done`;
+    document.getElementById('stat-remaining').textContent = remaining;
+    document.getElementById('stat-time').textContent = `~${remaining * 5}m`;
+
+    // Update overall progress
+    document.getElementById('overall-pct').textContent = `${pct}%`;
+    document.getElementById('overall-bar').style.width = `${pct}%`;
+
+    // Update phase progress rows
+    const rowsContainer = document.getElementById('phase-progress-rows');
+    rowsContainer.innerHTML = phases.map(phase => {
+      const counts = phaseCounts[phase.id] || { total: 0, done: 0 };
+      const phasePct = counts.total > 0 ? Math.round((counts.done / counts.total) * 100) : 0;
+      return `
+        <div class="phase-progress-row">
+          <span class="phase-name">${phase.name}</span>
+          <div class="mini-bar">
+            <div class="mini-bar-fill" style="width: ${phasePct}%; background: ${phase.color};"></div>
+          </div>
+          <span class="phase-pct">${phasePct}%</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ─── Initialize ───
+  document.addEventListener('DOMContentLoaded', () => {
+    const progress = loadProgress();
+
+    // Attach checkbox listeners
+    document.querySelectorAll('.task-checkbox').forEach(cb => {
+      const item = cb.closest('.task-item');
+      const taskId = item?.dataset.task;
+      if (taskId && progress[taskId]) {
+        cb.checked = true;
+        item.classList.add('done');
+      }
+      cb.addEventListener('change', () => {
+        handleCheckbox(taskId, cb.checked);
+      });
+    });
+
+    // Open first phase by default
+    const firstHeader = document.querySelector('.phase-header');
+    if (firstHeader) {
+      firstHeader.classList.add('open');
+      firstHeader.nextElementSibling.classList.add('open');
+    }
+
+    updateUI();
+  });
+</script>
+
+</body>
+</html>
