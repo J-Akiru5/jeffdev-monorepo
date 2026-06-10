@@ -290,3 +290,99 @@ export const GitHubIssueSchema = z.object({
   labels: z.array(z.union([z.string(), z.object({ name: z.string().optional() })])),
 });
 export type GitHubIssue = z.infer<typeof GitHubIssueSchema>;
+
+// ──────────────────────────────────────────────
+// Milestone Schema
+// ──────────────────────────────────────────────
+export const MilestoneStatusEnum = z.enum(["pending", "in_progress", "completed", "blocked"]);
+export type MilestoneStatus = z.infer<typeof MilestoneStatusEnum>;
+
+export const MilestoneSchema = z.object({
+  id: z.string(),
+  workspaceId: z.string(),
+  departmentId: z.string().nullable().optional(),
+  title: z.string().min(1).max(300),
+  description: z.string().optional(),
+  dueDate: z.string().optional(),
+  status: MilestoneStatusEnum.default("pending"),
+  deliverables: z.array(z.string()).default([]),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type Milestone = z.infer<typeof MilestoneSchema>;
+
+export const CreateMilestoneSchema = MilestoneSchema.omit({
+  id: true, createdAt: true, updatedAt: true,
+});
+export type CreateMilestoneInput = z.infer<typeof CreateMilestoneSchema>;
+
+export const UpdateMilestoneSchema = MilestoneSchema.partial().pick({
+  title: true, description: true, dueDate: true,
+  status: true, deliverables: true, departmentId: true,
+});
+export type UpdateMilestoneInput = z.infer<typeof UpdateMilestoneSchema>;
+
+// ──────────────────────────────────────────────
+// Business Model Canvas Schema
+// ──────────────────────────────────────────────
+export const BmcBlockEnum = z.enum([
+  "key_partners", "key_activities", "key_resources",
+  "value_propositions", "customer_relationships",
+  "channels", "customer_segments",
+  "cost_structure", "revenue_streams",
+]);
+export type BmcBlock = z.infer<typeof BmcBlockEnum>;
+
+export const BmcSectionSchema = z.object({
+  id: z.string(),
+  workspaceId: z.string(),
+  block: BmcBlockEnum,
+  content: z.string().default(""),
+  updatedBy: z.string().optional(),
+  updatedAt: z.string(),
+});
+export type BmcSection = z.infer<typeof BmcSectionSchema>;
+
+export const UpdateBmcSectionSchema = z.object({
+  block: BmcBlockEnum,
+  content: z.string(),
+});
+export type UpdateBmcSectionInput = z.infer<typeof UpdateBmcSectionSchema>;
+
+// Metadata for rendering the canvas grid
+export const BMC_BLOCKS = [
+  { key: "key_partners",           label: "Key Partners",            description: "Who are your key partners and suppliers?" },
+  { key: "key_activities",         label: "Key Activities",          description: "What key activities does your value proposition require?" },
+  { key: "key_resources",          label: "Key Resources",           description: "What key resources does your value proposition require?" },
+  { key: "value_propositions",     label: "Value Propositions",      description: "What value do you deliver to the customer?" },
+  { key: "customer_relationships", label: "Customer Relationships",  description: "What type of relationship does each segment expect?" },
+  { key: "channels",               label: "Channels",                description: "Through which channels do you reach your customers?" },
+  { key: "customer_segments",      label: "Customer Segments",       description: "For whom are you creating value?" },
+  { key: "cost_structure",         label: "Cost Structure",          description: "What are the most important costs in your business?" },
+  { key: "revenue_streams",        label: "Revenue Streams",         description: "For what value are your customers willing to pay?" },
+];
+
+// ──────────────────────────────────────────────
+// Infrastructure Cost Schema
+// ──────────────────────────────────────────────
+export const CostCategoryEnum = z.enum(["hosting", "database", "ai_api", "dev_tools", "other"]);
+export type CostCategory = z.infer<typeof CostCategoryEnum>;
+
+export const InfrastructureCostSchema = z.object({
+  id: z.string(),
+  workspaceId: z.string(),
+  serviceName: z.string().min(1).max(200),
+  category: CostCategoryEnum.default("other"),
+  monthlyBudget: z.number().default(0),
+  actualSpend: z.number().default(0),
+  period: z.string(),
+  notes: z.string().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+export type InfrastructureCost = z.infer<typeof InfrastructureCostSchema>;
+
+export const CreateInfrastructureCostSchema = InfrastructureCostSchema.omit({
+  id: true, createdAt: true, updatedAt: true,
+});
+export type CreateInfrastructureCostInput = z.infer<typeof CreateInfrastructureCostSchema>;
