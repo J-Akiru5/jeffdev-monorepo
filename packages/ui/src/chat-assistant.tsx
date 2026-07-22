@@ -70,7 +70,7 @@ export function ChatAssistant({
       if (customEvent.detail?.message) {
         setMessages((prev) => {
           // Prevent duplicate messages if fired multiple times
-          if (prev.length > 0 && prev[prev.length - 1].content === customEvent.detail.message) {
+          if (prev.length > 0 && prev[prev.length - 1]?.content === customEvent.detail?.message) {
             return prev;
           }
           return [
@@ -78,7 +78,7 @@ export function ChatAssistant({
             {
               id: `assistant-event-${Date.now()}`,
               role: "assistant",
-              content: customEvent.detail.message!,
+              content: customEvent.detail?.message ?? '',
               timestamp: new Date(),
             },
           ];
