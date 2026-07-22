@@ -48,7 +48,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }));
 
-    return [...staticPages, ...servicePages, ...projectPages];
+    // Dynamic blog posts
+    let blogPages: MetadataRoute.Sitemap = [];
+    try {
+      const { getBlogPosts } = await import('@/app/actions/blog');
+      const posts = await getBlogPosts(100);
+      blogPages = posts.map((p) => ({
+        url: `${BASE_URL}/blog/${p.slug}`,
+        lastModified: p.published_at ? new Date(p.published_at) : currentDate,
+        changeFrequency: 'monthly' as const,
+        priority: 0.6,
+      }));
+    } catch {
+      // Blog fetching failed, skip
+    }
+
+    return [...staticPages, ...servicePages, ...projectPages, ...blogPages];
   } catch {
     return [...staticPages];
   }

@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowUpRight, Check } from "lucide-react";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { CTASection } from "@/components/sections/cta-section";
@@ -33,21 +33,24 @@ export async function generateMetadata({
   params,
 }: ServicePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const service = await getServiceBySlug(slug);
+  const dbService = await getServiceBySlug(slug);
+  const fallbackService = staticServices.find((item) => item.slug === slug);
 
-  if (!service) {
+  if (!dbService && !fallbackService) {
     return { title: "Service Not Found" };
   }
 
+  const activeService = dbService ?? fallbackService!;
+
   return {
-    title: `${service.title} // Syntaxure Labs`,
-    description: service.description,
+    title: `${activeService.title} | Syntaxure Labs`,
+    description: activeService.description,
     alternates: {
       canonical: `/services/${slug}`,
     },
     openGraph: {
-      title: `${service.title} | Syntaxure Labs`,
-      description: service.description,
+      title: `${activeService.title} | Syntaxure Labs`,
+      description: activeService.description,
       url: `/services/${slug}`,
       siteName: 'Syntaxure Labs',
       type: 'website',
@@ -90,7 +93,18 @@ export default async function ServicePage({ params }: ServicePageProps) {
   return (
     <>
       <Header />
-      <main className="pt-24">
+      <main className="pt-32 pb-16">
+        {/* Desktop Absolute Back Button (Sits on the left side, professional style) */}
+        <div className="hidden xl:flex absolute left-[max(2rem,calc(50%-54rem))] top-36 z-50">
+          <Link
+            href="/services"
+            className="group flex items-center gap-2 rounded-md border border-[var(--border-subtle)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
+          >
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+            All Services
+          </Link>
+        </div>
+
         {/* BreadcrumbList JSON-LD */}
         <script
           type="application/ld+json"
@@ -106,15 +120,18 @@ export default async function ServicePage({ params }: ServicePageProps) {
           }}
         />
         {/* Hero Section */}
-        <section className="px-6 py-16 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <Link
-              href="/services"
-              className="inline-flex items-center gap-2 text-sm text-white/50 transition-colors hover:text-white"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              All Services
-            </Link>
+        <section className="px-6 pb-8 lg:px-8">
+          <div className="mx-auto max-w-7xl relative">
+            {/* Mobile/Tablet: Back button */}
+            <div className="mb-8 xl:hidden">
+              <Link
+                href="/services"
+                className="inline-flex items-center gap-2 rounded-md border border-[var(--border-subtle)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
+              >
+                <ArrowLeft className="h-4 w-4 transition-transform hover:-translate-x-0.5" />
+                All Services
+              </Link>
+            </div>
 
             <div className="mt-8 grid gap-12 lg:grid-cols-2">
               {/* Left: Content */}
@@ -162,26 +179,6 @@ export default async function ServicePage({ params }: ServicePageProps) {
                 investment={activeService.investment}
                 deliverables={activeService.deliverables}
               />
-            </div>
-          </div>
-        </section>
-
-        {/* Features Section */}
-        <section className="px-6 py-16 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <h2 className="text-2xl font-bold text-white">
-              What&apos;s Included
-            </h2>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {activeService.features.map((feature) => (
-                <div
-                  key={feature}
-                  className="flex items-center gap-3 rounded-md border border-white/[0.06] bg-white/[0.02] px-4 py-3"
-                >
-                  <Check className="h-4 w-4 flex-shrink-0 text-cyan-400" />
-                  <span className="text-sm text-white/70">{feature}</span>
-                </div>
-              ))}
             </div>
           </div>
         </section>

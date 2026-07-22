@@ -5,7 +5,7 @@ import { PrismPageClient } from "@/components/prism-page";
 export const metadata: Metadata = {
   title: "Prism Context Engine",
   description:
-    "Prism — deploy a context server that forces AI coding tools to follow your rules.",
+    "Prism is a context governance platform for AI coding assistants. Deploy rules, design systems, and security constraints to your AI tools.",
 };
 
 export const revalidate = 60;

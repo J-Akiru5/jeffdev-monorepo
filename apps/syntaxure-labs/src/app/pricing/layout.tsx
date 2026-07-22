@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Pricing & Plans',
   description:
-    'Transparent fixed-investment pricing for web development services. Choose the plan that fits your budget — from MVPs to enterprise platforms. No hidden fees, no surprises.',
+    'Transparent fixed-investment pricing for web development services. Choose the plan that fits your budget. From MVPs to enterprise platforms. No hidden fees, no surprises.',
   openGraph: {
     title: 'Pricing & Plans | Syntaxure Labs',
     description:

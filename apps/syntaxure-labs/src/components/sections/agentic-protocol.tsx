@@ -60,7 +60,7 @@ const pillars: ProtocolPillar[] = [
     numeral: "III",
     title: "We Build in the Right Order",
     description:
-      "We start with the foundation, then security, then features — so everything is solid and reliable.",
+      "We start with the foundation, then security, then features. Everything is solid and reliable.",
     points: [
       "Data structure first",
       "Security built in",
@@ -73,7 +73,7 @@ const pillars: ProtocolPillar[] = [
     numeral: "IV",
     title: "You Stay in Control",
     description:
-      "You review and approve each phase before we move forward — no surprises.",
+      "You review and approve each phase before we move forward. No surprises.",
     points: [
       "Checkpoints at every step",
       "Transparent progress",
@@ -137,7 +137,7 @@ export function AgenticProtocol() {
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-purple-500">Process</span>
           </h2>
           <p className="mt-6 text-[var(--text-secondary)] md:text-lg leading-relaxed max-w-2xl">
-            A clear, step-by-step approach to building your project — with your approval at every stage.
+            A clear, step-by-step approach to building your project. With your approval at every stage.
           </p>
         </div>
 

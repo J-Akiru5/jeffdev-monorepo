@@ -44,7 +44,7 @@ export function PrismHighlight({ cmsData }: { cmsData?: { description?: string }
               Prism Context Engine
             </h2>
             <p className="mt-4 text-lg text-[var(--text-secondary)] leading-relaxed max-w-xl">
-              {cmsData?.description || "Born from our own engineering needs. Prism is the context layer your AI coding assistant has been missing — and it's built with the same precision we bring to every client project."}
+              {cmsData?.description || "Born from our own engineering needs. Prism is the context layer your AI coding assistant has been missing. Built with the same precision we bring to every client project."}
             </p>
 
             <div className="mt-10 space-y-6">

@@ -66,35 +66,35 @@
 html.light {
   color-scheme: light;
 
-  /* Canvas */
-  --color-void: #f6f7fb;
-  --color-glass: rgba(255, 255, 255, 0.75);
-  --color-glass-heavy: rgba(255, 255, 255, 0.92);
-  --color-surface: #f4f6fb;
+  /* Canvas - Softer, less glaring slate/grey-blue to reduce eye strain */
+  --color-void: #eef2f6;
+  --color-glass: rgba(238, 242, 246, 0.75);
+  --color-glass-heavy: rgba(238, 242, 246, 0.92);
+  --color-surface: #e2e8f0;
 
   /* Text */
   --color-ink: #0b0f14;
 
-  /* Borders */
-  --border-subtle: rgba(15, 23, 42, 0.1);
-  --border-active: rgba(15, 23, 42, 0.2);
-  --border-glow: rgba(15, 23, 42, 0.3);
+  /* Borders — strengthened for better card/button visibility on light bg */
+  --border-subtle: rgba(15, 23, 42, 0.12);
+  --border-active: rgba(15, 23, 42, 0.22);
+  --border-glow: rgba(15, 23, 42, 0.35);
 
   /* Overlay */
-  --overlay-spotlight: radial-gradient(ellipse 80% 80% at 50% -20%, rgba(6, 182, 212, 0.12), transparent);
-  --overlay-grid-opacity: 0.06;
-  --overlay-grid-glow: rgba(6, 182, 212, 0.06);
-  --overlay-noise-opacity: 0.04;
+  --overlay-spotlight: radial-gradient(ellipse 80% 80% at 50% -20%, rgba(6, 182, 212, 0.08), transparent);
+  --overlay-grid-opacity: 0.05;
+  --overlay-grid-glow: rgba(6, 182, 212, 0.04);
+  --overlay-noise-opacity: 0.03;
 
   /* Glass-Neon Blend */
-  --glass-blend-cyan: rgba(6, 182, 212, 0.08);
-  --glass-blend-purple: rgba(139, 92, 246, 0.06);
-  --glass-edge-glow: rgba(6, 182, 212, 0.18);
+  --glass-blend-cyan: rgba(6, 182, 212, 0.06);
+  --glass-blend-purple: rgba(139, 92, 246, 0.05);
+  --glass-edge-glow: rgba(6, 182, 212, 0.12);
 
   /* Navbar tokens — light mode overrides */
   --bg-primary: var(--color-void);
   --bg-secondary: var(--color-surface);
-  --bg-tertiary: #e4ecff;
+  --bg-tertiary: #cbd5e1;
   --text-primary: var(--color-ink);
   --text-secondary: #3f3f46;
   --text-tertiary: #52525b;
@@ -512,11 +512,11 @@ body {
 
 /* bg-white/[0.01] through [0.06] bracket notation */
 .theme-light .bg-white\/\[0\.02\] {
-  background-color: rgba(15, 23, 42, 0.05);
+  background-color: rgba(15, 23, 42, 0.08);
 }
 
 .theme-light .bg-white\/\[0\.04\] {
-  background-color: rgba(15, 23, 42, 0.10);
+  background-color: rgba(15, 23, 42, 0.14);
 }
 
 /* bg-black solid — for option/select fallback */
@@ -605,6 +605,23 @@ body {
   color: #6d28d9;
 }
 
+/* Amber — 400 (#fbbf24) → 600 (#d97706) for EST badge readability */
+.theme-light .text-amber-400 {
+  color: #d97706;
+}
+
+.theme-light .bg-amber-500\/10 {
+  background-color: rgba(217, 119, 6, 0.12);
+}
+
+.theme-light .border-amber-500\/30 {
+  border-color: rgba(217, 119, 6, 0.30);
+}
+
+.theme-light .from-cyan-500\/40 {
+  --tw-gradient-from: rgba(14, 116, 144, 0.50);
+}
+
 /* Hover state overrides for accent colors */
 .theme-light .hover\:text-cyan-400:hover {
   color: #0f5f75;
@@ -675,6 +692,15 @@ body {
   background-color: rgba(6, 182, 212, 0.2);
 }
 
+/* Border cyan accents for step indicators and badges */
+.theme-light .border-cyan-500\/30 {
+  border-color: rgba(14, 116, 144, 0.45);
+}
+
+.theme-light .border-cyan-500\/20 {
+  border-color: rgba(14, 116, 144, 0.35);
+}
+
 /* Status badge stronger border in light */
 .theme-light .rounded-full.border.border-white\/10 {
   border-color: rgba(15, 23, 42, 0.3);
@@ -683,7 +709,7 @@ body {
 
 /* Service shortcuts strip border — stronger */
 .theme-light .border-white\/\[0\.05\] {
-  border-color: rgba(15, 23, 42, 0.22);
+  border-color: rgba(15, 23, 42, 0.28);
 }
 
 /* Neon glow shadows — soften to avoid washed look */
@@ -975,7 +1001,7 @@ body {
 
 /* Glass-neon — stronger border for light mode visibility */
 .theme-light .glass-neon {
-  border-color: rgba(15, 23, 42, 0.15);
+  border-color: rgba(15, 23, 42, 0.22);
   box-shadow:
     0 0 20px rgba(6, 182, 212, 0.06),
     0 0 40px rgba(139, 92, 246, 0.04),
@@ -983,7 +1009,7 @@ body {
 }
 
 .theme-light .glass-neon:hover {
-  border-color: rgba(15, 23, 42, 0.25);
+  border-color: rgba(15, 23, 42, 0.35);
   box-shadow:
     0 0 30px rgba(6, 182, 212, 0.12),
     0 0 60px rgba(139, 92, 246, 0.06),

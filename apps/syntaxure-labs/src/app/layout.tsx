@@ -9,8 +9,8 @@ import { FeatureFlagProvider } from "@/components/providers/feature-flag-provide
 import { getFeatureFlags } from "@/lib/feature-flags";
 import { CookieConsent } from "@/components/cookie-consent";
 import { AnalyticsProvider } from "@/components/analytics-provider";
-import { ChatAssistant } from "@syntaxure/ui/chat-assistant";
 import { Toaster } from "sonner";
+import { ChatAssistantClient as ChatAssistant } from "@/components/chat-assistant-client";
 import "./globals.css";
 
 /**
@@ -39,25 +39,23 @@ const jetbrainsMono = JetBrains_Mono({
  */
 export const metadata: Metadata = {
   title: {
-    default: "Syntaxure Labs — Enterprise Web Development & SaaS Solutions",
-    template: "%s // Syntaxure Labs",
+    default: "Syntaxure Labs | Global B2B Digital Transformation Agency",
+    template: "%s | Syntaxure Labs",
   },
   description:
-    "We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises. Next.js, Firebase, and AI-powered solutions.",
+    "Syntaxure Labs is a global B2B digital transformation agency specializing in scalable custom software, web architectures, and secure AI integrations. Creators of Context Engine for AI governance.",
   keywords: [
-    "web development agency",
-    "SaaS development",
-    "Next.js development",
-    "enterprise web solutions",
-    "cloud architecture",
+    "global digital transformation agency",
+    "custom software development company",
+    "SaaS architecture",
+    "AI governance",
+    "Context Engine",
+    "offshore software development",
     "Syntaxure Labs",
-    "custom web application development Philippines",
-    "SaaS development agency",
-    "Next.js agency for startups",
-    "web development Iloilo",
-    "fixed-price web development",
-    "AI-native development agency",
-    "startup MVP development",
+    "B2B software solutions",
+    "enterprise AI integration",
+    "workflow automation",
+    "Iloilo web development agency",
   ],
   authors: [{ name: "Syntaxure Labs" }],
   creator: "Syntaxure Labs",
@@ -67,9 +65,9 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://www.syntaxure.dev",
     siteName: "Syntaxure Labs",
-    title: "Syntaxure Labs — Enterprise Web Development & SaaS Solutions",
+    title: "Syntaxure Labs | Global B2B Digital Transformation Agency",
     description:
-      "We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises.",
+      "Global B2B digital transformation agency specializing in scalable custom software, web architectures, and secure AI integrations. Creators of Context Engine for AI governance.",
     images: [
       {
         url: "/syntaxure-business-card.png",
@@ -84,9 +82,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Syntaxure Labs — Enterprise Web Development & SaaS Solutions",
+    title: "Syntaxure Labs | Global B2B Digital Transformation Agency",
     description:
-      "We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises.",
+      "Global B2B digital transformation agency. We modernize operations by converting manual workflows into high-performance digital solutions. Creators of Context Engine.",
     images: ["/syntaxure-business-card.png"],
   },
   robots: {
@@ -107,7 +105,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#1c2124",
+  themeColor: "#06b6d4",
 };
 
 /**
@@ -115,7 +113,7 @@ export const viewport = {
  * -----------
  * The foundational shell for the entire application.
  * - Applies the "Endgame" dark void aesthetic (#050505)
- * - Provides smooth scrolling via Lenis
+ * - Uses native browser scrolling for optimal performance
  * - Renders the global grid/spotlight background
  */
 export default async function RootLayout({
@@ -136,7 +134,7 @@ export default async function RootLayout({
         <AnalyticsProvider />
         <ThemeBootstrap />
       </head>
-      <body className="bg-void text-white antialiased font-sans selection:bg-cyan-500/30 selection:text-white">
+      <body className="bg-slate-50 text-slate-900 dark:bg-[#050505] dark:text-slate-100 antialiased font-sans selection:bg-cyan-500/30 selection:text-white">
         {/* Global Grid Background */}
         <div
           className="pointer-events-none fixed inset-0 z-0"
@@ -170,18 +168,67 @@ export default async function RootLayout({
                     __html: JSON.stringify({
                       "@context": "https://schema.org",
                       "@type": "ProfessionalService",
+                      "@id": "https://www.syntaxure.dev/",
                       name: "Syntaxure Labs",
-                      
+                      image: "https://www.syntaxure.dev/syntaxure-business-card.png",
                       url: "https://www.syntaxure.dev",
                       logo: "https://www.syntaxure.dev/favicon.svg",
+                      description: "Syntaxure Labs is a global B2B digital transformation agency specializing in scalable custom software, web architectures, and secure AI integrations. Creators of Context Engine for AI governance.",
+                      address: {
+                        "@type": "PostalAddress",
+                        addressLocality: "Iloilo City",
+                        addressRegion: "Western Visayas",
+                        postalCode: "5000",
+                        addressCountry: "PH",
+                      },
+                      geo: {
+                        "@type": "GeoCoordinates",
+                        latitude: 10.6969,
+                        longitude: 122.5483,
+                      },
+                      openingHoursSpecification: [
+                        {
+                          "@type": "OpeningHoursSpecification",
+                          dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                          opens: "09:00",
+                          closes: "18:00",
+                        },
+                      ],
+                      telephone: "+63 970 576 2593",
+                      email: "contact@syntaxure.dev",
+                      priceRange: "₱₱₱",
+                      areaServed: ["Global", "Philippines", "Iloilo City"],
                       contactPoint: {
                         "@type": "ContactPoint",
-                        telephone: "+63-951-916-7103",
+                        telephone: "+63 970 576 2593",
                         contactType: "customer service",
                         email: "contact@syntaxure.dev",
                         areaServed: "Global",
                         availableLanguage: ["English", "Tagalog"],
                       },
+                      sameAs: [
+                        "https://www.linkedin.com/company/syntaxure-labs",
+                        "https://www.facebook.com/people/Syntaxure-Labs-PH/61590058783641/",
+                      ],
+                      makesOffer: [
+                        {
+                          "@type": "Offer",
+                          itemOffered: {
+                            "@type": "Service",
+                            name: "Digital Transformation & Custom Software",
+                            description: "Modernizing enterprise operations by converting manual workflows into scalable custom software, high performance marketing websites, and mobile applications."
+                          }
+                        },
+                        {
+                          "@type": "Offer",
+                          itemOffered: {
+                            "@type": "SoftwareApplication",
+                            name: "Context Engine",
+                            applicationCategory: "BusinessApplication",
+                            description: "A proprietary AI Governance layer that forces AI agents to adhere to established protocols and actively prevents AI hallucinations in enterprise environments."
+                          }
+                        }
+                      ]
                     }),
                   }}
                 />

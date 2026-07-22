@@ -38,13 +38,13 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${project.title} — Case Study // Syntaxure Labs`,
+    title: `${project.title} - Case Study | Syntaxure Labs`,
     description: project.description,
     alternates: {
       canonical: `/work/${slug}`,
     },
     openGraph: {
-      title: `${project.title} — Case Study | Syntaxure Labs`,
+      title: `${project.title} - Case Study | Syntaxure Labs`,
       description: project.description,
       url: `/work/${slug}`,
       siteName: 'Syntaxure Labs',

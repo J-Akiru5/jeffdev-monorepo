@@ -16,9 +16,9 @@ import { createClient } from "@/lib/supabase/server";
 import { getActiveAvailability } from "@/lib/availability";
 
 export const metadata: Metadata = {
-  title: "About",
+  title: "About Our Agency",
   description:
-    "Syntaxure Labs is a web development agency building high-performance systems for startups and enterprises. Learn about our approach and the team behind the code.",
+    "Syntaxure Labs is a global B2B digital transformation agency based in Iloilo City, Philippines. Creators of Context Engine for AI governance. Learn about our mission, team, and approach.",
 };
 
 export const revalidate = 60;
@@ -147,133 +147,97 @@ export default async function AboutPage() {
   return (
     <>
       <Header />
-      <main className="pt-24">
-        {/* Hero Section */}
-        <section className="px-6 py-16 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-sm text-white/50 transition-colors hover:text-white"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Home
-            </Link>
+      <main className="pt-24 pb-16">
+        {/* Desktop Absolute Back Button (Sits on the left side, professional style) */}
+        <div className="hidden xl:flex absolute left-[max(2rem,calc(50%-54rem))] top-28 z-50">
+          <Link
+            href="/"
+            className="group flex items-center gap-2 rounded-md border border-[var(--border-subtle)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
+          >
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+            Back to Home
+          </Link>
+        </div>
 
-            <div className="mt-8 grid gap-12 lg:grid-cols-2">
-              {/* Left: Content */}
+        {/* Hero Section */}
+        <section className="px-6 pb-8 lg:px-8">
+          <div className="mx-auto max-w-7xl relative">
+            {/* Mobile/Tablet: Back button */}
+            <div className="mb-8 xl:hidden">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 rounded-md border border-[var(--border-subtle)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
+              >
+                <ArrowLeft className="h-4 w-4 transition-transform hover:-translate-x-0.5" />
+                Back to Home
+              </Link>
+            </div>
+
+            <div className="mt-4 mx-auto max-w-4xl text-center">
               <div>
                 <span className="font-mono text-xs uppercase tracking-wider text-cyan-400">
                   {hero.tagline}
                 </span>
-                <h1 className="mt-4 text-4xl font-bold tracking-tight text-white md:text-5xl">
-                  {hero.heading1}
-                  <br />
+                <h1 className="mt-4 text-4xl font-bold tracking-tight text-white md:text-6xl">
+                  {hero.heading1}{" "}
                   <span className="text-gradient-holographic">
                     {hero.heading2}
                   </span>
                 </h1>
-                <p className="mt-6 text-lg leading-relaxed text-white/60">
+                <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/60">
                   {hero.description}
                 </p>
-                <p className="mt-4 text-white/50">{hero.subDescription}</p>
+                <p className="mx-auto mt-4 max-w-2xl text-white/50">{hero.subDescription}</p>
 
                 {/* Stats */}
-                <div className="mt-10 grid grid-cols-2 gap-6 sm:grid-cols-4">
+                <div className="mt-8 grid grid-cols-2 gap-8 sm:grid-cols-4 border-y border-white/[0.06] py-6">
                   {stats.map((stat) => (
-                    <div key={stat.label}>
-                      <div className="text-2xl font-bold text-white">
+                    <div key={stat.label} className="flex flex-col items-center justify-center">
+                      <div className="text-3xl font-bold text-white">
                         {stat.value}
                       </div>
-                      <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-white/40">
+                      <div className="mt-2 font-mono text-[10px] uppercase tracking-wider text-white/40">
                         {stat.label}
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-
-              {/* Right: Founder Card */}
-              <div className="rounded-md border border-white/[0.08] bg-white/[0.02] p-8">
-                <div className="font-mono text-xs uppercase tracking-wider text-white/40">
-                  {sectionHeaders.founder.cardLabel}
-                </div>
-
-                {/* Avatar */}
-                <div className="mt-6 flex items-center gap-4">
-                  <Image
-                    src={founder.image}
-                    alt={founder.name}
-                    width={64}
-                    height={64}
-                    priority
-                    className="h-16 w-16 rounded-md object-cover"
-                  />
-                  <div>
-                    <h3 className="text-xl font-semibold text-white">
-                      {founder.name}
-                    </h3>
-                    <p className="text-sm text-cyan-400">{founder.title}</p>
-                  </div>
-                </div>
-
-                <p className="mt-6 text-white/60">{founder.bio}</p>
-
-                {/* Info */}
-                <div className="mt-6 space-y-3 border-t border-white/[0.06] pt-6">
-                  <div className="flex items-center gap-3 text-sm text-white/50">
-                    <MapPin className="h-4 w-4" />
-                    {founder.location}
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-white/50">
-                    <Calendar className="h-4 w-4" />
-                    {founderAvailability}
-                  </div>
-                  <a
-                    href={`mailto:${founder.email}`}
-                    className="flex items-center gap-3 text-sm text-white/50 transition-colors hover:text-cyan-400"
-                  >
-                    <Mail className="h-4 w-4" />
-                    {founder.email}
-                  </a>
-                </div>
-
-                <Link
-                  href="/contact"
-                  className="mt-6 inline-flex items-center gap-2 text-sm text-cyan-400 transition-colors hover:text-cyan-300"
-                >
-                  Get in touch
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
             </div>
           </div>
         </section>
 
         {/* Kwadra TBI Section */}
-        <section className="px-6 py-16 lg:px-8">
+        <section className="px-6 pt-4 pb-8 lg:px-8">
           <div className="mx-auto max-w-7xl">
-            <div className="rounded-md border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-transparent p-8 md:p-12">
-              <div className="flex flex-col items-center text-center md:flex-row md:text-left md:items-start md:gap-8">
-                <div className="shrink-0">
-                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-full border border-amber-500/30 bg-amber-500/10">
-                    <span className="text-2xl font-bold text-amber-400">TBI</span>
+            <div className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-8 md:p-12 overflow-hidden">
+              <div className="flex flex-col items-center text-center md:flex-row md:text-left md:items-center md:gap-12">
+                <div className="shrink-0 mb-8 md:mb-0">
+                  <div className="h-40 w-40 md:h-56 md:w-56 rounded-full overflow-hidden bg-white shadow-sm border border-black/5 dark:border-white/10 flex items-center justify-center">
+                    <Image 
+                      src="/kwadra.png" 
+                      alt="Kwadra TBI Incubatee Cohort 5" 
+                      width={256} 
+                      height={256} 
+                      className="w-full h-full object-contain scale-[1.15]"
+                    />
                   </div>
                 </div>
-                <div className="mt-4 md:mt-0">
-                  <span className="font-mono text-xs uppercase tracking-wider text-amber-400">
+                <div className="flex-1">
+                  <span className="font-mono text-xs uppercase tracking-wider text-blue-500 dark:text-blue-400">
                     {sectionHeaders.kwadraTbi.label}
                   </span>
-                  <h2 className="mt-2 text-2xl font-bold text-white">
+                  <h2 className="mt-2 text-2xl font-bold text-[var(--text-primary)]">
                     {kwadraTbi.heading}
                   </h2>
-                  <p className="mt-3 max-w-2xl text-white/60">
+                  <p className="mt-3 max-w-2xl text-[var(--text-secondary)]">
                     {kwadraTbi.description}
                   </p>
-                  <div className="mt-6 flex flex-wrap gap-3">
+                  <div className="mt-6 flex flex-wrap justify-center md:justify-start gap-3">
                     {kwadraTbi.badges.map((badge) => (
                       <span
                         key={badge}
-                        className="rounded-sm border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-amber-400"
+                        className="rounded-sm border border-blue-500/20 bg-blue-500/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400"
                       >
                         {badge}
                       </span>
@@ -281,6 +245,52 @@ export default async function AboutPage() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Founders Section */}
+        <section className="px-6 py-16 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <h2 className="font-mono text-xs uppercase tracking-wider text-white/40">
+              {sectionHeaders.founders.label}
+            </h2>
+            <p className="mt-4 max-w-xl text-white/60">
+              {sectionHeaders.founders.subtitle}
+            </p>
+            <div className="mt-10 grid gap-6 sm:grid-cols-2 max-w-5xl mx-auto">
+              {founders.map((f) => (
+                <div
+                  key={f.name}
+                  className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 md:p-8"
+                >
+                  <div className="flex flex-col xl:flex-row xl:items-center gap-5">
+                    <Image
+                      src={f.image}
+                      alt={f.name}
+                      width={128}
+                      height={128}
+                      className="h-20 w-20 md:h-24 md:w-24 rounded-full object-cover shadow-sm border border-black/5 dark:border-white/10 shrink-0"
+                    />
+                    <div>
+                      <h3 className="text-lg md:text-xl font-semibold text-[var(--text-primary)]">{f.name}</h3>
+                      <p className="text-sm font-medium text-cyan-600 dark:text-cyan-400 mt-1">{f.title}</p>
+                    </div>
+                  </div>
+                  <p className="mt-6 text-sm leading-relaxed text-[var(--text-secondary)]">{f.bio}</p>
+                  <div className="mt-6 flex flex-col gap-3 border-t border-[var(--border-subtle)] pt-6">
+                    <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+                      <MapPin className="h-4 w-4 opacity-70" /> {f.location}
+                    </div>
+                    <a
+                      href={`mailto:${f.email}`}
+                      className="flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-cyan-500 transition-colors"
+                    >
+                      <Mail className="h-4 w-4 opacity-70" /> {f.email}
+                    </a>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
@@ -311,46 +321,20 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        {/* Founders Section */}
+        {/* Values Section */}
         <section className="px-6 py-16 lg:px-8">
           <div className="mx-auto max-w-7xl">
-            <h2 className="font-mono text-xs uppercase tracking-wider text-white/40">
-              {sectionHeaders.founders.label}
-            </h2>
-            <p className="mt-4 max-w-xl text-white/60">
-              {sectionHeaders.founders.subtitle}
-            </p>
-            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {founders.map((f) => (
+            <h2 className="text-2xl font-bold text-white">{sectionHeaders.values.heading}</h2>
+            <div className="mt-8 grid gap-6 md:grid-cols-3">
+              {values.map((val) => (
                 <div
-                  key={f.name}
+                  key={val.title}
                   className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6"
                 >
-                  <div className="flex items-center gap-4">
-                    <Image
-                      src={f.image}
-                      alt={f.name}
-                      width={56}
-                      height={56}
-                      className="h-14 w-14 rounded-md object-cover"
-                    />
-                    <div>
-                      <h3 className="font-semibold text-white">{f.name}</h3>
-                      <p className="text-sm text-cyan-400">{f.title}</p>
-                    </div>
-                  </div>
-                  <p className="mt-4 text-sm text-white/60">{f.bio}</p>
-                  <div className="mt-4 space-y-2 border-t border-white/[0.06] pt-4">
-                    <div className="flex items-center gap-2 text-xs text-white/40">
-                      <MapPin className="h-3.5 w-3.5" /> {f.location}
-                    </div>
-                    <a
-                      href={`mailto:${f.email}`}
-                      className="flex items-center gap-2 text-xs text-white/40 hover:text-cyan-400 transition-colors"
-                    >
-                      <Mail className="h-3.5 w-3.5" /> {f.email}
-                    </a>
-                  </div>
+                  <h3 className="font-semibold text-white">{val.title}</h3>
+                  <p className="mt-2 text-sm text-white/50">
+                    {val.description}
+                  </p>
                 </div>
               ))}
             </div>
@@ -383,64 +367,6 @@ export default async function AboutPage() {
                       </li>
                     ))}
                   </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Team Section */}
-        {realTeam.length > 0 && (
-          <section className="px-6 py-16 lg:px-8">
-            <div className="mx-auto max-w-7xl">
-              <h2 className="font-mono text-xs uppercase tracking-wider text-white/40">
-                {sectionHeaders.team.label}
-              </h2>
-              <p className="mt-4 max-w-xl text-white/60">
-                {sectionHeaders.team.subtitle}
-              </p>
-              <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-                {realTeam.map((member) => (
-                  <div
-                    key={member.role}
-                    className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6 text-center"
-                  >
-                    <div className="mx-auto h-20 w-20 rounded-full border border-white/10 bg-white/5 flex items-center justify-center overflow-hidden">
-                      <Image
-                        src={member.image}
-                        alt={member.name}
-                        width={80}
-                        height={80}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <h3 className="mt-4 font-semibold text-white">{member.name}</h3>
-                    <p className="text-sm text-cyan-400">{member.title}</p>
-                    <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-white/30">
-                      {member.role}
-                    </p>
-                    <p className="mt-3 text-xs text-white/50">{member.bio}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Values Section */}
-        <section className="px-6 py-16 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <h2 className="text-2xl font-bold text-white">{sectionHeaders.values.heading}</h2>
-            <div className="mt-8 grid gap-6 md:grid-cols-3">
-              {values.map((val) => (
-                <div
-                  key={val.title}
-                  className="rounded-md border border-white/[0.06] bg-white/[0.02] p-6"
-                >
-                  <h3 className="font-semibold text-white">{val.title}</h3>
-                  <p className="mt-2 text-sm text-white/50">
-                    {val.description}
-                  </p>
                 </div>
               ))}
             </div>
@@ -498,9 +424,9 @@ const DEFAULT_ABOUT_DATA: AboutData = {
     heading1: "We Build Systems",
     heading2: "That Launch",
     description:
-      "Syntaxure Labs is a new-breed development agency architecting high-performance systems for ambitious startups. We don't just write code — we partner with founders to turn 'Zero to One' ideas into scalable reality.",
+      "Syntaxure Labs is a specialized engineering studio building high-performance systems for ambitious startups and scaling enterprises. We partner with visionary teams to turn complex ideas into scalable reality.",
     subDescription:
-      "Est. 2025. Built on 5+ years of the founder's hands-on experience shipping production systems across SaaS, AI, and enterprise platforms. Proud member of Kwadra TBI Cohort 5.",
+      "Est. 2025. Built on our founders' deep technical experience shipping production systems across SaaS, AI, and enterprise platforms.",
   },
   stats: [
     { label: "Niche Focus", value: "Specialized" },
@@ -521,14 +447,14 @@ const DEFAULT_ABOUT_DATA: AboutData = {
     executiveSummary:
       "Syntaxure Labs is a technology company building AI-powered software ecosystems, enterprise solutions, and context intelligence platforms through its flagship product, Prism Context Engine.",
     mission:
-      "To serve as the strategic technical foundation for high-impact business concepts, transforming venture-ready ideas into sustainable, scalable software ecosystems through AI governance.",
+      "To serve as the strategic technical foundation for high-impact business concepts, transforming venture-ready ideas into sustainable, scalable software ecosystems through AI-driven architecture.",
     vision:
-      "To serve as the foundational technological backbone of the Southeast Asian startup economy, empowering enterprises through scalable AI infrastructure and becoming the premier provider of enterprise-grade software solutions by 2030.",
+      "To serve as the foundational technological backbone of the Southeast Asian startup economy, helping enterprises scale through AI infrastructure and becoming a leading provider of enterprise-grade software solutions by 2030.",
   },
   kwadraTbi: {
     heading: "Kwadra TBI Cohort 5",
     description:
-      "Syntaxure Labs is proud to be part of Kwadra TBI Cohort 5 — a startup incubation program by the Iloilo Provincial Government's Kwadra Care initiative. This program supports innovation-driven startups with mentorship, funding access, and go-to-market strategy.",
+      "Syntaxure Labs is proud to be part of Kwadra TBI Cohort 5, a startup incubation program by the Iloilo Provincial Government's Kwadra Care initiative. This program supports innovation-driven startups with mentorship, funding access, and go-to-market strategy.",
     badges: [
       "Startup Incubation",
       "Mentorship",
@@ -539,49 +465,36 @@ const DEFAULT_ABOUT_DATA: AboutData = {
   founders: [
     {
       name: "Jeff Edrick Martinez",
-      title: "Lead Architect & Founder",
-      bio: "Full-stack engineer with 5+ years building production systems. Specializing in Next.js, cloud architecture, and AI integration. Previously worked on projects for education, e-commerce, and SaaS clients.",
+      title: "CEO & Founder",
+      bio: "Technical founder with 5+ years architecting production systems. Specializes in Next.js, cloud infrastructure, and AI integration for high-growth SaaS, e-commerce, and enterprise clients.",
       image: "/profilepic.webp",
       email: "jeff@syntaxure.dev",
       location: "Iloilo City, Philippines",
     },
+    {
+      name: "Lou Vincent Baroro",
+      title: "CTO & Co-Founder",
+      bio: "Engineering leader specializing in scalable system architecture and artificial intelligence. Expert in designing high-performance cloud infrastructure, intelligent AI engines, and enterprise-grade platforms.",
+      image: "/cto.jpg",
+      email: "lou@syntaxure.dev",
+      location: "Iloilo City, Philippines",
+    }
   ],
   team: [
     {
       name: "Jeff Edrick Martinez",
       title: "Chief Executive Officer",
       role: "CEO",
-      bio: "Visionary leader driving the company strategy and growth.",
+      bio: "Visionary leader driving the company strategy, systems architecture, and growth.",
       image: "/profilepic.webp",
     },
     {
-      name: "To Be Announced",
+      name: "Lou Vincent Baroro",
       title: "Chief Technology Officer",
       role: "CTO",
-      bio: "Leading technical vision and engineering excellence.",
-      image: "/placeholder-avatar.svg",
-    },
-    {
-      name: "To Be Announced",
-      title: "Chief Marketing Officer",
-      role: "CMO",
-      bio: "Driving brand strategy, growth, and market positioning.",
-      image: "/placeholder-avatar.svg",
-    },
-    {
-      name: "To Be Announced",
-      title: "Chief Operating Officer",
-      role: "COO",
-      bio: "Overseeing operations, partnerships, and delivery excellence.",
-      image: "/placeholder-avatar.svg",
-    },
-    {
-      name: "To Be Announced",
-      title: "Chief Product Officer",
-      role: "CPO",
-      bio: "Shaping product vision and user experience strategy.",
-      image: "/placeholder-avatar.svg",
-    },
+      bio: "Leading technical vision, AI infrastructure, and engineering excellence.",
+      image: "/cto.jpg",
+    }
   ],
   techStack: {
     frontend: ["Next.js", "React", "TypeScript", "Tailwind CSS", "GSAP"],
@@ -593,7 +506,7 @@ const DEFAULT_ABOUT_DATA: AboutData = {
     {
       title: "Clarity Over Complexity",
       description:
-        "We write code that's readable, maintainable, and built to last. No clever hacks — just clean architecture.",
+        "We write code that is readable, maintainable, and built to last. No clever hacks, just clean architecture.",
     },
     {
       title: "Fixed Investment, No Surprises",
@@ -627,7 +540,7 @@ const DEFAULT_ABOUT_DATA: AboutData = {
     techStack: {
       label: "// Tech_Stack",
       subtitle:
-        "We use modern, battle-tested technologies. No legacy frameworks, no tech debt — just clean, scalable architecture.",
+        "We use modern, battle-tested technologies. No legacy frameworks, no tech debt. Just clean, scalable architecture.",
     },
     team: {
       label: "// Team",

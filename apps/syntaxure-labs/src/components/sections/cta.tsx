@@ -70,7 +70,7 @@ export function CTA({
 
             {/* Subtext */}
             <p className="mt-4 max-w-xl text-[var(--text-secondary)] md:text-lg leading-relaxed">
-              {cmsCta?.description || "Let's discuss your project. We'll scope it properly, define milestones, and give you a fixed investment quote — no surprises."}
+              {cmsCta?.description || "Let's discuss your project. We'll scope it properly, define milestones, and give you a clear investment quote. No surprises."}
             </p>
 
             {/* CTAs */}

@@ -14,9 +14,9 @@ import type { Metadata } from "next";
  */
 
 export const metadata: Metadata = {
-  title: "Work",
+  title: "Case Studies & Portfolio",
   description:
-    "Case studies and success stories. See how we help startups and enterprises build high-performance web systems that drive growth.",
+    "Real projects, real results. Explore our portfolio of enterprise web applications, SaaS platforms, and digital transformation case studies.",
 };
 
 export default async function WorkPage() {
@@ -27,17 +27,31 @@ export default async function WorkPage() {
   return (
     <>
       <Header />
-      <main className="pt-24">
+      <main className="pt-20 pb-16">
+        {/* Desktop Absolute Back Button (Sits on the left side, professional style) */}
+        <div className="hidden xl:flex absolute left-[max(2rem,calc(50%-54rem))] top-24 z-50">
+          <Link
+            href="/"
+            className="group flex items-center gap-2 rounded-md border border-[var(--border-subtle)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
+          >
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+            Back to Home
+          </Link>
+        </div>
+
         {/* Page Header */}
-        <section className="px-6 py-16 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-sm text-white/50 transition-colors hover:text-white"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Home
-            </Link>
+        <section className="px-6 pb-8 lg:px-8">
+          <div className="mx-auto max-w-7xl relative">
+            {/* Mobile/Tablet: Back button */}
+            <div className="mb-8 xl:hidden">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 rounded-md border border-[var(--border-subtle)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
+              >
+                <ArrowLeft className="h-4 w-4 transition-transform hover:-translate-x-0.5" />
+                Back to Home
+              </Link>
+            </div>
             <div className="mt-8 max-w-2xl">
               <span className="font-mono text-xs uppercase tracking-wider text-cyan-400">
                 {"// Case Studies"}
@@ -66,19 +80,18 @@ export default async function WorkPage() {
                   <ArrowUpRight className="h-6 w-6 text-white/30" />
                 </div>
                 <h3 className="mt-6 text-xl font-semibold text-white">
-                  Case Studies Coming Soon
+                  Portfolio Coming Soon
                 </h3>
                 <p className="mt-2 max-w-md mx-auto text-sm text-white/50">
-                  We&apos;re documenting our latest projects and success stories.
-                  Check back soon or get in touch to learn how we can help build
-                  your next system.
+                  We are a young company currently building our first featured projects.
+                  In the meantime, let us know about your project and we can start building together.
                 </p>
                 <div className="mt-8 flex justify-center">
                   <Link
                     href="/contact"
                     className="inline-flex items-center gap-2 rounded-md border border-cyan-500/50 bg-cyan-500/10 px-5 py-2.5 font-mono text-xs uppercase tracking-wider text-white backdrop-blur-md transition-all hover:border-cyan-400 hover:bg-cyan-500/20"
                   >
-                    Contact Us
+                    Start Your Project
                     <ArrowUpRight className="h-3.5 w-3.5" />
                   </Link>
                 </div>

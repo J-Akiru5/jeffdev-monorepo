@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Mail, MapPin, ArrowUpRight, BookOpen, Phone } from "lucide-react";
+import { Mail, MapPin, ArrowUpRight, BookOpen, Phone, Star } from "lucide-react";
 import { GithubIcon as Github } from "@/components/icons/brand-icons";
 import { SyntaxureLogo } from "@syntaxure/ui";
 
@@ -75,6 +75,15 @@ export function Footer() {
                 <MapPin className="h-4 w-4" />
                 Iloilo City, Philippines
               </div>
+              <a
+                href="https://maps.app.goo.gl/ALFPxasfNt9qjtrP9"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm text-[var(--text-secondary)] transition-colors hover:text-cyan-400"
+              >
+                <Star className="h-4 w-4" />
+                Google Business Profile
+              </a>
             </div>
           </div>
 

@@ -47,8 +47,7 @@ export function Hero({
             </div>
 
             {/* Architectural Accent Line (Left anchor on desktop) */}
-            {/* ── Top Badges ── */}
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 mb-8">
+            {/* ── Top Badges ── */}            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 mb-8">
               {availabilityText && (
                 <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-1 shadow-sm">
                   <span className="relative flex h-1.5 w-1.5">
@@ -60,20 +59,14 @@ export function Hero({
                   </span>
                 </div>
               )}
-              
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-1 shadow-sm">
-                <ShieldCheck className="h-3.5 w-3.5 text-cyan-500" />
-                <span className="font-mono text-[11px] text-[var(--text-secondary)] font-medium tracking-wide">
-                  TRUSTED BY GROWING BUSINESSES
-                </span>
-              </div>
+
             </div>
 
             {/* ── Headline ── */}
             <h1 className="text-4xl font-bold tracking-tight text-[var(--text-primary)] sm:text-5xl lg:text-6xl leading-[1.15]">
-              We Build Websites & Apps<br />
-              <span className="text-[var(--text-secondary)]">That Grow With Your Business</span><br />
-              <span className="bg-gradient-to-r from-cyan-500 to-violet-500 bg-clip-text text-transparent">Engineering with Precision.</span>
+              Custom Software<br />
+              <span className="text-[var(--text-secondary)]">For Growing Businesses</span><br />
+              <span className="text-gradient-holographic">Websites. Apps. AI. Built for results.</span>
             </h1>
 
             {/* ── Subtext ── */}
@@ -95,10 +88,10 @@ export function Hero({
               </Link>
 
               <Link
-                href="/work"
-                className="group flex items-center justify-center gap-2 rounded-md border border-transparent px-6 py-3 font-mono text-[13px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] transition-all hover:text-[var(--text-primary)] active:scale-95"
+                href="/contact"
+                className="group flex items-center justify-center gap-2 rounded-md border border-[var(--border-subtle)] px-6 py-3 font-mono text-[13px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] active:scale-95"
               >
-                VIEW_OUR_WORK
+                TALK_TO_US
               </Link>
             </div>
           </div>
@@ -118,18 +111,8 @@ export function Hero({
                   WebkitMaskRepeat: "no-repeat",
                 }}
              >
-                <div 
-                  className="absolute inset-0 w-full h-full font-mono text-[8px] sm:text-[9px] leading-[1.1] font-bold tracking-tighter text-justify break-all select-none"
-                  style={{
-                    background: "linear-gradient(135deg, #06b6d4, #8b5cf6)", // cyan-500 to violet-500
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    color: "transparent",
-                    maskImage: "radial-gradient(circle, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 80%)",
-                    WebkitMaskImage: "radial-gradient(circle, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 80%)",
-                  }}
-                >
-                  {"SYNTAXURE LABS WE BUILD WEBSITES AND APPS THAT GROW WITH YOUR BUSINESS ENGINEERING WITH PRECISION FAST RELIABLE SCALABLE ".repeat(150)}
+                <div              className="absolute inset-0 w-full h-full font-mono text-[8px] sm:text-[9px] leading-[1.1] font-bold tracking-tighter text-justify break-all select-none text-[var(--text-tertiary)] dark:text-cyan-500"
+                >{"SYNTAXURE LABS WE BUILD WEBSITES AND APPS THAT GROW WITH YOUR BUSINESS ENGINEERING WITH PRECISION FAST RELIABLE SCALABLE ".repeat(150)}
                 </div>
              </div>
           </div>

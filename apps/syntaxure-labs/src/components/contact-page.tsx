@@ -62,16 +62,30 @@ export function ContactPageClient({ pageContent }: ContactPageProps) {
   return (
     <>
       <Header />
-      <main className="pt-24">
-        <section className="px-6 py-16 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-sm text-white/50 transition-colors hover:text-white"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Home
-            </Link>
+      <main className="pt-32 pb-16">
+        {/* Desktop Absolute Back Button (Sits on the left side, professional style) */}
+        <div className="hidden xl:flex absolute left-[max(2rem,calc(50%-54rem))] top-36 z-50">
+          <Link
+            href="/"
+            className="group flex items-center gap-2 rounded-md border border-[var(--border-subtle)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
+          >
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+            Back to Home
+          </Link>
+        </div>
+
+        <section className="px-6 pb-8 lg:px-8">
+          <div className="mx-auto max-w-7xl relative">
+            {/* Mobile/Tablet: Back button */}
+            <div className="mb-8 xl:hidden">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 rounded-md border border-[var(--border-subtle)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
+              >
+                <ArrowLeft className="h-4 w-4 transition-transform hover:-translate-x-0.5" />
+                Back to Home
+              </Link>
+            </div>
 
             <div className="mt-8 grid gap-12 lg:grid-cols-2">
               {/* Left: Info */}

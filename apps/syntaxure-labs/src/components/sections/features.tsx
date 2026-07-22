@@ -32,7 +32,7 @@ const features: Feature[] = [
     icon: Shield,
     title: "Secure from Day One",
     description:
-      "Login, passwords, and data protection are built in — no extra setup needed.",
+      "Login, passwords, and data protection are built in. No extra setup needed.",
   },
   {
     id: "template-delivery",
@@ -46,14 +46,14 @@ const features: Feature[] = [
     icon: Bot,
     title: "Built for AI",
     description:
-      "Skip the refitting. We build your app from day one to integrate smart features, automation, and custom AI models seamlessly as your business grows.",
+      "Your app is built ready for AI from day one. Add smart features, automation, and custom AI models as your business grows.",
   },
   {
     id: "productized-customization",
     icon: Sliders,
     title: "Clear Pricing",
     description:
-      "Pick your plan and add features — no surprise costs.",
+      "Pick your plan and add features. No surprise costs.",
   },
   {
     id: "continuous-evolution",
@@ -87,7 +87,7 @@ export function Features() {
               Built to Last.
             </h2>
             <p className="mt-4 text-[var(--text-secondary)] leading-relaxed">
-              Six core strengths built into every project we deliver — giving you a solid foundation that's customized to your business without the months-long timeline.
+              Six core strengths built into every project we deliver. A solid foundation customized to your business without the months-long timeline.
             </p>
           </div>
         </div>
