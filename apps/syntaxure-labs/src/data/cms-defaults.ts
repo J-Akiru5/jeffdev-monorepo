@@ -11,7 +11,7 @@ export const HOMEPAGE_DEFAULTS = {
     heading1: "We Build Systems",
     heading2: "That Scale",
     description:
-      "Syntaxure Labs is a new-breed development agency architecting high-performance systems for ambitious startups. We don't just write code — we partner with founders to turn ideas into scalable reality.",
+      "Syntaxure Labs is a new-breed development agency architecting high-performance systems for ambitious startups. We don't just write code. We partner with founders to turn ideas into scalable reality.",
   },
   highlights: [
     "AI-native development pipeline",

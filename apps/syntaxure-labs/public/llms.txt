@@ -1,0 +1,39 @@
+# Syntaxure Labs
+
+> Syntaxure Labs is a global B2B digital transformation agency specializing in scalable custom software, web architectures, and secure AI integrations. Creators of Context Engine for AI governance.
+
+## Core Services
+
+- **Web Development**: High-performance marketing websites and web applications built with Next.js
+- **SaaS Platform Development**: Multi-tenant SaaS architectures with subscription billing and RBAC
+- **Cloud Infrastructure**: Cloud architecture, deployment, and 24/7 monitoring on Vercel/AWS/GCP
+- **AI Integration**: Custom AI solutions, RAG pipelines, workflow automation with Context Engine
+
+## Key Pages
+
+- Home: https://www.syntaxure.dev
+- Services: https://www.syntaxure.dev/services
+- Case Studies: https://www.syntaxure.dev/work
+- About: https://www.syntaxure.dev/about
+- Blog: https://www.syntaxure.dev/blog
+- Contact: https://www.syntaxure.dev/contact
+- Quote: https://www.syntaxure.dev/quote
+- Prism Context Engine: https://www.syntaxure.dev/prism
+
+## Company
+
+- Founded: 2025
+- Location: Iloilo City, Western Visayas, Philippines
+- Founder: Jeff Edrick Martinez (CEO)
+- Co-Founder: Lou Vincent Baroro (CTO)
+- Contact: contact@syntaxure.dev
+- Phone: +63 970 576 2593
+
+## Flagship Product: Context Engine
+
+Context Engine is a proprietary AI Governance layer that enforces strict protocols and actively prevents AI hallucinations in enterprise environments. It forces AI agents to adhere to established protocols and prevents hallucinations in enterprise environments.
+
+## Social
+
+- LinkedIn: https://www.linkedin.com/company/syntaxure-labs
+- Facebook: https://www.facebook.com/people/Syntaxure-Labs-PH/61590058783641/

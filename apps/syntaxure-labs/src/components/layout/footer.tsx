@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Mail, MapPin, ArrowUpRight, BookOpen, Phone, Star } from "lucide-react";
-import { GithubIcon as Github } from "@/components/icons/brand-icons";
+
 import { SyntaxureLogo } from "@syntaxure/ui";
 
 const DOCS_URL = process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.syntaxure.dev";
@@ -19,13 +19,9 @@ const footerLinks = {
     },
   ],
   resources: [
+    { href: "/blog", label: "Blog" },
     { href: DOCS_URL, label: "Documentation", external: true },
     { href: "/changelog", label: "Changelog" },
-    {
-      href: "https://github.com/J-Akiru5/jeffdev-monorepo",
-      label: "GitHub",
-      external: true,
-    },
   ],
   company: [
     { href: "/about", label: "About Studio" },
@@ -137,11 +133,7 @@ export function Footer() {
                       rel="noopener noreferrer"
                       className="group inline-flex items-center gap-1.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
                     >
-                      {link.href.includes("github") ? (
-                        <Github className="h-3.5 w-3.5" />
-                      ) : (
-                        <BookOpen className="h-3.5 w-3.5" />
-                      )}
+                      <BookOpen className="h-3.5 w-3.5" />
                       {link.label}
                     </a>
                   ) : (
@@ -208,17 +200,7 @@ export function Footer() {
             ))}
           </div>
 
-          <div className="flex items-center gap-4">
-            <a
-              href="https://github.com/J-Akiru5/jeffdev-monorepo"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[var(--text-tertiary)] transition-colors hover:text-[var(--text-secondary)]"
-              aria-label="GitHub"
-            >
-              <Github className="h-4 w-4" />
-            </a>
-          </div>
+          <div className="flex items-center gap-4" />
 
           <div className="text-center text-xs font-medium text-[var(--text-tertiary)] md:text-right">
             <p>© {currentYear} Syntaxure Labs. All rights reserved.</p>

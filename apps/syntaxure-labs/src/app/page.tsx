@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { FAQSection } from "@/components/sections/faq-section";
 import { HowWeWork } from "@/components/sections/how-we-work";
 import { Header } from "@/components/layout/header";
@@ -104,6 +106,24 @@ export default async function HomePage() {
         <AgenticProtocol />
         <HowWeWork />
         <FAQSection />
+
+        {/* Blog preview link */}
+        <section className="px-6 py-12 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <div className="mx-auto max-w-2xl text-center">
+              <Link
+                href="/blog"
+                className="group inline-flex items-center gap-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
+              >
+                <span className="font-mono text-xs uppercase tracking-wider">
+                  Insights and Updates
+                </span>
+                <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </Link>
+            </div>
+          </div>
+        </section>
+
         <CTASection cmsCta={content.cta} />
       </main>
       <Footer />

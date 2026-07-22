@@ -39,11 +39,11 @@ const jetbrainsMono = JetBrains_Mono({
  */
 export const metadata: Metadata = {
   title: {
-    default: "Syntaxure Labs | Global B2B Digital Transformation Agency",
+    default: "Syntaxure Labs | Custom Websites, SaaS Platforms & AI",
     template: "%s | Syntaxure Labs",
   },
   description:
-    "Syntaxure Labs is a global B2B digital transformation agency specializing in scalable custom software, web architectures, and secure AI integrations. Creators of Context Engine for AI governance.",
+    "Syntaxure Labs is a custom development agency specializing in high-performance websites, SaaS platforms, cloud infrastructure, and secure AI integration. Creators of Context Engine for AI governance.",
   keywords: [
     "global digital transformation agency",
     "custom software development company",
@@ -65,9 +65,9 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://www.syntaxure.dev",
     siteName: "Syntaxure Labs",
-    title: "Syntaxure Labs | Global B2B Digital Transformation Agency",
+    title: "Syntaxure Labs | Custom Websites, SaaS Platforms & AI",
     description:
-      "Global B2B digital transformation agency specializing in scalable custom software, web architectures, and secure AI integrations. Creators of Context Engine for AI governance.",
+      "Custom website development, SaaS platforms, cloud infrastructure, and secure AI integration. We build high-performance digital solutions for businesses ready to scale.",
     images: [
       {
         url: "/syntaxure-business-card.png",
@@ -82,9 +82,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Syntaxure Labs | Global B2B Digital Transformation Agency",
+    title: "Syntaxure Labs | Custom Websites, SaaS Platforms & AI",
     description:
-      "Global B2B digital transformation agency. We modernize operations by converting manual workflows into high-performance digital solutions. Creators of Context Engine.",
+      "Custom website development, SaaS platforms, and AI integration. We build high-performance digital solutions on modern web infrastructure.",
     images: ["/syntaxure-business-card.png"],
   },
   robots: {
@@ -167,7 +167,7 @@ export default async function RootLayout({
                   dangerouslySetInnerHTML={{
                     __html: JSON.stringify({
                       "@context": "https://schema.org",
-                      "@type": "ProfessionalService",
+                      "@type": "Organization",
                       "@id": "https://www.syntaxure.dev/",
                       name: "Syntaxure Labs",
                       image: "https://www.syntaxure.dev/syntaxure-business-card.png",
@@ -255,12 +255,12 @@ export default async function RootLayout({
         />
         <ChatAssistant
           apiEndpoint="/api/assistant"
-          title="Syntaxure Labs System Assistant"
-          welcomeMessage="How can I help you understand the Syntaxure Labs ecosystem today?"
+          title="AI Assistant"
+          welcomeMessage="Hi! How can we help you today? Ask about our services, pricing, or process."
           suggestions={[
-            "What is the difference between Syntaxure Labs and Prism?",
-            "What is the turborepo structure?",
-            "What is the Doppler Law?",
+            "What services do you offer?",
+            "How does your pricing work?",
+            "What is Context Engine?",
           ]}
         />
       </body>
