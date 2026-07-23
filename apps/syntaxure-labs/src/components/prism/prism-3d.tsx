@@ -68,6 +68,12 @@ export function Prism3D({ className }: Prism3DProps) {
           backdrop-filter: blur(8px);
           -webkit-backdrop-filter: blur(8px);
           backface-visibility: visible;
+          /* Light mode defaults */
+          border: 1px solid rgba(0, 0, 0, 0.15);
+          box-shadow: 0 0 30px rgba(6, 182, 212, 0.2) inset;
+        }
+
+        :global(.dark) .prism-face {
           border: 1px solid rgba(255, 255, 255, 0.15);
           box-shadow: 0 0 30px rgba(6, 182, 212, 0.1) inset;
         }
@@ -76,12 +82,21 @@ export function Prism3D({ className }: Prism3DProps) {
         .prism-side {
           width: 200px;
           height: 300px;
+          /* Light mode defaults */
+          background: linear-gradient(
+            135deg,
+            rgba(0, 0, 0, 0.05) 0%,
+            rgba(0, 0, 0, 0.01) 100%
+          );
+          overflow: hidden;
+        }
+
+        :global(.dark) .prism-side {
           background: linear-gradient(
             135deg,
             rgba(255, 255, 255, 0.05) 0%,
             rgba(255, 255, 255, 0.01) 100%
           );
-          overflow: hidden;
         }
 
         .prism-shine {

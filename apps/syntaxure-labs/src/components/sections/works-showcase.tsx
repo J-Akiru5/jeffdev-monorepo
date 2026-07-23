@@ -44,7 +44,7 @@ export function WorksShowcase({ projects: featuredProjects }: WorksShowcaseProps
   if (featuredProjects.length === 0) return null;
 
   return (
-    <section className="relative py-24 md:py-32" id="work">
+    <section className="relative py-16 md:py-24 lg:py-32" id="work">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         
         {/* ── Section Header ── */}
@@ -94,7 +94,7 @@ export function WorksShowcase({ projects: featuredProjects }: WorksShowcaseProps
         {/* ── Carousel ── */}
         <div
           ref={carouselRef}
-          className={`transition-all duration-1000 ease-out delay-100 ${
+          className={`transition-all duration-1000 ease-out md:delay-100 ${
             carouselInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
@@ -134,7 +134,7 @@ export function WorksShowcase({ projects: featuredProjects }: WorksShowcaseProps
                 </p>
 
                 {/* Tagline */}
-                <p className="mt-4 text-sm leading-relaxed text-[var(--text-secondary)] line-clamp-2 flex-grow">
+                <p className="mt-4 text-base leading-relaxed text-[var(--text-secondary)] line-clamp-2 flex-grow">
                   {project.tagline}
                 </p>
 

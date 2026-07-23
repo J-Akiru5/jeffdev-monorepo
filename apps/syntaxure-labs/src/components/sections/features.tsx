@@ -69,7 +69,7 @@ export function Features() {
   const { ref: listRef, isInView: listInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
 
   return (
-    <section className="relative py-24 lg:py-32 lazy-section border-t border-[var(--border-subtle)]" id="features">
+    <section className="relative py-16 md:py-24 lg:py-32 lazy-section border-t border-[var(--border-subtle)]" id="features">
       <div className="mx-auto max-w-7xl px-6 lg:px-8 flex flex-col lg:flex-row gap-16 lg:gap-24">
         
         {/* ── Left Column: Section Header ── */}
@@ -79,7 +79,7 @@ export function Features() {
             headerInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <div className="sticky top-32">
+          <div className="sticky top-32 text-center lg:text-left">
             <span className="font-mono text-xs font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
               Why Choose Us
             </span>
@@ -95,18 +95,18 @@ export function Features() {
         {/* ── Right Column: Features List ── */}
         <div
           ref={listRef}
-          className={`lg:w-2/3 grid gap-8 sm:grid-cols-2 transition-all duration-1000 ease-out delay-200 ${
+          className={`lg:w-2/3 grid gap-8 sm:grid-cols-2 transition-all duration-1000 ease-out md:delay-200 ${
             listInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
           {features.map((feature, idx) => (
             <HoverCard
               key={feature.id}
-              className="rounded-md p-6 transition-all duration-300 hover:bg-[var(--bg-secondary)] border border-transparent hover:border-[var(--border-active)]"
+              className="rounded-md p-6 transition-all duration-300 hover:bg-[var(--bg-secondary)] border border-transparent hover:border-[var(--border-active)] flex flex-row sm:flex-col items-start gap-4 sm:gap-0"
             >
               
               {/* Icon */}
-              <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-md border border-[var(--border-subtle)] bg-[var(--bg-primary)] shadow-sm">
+              <div className="sm:mb-4 shrink-0 inline-flex h-10 w-10 items-center justify-center rounded-md border border-[var(--border-subtle)] bg-[var(--bg-primary)] shadow-sm">
                 <feature.icon
                   className="h-5 w-5 text-[var(--text-primary)] transition-transform duration-300 group-hover:scale-110"
                   strokeWidth={1.5}
@@ -114,12 +114,14 @@ export function Features() {
               </div>
 
               {/* Content */}
-              <h3 className="text-lg font-bold text-[var(--text-primary)]">
-                {feature.title}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
-                {feature.description}
-              </p>
+              <div>
+                <h3 className="text-lg font-bold text-[var(--text-primary)]">
+                  {feature.title}
+                </h3>
+                <p className="mt-1 sm:mt-2 text-base leading-relaxed text-[var(--text-secondary)]">
+                  {feature.description}
+                </p>
+              </div>
             </HoverCard>
           ))}
         </div>

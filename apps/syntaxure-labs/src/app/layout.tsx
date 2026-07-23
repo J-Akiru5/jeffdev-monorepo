@@ -176,6 +176,7 @@ export default async function RootLayout({
                       description: "Syntaxure Labs is a global B2B digital transformation agency specializing in scalable custom software, web architectures, and secure AI integrations. Creators of Context Engine for AI governance.",
                       address: {
                         "@type": "PostalAddress",
+                        streetAddress: "Iloilo City",
                         addressLocality: "Iloilo City",
                         addressRegion: "Western Visayas",
                         postalCode: "5000",
@@ -196,7 +197,7 @@ export default async function RootLayout({
                       ],
                       telephone: "+63 970 576 2593",
                       email: "contact@syntaxure.dev",
-                      priceRange: "₱₱₱",
+                      priceRange: "$$$",
                       areaServed: ["Global", "Philippines", "Iloilo City"],
                       contactPoint: {
                         "@type": "ContactPoint",
@@ -225,6 +226,7 @@ export default async function RootLayout({
                             "@type": "SoftwareApplication",
                             name: "Context Engine",
                             applicationCategory: "BusinessApplication",
+                            operatingSystem: "Any",
                             description: "A proprietary AI Governance layer that forces AI agents to adhere to established protocols and actively prevents AI hallucinations in enterprise environments."
                           }
                         }

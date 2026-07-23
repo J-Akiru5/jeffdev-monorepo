@@ -26,7 +26,7 @@ export function PrismHighlight({ cmsData }: { cmsData?: { description?: string }
   const { ref: sectionRef, isInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
 
   return (
-    <section id="prism" className="py-24 md:py-32 border-y border-[var(--border-subtle)]">
+    <section id="prism" className="py-16 md:py-24 lg:py-32 border-y border-[var(--border-subtle)]">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="grid items-center gap-16 lg:grid-cols-2">
           
@@ -57,7 +57,7 @@ export function PrismHighlight({ cmsData }: { cmsData?: { description?: string }
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-[var(--text-primary)]">{h.title}</h4>
-                      <p className="mt-1 text-sm text-[var(--text-secondary)] leading-relaxed">{h.description}</p>
+                      <p className="mt-1 text-base text-[var(--text-secondary)] leading-relaxed">{h.description}</p>
                     </div>
                   </div>
                 );
@@ -75,7 +75,7 @@ export function PrismHighlight({ cmsData }: { cmsData?: { description?: string }
 
           {/* ── Right Content: Code Snippet ── */}
           <div
-            className={`hidden lg:block relative transition-all duration-1000 ease-out delay-200 ${
+            className={`hidden lg:block relative transition-all duration-1000 ease-out md:delay-200 ${
               isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
             }`}
           >

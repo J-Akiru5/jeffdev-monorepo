@@ -42,7 +42,7 @@ export function About() {
   const { ref: valuesRef, isInView: valuesInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
 
   return (
-    <section className="relative py-24 lg:py-32" id="about">
+    <section className="relative py-16 md:py-24 lg:py-32" id="about">
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
         {/* Section Header */}
         <div
@@ -66,7 +66,7 @@ export function About() {
             contentInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <div className="space-y-6">
+          <div className="order-2 lg:order-1 space-y-6">
             <p className="text-lg text-[var(--text-secondary)]">
               Syntaxure Labs is a boutique software studio specializing in high-performance web systems
               for ambitious startups and enterprises. We combine deep technical expertise with a
@@ -83,7 +83,7 @@ export function About() {
             </p>
           </div>
 
-          <div className="flex items-center justify-center">
+          <div className="order-1 lg:order-2 flex items-center justify-center">
             <div className="relative h-64 w-64 overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
               <div className="flex h-full items-center justify-center">
                 <div className="text-center">
@@ -111,17 +111,19 @@ export function About() {
               return (
                 <div
                   key={value.title}
-                  className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6"
+                  className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 sm:p-6 flex flex-row sm:flex-col items-start gap-4 sm:gap-0"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10">
+                  <div className="shrink-0 flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10 sm:mb-4">
                     <Icon className="h-5 w-5 text-cyan-400" />
                   </div>
-                  <h4 className="mt-4 text-sm font-semibold text-[var(--text-primary)]">
-                    {value.title}
-                  </h4>
-                  <p className="mt-2 text-sm text-[var(--text-secondary)]">
-                    {value.description}
-                  </p>
+                  <div>
+                    <h4 className="text-base font-semibold text-[var(--text-primary)]">
+                      {value.title}
+                    </h4>
+                    <p className="mt-1 sm:mt-2 text-base text-[var(--text-secondary)]">
+                      {value.description}
+                    </p>
+                  </div>
                 </div>
               );
             })}

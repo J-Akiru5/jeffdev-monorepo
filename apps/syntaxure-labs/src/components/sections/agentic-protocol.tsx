@@ -116,13 +116,13 @@ export function AgenticProtocol() {
   const { ref: sequenceRef, isInView: sequenceInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
 
   return (
-    <section id="agentic-protocol" className="relative overflow-hidden py-24 md:py-32 border-y border-[var(--border-subtle)]">
+    <section id="agentic-protocol" className="relative overflow-hidden py-16 md:py-24 lg:py-32 border-y border-[var(--border-subtle)]">
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
         
         {/* ── Header Section ── */}
         <div 
           ref={headerRef} 
-          className={`max-w-3xl transition-all duration-700 ease-out ${
+          className={`max-w-3xl mx-auto lg:mx-0 text-center lg:text-left transition-all duration-700 ease-out ${
             headerInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
@@ -144,13 +144,13 @@ export function AgenticProtocol() {
         {/* ── Pillars Grid ── */}
         <div
           ref={pillarsRef}
-          className={`mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-4 transition-all duration-1000 ease-out delay-100 ${
+          className={`mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-4 transition-all duration-1000 ease-out md:delay-100 ${
             pillarsInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
           {pillars.map((pillar) => (
-            <HoverCard key={pillar.id} className="flex flex-col group rounded-md border border-[var(--border-subtle)] bg-[var(--bg-primary)] p-6 transition-all duration-300 hover:border-[var(--text-tertiary)] shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
-              <div className="flex items-center justify-between mb-6">
+            <HoverCard key={pillar.id} className="flex flex-col group rounded-md border border-[var(--border-subtle)] bg-[var(--bg-primary)] p-5 sm:p-6 transition-all duration-300 hover:border-[var(--text-tertiary)] shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <span className="font-mono text-xs font-bold uppercase tracking-[0.3em] text-[var(--text-tertiary)] group-hover:text-[var(--text-secondary)] transition-colors">
                   {pillar.numeral}
                 </span>
@@ -162,11 +162,11 @@ export function AgenticProtocol() {
               <h3 className="text-lg font-bold text-[var(--text-primary)]">
                 {pillar.title}
               </h3>
-              <p className="mt-3 text-sm leading-relaxed text-[var(--text-secondary)] flex-grow">
+              <p className="mt-3 text-base leading-relaxed text-[var(--text-secondary)] flex-grow">
                 {pillar.description}
               </p>
 
-              <div className="mt-6 space-y-2 border-t border-[var(--border-subtle)] pt-4">
+              <div className="mt-4 sm:mt-6 space-y-2 border-t border-[var(--border-subtle)] pt-4">
                 {pillar.points.map((point) => (
                   <div key={point} className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
                     <ChevronRight className="h-3 w-3 text-[var(--text-tertiary)]" />
@@ -181,14 +181,14 @@ export function AgenticProtocol() {
         {/* ── Build Sequence ── */}
         <div
           ref={sequenceRef}
-          className={`mt-20 overflow-hidden rounded-md border border-[var(--border-subtle)] bg-[var(--bg-primary)] shadow-sm transition-all duration-1000 ease-out delay-200 ${
+          className={`mt-20 overflow-hidden rounded-md border border-[var(--border-subtle)] bg-[var(--bg-primary)] shadow-sm transition-all duration-1000 ease-out md:delay-200 ${
             sequenceInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <div className="p-8 md:p-12 grid gap-12 lg:grid-cols-[1fr_1.2fr] items-center">
+          <div className="p-6 sm:p-8 md:p-12 grid gap-12 lg:grid-cols-[1fr_1.2fr] items-center">
             
             {/* Left Side: Context */}
-            <div>
+            <div className="text-center lg:text-left">
               <div className="font-mono text-xs font-bold uppercase text-[var(--text-tertiary)] mb-4 tracking-wider">
                 Our Build Sequence
               </div>
@@ -200,7 +200,7 @@ export function AgenticProtocol() {
                 solid and reliable. You approve each step before we move forward.
               </p>
               
-              <div className="space-y-3 border-l-2 border-[var(--border-subtle)] pl-4">
+              <div className="space-y-3 border-l-2 border-[var(--border-subtle)] pl-4 text-left inline-block lg:block">
                 <div className="text-sm font-medium text-[var(--text-secondary)]">
                   <span className="text-[var(--text-primary)] font-bold mr-2">1.</span>
                   We stop and ask when requirements are unclear.
@@ -230,10 +230,10 @@ export function AgenticProtocol() {
                     <div className="font-mono text-[10px] font-bold uppercase tracking-widest text-[var(--text-tertiary)] mb-1">
                       {phase.phase}
                     </div>
-                    <h4 className="text-sm font-bold text-[var(--text-primary)] mb-1">
+                    <h4 className="text-base font-bold text-[var(--text-primary)] mb-1">
                       {phase.title}
                     </h4>
-                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                    <p className="text-base text-[var(--text-secondary)] leading-relaxed">
                       {phase.description}
                     </p>
                   </div>

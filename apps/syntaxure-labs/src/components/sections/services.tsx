@@ -33,7 +33,7 @@ export function Services({ services: dbServices }: ServicesProps) {
   }));
 
   return (
-    <section className="relative py-24 lg:py-32 lazy-section overflow-hidden" id="services">
+    <section className="relative py-16 md:py-24 lg:py-32 lazy-section overflow-hidden" id="services">
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
         
         {/* ── Section Header ── */}
@@ -57,7 +57,7 @@ export function Services({ services: dbServices }: ServicesProps) {
         {/* ── Service Cards Grid ── */}
         <div
           ref={cardsRef}
-          className={`mt-16 grid gap-6 md:grid-cols-3 transition-all duration-1000 ease-out delay-200 ${
+          className={`mt-16 grid gap-6 md:grid-cols-3 transition-all duration-1000 ease-out md:delay-200 ${
             cardsInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
@@ -81,7 +81,7 @@ export function Services({ services: dbServices }: ServicesProps) {
                 </div>
 
                 {/* Full description - sells the service */}
-                <p className="text-sm leading-relaxed text-[var(--text-secondary)] line-clamp-3">
+                <p className="text-base leading-relaxed text-[var(--text-secondary)] line-clamp-3">
                   {service.description}
                 </p>
 

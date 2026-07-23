@@ -39,7 +39,7 @@ export function FAQSection() {
   };
 
   return (
-    <section className="px-6 py-24 lg:px-8" id="faq">
+    <section className="px-6 py-16 md:py-24 lg:px-8" id="faq">
       <div className="mx-auto max-w-3xl">
         <div className="text-center">
           <span className="font-mono text-xs uppercase tracking-wider text-cyan-400">
@@ -80,7 +80,7 @@ export function FAQSection() {
                     isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
                   }`}
                 >
-                  <p className="border-t border-white/[0.06] px-6 py-5 text-sm leading-relaxed text-white/50">
+                  <p className="border-t border-white/[0.06] px-6 py-5 text-base leading-relaxed text-white/50">
                     {item.answer}
                   </p>
                 </div>

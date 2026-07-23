@@ -123,8 +123,8 @@ export function Header() {
 
       <div
         className={cn(
-          "overflow-hidden border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)] backdrop-blur-xl transition-all duration-300 md:hidden",
-          isMobileMenuOpen ? "max-h-96" : "max-h-0 border-transparent",
+          "overflow-y-auto overflow-x-hidden border-b border-[var(--border-subtle)] bg-[var(--bg-secondary)] backdrop-blur-xl transition-all duration-300 md:hidden",
+          isMobileMenuOpen ? "max-h-[calc(100vh-4rem)]" : "max-h-0 border-transparent",
         )}
       >
         <div className="space-y-1 px-6 py-4">
@@ -156,9 +156,7 @@ export function Header() {
               </Link>
             );
           })}
-          <div className="flex justify-center py-2">
-            <ThemeToggle className="w-full justify-center" />
-          </div>
+          {/* Removed duplicate ThemeToggle from here since it's already in the top nav */}
           <Link
             href="/quote"
             onClick={() => setIsMobileMenuOpen(false)}

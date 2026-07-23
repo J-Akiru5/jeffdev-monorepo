@@ -264,7 +264,7 @@ export default async function AboutPage() {
                   key={f.name}
                   className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 md:p-8"
                 >
-                  <div className="flex flex-col xl:flex-row xl:items-center gap-5">
+                  <div className="flex flex-col items-center text-center xl:flex-row xl:text-left gap-5">
                     <Image
                       src={f.image}
                       alt={f.name}

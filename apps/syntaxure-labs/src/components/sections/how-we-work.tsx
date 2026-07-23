@@ -31,7 +31,7 @@ export function HowWeWork() {
   const { ref, isInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
 
   return (
-    <section className="px-6 py-24 lg:px-8">
+    <section className="px-6 py-16 md:py-24 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="text-center">
           <span className="font-mono text-xs uppercase tracking-wider text-cyan-500 dark:text-cyan-400">
@@ -78,7 +78,7 @@ export function HowWeWork() {
                 <h3 className="text-lg font-semibold text-[var(--text-primary)]">
                   {step.title}
                 </h3>
-                <p className="mt-3 text-sm leading-relaxed text-[var(--text-secondary)]">
+                <p className="mt-3 text-base leading-relaxed text-[var(--text-secondary)]">
                   {step.description}
                 </p>
 

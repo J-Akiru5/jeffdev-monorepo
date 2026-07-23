@@ -27,7 +27,7 @@ export function Hero({
 
   return (
     <div className="relative z-10">
-      <section className="relative flex min-h-[90vh] items-center justify-center pb-24 pt-20 overflow-hidden">
+      <section className="relative flex min-h-[90vh] items-center justify-center pb-16 pt-20 md:pb-24 overflow-hidden">
         
         {/* ═══════════════════════════════════════
             CONTENT LAYOUT (2-Column)
