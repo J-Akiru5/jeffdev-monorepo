@@ -1,5 +1,3 @@
-"use client";
-
 interface LogoItem {
   name: string;
   color: string;

@@ -9,6 +9,7 @@
  */
 
 import { getAdminClient } from "@/lib/supabase/admin";
+import { logDataError } from "@/lib/errors";
 
 // =============================================================================
 // TYPES (matching the FirestoreService shape for backward compat)
@@ -121,7 +122,7 @@ export async function getServices(): Promise<DataService[]> {
       order: idx,
     }));
   } catch (error) {
-    console.error("[GET SERVICES ERROR]", error);
+    logDataError("[GET SERVICES ERROR]", error);
     return [];
   }
 }
@@ -202,7 +203,7 @@ export async function getProjects(): Promise<DataProject[]> {
           }) as any,
       );
   } catch (error) {
-    console.error("[GET PROJECTS ERROR]", error);
+    logDataError("[GET PROJECTS ERROR]", error);
     return [];
   }
 }
@@ -268,7 +269,7 @@ export async function getProjectBySlug(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any;
   } catch (error) {
-    console.error("[GET PROJECT ERROR]", error);
+    logDataError("[GET PROJECT ERROR]", error);
     return null;
   }
 }
@@ -302,7 +303,7 @@ export async function getQuotes(limit = 50): Promise<DataQuote[]> {
       updated_at: q.updated_at,
     }));
   } catch (error) {
-    console.error("[GET QUOTES ERROR]", error);
+    logDataError("[GET QUOTES ERROR]", error);
     return [];
   }
 }
@@ -333,7 +334,7 @@ export async function getMessages(limit = 50): Promise<DataMessage[]> {
       updated_at: m.updated_at,
     }));
   } catch (error) {
-    console.error("[GET MESSAGES ERROR]", error);
+    logDataError("[GET MESSAGES ERROR]", error);
     return [];
   }
 }

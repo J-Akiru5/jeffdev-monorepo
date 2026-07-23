@@ -1,8 +1,6 @@
-"use client";
-
 import Link from "next/link";
 import { ArrowUpRight, Zap } from "lucide-react";
-import { useInView } from "@/lib/use-in-view";
+import { Reveal } from "@/components/reveal";
 
 export function CTA({
   availabilityText,
@@ -18,16 +16,13 @@ export function CTA({
     url?: string;
   };
 }) {
-  const { ref: contentRef, isInView } = useInView<HTMLDivElement>({ threshold: 0.2 });
-
   return (
     <section className="relative py-24 md:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div
-          ref={contentRef}
-          className={`relative overflow-hidden rounded-md glass-neon p-12 md:p-16 text-center transition-all duration-1000 ease-out ${
-            isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
+        <Reveal
+          className="relative overflow-hidden rounded-md glass-neon p-12 md:p-16 text-center"
+          threshold={0.2}
+          transitionClassName="duration-1000 ease-out"
         >
           {/* Background Accents */}
           <div className="pointer-events-none absolute inset-0">
@@ -100,7 +95,7 @@ export function CTA({
               No commitment required. Free 30-minute discovery call.
             </p>
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );
