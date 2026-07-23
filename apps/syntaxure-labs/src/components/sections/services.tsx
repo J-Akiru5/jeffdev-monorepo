@@ -42,15 +42,10 @@ export function Services({ services: dbServices }: ServicesProps) {
           <p className="mt-4 text-[var(--text-secondary)]">
             Fixed-scope, premium digital products delivered without the typical agency friction. Pick a service, and we'll handle the rest.
           </p>
-        </Reveal>
+          </Reveal>
 
         {/* ── Service Cards Grid ── */}
-        <div
-          ref={cardsRef}
-          className={`mt-16 grid gap-6 md:grid-cols-3 transition-all duration-1000 ease-out md:delay-200 ${
-            cardsInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
+        <Reveal className="mt-16 grid gap-8 lg:grid-cols-2 xl:gap-10">
           {displayServices.map((service) => (
             <Link
               key={service.id}

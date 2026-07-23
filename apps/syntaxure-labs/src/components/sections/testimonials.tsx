@@ -30,7 +30,7 @@ export function Testimonials({ testimonials }: TestimonialsProps) {
           <p className="mt-4 text-[var(--text-secondary)]">
             Hear from the teams and founders we have partnered with.
           </p>
-        </Reveal>
+          </Reveal>
 
         {/* Testimonials Grid */}
         <Reveal className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" threshold={0.1}>

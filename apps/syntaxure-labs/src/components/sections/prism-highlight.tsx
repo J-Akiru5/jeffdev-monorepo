@@ -65,11 +65,7 @@ export function PrismHighlight({ cmsData }: { cmsData?: { description?: string }
           </Reveal>
 
           {/* ── Right Content: Code Snippet ── */}
-          <div
-            className={`hidden lg:block relative transition-all duration-1000 ease-out md:delay-200 ${
-              isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-            }`}
-          >
+          <Reveal className="hidden lg:block relative" transitionClassName="duration-1000 ease-out delay-200">
             {/* ── Ambient Technical Glow (Cyan Only) ── */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] -z-10 blur-[80px] pointer-events-none select-none opacity-40 dark:opacity-60">
               <div className="absolute inset-0 bg-cyan-500/30 rounded-full" />

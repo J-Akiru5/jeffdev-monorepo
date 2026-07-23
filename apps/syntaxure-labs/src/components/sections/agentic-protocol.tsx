@@ -114,12 +114,7 @@ export function AgenticProtocol() {
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
 
         {/* ── Header Section ── */}
-        <div 
-          ref={headerRef} 
-          className={`max-w-3xl mx-auto lg:mx-0 text-center lg:text-left transition-all duration-700 ease-out ${
-            headerInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
+        <Reveal className="max-w-3xl mx-auto lg:mx-0 text-center lg:text-left">
           <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-3 py-1 mb-4 shadow-sm">
             <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">
               How We Work
@@ -136,12 +131,7 @@ export function AgenticProtocol() {
         </Reveal>
 
         {/* ── Pillars Grid ── */}
-        <div
-          ref={pillarsRef}
-          className={`mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-4 transition-all duration-1000 ease-out md:delay-100 ${
-            pillarsInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
+        <Reveal className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {pillars.map((pillar) => (
             <HoverCard key={pillar.id} className="flex flex-col group rounded-md border border-[var(--border-subtle)] bg-[var(--bg-primary)] p-5 sm:p-6 transition-all duration-300 hover:border-[var(--text-tertiary)] shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
               <div className="flex items-center justify-between mb-4 sm:mb-6">
@@ -173,12 +163,7 @@ export function AgenticProtocol() {
         </Reveal>
 
         {/* ── Build Sequence ── */}
-        <div
-          ref={sequenceRef}
-          className={`mt-20 overflow-hidden rounded-md border border-[var(--border-subtle)] bg-[var(--bg-primary)] shadow-sm transition-all duration-1000 ease-out md:delay-200 ${
-            sequenceInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
+        <Reveal className="mt-20 overflow-hidden rounded-md border border-[var(--border-subtle)] bg-[var(--bg-primary)] shadow-sm">
           <div className="p-6 sm:p-8 md:p-12 grid gap-12 lg:grid-cols-[1fr_1.2fr] items-center">
             
             {/* Left Side: Context */}

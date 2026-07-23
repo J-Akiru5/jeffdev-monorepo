@@ -68,12 +68,7 @@ export function Features() {
       <div className="mx-auto max-w-7xl px-6 lg:px-8 flex flex-col lg:flex-row gap-16 lg:gap-24">
 
         {/* ── Left Column: Section Header ── */}
-        <div
-          ref={headerRef}
-          className={`lg:w-1/3 transition-all duration-700 ease-out ${
-            headerInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
+        <Reveal className="lg:w-1/3">
           <div className="sticky top-32 text-center lg:text-left">
             <span className="font-mono text-xs font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
               Why Choose Us
@@ -88,12 +83,7 @@ export function Features() {
         </Reveal>
 
         {/* ── Right Column: Features List ── */}
-        <div
-          ref={listRef}
-          className={`lg:w-2/3 grid gap-8 sm:grid-cols-2 transition-all duration-1000 ease-out md:delay-200 ${
-            listInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
+        <Reveal className="lg:w-2/3 grid gap-8 sm:grid-cols-2" transitionClassName="duration-1000 ease-out delay-200">
           {features.map((feature, idx) => (
             <HoverCard
               key={feature.id}

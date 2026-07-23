@@ -49,12 +49,7 @@ export function About() {
         </Reveal>
 
         {/* Content */}
-        <div
-          ref={contentRef}
-          className={`mt-12 grid gap-12 lg:grid-cols-2 transition-all duration-700 ease-out ${
-            contentInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
+        <Reveal className="mt-12 grid gap-12 lg:grid-cols-2">
           <div className="order-2 lg:order-1 space-y-6">
             <p className="text-lg text-[var(--text-secondary)]">
               Syntaxure Labs is a boutique software studio specializing in high-performance web systems
