@@ -6,16 +6,16 @@
  * Client component for switching between Changelog and Discussions views.
  */
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { FileText, MessageSquare } from "lucide-react";
 import { cn } from "@syntaxure/ui";
-import { ReleaseTimeline, type Release } from "./release-timeline";
 import { DiscussionsFeed } from "./discussions-feed";
 import type { CommunityPostWithAuthor } from "@/app/actions/community";
 
 interface CommunityTabsProps {
-  releases: Release[];
-  featuredReleases: Release[];
+  /** Server-rendered changelog (ReleaseTimeline) passed from the page. */
+  timeline: ReactNode;
+  changelogCount: number;
   posts: CommunityPostWithAuthor[];
 }
 
@@ -25,8 +25,8 @@ const tabs = [
 ] as const;
 
 export function CommunityTabs({
-  releases,
-  featuredReleases,
+  timeline,
+  changelogCount,
   posts,
 }: CommunityTabsProps) {
   const [activeTab, setActiveTab] = useState<"changelog" | "discussions">(
@@ -58,9 +58,7 @@ export function CommunityTabs({
                   : "bg-white/5 text-white/30",
               )}
             >
-              {tab.id === "changelog"
-                ? featuredReleases.length + releases.length
-                : posts.length}
+              {tab.id === "changelog" ? changelogCount : posts.length}
             </span>
           </button>
         ))}
@@ -68,7 +66,7 @@ export function CommunityTabs({
 
       {/* Tab Content */}
       {activeTab === "changelog" ? (
-        <ReleaseTimeline featured={featuredReleases} releases={releases} />
+        timeline
       ) : (
         <DiscussionsFeed posts={posts} />
       )}

@@ -1,8 +1,7 @@
-"use client";
-
 import Link from "next/link";
-import { ArrowUpRight, Zap, ArrowDown, ShieldCheck } from "lucide-react";
-import { useInView } from "@/lib/use-in-view";
+import { ArrowUpRight } from "lucide-react";
+import { Reveal } from "@/components/reveal";
+import { HeroScrollButton } from "./hero-scroll-button";
 
 export function Hero({
   availabilityText,
@@ -16,15 +15,6 @@ export function Hero({
     description?: string;
   };
 }) {
-  const { ref: containerRef, isInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
-
-  const scrollToContent = () => {
-    window.scrollTo({
-      top: window.innerHeight,
-      behavior: "smooth",
-    });
-  };
-
   return (
     <div className="relative z-10">
       <section className="relative flex min-h-[90vh] items-center justify-center pb-16 pt-20 md:pb-24 overflow-hidden">
@@ -32,11 +22,10 @@ export function Hero({
         {/* ═══════════════════════════════════════
             CONTENT LAYOUT (2-Column)
             ═══════════════════════════════════════ */}
-        <div 
-          ref={containerRef}
-          className={`relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center gap-16 lg:gap-12 transition-all duration-1000 ease-out ${
-            isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
+        <Reveal
+          className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center gap-16 lg:gap-12"
+          threshold={0.1}
+          transitionClassName="duration-1000 ease-out"
         >
           {/* ── Left Column: Text ── */}
           <div className="flex-1 text-center lg:text-left pt-10 lg:pt-0 relative">
@@ -116,18 +105,12 @@ export function Hero({
                 </div>
              </div>
           </div>
-        </div>
+        </Reveal>
 
         {/* ═══════════════════════════════════════
             SCROLL INDICATOR
             ═══════════════════════════════════════ */}
-        <button
-          onClick={scrollToContent}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 text-[var(--text-tertiary)] transition-colors hover:text-[var(--text-primary)] z-20"
-          aria-label="Scroll to content"
-        >
-          <ArrowDown className="h-5 w-5 animate-bounce" />
-        </button>
+        <HeroScrollButton />
       </section>
     </div>
   );

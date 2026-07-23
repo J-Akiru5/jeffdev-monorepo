@@ -1,5 +1,3 @@
-"use client";
-
 /**
  * About Section
  * --------------
@@ -7,7 +5,7 @@
  */
 
 import { Target, Zap, Shield, Users } from "lucide-react";
-import { useInView } from "@/lib/use-in-view";
+import { Reveal } from "@/components/reveal";
 
 const values = [
   {
@@ -37,27 +35,18 @@ const values = [
 ];
 
 export function About() {
-  const { ref: headerRef, isInView: headerInView } = useInView<HTMLDivElement>({ threshold: 0.2 });
-  const { ref: contentRef, isInView: contentInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
-  const { ref: valuesRef, isInView: valuesInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
-
   return (
     <section className="relative py-16 md:py-24 lg:py-32" id="about">
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
         {/* Section Header */}
-        <div
-          ref={headerRef}
-          className={`mx-auto max-w-2xl text-center transition-all duration-700 ease-out ${
-            headerInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
+        <Reveal className="mx-auto max-w-2xl text-center" threshold={0.2}>
           <span className="font-mono text-xs font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
             About Us
           </span>
           <h2 className="mt-3 text-3xl font-bold tracking-tight text-[var(--text-primary)] md:text-4xl">
             Building the Future, One System at a Time
           </h2>
-        </div>
+        </Reveal>
 
         {/* Content */}
         <div
@@ -93,15 +82,10 @@ export function About() {
               </div>
             </div>
           </div>
-        </div>
+        </Reveal>
 
         {/* Values */}
-        <div
-          ref={valuesRef}
-          className={`mt-20 transition-all duration-700 ease-out ${
-            valuesInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
+        <Reveal className="mt-20" threshold={0.1}>
           <h3 className="mb-8 text-center text-xl font-semibold text-[var(--text-primary)]">
             Our Values
           </h3>
@@ -128,7 +112,7 @@ export function About() {
               );
             })}
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

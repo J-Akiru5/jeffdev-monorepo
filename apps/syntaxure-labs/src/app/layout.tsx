@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
-import { SmoothScroll } from "@/components/providers/smooth-scroll";
 import { ThemeWrapper } from "@/components/providers/theme-wrapper";
 import { ThemeBootstrap } from "@/components/providers/theme-bootstrap";
 import { CurrencyProvider } from "@/contexts/currency-context";
@@ -158,7 +157,6 @@ export default async function RootLayout({
 
         {/* Application Content */}
         <ThemeWrapper>
-          <SmoothScroll>
           <FeatureFlagProvider flags={featureFlags}>
             <CurrencyProvider>
               <div className="relative z-10 min-h-screen flex flex-col">
@@ -238,7 +236,6 @@ export default async function RootLayout({
               </div>
             </CurrencyProvider>
           </FeatureFlagProvider>
-        </SmoothScroll>
         </ThemeWrapper>
 
         {/* Vercel Analytics - Web Vitals Tracking */}

@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Layers,
   Shield,
@@ -9,7 +7,7 @@ import {
   RefreshCw,
   type LucideIcon,
 } from "lucide-react";
-import { useInView } from "@/lib/use-in-view";
+import { Reveal } from "@/components/reveal";
 import { HoverCard } from "@syntaxure/ui";
 
 type Feature = {
@@ -65,13 +63,10 @@ const features: Feature[] = [
 ];
 
 export function Features() {
-  const { ref: headerRef, isInView: headerInView } = useInView<HTMLDivElement>({ threshold: 0.2 });
-  const { ref: listRef, isInView: listInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
-
   return (
     <section className="relative py-16 md:py-24 lg:py-32 lazy-section border-t border-[var(--border-subtle)]" id="features">
       <div className="mx-auto max-w-7xl px-6 lg:px-8 flex flex-col lg:flex-row gap-16 lg:gap-24">
-        
+
         {/* ── Left Column: Section Header ── */}
         <div
           ref={headerRef}
@@ -90,7 +85,7 @@ export function Features() {
               Six core strengths built into every project we deliver. A solid foundation customized to your business without the months-long timeline.
             </p>
           </div>
-        </div>
+        </Reveal>
 
         {/* ── Right Column: Features List ── */}
         <div
@@ -124,7 +119,7 @@ export function Features() {
               </div>
             </HoverCard>
           ))}
-        </div>
+        </Reveal>
       </div>
     </section>
   );

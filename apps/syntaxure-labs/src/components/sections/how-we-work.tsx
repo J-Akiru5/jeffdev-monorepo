@@ -1,7 +1,5 @@
-"use client";
-
 import { Lightbulb, Code, Rocket } from "lucide-react";
-import { useInView } from "@/lib/use-in-view";
+import { Reveal } from "@/components/reveal";
 
 const steps = [
   {
@@ -28,8 +26,6 @@ const steps = [
 ];
 
 export function HowWeWork() {
-  const { ref, isInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
-
   return (
     <section className="px-6 py-16 md:py-24 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -46,20 +42,14 @@ export function HowWeWork() {
           </p>
         </div>
 
-        <div
-          ref={ref}
-          className="mt-16 grid gap-8 md:grid-cols-3"
-        >
+        <div className="mt-16 grid gap-8 md:grid-cols-3">
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (
-              <div
+              <Reveal
                 key={step.title}
-                className={`relative rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-8 transition-all duration-700 ease-out ${
-                  isInView
-                    ? "opacity-100 translate-y-0"
-                    : "opacity-0 translate-y-8"
-                }`}
+                className="relative rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-8"
+                threshold={0.1}
                 style={{ transitionDelay: `${index * 200}ms` }}
               >
                 <div className="mb-6 flex items-center gap-4">
@@ -95,7 +85,7 @@ export function HowWeWork() {
                     <div className="h-px w-8 bg-gradient-to-r from-cyan-500/40 to-transparent" />
                   </div>
                 )}
-              </div>
+              </Reveal>
             );
           })}
         </div>

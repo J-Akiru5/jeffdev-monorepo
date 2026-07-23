@@ -1,7 +1,5 @@
-"use client";
-
 import Link from "next/link";
-import { useInView } from "@/lib/use-in-view";
+import { Reveal } from "@/components/reveal";
 import { ArrowUpRight, Cpu, Shield, Zap } from "lucide-react";
 
 const highlights = [
@@ -23,20 +21,13 @@ const highlights = [
 ];
 
 export function PrismHighlight({ cmsData }: { cmsData?: { description?: string } }) {
-  const { ref: sectionRef, isInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
-
   return (
     <section id="prism" className="py-16 md:py-24 lg:py-32 border-y border-[var(--border-subtle)]">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="grid items-center gap-16 lg:grid-cols-2">
-          
+
           {/* ── Left Content ── */}
-          <div
-            ref={sectionRef}
-            className={`transition-all duration-1000 ease-out ${
-              isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-            }`}
-          >
+          <Reveal threshold={0.1} transitionClassName="duration-1000 ease-out">
             <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--text-tertiary)] shadow-sm">
               Our Flagship Product
             </div>
@@ -71,7 +62,7 @@ export function PrismHighlight({ cmsData }: { cmsData?: { description?: string }
               Learn_More_About_Prism
               <ArrowUpRight className="h-4 w-4" />
             </Link>
-          </div>
+          </Reveal>
 
           {/* ── Right Content: Code Snippet ── */}
           <div
@@ -120,7 +111,7 @@ export function PrismHighlight({ cmsData }: { cmsData?: { description?: string }
                 </div>
               </div>
             </div>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>

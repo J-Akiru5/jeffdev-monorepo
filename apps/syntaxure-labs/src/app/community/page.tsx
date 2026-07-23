@@ -9,8 +9,10 @@ import {
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { CommunityTabs } from "@/components/sections/community-tabs";
+import { ReleaseTimeline } from "@/components/sections/release-timeline";
 import { createClient } from "@/lib/supabase/server";
 import { getPublishedCommunityPosts } from "@/app/actions/community";
+import { logDataError } from "@/lib/errors";
 import type { Metadata } from "next";
 import type { Release } from "@/types/database";
 
@@ -30,43 +32,45 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function CommunityPage() {
-  let featuredReleases: Release[] = [];
-  let recentReleases: Release[] = [];
-  let communityPosts: Awaited<ReturnType<typeof getPublishedCommunityPosts>> =
-    [];
+async function getReleases(): Promise<{
+  featured: Release[];
+  timeline: Release[];
+}> {
+  const supabase = await createClient();
 
-  try {
-    const supabase = await createClient();
-
-    // Fetch featured releases
-    const { data: featured } = await supabase
+  const [{ data: featured }, { data: timeline }] = await Promise.all([
+    supabase
       .from("releases")
       .select("*")
       .eq("is_featured", true)
       .order("date", { ascending: false })
-      .limit(6);
-
-    // Fetch non-featured releases
-    const { data: timeline } = await supabase
+      .limit(6),
+    supabase
       .from("releases")
       .select("*")
       .eq("is_featured", false)
       .order("date", { ascending: false })
-      .limit(50);
+      .limit(50),
+  ]);
 
-    featuredReleases = (featured ?? []) as Release[];
-    recentReleases = (timeline ?? []) as Release[];
-  } catch (error) {
-    console.error("[community] Failed to fetch releases:", error);
-  }
+  return {
+    featured: (featured ?? []) as Release[],
+    timeline: (timeline ?? []) as Release[],
+  };
+}
 
-  // Fetch published community posts
-  try {
-    communityPosts = await getPublishedCommunityPosts();
-  } catch (error) {
-    console.error("[community] Failed to fetch community posts:", error);
-  }
+export default async function CommunityPage() {
+  // Releases and community posts are independent — fetch in parallel.
+  const [releasesResult, communityPosts] = await Promise.all([
+    getReleases().catch((error) => {
+      logDataError("[community] Failed to fetch releases", error);
+      return { featured: [] as Release[], timeline: [] as Release[] };
+    }),
+    getPublishedCommunityPosts(),
+  ]);
+
+  const featuredReleases = releasesResult.featured;
+  const recentReleases = releasesResult.timeline;
 
   const totalPosts = featuredReleases.length + recentReleases.length;
 
@@ -161,29 +165,34 @@ export default async function CommunityPage() {
         <section className="px-6 pb-24 lg:px-8">
           <div className="mx-auto max-w-5xl">
             <CommunityTabs
-              featuredReleases={featuredReleases.map((r) => ({
-                id: r.id,
-                title: r.title,
-                version: r.version,
-                date: r.date,
-                type: r.type as "tool" | "update" | "patch",
-                description: r.description,
-                link: r.link,
-                tags: r.tags,
-                is_featured: r.is_featured,
-              }))}
-              releases={recentReleases.map((r) => ({
-                id: r.id,
-                title: r.title,
-                version: r.version,
-                date: r.date,
-                type: r.type as "tool" | "update" | "patch",
-                description: r.description,
-                link: r.link,
-                tags: r.tags,
-                is_featured: r.is_featured,
-              }))}
+              changelogCount={totalPosts}
               posts={communityPosts}
+              timeline={
+                <ReleaseTimeline
+                  featured={featuredReleases.map((r) => ({
+                    id: r.id,
+                    title: r.title,
+                    version: r.version,
+                    date: r.date,
+                    type: r.type as "tool" | "update" | "patch",
+                    description: r.description,
+                    link: r.link,
+                    tags: r.tags,
+                    is_featured: r.is_featured,
+                  }))}
+                  releases={recentReleases.map((r) => ({
+                    id: r.id,
+                    title: r.title,
+                    version: r.version,
+                    date: r.date,
+                    type: r.type as "tool" | "update" | "patch",
+                    description: r.description,
+                    link: r.link,
+                    tags: r.tags,
+                    is_featured: r.is_featured,
+                  }))}
+                />
+              }
             />
           </div>
         </section>

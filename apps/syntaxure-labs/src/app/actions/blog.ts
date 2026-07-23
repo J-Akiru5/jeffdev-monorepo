@@ -8,6 +8,7 @@
 "use server";
 
 import { getAdminClient } from "@/lib/supabase/admin";
+import { logDataError } from "@/lib/errors";
 import type { BlogPost } from "@/types/blog";
 
 export async function getBlogPosts(limit = 20): Promise<BlogPost[]> {
@@ -23,7 +24,7 @@ export async function getBlogPosts(limit = 20): Promise<BlogPost[]> {
     if (error) throw error;
     return (data || []) as BlogPost[];
   } catch (error) {
-    console.error("[GET BLOG POSTS ERROR]", error);
+    logDataError("[GET BLOG POSTS ERROR]", error);
     return [];
   }
 }
@@ -41,7 +42,7 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
     if (error) throw error;
     return data as BlogPost;
   } catch (error) {
-    console.error("[GET BLOG POST ERROR]", error);
+    logDataError("[GET BLOG POST ERROR]", error);
     return null;
   }
 }
@@ -64,7 +65,7 @@ export async function getBlogTags(): Promise<string[]> {
     }
     return Array.from(tags).sort();
   } catch (error) {
-    console.error("[GET BLOG TAGS ERROR]", error);
+    logDataError("[GET BLOG TAGS ERROR]", error);
     return [];
   }
 }

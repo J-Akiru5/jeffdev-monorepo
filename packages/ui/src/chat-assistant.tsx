@@ -15,7 +15,7 @@ interface Message {
   timestamp: Date;
 }
 
-interface ChatAssistantProps {
+export interface ChatAssistantProps {
   className?: string;
   apiEndpoint: string;
   title?: string;

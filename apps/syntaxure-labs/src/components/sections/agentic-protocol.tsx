@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Database,
   Shield,
@@ -9,7 +7,7 @@ import {
   type LucideIcon,
   ChevronRight,
 } from "lucide-react";
-import { useInView } from "@/lib/use-in-view";
+import { Reveal } from "@/components/reveal";
 import { HoverCard } from "@syntaxure/ui";
 
 type ProtocolPillar = {
@@ -111,14 +109,10 @@ const buildSequence: BuildPhase[] = [
 ];
 
 export function AgenticProtocol() {
-  const { ref: headerRef, isInView: headerInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
-  const { ref: pillarsRef, isInView: pillarsInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
-  const { ref: sequenceRef, isInView: sequenceInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
-
   return (
     <section id="agentic-protocol" className="relative overflow-hidden py-16 md:py-24 lg:py-32 border-y border-[var(--border-subtle)]">
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
-        
+
         {/* ── Header Section ── */}
         <div 
           ref={headerRef} 
@@ -139,7 +133,7 @@ export function AgenticProtocol() {
           <p className="mt-6 text-[var(--text-secondary)] md:text-lg leading-relaxed max-w-2xl">
             A clear, step-by-step approach to building your project. With your approval at every stage.
           </p>
-        </div>
+        </Reveal>
 
         {/* ── Pillars Grid ── */}
         <div
@@ -176,7 +170,7 @@ export function AgenticProtocol() {
               </div>
             </HoverCard>
           ))}
-        </div>
+        </Reveal>
 
         {/* ── Build Sequence ── */}
         <div
@@ -241,7 +235,7 @@ export function AgenticProtocol() {
               ))}
             </div>
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

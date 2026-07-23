@@ -1,8 +1,6 @@
-"use client";
-
 import Link from "next/link";
 import { Globe, Cloud, Cpu, Sparkles, Code, Smartphone, Lightbulb, ArrowUpRight, Check } from "lucide-react";
-import { useInView } from "@/lib/use-in-view";
+import { Reveal } from "@/components/reveal";
 import type { DataService } from "@/lib/data";
 
 const categoryIcons: Record<string, typeof Globe> = {
@@ -20,9 +18,6 @@ interface ServicesProps {
 }
 
 export function Services({ services: dbServices }: ServicesProps) {
-  const { ref: headerRef, isInView: headerInView } = useInView<HTMLDivElement>({ threshold: 0.2 });
-  const { ref: cardsRef, isInView: cardsInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
-
   const displayServices = dbServices.map((svc) => ({
     id: svc.slug,
     icon: categoryIcons[svc.icon] || Globe,
@@ -37,12 +32,7 @@ export function Services({ services: dbServices }: ServicesProps) {
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
         
         {/* ── Section Header ── */}
-        <div
-          ref={headerRef}
-          className={`mx-auto max-w-2xl text-center transition-all duration-700 ease-out ${
-            headerInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
+        <Reveal className="mx-auto max-w-2xl text-center" threshold={0.2}>
           <span className="font-mono text-xs font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
             What We Offer
           </span>
@@ -52,7 +42,7 @@ export function Services({ services: dbServices }: ServicesProps) {
           <p className="mt-4 text-[var(--text-secondary)]">
             Fixed-scope, premium digital products delivered without the typical agency friction. Pick a service, and we'll handle the rest.
           </p>
-        </div>
+        </Reveal>
 
         {/* ── Service Cards Grid ── */}
         <div
@@ -112,7 +102,7 @@ export function Services({ services: dbServices }: ServicesProps) {
               </div>
             </Link>
           ))}
-        </div>
+        </Reveal>
       </div>
     </section>
   );
