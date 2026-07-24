@@ -39,6 +39,7 @@
     "eslint": "^9.39.1",
     "husky": "^9.1.7",
     "lint-staged": "^17.0.5",
+    "napi-postinstall": "^0.3.4",
     "prettier": "^3.7.4",
     "supabase": "^2.101.0",
     "syncpack": "^13.0.4",
