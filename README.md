@@ -284,7 +284,7 @@ check-types → lint → test → build
 
 <div align="center">
 
-**MIT License** · Copyright (c) 2025 Syntaxure Labs
+**MIT License** · Copyright (c) 2026 Syntaxure Labs
 
 <br />
 
