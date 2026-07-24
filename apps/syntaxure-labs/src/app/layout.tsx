@@ -13,7 +13,6 @@ import { AnalyticsProvider } from "@/components/analytics-provider";
 import { Toaster } from "sonner";
 import { ChatAssistantClient as ChatAssistant } from "@/components/chat-assistant-client";
 import { CurrencyOverride } from "@/components/currency-override";
-import { KwadraWidget } from "@/components/kwadra-widget";
 import "./globals.css";
 
 /**
@@ -278,7 +277,6 @@ export default async function RootLayout({
         {/* Vercel Analytics - Web Vitals Tracking */}
         <Analytics />
         <CookieConsent />
-        <KwadraWidget />
         <Toaster
           theme="system"
           position="bottom-right"

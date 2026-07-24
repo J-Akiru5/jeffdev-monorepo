@@ -11,6 +11,7 @@ import {
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { CTASection } from "@/components/sections/cta-section";
+import { KwadraWidget } from "@/components/kwadra-widget";
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveAvailability } from "@/lib/availability";
@@ -373,6 +374,7 @@ export default async function AboutPage() {
         <CTASection />
       </main>
       <Footer />
+      <KwadraWidget />
     </>
   );
 }
