@@ -33,6 +33,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
+      - run: npm install -g napi-postinstall
       - run: pnpm install --frozen-lockfile
 
       - name: Build packages

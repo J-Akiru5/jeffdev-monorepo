@@ -53,6 +53,7 @@ jobs:
           key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             pnpm-store-
+      - run: npm install -g napi-postinstall
       - run: pnpm install --frozen-lockfile
       - name: Cache turbo build outputs
         uses: actions/cache@v4
@@ -84,6 +85,7 @@ jobs:
         with:
           path: .turbo
           key: turbo-${{ github.sha }}
+      - run: npm install -g napi-postinstall
       - run: pnpm install --frozen-lockfile --prefer-offline
       - run: pnpm run check-types
 
@@ -109,6 +111,7 @@ jobs:
         with:
           path: .turbo
           key: turbo-${{ github.sha }}
+      - run: npm install -g napi-postinstall
       - run: pnpm install --frozen-lockfile --prefer-offline
       - run: pnpm run lint
 
@@ -138,6 +141,7 @@ jobs:
         with:
           path: .turbo
           key: turbo-${{ github.sha }}
+      - run: npm install -g napi-postinstall
       - run: pnpm install --frozen-lockfile --prefer-offline
 
       # prism-context-engine depends on prism-mcp-server — build it first
@@ -267,6 +271,7 @@ jobs:
         with:
           path: .turbo
           key: turbo-${{ github.sha }}
+      - run: npm install -g napi-postinstall
       - run: pnpm install --frozen-lockfile --prefer-offline
       - run: pnpm --filter ${{ matrix.app }} run build
         env:
