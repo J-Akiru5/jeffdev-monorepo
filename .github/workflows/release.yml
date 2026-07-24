@@ -2,7 +2,7 @@ name: Release
 on:
   push:
     branches: [main]
-    paths-ignore: ['**.md']
+    paths-ignore: ["**.md"]
 
 concurrency:
   group: release-${{ github.ref }}
@@ -10,7 +10,7 @@ concurrency:
 
 env:
   TURBO_TELEMETRY_DISABLED: 1
-  PNPM_VERSION: 9.1.0
+  PNPM_VERSION: 9
   NODE_VERSION: "22"
 
 jobs:
@@ -36,13 +36,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
 
-      - name: Install build dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential python3
-
-      - uses: SocketDev/action@v1
-        with:
-          mode: firewall-free
-      - run: sfw pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile
 
       - name: Build packages
         run: pnpm --filter prism-context-engine... run build
