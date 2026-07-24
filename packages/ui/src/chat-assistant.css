@@ -120,7 +120,11 @@
   transition: all 0.15s ease;
 }
 
-.chat-assistant-clear-btn:hover,
+.chat-assistant-clear-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
 .chat-assistant-close-btn:hover {
   background: var(--bg-tertiary);
   color: var(--text-primary);

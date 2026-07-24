@@ -84,7 +84,9 @@ export default async function ServicePage({ params }: ServicePageProps) {
     features: fallbackService!.features,
     deliverables: fallbackService!.deliverables,
     investment: {
-      starting: `PHP ${fallbackService!.investment.startingPrice.toLocaleString()}`,
+      starting: fallbackService!.investment.startingPrice > 0
+        ? `PHP ${fallbackService!.investment.startingPrice.toLocaleString()}`
+        : "Custom quote",
       timeline: fallbackService!.investment.timeline,
     },
     order: 0,
@@ -155,7 +157,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
                 {/* CTAs */}
                 <div className="mt-8 flex flex-wrap gap-4">
                   <Link
-                    href="/quote"
+                    href={`/quote?service=${slug}`}
                     className="group relative overflow-hidden rounded-md border border-cyan-500/50 bg-cyan-500/10 px-6 py-3 backdrop-blur-md transition-all hover:border-cyan-400 hover:bg-cyan-500/20 hover:shadow-[0_0_30px_rgba(6,182,212,0.25)]"
                   >                      <span className="relative z-10 flex items-center gap-2 font-mono text-sm uppercase tracking-wider text-[var(--text-primary)]">
                       Get_Quote

@@ -118,11 +118,16 @@ function getClientIP(request: NextRequest): string {
 
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting via Upstash
+    // Rate limiting via Upstash (optional — graceful fallback if Redis is unavailable)
     const clientIP = getClientIP(request);
-    const rlResult = await checkRateLimit(clientIP, "assistant");
+    let rlResult: { allowed: boolean; limit: number; remaining: number; reset: number } | null = null;
+    try {
+      rlResult = await checkRateLimit(clientIP, "assistant");
+    } catch (error) {
+      console.error("[ASSISTANT] Rate limiter unavailable (Redis missing?), skipping:", error);
+    }
 
-    if (!rlResult.allowed) {
+    if (rlResult && !rlResult.allowed) {
       return NextResponse.json(
         { error: "Rate limit exceeded. Please wait a moment before trying again." },
         { status: 429, headers: getRateLimitHeaders(rlResult) },
@@ -162,17 +167,22 @@ export async function POST(request: NextRequest) {
     if (!guardCheck.relevant) {
       return NextResponse.json(
         { response: guardCheck.reason, blocked: true },
-        { headers: { ...getRateLimitHeaders(rlResult) } },
+        { headers: { ...(rlResult ? getRateLimitHeaders(rlResult) : {}) } },
       );
     }
 
-    // Check cache for common questions
+    // Check cache for common questions (optional — graceful fallback if Redis is unavailable)
     const cacheKey = `assistant:labs:${userQuestion.toLowerCase().trim()}`;
-    const cachedResponse = await getCachedResponse(cacheKey);
+    let cachedResponse: string | null = null;
+    try {
+      cachedResponse = await getCachedResponse(cacheKey);
+    } catch (error) {
+      console.error("[ASSISTANT] Cache unavailable (Redis missing?), skipping:", error);
+    }
     if (cachedResponse) {
       return NextResponse.json(
         { response: cachedResponse, cached: true },
-        { headers: { ...getRateLimitHeaders(rlResult), "X-Cache": "HIT" } },
+        { headers: { ...(rlResult ? getRateLimitHeaders(rlResult) : {}), "X-Cache": "HIT" } },
       );
     }
 
@@ -181,7 +191,7 @@ export async function POST(request: NextRequest) {
       process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
-        { error: "AI service not configured. Please contact support." },
+        { error: "Our AI Assistant is currently taking a quick break. Please email us at contact@syntaxure.dev instead!" },
         { status: 503 },
       );
     }
@@ -220,12 +230,16 @@ Provide a helpful, accurate response based on the system context above.`;
     const result = await model.generateContent(systemPrompt);
     const response = result.response.text();
 
-    // Cache the response
-    await cacheResponse(cacheKey, response, 300);
+    // Cache the response (optional — graceful fallback if Redis is unavailable)
+    try {
+      await cacheResponse(cacheKey, response, 300);
+    } catch (error) {
+      console.error("[ASSISTANT] Cache write unavailable (Redis missing?), skipping:", error);
+    }
 
     return NextResponse.json(
       { response, cached: false },
-      { headers: { ...getRateLimitHeaders(rlResult), "X-Cache": "MISS" } },
+      { headers: { ...(rlResult ? getRateLimitHeaders(rlResult) : {}), "X-Cache": "MISS" } },
     );
   } catch (error) {
     console.error("System Assistant error:", error);
@@ -235,7 +249,7 @@ Provide a helpful, accurate response based on the system context above.`;
 
     if (errorMessage.includes("API key")) {
       return NextResponse.json(
-        { error: "AI service authentication failed. Please check configuration." },
+        { error: "Our AI Assistant is currently offline. Please email us at contact@syntaxure.dev instead!" },
         { status: 503 },
       );
     }

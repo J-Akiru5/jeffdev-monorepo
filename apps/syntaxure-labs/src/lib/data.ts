@@ -103,24 +103,30 @@ export async function getServices(): Promise<DataService[]> {
     if (error) throw error;
     if (!data) return [];
 
-    // Map Supabase columns to DataService shape
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return data.map((svc: any, idx: number) => ({
-      slug: svc.name?.toLowerCase().replace(/\s+/g, "-") || `service-${idx}`,
-      icon: mapCategoryToIcon(svc.category),
-      title: svc.name || "",
-      tagline: svc.description?.slice(0, 120) || "",
-      description: svc.description || "",
-      features: [],
-      deliverables: [],
-      investment: {
-        starting: svc.price_min
-          ? `$${Number(svc.price_min).toLocaleString()}`
-          : "",
-        timeline: "",
-      },
-      order: idx,
-    }));
+    // Map Supabase columns to DataService shape.
+    // Rules:
+    //   - price_min > 0  → show that price (overrides hardcoded)
+    //   - price_min = 0  → show "Custom quote" (admin set it)
+    //   - price_min null  → skip (no price set, fall through to hardcoded)
+     
+    return data
+      .filter((svc: any) => svc.price_min !== null && svc.price_min !== undefined)
+      .map((svc: any, idx: number) => ({
+        slug: svc.name?.toLowerCase().replace(/\s+/g, "-") || `service-${idx}`,
+        icon: mapCategoryToIcon(svc.category),
+        title: svc.name || "",
+        tagline: svc.description?.slice(0, 120) || "",
+        description: svc.description || "",
+        features: [],
+        deliverables: [],
+        investment: {
+          starting: svc.price_min > 0
+            ? `₱${Number(svc.price_min).toLocaleString()}`
+            : "Custom quote",
+          timeline: svc.timeline || "",
+        },
+        order: idx,
+      }));
   } catch (error) {
     logDataError("[GET SERVICES ERROR]", error);
     return [];

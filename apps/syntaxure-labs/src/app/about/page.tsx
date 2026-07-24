@@ -207,43 +207,27 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        {/* Kwadra TBI Section */}
-        <section className="px-6 pt-4 pb-8 lg:px-8">
+        {/* Mission & Vision Section */}
+        <section className="px-6 py-16 lg:px-8">
           <div className="mx-auto max-w-7xl">
-            <div className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-8 md:p-12 overflow-hidden">
-              <div className="flex flex-col items-center text-center md:flex-row md:text-left md:items-center md:gap-12">
-                <div className="shrink-0 mb-8 md:mb-0">
-                  <div className="h-40 w-40 md:h-56 md:w-56 rounded-full overflow-hidden bg-white shadow-sm border border-black/5 dark:border-white/10 flex items-center justify-center">
-                    <Image 
-                      src="/kwadra.png" 
-                      alt="Kwadra TBI Incubatee Cohort 5" 
-                      width={256} 
-                      height={256} 
-                      className="w-full h-full object-contain scale-[1.15]"
-                    />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <span className="font-mono text-xs uppercase tracking-wider text-blue-500 dark:text-blue-400">
-                    {sectionHeaders.kwadraTbi.label}
-                  </span>
-                  <h2 className="mt-2 text-2xl font-bold text-[var(--text-primary)]">
-                    {kwadraTbi.heading}
-                  </h2>
-                  <p className="mt-3 max-w-2xl text-[var(--text-secondary)]">
-                    {kwadraTbi.description}
-                  </p>
-                  <div className="mt-6 flex flex-wrap justify-center md:justify-start gap-3">
-                    {kwadraTbi.badges.map((badge) => (
-                      <span
-                        key={badge}
-                        className="rounded-sm border border-blue-500/20 bg-blue-500/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-blue-600 dark:text-blue-400"
-                      >
-                        {badge}
-                      </span>
-                    ))}
-                  </div>
-                </div>
+            <h2 className="font-mono text-xs uppercase tracking-wider text-white/40">
+              {sectionHeaders.missionVision.label}
+            </h2>
+            <p className="mt-6 max-w-3xl text-lg leading-relaxed text-white/60">
+              {missionVision.executiveSummary}
+            </p>
+            <div className="mt-10 grid gap-8 md:grid-cols-2">
+              <div className="rounded-md border border-cyan-500/20 bg-gradient-to-br from-cyan-500/5 to-transparent p-8">
+                <h3 className="font-mono text-xs uppercase tracking-wider text-cyan-400">
+                  {sectionHeaders.missionVision.missionLabel}
+                </h3>
+                <p className="mt-4 text-white/70">{missionVision.mission}</p>
+              </div>
+              <div className="rounded-md border border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-transparent p-8">
+                <h3 className="font-mono text-xs uppercase tracking-wider text-purple-400">
+                  {sectionHeaders.missionVision.visionLabel}
+                </h3>
+                <p className="mt-4 text-white/70">{missionVision.vision}</p>
               </div>
             </div>
           </div>
@@ -295,31 +279,6 @@ export default async function AboutPage() {
           </div>
         </section>
 
-        {/* Mission & Vision Section */}
-        <section className="px-6 py-16 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <h2 className="font-mono text-xs uppercase tracking-wider text-white/40">
-              {sectionHeaders.missionVision.label}
-            </h2>
-            <p className="mt-6 max-w-3xl text-lg leading-relaxed text-white/60">
-              {missionVision.executiveSummary}
-            </p>
-            <div className="mt-10 grid gap-8 md:grid-cols-2">
-              <div className="rounded-md border border-cyan-500/20 bg-gradient-to-br from-cyan-500/5 to-transparent p-8">
-                <h3 className="font-mono text-xs uppercase tracking-wider text-cyan-400">
-                  {sectionHeaders.missionVision.missionLabel}
-                </h3>
-                <p className="mt-4 text-white/70">{missionVision.mission}</p>
-              </div>
-              <div className="rounded-md border border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-transparent p-8">
-                <h3 className="font-mono text-xs uppercase tracking-wider text-purple-400">
-                  {sectionHeaders.missionVision.visionLabel}
-                </h3>
-                <p className="mt-4 text-white/70">{missionVision.vision}</p>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* Values Section */}
         <section className="px-6 py-16 lg:px-8">
@@ -420,7 +379,7 @@ export default async function AboutPage() {
 
 const DEFAULT_ABOUT_DATA: AboutData = {
   hero: {
-    tagline: "// About.studio",
+    tagline: "// About.labs",
     heading1: "We Build Systems",
     heading2: "That Launch",
     description:

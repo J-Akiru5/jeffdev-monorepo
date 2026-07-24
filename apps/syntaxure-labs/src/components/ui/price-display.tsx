@@ -21,10 +21,14 @@ interface PriceDisplayProps {
 }
 
 /**
- * Parse a number string to extract the numeric value
+ * Parse a number string to extract the numeric value.
+ * Handles formats like "PHP 150,000", "$1,340", "₱75,000", "1.5K".
  */
 function parseAmount(value: string): number {
-  const cleaned = value.replace(/[₱$,\s]/g, "");
+  // Remove currency symbols, commas, whitespace, and text prefixes like "PHP"
+  const cleaned = value
+    .replace(/[₱$,\s]/g, "")
+    .replace(/^PHP/i, "");
 
   if (cleaned.toUpperCase().includes("K")) {
     const num = parseFloat(cleaned.replace(/[Kk]/g, ""));
@@ -46,6 +50,15 @@ export function PriceDisplay({
   className = "",
 }: PriceDisplayProps) {
   const { exchangeRate, formatPrice, isLoading } = useCurrency();
+
+  // Handle non-numeric labels like "Custom quote" — display as-is
+  if (typeof amount === "string" && !/\d/.test(amount)) {
+    return (
+      <span className={className} data-loading={isLoading}>
+        {amount}
+      </span>
+    );
+  }
 
   // 1. Get numeric amount
   const numericAmount =

@@ -34,7 +34,7 @@ export const services: Service[] = [
     title: "Custom Websites & Web Applications",
     tagline: "Fast, beautiful websites that drive business growth.",
     description:
-      "We build high-performance websites and web apps that load instantly, rank well on Google, and convert visitors into customers. Your site will look great on any device and reflect your brand perfectly.",
+      "We build high-performance websites and web apps that load instantly, rank well on Google, and convert visitors into customers. Your site will look great on any device and reflect your brand perfectly. Deployed and ready for your domain right out of the gate.",
     features: [
       "Blazing-fast load times",
       "Mobile-friendly on all devices",
@@ -46,9 +46,10 @@ export const services: Service[] = [
       "Custom design with your brand colors and logo",
       "Works perfectly on phone, tablet, and desktop",
       "Performance and SEO optimization report",
+      "Optional managed hosting & maintenance (starts at ₱5,000/mo)",
     ],
     investment: {
-      startingPrice: 75000,
+      startingPrice: 150000,
       timeline: "2-4 weeks",
     },
   },
@@ -59,7 +60,7 @@ export const services: Service[] = [
     title: "SaaS Platform Development",
     tagline: "Launch your subscription product in weeks, not months.",
     description:
-      "We build custom software-as-a-service platforms with everything you need built-in: user accounts, subscription billing, and the ability to serve multiple clients from one system. You focus on your business rules; we handle the rest.",
+      "We build custom software-as-a-service platforms with everything you need built-in: user accounts, subscription billing, and the ability to serve multiple clients from one system. We handle the full deployment pipeline so you can focus on your business rules, not the infrastructure.",
     features: [
       "User accounts and login system",
       "Subscription payment processing",
@@ -67,13 +68,14 @@ export const services: Service[] = [
       "Ready-to-launch foundation",
     ],
     deliverables: [
-      "Complete SaaS platform ready to launch",
+      "Complete SaaS platform deployed and ready to launch",
       "Payment processing integration",
       "Admin dashboard for managing users",
       "Account registration and login flow",
+      "Cloud hosting setup with CI/CD pipeline",
     ],
     investment: {
-      startingPrice: 150000,
+      startingPrice: 250000,
       timeline: "4-8 weeks",
     },
   },
@@ -98,7 +100,7 @@ export const services: Service[] = [
       "Regular security updates and maintenance",
     ],
     investment: {
-      startingPrice: 50000,
+      startingPrice: 80000,
       timeline: "1-2 weeks (setup) + monthly hosting",
     },
   },
@@ -109,7 +111,7 @@ export const services: Service[] = [
     title: "AI Integration & Automation",
     tagline: "Make your product smarter with artificial intelligence.",
     description:
-      "We add AI capabilities to your product so it can automate repetitive tasks, answer customer questions intelligently, and make smarter decisions. Powered by our Context Engine technology for reliable, accurate AI behavior.",
+      "We add AI capabilities to your product so it can automate repetitive tasks, answer customer questions intelligently, and make smarter decisions. Powered by our Context Engine technology for reliable, accurate AI behavior. We deploy and integrate directly into your existing stack.",
     features: [
       "AI-powered search and recommendations",
       "Automated document processing",
@@ -117,13 +119,13 @@ export const services: Service[] = [
       "Custom AI trained on your data",
     ],
     deliverables: [
-      "AI feature integrated into your product",
+      "AI feature deployed and integrated into your product",
       "Custom knowledge base for your AI",
       "Automated workflow setup",
       "AI behavior testing and optimization",
     ],
     investment: {
-      startingPrice: 100000,
+      startingPrice: 0,
       timeline: "2-4 weeks",
     },
   },

@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { cookies, headers } from "next/headers";
 import { Analytics } from "@vercel/analytics/react";
 import { ThemeWrapper } from "@/components/providers/theme-wrapper";
 import { ThemeBootstrap } from "@/components/providers/theme-bootstrap";
 import { CurrencyProvider } from "@/contexts/currency-context";
+import type { CurrencyCode } from "@/lib/currency";
 import { FeatureFlagProvider } from "@/components/providers/feature-flag-provider";
 import { getFeatureFlags } from "@/lib/feature-flags";
 import { CookieConsent } from "@/components/cookie-consent";
 import { AnalyticsProvider } from "@/components/analytics-provider";
 import { Toaster } from "sonner";
 import { ChatAssistantClient as ChatAssistant } from "@/components/chat-assistant-client";
+import { CurrencyOverride } from "@/components/currency-override";
+import { KwadraWidget } from "@/components/kwadra-widget";
 import "./globals.css";
 
 /**
@@ -115,13 +119,45 @@ export const viewport = {
  * - Uses native browser scrolling for optimal performance
  * - Renders the global grid/spotlight background
  */
+/**
+ * Detect the user's currency server-side.
+ * Priority: 1) Cookie > 2) Geo header (Vercel) > 3) Accept-Language > 4) Default USD
+ *
+ * On Vercel production, x-vercel-ip-country detects actual visitor location.
+ * On localhost, falls back to browser language (Accept-Language).
+ * Use ?currency=USD or ?currency=PHP in the URL to test different currencies.
+ */
+async function detectCurrency(): Promise<CurrencyCode> {
+  // 0. URL param override (set via client CurrencyOverride component)
+  const cookieStore = await cookies();
+  const cookieVal = cookieStore.get("currency")?.value;
+  if (cookieVal === "PHP" || cookieVal === "USD") return cookieVal;
+
+  // 1. Vercel geo header (accurate country detection on production)
+  const headersList = await headers();
+  const country = headersList.get("x-vercel-ip-country")?.toUpperCase();
+  if (country === "PH") return "PHP";
+
+  // 2. Accept-Language header (fallback for localhost)
+  const acceptLang = headersList.get("accept-language") || "";
+  const phLocales = ["tl", "fil", "en-ph", "ceb", "hil", "ilo"];
+  const isPhilippines = phLocales.some((l) => acceptLang.toLowerCase().includes(l));
+  if (isPhilippines) return "PHP";
+
+  // 3. Default
+  return "USD";
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Fetch feature flags server-side
-  const featureFlags = await getFeatureFlags();
+  // Fetch feature flags + detect currency server-side
+  const [featureFlags, initialCurrency] = await Promise.all([
+    getFeatureFlags(),
+    detectCurrency(),
+  ]);
 
   return (
     <html
@@ -158,7 +194,8 @@ export default async function RootLayout({
         {/* Application Content */}
         <ThemeWrapper>
           <FeatureFlagProvider flags={featureFlags}>
-            <CurrencyProvider>
+            <CurrencyProvider initialCurrency={initialCurrency}>
+              <CurrencyOverride />
               <div className="relative z-10 min-h-screen flex flex-col">
                 <script
                   type="application/ld+json"
@@ -241,6 +278,7 @@ export default async function RootLayout({
         {/* Vercel Analytics - Web Vitals Tracking */}
         <Analytics />
         <CookieConsent />
+        <KwadraWidget />
         <Toaster
           theme="system"
           position="bottom-right"

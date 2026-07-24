@@ -1,8 +1,8 @@
 /**
  * Quote Form Server Action
  * -------------------------
- * Handles multi-step quote form submissions for SaaS template customization:
- * 1. Validates all steps with Zod
+ * Handles quote form submissions for custom development projects:
+ * 1. Validates with Zod
  * 2. Saves to Supabase
  * 3. Sends email notification to hire@syntaxure.dev
  */
@@ -14,16 +14,22 @@ import { sendEmail, quoteEmailTemplate, EMAIL_ADDRESSES } from "@/lib/email";
 import { generateQuoteRef } from "@/lib/ref-generator";
 
 const quoteSchema = z.object({
-  // Step 1: Template Selection
-  templateSelected: z.string().min(1, "Please select a template"),
-  templateName: z.string().min(1, "Template name is required"),
+  // Project type
+  projectType: z.string().min(1, "Please select a project type"),
+  projectTypeLabel: z.string().min(1, "Project type label is required"),
 
-  // Step 2: Customization Scope
-  customizationScope: z.enum(["brand", "api", "features", "full"], {
-    message: "Please select a customization scope",
+  // Scope
+  projectScope: z.enum(["template", "redesign", "features", "full"], {
+    message: "Please select a project scope",
   }),
 
-  // Step 3: Contact Info & Requirements
+  // Budget (optional)
+  budgetRange: z.string().optional(),
+
+  // Timeline
+  timeline: z.string().optional(),
+
+  // Contact
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   company: z.string().optional(),
@@ -34,6 +40,28 @@ const quoteSchema = z.object({
 });
 
 export type QuoteFormData = z.infer<typeof quoteSchema>;
+
+const scopeLabels: Record<string, string> = {
+  template: "MVP / Initial Launch",
+  redesign: "Redesign / Revamp",
+  features: "Add New Features",
+  full: "100% Custom Build",
+};
+
+const budgetLabels: Record<string, string> = {
+  "50-100k": "₱50K - ₱100K",
+  "100-250k": "₱100K - ₱250K",
+  "250-500k": "₱250K - ₱500K",
+  "500k-plus": "₱500K+",
+  "not-sure": "Not sure yet",
+};
+
+const timelineLabels: Record<string, string> = {
+  asap: "ASAP (1-2 weeks)",
+  "1-3months": "1-3 months",
+  "3-6months": "3-6 months",
+  flexible: "Flexible",
+};
 
 export async function submitQuoteForm(data: QuoteFormData) {
   try {
@@ -46,32 +74,44 @@ export async function submitQuoteForm(data: QuoteFormData) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const supabase = getAdminClient() as any;
 
-    // Save to Supabase
-    // NOTE: name/email/company/phone are stored in metadata (no dedicated columns in quotes table)
-    // user_id is NULL for public (unauthenticated) quote requests
-    // status starts as 'draft' (the only valid values: draft/sent/accepted/rejected/expired)
+    // Build title and project summary
+    const title = `${validated.name} - ${validated.projectTypeLabel}`;
+    const scopeLabel = scopeLabels[validated.projectScope] || validated.projectScope;
+    const budgetLabel = validated.budgetRange
+      ? budgetLabels[validated.budgetRange] || validated.budgetRange
+      : "Not specified";
+    const timelineLabel = validated.timeline
+      ? timelineLabels[validated.timeline] || validated.timeline
+      : "Not specified";
+
+    // Save to Supabase (store new fields in metadata JSON column)
     const { data: result, error } = await supabase
       .from("quotes")
       .insert([
         {
           user_id: null,
           project_id: null,
-          title: `${validated.name} - ${validated.templateName}`,
+          title,
           description: validated.requirements,
           amount: 0,
           status: "draft",
           valid_until: null,
           line_items: [],
-          quote_type: "template",
+          quote_type: "custom",
           metadata: {
             refNo,
             name: validated.name,
             email: validated.email,
             company: validated.company || null,
             phone: validated.phone || null,
-            templateId: validated.templateSelected,
-            templateName: validated.templateName,
-            scope: validated.customizationScope,
+            projectType: validated.projectType,
+            projectTypeLabel: validated.projectTypeLabel,
+            projectScope: validated.projectScope,
+            scopeLabel,
+            budgetRange: validated.budgetRange || null,
+            budgetLabel,
+            timeline: validated.timeline || null,
+            timelineLabel,
           },
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -84,13 +124,15 @@ export async function submitQuoteForm(data: QuoteFormData) {
     // Send email notification
     await sendEmail({
       to: EMAIL_ADDRESSES.hire,
-      subject: `🎯 New Quote Request: ${validated.templateName} - ${validated.customizationScope}`,
+      subject: `🎯 New Quote Request: ${validated.projectTypeLabel} - ${scopeLabel}`,
       html: quoteEmailTemplate({
         name: validated.name,
         email: validated.email,
         company: validated.company,
-        templateName: validated.templateName,
-        scope: validated.customizationScope,
+        projectType: validated.projectTypeLabel,
+        projectScope: scopeLabel,
+        budgetRange: budgetLabel,
+        timeline: timelineLabel,
         requirements: validated.requirements,
       }),
       replyTo: validated.email,
