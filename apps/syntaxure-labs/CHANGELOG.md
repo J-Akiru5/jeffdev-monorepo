@@ -1,5 +1,28 @@
 # syntaxure-labs
 
+## 1.2.0
+
+### Minor Changes
+
+- **v3.2.0 — AI Chat Assistant, UX Overhaul & About Page Redesign**
+
+  ### syntaxure-labs
+  - Added contextual AI chat assistant popups on all pages (Google Gemini-powered, with rate limiting and topic guard rails)
+  - Chat assistant automatically closes on client-side route changes
+  - Refactored about page for 2026 enterprise standard (mission, values, founders)
+  - Added Kwadra TBI widget, moved exclusively to about page
+  - Refined hero section copy and design
+  - Softer light mode palette across the site
+  - Mobile UX and typography upgrade (responsive polish, spacing, font sizing)
+  - Optimized Prism waitlist layout
+  - Reveal scroll-animation component syntax fixes
+  - Bumped copyright year to 2026
+
+  ### @syntaxure/ui
+  - Exported `ChatAssistantProps` type for consumer use
+  - Refined section components for syntaxure-labs
+  - Updated Kwadra widget UI/UX
+
 ## 1.1.0
 
 ### Minor Changes
