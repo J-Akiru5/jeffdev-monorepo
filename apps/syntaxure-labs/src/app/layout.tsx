@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     template: "%s | Syntaxure Labs",
   },
   description:
-    "Syntaxure Labs is a custom development agency specializing in high-performance websites, SaaS platforms, cloud infrastructure, and secure AI integration. Creators of Context Engine for AI governance.",
+    "Syntaxure Labs builds custom websites, SaaS platforms, cloud infrastructure, and AI integration. Creators of Context Engine for AI governance.",
   keywords: [
     "global digital transformation agency",
     "custom software development company",
@@ -68,8 +68,8 @@ export const metadata: Metadata = {
     url: "https://www.syntaxure.dev",
     siteName: "Syntaxure Labs",
     title: "Syntaxure Labs | Custom Websites, SaaS Platforms & AI",
-    description:
-      "Custom website development, SaaS platforms, cloud infrastructure, and secure AI integration. We build high-performance digital solutions for businesses ready to scale.",
+  description:
+    "Custom websites, SaaS platforms, cloud infrastructure, and AI integration. High-performance digital solutions for businesses ready to scale.",
     images: [
       {
         url: "/syntaxure-business-card.png",
@@ -165,6 +165,7 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        <link rel="llms-txt" href="/llms.txt" />
         <AnalyticsProvider />
         <ThemeBootstrap />
       </head>
@@ -261,7 +262,13 @@ export default async function RootLayout({
                             name: "Context Engine",
                             applicationCategory: "BusinessApplication",
                             operatingSystem: "Any",
-                            description: "A proprietary AI Governance layer that forces AI agents to adhere to established protocols and actively prevents AI hallucinations in enterprise environments."
+                            description: "A proprietary AI Governance layer that forces AI agents to adhere to established protocols and actively prevents AI hallucinations in enterprise environments.",
+                            offers: {
+                              "@type": "Offer",
+                              price: "0",
+                              priceCurrency: "USD",
+                              availability: "https://schema.org/ContactForPrice"
+                            }
                           }
                         }
                       ]

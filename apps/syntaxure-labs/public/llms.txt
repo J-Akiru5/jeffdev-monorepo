@@ -1,39 +1,95 @@
 # Syntaxure Labs
 
-> Syntaxure Labs is a global B2B digital transformation agency specializing in scalable custom software, web architectures, and secure AI integrations. Creators of Context Engine for AI governance.
+> Syntaxure Labs is a global B2B digital transformation agency specializing in scalable custom software, web architectures, and secure AI integrations. Creators of Context Engine for AI governance. Based in Iloilo City, Philippines. Est. 2025.
 
-## Core Services
+## Services
 
-- **Web Development**: High-performance marketing websites and web applications built with Next.js
-- **SaaS Platform Development**: Multi-tenant SaaS architectures with subscription billing and RBAC
-- **Cloud Infrastructure**: Cloud architecture, deployment, and 24/7 monitoring on Vercel/AWS/GCP
-- **AI Integration**: Custom AI solutions, RAG pipelines, workflow automation with Context Engine
+We offer fixed-investment pricing with predictable timelines. Every project starts with a free consultation and scope proposal delivered within 24 hours.
+
+### Custom Websites & Web Applications
+High-performance websites and web apps that load instantly, rank well on Google, and convert visitors. Custom design, mobile-first, SEO-optimized.
+- **Timeline:** 2-4 weeks
+- **Starting at:** PHP 150,000
+- **Details:** https://www.syntaxure.dev/services/web-development
+
+### SaaS Platform Development
+Multi-tenant SaaS platforms with user accounts, subscription billing, RBAC, and ready-to-launch foundations. Full deployment pipeline included.
+- **Timeline:** 4-8 weeks
+- **Starting at:** PHP 250,000
+- **Details:** https://www.syntaxure.dev/services/saas-platforms
+
+### Cloud Hosting & Infrastructure
+Enterprise-grade cloud hosting with 24/7 monitoring, automatic scaling, security updates, and disaster recovery. Fully managed.
+- **Timeline:** 1-2 weeks setup + monthly hosting
+- **Starting at:** PHP 80,000
+- **Details:** https://www.syntaxure.dev/services/cloud-architecture
+
+### AI Integration & Automation
+AI-powered search, chatbots, document processing, and workflow automation powered by Context Engine technology. Custom integrations.
+- **Timeline:** 2-4 weeks
+- **Pricing:** Custom quote (varies per project)
+- **Details:** https://www.syntaxure.dev/services/ai-integration
+
+### Managed Hosting & Maintenance (Monthly)
+Ongoing hosting management, security updates, performance monitoring, and maintenance retainer.
+- **Starting at:** PHP 5,000-15,000/month
 
 ## Key Pages
 
-- Home: https://www.syntaxure.dev
-- Services: https://www.syntaxure.dev/services
-- Case Studies: https://www.syntaxure.dev/work
-- About: https://www.syntaxure.dev/about
-- Blog: https://www.syntaxure.dev/blog
-- Contact: https://www.syntaxure.dev/contact
-- Quote: https://www.syntaxure.dev/quote
-- Prism Context Engine: https://www.syntaxure.dev/prism
+- **Home:** https://www.syntaxure.dev — Agency landing page with hero, services overview, featured work, features, prism highlight, FAQ, and CTA
+- **Services Overview:** https://www.syntaxure.dev/services — Grid of all 4 service offerings with descriptions and timelines
+- **Service Details:** https://www.syntaxure.dev/services/[slug] — Detailed per-service pages with features, deliverables, FAQ, and quote CTA
+- **Work/Case Studies:** https://www.syntaxure.dev/work — Portfolio of projects and case studies with filters
+- **About:** https://www.syntaxure.dev/about — Company mission, vision, founders (Jeff Edrick Martinez & Lou Vincent Baroro), tech stack, values, brand assets
+- **Blog:** https://www.syntaxure.dev/blog — Insights on AI governance, SaaS architecture, web development, digital transformation, tutorials, and product updates
+- **Contact:** https://www.syntaxure.dev/contact — Contact form and company information
+- **Quote:** https://www.syntaxure.dev/quote — Multi-step quote request form (template selection, customization scope, contact details)
+- **Pricing:** https://www.syntaxure.dev/pricing — Template-based pricing tiers and packages
+- **Features:** https://www.syntaxure.dev/features — Six architectural pillars: multi-tenant architecture, ready-to-ship security, template-accelerated delivery, AI-native extensibility, productized customization, continuous evolution
+- **Prism Context Engine:** https://www.syntaxure.dev/prism — Flagship product waitlist page
+- **Community:** https://www.syntaxure.dev/community — Release notifications, beta programs, and community updates
+
+## Blog Topics
+
+The Syntaxure Labs blog covers:
+- AI governance and context management
+- SaaS architecture and design patterns
+- Web development best practices and tutorials
+- Digital transformation strategies
+- Case studies on system architecture
+- Product updates and release notes
+- Technology deep dives and thought leadership
+
+**URL:** https://www.syntaxure.dev/blog
+
+## Full Context
+
+For complete detailed context including full service descriptions, all FAQ answers, complete tech stack details, methodology breakdown, and extended company information:
+
+https://www.syntaxure.dev/llms-full.txt
 
 ## Company
 
-- Founded: 2025
-- Location: Iloilo City, Western Visayas, Philippines
-- Founder: Jeff Edrick Martinez (CEO)
-- Co-Founder: Lou Vincent Baroro (CTO)
-- Contact: contact@syntaxure.dev
-- Phone: +63 970 576 2593
+- **Founded:** 2025
+- **Location:** Iloilo City, Western Visayas, Philippines
+- **Founder:** Jeff Edrick Martinez (CEO) — Technical founder, 5+ years in production systems, Next.js, cloud, AI
+- **Co-Founder:** Lou Vincent Baroro (CTO) — Engineering leader, scalable architecture, AI infrastructure
+- **Contact:** contact@syntaxure.dev
+- **Phone:** +63 970 576 2593
 
 ## Flagship Product: Context Engine
 
-Context Engine is a proprietary AI Governance layer that enforces strict protocols and actively prevents AI hallucinations in enterprise environments. It forces AI agents to adhere to established protocols and prevents hallucinations in enterprise environments.
+Context Engine is a proprietary AI Governance layer that enforces strict protocols and actively prevents AI hallucinations in enterprise environments. It ensures AI agents follow established rules, validates outputs against context, and provides audit trails. Available as a SaaS subscription (pricing available on request).
+
+**URL:** https://www.syntaxure.dev/prism
 
 ## Social
 
-- LinkedIn: https://www.linkedin.com/company/syntaxure-labs
-- Facebook: https://www.facebook.com/people/Syntaxure-Labs-PH/61590058783641/
+- **LinkedIn:** https://www.linkedin.com/company/syntaxure-labs
+- **Facebook:** https://www.facebook.com/people/Syntaxure-Labs-PH/61590058783641/
+
+## Legal
+
+- **Privacy Policy:** https://www.syntaxure.dev/privacy
+- **Terms of Service:** https://www.syntaxure.dev/terms
+- **Cookie Policy:** https://www.syntaxure.dev/cookies
