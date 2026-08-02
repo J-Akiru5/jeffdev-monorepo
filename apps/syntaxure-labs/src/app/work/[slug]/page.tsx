@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowUpRight, ExternalLink, Quote } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { CTASection } from "@/components/sections/cta-section";
+import { ProjectGallery } from "@/components/work/project-gallery";
 import { getProjectBySlug, getProjects } from "@/lib/data";
 import { projects as staticProjects } from "@/data/projects";
 import type { Metadata } from "next";
@@ -80,7 +81,18 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   return (
     <>
       <Header />
-      <main className="pt-24">
+      <main className="pt-32 pb-16">
+        {/* Desktop Absolute Back Button (Sits on the left side, professional style) */}
+        <div className="hidden xl:flex absolute left-[max(2rem,calc(50%-54rem))] top-36 z-50">
+          <Link
+            href="/work"
+            className="group flex items-center gap-2 rounded-md border border-[var(--border-subtle)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
+          >
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+            All Projects
+          </Link>
+        </div>
+
         {/* BreadcrumbList JSON-LD */}
         <script
           type="application/ld+json"
@@ -96,47 +108,79 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           }}
         />
         {/* Hero Section */}
-        <section className="px-6 py-16 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <Link
-              href="/work"
-              className="inline-flex items-center gap-2 text-sm text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              All Projects
-            </Link>
+        <section className="px-6 pb-8 lg:px-8">
+          <div className="mx-auto max-w-7xl relative">
+            {/* Mobile/Tablet: Back button */}
+            <div className="mb-8 xl:hidden">
+              <Link
+                href="/work"
+                className="inline-flex items-center gap-2 rounded-md border border-[var(--border-subtle)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
+              >
+                <ArrowLeft className="h-4 w-4 transition-transform hover:-translate-x-0.5" />
+                All Projects
+              </Link>
+            </div>
 
-            <div className="mt-8 max-w-3xl">
-              <span className="font-mono text-xs uppercase tracking-wider text-cyan-500 dark:text-cyan-400">
-                {activeProject.category}
-              </span>
-              <h1 className="mt-4 text-4xl font-bold tracking-tight text-[var(--text-primary)] md:text-5xl">
-                {activeProject.title}
-              </h1>
-              <p className="mt-2 text-lg text-[var(--text-secondary)]">
-                {activeProject.client}
-              </p>
-              <p className="mt-6 text-xl leading-relaxed text-[var(--text-secondary)]">
-                {activeProject.description}
-              </p>
+            <div className="mt-8 grid gap-12 lg:grid-cols-12 lg:gap-8">
+              {/* Left Column: Title & CTA */}
+              <div className="lg:col-span-7">
+                <span className="font-mono text-xs uppercase tracking-wider text-cyan-500 dark:text-cyan-400">
+                  {activeProject.category}
+                </span>
+                <h1 className="mt-4 text-4xl font-bold tracking-tight text-[var(--text-primary)] md:text-5xl lg:text-6xl">
+                  {activeProject.title}
+                </h1>
+                <p className="mt-4 text-lg font-medium text-[var(--text-secondary)]">
+                  {activeProject.client}
+                </p>
 
-              {/* Live Site CTA — only shown when publishedSiteUrl is set */}
-              {(activeProject as { publishedSiteUrl?: string | null }).publishedSiteUrl && (
-                <div className="mt-8">
-                  <a
-                    href={(activeProject as { publishedSiteUrl?: string | null }).publishedSiteUrl!}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-md border border-emerald-500/40
-                               bg-emerald-500/10 px-5 py-2.5 font-mono text-xs uppercase tracking-wider
-                               text-emerald-400 backdrop-blur-md transition-all
-                               hover:border-emerald-400 hover:bg-emerald-500/20 hover:text-white"
-                  >
-                    <ExternalLink className="h-3.5 w-3.5" />
-                    Visit Live Site
-                  </a>
-                </div>
-              )}
+                {/* Live Site CTA — only shown when publishedSiteUrl is set */}
+                {(activeProject as { publishedSiteUrl?: string | null }).publishedSiteUrl && (
+                  <div className="mt-8">
+                    <a
+                      href={(activeProject as { publishedSiteUrl?: string | null }).publishedSiteUrl!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-md border border-emerald-500/40
+                                 bg-emerald-500/10 px-5 py-2.5 font-mono text-xs uppercase tracking-wider
+                                 text-emerald-400 backdrop-blur-md transition-all
+                                 hover:border-emerald-400 hover:bg-emerald-500/20 hover:text-white"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      Visit Live Site
+                    </a>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column: Description & Metadata */}
+              <div className="lg:col-span-5 lg:pt-12">
+                <h3 className="font-mono text-xs uppercase tracking-wider text-[var(--text-tertiary)] mb-4">
+                  Project Overview
+                </h3>
+                <p className="text-lg leading-relaxed text-[var(--text-secondary)]">
+                  {activeProject.description}
+                </p>
+
+                {/* Tech Stack Mini Display */}
+                {activeProject.technologies && activeProject.technologies.length > 0 && (
+                  <div className="mt-8">
+                    <h3 className="font-mono text-xs uppercase tracking-wider text-[var(--text-tertiary)] mb-3">
+                      Core Stack
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {activeProject.technologies.slice(0, 6).map((tech) => (
+                        <span
+                          key={tech}
+                          className="rounded-sm border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Results Banner */}
@@ -155,12 +199,12 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
             {/* Cover Image */}
             {activeProject.image && (
-              <div className="mt-12 overflow-hidden rounded-md border border-[var(--border-subtle)] relative aspect-[21/9]">
+              <div className="mt-12 overflow-hidden flex items-center justify-center relative aspect-video md:aspect-[21/9]">
                 <Image
                   src={activeProject.image}
                   alt={`${activeProject.title} cover`}
                   fill
-                  className="object-cover"
+                  className="object-contain"
                   sizes="(max-width: 1200px) 100vw, 1200px"
                   priority
                 />
@@ -198,14 +242,15 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
         {/* Technologies */}
         <section className="px-6 py-16 lg:px-8">
-          <div className="mx-auto max-w-7xl">                <h2 className="font-mono text-xs uppercase tracking-wider text-[var(--text-tertiary)]">
-                  Technologies Used
-                </h2>
-                <div className="mt-6 flex flex-wrap gap-3">
-                  {activeProject.technologies.map((tech) => (
-                    <span
-                      key={tech}
-                      className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-4 py-2 font-mono text-sm text-[var(--text-secondary)]"
+          <div className="mx-auto max-w-7xl">
+            <h2 className="font-mono text-xs uppercase tracking-wider text-[var(--text-tertiary)]">
+              Technologies Used
+            </h2>
+            <div className="mt-6 flex flex-wrap gap-3">
+              {activeProject.technologies.map((tech) => (
+                <span
+                  key={tech}
+                  className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-4 py-2 font-mono text-sm text-[var(--text-secondary)]"
                 >
                   {tech}
                 </span>
@@ -213,6 +258,27 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             </div>
           </div>
         </section>
+
+        {/* Services Delivered */}
+        {(activeProject as any).services && (activeProject as any).services.length > 0 && (
+          <section className="px-6 pb-16 lg:px-8">
+            <div className="mx-auto max-w-7xl">
+              <h2 className="font-mono text-xs uppercase tracking-wider text-[var(--text-tertiary)]">
+                Services Delivered
+              </h2>
+              <div className="mt-6 flex flex-wrap gap-3">
+                {((activeProject as any).services as string[]).map((service: string) => (
+                  <span
+                    key={service}
+                    className="rounded-md border border-emerald-500/20 bg-emerald-500/5 px-4 py-2 font-mono text-sm text-emerald-400"
+                  >
+                    {service}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Testimonial */}
         {activeProject.testimonial && (
@@ -234,6 +300,11 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               </div>
             </div>
           </section>
+        )}
+
+        {/* Interactive Image Swapper Gallery */}
+        {(activeProject as any).gallery && (activeProject as any).gallery.length > 0 && (
+          <ProjectGallery images={(activeProject as any).gallery} title={activeProject.title} />
         )}
 
         {/* Other Projects */}

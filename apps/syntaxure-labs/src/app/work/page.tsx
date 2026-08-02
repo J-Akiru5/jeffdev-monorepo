@@ -1,9 +1,11 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowUpRight, ArrowLeft } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { CTASection } from "@/components/sections/cta-section";
 import { getProjects, getFeaturedProjects } from "@/lib/data";
+import { projects as staticProjects } from "@/data/projects";
 import type { Metadata } from "next";
 
 /**
@@ -20,9 +22,11 @@ export const metadata: Metadata = {
 };
 
 export default async function WorkPage() {
-  const allProjects = await getProjects();
-  const featuredProjects = await getFeaturedProjects();
-  const otherProjects = allProjects.filter((p) => !p.featured);
+  const dbProjects = await getProjects();
+  const allProjects = dbProjects.length > 0 ? dbProjects : staticProjects;
+  const dbFeatured = await getFeaturedProjects();
+  const featuredProjects = dbFeatured.length > 0 ? dbFeatured : staticProjects.filter((p) => p.featured);
+  const otherProjects = allProjects.filter((p) => !(p as any).featured && !featuredProjects.some((f) => f.slug === p.slug));
 
   return (
     <>
@@ -108,19 +112,19 @@ export default async function WorkPage() {
                     {/* Left: Content */}
                     <div>
                       <span className="font-mono text-xs uppercase tracking-wider text-cyan-500/70 dark:text-cyan-400/70">
-                        {project.category}
+                        {(project as any).category || ""}
                       </span>
                       <h3 className="mt-2 text-2xl font-bold text-[var(--text-primary)]">
                         {project.title}
                       </h3>
                       <p className="mt-1 text-sm text-[var(--text-secondary)]">
-                        {project.client}
+                        {(project as any).client || ""}
                       </p>
-                      <p className="mt-4 text-[var(--text-secondary)]">{project.tagline}</p>
+                      <p className="mt-4 text-[var(--text-secondary)]">{(project as any).tagline || ""}</p>
 
                       {/* Technologies */}
                       <div className="mt-6 flex flex-wrap gap-2">
-                        {project.technologies.slice(0, 4).map((tech) => (
+                        {((project as any).technologies || []).slice(0, 5).map((tech: string) => (
                           <span
                             key={tech}
                             className="rounded-sm border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]"
@@ -129,22 +133,63 @@ export default async function WorkPage() {
                           </span>
                         ))}
                       </div>
+
+                      {/* Services Delivered */}
+                      {(project as any).services && (project as any).services.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {((project as any).services as string[]).slice(0, 4).map((service: string) => (
+                            <span
+                              key={service}
+                              className="rounded-sm border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-emerald-400/80"
+                            >
+                              {service}
+                            </span>
+                          ))}
+                          {((project as any).services as string[]).length > 4 && (
+                            <span className="rounded-sm border border-emerald-500/10 bg-emerald-500/5 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-emerald-400/50">
+                              +{((project as any).services as string[]).length - 4} more
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Live Site Badge */}
+                      {(project as any).publishedSiteUrl && (
+                        <div className="mt-4">
+                          <span className="inline-flex items-center gap-1.5 rounded-sm border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-emerald-400">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            Live
+                          </span>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Right: Results */}
+                    {/* Right: Hero Image or Results */}
                     <div className="flex items-center">
-                      <div className="grid w-full grid-cols-3 gap-4">
-                        {project.results.map((result) => (
-                          <div key={result.metric} className="text-center">
-                            <div className="text-2xl font-bold text-[var(--text-primary)]">
-                              {result.value}
+                      {(project as any).image ? (
+                        <div className="w-full overflow-hidden flex items-center justify-center relative aspect-[16/10]">
+                          <Image
+                            src={(project as any).image}
+                            alt={`${project.title} preview`}
+                            fill
+                            className="object-contain transition-transform duration-500 group-hover:scale-105"
+                            sizes="(max-width: 1024px) 100vw, 50vw"
+                          />
+                        </div>
+                      ) : (
+                        <div className="grid w-full grid-cols-3 gap-4">
+                          {((project as any).results || []).map((result: { metric: string; value: string }) => (
+                            <div key={result.metric} className="text-center">
+                              <div className="text-2xl font-bold text-[var(--text-primary)]">
+                                {result.value}
+                              </div>
+                              <div className="mt-1 font-mono text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]">
+                                {result.metric}
+                              </div>
                             </div>
-                            <div className="mt-1 font-mono text-[10px] uppercase tracking-wider text-[var(--text-tertiary)]">
-                              {result.metric}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
 
