@@ -18,6 +18,8 @@ export function ProjectGallery({ images, title }: ProjectGalleryProps) {
 
   if (!images || images.length === 0) return null;
 
+  const activeImage = images[activeIndex] || images[0];
+
   return (
     <section className="px-6 py-16 lg:px-8">
       <div className="mx-auto max-w-7xl">
@@ -28,14 +30,16 @@ export function ProjectGallery({ images, title }: ProjectGalleryProps) {
         <div className="flex flex-col lg:flex-row gap-6 h-auto lg:h-[600px]">
           {/* Main View Area */}
           <div className="flex-1 relative overflow-hidden h-[400px] lg:h-full flex items-center justify-center">
-            <Image
-              src={images[activeIndex].url}
-              alt={images[activeIndex].alt || `${title} screenshot ${activeIndex + 1}`}
-              fill
-              className="object-contain p-2"
-              sizes="(max-width: 1024px) 100vw, 75vw"
-              priority
-            />
+            {activeImage && (
+              <Image
+                src={activeImage.url}
+                alt={activeImage.alt || `${title} screenshot ${activeIndex + 1}`}
+                fill
+                className="object-contain p-2"
+                sizes="(max-width: 1024px) 100vw, 75vw"
+                priority
+              />
+            )}
           </div>
 
           {/* Thumbnails Sidebar */}
