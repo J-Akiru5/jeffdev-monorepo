@@ -9,9 +9,24 @@
  * Run: npm run seed:keandrew
  *
  * The npm script uses dotenv-cli to load .env.local before running tsx.
+ *
+ * Migration note: the Cosmos-era version tagged everything with a literal
+ * `userId: "demo-user"` string and left rules/components owner fields unset
+ * entirely. Postgres requires a real UUID for prism_brands.user_id /
+ * prism_rules.created_by / prism_components.user_id (all FK'd to
+ * user_profiles), so this version creates/reuses one real demo Supabase
+ * auth user and uses its id consistently. It also remaps the demo rule
+ * categories ("design", "component", "voice") onto the governance category
+ * enum prism_rules.category now enforces (architecture/styling/security/
+ * performance/testing/documentation/custom) — Mongo never enforced that
+ * enum at the DB level, this seed script just relied on it being absent.
  */
 
-import { getCollection, closeConnection } from "@syntaxure-labs/db";
+import { createClient } from "@supabase/supabase-js";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
+
+const DEMO_EMAIL = "demo-keandrew@syntaxure.dev";
+const DEMO_PASSWORD = `demo-${Math.random().toString(36).slice(2)}-${Date.now()}`;
 
 // Keandrew Brand Definition
 const KEANDREW_BRAND = {
@@ -61,18 +76,15 @@ const KEANDREW_BRAND = {
     unit: 4,
     borderRadius: "sm",
   },
-
-  createdAt: new Date().toISOString(),
 };
 
 // Keandrew Prism Rules
 const KEANDREW_RULES = [
   {
     name: "Keandrew Color System",
-    category: "design",
+    category: "styling", // was "design" — not a valid prism_rules.category value
     priority: 1,
     tags: ["colors", "brand", "keandrew"],
-    isPublic: true,
     content: `# Keandrew Color System
 
 ## Primary Palette
@@ -91,14 +103,12 @@ The Keandrew brand uses a sophisticated dark palette with warm accents.
 2. Accent gold should be used sparingly for impact
 3. Maintain high contrast between text and background
 4. Use the grey (#6B6B6B) for captions and metadata`,
-    createdAt: new Date().toISOString(),
   },
   {
     name: "Keandrew Typography",
-    category: "design",
+    category: "styling", // was "design"
     priority: 2,
     tags: ["typography", "fonts", "keandrew"],
-    isPublic: true,
     content: `# Keandrew Typography
 
 ## Font Stack
@@ -121,14 +131,12 @@ The Keandrew brand uses a sophisticated dark palette with warm accents.
 - Client testimonials: Cormorant Garamond, Italic, 20px
 - Pricing: JetBrains Mono for numbers
 - Studio name in hero: Cormorant Garamond, 64px+`,
-    createdAt: new Date().toISOString(),
   },
   {
     name: "Keandrew Component Patterns",
-    category: "component",
+    category: "architecture", // was "component"
     priority: 3,
     tags: ["components", "ui", "keandrew"],
-    isPublic: true,
     content: `# Keandrew Component Patterns
 
 ## Button Component
@@ -165,14 +173,12 @@ The Keandrew brand uses a sophisticated dark palette with warm accents.
 - 3:2 for landscape shots
 - Hover effect: slight zoom (scale 1.02) with brightness adjustment
 - Gap: 16px (4 spacing units)`,
-    createdAt: new Date().toISOString(),
   },
   {
     name: "Keandrew Voice & Tone",
-    category: "voice",
+    category: "documentation", // was "voice"
     priority: 4,
     tags: ["copy", "voice", "keandrew"],
-    isPublic: true,
     content: `# Keandrew Voice & Tone
 
 ## Personality
@@ -204,24 +210,23 @@ authentic, intimate, timeless, curated, refined, cherished, moment, legacy, craf
 
 ## Avoid
 cheap, discount, amazing, awesome, super, best ever, professional (overused)`,
-    createdAt: new Date().toISOString(),
   },
 ];
 
-// UI Component Examples (to be stored as "components" collection)
+// UI Component Examples (stored in prism_components)
 const KEANDREW_COMPONENTS = [
   {
     name: "Keandrew Hero Section",
-    category: "section",
-    framework: "nextjs",
+    designSystem: "custom",
+    stack: "nextjs",
     code: `export function HeroSection() {
   return (
     <section className="relative min-h-screen bg-[#0F0F0F] flex items-center justify-center">
       {/* Background Image */}
       <div className="absolute inset-0 opacity-40">
-        <img 
-          src="/images/hero-wedding.jpg" 
-          alt="" 
+        <img
+          src="/images/hero-wedding.jpg"
+          alt=""
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F0F] to-transparent" />
@@ -229,7 +234,7 @@ const KEANDREW_COMPONENTS = [
 
       {/* Content */}
       <div className="relative z-10 text-center px-4 max-w-4xl">
-        <h1 
+        <h1
           className="text-6xl md:text-7xl font-normal text-[#F5F2EE]"
           style={{ fontFamily: "'Cormorant Garamond', serif" }}
         >
@@ -239,7 +244,7 @@ const KEANDREW_COMPONENTS = [
           Photography Studio
         </p>
         <p className="text-[#F5F2EE]/80 text-lg mt-8 font-light max-w-2xl mx-auto">
-          Capturing life's authentic moments—from intimate portraits 
+          Capturing life's authentic moments—from intimate portraits
           to the grandest celebrations.
         </p>
         <div className="flex gap-4 justify-center mt-12">
@@ -254,12 +259,11 @@ const KEANDREW_COMPONENTS = [
     </section>
   );
 }`,
-    createdAt: new Date().toISOString(),
   },
   {
     name: "Keandrew Service Card",
-    category: "component",
-    framework: "nextjs",
+    designSystem: "custom",
+    stack: "nextjs",
     code: `interface ServiceCardProps {
   title: string;
   description: string;
@@ -280,8 +284,8 @@ export function ServiceCard({ title, description, price, image, category }: Serv
     <div className="group bg-[#1A1A1A] border border-white/5 overflow-hidden hover:border-white/10 transition-colors">
       {/* Image */}
       <div className="aspect-[4/5] overflow-hidden">
-        <img 
-          src={image} 
+        <img
+          src={image}
           alt={title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
@@ -289,23 +293,23 @@ export function ServiceCard({ title, description, price, image, category }: Serv
 
       {/* Content */}
       <div className="p-6">
-        <span 
+        <span
           className="text-xs uppercase tracking-wider px-2 py-1 rounded"
-          style={{ 
+          style={{
             backgroundColor: \`\${categoryColors[category]}15\`,
             color: categoryColors[category]
           }}
         >
           {category}
         </span>
-        
+
         <h3 className="text-lg font-medium text-[#F5F2EE] mt-4">
           {title}
         </h3>
         <p className="text-[#6B6B6B] text-sm mt-2 line-clamp-2">
           {description}
         </p>
-        
+
         <div className="flex items-center justify-between mt-6 pt-4 border-t border-white/5">
           <span className="font-mono text-[#F5F2EE]">{price}</span>
           <button className="text-[#A08B5B] text-sm hover:underline">
@@ -316,12 +320,11 @@ export function ServiceCard({ title, description, price, image, category }: Serv
     </div>
   );
 }`,
-    createdAt: new Date().toISOString(),
   },
   {
     name: "Keandrew Testimonial",
-    category: "component",
-    framework: "nextjs",
+    designSystem: "custom",
+    stack: "nextjs",
     code: `interface TestimonialProps {
   quote: string;
   author: string;
@@ -331,7 +334,7 @@ export function ServiceCard({ title, description, price, image, category }: Serv
 export function Testimonial({ quote, author, event }: TestimonialProps) {
   return (
     <blockquote className="bg-[#1A1A1A] border border-white/5 p-8">
-      <p 
+      <p
         className="text-xl text-[#F5F2EE] italic leading-relaxed"
         style={{ fontFamily: "'Cormorant Garamond', serif" }}
       >
@@ -349,38 +352,113 @@ export function Testimonial({ quote, author, event }: TestimonialProps) {
 }
 
 // Usage
-<Testimonial 
+<Testimonial
   quote="He didn't just capture our wedding—he told our story. Every photo feels like a cherished memory."
   author="Maria & James"
   event="December 2024 Wedding"
 />`,
-    createdAt: new Date().toISOString(),
   },
 ];
+
+/**
+ * Get or create the demo Supabase auth user that owns all Keandrew seed
+ * data, and its matching user_profiles row (prism_brands/prism_rules/
+ * prism_components all FK to a real user id now).
+ */
+async function getOrCreateDemoUser(): Promise<string> {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error(
+      "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY",
+    );
+  }
+
+  const supabase = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+
+  const { data: existingUsers } = await supabase.auth.admin.listUsers();
+  const existing = existingUsers?.users.find((u) => u.email === DEMO_EMAIL);
+  if (existing) return existing.id;
+
+  const { data, error } = await supabase.auth.admin.createUser({
+    email: DEMO_EMAIL,
+    password: DEMO_PASSWORD,
+    email_confirm: true,
+    user_metadata: { full_name: "Keandrew Demo" },
+  });
+  if (error) throw error;
+
+  await supabase.from("user_profiles").upsert(
+    {
+      id: data.user.id,
+      email: DEMO_EMAIL,
+      full_name: "Keandrew Demo",
+      role: "client",
+      tier: "free",
+    },
+    { onConflict: "id" },
+  );
+
+  return data.user.id;
+}
 
 async function main() {
   console.log("🚀 Seeding Keandrew Photography Studio demo...");
 
   try {
+    const demoUserId = await getOrCreateDemoUser();
+    const db = getPrismDb();
+
     // Seed Brand
-    const brandsCollection = await getCollection("brands");
-    await brandsCollection.deleteMany({ slug: KEANDREW_BRAND.slug });
-    await brandsCollection.insertOne({
-      ...KEANDREW_BRAND,
-      userId: "demo-user", // Special demo user
+    await db.from("prism_brands").delete().eq("slug", KEANDREW_BRAND.slug);
+    const { error: brandError } = await db.from("prism_brands").insert({
+      user_id: demoUserId,
+      slug: KEANDREW_BRAND.slug,
+      company_name: KEANDREW_BRAND.companyName,
+      tagline: KEANDREW_BRAND.tagline,
+      industry: KEANDREW_BRAND.industry,
+      colors: KEANDREW_BRAND.colors,
+      typography: KEANDREW_BRAND.typography,
+      voice: KEANDREW_BRAND.voice,
+      imagery: KEANDREW_BRAND.imagery,
+      spacing: KEANDREW_BRAND.spacing,
     });
+    if (brandError) throw brandError;
     console.log("✅ Seeded Keandrew brand profile");
 
     // Seed Rules
-    const rulesCollection = await getCollection("rules");
-    await rulesCollection.deleteMany({ tags: { $in: ["keandrew"] } });
-    await rulesCollection.insertMany(KEANDREW_RULES);
+    await db.from("prism_rules").delete().overlaps("tags", ["keandrew"]);
+    const { error: rulesError } = await db.from("prism_rules").insert(
+      KEANDREW_RULES.map((r) => ({
+        name: r.name,
+        category: r.category,
+        priority: r.priority,
+        tags: r.tags,
+        content: r.content,
+        created_by: demoUserId,
+        is_active: true,
+      })),
+    );
+    if (rulesError) throw rulesError;
     console.log(`✅ Seeded ${KEANDREW_RULES.length} Keandrew rules`);
 
     // Seed Components
-    const componentsCollection = await getCollection("components");
-    await componentsCollection.deleteMany({ name: { $regex: /^Keandrew/ } });
-    await componentsCollection.insertMany(KEANDREW_COMPONENTS);
+    await db.from("prism_components").delete().ilike("name", "Keandrew%");
+    const crypto = await import("crypto");
+    const { error: componentsError } = await db.from("prism_components").insert(
+      KEANDREW_COMPONENTS.map((c) => ({
+        id: `comp_${crypto.randomBytes(12).toString("hex")}`,
+        user_id: demoUserId,
+        name: c.name,
+        design_system: c.designSystem,
+        stack: c.stack,
+        code: c.code,
+        generated_by: "manual",
+      })),
+    );
+    if (componentsError) throw componentsError;
     console.log(`✅ Seeded ${KEANDREW_COMPONENTS.length} Keandrew components`);
 
     console.log("\n🎉 Done! Keandrew demo data seeded successfully.");
@@ -391,8 +469,6 @@ async function main() {
   } catch (error) {
     console.error("❌ Error:", error);
     process.exit(1);
-  } finally {
-    await closeConnection();
   }
 }
 

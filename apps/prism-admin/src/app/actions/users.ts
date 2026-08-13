@@ -1,20 +1,29 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getCollection } from "@syntaxure-labs/db/cosmos";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 
+/**
+ * Note: this used to update a Cosmos DB `users` collection keyed by a Mongo
+ * ObjectId, which was a separate record from the one the rest of Prism reads
+ * tier from (`subscriptions`/now `prism_subscriptions`, keyed by Supabase
+ * user id) — so this admin control never actually affected what the app
+ * enforced. It's been pointed at `user_profiles` (keyed by the real Supabase
+ * user id) during the Postgres migration, which is at least consistent and
+ * queryable, but the underlying disconnect from `prism_subscriptions.tier`
+ * is a pre-existing product question, not something fixed here.
+ */
 export async function overrideUserTier(
   userId: string,
   tier: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const usersCollection = await getCollection("users");
-    const { ObjectId } = await import("mongodb");
-
-    await usersCollection.updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: { tier, updatedAt: new Date().toISOString() } },
-    );
+    const db = getPrismDb();
+    const { error } = await db
+      .from("user_profiles")
+      .update({ tier, updated_at: new Date().toISOString() })
+      .eq("id", userId);
+    if (error) throw error;
 
     revalidatePath("/admin/users");
     return { success: true };
@@ -33,13 +42,12 @@ export async function toggleUserStatus(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const newStatus = currentStatus === "suspended" ? "active" : "suspended";
-    const usersCollection = await getCollection("users");
-    const { ObjectId } = await import("mongodb");
-
-    await usersCollection.updateOne(
-      { _id: new ObjectId(userId) },
-      { $set: { status: newStatus, updatedAt: new Date().toISOString() } },
-    );
+    const db = getPrismDb();
+    const { error } = await db
+      .from("user_profiles")
+      .update({ status: newStatus, updated_at: new Date().toISOString() })
+      .eq("id", userId);
+    if (error) throw error;
 
     revalidatePath("/admin/users");
     return { success: true };

@@ -2,27 +2,13 @@
 
 import { z } from "zod";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { logDataError } from "@/lib/errors";
 import { sendEmail } from "@/lib/email";
 import {
   communityWelcomeEmail,
   communityAdminNotification,
 } from "@/lib/emails/community-emails";
 import type { CommunityPost, CommunityMember } from "@/types/database";
-
-// =============================================================================
-// TAG HELPERS (Phase 1B — junction tables)
-// =============================================================================
-
-/**
- * Extract tag names from the nested community_post_tags → tags join result.
- */
-function extractTags(raw: Record<string, unknown>): string[] {
-  const junction = raw.community_post_tags as
-    | Array<{ tags: { name: string } | null }>
-    | undefined;
-  if (!junction) return [];
-  return junction.map((row) => row.tags?.name).filter(Boolean) as string[];
-}
 
 // =============================================================================
 // PUBLIC: Fetch published community posts
@@ -33,6 +19,41 @@ export interface CommunityPostWithAuthor extends CommunityPost {
   tags: string[];
 }
 
+/**
+ * Best-effort tag lookup via the junction table, fetched separately from the
+ * posts query. The community_posts ↔ community_post_tags relationship is not
+ * in the PostgREST schema cache (PGRST200), so embedding it in the main select
+ * fails the entire query. On any failure, posts simply render without tags.
+ */
+async function getTagsByPostId(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: any,
+  postIds: string[],
+): Promise<Map<string, string[]>> {
+  const tagsByPost = new Map<string, string[]>();
+  if (postIds.length === 0) return tagsByPost;
+
+  try {
+    const { data, error } = await supabase
+      .from("community_post_tags")
+      .select("post_id, tags(name)")
+      .in("post_id", postIds);
+
+    if (error) throw error;
+
+    for (const row of (data ?? []) as Array<Record<string, unknown>>) {
+      const postId = row.post_id as string | undefined;
+      const name = (row.tags as { name?: string } | null)?.name;
+      if (!postId || !name) continue;
+      tagsByPost.set(postId, [...(tagsByPost.get(postId) ?? []), name]);
+    }
+  } catch (error) {
+    logDataError("[community] getPublishedCommunityPosts tags", error);
+  }
+
+  return tagsByPost;
+}
+
 export async function getPublishedCommunityPosts(): Promise<CommunityPostWithAuthor[]> {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,23 +61,26 @@ export async function getPublishedCommunityPosts(): Promise<CommunityPostWithAut
 
     const { data, error } = await supabase
       .from("community_posts")
-      .select("*, author:community_members(*), community_post_tags(tags(name))")
+      .select("*, author:community_members(*)")
       .eq("is_published", true)
       .order("is_pinned", { ascending: false })
       .order("created_at", { ascending: false });
 
     if (error) throw error;
 
-    // Extract tags from junction table and map to expected shape
-    const posts = (data ?? []).map((row: Record<string, unknown>) => ({
-      ...row,
-      tags: extractTags(row),
-    })) as CommunityPostWithAuthor[];
+    const posts = (data ?? []) as Array<Record<string, unknown>>;
+    const tagsByPost = await getTagsByPostId(
+      supabase,
+      posts.map((row) => row.id as string).filter(Boolean),
+    );
 
-    return posts;
+    return posts.map((row) => ({
+      ...row,
+      tags: tagsByPost.get(row.id as string) ?? [],
+    })) as CommunityPostWithAuthor[];
   } catch (error) {
-    console.error("[community] getPublishedCommunityPosts error:", error);
-    throw new Error("Failed to load community posts. Please try again later.");
+    logDataError("[community] getPublishedCommunityPosts", error);
+    return [];
   }
 }
 
@@ -142,7 +166,7 @@ export async function registerCommunityMember(data: {
       const message = error.issues?.[0]?.message || "Invalid registration data";
       return { success: false, error: message };
     }
-    console.error("[COMMUNITY REGISTRATION ERROR]", error);
+    logDataError("[COMMUNITY REGISTRATION ERROR]", error);
     return { success: false, error: "Failed to complete registration. Please try again." };
   }
 }

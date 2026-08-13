@@ -113,9 +113,7 @@
 
 | Variable                            | Description                                                               | Source             |
 | ----------------------------------- | ------------------------------------------------------------------------- | ------------------ |
-| `SUPABASE_SERVICE_ROLE_KEY`         | 🔒 Supabase service role key                                              | Supabase Dashboard |
-| `MONGODB_URI`                       | 🔒 Azure Cosmos DB MongoDB connection string                              | Azure Portal       |
-| `COSMOS_DATABASE_NAME`              | Database name (default: `prism`)                                          | You set            |
+| `SUPABASE_SERVICE_ROLE_KEY`         | 🔒 Supabase service role key (also used for `prism_*` Postgres tables)    | Supabase Dashboard |
 | `GEMINI_API_KEY`                    | 🔒 Gemini AI API key                                                      | Google AI Studio   |
 | `AZURE_OPENAI_ENDPOINT`             | 🔒 Azure OpenAI endpoint                                                  | Azure Portal       |
 | `AZURE_OPENAI_API_KEY`              | 🔒 Azure OpenAI API key                                                   | Azure Portal       |
@@ -273,22 +271,22 @@
 
 ### Environment Variables
 
-| Variable                            | Description                                                  | Source       |
-| ----------------------------------- | ------------------------------------------------------------ | ------------ |
-| `MONGODB_URI`                       | 🔒 Cosmos DB connection string                               | Azure Portal |
-| `COSMOS_DATABASE_NAME`              | Database name (default: `prism`)                             | You set      |
-| `AZURE_OPENAI_ENDPOINT`             | 🔒 Azure OpenAI endpoint                                     | Azure Portal |
-| `AZURE_OPENAI_API_KEY`              | 🔒 Azure OpenAI API key                                      | Azure Portal |
-| `AZURE_OPENAI_DEPLOYMENT_NAME`      | Model deployment name                                        | Azure Portal |
-| `AZURE_OPENAI_EMBEDDING_DEPLOYMENT` | Embedding model name                                         | Azure Portal |
-| `GEMINI_MODEL`                      | Gemini model name (fallback)                                 | You set      |
-| `PRISM_API_KEY`                     | 🔒 API key — **must match** `prism-engine`'s `PRISM_API_KEY` | You generate |
-| `PRISM_API_URL`                     | Prism Engine URL (e.g. `https://prism.syntaxure.dev`)        | You set      |
-| `USE_GREMLIN_RANKING`               | `true`/`false` — Gremlin graph ranking                       | You set      |
+| Variable                            | Description                                                                       | Source             |
+| ----------------------------------- | --------------------------------------------------------------------------------- | ------------------ |
+| `NEXT_PUBLIC_SUPABASE_URL`          | Supabase project URL (same project as prism-engine)                               | Supabase Dashboard |
+| `SUPABASE_SERVICE_ROLE_KEY`         | 🔒 Supabase service role key — reads/writes `prism_*` tables                      | Supabase Dashboard |
+| `AZURE_OPENAI_ENDPOINT`             | 🔒 Azure OpenAI endpoint                                                          | Azure Portal       |
+| `AZURE_OPENAI_API_KEY`              | 🔒 Azure OpenAI API key                                                           | Azure Portal       |
+| `AZURE_OPENAI_DEPLOYMENT_NAME`      | Model deployment name                                                             | Azure Portal       |
+| `AZURE_OPENAI_EMBEDDING_DEPLOYMENT` | Embedding model name                                                              | Azure Portal       |
+| `GEMINI_MODEL`                      | Gemini model name (fallback)                                                      | You set            |
+| `PRISM_API_KEY`                     | 🔒 API key — **must match** `prism-engine`'s `PRISM_API_KEY`                      | You generate       |
+| `PRISM_API_URL`                     | Prism Engine URL (e.g. `https://prism.syntaxure.dev`)                             | You set            |
+| `USE_GREMLIN_RANKING`               | `true`/`false` — rule-graph ranking (Postgres-backed now, see PRISM_MIGRATION.md) | You set            |
 
 ### Dependencies (key)
 
-`@modelcontextprotocol/sdk`, `@google/generative-ai`, `openai`, `mongodb`, `playwright`, `gpt-tokenizer`, `@syntaxure-labs/db` (workspace)
+`@modelcontextprotocol/sdk`, `@google/generative-ai`, `openai`, `@syntaxure-labs/db` (workspace), `@syntaxure/supabase` (workspace), `playwright`, `gpt-tokenizer`
 
 **⚠️ Note:** Uses `playwright` in production (web scraping) — needs headless browser environment.
 
@@ -329,12 +327,12 @@ docker run -p 8000:8000 prism-analytics
 
 ## 🏗️ Workspace Packages (built automatically by pnpm)
 
-| Package                   | Path                         | Purpose                                             |
-| ------------------------- | ---------------------------- | --------------------------------------------------- |
-| `@syntaxure/ui`           | `packages/ui`                | Shared UI components (Button, Card, Badge, etc.)    |
-| `@syntaxure-labs/db`      | `packages/db`                | Database clients: Cosmos DB (MongoDB API) + Gremlin |
-| `@repo/typescript-config` | `packages/typescript-config` | Shared TypeScript configurations                    |
-| `@repo/eslint-config`     | `packages/eslint-config`     | Shared ESLint configurations                        |
+| Package                   | Path                         | Purpose                                                 |
+| ------------------------- | ---------------------------- | ------------------------------------------------------- |
+| `@syntaxure/ui`           | `packages/ui`                | Shared UI components (Button, Card, Badge, etc.)        |
+| `@syntaxure-labs/db`      | `packages/db`                | Prisma schema + Postgres/Supabase clients (incl. Prism) |
+| `@repo/typescript-config` | `packages/typescript-config` | Shared TypeScript configurations                        |
+| `@repo/eslint-config`     | `packages/eslint-config`     | Shared ESLint configurations                            |
 
 ---
 
@@ -384,8 +382,7 @@ Then populate each with the env vars listed above.
 
 - [ ] All code pushed to `develop` branch
 - [ ] Merge `develop` → `main` (or deploy from `develop`)
-- [ ] Supabase project created and migrations run (`supabase/marketing_schema.sql`)
-- [ ] Azure Cosmos DB instance running with MongoDB API
+- [ ] Supabase project created and migrations run (`supabase/marketing_schema.sql`, incl. `supabase/migrations/20260813000001_prism_context_engine.sql` for Prism)
 - [ ] All API keys and secrets obtained from providers
 - [ ] Doppler project created for new environment
 

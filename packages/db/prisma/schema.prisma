@@ -280,12 +280,16 @@ model UserProfile {
   fullName     String?  @map("full_name")
   role         String   @default("client") @db.Text
   tier         String   @default("free") @db.Text
+  status       String   @default("active") @db.Text
   avatarUrl    String?  @map("avatar_url") @db.Text
   bio          String?  @db.Text
   companyName  String?  @map("company_name") @db.Text
   phone        String?  @db.Text
   timezone     String   @default("UTC") @db.Text
   preferences  Json     @default("{}")
+  /// Prism notification preferences (productUpdates/usageAlerts/marketing).
+  /// Migrated from Cosmos `users` collection — see prism-context-engine migration.
+  notificationPrefs Json? @map("notification_prefs")
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt    DateTime @default(now()) @map("updated_at") @db.Timestamptz()
 
@@ -309,6 +313,7 @@ model UserProfile {
   sitePagesUpdated   SitePage[]
   availabilitySlotsUpdated AvailabilitySlot[]
   workspaces         WorkspaceMember[]
+  prismProjects      PrismProject[]
 
   @@map("user_profiles")
 }
@@ -1196,4 +1201,307 @@ model CommunityInvite {
   @@index([token])
   @@index([email])
   @@map("community_invites")
+}
+
+// =============================================================================
+// PRISM CONTEXT ENGINE (migrated from Azure Cosmos DB — MongoDB API + Gremlin)
+// =============================================================================
+// Source collections: projects, rules, skills, components, brands, ruleSets,
+// apiKeys, subscriptions, usage, generations, videos, prism_telemetry,
+// governance_memory. See PRISM_MIGRATION.md for the full migration notes,
+// including two pre-existing data-shape inconsistencies fixed opportunistically
+// during the port (rules.userId vs rules.createdBy; webhook_events reuse).
+//
+// `userId`/`createdBy`/`teamId` columns below intentionally have NO foreign-key
+// relation to UserProfile. The source Cosmos collections were schemaless and at
+// least one code path (MCP `list_rules`) wrote a literal "demo-user" sentinel as
+// an owner id — a real FK would reject that. Keeping these as plain columns
+// preserves current behavior; tightening them into relations is a follow-up.
+// =============================================================================
+
+model PrismProject {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  name         String   @db.Text
+  slug         String   @db.Text
+  designSystem String   @map("design_system") @db.Text
+  stack        String   @db.Text
+  visibility   String   @default("private") @db.Text
+  description  String?  @db.Text
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt    DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  user   UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rules  PrismRule[]
+  skills PrismSkill[]
+  videos PrismVideo[]
+
+  @@unique([userId, slug])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("prism_projects")
+}
+
+model PrismRule {
+  id             String   @id @default(uuid()) @db.Uuid
+  projectId      String?  @map("project_id") @db.Uuid
+  createdBy      String   @map("created_by") @db.Uuid
+  name           String   @db.Text
+  description    String?  @db.Text
+  category       String   @default("custom") @db.Text
+  content        String   @db.Text
+  priority       Int      @default(50)
+  tags           String[] @default([])
+  pattern        String?  @db.Text
+  severity       String   @default("warning") @db.Text
+  source         String   @default("manual") @db.Text
+  skillsContent  String?  @map("skills_content") @db.Text
+  sourceRuleSet  String?  @map("source_rule_set") @db.Uuid
+  originalRuleId String?  @map("original_rule_id") @db.Uuid
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt      DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  project        PrismProject?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  edgesFrom      PrismRuleEdge[]  @relation("RuleEdgeFrom")
+  edgesTo        PrismRuleEdge[]  @relation("RuleEdgeTo")
+
+  @@index([projectId])
+  @@index([createdBy])
+  @@index([category])
+  @@index([isActive])
+  @@index([createdAt])
+  @@map("prism_rules")
+}
+
+model PrismSkill {
+  id          String   @id @default(uuid()) @db.Uuid
+  projectId   String?  @map("project_id") @db.Uuid
+  createdBy   String   @map("created_by") @db.Uuid
+  name        String   @db.Text
+  description String   @default("") @db.Text
+  category    String   @db.Text
+  /// Array of { title: string, content: string } steps.
+  steps       Json     @default("[]")
+  tags        String[] @default([])
+  source      String   @default("manual") @db.Text
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  project PrismProject? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@index([createdBy])
+  @@index([category])
+  @@map("prism_skills")
+}
+
+model PrismComponent {
+  /// App-generated id (`comp_<hex>`), preserved from the Cosmos-era format.
+  id           String   @id @db.Text
+  userId       String   @map("user_id") @db.Uuid
+  name         String   @db.Text
+  description  String?  @db.Text
+  code         String   @db.Text
+  /// Freeform rules/notes text attached to the saved component (not a relation).
+  rules        String?  @db.Text
+  designSystem String   @map("design_system") @db.Text
+  stack        String   @db.Text
+  generatedBy  String   @default("ai") @map("generated_by") @db.Text
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt    DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("prism_components")
+}
+
+model PrismBrand {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  slug        String   @db.Text
+  companyName String   @map("company_name") @db.Text
+  tagline     String?  @db.Text
+  industry    String   @db.Text
+  colors      Json
+  typography  Json
+  voice       Json
+  imagery     Json
+  spacing     Json
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  @@unique([userId, slug])
+  @@index([userId])
+  @@map("prism_brands")
+}
+
+/// Public marketplace rule bundles. `ruleIds` is a denormalized snapshot of
+/// PrismRule ids (matches the original Cosmos doc shape — a bundle is a named
+/// list of rule ids, not a live join).
+model PrismRuleSet {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @db.Text
+  description String?  @db.Text
+  ruleIds     String[] @map("rule_ids")
+  isPublic    Boolean  @default(true) @map("is_public")
+  createdBy   String   @map("created_by") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([isPublic])
+  @@index([createdAt])
+  @@map("prism_rule_sets")
+}
+
+model PrismApiKey {
+  /// App-generated id (`key_<hex>`), preserved from the Cosmos-era format.
+  id          String    @id @db.Text
+  userId      String    @map("user_id") @db.Uuid
+  keyHash     String    @unique @map("key_hash") @db.Text
+  keyPrefix   String    @map("key_prefix") @db.Text
+  name        String    @db.Text
+  lastUsedAt  DateTime? @map("last_used_at") @db.Timestamptz()
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  revokedAt   DateTime? @map("revoked_at") @db.Timestamptz()
+
+  @@index([userId])
+  @@map("prism_api_keys")
+}
+
+/// Prism SaaS billing state, distinct from the agency `Subscription` model
+/// (PayPal/Maya client contracts) — different business domain, same provider.
+model PrismSubscription {
+  id                   String    @id @default(uuid()) @db.Uuid
+  userId               String    @unique @map("user_id") @db.Uuid
+  tier                 String    @default("free") @db.Text
+  status               String    @default("active") @db.Text
+  paypalSubscriptionId String?   @map("paypal_subscription_id") @db.Text
+  currentPeriodStart   DateTime? @map("current_period_start") @db.Timestamptz()
+  currentPeriodEnd     DateTime? @map("current_period_end") @db.Timestamptz()
+  modifiedBy           String?   @map("modified_by") @db.Uuid
+  metadata             Json      @default("{}")
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt            DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
+
+  @@index([status])
+  @@map("prism_subscriptions")
+}
+
+model PrismUsage {
+  id                String   @id @default(uuid()) @db.Uuid
+  userId            String   @map("user_id") @db.Uuid
+  /// YYYY-MM
+  month             String   @db.Text
+  aiGenerations     Int      @default(0) @map("ai_generations")
+  rulesCreated      Int      @default(0) @map("rules_created")
+  componentsCreated Int      @default(0) @map("components_created")
+  updatedAt         DateTime @default(now()) @map("updated_at") @db.Timestamptz()
+
+  @@unique([userId, month])
+  @@map("prism_usage")
+}
+
+model PrismGeneration {
+  /// App-generated id (`gen_<hex>`), preserved from the Cosmos-era format.
+  id        String   @id @db.Text
+  userId    String   @map("user_id") @db.Uuid
+  type      String   @default("component") @db.Text
+  prompt    String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  @@index([userId, createdAt])
+  @@map("prism_generations")
+}
+
+/// Video transcripts. `embedding` is a pgvector column (1536-dim, text-embedding-3-small)
+/// — declared Unsupported here because Prisma Client can't type pgvector natively;
+/// see packages/db/src/prism/vector-search.ts for the $queryRaw helpers that use it.
+model PrismVideo {
+  id         String                 @id @default(uuid()) @db.Uuid
+  projectId  String                 @map("project_id") @db.Uuid
+  userId     String?                @map("user_id") @db.Uuid
+  title      String                 @db.Text
+  status     String                 @default("pending") @db.Text
+  duration   Int?
+  transcript String?                       @db.Text
+  embedding  Unsupported("vector(1536)")?
+  createdAt  DateTime                      @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt  DateTime               @default(now()) @map("updated_at") @db.Timestamptz()
+
+  // Relations
+  project PrismProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("prism_videos")
+}
+
+model PrismTelemetry {
+  id             String   @id @default(uuid()) @db.Uuid
+  userId         String   @map("user_id") @db.Uuid
+  toolName       String   @map("tool_name") @db.Text
+  tokenCount     Int      @default(0) @map("token_count")
+  byteSize       Int      @default(0) @map("byte_size")
+  isError        Boolean  @default(false) @map("is_error")
+  cacheHit       Boolean  @default(false) @map("cache_hit")
+  fromCache      Boolean  @default(false) @map("from_cache")
+  clientPlatform String?  @map("client_platform") @db.Text
+  /// Not a FK / not @db.Uuid on purpose — telemetry is best-effort logging
+  /// and callers may send an arbitrary id string; strict typing here would
+  /// turn a logging call into a hard failure.
+  projectId      String?  @map("project_id") @db.Text
+  model          String?  @db.Text
+  timestamp      DateTime @default(now()) @db.Timestamptz()
+  ingestedAt     DateTime @default(now()) @map("ingested_at") @db.Timestamptz()
+
+  @@index([userId, timestamp])
+  @@index([toolName])
+  @@index([projectId])
+  @@map("prism_telemetry")
+}
+
+model PrismGovernanceMemory {
+  id         String    @id @default(uuid()) @db.Uuid
+  type       String    @db.Text
+  scope      String    @db.Text
+  /// Not @db.Uuid on purpose — see PrismTelemetry.projectId.
+  projectId  String?   @map("project_id") @db.Text
+  teamId     String?   @map("team_id") @db.Text
+  content    String    @db.Text
+  tags       String[]  @default([])
+  importance String    @default("medium") @db.Text
+  source     String    @db.Text
+  sessionId  String?   @map("session_id") @db.Text
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt  DateTime  @default(now()) @map("updated_at") @db.Timestamptz()
+  expiresAt  DateTime? @map("expires_at") @db.Timestamptz()
+  metadata   Json?
+
+  @@index([projectId])
+  @@index([teamId])
+  @@index([type])
+  @@index([expiresAt])
+  @@map("prism_governance_memory")
+}
+
+/// Replaces the Cosmos Gremlin graph's `relates_to` / `conflicts_with` edges.
+/// Tag-overlap boosting no longer needs a graph traversal — it's a plain
+/// array-overlap query against PrismRule.tags (see prism/rule-graph.ts).
+model PrismRuleEdge {
+  id        String   @id @default(uuid()) @db.Uuid
+  fromRuleId String  @map("from_rule_id") @db.Uuid
+  toRuleId   String  @map("to_rule_id") @db.Uuid
+  edgeType   String  @map("edge_type") @db.Text
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  fromRule PrismRule @relation("RuleEdgeFrom", fields: [fromRuleId], references: [id], onDelete: Cascade)
+  toRule   PrismRule @relation("RuleEdgeTo", fields: [toRuleId], references: [id], onDelete: Cascade)
+
+  @@unique([fromRuleId, toRuleId, edgeType])
+  @@index([fromRuleId])
+  @@index([toRuleId])
+  @@map("prism_rule_edges")
 }

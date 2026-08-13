@@ -11,6 +11,17 @@
 @import "@syntaxure/ui/styles.css";
 
 /* ----------------------------------------
+   CUSTOM DARK MODE VARIANT
+   ----------------------------------------
+   The site uses data-theme attribute (set by next-themes) to toggle
+   between light and dark mode, NOT the system prefers-color-scheme
+   media query. This custom variant makes Tailwind's dark:* classes
+   respect the data-theme="dark" attribute, so manual theme toggles
+   work correctly.
+   ---------------------------------------- */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ----------------------------------------
    PERFORMANCE: GPU Acceleration & Layout Containment
    ---------------------------------------- */
 .gpu {

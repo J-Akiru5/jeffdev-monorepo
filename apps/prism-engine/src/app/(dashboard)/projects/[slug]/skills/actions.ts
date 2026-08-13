@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -64,12 +64,15 @@ export async function createSkill(
   const projectSlug = formData.get("projectSlug") as string;
   const rawSteps = formData.get("steps") as string; // Will be passed as JSON string from a hidden field
 
+  const db = getPrismDb();
+
   // Find project
-  const projectsCollection = await getCollection("projects");
-  const project = await projectsCollection.findOne({
-    userId,
-    slug: projectSlug,
-  });
+  const { data: project } = await db
+    .from("prism_projects")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("slug", projectSlug)
+    .maybeSingle();
 
   if (!project) {
     return { error: { general: "Project not found" } };
@@ -97,20 +100,17 @@ export async function createSkill(
 
   const { name, description, category, steps, tags } = parsed.data;
 
-  // Create skill document
-  const skillsCollection = await getCollection("skills");
-  await skillsCollection.insertOne({
-    projectId: project._id.toString(),
-    createdBy: userId,
+  // Create skill row
+  await db.from("prism_skills").insert({
+    project_id: project.id,
+    created_by: userId,
     name,
     description,
     category,
     steps,
     tags,
     source: "manual",
-    isActive: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    is_active: true,
   });
 
   revalidatePath(`/projects/${projectSlug}/skills`);

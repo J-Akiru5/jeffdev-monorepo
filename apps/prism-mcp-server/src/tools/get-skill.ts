@@ -1,4 +1,3 @@
-import { ObjectId } from "@syntaxure-labs/db/cosmos";
 import type { GetSkillInput, ToolOutput } from "../types.js";
 import { countTokensInText } from "../middleware/token-counter.js";
 
@@ -17,44 +16,67 @@ export async function handleGetSkill(
   }
 
   try {
-    const { getCollection } = await import("@syntaxure-labs/db/cosmos");
-    const skills = await getCollection("skills");
-    const rules = await getCollection("rules");
+    const { getPrismDb, isValidId } = await import("@syntaxure-labs/db/prism");
+    const db = getPrismDb();
 
-    let doc;
+    let doc: { name: string; description?: string | null; steps?: unknown; skillsContent?: string | null; content?: string } | null = null;
     let isSkillDoc = true;
 
-    if (ObjectId.isValid(skillId)) {
-      doc = await skills.findOne({ _id: new ObjectId(skillId) });
+    if (isValidId(skillId)) {
+      const { data } = await db
+        .from("prism_skills")
+        .select("name, description, steps")
+        .eq("id", skillId)
+        .maybeSingle();
+      doc = data;
     }
 
     if (!doc) {
-      doc = await skills.findOne({ name: { $regex: skillId, $options: "i" } });
+      const { data } = await db
+        .from("prism_skills")
+        .select("name, description, steps")
+        .ilike("name", `%${skillId}%`)
+        .limit(1)
+        .maybeSingle();
+      doc = data;
     }
 
     if (!doc) {
       isSkillDoc = false;
       // Fallback to rules collection
-      if (ObjectId.isValid(skillId)) {
-        doc = await rules.findOne({ _id: new ObjectId(skillId) });
+      if (isValidId(skillId)) {
+        const { data } = await db
+          .from("prism_rules")
+          .select("name, content, skillsContent:skills_content")
+          .eq("id", skillId)
+          .maybeSingle();
+        doc = data;
       }
 
       if (!doc) {
-        doc = await rules.findOne({ name: skillId });
+        const { data } = await db
+          .from("prism_rules")
+          .select("name, content, skillsContent:skills_content")
+          .eq("name", skillId)
+          .maybeSingle();
+        doc = data;
       }
 
       if (!doc) {
-        doc = await rules.findOne({
-          skillsContent: { $exists: true, $ne: null },
-          name: { $regex: skillId, $options: "i" },
-        });
+        const { data } = await db
+          .from("prism_rules")
+          .select("name, content, skillsContent:skills_content")
+          .not("skills_content", "is", null)
+          .ilike("name", `%${skillId}%`)
+          .limit(1)
+          .maybeSingle();
+        doc = data;
       }
     }
 
     if (!doc) {
       return {
         content: [{ type: "text", text: `Skill "${skillId}" not found.` }],
-        isError: true,
       };
     }
 

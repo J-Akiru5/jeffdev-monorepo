@@ -120,7 +120,11 @@
   transition: all 0.15s ease;
 }
 
-.chat-assistant-clear-btn:hover,
+.chat-assistant-clear-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
 .chat-assistant-close-btn:hover {
   background: var(--bg-tertiary);
   color: var(--text-primary);
@@ -505,9 +509,12 @@
     right: 0;
     width: 100%;
     max-width: 100%;
-    height: 100%;
-    max-height: 100%;
-    border-radius: 0;
+    height: calc(100% - 60px);
+    max-height: calc(100% - 60px);
+    border-radius: 20px 20px 0 0;
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
   }
 
   .chat-assistant-trigger {

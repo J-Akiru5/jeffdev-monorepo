@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 export const dynamic = "force-dynamic";
 
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import DashboardShell from "@/components/layout/dashboard-shell";
 
 /**
@@ -27,8 +27,12 @@ export default async function DashboardLayout({
   let currentTier = "free";
   if (user) {
     try {
-      const col = await getCollection("subscriptions");
-      const sub = await col.findOne({ userId: user.id });
+      const db = getPrismDb();
+      const { data: sub } = await db
+        .from("prism_subscriptions")
+        .select("tier")
+        .eq("user_id", user.id)
+        .maybeSingle();
       currentTier = sub?.tier || "free";
     } catch {
       currentTier = "free";

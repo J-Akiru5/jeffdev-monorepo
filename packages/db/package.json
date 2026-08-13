@@ -8,9 +8,9 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
-    "./cosmos": {
-      "types": "./src/cosmos.ts",
-      "default": "./src/cosmos.ts"
+    "./prism": {
+      "types": "./src/prism.ts",
+      "default": "./src/prism.ts"
     },
     "./schema": {
       "types": "./src/schema.ts",
@@ -39,8 +39,8 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
-    "gremlin": "^3.8.1",
-    "mongodb": "^6.15.0",
+    "@supabase/supabase-js": "^2.47.0",
+    "@syntaxure/supabase": "workspace:*",
     "pg": "^8.21.0",
     "prisma": "^7.8.0",
     "zod": "^4.2.1"

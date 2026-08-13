@@ -1,5 +1,3 @@
-"use client";
-
 /**
  * Release Timeline Component
  * --------------------------

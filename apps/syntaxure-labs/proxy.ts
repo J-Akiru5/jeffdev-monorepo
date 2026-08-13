@@ -3,6 +3,8 @@
  * --------------------
  * Handles session refresh and redirects /admin/* routes to prism-admin.
  * Only /admin/login is allowed through for local authentication.
+ *
+ * Currency detection is now handled server-side in RootLayout.
  */
 
 import { NextResponse, type NextRequest } from "next/server";

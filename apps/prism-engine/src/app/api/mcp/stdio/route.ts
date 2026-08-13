@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb, isValidId } from "@syntaxure-labs/db/prism";
 import { NextRequest, NextResponse } from "next/server";
 import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
 import type { RuleDoc, BrandDoc } from "@/lib/types";
@@ -493,7 +493,7 @@ async function handleToolCall(
 
   switch (name) {
     case "get_architectural_rules": {
-      const rules = await getCollection("rules");
+      const db = getPrismDb();
       const category = typeof args?.category === 'string' ? args.category : undefined;
       const tag = typeof args?.tag === 'string' ? args.tag : undefined;
       const task = typeof args?.task === 'string' ? args.task : undefined;
@@ -501,15 +501,21 @@ async function handleToolCall(
       const maxTokens = Number(args?.maxTokens) || 4000;
       const format = args?.format === "markdown" || args?.format === "json" ? args.format : "markdown";
 
-      const query: Record<string, unknown> = { userId, isActive: true };
-      if (category) query.category = category;
-      if (tag) query.tags = tag;
-      if (projectId) query.projectId = projectId;
+      let ruleQuery = db
+        .from("prism_rules")
+        .select(
+          "_id:id, name, content, priority, category, tags, skillsContent:skills_content, updatedAt:updated_at",
+        )
+        .eq("created_by", userId)
+        .eq("is_active", true);
+      if (category) ruleQuery = ruleQuery.eq("category", category);
+      if (tag) ruleQuery = ruleQuery.contains("tags", [tag]);
+      if (projectId) ruleQuery = ruleQuery.eq("project_id", projectId);
 
-      const foundRules = (await rules
-        .find(query)
-        .sort({ priority: 1 })
-        .toArray()) as unknown as RuleDoc[];
+      const { data: foundRulesData } = await ruleQuery.order("priority", {
+        ascending: true,
+      });
+      const foundRules = (foundRulesData ?? []) as unknown as RuleDoc[];
 
       if (foundRules.length === 0) {
         return {
@@ -608,18 +614,19 @@ async function handleToolCall(
         };
       }
 
-      const rulesDb = await getCollection("rules");
-      const vQuery: Record<string, unknown> = {
-        userId,
-        isActive: true,
-        pattern: { $exists: true, $ne: null },
-      };
-      if (vCategory) vQuery.category = vCategory;
+      const db = getPrismDb();
+      let vQuery = db
+        .from("prism_rules")
+        .select("name, content, priority, category, pattern, severity")
+        .eq("created_by", userId)
+        .eq("is_active", true)
+        .not("pattern", "is", null);
+      if (vCategory) vQuery = vQuery.eq("category", vCategory);
 
-      const patternRules = (await rulesDb
-        .find(vQuery)
-        .sort({ priority: 1 })
-        .toArray()) as unknown as RuleDoc[];
+      const { data: patternRulesData } = await vQuery.order("priority", {
+        ascending: true,
+      });
+      const patternRules = (patternRulesData ?? []) as unknown as RuleDoc[];
 
       const violations: string[] = [];
 
@@ -669,28 +676,27 @@ async function handleToolCall(
         };
       }
 
-      const rulesDb = await getCollection("rules");
-      const vQuery: Record<string, unknown> = {
-        userId,
-        isActive: true,
-        pattern: { $exists: true, $ne: null },
-      };
+      const db = getPrismDb();
+      let vQuery = db
+        .from("prism_rules")
+        .select("_id:id, name, content, priority, category, pattern, severity")
+        .eq("created_by", userId)
+        .eq("is_active", true)
+        .not("pattern", "is", null);
       const ruleIds = Array.isArray(args?.ruleIds) ? args.ruleIds as unknown as string[] : undefined;
       if (ruleIds && ruleIds.length > 0) {
-        const { ObjectId } = await import("mongodb");
-        vQuery._id = {
-          $in: ruleIds.map((id) =>
-            ObjectId.isValid(id) ? new ObjectId(id) : id,
-          ),
-        };
+        vQuery = vQuery.in(
+          "id",
+          ruleIds.filter((id) => isValidId(id)),
+        );
       }
-      if (args?.projectId) vQuery.projectId = args.projectId;
-      if (args?.category) vQuery.category = args.category;
+      if (args?.projectId) vQuery = vQuery.eq("project_id", args.projectId as string);
+      if (args?.category) vQuery = vQuery.eq("category", args.category as string);
 
-      const patternRules = (await rulesDb
-        .find(vQuery)
-        .sort({ priority: 1 })
-        .toArray()) as unknown as RuleDoc[];
+      const { data: patternRulesData } = await vQuery.order("priority", {
+        ascending: true,
+      });
+      const patternRules = (patternRulesData ?? []) as unknown as RuleDoc[];
 
       function findLineColumn(
         text: string,
@@ -887,8 +893,14 @@ async function handleToolCall(
     }
 
     case "get_brand_rules": {
-      const brands = await getCollection("brands");
-      const brand = (await brands.findOne({ userId })) as unknown as BrandDoc | null;
+      const db = getPrismDb();
+      const { data: brand } = await db
+        .from("prism_brands")
+        .select(
+          "companyName:company_name, colors, typography, voice",
+        )
+        .eq("user_id", userId)
+        .maybeSingle<BrandDoc>();
 
       if (!brand) {
         return { content: [{ type: "text", text: "No brand configured" }] };
@@ -909,13 +921,16 @@ async function handleToolCall(
     }
 
     case "list_rules": {
-      const rules = await getCollection("rules");
-      const userRules = await rules.find({ userId }).limit(20).toArray();
-      const demoRules = await rules
-        .find({ userId: "demo-user" })
-        .limit(5)
-        .toArray();
-      const allRules = [...userRules, ...demoRules];
+      const db = getPrismDb();
+      const { data: userRules } = await db
+        .from("prism_rules")
+        .select("name, content")
+        .eq("created_by", userId)
+        .limit(20);
+      // "demo-user" is a legacy Cosmos-era sentinel, not a real UUID — it never
+      // matches a real created_by value in Postgres, so this degrades to [].
+      const demoRules: { name: string; content: string }[] = [];
+      const allRules = [...(userRules ?? []), ...demoRules];
 
       return {
         content: [
@@ -933,16 +948,19 @@ async function handleToolCall(
     }
 
     case "list_projects": {
-      const projects = await getCollection("projects");
-      const query: Record<string, unknown> = { userId };
-      if (args?.stack) query.stack = args.stack;
-      if (args?.designSystem) query.designSystem = args.designSystem;
+      const db = getPrismDb();
+      let projectQuery = db
+        .from("prism_projects")
+        .select("name, slug, stack, designSystem:design_system")
+        .eq("user_id", userId);
+      if (args?.stack) projectQuery = projectQuery.eq("stack", args.stack as string);
+      if (args?.designSystem)
+        projectQuery = projectQuery.eq("design_system", args.designSystem as string);
 
-      const items = await projects
-        .find(query)
-        .sort({ createdAt: -1 })
-        .limit(20)
-        .toArray();
+      const { data: itemsData } = await projectQuery
+        .order("created_at", { ascending: false })
+        .limit(20);
+      const items = itemsData ?? [];
 
       return {
         content: [
@@ -977,25 +995,31 @@ async function handleToolCall(
         };
       }
 
-      const rules = await getCollection("rules");
-      const now = new Date().toISOString();
-      const doc = {
-        name,
-        category,
-        content,
-        priority,
-        projectId: projectId || null,
-        userId,
-        isActive: true,
-        createdAt: now,
-        updatedAt: now,
-      };
-      const result = await rules.insertOne(doc);
+      const db = getPrismDb();
+      const { data: inserted, error: insertError } = await db
+        .from("prism_rules")
+        .insert({
+          name,
+          category,
+          content,
+          priority,
+          project_id: projectId || null,
+          created_by: userId,
+          is_active: true,
+        })
+        .select("id")
+        .single();
+      if (insertError || !inserted) {
+        return {
+          content: [{ type: "text", text: `Error creating rule: ${insertError?.message ?? "unknown error"}` }],
+          error: true,
+        };
+      }
       return {
         content: [
           {
             type: "text",
-            text: `Rule "${name}" created successfully (ID: ${result.insertedId})`,
+            text: `Rule "${name}" created successfully (ID: ${inserted.id})`,
           },
         ],
       };
@@ -1009,20 +1033,27 @@ async function handleToolCall(
         };
 
       const updates: Record<string, unknown> = {
-        updatedAt: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
       if (typeof args?.name === 'string') updates.name = args.name;
       if (typeof args?.category === 'string') updates.category = args.category;
       if (typeof args?.content === 'string') updates.content = args.content;
 
-      const rules = await getCollection("rules");
-      const { ObjectId } = await import("mongodb");
-      const result = await rules.updateOne(
-        { _id: new ObjectId(ruleId), userId },
-        { $set: updates },
-      );
+      if (!isValidId(ruleId)) {
+        return {
+          content: [{ type: "text", text: "Rule not found or unauthorized." }],
+        };
+      }
 
-      if (result.matchedCount === 0) {
+      const db = getPrismDb();
+      const { data: updated } = await db
+        .from("prism_rules")
+        .update(updates)
+        .eq("id", ruleId)
+        .eq("created_by", userId)
+        .select("id");
+
+      if (!updated || updated.length === 0) {
         return {
           content: [{ type: "text", text: "Rule not found or unauthorized." }],
         };
@@ -1039,14 +1070,21 @@ async function handleToolCall(
           content: [{ type: "text", text: "Error: ruleId is required" }],
         };
 
-      const rules = await getCollection("rules");
-      const { ObjectId } = await import("mongodb");
-      const result = await rules.deleteOne({
-        _id: new ObjectId(ruleId),
-        userId,
-      });
+      if (!isValidId(ruleId)) {
+        return {
+          content: [{ type: "text", text: "Rule not found or unauthorized." }],
+        };
+      }
 
-      if (result.deletedCount === 0) {
+      const db = getPrismDb();
+      const { data: deleted } = await db
+        .from("prism_rules")
+        .delete()
+        .eq("id", ruleId)
+        .eq("created_by", userId)
+        .select("id");
+
+      if (!deleted || deleted.length === 0) {
         return {
           content: [{ type: "text", text: "Rule not found or unauthorized." }],
         };
@@ -1057,31 +1095,35 @@ async function handleToolCall(
     }
 
     case "get_brand_profile": {
-      const brands = await getCollection("brands");
+      const db = getPrismDb();
+      const brandSelect =
+        "companyName:company_name, tagline, industry, colors, typography, voice";
       const brandId = typeof args?.brandId === 'string' ? args.brandId : undefined;
-      const query: Record<string, unknown> = { userId };
       let brand: BrandDoc | null = null;
       if (brandId) {
-        brand = (await brands.findOne({
-          ...query,
-          slug: brandId,
-        })) as unknown as BrandDoc | null;
-        if (!brand) {
-          try {
-            const { ObjectId } = await import("mongodb");
-            if (ObjectId.isValid(brandId))
-              brand = (await brands.findOne({
-                ...query,
-                _id: new ObjectId(brandId),
-              })) as unknown as BrandDoc | null;
-          } catch {
-            /* skip */
-          }
+        const { data: bySlug } = await db
+          .from("prism_brands")
+          .select(brandSelect)
+          .eq("user_id", userId)
+          .eq("slug", brandId)
+          .maybeSingle<BrandDoc>();
+        brand = bySlug;
+        if (!brand && isValidId(brandId)) {
+          const { data: byId } = await db
+            .from("prism_brands")
+            .select(brandSelect)
+            .eq("user_id", userId)
+            .eq("id", brandId)
+            .maybeSingle<BrandDoc>();
+          brand = byId;
         }
       } else {
-        brand = (await brands.findOne(
-          query,
-        )) as unknown as BrandDoc | null;
+        const { data } = await db
+          .from("prism_brands")
+          .select(brandSelect)
+          .eq("user_id", userId)
+          .maybeSingle<BrandDoc>();
+        brand = data;
       }
 
       if (!brand) {
@@ -1136,15 +1178,17 @@ async function handleToolCall(
 
     case "search_marketplace": {
       const query = typeof args?.query === 'string' ? args.query : '';
-      const ruleSets = await getCollection("ruleSets");
-      const mQuery: Record<string, unknown> = { isPublic: true };
-      if (query) mQuery.name = { $regex: query, $options: "i" };
+      const db = getPrismDb();
+      let mQuery = db
+        .from("prism_rule_sets")
+        .select("name, description, ruleIds:rule_ids")
+        .eq("is_public", true);
+      if (query) mQuery = mQuery.ilike("name", `%${query}%`);
 
-      const items = await ruleSets
-        .find(mQuery)
-        .sort({ createdAt: -1 })
-        .limit(10)
-        .toArray();
+      const { data: itemsData } = await mQuery
+        .order("created_at", { ascending: false })
+        .limit(10);
+      const items = itemsData ?? [];
 
       return {
         content: [
@@ -1155,7 +1199,7 @@ async function handleToolCall(
                 ? `# Marketplace Results\n\n${items
                     .map(
                       (rs) =>
-                        `- **${rs.name}** (${rs.rules?.length || 0} rules)\n  ${rs.description || ""}`,
+                        `- **${rs.name}** (${rs.ruleIds?.length || 0} rules)\n  ${rs.description || ""}`,
                     )
                     .join("\n\n")}`
                 : `No marketplace results for "${query || "all"}"`,
@@ -1166,19 +1210,26 @@ async function handleToolCall(
 
     case "get_usage_stats": {
       try {
-        const expiration = await getCollection("generations");
+        const db = getPrismDb();
         const monthStart = new Date();
         monthStart.setDate(1);
         monthStart.setHours(0, 0, 0, 0);
+        const countOpts = { count: "exact" as const, head: true };
 
-        const [projects, rules, components, gens] = await Promise.all([
-          getCollection("projects").then((c) => c.countDocuments({ userId })),
-          getCollection("rules").then((c) => c.countDocuments({ userId })),
-          getCollection("components").then((c) => c.countDocuments({ userId })),
-          expiration.countDocuments({
-            userId,
-            createdAt: { $gte: monthStart.toISOString() },
-          }),
+        const [
+          { count: projects },
+          { count: rules },
+          { count: components },
+          { count: gens },
+        ] = await Promise.all([
+          db.from("prism_projects").select("id", countOpts).eq("user_id", userId),
+          db.from("prism_rules").select("id", countOpts).eq("created_by", userId),
+          db.from("prism_components").select("id", countOpts).eq("user_id", userId),
+          db
+            .from("prism_generations")
+            .select("id", countOpts)
+            .eq("user_id", userId)
+            .gte("created_at", monthStart.toISOString()),
         ]);
 
         const userTier = await getUserTier(userId);
@@ -1215,19 +1266,36 @@ async function handleToolCall(
       }
 
       try {
-        const { ObjectId } = await import("mongodb");
-        const rules = await getCollection("rules");
-        let doc;
+        const db = getPrismDb();
+        const ruleSelect = "name, content, skillsContent:skills_content";
+        let doc: { name: string; content: string; skillsContent: string | null } | null = null;
 
-        if (ObjectId.isValid(skillId)) {
-          doc = await rules.findOne({ _id: new ObjectId(skillId) });
+        if (isValidId(skillId)) {
+          const { data } = await db
+            .from("prism_rules")
+            .select(ruleSelect)
+            .eq("id", skillId)
+            .maybeSingle();
+          doc = data;
         }
-        if (!doc) doc = await rules.findOne({ name: skillId });
-        if (!doc)
-          doc = await rules.findOne({
-            skillsContent: { $exists: true, $ne: null },
-            name: { $regex: skillId, $options: "i" },
-          });
+        if (!doc) {
+          const { data } = await db
+            .from("prism_rules")
+            .select(ruleSelect)
+            .eq("name", skillId)
+            .maybeSingle();
+          doc = data;
+        }
+        if (!doc) {
+          const { data } = await db
+            .from("prism_rules")
+            .select(ruleSelect)
+            .not("skills_content", "is", null)
+            .ilike("name", `%${skillId}%`)
+            .limit(1)
+            .maybeSingle();
+          doc = data;
+        }
 
         if (!doc) {
           return {
@@ -1264,11 +1332,13 @@ async function handleToolCall(
  */
 async function getUserTier(userId: string): Promise<SubscriptionTier> {
   try {
-    const subs = await getCollection("subscriptions");
-    const sub = await subs.findOne({
-      userId,
-      status: { $in: ["active", "trialing"] },
-    });
+    const db = getPrismDb();
+    const { data: sub } = await db
+      .from("prism_subscriptions")
+      .select("tier")
+      .eq("user_id", userId)
+      .in("status", ["active", "trialing"])
+      .maybeSingle();
     return (sub?.tier as SubscriptionTier) || "free";
   } catch {
     return "free";

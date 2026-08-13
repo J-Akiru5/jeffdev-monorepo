@@ -20,6 +20,27 @@ export async function generateMetadata({
   return {
     title: post.title,
     description: post.excerpt || undefined,
+    alternates: {
+      canonical: `/blog/${slug}`,
+    },
+    openGraph: {
+      title: `${post.title} | Syntaxure Labs`,
+      description: post.excerpt || undefined,
+      url: `https://www.syntaxure.dev/blog/${slug}`,
+      siteName: 'Syntaxure Labs',
+      type: 'article',
+      publishedTime: post.published_at || undefined,
+      authors: [post.author],
+      images: post.cover_image
+        ? [{ url: post.cover_image, width: 1200, height: 630, alt: post.title }]
+        : [{ url: 'https://www.syntaxure.dev/syntaxure-business-card.png', width: 1200, height: 630, alt: 'Syntaxure Labs' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${post.title} | Syntaxure Labs`,
+      description: post.excerpt || undefined,
+      images: post.cover_image ? [post.cover_image] : ['https://www.syntaxure.dev/syntaxure-business-card.png'],
+    },
   };
 }
 
@@ -36,8 +57,53 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     notFound();
   }
 
+  // Article JSON-LD for AI crawlers
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.excerpt || undefined,
+    author: {
+      '@type': 'Person',
+      name: post.author,
+    },
+    datePublished: post.published_at || undefined,
+    image: post.cover_image || undefined,
+    publisher: {
+      '@type': 'Organization',
+      name: 'Syntaxure Labs',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://www.syntaxure.dev/favicon.svg',
+      },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://www.syntaxure.dev/blog/${slug}`,
+    },
+  };
+
   return (
-    <div className="min-h-screen pt-24 pb-16">
+    <>
+      {/* BreadcrumbList JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Blog', item: 'https://www.syntaxure.dev/blog' },
+              { '@type': 'ListItem', position: 2, name: post.title, item: `https://www.syntaxure.dev/blog/${slug}` },
+            ],
+          }),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <div className="min-h-screen pt-24 pb-16">
       <article className="mx-auto max-w-3xl px-6 lg:px-8">
         <Link
           href="/blog"
@@ -107,5 +173,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         </div>
       </article>
     </div>
+    </>
   );
 }

@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCollection } from "@syntaxure-labs/db/cosmos";
-import { ObjectId } from "mongodb";
+import { getPrismDb, isValidId } from "@syntaxure-labs/db/prism";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
 
 export async function POST(
@@ -11,49 +10,57 @@ export async function POST(
   if (auth instanceof Response) return auth;
 
   const { id } = await params;
-  if (!ObjectId.isValid(id)) return errorResponse("Invalid rule set ID", 400);
+  if (!isValidId(id)) return errorResponse("Invalid rule set ID", 400);
 
-  const ruleSets = await getCollection("ruleSets");
-  const ruleSet = await ruleSets.findOne({
-    _id: new ObjectId(id),
-    isPublic: true,
-  });
+  const db = getPrismDb();
+  const { data: ruleSet } = await db
+    .from("prism_rule_sets")
+    .select("name, ruleIds:rule_ids")
+    .eq("id", id)
+    .eq("is_public", true)
+    .maybeSingle();
   if (!ruleSet) return errorResponse("Rule set not found or not public", 404);
 
-  const rules = await getCollection("rules");
   const installed: string[] = [];
-  const ruleIds = (ruleSet.rules || []) as unknown as string[];
+  const ruleIds = ((ruleSet.ruleIds || []) as string[]).filter((ruleId) =>
+    isValidId(ruleId),
+  );
 
   for (const ruleId of ruleIds) {
-    if (!ObjectId.isValid(ruleId)) continue;
-    const sourceRule = await rules.findOne({ _id: new ObjectId(ruleId) });
+    const { data: sourceRule } = await db
+      .from("prism_rules")
+      .select("name, description, category, content, priority, tags, pattern, severity")
+      .eq("id", ruleId)
+      .maybeSingle();
     if (!sourceRule) continue;
 
-    const now = new Date().toISOString();
-    const doc = {
-      name: sourceRule.name,
-      description: sourceRule.description || "",
-      category: sourceRule.category || "custom",
-      content: sourceRule.content,
-      priority: sourceRule.priority ?? 50,
-      tags: sourceRule.tags || [],
-      pattern: sourceRule.pattern,
-      severity: sourceRule.severity || "warning",
-      isActive: true,
-      createdBy: auth.userId,
-      sourceRuleSet: id,
-      originalRuleId: ruleId,
-      createdAt: now,
-      updatedAt: now,
-    };
+    const { data: existing } = await db
+      .from("prism_rules")
+      .select("id")
+      .eq("created_by", auth.userId)
+      .eq("original_rule_id", ruleId)
+      .maybeSingle();
 
-    const existing = await rules.findOne({
-      createdBy: auth.userId,
-      originalRuleId: ruleId,
-    });
     if (!existing) {
-      const result = await rules.insertOne(doc);
-      installed.push(result.insertedId.toString());
+      const { data: inserted } = await db
+        .from("prism_rules")
+        .insert({
+          name: sourceRule.name,
+          description: sourceRule.description || "",
+          category: sourceRule.category || "custom",
+          content: sourceRule.content,
+          priority: sourceRule.priority ?? 50,
+          tags: sourceRule.tags || [],
+          pattern: sourceRule.pattern,
+          severity: sourceRule.severity || "warning",
+          is_active: true,
+          created_by: auth.userId,
+          source_rule_set: id,
+          original_rule_id: ruleId,
+        })
+        .select("id")
+        .single();
+      if (inserted) installed.push(inserted.id);
     }
   }
 

@@ -446,13 +446,19 @@ export async function handlePrismDrip(input: DripInput): Promise<ToolOutput> {
       };
     }
 
-    const { getCollection } = await import("@syntaxure-labs/db/cosmos");
-    const rules = await getCollection("rules");
+    const { getPrismDb } = await import("@syntaxure-labs/db/prism");
+    const db = getPrismDb();
 
-    const query: Record<string, unknown> = { isActive: true };
-    if (projectId) query.projectId = projectId;
+    let query = db
+      .from("prism_rules")
+      .select(
+        "_id:id, name, content, priority, category, tags, pattern, severity",
+      )
+      .eq("is_active", true);
+    if (projectId) query = query.eq("project_id", projectId);
 
-    const allRules = (await rules.find(query).toArray()) as unknown as RuleDoc[];
+    const { data } = await query;
+    const allRules = (data ?? []) as unknown as RuleDoc[];
 
     if (allRules.length === 0) {
       return {

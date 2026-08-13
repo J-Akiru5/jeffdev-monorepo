@@ -12,45 +12,43 @@ import {
   DEFAULT_EXCHANGE_RATE,
   formatPrice as formatPriceUtil,
   formatPriceRange as formatPriceRangeUtil,
-  getCurrencyFromCookie,
 } from "@/lib/currency";
 
 interface CurrencyContextValue {
-  /** Current currency code */
   currency: CurrencyCode;
-  /** Exchange rate: 1 USD = X PHP */
   exchangeRate: number;
-  /** Whether the exchange rate is still loading */
   isLoading: boolean;
-  /** Format a PHP amount in the current currency */
   formatPrice: (phpAmount: number, options?: { compact?: boolean }) => string;
-  /** Format a price range in the current currency */
   formatPriceRange: (minPhp: number, maxPhp: number | null) => string;
 }
 
 const CurrencyContext = createContext<CurrencyContextValue | null>(null);
 
+interface CurrencyProviderProps {
+  children: ReactNode;
+  /** Detected server-side from cookie + Accept-Language header */
+  initialCurrency: CurrencyCode;
+}
+
 /**
  * Currency Provider
  * -----------------
  * Provides currency context to all child components.
- * Reads the currency cookie set by middleware and fetches live exchange rate.
+ * Takes the initial currency from the server-side layout (which reads
+ * the cookie + Accept-Language header), then fetches the live exchange rate.
+ *
+ * This avoids relying on middleware/proxy for currency detection —
+ * the correct currency is known from the very first SSR render.
  */
-export function CurrencyProvider({ children }: { children: ReactNode }) {
-  const [currency, setCurrency] = useState<CurrencyCode>("USD");
+export function CurrencyProvider({
+  children,
+  initialCurrency,
+}: CurrencyProviderProps) {
+  const [currency, setCurrency] = useState<CurrencyCode>(initialCurrency);
   const [exchangeRate, setExchangeRate] = useState(DEFAULT_EXCHANGE_RATE);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Read currency from cookie
-    const cookies = document.cookie.split(";");
-    const currencyCookie = cookies.find((c) =>
-      c.trim().startsWith("currency="),
-    );
-    const cookieValue = currencyCookie?.split("=")[1]?.trim();
-    const detectedCurrency = getCurrencyFromCookie(cookieValue);
-    setCurrency(detectedCurrency);
-
     // Fetch live exchange rate
     const fetchRate = async () => {
       try {
@@ -61,7 +59,6 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
         }
       } catch (error) {
         console.error("Failed to fetch exchange rate:", error);
-        // Keep default rate on error
       } finally {
         setIsLoading(false);
       }
@@ -93,9 +90,6 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * Hook to access currency context
- */
 export function useCurrency() {
   const context = useContext(CurrencyContext);
   if (!context) {

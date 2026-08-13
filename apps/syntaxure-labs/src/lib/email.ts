@@ -144,17 +144,12 @@ export function quoteEmailTemplate(data: {
   name: string;
   email: string;
   company?: string;
-  templateName: string;
-  scope: string;
+  projectType: string;
+  projectScope: string;
+  budgetRange?: string;
+  timeline?: string;
   requirements: string;
 }) {
-  const scopeLabels: Record<string, string> = {
-    brand: "Basic Brand/UI Tweaks",
-    api: "Custom API Integrations",
-    features: "New Features on Top",
-    full: "Full Custom Build",
-  };
-
   return `
 <!DOCTYPE html>
 <html>
@@ -164,7 +159,7 @@ export function quoteEmailTemplate(data: {
   <title>New Quote Request</title>
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 30px; border-radius: 8px 8px 0 0;">
+  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 8px 8px 0 0;">
     <h1 style="margin: 0; color: white; font-size: 24px; font-weight: 600;">🎯 New Quote Request</h1>
   </div>
   
@@ -179,7 +174,7 @@ export function quoteEmailTemplate(data: {
         </tr>
         <tr>
           <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: 600; color: #666;">Email:</td>
-          <td style="padding: 10px 0; border-bottom: 1px solid #eee;"><a href="mailto:${data.email}" style="color: #f5576c; text-decoration: none;">${data.email}</a></td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #eee;"><a href="mailto:${data.email}" style="color: #667eea; text-decoration: none;">${data.email}</a></td>
         </tr>
         ${
           data.company
@@ -193,27 +188,43 @@ export function quoteEmailTemplate(data: {
     </div>
     
     <div style="background: white; padding: 25px; border-radius: 6px; margin-bottom: 20px;">
-      <h2 style="margin: 0 0 20px 0; color: #333; font-size: 18px; font-weight: 600;">Template & Scope</h2>
+      <h2 style="margin: 0 0 20px 0; color: #333; font-size: 18px; font-weight: 600;">Project Details</h2>
       
       <table style="width: 100%; border-collapse: collapse;">
         <tr>
-          <td style="padding: 10px 0; border-bottom: 1px solid #eee; width: 120px; font-weight: 600; color: #666;">Template:</td>
-          <td style="padding: 10px 0; border-bottom: 1px solid #eee;">${data.templateName}</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #eee; width: 120px; font-weight: 600; color: #666;">Type:</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #eee;">${data.projectType}</td>
         </tr>
         <tr>
           <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: 600; color: #666;">Scope:</td>
-          <td style="padding: 10px 0; border-bottom: 1px solid #eee;">${scopeLabels[data.scope] || data.scope}</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #eee;">${data.projectScope}</td>
         </tr>
+        ${
+          data.budgetRange
+            ? `<tr>
+          <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: 600; color: #666;">Budget:</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #eee;">${data.budgetRange}</td>
+        </tr>`
+            : ""
+        }
+        ${
+          data.timeline
+            ? `<tr>
+          <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: 600; color: #666;">Timeline:</td>
+          <td style="padding: 10px 0; border-bottom: 1px solid #eee;">${data.timeline}</td>
+        </tr>`
+            : ""
+        }
       </table>
     </div>
     
     <div style="background: white; padding: 25px; border-radius: 6px; margin-bottom: 20px;">
-      <h2 style="margin: 0 0 15px 0; color: #333; font-size: 18px; font-weight: 600;">Customization Requirements</h2>
+      <h2 style="margin: 0 0 15px 0; color: #333; font-size: 18px; font-weight: 600;">Project Requirements</h2>
       <p style="margin: 0; white-space: pre-wrap; color: #555;">${data.requirements}</p>
     </div>
     
-    <div style="margin-top: 20px; padding: 15px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 4px;">
-      <p style="margin: 0; font-size: 14px; color: #e65100;">
+    <div style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-left: 4px solid #4caf50; border-radius: 4px;">
+      <p style="margin: 0; font-size: 14px; color: #2e7d32;">
         <strong>⏰ Action Required:</strong> Respond within 24 hours to maintain SLA.
       </p>
     </div>

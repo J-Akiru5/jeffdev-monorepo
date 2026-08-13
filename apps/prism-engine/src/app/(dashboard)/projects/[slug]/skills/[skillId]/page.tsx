@@ -1,10 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
-import { ObjectId } from "mongodb";
+import { getPrismDb, isValidId } from "@syntaxure-labs/db/prism";
 import { ArrowLeft, BookOpen } from "lucide-react";
-import type { SkillDoc } from "@/lib/types";
 
 interface Props {
   params: Promise<{ slug: string; skillId: string }>;
@@ -21,21 +19,25 @@ export default async function SkillDetailPage({ params }: Props) {
 
   const userId = user.id;
 
-  if (!ObjectId.isValid(skillId)) {
+  if (!isValidId(skillId)) {
     notFound();
   }
 
-  const skillsCollection = await getCollection("skills");
-  const skill = (await skillsCollection.findOne({
-    _id: new ObjectId(skillId),
-    createdBy: userId,
-  })) as SkillDoc | null;
+  const db = getPrismDb();
+  const { data: skill } = await db
+    .from("prism_skills")
+    .select(
+      "name, category, description, steps, source, isActive:is_active",
+    )
+    .eq("id", skillId)
+    .eq("created_by", userId)
+    .maybeSingle();
 
   if (!skill) {
     notFound();
   }
 
-  const steps = skill.steps || [];
+  const steps = (skill.steps as Array<{ title: string; content: string }> | null) || [];
 
   return (
     <div className="space-y-8 max-w-4xl">

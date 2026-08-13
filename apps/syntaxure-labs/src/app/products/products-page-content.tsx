@@ -236,7 +236,7 @@ export default function ProductsPageContent({
             branding, feature additions, integrations, or full rewrites.
           </p>
           <Link
-            href="/quote?type=customization"
+            href="/quote"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-medium transition-colors"
           >
             Request Custom Quote

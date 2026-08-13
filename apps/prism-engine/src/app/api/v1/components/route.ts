@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCollection } from "@syntaxure-labs/db/cosmos";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { authenticate, successResponse } from "@/lib/api-auth";
 
 export async function GET(request: NextRequest) {
@@ -14,27 +14,26 @@ export async function GET(request: NextRequest) {
   );
   const modifiedAfter = searchParams.get("modifiedAfter");
 
-  const components = await getCollection("components");
-  const query: Record<string, unknown> = { userId: auth.userId };
-  if (modifiedAfter) query.updatedAt = { $gte: modifiedAfter };
+  const db = getPrismDb();
+  let query = db
+    .from("prism_components")
+    .select(
+      "id, name, description, designSystem:design_system, stack, createdAt:created_at",
+      { count: "exact" },
+    )
+    .eq("user_id", auth.userId);
+  if (modifiedAfter) query = query.gte("updated_at", modifiedAfter);
 
-  const total = await components.countDocuments(query);
-  const items = await components
-    .find(query)
-    .sort({ createdAt: -1 })
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .toArray();
+  const { data: itemsRaw, count } = await query
+    .order("created_at", { ascending: false })
+    .range((page - 1) * limit, page * limit - 1);
+  const items = itemsRaw ?? [];
+  const total = count ?? 0;
 
-  return successResponse(
-    items.map((c) => ({
-      id: c.id,
-      name: c.name,
-      description: c.description,
-      designSystem: c.designSystem,
-      stack: c.stack,
-      createdAt: c.createdAt,
-    })),
-    { page, limit, total, totalPages: Math.ceil(total / limit) },
-  );
+  return successResponse(items, {
+    page,
+    limit,
+    total,
+    totalPages: Math.ceil(total / limit),
+  });
 }

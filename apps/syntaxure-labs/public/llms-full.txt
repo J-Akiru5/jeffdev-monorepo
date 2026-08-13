@@ -1,0 +1,197 @@
+# Syntaxure Labs — Full Context
+
+> Syntaxure Labs is a global B2B digital transformation agency specializing in scalable custom software, web architectures, and secure AI integrations. Creators of Context Engine for AI governance. Based in Iloilo City, Philippines. Est. 2025.
+
+## Company Overview
+
+Syntaxure Labs is a specialized engineering studio that partners with ambitious startups and scaling enterprises to build high-performance digital systems. We transform slow manual workflows into fast, scalable digital solutions built on modern web frameworks and secure cloud infrastructure.
+
+- **Founded:** 2025
+- **Location:** Iloilo City, Western Visayas, Philippines
+- **Founder:** Jeff Edrick Martinez (CEO) — Technical founder with 5+ years architecting production systems. Specializes in Next.js, cloud infrastructure, and AI integration.
+- **Co-Founder:** Lou Vincent Baroro (CTO) — Engineering leader specializing in scalable system architecture, AI infrastructure, and enterprise-grade platforms.
+- **Contact:** contact@syntaxure.dev
+- **Phone:** +63 970 576 2593
+- **Website:** https://www.syntaxure.dev
+
+## Core Services
+
+### 1. Custom Websites & Web Applications
+
+We build high-performance websites and web apps that load instantly, rank well on Google, and convert visitors into customers. Your site will look great on any device and reflect your brand perfectly. Deployed and ready for your domain right out of the gate.
+
+**Features:**
+- Blazing-fast load times
+- Mobile-friendly on all devices
+- Search engine optimized
+- Custom design that matches your brand
+
+**Deliverables:**
+- Fully built and deployed website
+- Custom design with your brand colors and logo
+- Works perfectly on phone, tablet, and desktop
+- Performance and SEO optimization report
+- Optional managed hosting and maintenance
+
+**Timeline:** 2-4 weeks
+**Starting investment:** PHP 150,000
+
+### 2. SaaS Platform Development
+
+We build custom software-as-a-service platforms with everything you need built-in: user accounts, subscription billing, and the ability to serve multiple clients from one system. We handle the full deployment pipeline so you can focus on your business rules, not the infrastructure.
+
+**Features:**
+- User accounts and login system
+- Subscription payment processing
+- User permissions and team management
+- Ready-to-launch foundation
+
+**Deliverables:**
+- Complete SaaS platform deployed and ready to launch
+- Payment processing integration
+- Admin dashboard for managing users
+- Account registration and login flow
+- Cloud hosting setup with CI/CD pipeline
+
+**Timeline:** 4-8 weeks
+**Starting investment:** PHP 250,000
+
+### 3. Cloud Hosting & Infrastructure
+
+We set up and manage enterprise-grade cloud hosting that keeps your website or app running smoothly, even as your traffic grows. We handle the ongoing maintenance, security updates, and monitoring so you never have to worry about technical infrastructure.
+
+**Features:**
+- Fully managed cloud hosting setup and maintenance
+- Automatic scaling as your traffic grows
+- 24/7 monitoring and security updates
+- Regular backups and disaster recovery
+
+**Deliverables:**
+- Cloud hosting account setup and ongoing management
+- Automated backup and recovery system
+- 24/7 performance and uptime monitoring
+- Regular security updates and maintenance
+
+**Timeline:** 1-2 weeks (setup) + monthly hosting
+**Starting investment:** PHP 80,000
+
+### 4. AI Integration & Automation
+
+We add AI capabilities to your product so it can automate repetitive tasks, answer customer questions intelligently, and make smarter decisions. Powered by our Context Engine technology for reliable, accurate AI behavior. We deploy and integrate directly into your existing stack.
+
+**Features:**
+- AI-powered search and recommendations
+- Automated document processing
+- Smart customer support chatbots
+- Custom AI trained on your data
+
+**Deliverables:**
+- AI feature deployed and integrated into your product
+- Custom knowledge base for your AI
+- Automated workflow setup
+- AI behavior testing and optimization
+
+**Timeline:** 2-4 weeks
+**Starting investment:** Custom quote (varies per project)
+
+### Managed Hosting & Maintenance (Monthly)
+
+Keep your system running smoothly with ongoing managed hosting and maintenance services.
+
+**Features:**
+- Cloud hosting and infrastructure management
+- Security updates and monitoring
+- Performance optimization
+- Monthly retainer for ongoing maintenance
+
+**Starting at:** PHP 5,000-15,000/month
+
+## Flagship Product: Context Engine
+
+Context Engine is a proprietary AI Governance layer that forces AI agents to adhere to established protocols and actively prevents AI hallucinations in enterprise environments. It is designed to bring structure, safety, and predictability to AI-powered operations within an organization.
+
+**Key Capabilities:**
+- Enforces strict AI behavioral protocols and rules
+- Prevents AI hallucinations by validating outputs against established contexts
+- Supports enterprise-grade security and compliance requirements
+- Integrates with existing AI tools and workflows
+- Provides visibility and audit trails for AI agent actions
+
+**Application Category:** BusinessApplication
+**Platform:** Web-based, Any operating system
+**Availability:** Contact for pricing (SaaS subscription model for international customers)
+
+## How We Work
+
+1. **Discovery & Proposal (Free)** — We discuss your project goals, technical requirements, and budget. Within 24 hours, you receive a fixed-price proposal with a clear scope and timeline.
+2. **Planning & Architecture** — We design the system architecture, create a component tree, and validate the technical approach before writing a single line of production code.
+3. **Build & Iterate** — We build your system in structured sprints with regular check-ins. You see progress weekly, not just at the end.
+4. **Launch & Support** — We deploy your system, set up monitoring, and hand over with documentation. Ongoing maintenance and hosting options are available.
+
+**Development Methodology:** Agentic Protocol — A structured development methodology that ensures every project is planned, validated, and executed with precision.
+
+## Why Choose Syntaxure Labs
+
+### Six Architectural Pillars
+
+1. **Multi-Tenant Architecture** — Every template features a fully-baked multi-tenant architecture with robust organization isolation, team workspaces, and scalable database indexing right out of the box.
+
+2. **Ready-to-Ship Security** — Production-grade authentication, role-based access control (RBAC), and encrypted data handling are natively integrated into the core boilerplate.
+
+3. **Template-Accelerated Delivery** — Zero to launch in weeks using production SaaS core instead of starting from an empty workspace.
+
+4. **AI-Native Extensibility** — Core architecture is built to cleanly integrate AI native workflows, vector search, and automated pipeline contexts.
+
+5. **Productized Customization** — Predictable value tiers with flat-rate pricing instead of hourly billing or ambiguous estimates.
+
+6. **Continuous Evolution** — CI/CD enabled template upgrades and decoupled scaling for long-term growth.
+
+### Values
+
+- **Clarity Over Complexity** — We write code that is readable, maintainable, and built to last. No clever hacks, just clean architecture.
+- **Fixed Investment, No Surprises** — We scope properly, quote fairly, and deliver on time. You know exactly what you're getting before we start.
+- **Partnership, Not Vendorship** — We invest in your success. Our best clients become long-term partners.
+
+### Tech Stack
+
+| Category | Technologies |
+|----------|-------------|
+| Frontend | Next.js, React, TypeScript, Tailwind CSS, GSAP |
+| Backend | Node.js, Laravel, PostgreSQL, Firebase |
+| Cloud | Vercel, AWS, Cloudflare, Docker |
+| AI | OpenAI, Claude, Langchain, Pinecone |
+
+## FAQ
+
+### What does Syntaxure Labs do?
+Syntaxure Labs is a global B2B digital transformation agency specializing in scalable custom software, web architectures, and secure AI integrations. We partner with enterprises to modernize operations, converting slow manual workflows into high-performance digital solutions built on modern frameworks and secure cloud infrastructure.
+
+### What is Context Engine?
+Context Engine is a proprietary AI Governance layer that enforces strict protocols and actively prevents AI hallucinations in enterprise environments. It is our flagship product that demonstrates our deep expertise in AI architecture and enterprise-grade system design.
+
+### Where is Syntaxure Labs based?
+We are based in Iloilo City, Philippines, rooted in the emerging innovation ecosystem of Western Visayas. We operate globally, delivering enterprise-grade engineering standards to clients worldwide from our Southeast Asian development hub.
+
+### What services does Syntaxure Labs offer?
+We offer custom software development, SaaS platform architecture, cloud infrastructure deployment, AI integration services, and high-performance web development. All services are delivered with fixed-investment pricing and predictable timelines, tailored to each client's specific needs.
+
+### How do I start a project with Syntaxure Labs?
+Contact us through our website to discuss your project requirements. We provide a free consultation to understand your vision, scope your project thoroughly, and deliver a fixed-price investment estimate within 24 hours. No surprises, just transparent partnership from day one.
+
+## Blog & Insights
+
+Topics covered include AI governance, SaaS architecture, web development best practices, digital transformation strategies, and product updates from the Syntaxure Labs team. The blog features tutorials, technical deep dives, case studies on system architecture, and thought leadership on emerging technologies.
+
+Available at: https://www.syntaxure.dev/blog
+
+## Social & Community
+
+- **LinkedIn:** https://www.linkedin.com/company/syntaxure-labs
+- **Facebook:** https://www.facebook.com/people/Syntaxure-Labs-PH/61590058783641/
+- **Community:** https://www.syntaxure.dev/community — Get notified about new releases, beta programs, and exclusive updates.
+
+## Legal
+
+- **Privacy Policy:** https://www.syntaxure.dev/privacy
+- **Terms of Service:** https://www.syntaxure.dev/terms
+- **Cookie Policy:** https://www.syntaxure.dev/cookies

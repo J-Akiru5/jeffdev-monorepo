@@ -27,7 +27,6 @@ concurrency:
 
 env:
   TURBO_TELEMETRY_DISABLED: 1
-  PNPM_VERSION: 9.1.0
   NODE_VERSION: "22"
 
 jobs:
@@ -38,10 +37,8 @@ jobs:
     outputs:
       pnpm-store-path: ${{ steps.pnpm-cache.outputs.path }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -56,6 +53,7 @@ jobs:
           key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
             pnpm-store-
+      - run: npm install -g napi-postinstall
       - run: pnpm install --frozen-lockfile
       - name: Cache turbo build outputs
         uses: actions/cache@v4
@@ -71,10 +69,8 @@ jobs:
     needs: install
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -89,6 +85,7 @@ jobs:
         with:
           path: .turbo
           key: turbo-${{ github.sha }}
+      - run: npm install -g napi-postinstall
       - run: pnpm install --frozen-lockfile --prefer-offline
       - run: pnpm run check-types
 
@@ -98,10 +95,8 @@ jobs:
     needs: install
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -116,6 +111,7 @@ jobs:
         with:
           path: .turbo
           key: turbo-${{ github.sha }}
+      - run: npm install -g napi-postinstall
       - run: pnpm install --frozen-lockfile --prefer-offline
       - run: pnpm run lint
 
@@ -129,10 +125,8 @@ jobs:
         package: [prism-context-engine, prism-mcp-server]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -147,6 +141,7 @@ jobs:
         with:
           path: .turbo
           key: turbo-${{ github.sha }}
+      - run: npm install -g napi-postinstall
       - run: pnpm install --frozen-lockfile --prefer-offline
 
       # prism-context-engine depends on prism-mcp-server — build it first
@@ -174,12 +169,12 @@ jobs:
       prism-docs: ${{ steps.changes.outputs.prism-docs }}
       prism-mcp-server: ${{ steps.changes.outputs.prism-mcp-server }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v44
+        uses: tj-actions/changed-files@v47
         with:
           files_yaml: |
             syntaxure-labs:
@@ -260,10 +255,8 @@ jobs:
         app: ${{ fromJson(needs.detect-changes.outputs.apps) }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -278,6 +271,7 @@ jobs:
         with:
           path: .turbo
           key: turbo-${{ github.sha }}
+      - run: npm install -g napi-postinstall
       - run: pnpm install --frozen-lockfile --prefer-offline
       - run: pnpm --filter ${{ matrix.app }} run build
         env:
@@ -291,25 +285,31 @@ jobs:
   # failed or was skipped, this fails so the PR cannot merge.
   ci-status:
     name: CI Status (typecheck, lint, test, build)
-    needs: [typecheck, lint, test, detect-changes, build]
+    needs: [install, typecheck, lint, test, detect-changes, build]
     if: always()
     runs-on: ubuntu-latest
     steps:
+      - name: "Check: install"
+        run: |
+          if [ "${{ needs.install.result }}" != "success" ]; then
+            echo "Install failed — cannot proceed"
+            exit 1
+          fi
       - name: "Check: typecheck"
         run: |
-          if [ "${{ needs.typecheck.result }}" != "success" ]; then
+          if [ "${{ needs.typecheck.result }}" == "failure" ]; then
             echo "Result: ${{ needs.typecheck.result }}"
             exit 1
           fi
       - name: "Check: lint"
         run: |
-          if [ "${{ needs.lint.result }}" != "success" ]; then
+          if [ "${{ needs.lint.result }}" == "failure" ]; then
             echo "Result: ${{ needs.lint.result }}"
             exit 1
           fi
       - name: "Check: tests"
         run: |
-          if [ "${{ needs.test.result }}" != "success" ]; then
+          if [ "${{ needs.test.result }}" == "failure" ]; then
             echo "Result: ${{ needs.test.result }}"
             exit 1
           fi

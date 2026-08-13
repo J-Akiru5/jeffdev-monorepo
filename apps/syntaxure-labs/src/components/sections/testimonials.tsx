@@ -1,5 +1,3 @@
-"use client";
-
 /**
  * Testimonials Section
  * ---------------------
@@ -8,7 +6,7 @@
  */
 
 import { Quote } from "lucide-react";
-import { useInView } from "@/lib/use-in-view";
+import { Reveal } from "@/components/reveal";
 import type { Testimonial } from "@/app/actions/testimonials";
 
 interface TestimonialsProps {
@@ -16,21 +14,13 @@ interface TestimonialsProps {
 }
 
 export function Testimonials({ testimonials }: TestimonialsProps) {
-  const { ref: headerRef, isInView: headerInView } = useInView<HTMLDivElement>({ threshold: 0.2 });
-  const { ref: gridRef, isInView: gridInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
-
   if (testimonials.length === 0) return null;
 
   return (
     <section className="relative py-24 lg:py-32" id="testimonials">
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
         {/* Section Header */}
-        <div
-          ref={headerRef}
-          className={`mx-auto max-w-2xl text-center transition-all duration-700 ease-out ${
-            headerInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
+        <Reveal className="mx-auto max-w-2xl text-center" threshold={0.2}>
           <span className="font-mono text-xs font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
             Client Feedback
           </span>
@@ -40,15 +30,10 @@ export function Testimonials({ testimonials }: TestimonialsProps) {
           <p className="mt-4 text-[var(--text-secondary)]">
             Hear from the teams and founders we have partnered with.
           </p>
-        </div>
+          </Reveal>
 
         {/* Testimonials Grid */}
-        <div
-          ref={gridRef}
-          className={`mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 transition-all duration-700 ease-out ${
-            gridInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
+        <Reveal className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" threshold={0.1}>
           {testimonials.map((testimonial) => (
             <div
               key={testimonial.id}
@@ -86,7 +71,7 @@ export function Testimonials({ testimonials }: TestimonialsProps) {
               </div>
             </div>
           ))}
-        </div>
+        </Reveal>
       </div>
     </section>
   );

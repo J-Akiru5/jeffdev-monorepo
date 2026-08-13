@@ -6,6 +6,3 @@ export { Footer } from "./layout/footer";
 export { Hero } from "./sections/hero";
 export { Services } from "./sections/services";
 export { CTA } from "./sections/cta";
-
-// Provider Components
-export { SmoothScroll } from "./providers/smooth-scroll";

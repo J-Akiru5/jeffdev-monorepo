@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCollection } from "@syntaxure-labs/db/cosmos";
-import { ObjectId } from "mongodb";
+import { getPrismDb, isValidId } from "@syntaxure-labs/db/prism";
 import { z } from "zod";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
 
@@ -33,13 +32,15 @@ export async function GET(
   if (auth instanceof Response) return auth;
 
   const { id } = await params;
-  if (!ObjectId.isValid(id)) return errorResponse("Invalid project ID", 400);
+  if (!isValidId(id)) return errorResponse("Invalid project ID", 400);
 
-  const projects = await getCollection("projects");
-  const project = await projects.findOne({
-    _id: new ObjectId(id),
-    userId: auth.userId,
-  });
+  const db = getPrismDb();
+  const { data: project } = await db
+    .from("prism_projects")
+    .select("id")
+    .eq("id", id)
+    .eq("user_id", auth.userId)
+    .maybeSingle();
   if (!project) return errorResponse("Project not found", 404);
 
   const { searchParams } = new URL(request.url);
@@ -50,22 +51,26 @@ export async function GET(
   );
   const category = searchParams.get("category");
 
-  const rules = await getCollection("rules");
-  const projectId = project._id.toString();
-  const query: Record<string, unknown> = { projectId, isActive: true };
+  let query = db
+    .from("prism_rules")
+    .select(
+      "_id:id, name, description, category, content, priority, tags, pattern, severity, isActive:is_active, createdAt:created_at, updatedAt:updated_at",
+      { count: "exact" },
+    )
+    .eq("project_id", project.id)
+    .eq("is_active", true);
   if (
     category &&
     RULE_CATEGORIES.includes(category as (typeof RULE_CATEGORIES)[number])
   )
-    query.category = category;
+    query = query.eq("category", category);
 
-  const total = await rules.countDocuments(query);
-  const items = await rules
-    .find(query)
-    .sort({ priority: 1, createdAt: -1 })
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .toArray();
+  const { data: itemsRaw, count } = await query
+    .order("priority", { ascending: true })
+    .order("created_at", { ascending: false })
+    .range((page - 1) * limit, page * limit - 1);
+  const items = itemsRaw ?? [];
+  const total = count ?? 0;
 
   return successResponse(
     items.map((r) => ({
@@ -94,13 +99,15 @@ export async function POST(
   if (auth instanceof Response) return auth;
 
   const { id } = await params;
-  if (!ObjectId.isValid(id)) return errorResponse("Invalid project ID", 400);
+  if (!isValidId(id)) return errorResponse("Invalid project ID", 400);
 
-  const projects = await getCollection("projects");
-  const project = await projects.findOne({
-    _id: new ObjectId(id),
-    userId: auth.userId,
-  });
+  const db = getPrismDb();
+  const { data: project } = await db
+    .from("prism_projects")
+    .select("id")
+    .eq("id", id)
+    .eq("user_id", auth.userId)
+    .maybeSingle();
   if (!project) return errorResponse("Project not found", 404);
 
   let body: unknown;
@@ -117,20 +124,41 @@ export async function POST(
       422,
     );
 
-  const rules = await getCollection("rules");
   const now = new Date().toISOString();
-  const doc = {
-    ...parsed.data,
-    projectId: project._id.toString(),
-    createdBy: auth.userId,
-    isActive: true,
-    createdAt: now,
-    updatedAt: now,
-  };
+  const { data: inserted, error } = await db
+    .from("prism_rules")
+    .insert({
+      project_id: project.id,
+      created_by: auth.userId,
+      name: parsed.data.name,
+      description: parsed.data.description,
+      category: parsed.data.category,
+      content: parsed.data.content,
+      priority: parsed.data.priority,
+      tags: parsed.data.tags,
+      pattern: parsed.data.pattern || null,
+      severity: parsed.data.severity,
+      is_active: true,
+      created_at: now,
+      updated_at: now,
+    })
+    .select("id")
+    .single();
 
-  const result = await rules.insertOne(doc);
+  if (error || !inserted) {
+    return errorResponse("Failed to create rule", 500);
+  }
+
   return successResponse(
-    { id: result.insertedId.toString(), ...doc },
+    {
+      id: inserted.id,
+      ...parsed.data,
+      projectId: project.id,
+      createdBy: auth.userId,
+      isActive: true,
+      createdAt: now,
+      updatedAt: now,
+    },
     { created: true },
   );
 }

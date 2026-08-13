@@ -7,6 +7,7 @@
 "use server";
 
 import { getAdminClient } from "@/lib/supabase/admin";
+import { logDataError } from "@/lib/errors";
 
 export interface Testimonial {
   id: string;
@@ -31,7 +32,7 @@ export async function getTestimonials(): Promise<Testimonial[]> {
     if (error) throw error;
     return (data || []) as Testimonial[];
   } catch (error) {
-    console.error("[GET TESTIMONIALS ERROR]", error);
+    logDataError("[GET TESTIMONIALS ERROR]", error);
     return [];
   }
 }

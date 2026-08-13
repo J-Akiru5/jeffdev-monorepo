@@ -25,7 +25,7 @@ export const prismWaitlistConfirmation = `
     <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
       <p style="font-size: 12px; color: rgba(255,255,255,0.3);">
         Syntaxure Labs • Prism Division<br>
-        <a href="https://www.syntaxure.dev/prism" style="color: #8b5cf6; text-decoration: none;">jeffdev.studio/prism</a>
+        <a href="https://www.syntaxure.dev/prism" style="color: #8b5cf6; text-decoration: none;">syntaxure.dev/prism</a>
       </p>
     </div>
   </div>

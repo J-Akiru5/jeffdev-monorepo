@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCollection } from "@syntaxure-labs/db/cosmos";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
 import { TIER_LIMITS } from "@/lib/subscriptions";
 
@@ -8,6 +8,15 @@ const GPT4O_MINI_PER_1K_OUTPUT = 0.0006;
 
 function formatLimit(limit: number): number | string {
   return limit === -1 ? "unlimited" : limit;
+}
+
+interface TelemetryRow {
+  tokenCount: number | null;
+  isError: boolean | null;
+  cacheHit: boolean | null;
+  toolName: string | null;
+  projectId: string | null;
+  clientPlatform: string | null;
 }
 
 export async function GET(request: NextRequest) {
@@ -20,131 +29,62 @@ export async function GET(request: NextRequest) {
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
 
-  const [projects, rules, components, generations, telemetryColl] =
-    await Promise.all([
-      getCollection("projects"),
-      getCollection("rules"),
-      getCollection("components"),
-      getCollection("generations"),
-      getCollection("prism_telemetry"),
-    ]);
+  const db = getPrismDb();
+  const countOpts = { count: "exact" as const, head: true };
 
   const [
-    projectCount,
-    ruleCount,
-    componentCount,
-    generationCount,
-    telemetryAgg,
-    toolBreakdown,
-    projectBreakdown,
-    platformBreakdown,
+    { count: projectCount },
+    { count: ruleCount },
+    { count: componentCount },
+    { count: generationCount },
+    { data: telemetryRowsRaw },
   ] = await Promise.all([
-    projects.countDocuments({ userId: auth.userId }),
-    rules.countDocuments({ createdBy: auth.userId }),
-    components.countDocuments({ userId: auth.userId }),
-    generations.countDocuments({
-      userId: auth.userId,
-      createdAt: { $gte: monthStart.toISOString() },
-    }),
-    // Use aggregation pipeline instead of fetching all documents
-    telemetryColl
-      .aggregate([
-        {
-          $match: {
-            userId: auth.userId,
-            timestamp: { $gte: monthStart.toISOString() },
-          },
-        },
-        {
-          $group: {
-            _id: null,
-            totalTokens: { $sum: { $ifNull: ["$tokenCount", 0] } },
-            totalCalls: { $sum: 1 },
-            errorCalls: { $sum: { $cond: ["$isError", 1, 0] } },
-            cacheHitCalls: { $sum: { $cond: ["$cacheHit", 1, 0] } },
-          },
-        },
-      ])
-      .toArray(),
-    // Aggregate tokens by tool
-    telemetryColl
-      .aggregate([
-        {
-          $match: {
-            userId: auth.userId,
-            timestamp: { $gte: monthStart.toISOString() },
-          },
-        },
-        {
-          $group: {
-            _id: "$toolName",
-            tokens: { $sum: { $ifNull: ["$tokenCount", 0] } },
-          },
-        },
-      ])
-      .toArray(),
-    // Aggregate tokens by project
-    telemetryColl
-      .aggregate([
-        {
-          $match: {
-            userId: auth.userId,
-            timestamp: { $gte: monthStart.toISOString() },
-            projectId: { $ne: null },
-          },
-        },
-        {
-          $group: {
-            _id: "$projectId",
-            tokens: { $sum: { $ifNull: ["$tokenCount", 0] } },
-          },
-        },
-      ])
-      .toArray(),
-    // Aggregate calls by platform
-    telemetryColl
-      .aggregate([
-        {
-          $match: {
-            userId: auth.userId,
-            timestamp: { $gte: monthStart.toISOString() },
-          },
-        },
-        {
-          $group: {
-            _id: { $ifNull: ["$clientPlatform", "unknown"] },
-            count: { $sum: 1 },
-          },
-        },
-      ])
-      .toArray(),
+    db.from("prism_projects").select("id", countOpts).eq("user_id", auth.userId),
+    db.from("prism_rules").select("id", countOpts).eq("created_by", auth.userId),
+    db.from("prism_components").select("id", countOpts).eq("user_id", auth.userId),
+    db
+      .from("prism_generations")
+      .select("id", countOpts)
+      .eq("user_id", auth.userId)
+      .gte("created_at", monthStart.toISOString()),
+    // Fetch this month's telemetry rows and aggregate in-process — the
+    // volume here (one user, one month of MCP tool calls) is small enough
+    // that this is simpler and just as fast as four separate aggregate
+    // queries, and avoids needing a Postgres RPC function for GROUP BY.
+    db
+      .from("prism_telemetry")
+      .select(
+        "tokenCount:token_count, isError:is_error, cacheHit:cache_hit, toolName:tool_name, projectId:project_id, clientPlatform:client_platform",
+      )
+      .eq("user_id", auth.userId)
+      .gte("timestamp", monthStart.toISOString()),
   ]);
 
-  const agg = (telemetryAgg as unknown as Array<{
-    totalTokens: number;
-    totalCalls: number;
-    errorCalls: number;
-    cacheHitCalls: number;
-  }>)[0];
+  const telemetryRows = (telemetryRowsRaw ?? []) as TelemetryRow[];
 
-  const totalTokens = agg?.totalTokens || 0;
-  const totalCalls = agg?.totalCalls || 0;
-  const errorCalls = agg?.errorCalls || 0;
-  const cacheHitCalls = agg?.cacheHitCalls || 0;
-
+  let totalTokens = 0;
+  let totalCalls = 0;
+  let errorCalls = 0;
+  let cacheHitCalls = 0;
   const tokensByTool: Record<string, number> = {};
-  for (const t of toolBreakdown as unknown as Array<{ _id: string; tokens: number }>) {
-    if (t._id) tokensByTool[t._id] = t.tokens;
-  }
-
   const tokensByProject: Record<string, number> = {};
-  for (const p of projectBreakdown as unknown as Array<{ _id: string; tokens: number }>) {
-    if (p._id) tokensByProject[p._id] = p.tokens;
-  }
-
   const callsByPlatform: Record<string, number> = {};
-  for (const p of platformBreakdown as unknown as Array<{ _id: string; count: number }>) {
-    if (p._id) callsByPlatform[p._id] = p.count;
+
+  for (const row of telemetryRows) {
+    const tokens = row.tokenCount ?? 0;
+    totalTokens += tokens;
+    totalCalls += 1;
+    if (row.isError) errorCalls += 1;
+    if (row.cacheHit) cacheHitCalls += 1;
+    if (row.toolName) {
+      tokensByTool[row.toolName] = (tokensByTool[row.toolName] || 0) + tokens;
+    }
+    if (row.projectId) {
+      tokensByProject[row.projectId] =
+        (tokensByProject[row.projectId] || 0) + tokens;
+    }
+    const platform = row.clientPlatform || "unknown";
+    callsByPlatform[platform] = (callsByPlatform[platform] || 0) + 1;
   }
 
   const costEstimate =
@@ -160,14 +100,14 @@ export async function GET(request: NextRequest) {
   return successResponse({
     tier: auth.tier,
     usage: {
-      projects: { used: projectCount, limit: formatLimit(limits.projects) },
-      rules: { used: ruleCount, limit: formatLimit(limits.rules) },
+      projects: { used: projectCount ?? 0, limit: formatLimit(limits.projects) },
+      rules: { used: ruleCount ?? 0, limit: formatLimit(limits.rules) },
       components: {
-        used: componentCount,
+        used: componentCount ?? 0,
         limit: formatLimit(limits.components),
       },
       aiGenerations: {
-        used: generationCount,
+        used: generationCount ?? 0,
         limit: formatLimit(limits.aiGenerations),
       },
     },
@@ -205,23 +145,23 @@ export async function POST(request: NextRequest) {
     return errorResponse("No events provided", 400);
   }
 
-  const telemetryColl = await getCollection("prism_telemetry");
+  const db = getPrismDb();
   const docs = events.map((e: Record<string, unknown>) => ({
-    userId: auth.userId,
-    toolName: e.toolName || "unknown",
-    tokenCount: typeof e.tokenCount === "number" ? e.tokenCount : 0,
-    byteSize: typeof e.byteSize === "number" ? e.byteSize : 0,
-    isError: !!e.isError,
-    cacheHit: !!e.cacheHit,
-    fromCache: !!e.fromCache,
-    clientPlatform: e.clientPlatform || "unknown",
-    projectId: e.projectId || null,
+    user_id: auth.userId,
+    tool_name: e.toolName || "unknown",
+    token_count: typeof e.tokenCount === "number" ? e.tokenCount : 0,
+    byte_size: typeof e.byteSize === "number" ? e.byteSize : 0,
+    is_error: !!e.isError,
+    cache_hit: !!e.cacheHit,
+    from_cache: !!e.fromCache,
+    client_platform: e.clientPlatform || "unknown",
+    project_id: e.projectId || null,
     model: e.model || null,
     timestamp: e.timestamp || new Date().toISOString(),
-    ingestedAt: new Date().toISOString(),
+    ingested_at: new Date().toISOString(),
   }));
 
-  await telemetryColl.insertMany(docs);
+  await db.from("prism_telemetry").insert(docs);
 
   return successResponse({ ingested: docs.length });
 }

@@ -9,60 +9,98 @@ import {
 
 export const runtime = "edge";
 
-// System Wide Knowledge Base Context
+// Client-facing knowledge base — no internal architecture or dev info
 const SYSTEM_WIDE_CONTEXT = `
-# Syntaxure Labs Monorepo - System-Wide Context
-You are the Syntaxure Labs System Assistant, an AI built into the Syntaxure Labs monorepo (agency app) to help users, administrators, and developers understand the entire Syntaxure Labs ecosystem, architecture, and tech stack.
+# Syntaxure Labs - Company & Services
+You are the Syntaxure Labs AI Assistant. Your role is to help potential clients understand what Syntaxure Labs offers and guide them toward starting a project.
 
-## 1. Core Businesses (The Dual-Engine Strategy)
-**Engine A: The Agency (syntaxure.dev)**
-- Role: The "Research Lab" & "Cash Cow."
-- Business Model: SaaS subscription-based transactions. Pre-configured templates are available for clients to register and subscribe to.
-- Customizations: For custom requirements or bespoke designs, clients can book a call to request a personalized quotation.
-- Pitch: "We don't just build your app; we install the Infrastructure so you can maintain it yourself."
-- Tech: Next.js 16 + Supabase.
+## About Syntaxure Labs
+Syntaxure Labs is a custom software development agency. We build high-performance websites, SaaS platforms, cloud infrastructure, and AI integrations for businesses. We are based in Iloilo City, Philippines and operate globally.
 
-**Engine B: The Product (prism.syntaxure.dev - Prism Context Engine)**
-- Role: The "Scale" & "Asset." Context-as-a-Service for AI coding assistants.
-- Business Model: SaaS subscription model.
-- Pitch: "Stop your AI from hallucinating. Deploy a Context Server that forces Cursor/Windsurf to follow your Design System."
-- Tech: Next.js 16 + Azure Cosmos DB (NoSQL).
+## Services
+1. **Web Development**: Custom high-performance marketing websites and web applications built with modern frameworks. Designed to load fast, rank well on search engines, and convert visitors.
+2. **SaaS Platform Development**: Multi-tenant SaaS architectures with user accounts, subscription billing, and role-based access control. We build the foundation so you can launch and iterate.
+3. **Cloud Infrastructure**: Cloud architecture design, deployment, and monitoring. We set up hosting that is secure, scalable, and cost-efficient.
+4. **AI Integration**: Custom AI solutions including chatbots, document processing, intelligent search, and workflow automation. We also offer Context Engine for AI governance.
 
-## 2. Monorepo Architecture (Turborepo)
-- **apps/syntaxure-labs**: The Marketing Site & Admin (Client-facing). Port 3000. Stack: Next.js 16 + Supabase.
-- **apps/prism-engine**: The Prism Context Engine SaaS platform for Vibecoders. Port 3001. Stack: Next.js 16 + Azure Cosmos DB. Has its own AI assistant at /api/assistant covering MCP setup, video rule extraction, pricing, and integrations.
-- **apps/prism-admin**: The unified admin panel ("Mission Control") for Syntaxure Labs. Port 3004. Stack: Next.js 16 + Supabase. Sections: Users, Subscriptions, Analytics, Agency Services, Contracts, Quotes, Projects, Workspaces, Releases, Billing, Settings. Has its own AI assistant at /api/assistant for admin operations.
-- **apps/prism-manage**: Personal & team project management app. Port 3007. Stack: Next.js 16 + Supabase. Features: Task list (virtualized), Kanban board, Calendar (Google Calendar sync), Marketing board with CPO review, Settings with audit trail. Has its own AI assistant at /api/assistant for task/productivity help.
-- **apps/prism-mcp-server**: Node.js + MCP SDK (The AI "Brain" Context Server). Port 3003.
-- **apps/prism-docs**: Documentation site (Nextra 4). Port 3002.
-- **apps/prism-analytics**: Python FastAPI analytics service. Port 8000.
-- **packages/ui**: Shared Headless UI + Tailwind components (includes ChatAssistant, data-table, cards, buttons).
-- **packages/db**: Shared Database Clients (Cosmos & Firestore).
-- **packages/typescript-config**, **packages/eslint-config**: Shared configs.
-*Rule: Strict boundaries (No Cross-App Imports). UI is "Shared First" in packages/ui.*
+## Flagship Product: Context Engine
+Context Engine is a proprietary AI Governance layer that enforces strict protocols and prevents AI hallucinations in enterprise environments. It ensures AI agents follow established rules and produce reliable, safe outputs.
 
-Each app that has an AI assistant (/api/assistant) has its own knowledge base tailored to its domain. The system-wide assistant (this one) covers the entire monorepo ecosystem and architecture.
+## Pricing
+We use custom pricing based on your project scope and requirements. Every project starts with a free consultation where we discuss your goals, then provide a fixed-price investment estimate. There are no hidden fees or hourly surprises.
 
-## 3. Tech Stack ("Bleeding Edge")
-- **Framework**: Next.js 16 (App Router) + React 19. (useOptimistic, useTransition, Server Actions natively).
-- **State/Caching**: Upstash (Redis) for Rate Limiting. Zustand for global client state.
-- **Storage**: Cloudflare R2 (S3 Compatible).
-- **AI**: Vercel AI SDK (ai), Gemini 2.5 Flash, Azure OpenAI (GPT-4o), Azure AI Search / ChromaDB.
-- **Frontend**: Tailwind CSS v4, @studio-freight/lenis (Scroll), framer-motion, gsap.
+## Process
+1. **Discovery Call**: Free consultation to understand your project goals and requirements.
+2. **Project Scope**: We define the deliverables, timeline, and fixed investment.
+3. **Build**: Our team builds your solution using modern, scalable architecture.
+4. **Launch & Support**: We deploy, test, and provide ongoing support.
 
-## 4. Visual Constitution (Design System)
-- **Vibe**: Precision Engineering, Stealth Luxury, "Operating System" feel.
-- **The "Void" Law**: The universe is #050505. There is no light mode.
-- **Gradients**: Holographic Gradients (primary-cyan #06b6d4, primary-purple #8b5cf6).
-- **Typography**: Inter (Variable) for Headings, JetBrains Mono for Technical Data.
-- **Components**: "Ghost Glow" Buttons, "Glass Panel" Cards. Never pure black, use white/0.02 surface.
+## Team
+- **Jeff Edrick Martinez** - CEO & Founder
+- **Lou Vincent Baroro** - CTO & Co-Founder
 
-## 5. Security & Principles
-- **Doppler Law**: Secrets are injected via Doppler (doppler run -- turbo dev), no manual .env files.
-- **Zod Gate**: Every Server Action MUST validate inputs using Zod.
-- **Server/Client Boundaries**: Firestore Timestamps MUST be serialized before passing to Client Components.
-- **Alpha Filter**: Priority is "Sovereign" tech that empowers users to own their code and fixes "Context Entropy".
+## Contact
+- Email: contact@syntaxure.dev
+- Phone: +63 970 576 2593
+- Location: Iloilo City, Philippines
 `;
+
+/**
+ * Guard rail: Check if the question is relevant to this chatbot's purpose.
+ * Only questions about services, pricing, process, company, or general inquiries are allowed.
+ */
+const ALLOWED_TOPICS = [
+  "service", "website", "web", "saas", "platform", "cloud", "ai", "ai integration",
+  "context engine", "pricing", "price", "cost", "budget", "quote", "investment",
+  "process", "timeline", "how long", "how it works",
+  "contact", "email", "phone", "location", "iloilo", "philippines",
+  "team", "founder", "jeff", "lou", "about", "company",
+  "start", "start project", "free consultation", "discovery call",
+  "portfolio", "work", "case study", "project",
+  "hello", "hi", "hey", "good morning", "good afternoon", "good evening",
+  "help", "question", "support",
+];
+
+const BLOCKED_KEYWORDS = [
+  // Direct probing for secrets or internal source
+  "source code", "monorepo", "turborepo",
+  "password", "secret", "api key", "token", "credential",
+  // Malicious intent
+  "hack", "exploit", "vulnerability", "security flaw",
+  // Internal dev tooling (clients would never know these)
+  "doppler", ".env", "zod", "upstash",
+];
+
+function isQuestionRelevant(question: string): { relevant: boolean; reason?: string } {
+  const lower = question.toLowerCase().trim();
+
+  // Check for blocked keywords first
+  for (const keyword of BLOCKED_KEYWORDS) {
+    if (lower.includes(keyword)) {
+      return {
+        relevant: false,
+        reason: `I can only answer questions about Syntaxure Labs services, pricing, and process. Could you ask about something related to how we can help with your project?`,
+      };
+    }
+  }
+
+  // Short messages like "hi" or "hello" should always pass
+  if (lower.length < 10) {
+    return { relevant: true };
+  }
+
+  // Check if the question contains at least one allowed topic
+  const hasAllowedTopic = ALLOWED_TOPICS.some((topic) => lower.includes(topic));
+
+  if (!hasAllowedTopic) {
+    return {
+      relevant: false,
+      reason: `I'm here to help with questions about Syntaxure Labs services, pricing, and how we can help with your project. Could you ask something related to that?`,
+    };
+  }
+
+  return { relevant: true };
+}
 
 function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get("x-forwarded-for");
@@ -80,11 +118,16 @@ function getClientIP(request: NextRequest): string {
 
 export async function POST(request: NextRequest) {
   try {
-    // Rate limiting via Upstash
+    // Rate limiting via Upstash (optional — graceful fallback if Redis is unavailable)
     const clientIP = getClientIP(request);
-    const rlResult = await checkRateLimit(clientIP, "assistant");
+    let rlResult: { allowed: boolean; limit: number; remaining: number; reset: number } | null = null;
+    try {
+      rlResult = await checkRateLimit(clientIP, "assistant");
+    } catch (error) {
+      console.error("[ASSISTANT] Rate limiter unavailable (Redis missing?), skipping:", error);
+    }
 
-    if (!rlResult.allowed) {
+    if (rlResult && !rlResult.allowed) {
       return NextResponse.json(
         { error: "Rate limit exceeded. Please wait a moment before trying again." },
         { status: 429, headers: getRateLimitHeaders(rlResult) },
@@ -119,13 +162,27 @@ export async function POST(request: NextRequest) {
 
     const userQuestion = lastMessage.content;
 
-    // Check cache for common questions
+    // Guard rail: Check question relevance before sending to AI
+    const guardCheck = isQuestionRelevant(userQuestion);
+    if (!guardCheck.relevant) {
+      return NextResponse.json(
+        { response: guardCheck.reason, blocked: true },
+        { headers: { ...(rlResult ? getRateLimitHeaders(rlResult) : {}) } },
+      );
+    }
+
+    // Check cache for common questions (optional — graceful fallback if Redis is unavailable)
     const cacheKey = `assistant:labs:${userQuestion.toLowerCase().trim()}`;
-    const cachedResponse = await getCachedResponse(cacheKey);
+    let cachedResponse: string | null = null;
+    try {
+      cachedResponse = await getCachedResponse(cacheKey);
+    } catch (error) {
+      console.error("[ASSISTANT] Cache unavailable (Redis missing?), skipping:", error);
+    }
     if (cachedResponse) {
       return NextResponse.json(
         { response: cachedResponse, cached: true },
-        { headers: { ...getRateLimitHeaders(rlResult), "X-Cache": "HIT" } },
+        { headers: { ...(rlResult ? getRateLimitHeaders(rlResult) : {}), "X-Cache": "HIT" } },
       );
     }
 
@@ -134,7 +191,7 @@ export async function POST(request: NextRequest) {
       process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
-        { error: "AI service not configured. Please contact support." },
+        { error: "Our AI Assistant is currently taking a quick break. Please email us at contact@syntaxure.dev instead!" },
         { status: 503 },
       );
     }
@@ -156,13 +213,11 @@ export async function POST(request: NextRequest) {
     const systemPrompt = `${SYSTEM_WIDE_CONTEXT}
 
 ## Your Guidelines:
-1. You are the definitive guide for the Syntaxure Labs monorepo. Answer questions about its architecture, components, Tech Stack, or rules.
-2. If asked about unrelated topics, politely redirect back to Syntaxure Labs/Prism ecosystem.
-3. Be concise but thorough - aim for helpful, actionable answers. Provide code snippets if applicable using the design system rules.
-4. Use markdown formatting for code blocks, lists, and emphasis.
-5. When referencing code, use proper syntax highlighting.
-6. Be friendly, authoritative, and professional in tone (like a Lead Architect).
-7. If you're unsure about a specific internal detail not covered in the context, say so rather than making up information.
+1. You are a helpful assistant for potential clients visiting the Syntaxure Labs website. Answer questions about services, pricing, process, and company information.
+2. If asked about technical internal details (code, architecture, infrastructure), politely explain that those details are internal and redirect to discussing how we can help with their project.
+3. If asked about pricing, explain that it is custom based on project scope and invite them to start a free consultation or request a quote.
+4. Be friendly, professional, and clear - avoid buzzwords and technical jargon. Write for a business owner or decision maker.
+5. If you're unsure about something not covered in the context, say so rather than making up information.
 
 ${conversationHistory ? `## Previous Conversation:\n${conversationHistory}\n` : ""}
 
@@ -175,12 +230,16 @@ Provide a helpful, accurate response based on the system context above.`;
     const result = await model.generateContent(systemPrompt);
     const response = result.response.text();
 
-    // Cache the response
-    await cacheResponse(cacheKey, response, 300);
+    // Cache the response (optional — graceful fallback if Redis is unavailable)
+    try {
+      await cacheResponse(cacheKey, response, 300);
+    } catch (error) {
+      console.error("[ASSISTANT] Cache write unavailable (Redis missing?), skipping:", error);
+    }
 
     return NextResponse.json(
       { response, cached: false },
-      { headers: { ...getRateLimitHeaders(rlResult), "X-Cache": "MISS" } },
+      { headers: { ...(rlResult ? getRateLimitHeaders(rlResult) : {}), "X-Cache": "MISS" } },
     );
   } catch (error) {
     console.error("System Assistant error:", error);
@@ -190,7 +249,7 @@ Provide a helpful, accurate response based on the system context above.`;
 
     if (errorMessage.includes("API key")) {
       return NextResponse.json(
-        { error: "AI service authentication failed. Please check configuration." },
+        { error: "Our AI Assistant is currently offline. Please email us at contact@syntaxure.dev instead!" },
         { status: 503 },
       );
     }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import {
   Check,
   Crown,
@@ -27,21 +27,31 @@ export default async function SubscriptionPage() {
   }
 
   const userId = user.id;
+  const db = getPrismDb();
 
   // Fetch user's current subscription (if any)
-  const subscriptionsCollection = await getCollection("subscriptions");
-  const subscription = (await subscriptionsCollection.findOne({ userId })) as SubscriptionDoc | null;
+  const { data: subscriptionRow } = await db
+    .from("prism_subscriptions")
+    .select("tier, status")
+    .eq("user_id", userId)
+    .maybeSingle();
+  const subscription = subscriptionRow as unknown as SubscriptionDoc | null;
 
   // Fetch usage stats
-  const projectsCollection = await getCollection("projects");
-  const rulesCollection = await getCollection("rules");
-
-  const [projectCount, ruleCount, pricingPlans, faqs] = await Promise.all([
-    projectsCollection.countDocuments({ userId }),
-    rulesCollection.countDocuments({ createdBy: userId }),
+  const countOpts = { count: "exact" as const, head: true };
+  const [
+    { count: projectCountRaw },
+    { count: ruleCountRaw },
+    pricingPlans,
+    faqs,
+  ] = await Promise.all([
+    db.from("prism_projects").select("id", countOpts).eq("user_id", userId),
+    db.from("prism_rules").select("id", countOpts).eq("created_by", userId),
     getPricingPlans(),
     getPricingFAQs(),
   ]);
+  const projectCount = projectCountRaw ?? 0;
+  const ruleCount = ruleCountRaw ?? 0;
 
   const currentTier = subscription?.tier || "free";
 

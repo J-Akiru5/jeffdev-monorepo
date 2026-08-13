@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { logDataError } from "@/lib/errors";
 
 /**
  * CMS Bridge Layer
@@ -18,14 +19,19 @@ export async function getPageContent(
       .eq("page_slug", slug)
       .order("sort_order", { ascending: true });
 
-    if (error || !rows || rows.length === 0) return undefined;
+    if (error) {
+      logDataError("[GET PAGE CONTENT ERROR]", error);
+      return undefined;
+    }
+    if (!rows || rows.length === 0) return undefined;
 
     const content: Record<string, any> = {};
     for (const row of rows) {
       content[row.section_key] = row.content;
     }
     return content;
-  } catch {
+  } catch (error) {
+    logDataError("[GET PAGE CONTENT ERROR]", error);
     return undefined;
   }
 }

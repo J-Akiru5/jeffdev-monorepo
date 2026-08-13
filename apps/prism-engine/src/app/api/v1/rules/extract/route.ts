@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCollection } from "@syntaxure-labs/db/cosmos";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
 import { generateChatCompletion } from "@/lib/ai-router";
 
@@ -125,7 +125,7 @@ Return ONLY the JSON array.`;
     }
 
     // Persist to database
-    const rulesCollection = await getCollection("rules");
+    const db = getPrismDb();
     const now = new Date().toISOString();
     let created = 0;
 
@@ -150,18 +150,18 @@ Return ONLY the JSON array.`;
             ? r.priority
             : 50,
         tags: Array.isArray(r.tags) ? r.tags : [],
-        pattern: typeof r.pattern === "string" ? r.pattern : undefined,
+        pattern: typeof r.pattern === "string" ? r.pattern : null,
         severity: ["error", "warning", "info"].includes(r.severity || "")
           ? r.severity
           : "warning",
         source: "repo",
-        createdBy: auth.userId,
-        isActive: true,
-        createdAt: now,
-        updatedAt: now,
+        created_by: auth.userId,
+        is_active: true,
+        created_at: now,
+        updated_at: now,
       };
-      await rulesCollection.insertOne(doc);
-      created++;
+      const { error } = await db.from("prism_rules").insert(doc);
+      if (!error) created++;
     }
 
     return successResponse({

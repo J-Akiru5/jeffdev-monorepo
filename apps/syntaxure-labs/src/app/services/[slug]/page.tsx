@@ -1,7 +1,7 @@
 import { createElement } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowUpRight, Check } from "lucide-react";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { CTASection } from "@/components/sections/cta-section";
@@ -33,24 +33,27 @@ export async function generateMetadata({
   params,
 }: ServicePageProps): Promise<Metadata> {
   const { slug } = await params;
-  const service = await getServiceBySlug(slug);
+  const dbService = await getServiceBySlug(slug);
+  const fallbackService = staticServices.find((item) => item.slug === slug);
 
-  if (!service) {
+  if (!dbService && !fallbackService) {
     return { title: "Service Not Found" };
   }
 
+  const activeService = dbService ?? fallbackService!;
+
   return {
-    title: `${service.title} // Syntaxure Labs`,
-    description: service.description,
+    title: `${activeService.title} | Syntaxure Labs`,
+    description: activeService.description,
     alternates: {
       canonical: `/services/${slug}`,
     },
     openGraph: {
-      title: `${service.title} | Syntaxure Labs`,
-      description: service.description,
-      url: `/services/${slug}`,
-      siteName: 'Syntaxure Labs',
-      type: 'website',
+      title: `${activeService.title} | Syntaxure Labs`,
+      description: activeService.description,                      url: `https://www.syntaxure.dev/services/${slug}`,
+                      siteName: 'Syntaxure Labs',
+                      type: 'website',
+                      images: [{ url: 'https://www.syntaxure.dev/syntaxure-business-card.png', width: 1200, height: 630, alt: activeService.title }],
     },
   };
 }
@@ -81,7 +84,9 @@ export default async function ServicePage({ params }: ServicePageProps) {
     features: fallbackService!.features,
     deliverables: fallbackService!.deliverables,
     investment: {
-      starting: `PHP ${fallbackService!.investment.startingPrice.toLocaleString()}`,
+      starting: fallbackService!.investment.startingPrice > 0
+        ? `PHP ${fallbackService!.investment.startingPrice.toLocaleString()}`
+        : "Custom quote",
       timeline: fallbackService!.investment.timeline,
     },
     order: 0,
@@ -90,7 +95,18 @@ export default async function ServicePage({ params }: ServicePageProps) {
   return (
     <>
       <Header />
-      <main className="pt-24">
+      <main className="pt-32 pb-16">
+        {/* Desktop Absolute Back Button (Sits on the left side, professional style) */}
+        <div className="hidden xl:flex absolute left-[max(2rem,calc(50%-54rem))] top-36 z-50">
+          <Link
+            href="/services"
+            className="group flex items-center gap-2 rounded-md border border-[var(--border-subtle)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
+          >
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+            All Services
+          </Link>
+        </div>
+
         {/* BreadcrumbList JSON-LD */}
         <script
           type="application/ld+json"
@@ -106,51 +122,53 @@ export default async function ServicePage({ params }: ServicePageProps) {
           }}
         />
         {/* Hero Section */}
-        <section className="px-6 py-16 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <Link
-              href="/services"
-              className="inline-flex items-center gap-2 text-sm text-white/50 transition-colors hover:text-white"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              All Services
-            </Link>
+        <section className="px-6 pb-8 lg:px-8">
+          <div className="mx-auto max-w-7xl relative">
+            {/* Mobile/Tablet: Back button */}
+            <div className="mb-8 xl:hidden">
+              <Link
+                href="/services"
+                className="inline-flex items-center gap-2 rounded-md border border-[var(--border-subtle)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
+              >
+                <ArrowLeft className="h-4 w-4 transition-transform hover:-translate-x-0.5" />
+                All Services
+              </Link>
+            </div>
 
             <div className="mt-8 grid gap-12 lg:grid-cols-2">
               {/* Left: Content */}
               <div>
-                <div className="inline-flex rounded-md border border-white/10 bg-white/5 p-3">
+                <div className="inline-flex rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-3">
                   {createElement(getIcon(activeService.icon), {
-                    className: "h-8 w-8 text-cyan-400",
+                    className: "h-8 w-8 text-cyan-500 dark:text-cyan-400",
                   })}
                 </div>
 
-                <h1 className="mt-6 text-4xl font-bold tracking-tight text-white md:text-5xl">
+                <h1 className="mt-6 text-4xl font-bold tracking-tight text-[var(--text-primary)] md:text-5xl">
                   {activeService.title}
                 </h1>
-                <p className="mt-2 font-mono text-sm text-cyan-400">
+                <p className="mt-2 font-mono text-sm text-cyan-500 dark:text-cyan-400">
                   {activeService.tagline}
                 </p>
-                <p className="mt-6 text-lg leading-relaxed text-white/60">
+                <p className="mt-6 text-lg leading-relaxed text-[var(--text-secondary)]">
                   {activeService.description}
                 </p>
 
                 {/* CTAs */}
                 <div className="mt-8 flex flex-wrap gap-4">
                   <Link
-                    href="/quote"
+                    href={`/quote?service=${slug}`}
                     className="group relative overflow-hidden rounded-md border border-cyan-500/50 bg-cyan-500/10 px-6 py-3 backdrop-blur-md transition-all hover:border-cyan-400 hover:bg-cyan-500/20 hover:shadow-[0_0_30px_rgba(6,182,212,0.25)]"
-                  >
-                    <span className="relative z-10 flex items-center gap-2 font-mono text-sm uppercase tracking-wider text-white">
+                  >                      <span className="relative z-10 flex items-center gap-2 font-mono text-sm uppercase tracking-wider text-[var(--text-primary)]">
                       Get_Quote
                       <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                     </span>
                   </Link>
                   <Link
                     href="/contact"
-                    className="group flex items-center gap-2 rounded-md border border-white/10 bg-black/50 px-6 py-3 backdrop-blur-md transition-all hover:border-white/20"
+                    className="group flex items-center gap-2 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-6 py-3 backdrop-blur-md transition-all hover:border-[var(--text-tertiary)]"
                   >
-                    <span className="font-mono text-sm uppercase tracking-wider text-white/70 transition-colors group-hover:text-white">
+                    <span className="font-mono text-sm uppercase tracking-wider text-[var(--text-secondary)] transition-colors group-hover:text-[var(--text-primary)]">
                       Book_Call
                     </span>
                   </Link>
@@ -166,30 +184,10 @@ export default async function ServicePage({ params }: ServicePageProps) {
           </div>
         </section>
 
-        {/* Features Section */}
-        <section className="px-6 py-16 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <h2 className="text-2xl font-bold text-white">
-              What&apos;s Included
-            </h2>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {activeService.features.map((feature) => (
-                <div
-                  key={feature}
-                  className="flex items-center gap-3 rounded-md border border-white/[0.06] bg-white/[0.02] px-4 py-3"
-                >
-                  <Check className="h-4 w-4 flex-shrink-0 text-cyan-400" />
-                  <span className="text-sm text-white/70">{feature}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* Other Services */}
         <section className="px-6 py-16 lg:px-8">
           <div className="mx-auto max-w-7xl">
-            <h2 className="text-2xl font-bold text-white">Other Services</h2>
+            <h2 className="text-2xl font-bold text-[var(--text-primary)]">Other Services</h2>
             <div className="mt-8 grid gap-6 md:grid-cols-2">
               {otherServices.map((s) => {
                 const otherIconComponent =
@@ -198,20 +196,20 @@ export default async function ServicePage({ params }: ServicePageProps) {
                   <Link
                     key={s.slug}
                     href={`/services/${s.slug}`}
-                    className="group flex items-center gap-4 rounded-md border border-white/[0.06] bg-white/[0.02] p-6 transition-all hover:border-white/[0.12] hover:bg-white/[0.04]"
+                    className="group flex items-center gap-4 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 transition-all hover:border-[var(--text-tertiary)] hover:bg-[var(--bg-primary)]"
                   >
-                    <div className="rounded-md border border-white/10 bg-white/5 p-2">
+                    <div className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-primary)] p-2">
                       {createElement(otherIconComponent, {
-                        className: "h-5 w-5 text-cyan-400",
+                        className: "h-5 w-5 text-cyan-500 dark:text-cyan-400",
                       })}
                     </div>
                     <div className="flex-1">
-                      <div className="font-semibold text-white">{s.title}</div>
-                      <div className="mt-0.5 text-sm text-white/50">
+                      <div className="font-semibold text-[var(--text-primary)]">{s.title}</div>
+                      <div className="mt-0.5 text-sm text-[var(--text-secondary)]">
                         {s.tagline}
                       </div>
                     </div>
-                    <ArrowUpRight className="h-4 w-4 text-white/30 transition-colors group-hover:text-white" />
+                    <ArrowUpRight className="h-4 w-4 text-[var(--text-tertiary)] transition-colors group-hover:text-[var(--text-primary)]" />
                   </Link>
                 );
               })}

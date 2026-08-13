@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCollection } from "@syntaxure-labs/db/cosmos";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { z } from "zod";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
 
@@ -87,19 +87,23 @@ export async function GET(request: NextRequest) {
   const industry = searchParams.get("industry");
   const modifiedAfter = searchParams.get("modifiedAfter");
 
-  const brands = await getCollection("brands");
-  const query: Record<string, unknown> = { userId: auth.userId };
+  const db = getPrismDb();
+  let query = db
+    .from("prism_brands")
+    .select(
+      "_id:id, slug, companyName:company_name, tagline, industry, colors, createdAt:created_at, updatedAt:updated_at",
+      { count: "exact" },
+    )
+    .eq("user_id", auth.userId);
   if (industry && INDUSTRIES.includes(industry as (typeof INDUSTRIES)[number]))
-    query.industry = industry;
-  if (modifiedAfter) query.updatedAt = { $gte: modifiedAfter };
+    query = query.eq("industry", industry);
+  if (modifiedAfter) query = query.gte("updated_at", modifiedAfter);
 
-  const total = await brands.countDocuments(query);
-  const items = await brands
-    .find(query)
-    .sort({ createdAt: -1 })
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .toArray();
+  const { data: itemsRaw, count } = await query
+    .order("created_at", { ascending: false })
+    .range((page - 1) * limit, page * limit - 1);
+  const items = itemsRaw ?? [];
+  const total = count ?? 0;
 
   return successResponse(
     items.map((b) => ({
@@ -137,24 +141,50 @@ export async function POST(request: NextRequest) {
   const { companyName, ...rest } = parsed.data;
   const slug = slugify(companyName);
 
-  const brands = await getCollection("brands");
-  const existing = await brands.findOne({ userId: auth.userId, slug });
+  const db = getPrismDb();
+  const { data: existing } = await db
+    .from("prism_brands")
+    .select("id")
+    .eq("user_id", auth.userId)
+    .eq("slug", slug)
+    .maybeSingle();
   if (existing)
     return errorResponse("A brand with this name already exists", 409);
 
   const now = new Date().toISOString();
-  const doc = {
-    userId: auth.userId,
-    slug,
-    companyName,
-    ...rest,
-    createdAt: now,
-    updatedAt: now,
-  };
+  const { data: inserted, error } = await db
+    .from("prism_brands")
+    .insert({
+      user_id: auth.userId,
+      slug,
+      company_name: companyName,
+      tagline: rest.tagline,
+      industry: rest.industry,
+      colors: rest.colors,
+      typography: rest.typography,
+      voice: rest.voice,
+      imagery: rest.imagery,
+      spacing: rest.spacing,
+      created_at: now,
+      updated_at: now,
+    })
+    .select("id")
+    .single();
 
-  const result = await brands.insertOne(doc);
+  if (error || !inserted) {
+    return errorResponse("Failed to create brand", 500);
+  }
+
   return successResponse(
-    { id: result.insertedId.toString(), ...doc },
+    {
+      id: inserted.id,
+      userId: auth.userId,
+      slug,
+      companyName,
+      ...rest,
+      createdAt: now,
+      updatedAt: now,
+    },
     { created: true },
   );
 }

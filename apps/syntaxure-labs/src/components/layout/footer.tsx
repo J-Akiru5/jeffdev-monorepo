@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Mail, MapPin, ArrowUpRight, BookOpen, Phone } from "lucide-react";
-import { GithubIcon as Github } from "@/components/icons/brand-icons";
+import { Mail, MapPin, ArrowUpRight, BookOpen, Phone, Star } from "lucide-react";
+
 import { SyntaxureLogo } from "@syntaxure/ui";
 
 const DOCS_URL = process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.syntaxure.dev";
@@ -19,13 +19,9 @@ const footerLinks = {
     },
   ],
   resources: [
+    { href: "/blog", label: "Blog" },
     { href: DOCS_URL, label: "Documentation", external: true },
     { href: "/changelog", label: "Changelog" },
-    {
-      href: "https://github.com/J-Akiru5/jeffdev-monorepo",
-      label: "GitHub",
-      external: true,
-    },
   ],
   company: [
     { href: "/about", label: "About Studio" },
@@ -44,8 +40,8 @@ export function Footer() {
   return (
     <footer className="border-t border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
       <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-          <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-6">
-          <div className="lg:col-span-1">
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4 lg:grid-cols-7">
+          <div className="col-span-2 md:col-span-4 lg:col-span-2 lg:pr-8">
             <Link href="/" className="inline-flex items-center gap-2">
               <SyntaxureLogo className="h-8 w-8 text-[var(--text-primary)]" />
               <span className="font-bold tracking-tight text-[var(--text-primary)]">
@@ -75,14 +71,23 @@ export function Footer() {
                 <MapPin className="h-4 w-4" />
                 Iloilo City, Philippines
               </div>
+              <a
+                href="https://maps.app.goo.gl/ALFPxasfNt9qjtrP9"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm text-[var(--text-secondary)] transition-colors hover:text-cyan-400"
+              >
+                <Star className="h-4 w-4" />
+                Google Business Profile
+              </a>
             </div>
           </div>
 
-          <div>
+          <div className="col-span-1">
             <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
               Services
             </h3>
-            <ul className="mt-4 space-y-3">
+            <ul className="mt-4 space-y-2.5">
               {footerLinks.services.map((link) => (
                 <li key={link.href}>
                   <Link
@@ -96,11 +101,11 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="col-span-1">
             <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
               Products
             </h3>
-            <ul className="mt-4 space-y-3">
+            <ul className="mt-4 space-y-2.5">
               {footerLinks.products.map((link) => (
                 <li key={link.href}>
                   <Link
@@ -114,11 +119,11 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="col-span-1">
             <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
               Resources
             </h3>
-            <ul className="mt-4 space-y-3">
+            <ul className="mt-4 space-y-2.5">
               {footerLinks.resources.map((link) => (
                 <li key={link.href}>
                   {"external" in link && link.external ? (
@@ -128,11 +133,7 @@ export function Footer() {
                       rel="noopener noreferrer"
                       className="group inline-flex items-center gap-1.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:text-[var(--text-primary)]"
                     >
-                      {link.href.includes("github") ? (
-                        <Github className="h-3.5 w-3.5" />
-                      ) : (
-                        <BookOpen className="h-3.5 w-3.5" />
-                      )}
+                      <BookOpen className="h-3.5 w-3.5" />
                       {link.label}
                     </a>
                   ) : (
@@ -148,11 +149,11 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="col-span-1">
             <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
               Company
             </h3>
-            <ul className="mt-4 space-y-3">
+            <ul className="mt-4 space-y-2.5">
               {footerLinks.company.map((link) => (
                 <li key={link.href}>
                   <Link
@@ -166,7 +167,7 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="col-span-2 md:col-span-4 lg:col-span-1">
             <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-[var(--text-tertiary)]">
               Start a Project
             </h3>
@@ -176,7 +177,7 @@ export function Footer() {
             </p>
             <Link
               href="/quote"
-              className="group relative mt-4 inline-flex items-center gap-2 overflow-hidden rounded-md border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-5 py-2.5 font-mono text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] transition-all hover:border-[var(--text-tertiary)] hover:text-[var(--text-primary)] shadow-sm"
+              className="group relative mt-4 inline-flex w-full justify-center sm:w-auto items-center gap-2 overflow-hidden rounded-md border border-[var(--border-subtle)] bg-[var(--bg-primary)] px-5 py-2.5 font-mono text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] transition-all hover:border-[var(--text-tertiary)] hover:text-[var(--text-primary)] shadow-sm"
             >
               Get_Quote
               <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
@@ -199,17 +200,7 @@ export function Footer() {
             ))}
           </div>
 
-          <div className="flex items-center gap-4">
-            <a
-              href="https://github.com/J-Akiru5/jeffdev-monorepo"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[var(--text-tertiary)] transition-colors hover:text-[var(--text-secondary)]"
-              aria-label="GitHub"
-            >
-              <Github className="h-4 w-4" />
-            </a>
-          </div>
+          <div className="flex items-center gap-4" />
 
           <div className="text-center text-xs font-medium text-[var(--text-tertiary)] md:text-right">
             <p>© {currentYear} Syntaxure Labs. All rights reserved.</p>

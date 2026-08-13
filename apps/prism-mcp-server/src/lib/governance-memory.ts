@@ -19,7 +19,7 @@
  * - incident: "Rule #5 added because of production incident on 2024-02-01"
  * - progress: "Working on auth module. 3 of 5 tasks complete."
  *
- * Storage: Cosmos DB `governance_memory` collection
+ * Storage: Postgres `prism_governance_memory` table (Supabase)
  * Access: All team agents via MCP tool `prism_memory`
  */
 
@@ -78,7 +78,8 @@ export interface MemoryStats {
 // Memory Manager
 // =============================================================================
 
-const MEMORY_COLLECTION = "governance_memory";
+const MEMORY_SELECT =
+  "_id:id, type, scope, projectId:project_id, teamId:team_id, content, tags, importance, source, sessionId:session_id, createdAt:created_at, updatedAt:updated_at, expiresAt:expires_at, metadata";
 
 /**
  * Store a memory entry in the governance memory.
@@ -86,55 +87,63 @@ const MEMORY_COLLECTION = "governance_memory";
 export async function storeMemory(
   entry: Omit<MemoryEntry, "_id" | "createdAt" | "updatedAt">,
 ): Promise<MemoryEntry> {
-  const { getCollection } = await import("@syntaxure-labs/db/cosmos");
-  const memories = await getCollection(MEMORY_COLLECTION);
+  const { getPrismDb } = await import("@syntaxure-labs/db/prism");
+  const db = getPrismDb();
 
   const now = new Date().toISOString();
-  const doc: MemoryEntry = {
-    ...entry,
-    createdAt: now,
-    updatedAt: now,
-  };
+  const { data, error } = await db
+    .from("prism_governance_memory")
+    .insert({
+      type: entry.type,
+      scope: entry.scope,
+      project_id: entry.projectId ?? null,
+      team_id: entry.teamId ?? null,
+      content: entry.content,
+      tags: entry.tags,
+      importance: entry.importance,
+      source: entry.source,
+      session_id: entry.sessionId ?? null,
+      expires_at: entry.expiresAt ?? null,
+      metadata: entry.metadata ?? null,
+      created_at: now,
+      updated_at: now,
+    })
+    .select(MEMORY_SELECT)
+    .single();
 
-  const result = await memories.insertOne(doc as unknown as Record<string, unknown>);
-  return { ...doc, _id: result.insertedId };
+  if (error || !data) {
+    throw error ?? new Error("Failed to store memory entry");
+  }
+
+  return { ...(data as unknown as MemoryEntry), _id: { toString: () => data._id } };
 }
 
 /**
  * Query memories from the governance memory.
  */
 export async function queryMemories(query: MemoryQuery): Promise<MemoryEntry[]> {
-  const { getCollection } = await import("@syntaxure-labs/db/cosmos");
-  const memories = await getCollection(MEMORY_COLLECTION);
+  const { getPrismDb } = await import("@syntaxure-labs/db/prism");
+  const db = getPrismDb();
 
-  const filter: Record<string, unknown> = {};
+  let q = db.from("prism_governance_memory").select(MEMORY_SELECT);
 
-  if (query.type) filter.type = query.type;
-  if (query.scope) filter.scope = query.scope;
-  if (query.projectId) filter.projectId = query.projectId;
-  if (query.teamId) filter.teamId = query.teamId;
-  if (query.importance) filter.importance = query.importance;
-  if (query.tags && query.tags.length > 0) {
-    filter.tags = { $in: query.tags };
-  }
-  if (query.since) {
-    filter.createdAt = { $gte: query.since };
-  }
+  if (query.type) q = q.eq("type", query.type);
+  if (query.scope) q = q.eq("scope", query.scope);
+  if (query.projectId) q = q.eq("project_id", query.projectId);
+  if (query.teamId) q = q.eq("team_id", query.teamId);
+  if (query.importance) q = q.eq("importance", query.importance);
+  if (query.tags && query.tags.length > 0) q = q.overlaps("tags", query.tags);
+  if (query.since) q = q.gte("created_at", query.since);
   // Don't return expired memories
-  filter.$or = [
-    { expiresAt: { $exists: false } },
-    { expiresAt: null },
-    { expiresAt: { $gt: new Date().toISOString() } },
-  ];
+  q = q.or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`);
 
   const limit = query.limit || 50;
-  const results = await memories
-    .find(filter)
-    .sort({ createdAt: -1 })
-    .limit(limit)
-    .toArray();
+  const { data, error } = await q
+    .order("created_at", { ascending: false })
+    .limit(limit);
 
-  return results as unknown as MemoryEntry[];
+  if (error) throw error;
+  return (data ?? []) as unknown as MemoryEntry[];
 }
 
 /**
@@ -144,14 +153,16 @@ export async function getMemoryStats(
   projectId?: string,
   teamId?: string,
 ): Promise<MemoryStats> {
-  const { getCollection } = await import("@syntaxure-labs/db/cosmos");
-  const memories = await getCollection(MEMORY_COLLECTION);
+  const { getPrismDb } = await import("@syntaxure-labs/db/prism");
+  const db = getPrismDb();
 
-  const filter: Record<string, unknown> = {};
-  if (projectId) filter.projectId = projectId;
-  if (teamId) filter.teamId = teamId;
+  let q = db.from("prism_governance_memory").select(MEMORY_SELECT);
+  if (projectId) q = q.eq("project_id", projectId);
+  if (teamId) q = q.eq("team_id", teamId);
 
-  const all = await memories.find(filter).toArray() as unknown as MemoryEntry[];
+  const { data, error } = await q;
+  if (error) throw error;
+  const all = (data ?? []) as unknown as MemoryEntry[];
 
   const byType: Record<MemoryType, number> = {
     decision: 0,
@@ -200,14 +211,17 @@ export async function getMemoryStats(
  * Delete expired memories (cleanup).
  */
 export async function cleanupExpiredMemories(): Promise<number> {
-  const { getCollection } = await import("@syntaxure-labs/db/cosmos");
-  const memories = await getCollection(MEMORY_COLLECTION);
+  const { getPrismDb } = await import("@syntaxure-labs/db/prism");
+  const db = getPrismDb();
 
-  const result = await memories.deleteMany({
-    expiresAt: { $lt: new Date().toISOString() },
-  });
+  const { data, error } = await db
+    .from("prism_governance_memory")
+    .delete()
+    .lt("expires_at", new Date().toISOString())
+    .select("id");
 
-  return result.deletedCount;
+  if (error) throw error;
+  return data?.length ?? 0;
 }
 
 /**

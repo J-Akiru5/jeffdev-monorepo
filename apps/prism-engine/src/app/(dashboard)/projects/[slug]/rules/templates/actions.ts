@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ruleTemplates } from "@/data/rule-templates";
@@ -33,12 +33,15 @@ export async function installTemplate(
     return { error: "Missing required fields" };
   }
 
+  const db = getPrismDb();
+
   // Find project
-  const projectsCollection = await getCollection("projects");
-  const project = await projectsCollection.findOne({
-    userId,
-    slug: projectSlug,
-  });
+  const { data: project } = await db
+    .from("prism_projects")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("slug", projectSlug)
+    .maybeSingle();
 
   if (!project) {
     return { error: "Project not found" };
@@ -51,12 +54,9 @@ export async function installTemplate(
   }
 
   // Insert rules
-  const rulesCollection = await getCollection("rules");
-  const now = new Date().toISOString();
-
   const rulesToInsert = template.rules.map((rule) => ({
-    projectId: project._id.toString(),
-    createdBy: userId,
+    project_id: project.id,
+    created_by: userId,
     name: rule.name,
     category: rule.category,
     content: rule.content,
@@ -64,14 +64,11 @@ export async function installTemplate(
     pattern: rule.pattern || null,
     severity: rule.severity || "warning",
     source: "template",
-    isActive: true,
-    createdAt: now,
-    updatedAt: now,
+    is_active: true,
   }));
 
-  try {
-    await rulesCollection.insertMany(rulesToInsert);
-  } catch {
+  const { error } = await db.from("prism_rules").insert(rulesToInsert);
+  if (error) {
     return { error: "Failed to install template rules" };
   }
 

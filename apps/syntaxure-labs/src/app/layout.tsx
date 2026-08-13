@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
+import { cookies, headers } from "next/headers";
 import { Analytics } from "@vercel/analytics/react";
-import { SmoothScroll } from "@/components/providers/smooth-scroll";
 import { ThemeWrapper } from "@/components/providers/theme-wrapper";
 import { ThemeBootstrap } from "@/components/providers/theme-bootstrap";
 import { CurrencyProvider } from "@/contexts/currency-context";
+import type { CurrencyCode } from "@/lib/currency";
 import { FeatureFlagProvider } from "@/components/providers/feature-flag-provider";
 import { getFeatureFlags } from "@/lib/feature-flags";
 import { CookieConsent } from "@/components/cookie-consent";
 import { AnalyticsProvider } from "@/components/analytics-provider";
-import { ChatAssistant } from "@syntaxure/ui/chat-assistant";
 import { Toaster } from "sonner";
+import { ChatAssistantClient as ChatAssistant } from "@/components/chat-assistant-client";
+import { CurrencyOverride } from "@/components/currency-override";
 import "./globals.css";
 
 /**
@@ -39,25 +41,23 @@ const jetbrainsMono = JetBrains_Mono({
  */
 export const metadata: Metadata = {
   title: {
-    default: "Syntaxure Labs — Enterprise Web Development & SaaS Solutions",
-    template: "%s // Syntaxure Labs",
+    default: "Syntaxure Labs | Custom Websites, SaaS Platforms & AI",
+    template: "%s | Syntaxure Labs",
   },
   description:
-    "We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises. Next.js, Firebase, and AI-powered solutions.",
+    "Syntaxure Labs builds custom websites, SaaS platforms, cloud infrastructure, and AI integration. Creators of Context Engine for AI governance.",
   keywords: [
-    "web development agency",
-    "SaaS development",
-    "Next.js development",
-    "enterprise web solutions",
-    "cloud architecture",
+    "global digital transformation agency",
+    "custom software development company",
+    "SaaS architecture",
+    "AI governance",
+    "Context Engine",
+    "offshore software development",
     "Syntaxure Labs",
-    "custom web application development Philippines",
-    "SaaS development agency",
-    "Next.js agency for startups",
-    "web development Iloilo",
-    "fixed-price web development",
-    "AI-native development agency",
-    "startup MVP development",
+    "B2B software solutions",
+    "enterprise AI integration",
+    "workflow automation",
+    "Iloilo web development agency",
   ],
   authors: [{ name: "Syntaxure Labs" }],
   creator: "Syntaxure Labs",
@@ -67,9 +67,9 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://www.syntaxure.dev",
     siteName: "Syntaxure Labs",
-    title: "Syntaxure Labs — Enterprise Web Development & SaaS Solutions",
-    description:
-      "We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises.",
+    title: "Syntaxure Labs | Custom Websites, SaaS Platforms & AI",
+  description:
+    "Custom websites, SaaS platforms, cloud infrastructure, and AI integration. High-performance digital solutions for businesses ready to scale.",
     images: [
       {
         url: "/syntaxure-business-card.png",
@@ -84,9 +84,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Syntaxure Labs — Enterprise Web Development & SaaS Solutions",
+    title: "Syntaxure Labs | Custom Websites, SaaS Platforms & AI",
     description:
-      "We build high-performance web applications, scalable SaaS platforms, and cloud infrastructure for startups and enterprises.",
+      "Custom website development, SaaS platforms, and AI integration. We build high-performance digital solutions on modern web infrastructure.",
     images: ["/syntaxure-business-card.png"],
   },
   robots: {
@@ -107,7 +107,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#1c2124",
+  themeColor: "#06b6d4",
 };
 
 /**
@@ -115,16 +115,48 @@ export const viewport = {
  * -----------
  * The foundational shell for the entire application.
  * - Applies the "Endgame" dark void aesthetic (#050505)
- * - Provides smooth scrolling via Lenis
+ * - Uses native browser scrolling for optimal performance
  * - Renders the global grid/spotlight background
  */
+/**
+ * Detect the user's currency server-side.
+ * Priority: 1) Cookie > 2) Geo header (Vercel) > 3) Accept-Language > 4) Default USD
+ *
+ * On Vercel production, x-vercel-ip-country detects actual visitor location.
+ * On localhost, falls back to browser language (Accept-Language).
+ * Use ?currency=USD or ?currency=PHP in the URL to test different currencies.
+ */
+async function detectCurrency(): Promise<CurrencyCode> {
+  // 0. URL param override (set via client CurrencyOverride component)
+  const cookieStore = await cookies();
+  const cookieVal = cookieStore.get("currency")?.value;
+  if (cookieVal === "PHP" || cookieVal === "USD") return cookieVal;
+
+  // 1. Vercel geo header (accurate country detection on production)
+  const headersList = await headers();
+  const country = headersList.get("x-vercel-ip-country")?.toUpperCase();
+  if (country === "PH") return "PHP";
+
+  // 2. Accept-Language header (fallback for localhost)
+  const acceptLang = headersList.get("accept-language") || "";
+  const phLocales = ["tl", "fil", "en-ph", "ceb", "hil", "ilo"];
+  const isPhilippines = phLocales.some((l) => acceptLang.toLowerCase().includes(l));
+  if (isPhilippines) return "PHP";
+
+  // 3. Default
+  return "USD";
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Fetch feature flags server-side
-  const featureFlags = await getFeatureFlags();
+  // Fetch feature flags + detect currency server-side
+  const [featureFlags, initialCurrency] = await Promise.all([
+    getFeatureFlags(),
+    detectCurrency(),
+  ]);
 
   return (
     <html
@@ -133,10 +165,11 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        <link rel="llms-txt" href="/llms.txt" />
         <AnalyticsProvider />
         <ThemeBootstrap />
       </head>
-      <body className="bg-void text-white antialiased font-sans selection:bg-cyan-500/30 selection:text-white">
+      <body className="bg-slate-50 text-slate-900 dark:bg-[#050505] dark:text-slate-100 antialiased font-sans selection:bg-cyan-500/30 selection:text-white">
         {/* Global Grid Background */}
         <div
           className="pointer-events-none fixed inset-0 z-0"
@@ -160,28 +193,85 @@ export default async function RootLayout({
 
         {/* Application Content */}
         <ThemeWrapper>
-          <SmoothScroll>
           <FeatureFlagProvider flags={featureFlags}>
-            <CurrencyProvider>
+            <CurrencyProvider initialCurrency={initialCurrency}>
+              <CurrencyOverride />
               <div className="relative z-10 min-h-screen flex flex-col">
                 <script
                   type="application/ld+json"
                   dangerouslySetInnerHTML={{
                     __html: JSON.stringify({
                       "@context": "https://schema.org",
-                      "@type": "ProfessionalService",
+                      "@type": "Organization",
+                      "@id": "https://www.syntaxure.dev/",
                       name: "Syntaxure Labs",
-                      
+                      image: "https://www.syntaxure.dev/syntaxure-business-card.png",
                       url: "https://www.syntaxure.dev",
                       logo: "https://www.syntaxure.dev/favicon.svg",
+                      description: "Syntaxure Labs is a global B2B digital transformation agency specializing in scalable custom software, web architectures, and secure AI integrations. Creators of Context Engine for AI governance.",
+                      address: {
+                        "@type": "PostalAddress",
+                        streetAddress: "Iloilo City",
+                        addressLocality: "Iloilo City",
+                        addressRegion: "Western Visayas",
+                        postalCode: "5000",
+                        addressCountry: "PH",
+                      },
+                      geo: {
+                        "@type": "GeoCoordinates",
+                        latitude: 10.6969,
+                        longitude: 122.5483,
+                      },
+                      openingHoursSpecification: [
+                        {
+                          "@type": "OpeningHoursSpecification",
+                          dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                          opens: "09:00",
+                          closes: "18:00",
+                        },
+                      ],
+                      telephone: "+63 970 576 2593",
+                      email: "contact@syntaxure.dev",
+                      priceRange: "$$$",
+                      areaServed: ["Global", "Philippines", "Iloilo City"],
                       contactPoint: {
                         "@type": "ContactPoint",
-                        telephone: "+63-951-916-7103",
+                        telephone: "+63 970 576 2593",
                         contactType: "customer service",
                         email: "contact@syntaxure.dev",
                         areaServed: "Global",
                         availableLanguage: ["English", "Tagalog"],
                       },
+                      sameAs: [
+                        "https://www.linkedin.com/company/syntaxure-labs",
+                        "https://www.facebook.com/people/Syntaxure-Labs-PH/61590058783641/",
+                      ],
+                      makesOffer: [
+                        {
+                          "@type": "Offer",
+                          itemOffered: {
+                            "@type": "Service",
+                            name: "Digital Transformation & Custom Software",
+                            description: "Modernizing enterprise operations by converting manual workflows into scalable custom software, high performance marketing websites, and mobile applications."
+                          }
+                        },
+                        {
+                          "@type": "Offer",
+                          itemOffered: {
+                            "@type": "SoftwareApplication",
+                            name: "Context Engine",
+                            applicationCategory: "BusinessApplication",
+                            operatingSystem: "Any",
+                            description: "A proprietary AI Governance layer that forces AI agents to adhere to established protocols and actively prevents AI hallucinations in enterprise environments.",
+                            offers: {
+                              "@type": "Offer",
+                              price: "0",
+                              priceCurrency: "USD",
+                              availability: "https://schema.org/ContactForPrice"
+                            }
+                          }
+                        }
+                      ]
                     }),
                   }}
                 />
@@ -189,7 +279,6 @@ export default async function RootLayout({
               </div>
             </CurrencyProvider>
           </FeatureFlagProvider>
-        </SmoothScroll>
         </ThemeWrapper>
 
         {/* Vercel Analytics - Web Vitals Tracking */}
@@ -208,12 +297,12 @@ export default async function RootLayout({
         />
         <ChatAssistant
           apiEndpoint="/api/assistant"
-          title="Syntaxure Labs System Assistant"
-          welcomeMessage="How can I help you understand the Syntaxure Labs ecosystem today?"
+          title="AI Assistant"
+          welcomeMessage="Hi! How can we help you today? Ask about our services, pricing, or process."
           suggestions={[
-            "What is the difference between Syntaxure Labs and Prism?",
-            "What is the turborepo structure?",
-            "What is the Doppler Law?",
+            "What services do you offer?",
+            "How does your pricing work?",
+            "What is Context Engine?",
           ]}
         />
       </body>

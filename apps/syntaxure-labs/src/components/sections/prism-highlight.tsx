@@ -1,7 +1,5 @@
-"use client";
-
 import Link from "next/link";
-import { useInView } from "@/lib/use-in-view";
+import { Reveal } from "@/components/reveal";
 import { ArrowUpRight, Cpu, Shield, Zap } from "lucide-react";
 
 const highlights = [
@@ -23,20 +21,13 @@ const highlights = [
 ];
 
 export function PrismHighlight({ cmsData }: { cmsData?: { description?: string } }) {
-  const { ref: sectionRef, isInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
-
   return (
-    <section id="prism" className="py-24 md:py-32 border-y border-[var(--border-subtle)]">
+    <section id="prism" className="py-16 md:py-24 lg:py-32 border-y border-[var(--border-subtle)]">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="grid items-center gap-16 lg:grid-cols-2">
-          
+
           {/* ── Left Content ── */}
-          <div
-            ref={sectionRef}
-            className={`transition-all duration-1000 ease-out ${
-              isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-            }`}
-          >
+          <Reveal threshold={0.1} transitionClassName="duration-1000 ease-out">
             <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--text-tertiary)] shadow-sm">
               Our Flagship Product
             </div>
@@ -44,7 +35,7 @@ export function PrismHighlight({ cmsData }: { cmsData?: { description?: string }
               Prism Context Engine
             </h2>
             <p className="mt-4 text-lg text-[var(--text-secondary)] leading-relaxed max-w-xl">
-              {cmsData?.description || "Born from our own engineering needs. Prism is the context layer your AI coding assistant has been missing — and it's built with the same precision we bring to every client project."}
+              {cmsData?.description || "Born from our own engineering needs. Prism is the context layer your AI coding assistant has been missing. Built with the same precision we bring to every client project."}
             </p>
 
             <div className="mt-10 space-y-6">
@@ -57,7 +48,7 @@ export function PrismHighlight({ cmsData }: { cmsData?: { description?: string }
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-[var(--text-primary)]">{h.title}</h4>
-                      <p className="mt-1 text-sm text-[var(--text-secondary)] leading-relaxed">{h.description}</p>
+                      <p className="mt-1 text-base text-[var(--text-secondary)] leading-relaxed">{h.description}</p>
                     </div>
                   </div>
                 );
@@ -71,14 +62,10 @@ export function PrismHighlight({ cmsData }: { cmsData?: { description?: string }
               Learn_More_About_Prism
               <ArrowUpRight className="h-4 w-4" />
             </Link>
-          </div>
+          </Reveal>
 
           {/* ── Right Content: Code Snippet ── */}
-          <div
-            className={`hidden lg:block relative transition-all duration-1000 ease-out delay-200 ${
-              isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-            }`}
-          >
+          <Reveal className="hidden lg:block relative" transitionClassName="duration-1000 ease-out delay-200">
             {/* ── Ambient Technical Glow (Cyan Only) ── */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] -z-10 blur-[80px] pointer-events-none select-none opacity-40 dark:opacity-60">
               <div className="absolute inset-0 bg-cyan-500/30 rounded-full" />
@@ -120,7 +107,7 @@ export function PrismHighlight({ cmsData }: { cmsData?: { description?: string }
                 </div>
               </div>
             </div>
-          </div>
+          </Reveal>
         </div>
       </div>
     </section>

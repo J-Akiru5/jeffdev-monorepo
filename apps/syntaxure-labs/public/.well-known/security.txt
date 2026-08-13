@@ -1,0 +1,16 @@
+# Security Contact for Syntaxure Labs
+# https://www.syntaxure.dev
+
+# Please report security vulnerabilities responsibly.
+# We aim to acknowledge receipt within 48 hours.
+
+Contact: mailto:contact@syntaxure.dev
+Preferred-Languages: en, tl
+Canonical: https://www.syntaxure.dev/.well-known/security.txt
+Policy: https://www.syntaxure.dev/privacy
+
+# Expiry date (ISO 8601) — re-review annually
+Expires: 2027-07-30T00:00:00.000Z
+
+# Acknowledgments
+# We thank security researchers who help keep our users safe.

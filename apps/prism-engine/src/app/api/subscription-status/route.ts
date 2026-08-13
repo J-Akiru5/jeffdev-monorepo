@@ -30,10 +30,14 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Check subscription status in Cosmos DB
-    const { getCollection } = await import("@syntaxure-labs/db");
-    const subscriptions = await getCollection("subscriptions");
-    const subscription = await subscriptions.findOne({ userId: user.id });
+    // Check subscription status in Postgres
+    const { getPrismDb } = await import("@syntaxure-labs/db/prism");
+    const db = getPrismDb();
+    const { data: subscription } = await db
+      .from("prism_subscriptions")
+      .select("tier, status, paypalSubscriptionId:paypal_subscription_id")
+      .eq("user_id", user.id)
+      .maybeSingle();
 
     if (!subscription) {
       return NextResponse.json({

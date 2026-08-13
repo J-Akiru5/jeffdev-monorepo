@@ -4,9 +4,9 @@ import { getBlogPosts } from "@/app/actions/blog";
 import { Calendar, Tag } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Blog",
+  title: "Insights & Updates",
   description:
-    "Insights, tutorials, and updates from Syntaxure Labs on web development, SaaS, and AI.",
+    "Insights on AI governance, SaaS architecture, web development, and digital transformation from the Syntaxure Labs team. Tutorials, deep dives, and product updates.",
 };
 
 export const revalidate = 300;

@@ -15,34 +15,37 @@ export async function handleListSkills(
   }
 
   try {
-    const { getCollection } = await import("@syntaxure-labs/db/cosmos");
-    const skills = await getCollection("skills");
-    const rules = await getCollection("rules");
+    const { getPrismDb } = await import("@syntaxure-labs/db/prism");
+    const db = getPrismDb();
 
     interface SkillDoc {
-      _id: { toString(): string };
+      id: string;
       name: string;
       description?: string;
       category?: string;
       steps?: unknown[];
     }
 
-    // Get from skills collection
-    const projectSkills = (await skills
-      .find({ projectId, isActive: true })
-      .sort({ createdAt: -1 })
-      .toArray()) as unknown as SkillDoc[];
+    // Get from prism_skills
+    const { data: projectSkills } = await db
+      .from("prism_skills")
+      .select("id, name, description, category, steps")
+      .eq("project_id", projectId)
+      .eq("is_active", true)
+      .order("created_at", { ascending: false });
 
-    // Get legacy skills from rules collection
-    const legacySkills = (await rules
-      .find({
-        projectId,
-        isActive: true,
-        skillsContent: { $exists: true, $ne: null },
-      })
-      .toArray()) as unknown as SkillDoc[];
+    // Get legacy skills stored on prism_rules.skills_content
+    const { data: legacySkills } = await db
+      .from("prism_rules")
+      .select("id, name")
+      .eq("project_id", projectId)
+      .eq("is_active", true)
+      .not("skills_content", "is", null);
 
-    if (projectSkills.length === 0 && legacySkills.length === 0) {
+    const allProjectSkills = (projectSkills ?? []) as SkillDoc[];
+    const allLegacySkills = (legacySkills ?? []) as SkillDoc[];
+
+    if (allProjectSkills.length === 0 && allLegacySkills.length === 0) {
       return {
         content: [{ type: "text", text: "No skills found for this project." }],
       };
@@ -50,20 +53,20 @@ export async function handleListSkills(
 
     let outputText = "# Project Skills\n\n";
 
-    if (projectSkills.length > 0) {
+    if (allProjectSkills.length > 0) {
       outputText += "## Procedural Workflows\n\n";
-      projectSkills.forEach((s) => {
+      allProjectSkills.forEach((s) => {
         const stepCount = s.steps?.length || 0;
-        outputText += `- **${s.name}** (ID: ${s._id.toString()})\n`;
+        outputText += `- **${s.name}** (ID: ${s.id})\n`;
         if (s.description) outputText += `  *${s.description}*\n`;
         outputText += `  *Steps: ${stepCount} | Category: ${s.category}*\n\n`;
       });
     }
 
-    if (legacySkills.length > 0) {
+    if (allLegacySkills.length > 0) {
       outputText += "## Legacy Skills (from Rules)\n\n";
-      legacySkills.forEach((r) => {
-        outputText += `- **${r.name}** (ID: ${r._id.toString()})\n`;
+      allLegacySkills.forEach((r) => {
+        outputText += `- **${r.name}** (ID: ${r.id})\n`;
       });
     }
 

@@ -414,7 +414,7 @@ export default function ProductDetailContent({
                     {needsCustomization ? (
                       // Custom Quote Flow
                       <Link
-                        href={`/quote?template=${template.slug}&term=${selectedTerm.id}&type=customization`}
+                        href="/quote"
                         className="w-full h-12 rounded-lg bg-white/10 hover:bg-white/15 text-white font-medium flex items-center justify-center gap-2 transition-colors border border-white/10"
                       >
                         <MessageSquare className="h-4 w-4" />
@@ -425,7 +425,7 @@ export default function ProductDetailContent({
                       <button
                         onClick={() => {
                           // Navigate to Maya checkout or quote form
-                          router.push(`/quote?template=${template.slug}&term=${selectedTerm.id}&type=direct`);
+                          router.push("/quote");
                         }}
                         className="w-full h-12 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-medium flex items-center justify-center gap-2 transition-colors"
                       >

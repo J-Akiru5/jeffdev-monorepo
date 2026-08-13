@@ -1,5 +1,3 @@
-"use client";
-
 /**
  * About Section
  * --------------
@@ -7,7 +5,7 @@
  */
 
 import { Target, Zap, Shield, Users } from "lucide-react";
-import { useInView } from "@/lib/use-in-view";
+import { Reveal } from "@/components/reveal";
 
 const values = [
   {
@@ -37,36 +35,22 @@ const values = [
 ];
 
 export function About() {
-  const { ref: headerRef, isInView: headerInView } = useInView<HTMLDivElement>({ threshold: 0.2 });
-  const { ref: contentRef, isInView: contentInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
-  const { ref: valuesRef, isInView: valuesInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
-
   return (
-    <section className="relative py-24 lg:py-32" id="about">
+    <section className="relative py-16 md:py-24 lg:py-32" id="about">
       <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8">
         {/* Section Header */}
-        <div
-          ref={headerRef}
-          className={`mx-auto max-w-2xl text-center transition-all duration-700 ease-out ${
-            headerInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
+        <Reveal className="mx-auto max-w-2xl text-center" threshold={0.2}>
           <span className="font-mono text-xs font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
             About Us
           </span>
           <h2 className="mt-3 text-3xl font-bold tracking-tight text-[var(--text-primary)] md:text-4xl">
             Building the Future, One System at a Time
           </h2>
-        </div>
+        </Reveal>
 
         {/* Content */}
-        <div
-          ref={contentRef}
-          className={`mt-12 grid gap-12 lg:grid-cols-2 transition-all duration-700 ease-out ${
-            contentInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
-          <div className="space-y-6">
+        <Reveal className="mt-12 grid gap-12 lg:grid-cols-2">
+          <div className="order-2 lg:order-1 space-y-6">
             <p className="text-lg text-[var(--text-secondary)]">
               Syntaxure Labs is a boutique software studio specializing in high-performance web systems
               for ambitious startups and enterprises. We combine deep technical expertise with a
@@ -83,7 +67,7 @@ export function About() {
             </p>
           </div>
 
-          <div className="flex items-center justify-center">
+          <div className="order-1 lg:order-2 flex items-center justify-center">
             <div className="relative h-64 w-64 overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)]">
               <div className="flex h-full items-center justify-center">
                 <div className="text-center">
@@ -93,15 +77,10 @@ export function About() {
               </div>
             </div>
           </div>
-        </div>
+        </Reveal>
 
         {/* Values */}
-        <div
-          ref={valuesRef}
-          className={`mt-20 transition-all duration-700 ease-out ${
-            valuesInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
+        <Reveal className="mt-20" threshold={0.1}>
           <h3 className="mb-8 text-center text-xl font-semibold text-[var(--text-primary)]">
             Our Values
           </h3>
@@ -111,22 +90,24 @@ export function About() {
               return (
                 <div
                   key={value.title}
-                  className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6"
+                  className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-5 sm:p-6 flex flex-row sm:flex-col items-start gap-4 sm:gap-0"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10">
+                  <div className="shrink-0 flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-500/10 sm:mb-4">
                     <Icon className="h-5 w-5 text-cyan-400" />
                   </div>
-                  <h4 className="mt-4 text-sm font-semibold text-[var(--text-primary)]">
-                    {value.title}
-                  </h4>
-                  <p className="mt-2 text-sm text-[var(--text-secondary)]">
-                    {value.description}
-                  </p>
+                  <div>
+                    <h4 className="text-base font-semibold text-[var(--text-primary)]">
+                      {value.title}
+                    </h4>
+                    <p className="mt-1 sm:mt-2 text-base text-[var(--text-secondary)]">
+                      {value.description}
+                    </p>
+                  </div>
                 </div>
               );
             })}
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

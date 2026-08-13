@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Business Model Canvas — Syntaxure Labs</title>
+  <meta name="description" content="Business Model Canvas for Syntaxure Labs — Governance over Generation." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================
+       SYNTAXURE LABS — BMC
+       Endgame Design System (Dark-First)
+       The universe is #050505 — until the sun rises.
+       ============================================ */
+
+    :root {
+      /* Canvas (Backgrounds) */
+      --color-void: #050505;
+      --color-glass: rgba(10, 10, 10, 0.6);
+      --color-glass-heavy: rgba(10, 10, 10, 0.85);
+      --color-surface: #0a0a0a;
+      --color-surface-2: #141414;
+
+      /* Text */
+      --color-ink: #ededed;
+      --text-secondary: rgba(255, 255, 255, 0.6);
+      --text-tertiary: rgba(255, 255, 255, 0.4);
+
+      /* Accents (Holographic) */
+      --color-cyan: #06b6d4;
+      --color-purple: #8b5cf6;
+      --color-emerald: #10b981;
+      --color-amber: #f59e0b;
+
+      /* Borders */
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-active: rgba(255, 255, 255, 0.15);
+      --border-glow: rgba(255, 255, 255, 0.25);
+
+      /* Typography */
+      --tracking-tight: -0.02em;
+      --tracking-mono: -0.01em;
+
+      /* Glass-Neon Blend */
+      --glass-blend-cyan: rgba(6, 182, 212, 0.06);
+      --glass-blend-purple: rgba(139, 92, 246, 0.04);
+      --glass-edge-glow: rgba(6, 182, 212, 0.08);
+
+      /* Fonts */
+      --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    }
+
+    /* ----------------------------------------
+       GLOBAL BASE STYLES
+       ---------------------------------------- */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      color-scheme: dark;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--color-void);
+      color: var(--color-ink);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+      touch-action: manipulation;
+    }
+
+    ::selection {
+      background: rgba(6, 182, 212, 0.3);
+      color: white;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--color-cyan);
+      outline-offset: 2px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--color-void); }
+    ::-webkit-scrollbar-thumb { background: var(--border-active); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--border-glow); }
+
+    /* ----------------------------------------
+       BACKGROUND OVERLAYS
+       ---------------------------------------- */
+    .bg-overlays {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .grid-overlay {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border-subtle) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px);
+      background-size: 64px 64px;
+      opacity: 0.4;
+    }
+
+    .spotlight {
+      position: absolute;
+      top: -10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120%;
+      height: 600px;
+      background: radial-gradient(ellipse 80% 80% at 50% 0%, rgba(6, 182, 212, 0.12), transparent 70%);
+      pointer-events: none;
+    }
+
+    .spotlight-purple {
+      position: absolute;
+      bottom: -10%;
+      left: 30%;
+      width: 800px;
+      height: 600px;
+      background: radial-gradient(ellipse 80% 80% at 50% 100%, rgba(139, 92, 246, 0.08), transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ----------------------------------------
+       LAYOUT CONTAINER
+       ---------------------------------------- */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* ----------------------------------------
+       HEADER
+       ---------------------------------------- */
+    .header {
+      padding: 4rem 0 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 1.5rem;
+    }
+
+    .logo-mark {
+      width: 64px;
+      height: 64px;
+      filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.4));
+      animation: neon-pulse 4s ease-in-out infinite;
+    }
+
+    .header-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.375rem 1rem;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: var(--color-glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .header-tag .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-emerald);
+      box-shadow: 0 0 8px var(--color-emerald);
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    .header-tag span {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .header h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      letter-spacing: var(--tracking-tight);
+      line-height: 1.1;
+      margin: 0;
+    }
+
+    .header h1 .gradient {
+      background: linear-gradient(135deg, var(--color-cyan), var(--color-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header .subtitle {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.05em;
+      max-width: 600px;
+      line-height: 1.5;
+    }
+
+    /* Dual-engine badge */
+    .dual-engine {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+
+    .engine-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      background: var(--color-surface);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .engine-badge .label { color: var(--text-tertiary); }
+    .engine-badge .value { }
+    .engine-badge.a .value { color: var(--color-cyan); }
+    .engine-badge.b .value { color: var(--color-purple); }
+    .engine-badge .arrow { color: var(--text-tertiary); font-size: 14px; }
+
+    /* ----------------------------------------
+       BMC GRID
+       ---------------------------------------- */
+    .bmc {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 12px;
+      padding: 2rem 0;
+    }
+
+    /* Block spans */
+    .span-2 { grid-column: span 2; }
+    .span-5 { grid-column: span 5; }
+
+    .block {
+      position: relative;
+      background: var(--color-glass);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 1.25rem;
+      transition: border-color 0.4s ease, box-shadow 0.4s ease;
+      display: flex;
+      flex-direction: column;
+      min-height: 280px;
+    }
+
+    .block:hover {
+      border-color: var(--border-active);
+      box-shadow:
+        0 0 40px var(--glass-edge-glow),
+        0 0 80px var(--glass-blend-purple),
+        inset 0 0 40px var(--glass-blend-cyan);
+    }
+
+    /* Block header */
+    .block-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .block-head .icon-box {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+      background: var(--color-surface);
+      flex-shrink: 0;
+    }
+
+    .block-head .icon-box svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 1.5;
+    }
+
+    .block-head .title-wrap {
+      flex: 1;
+      margin-left: 0.75rem;
+    }
+
+    .block-head .num {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+
+    .block-head .title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--color-ink);
+      margin-top: 2px;
+    }
+
+    /* Accent color variants */
+    .accent-cyan .block-head .icon-box { border-color: rgba(6, 182, 212, 0.3); }
+    .accent-cyan .block-head .icon-box svg { color: var(--color-cyan); }
+    .accent-cyan .block-head .num { color: rgba(6, 182, 212, 0.6); }
+
+    .accent-purple .block-head .icon-box { border-color: rgba(139, 92, 246, 0.3); }
+    .accent-purple .block-head .icon-box svg { color: var(--color-purple); }
+    .accent-purple .block-head .num { color: rgba(139, 92, 246, 0.6); }
+
+    .accent-emerald .block-head .icon-box { border-color: rgba(16, 185, 129, 0.3); }
+    .accent-emerald .block-head .icon-box svg { color: var(--color-emerald); }
+    .accent-emerald .block-head .num { color: rgba(16, 185, 129, 0.6); }
+
+    .accent-amber .block-head .icon-box { border-color: rgba(245, 158, 11, 0.3); }
+    .accent-amber .block-head .icon-box svg { color: var(--color-amber); }
+    .accent-amber .block-head .num { color: rgba(245, 158, 11, 0.6); }
+
+    /* Block content */
+    .block-body {
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+
+    .item {
+      margin-bottom: 0.75rem;
+    }
+
+    .item:last-child { margin-bottom: 0; }
+
+    .item-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 0.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .item-label .marker {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .marker.cyan { background: var(--color-cyan); }
+    .marker.purple { background: var(--color-purple); }
+    .marker.emerald { background: var(--color-emerald); }
+    .marker.amber { background: var(--color-amber); }
+
+    .item-text {
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: rgba(255, 255, 255, 0.7);
+      padding-left: 0.55rem;
+    }
+
+    .item-text strong {
+      color: var(--color-ink);
+      font-weight: 600;
+    }
+
+    .item-text .mono {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--color-cyan);
+    }
+
+    .item-text .mono-purple {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      color: var(--color-purple);
+    }
+
+    /* Dual-engine section within blocks */
+    .engine-split {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .engine-split .col {
+      flex: 1;
+      padding: 0.5rem;
+      border-radius: 4px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .engine-split .col.a {
+      border-color: rgba(6, 182, 212, 0.15);
+      background: rgba(6, 182, 212, 0.03);
+    }
+
+    .engine-split .col.b {
+      border-color: rgba(139, 92, 246, 0.15);
+      background: rgba(139, 92, 246, 0.03);
+    }
+
+    .engine-split .col-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .engine-split .col.a .col-label { color: var(--color-cyan); }
+    .engine-split .col.b .col-label { color: var(--color-purple); }
+
+    .engine-split .col-text {
+      font-size: 11px;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* Value prop highlight */
+    .vp-highlight {
+      padding: 0.6rem 0.75rem;
+      border-radius: 4px;
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.06), rgba(139, 92, 246, 0.04));
+      margin-bottom: 0.75rem;
+    }
+
+    .vp-highlight .vp-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-ink);
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .vp-highlight .vp-title .badge {
+      font-family: var(--font-mono);
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    .vp-highlight .vp-title .badge.cyan {
+      background: rgba(6, 182, 212, 0.15);
+      color: var(--color-cyan);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+    }
+
+    .vp-highlight .vp-title .badge.purple {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--color-purple);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+    .vp-highlight .vp-desc {
+      font-size: 11.5px;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* Cost/Revenue bars */
+    .bar-row {
+      margin-bottom: 0.6rem;
+    }
+
+    .bar-row:last-child { margin-bottom: 0; }
+
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.3rem;
+    }
+
+    .bar-label .name {
+      font-size: 11.5px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .bar-label .val {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+    }
+
+    .bar-track {
+      height: 4px;
+      border-radius: 2px;
+      background: var(--color-surface);
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.8s ease;
+    }
+
+    .bar-fill.cyan { background: linear-gradient(90deg, var(--color-cyan), #67e8f9); }
+    .bar-fill.purple { background: linear-gradient(90deg, var(--color-purple), #c4b5fd); }
+    .bar-fill.emerald { background: linear-gradient(90deg, var(--color-emerald), #6ee7b7); }
+    .bar-fill.amber { background: linear-gradient(90deg, var(--color-amber), #fcd34d); }
+    .bar-fill.gradient { background: linear-gradient(90deg, var(--color-cyan), var(--color-purple)); }
+
+    /* Footer */
+    .footer {
+      padding: 2rem 0 4rem;
+      text-align: center;
+    }
+
+    .footer .footer-text {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.05em;
+    }
+
+    .footer .footer-text .gradient {
+      background: linear-gradient(135deg, var(--color-cyan), var(--color-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+    }
+
+    /* ----------------------------------------
+       ANIMATIONS
+       ---------------------------------------- */
+    @keyframes neon-pulse {
+      0%, 100% { filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.5)); }
+      50% { filter: drop-shadow(0 0 30px rgba(6, 182, 212, 0.8)); }
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in {
+      animation: fade-in 0.6s ease-out forwards;
+    }
+
+    /* ----------------------------------------
+       RESPONSIVE — MOBILE OPTIMIZATION
+       "The Thumb Zone" — Native App Feel on the Web
+       ---------------------------------------- */
+
+    /* Tablet: 5-column BMC layout */
+    @media (max-width: 1200px) {
+      .bmc {
+        grid-template-columns: repeat(5, 1fr);
+      }
+      .span-2 { grid-column: span 1; }
+      .span-5 { grid-column: span 5; }
+    }
+
+    /* Mobile: single-column stack */
+    @media (max-width: 768px) {
+      .page {
+        padding: 0 1rem;
+        padding-left: max(1rem, env(safe-area-inset-left));
+        padding-right: max(1rem, env(safe-area-inset-right));
+      }
+
+      /* Header */
+      .header {
+        padding: 2.5rem 0 1.5rem;
+        gap: 1rem;
+      }
+      .logo-mark {
+        width: 48px;
+        height: 48px;
+      }
+      .header h1 {
+        font-size: 1.75rem;
+      }
+      .header .subtitle {
+        font-size: 12px;
+        line-height: 1.6;
+      }
+      .header .subtitle br { display: none; }
+
+      /* Dual-engine badges: stack vertically on narrow screens */
+      .dual-engine {
+        gap: 0.5rem;
+        margin-top: 0.25rem;
+      }
+      .engine-badge {
+        padding: 0.4rem 0.75rem;
+        font-size: 10px;
+      }
+
+      /* BMC: single column */
+      .bmc {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 1rem 0;
+      }
+      .span-2, .span-5 { grid-column: span 1; }
+
+      /* Hide spacer divs entirely — they create empty gaps in single-col */
+      .span-2[aria-hidden="true"] { display: none; }
+
+      /* Blocks: no fixed min-height, allow natural flow */
+      .block {
+        min-height: auto;
+        padding: 1rem;
+        border-radius: 6px;
+      }
+
+      /* No nested scroll inside blocks — let the page scroll */
+      .block-body {
+        overflow: visible;
+      }
+
+      /* Disable hover glow on touch (saves battery, avoids stuck states) */
+      .block:hover {
+        border-color: var(--border-subtle);
+        box-shadow: none;
+      }
+
+      /* Block header: tighter spacing */
+      .block-head {
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+      }
+      .block-head .icon-box {
+        width: 28px;
+        height: 28px;
+      }
+      .block-head .icon-box svg {
+        width: 14px;
+        height: 14px;
+      }
+      .block-head .title {
+        font-size: 14px;
+      }
+      .block-head .num {
+        font-size: 9px;
+      }
+
+      /* Engine split: stack columns vertically */
+      .engine-split {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .engine-split .col {
+        padding: 0.625rem;
+      }
+      .engine-split .col-text {
+        font-size: 12px;
+      }
+
+      /* Item text: slightly larger for readability */
+      .item-text {
+        font-size: 13px;
+        padding-left: 0.55rem;
+      }
+      .item-label {
+        font-size: 10px;
+      }
+
+      /* Value props: full width, slightly larger text */
+      .vp-highlight {
+        padding: 0.75rem;
+      }
+      .vp-highlight .vp-title {
+        font-size: 13px;
+        flex-wrap: wrap;
+      }
+      .vp-highlight .vp-desc {
+        font-size: 12.5px;
+      }
+
+      /* Cost/Revenue inner grids: collapse to single column */
+      .split-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1.25rem !important;
+      }
+
+      /* Bar labels: allow wrapping, prevent overflow */
+      .bar-label {
+        flex-wrap: wrap;
+        gap: 0.25rem;
+      }
+      .bar-label .name {
+        font-size: 12px;
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+      .bar-label .val {
+        font-size: 9px;
+        white-space: nowrap;
+      }
+
+      /* Footer */
+      .footer {
+        padding: 1.5rem 0 3rem;
+        padding-bottom: max(3rem, env(safe-area-inset-bottom));
+      }
+      .footer .footer-text {
+        font-size: 10px;
+      }
+      .footer .footer-text br { display: none; }
+    }
+
+    /* Small phones: tighter density */
+    @media (max-width: 480px) {
+      .page { padding: 0 0.75rem; }
+
+      .header { padding: 2rem 0 1rem; }
+      .header h1 { font-size: 1.5rem; }
+      .header .subtitle { font-size: 11px; }
+
+      .block { padding: 0.875rem; }
+
+      .dual-engine { flex-direction: column; align-items: stretch; gap: 0.4rem; }
+      .engine-badge { justify-content: center; }
+
+      .block-head .title { font-size: 13px; }
+      .item-text { font-size: 12.5px; }
+      .vp-highlight .vp-title { font-size: 12px; }
+      .vp-highlight .vp-desc { font-size: 12px; }
+    }
+
+    /* Touch devices: disable hover-dependent interactions */
+    @media (hover: none) {
+      .block:hover {
+        border-color: var(--border-subtle);
+        box-shadow: none;
+      }
+    }
+
+    /* Reduced motion: respect OS accessibility setting */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+      .animate-fade-in { animation: none !important; opacity: 1 !important; }
+      .logo-mark { animation: none !important; }
+    }
+
+    /* Print */
+    @media print {
+      body { background: #fff; }
+      .bg-overlays { display: none; }
+      .block {
+        background: #fff;
+        border-color: #ddd;
+        color: #111;
+        break-inside: avoid;
+      }
+      .block-head .title, .item-text strong { color: #111; }
+      .item-text, .item-label { color: #333; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════
+       BACKGROUND OVERLAYS
+       ═══════════════════════════════════════ -->
+  <div class="bg-overlays">
+    <div class="grid-overlay"></div>
+    <div class="spotlight"></div>
+    <div class="spotlight-purple"></div>
+  </div>
+
+  <div class="page">
+
+    <!-- ═══════════════════════════════════════
+         HEADER
+         ═══════════════════════════════════════ -->
+    <header class="header">
+      <!-- Syntaxure Logo (inline SVG from packages/ui/src/logo.tsx) -->
+      <svg class="logo-mark" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Syntaxure Labs">
+        <defs>
+          <linearGradient id="sx-g-bmc" x1="100%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#00e5ff" />
+            <stop offset="45%" stop-color="#3060ff" />
+            <stop offset="100%" stop-color="#9b00ff" />
+          </linearGradient>
+          <filter id="sx-bloom-bmc" x="-25%" y="-25%" width="150%" height="150%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur-wide" />
+            <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur-tight" />
+            <feMerge>
+              <feMergeNode in="blur-wide" />
+              <feMergeNode in="blur-tight" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        <g filter="url(#sx-bloom-bmc)">
+          <polygon points="46,5 91,5 7,73" fill="url(#sx-g-bmc)" />
+          <polygon points="9,95 54,95 93,25" fill="url(#sx-g-bmc)" />
+        </g>
+      </svg>
+
+      <div class="header-tag">
+        <span class="dot"></span>
+        <span>Business Model Canvas &middot; v2.0 &middot; 2026</span>
+      </div>
+
+      <h1>
+        Syntaxure Labs<br/>
+        <span class="gradient">Business Model Canvas</span>
+      </h1>
+
+      <p class="subtitle">
+        // Governance over Generation — A dual-engine technology company<br/>
+        architecting high-performance systems &amp; AI context governance for the SEA startup economy.
+      </p>
+
+      <!-- Dual-Engine Strategy -->
+      <div class="dual-engine">
+        <div class="engine-badge a">
+          <span class="label">Engine A</span>
+          <span class="arrow">&rarr;</span>
+          <span class="value">The Agency</span>
+        </div>
+        <div class="engine-badge">
+          <span class="label">Cash Cow</span>
+          <span class="arrow">&rarr;</span>
+          <span class="label">R&amp;D Runway</span>
+        </div>
+        <div class="engine-badge b">
+          <span class="label">Engine B</span>
+          <span class="arrow">&rarr;</span>
+          <span class="value">Prism Context Engine</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════
+         BMC GRID
+         Layout: 10 columns
+         Row 1: Partners(2) | Activities(2) | ValueProps(2) | Relationships(2) | Segments(2)
+         Row 2:                | Resources(2) |              | Channels(2)    |
+         Row 3: Cost Structure(5)             | Revenue Streams(5)
+         ═══════════════════════════════════════ -->
+    <div class="bmc">
+
+      <!-- ── 1. KEY PARTNERS ── -->
+      <div class="block span-2 accent-cyan animate-fade-in" style="animation-delay: 0.05s;">
+        <div class="block-head">
+          <div class="icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="title-wrap">
+            <div class="num">01 / Partners</div>
+            <div class="title">Key Partners</div>
+          </div>
+        </div>
+        <div class="block-body">
+          <div class="item">
+            <div class="item-label"><span class="marker cyan"></span>Infrastructure</div>
+            <div class="item-text"><strong>Supabase</strong> — primary database &amp; auth backend across all apps</div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker cyan"></span>AI Provider</div>
+            <div class="item-text"><strong>Google Gemini</strong> — embeddings &amp; chat models (gemini-3.5-flash, gemini-embedding-2)</div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker cyan"></span>Cloud &amp; Deploy</div>
+            <div class="item-text"><strong>Vercel</strong> — Next.js hosting &amp; edge deployment</div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker cyan"></span>Database (Prism)</div>
+            <div class="item-text"><strong>Azure Cosmos DB</strong> — MongoDB API for Prism rule storage &amp; vector search</div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker cyan"></span>Protocol Ecosystem</div>
+            <div class="item-text"><strong>MCP</strong> (Anthropic) — Model Context Protocol partners: <span class="mono">Cursor, Windsurf, VS Code, Claude, Copilot</span></div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker cyan"></span>Incubator</div>
+            <div class="item-text"><strong>Kwadra TBI</strong> Cohort 5 — mentorship, funding access, go-to-market strategy (Iloilo Provincial Gov't)</div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker cyan"></span>Tooling</div>
+            <div class="item-text"><strong>Doppler</strong> (secrets), <strong>PayPal</strong> (payments), <strong>Resend</strong> (email), <strong>GitHub</strong> (CI/CD)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 2. KEY ACTIVITIES ── -->
+      <div class="block span-2 accent-cyan animate-fade-in" style="animation-delay: 0.1s;">
+        <div class="block-head">
+          <div class="icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="title-wrap">
+            <div class="num">02 / Activities</div>
+            <div class="title">Key Activities</div>
+          </div>
+        </div>
+        <div class="block-body">
+          <div class="engine-split">
+            <div class="col a">
+              <div class="col-label">Engine A &middot; Agency</div>
+              <div class="col-text">Custom web &amp; SaaS development<br/>Productized template delivery<br/>Client onboarding &amp; scoping<br/>Care Plan maintenance</div>
+            </div>
+            <div class="col b">
+              <div class="col-label">Engine B &middot; Prism</div>
+              <div class="col-text">Context rule extraction (Playwright)<br/>MCP server development<br/>AI embedding &amp; ranking R&amp;D<br/>Cross-IDE integration</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker cyan"></span>Shared</div>
+            <div class="item-text"><strong>SaaS template architecture</strong> — reusable production cores (multi-tenancy, RBAC, billing) customized per client</div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker cyan"></span>Shared</div>
+            <div class="item-text"><strong>Design system engineering</strong> — Ghost Glow component library (@syntaxure/ui) maintenance &amp; evolution</div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker cyan"></span>Shared</div>
+            <div class="item-text"><strong>Dogfooding</strong> — Prism builds the agency's own products; agency projects validate Prism's capabilities</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 3. VALUE PROPOSITIONS ── -->
+      <div class="block span-2 accent-emerald animate-fade-in" style="animation-delay: 0.15s;">
+        <div class="block-head">
+          <div class="icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="title-wrap">
+            <div class="num">03 / Value Props</div>
+            <div class="title">Value Propositions</div>
+          </div>
+        </div>
+        <div class="block-body">
+          <div class="vp-highlight">
+            <div class="vp-title">
+              <span class="badge cyan">Agency</span>
+              Zero to One in Weeks
+            </div>
+            <div class="vp-desc">Production-ready SaaS templates customized to your business logic — skip months of boilerplate. <strong>Weeks, not months.</strong></div>
+          </div>
+          <div class="vp-highlight">
+            <div class="vp-title">
+              <span class="badge cyan">Agency</span>
+              Fixed Investment, No Surprises
+            </div>
+            <div class="vp-desc">Productized pricing tiers with transparent deliverables. No hourly billing, no scope creep. You own 100% of the source code.</div>
+          </div>
+          <div class="vp-highlight">
+            <div class="vp-title">
+              <span class="badge purple">Prism</span>
+              Governance over Generation
+            </div>
+            <div class="vp-desc">Deploy a context server that forces AI coding tools to follow your design system, patterns, and rules. <span class="mono-purple">64% token reduction</span> ($55&ndash;150 &rarr; $20&ndash;55/dev/month).</div>
+          </div>
+          <div class="vp-highlight">
+            <div class="vp-title">
+              <span class="badge purple">Prism</span>
+              Zero Hallucination, Active Enforcement
+            </div>
+            <div class="vp-desc">Cross-IDE (Cursor, Windsurf, VS Code, Claude, Copilot). <strong>prism_check</strong> catches violations on save; <strong>prism_fix</strong> auto-corrects before git.</div>
+          </div>
+          <div class="vp-highlight">
+            <div class="vp-title">
+              <span class="badge cyan">Shared</span>
+              Partnership, Not Vendorship
+            </div>
+            <div class="vp-desc">We invest in your success. Human-in-the-loop approval at every phase. Enterprise-grade security by default. AI-native extensibility from day one.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 4. CUSTOMER RELATIONSHIPS ── -->
+      <div class="block span-2 accent-purple animate-fade-in" style="animation-delay: 0.2s;">
+        <div class="block-head">
+          <div class="icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="title-wrap">
+            <div class="num">04 / Relations</div>
+            <div class="title">Customer Relationships</div>
+          </div>
+        </div>
+        <div class="block-body">
+          <div class="engine-split">
+            <div class="col a">
+              <div class="col-label">Agency</div>
+              <div class="col-text">Long-term partnerships<br/>Fixed-scope transparency<br/>Phase-gate approvals<br/>100% source ownership</div>
+            </div>
+            <div class="col b">
+              <div class="col-label">Prism</div>
+              <div class="col-text">Self-service (Free tier)<br/>"Vibecoder" cult building<br/>7-day free trials<br/>Dedicated enterprise support</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker purple"></span>Trust Protocol</div>
+            <div class="item-text">Radical honesty, not hype. <strong>Case studies with metrics</strong> over generic testimonials. Open standards partner (MCP, Headless UI, open source).</div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker purple"></span>Retention</div>
+            <div class="item-text">Mandatory <strong>Care Plan</strong> (12&ndash;18 months included) &rarr; converts to recurring retainer. Existing clients get priority scheduling &amp; upgrade discounts.</div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker purple"></span>Communication</div>
+            <div class="item-text">24-hour response (Business), 12-hour (Custom), 1-hour (Enterprise). Email + contact forms + Slack for active projects.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 5. CUSTOMER SEGMENTS ── -->
+      <div class="block span-2 accent-purple animate-fade-in" style="animation-delay: 0.25s;">
+        <div class="block-head">
+          <div class="icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2M16 3.13a4 4 0 0 1 0 7.75M21 21v-2a4 4 0 0 0-3-3.87" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="title-wrap">
+            <div class="num">05 / Segments</div>
+            <div class="title">Customer Segments</div>
+          </div>
+        </div>
+        <div class="block-body">
+          <div class="engine-split">
+            <div class="col a">
+              <div class="col-label">Agency Clients</div>
+              <div class="col-text">Startups &amp; founders (Zero-to-One)<br/>Growing businesses (web &amp; apps)<br/>Enterprise (dedicated teams)<br/>SEA-focused, cost-sensitive</div>
+            </div>
+            <div class="col b">
+              <div class="col-label">Prism Users</div>
+              <div class="col-text">"Alpha" developers &amp; CTOs<br/>Senior engineers (anti-hype)<br/>Teams syncing rules (10+ devs)<br/>Enterprise compliance pilots</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker purple"></span>Primary Market</div>
+            <div class="item-text"><strong>Southeast Asia</strong> — cost-sensitivity is a first-class design concern. Iloilo City, Philippines HQ.</div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker purple"></span>Alpha Filter</div>
+            <div class="item-text">We chase <strong>Alpha Users</strong> — CTOs, senior engineers, founders — not traffic. Features must be Sovereign, solve Context Entropy, and be Dogfoodable.</div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker purple"></span>Tiers</div>
+            <div class="item-text"><span class="mono-purple">Free</span> &rarr; <span class="mono-purple">Pro ($18/mo)</span> &rarr; <span class="mono-purple">Team ($54/mo)</span> &rarr; <span class="mono-purple">Enterprise</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spacer: positions Resources under Activities -->
+      <div class="span-2" aria-hidden="true"></div>
+
+      <!-- ── 6. KEY RESOURCES ── -->
+      <div class="block span-2 accent-cyan animate-fade-in" style="animation-delay: 0.3s;">
+        <div class="block-head">
+          <div class="icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="title-wrap">
+            <div class="num">06 / Resources</div>
+            <div class="title">Key Resources</div>
+          </div>
+        </div>
+        <div class="block-body">
+          <div class="item">
+            <div class="item-label"><span class="marker cyan"></span>Intellectual Property</div>
+            <div class="item-text"><strong>Prism Context Engine</strong> — MCP server, 9 tools, smart selection, enforcement engine, 139+ tests, npm-published CLI</div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker cyan"></span>Design System</div>
+            <div class="item-text"><strong>Ghost Glow</strong> component library (@syntaxure/ui) — 40+ components, holographic design constitution, dark/light dual-mode</div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker cyan"></span>Codebase</div>
+            <div class="item-text"><strong>Monorepo</strong> — 8 apps + 8 packages, production-ready SaaS templates (multi-tenancy, RBAC, billing, AI-native)</div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker cyan"></span>Human Capital</div>
+            <div class="item-text"><strong>Founder</strong> Jeff Edrick Martinez — 5+ years production systems, Next.js/cloud/AI specialist. Lead Architect &amp; sole builder.</div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker cyan"></span>Brand &amp; Network</div>
+            <div class="item-text">Kwadra TBI Cohort 5 membership, syntaxure.dev domain, open-source credibility (MCP partner, published npm packages)</div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker cyan"></span>Infrastructure</div>
+            <div class="item-text">Supabase + Cosmos DB + Gemini AI + Vercel edge + Cloudflare R2 — scalable from day one</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spacer: positions Channels under Customer Relationships -->
+      <div class="span-2" aria-hidden="true"></div>
+
+      <!-- ── 7. CHANNELS ── -->
+      <div class="block span-2 accent-purple animate-fade-in" style="animation-delay: 0.35s;">
+        <div class="block-head">
+          <div class="icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="10"/></svg>
+          </div>
+          <div class="title-wrap">
+            <div class="num">07 / Channels</div>
+            <div class="title">Channels</div>
+          </div>
+        </div>
+        <div class="block-body">
+          <div class="engine-split">
+            <div class="col a">
+              <div class="col-label">Agency</div>
+              <div class="col-text"><strong>syntaxure.dev</strong> (port 3000)<br/>Services &amp; pricing pages<br/>Quote &amp; contact forms<br/>Work portfolio</div>
+            </div>
+            <div class="col b">
+              <div class="col-label">Prism</div>
+              <div class="col-text"><strong>prism.syntaxure.dev</strong> (port 3001)<br/>Self-serve sign-up<br/>CLI: <span style="font-family:var(--font-mono);font-size:10px;">prism init &amp; prism serve</span><br/>VS Code extension</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker purple"></span>Documentation</div>
+            <div class="item-text"><strong>docs.syntaxure.dev</strong> — Nextra 4, 8 locales, MCP setup guides, API references</div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker purple"></span>SEO &amp; Content</div>
+            <div class="item-text">Organic search targeting: "MCP server", "AI context governance", "Cursor rules", "AI hallucination prevention". Anti-hype voice.</div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker purple"></span>Distribution</div>
+            <div class="item-text"><strong>npm</strong> registry (prism-context-engine), <strong>VS Code Marketplace</strong> (extension), <strong>GitHub</strong> (open source credibility)</div>
+          </div>
+          <div class="item">
+            <div class="item-label"><span class="marker purple"></span>Referral</div>
+            <div class="item-text">Kwadra TBI network, client word-of-mouth, existing client upgrade path (priority scheduling + discounts)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 8. COST STRUCTURE ── -->
+      <div class="block span-5 accent-amber animate-fade-in" style="animation-delay: 0.4s;">
+        <div class="block-head">
+          <div class="icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="title-wrap">
+            <div class="num">08 / Costs</div>
+            <div class="title">Cost Structure</div>
+          </div>
+        </div>
+        <div class="block-body">
+          <div class="split-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <!-- Left: Cost bars -->
+            <div>
+              <div class="bar-row">
+                <div class="bar-label"><span class="name">AI API Costs (Gemini/OpenAI)</span><span class="val">Variable</span></div>
+                <div class="bar-track"><div class="bar-fill cyan" style="width: 70%;"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-label"><span class="name">Cloud Infrastructure</span><span class="val">Fixed</span></div>
+                <div class="bar-track"><div class="bar-fill purple" style="width: 45%;"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-label"><span class="name">Vercel Hosting</span><span class="val">Fixed</span></div>
+                <div class="bar-track"><div class="bar-fill purple" style="width: 30%;"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-label"><span class="name">Supabase + Cosmos DB</span><span class="val">Tiered</span></div>
+                <div class="bar-track"><div class="bar-fill emerald" style="width: 35%;"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-label"><span class="name">SaaS Tooling (Doppler, etc.)</span><span class="val">Fixed</span></div>
+                <div class="bar-track"><div class="bar-fill amber" style="width: 15%;"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-label"><span class="name">Founder Time (Opportunity)</span><span class="val">Primary</span></div>
+                <div class="bar-track"><div class="bar-fill gradient" style="width: 90%;"></div></div>
+              </div>
+            </div>
+            <!-- Right: Cost notes -->
+            <div>
+              <div class="item">
+                <div class="item-label"><span class="marker amber"></span>Model</div>
+                <div class="item-text"><strong>Value-driven, cost-conscious.</strong> SEA cost-sensitivity is a first-class concern. 100% of agency profit &rarr; Prism runway.</div>
+              </div>
+              <div class="item">
+                <div class="item-label"><span class="marker amber"></span>Key Cost Drivers</div>
+                <div class="item-text">Gemini API tokens (embeddings + chat), Cosmos DB RU/s, Vercel bandwidth, PayPal transaction fees</div>
+              </div>
+              <div class="item">
+                <div class="item-label"><span class="marker amber"></span>Optimization</div>
+                <div class="item-text">LRU caching (memory + disk) &rarr; 40%+ cache hit rate = 0 tokens on repeat calls. Progressive disclosure &rarr; ~1,800 tokens/call vs ~60,000 baseline.</div>
+              </div>
+              <div class="item">
+                <div class="item-label"><span class="marker amber"></span>Lean Advantage</div>
+                <div class="item-text">Solo founder, incubator-subsidized, no office rent. Doppler free tier, Vercel hobby &rarr; pro. Minimal marketing spend (organic SEO + dogfooding).</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 9. REVENUE STREAMS ── -->
+      <div class="block span-5 accent-emerald animate-fade-in" style="animation-delay: 0.45s;">
+        <div class="block-head">
+          <div class="icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M23 6l-9.5 9.5-5-5L1 18" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 6h6v6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="title-wrap">
+            <div class="num">09 / Revenue</div>
+            <div class="title">Revenue Streams</div>
+          </div>
+        </div>
+        <div class="block-body">
+          <div class="split-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <!-- Left: Agency revenue -->
+            <div>
+              <div class="item-label" style="margin-bottom: 0.5rem;"><span class="marker cyan"></span>Engine A &middot; Agency (Project Fees)</div>
+              <div class="bar-row">
+                <div class="bar-label"><span class="name">Starter &mdash; <span style="font-family:var(--font-mono);">&#8369;25K</span></span><span class="val">5 pages</span></div>
+                <div class="bar-track"><div class="bar-fill cyan" style="width: 25%;"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-label"><span class="name">Business &mdash; <span style="font-family:var(--font-mono);">&#8369;65K</span></span><span class="val">15 pages + CMS</span></div>
+                <div class="bar-track"><div class="bar-fill cyan" style="width: 55%;"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-label"><span class="name">Custom &mdash; <span style="font-family:var(--font-mono);">&#8369;180K</span></span><span class="val">Full-stack SaaS</span></div>
+                <div class="bar-track"><div class="bar-fill cyan" style="width: 85%;"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-label"><span class="name">Enterprise &mdash; Custom</span><span class="val">Dedicated team</span></div>
+                <div class="bar-track"><div class="bar-fill cyan" style="width: 95%;"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-label"><span class="name">Care Plan &mdash; <span style="font-family:var(--font-mono);">&#8369;2&ndash;5K/mo</span></span><span class="val">Recurring</span></div>
+                <div class="bar-track"><div class="bar-fill cyan" style="width: 20%;"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-label"><span class="name">AI Integration &mdash; <span style="font-family:var(--font-mono);">&#8369;100K+</span></span><span class="val">Add-on</span></div>
+                <div class="bar-track"><div class="bar-fill cyan" style="width: 50%;"></div></div>
+              </div>
+            </div>
+            <!-- Right: Prism revenue -->
+            <div>
+              <div class="item-label" style="margin-bottom: 0.5rem;"><span class="marker purple"></span>Engine B &middot; Prism (SaaS Subscriptions)</div>
+              <div class="bar-row">
+                <div class="bar-label"><span class="name">Free &mdash; <span style="font-family:var(--font-mono);">$0/mo</span></span><span class="val">5 rules, 1 project</span></div>
+                <div class="bar-track"><div class="bar-fill purple" style="width: 5%;"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-label"><span class="name">Pro &mdash; <span style="font-family:var(--font-mono);">$18/mo</span></span><span class="val">Unlimited rules</span></div>
+                <div class="bar-track"><div class="bar-fill purple" style="width: 30%;"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-label"><span class="name">Team &mdash; <span style="font-family:var(--font-mono);">$54/mo</span></span><span class="val">10 members</span></div>
+                <div class="bar-track"><div class="bar-fill purple" style="width: 55%;"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-label"><span class="name">Enterprise &mdash; Custom</span><span class="val">SSO, audit, dedicated</span></div>
+                <div class="bar-track"><div class="bar-fill purple" style="width: 95%;"></div></div>
+              </div>
+              <div class="bar-row">
+                <div class="bar-label"><span class="name">Annual plans &mdash; ~17% off</span><span class="val">Upfront cash</span></div>
+                <div class="bar-track"><div class="bar-fill purple" style="width: 40%;"></div></div>
+              </div>
+              <div style="margin-top: 0.75rem; padding: 0.5rem 0.75rem; border-radius: 4px; border: 1px solid rgba(139, 92, 246, 0.2); background: rgba(139, 92, 246, 0.04);">
+                <div class="item-label"><span class="marker purple"></span>Target Metric</div>
+                <div class="item-text" style="padding-left: 0;"><strong>64% token reduction</strong> per dev/month &rarr; <span class="mono-purple">$55&ndash;150 &rarr; $20&ndash;55</span>. This is the sales pitch &amp; the ROI proof.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <!-- /BMC GRID -->
+
+    <!-- ═══════════════════════════════════════
+         FOOTER
+         ═══════════════════════════════════════ -->
+    <footer class="footer">
+      <p class="footer-text">
+        <span class="gradient">Syntaxure Labs</span> &middot; Governance over Generation &middot; Est. 2025 &middot; Iloilo City, Philippines<br/>
+        Kwadra TBI Cohort 5 &middot; <span style="opacity:0.5;">syntaxure.dev</span> &middot; <span style="opacity:0.5;">prism.syntaxure.dev</span> &middot; <span style="opacity:0.5;">docs.syntaxure.dev</span>
+      </p>
+    </footer>
+
+  </div>
+  <!-- /PAGE -->
+
+</body>
+</html>

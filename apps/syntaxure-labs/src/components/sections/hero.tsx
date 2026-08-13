@@ -1,8 +1,7 @@
-"use client";
-
 import Link from "next/link";
-import { ArrowUpRight, Zap, ArrowDown, ShieldCheck } from "lucide-react";
-import { useInView } from "@/lib/use-in-view";
+import { ArrowUpRight } from "lucide-react";
+import { Reveal } from "@/components/reveal";
+import { HeroScrollButton } from "./hero-scroll-button";
 
 export function Hero({
   availabilityText,
@@ -16,27 +15,17 @@ export function Hero({
     description?: string;
   };
 }) {
-  const { ref: containerRef, isInView } = useInView<HTMLDivElement>({ threshold: 0.1 });
-
-  const scrollToContent = () => {
-    window.scrollTo({
-      top: window.innerHeight,
-      behavior: "smooth",
-    });
-  };
-
   return (
     <div className="relative z-10">
-      <section className="relative flex min-h-[90vh] items-center justify-center pb-24 pt-20 overflow-hidden">
+      <section className="relative flex min-h-[90vh] items-center justify-center pb-16 pt-20 md:pb-24 overflow-hidden">
         
         {/* ═══════════════════════════════════════
             CONTENT LAYOUT (2-Column)
             ═══════════════════════════════════════ */}
-        <div 
-          ref={containerRef}
-          className={`relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center gap-16 lg:gap-12 transition-all duration-1000 ease-out ${
-            isInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
+        <Reveal
+          className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center gap-16 lg:gap-12"
+          threshold={0.1}
+          transitionClassName="duration-1000 ease-out"
         >
           {/* ── Left Column: Text ── */}
           <div className="flex-1 text-center lg:text-left pt-10 lg:pt-0 relative">
@@ -47,8 +36,7 @@ export function Hero({
             </div>
 
             {/* Architectural Accent Line (Left anchor on desktop) */}
-            {/* ── Top Badges ── */}
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 mb-8">
+            {/* ── Top Badges ── */}            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 mb-8">
               {availabilityText && (
                 <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-1 shadow-sm">
                   <span className="relative flex h-1.5 w-1.5">
@@ -60,20 +48,14 @@ export function Hero({
                   </span>
                 </div>
               )}
-              
-              <div className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-secondary)] px-3 py-1 shadow-sm">
-                <ShieldCheck className="h-3.5 w-3.5 text-cyan-500" />
-                <span className="font-mono text-[11px] text-[var(--text-secondary)] font-medium tracking-wide">
-                  TRUSTED BY GROWING BUSINESSES
-                </span>
-              </div>
+
             </div>
 
             {/* ── Headline ── */}
             <h1 className="text-4xl font-bold tracking-tight text-[var(--text-primary)] sm:text-5xl lg:text-6xl leading-[1.15]">
-              We Build Websites & Apps<br />
-              <span className="text-[var(--text-secondary)]">That Grow With Your Business</span><br />
-              <span className="bg-gradient-to-r from-cyan-500 to-violet-500 bg-clip-text text-transparent">Engineering with Precision.</span>
+              Custom Software<br />
+              <span className="text-[var(--text-secondary)]">For Growing Businesses</span><br />
+              <span className="text-gradient-holographic">Websites. Apps. AI. Built for results.</span>
             </h1>
 
             {/* ── Subtext ── */}
@@ -95,10 +77,10 @@ export function Hero({
               </Link>
 
               <Link
-                href="/work"
-                className="group flex items-center justify-center gap-2 rounded-md border border-transparent px-6 py-3 font-mono text-[13px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] transition-all hover:text-[var(--text-primary)] active:scale-95"
+                href="/contact"
+                className="group flex items-center justify-center gap-2 rounded-md border border-[var(--border-subtle)] px-6 py-3 font-mono text-[13px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] transition-all hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)] active:scale-95"
               >
-                VIEW_OUR_WORK
+                TALK_TO_US
               </Link>
             </div>
           </div>
@@ -118,33 +100,17 @@ export function Hero({
                   WebkitMaskRepeat: "no-repeat",
                 }}
              >
-                <div 
-                  className="absolute inset-0 w-full h-full font-mono text-[8px] sm:text-[9px] leading-[1.1] font-bold tracking-tighter text-justify break-all select-none"
-                  style={{
-                    background: "linear-gradient(135deg, #06b6d4, #8b5cf6)", // cyan-500 to violet-500
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    color: "transparent",
-                    maskImage: "radial-gradient(circle, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 80%)",
-                    WebkitMaskImage: "radial-gradient(circle, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 80%)",
-                  }}
-                >
-                  {"SYNTAXURE LABS WE BUILD WEBSITES AND APPS THAT GROW WITH YOUR BUSINESS ENGINEERING WITH PRECISION FAST RELIABLE SCALABLE ".repeat(150)}
+                <div              className="absolute inset-0 w-full h-full font-mono text-[8px] sm:text-[9px] leading-[1.1] font-bold tracking-tighter text-justify break-all select-none text-[var(--text-tertiary)] dark:text-cyan-500"
+                >{"SYNTAXURE LABS WE BUILD WEBSITES AND APPS THAT GROW WITH YOUR BUSINESS ENGINEERING WITH PRECISION FAST RELIABLE SCALABLE ".repeat(150)}
                 </div>
              </div>
           </div>
-        </div>
+        </Reveal>
 
         {/* ═══════════════════════════════════════
             SCROLL INDICATOR
             ═══════════════════════════════════════ */}
-        <button
-          onClick={scrollToContent}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 text-[var(--text-tertiary)] transition-colors hover:text-[var(--text-primary)] z-20"
-          aria-label="Scroll to content"
-        >
-          <ArrowDown className="h-5 w-5 animate-bounce" />
-        </button>
+        <HeroScrollButton />
       </section>
     </div>
   );

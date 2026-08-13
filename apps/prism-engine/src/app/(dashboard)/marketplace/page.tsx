@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import {
   Store,
   Download,
@@ -29,24 +29,28 @@ export default async function MarketplacePage({
   const page = Math.max(1, parseInt(params.page || "1"));
   const limit = 20;
 
-  const ruleSets = await getCollection("ruleSets");
-  const query: Record<string, unknown> = { isPublic: true };
-   
-  if (q) query.name = { $regex: q, $options: "i" };
+  const db = getPrismDb();
+  let listQuery = db
+    .from("prism_rule_sets")
+    .select("_id:id, name, description, ruleIds:rule_ids, createdBy:created_by", {
+      count: "exact",
+    })
+    .eq("is_public", true);
+  if (q) listQuery = listQuery.ilike("name", `%${q}%`);
 
-  const total = await ruleSets.countDocuments(query);
-  const items = await ruleSets
-    .find(query)
-    .sort({ createdAt: -1 })
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .toArray();
+  const { data: itemRows, count: totalRaw } = await listQuery
+    .order("created_at", { ascending: false })
+    .range((page - 1) * limit, page * limit - 1);
+  const items = itemRows ?? [];
+  const total = totalRaw ?? 0;
 
   // Count user's own published sets
-  const mySets = await ruleSets.countDocuments({
-    createdBy: userId,
-    isPublic: true,
-  });
+  const { count: mySetsRaw } = await db
+    .from("prism_rule_sets")
+    .select("id", { count: "exact", head: true })
+    .eq("created_by", userId)
+    .eq("is_public", true);
+  const mySets = mySetsRaw ?? 0;
 
   return (
     <div className="space-y-8">
@@ -113,7 +117,7 @@ export default async function MarketplacePage({
                   <Package className="h-5 w-5" />
                 </div>
                 <Badge variant="default" className="text-[10px]">
-                  {rs.rules?.length || 0} rules
+                  {rs.ruleIds?.length || 0} rules
                 </Badge>
               </div>
               <h3 className="font-medium text-white group-hover:text-emerald-400 transition-colors">

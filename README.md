@@ -33,7 +33,7 @@
 
 This monorepo powers **Syntaxure Labs** — a technology startup building high-performance web applications, scalable SaaS platforms, and AI governance systems. From zero to production: we transform complex ideas into reliable software ecosystems built for scale and absolute control.
 
-**Current Version**: `2.0.0` (May 24, 2026)
+**Current Version**: `2.1.0` (August 3, 2026)
 
 ---
 
@@ -51,12 +51,16 @@ This monorepo powers **Syntaxure Labs** — a technology startup building high-p
 │  ├── prism-docs          → Multi-language documentation (:3002)     │
 │  ├── prism-admin         → Agency admin panel           (:3004)     │
 │  ├── prism-manage        → Internal project management  (:3007)     │
+│  ├── syntaxure-pm        → Docs + project management    (:3008)     │
 │  ├── prism-mcp-server    → AI context server (MCP)      (stdio)     │
 │  └── prism-analytics     → Python FastAPI analytics      (:8000)     │
 ├──────────────────────────────────────────────────────────────────────┤
 │  packages/                                                           │
 │  ├── @syntaxure/ui         → Ghost Glow component library           │
-│  ├── @syntaxure-labs/db    → Firebase + Cosmos DB clients           │
+│  ├── @syntaxure-labs/db    → Prisma schema + Postgres clients       │
+│  ├── @syntaxure/supabase   → Supabase SSR client (server/browser)   │
+│  ├── @syntaxure/redis      → Upstash Redis (rate-limit, cache)     │
+│  ├── @syntaxure/sentry-config → Sentry error monitoring             │
 │  ├── prism-context-engine  → Context governance for LLMs            │
 │  ├── @repo/eslint-config   → Shared ESLint configuration            │
 │  └── @repo/typescript-config → Shared TypeScript configuration      │
@@ -69,17 +73,17 @@ This monorepo powers **Syntaxure Labs** — a technology startup building high-p
 
 ## ◈ Tech Stack
 
-| Layer           | Technology                                         |
-| --------------- | -------------------------------------------------- |
-| **Framework**   | Next.js 16 (App Router)                            |
-| **UI**          | React 19, Tailwind CSS v4, Headless UI             |
-| **Database**    | Supabase (primary), Azure Cosmos DB (prism-engine) |
-| **Auth**        | Supabase Auth                                      |
-| **AI Protocol** | Model Context Protocol (MCP)                       |
-| **Secrets**     | Doppler                                            |
-| **Monorepo**    | Turborepo + pnpm workspaces                        |
-| **CI/CD**       | GitHub Actions, Vercel                             |
-| **Analytics**   | Python FastAPI, pandas, Vercel Analytics           |
+| Layer           | Technology                                       |
+| --------------- | ------------------------------------------------ |
+| **Framework**   | Next.js 16 (App Router)                          |
+| **UI**          | React 19, Tailwind CSS v4, Headless UI           |
+| **Database**    | Supabase (Postgres, all apps incl. prism-engine) |
+| **Auth**        | Supabase Auth                                    |
+| **AI Protocol** | Model Context Protocol (MCP)                     |
+| **Secrets**     | Doppler                                          |
+| **Monorepo**    | Turborepo + pnpm workspaces                      |
+| **CI/CD**       | GitHub Actions, Vercel                           |
+| **Analytics**   | Python FastAPI, pandas, Vercel Analytics         |
 
 ---
 
@@ -108,7 +112,7 @@ The primary marketing site, CRM, and client-facing platform. Handles quotes, inv
 
 SaaS platform for developers to manage AI context rules. Brand management, video context pipeline, and AI component generation.
 
-**Stack**: Next.js 16, Supabase Auth, Cosmos DB
+**Stack**: Next.js 16, Supabase Auth, Supabase Postgres
 
 </td>
 </tr>
@@ -150,13 +154,26 @@ Internal project management with kanban boards, marketing tools, and workspace c
 </td>
 <td width="50%" valign="top">
 
+### ◈ Syntaxure PM
+
+`apps/syntaxure-pm` · Port `3008`
+
+Documentation site and project management platform with Supabase backend, Upstash Redis caching, and Sentry monitoring.
+
+**Stack**: Next.js 16, Supabase, Upstash Redis
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
 ### ◈ Prism MCP Server
 
 `apps/prism-mcp-server` · stdio
 
 AI context server implementing the Model Context Protocol. Enables coding assistants to query architectural rules directly.
 
-**Stack**: Node.js, MCP SDK, Cosmos DB
+**Stack**: Node.js, MCP SDK, Supabase Postgres
 
 </td>
 </tr>
@@ -181,13 +198,16 @@ Python FastAPI analytics service for business intelligence, reporting, and data-
 
 ## ◈ Packages
 
-| Package                         | Name                        | Description                                                                                                                        |
-| ------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/ui`                   | **@syntaxure/ui**           | Ghost Glow component library — Button, Card, Input, Badge, ProgressBar, DataTable, and the SyntaxureLogo with holographic gradient |
-| `packages/db`                   | **@syntaxure-labs/db**      | Unified database clients for Firebase and Azure Cosmos DB with Zod validation schemas                                              |
-| `packages/prism-context-engine` | **prism-context-engine**    | Context governance engine for LLMs — rule storage, validation, and retrieval for AI coding assistants                              |
-| `packages/eslint-config`        | **@repo/eslint-config**     | Shared ESLint configuration across all workspaces                                                                                  |
-| `packages/typescript-config`    | **@repo/typescript-config** | Shared TypeScript compiler configuration                                                                                           |
+| Package                         | Name                         | Description                                                                                                                        |
+| ------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/ui`                   | **@syntaxure/ui**            | Ghost Glow component library — Button, Card, Input, Badge, ProgressBar, DataTable, and the SyntaxureLogo with holographic gradient |
+| `packages/db`                   | **@syntaxure-labs/db**       | Prisma schema + Postgres/Supabase clients (incl. Prism) with Zod validation schemas                                                |
+| `packages/supabase`             | **@syntaxure/supabase**      | Supabase SSR client with server, browser, admin, and middleware exports for Next.js 16                                             |
+| `packages/redis`                | **@syntaxure/redis**         | Upstash Redis integration with rate-limiting and caching utilities                                                                 |
+| `packages/sentry-config`        | **@syntaxure/sentry-config** | Sentry error monitoring configuration for Next.js applications                                                                     |
+| `packages/prism-context-engine` | **prism-context-engine**     | Context governance engine for LLMs — rule storage, validation, and retrieval for AI coding assistants                              |
+| `packages/eslint-config`        | **@repo/eslint-config**      | Shared ESLint configuration across all workspaces                                                                                  |
+| `packages/typescript-config`    | **@repo/typescript-config**  | Shared TypeScript compiler configuration                                                                                           |
 
 ```tsx
 import { Button, Card, Badge } from "@syntaxure/ui";
@@ -276,6 +296,7 @@ check-types → lint → test → build
 | Prism Docs      | 3002 | http://localhost:3002 |
 | Prism Admin     | 3004 | http://localhost:3004 |
 | Prism Manage    | 3007 | http://localhost:3007 |
+| Syntaxure PM    | 3008 | http://localhost:3008 |
 | Prism Analytics | 8000 | http://localhost:8000 |
 
 ---
@@ -284,7 +305,7 @@ check-types → lint → test → build
 
 <div align="center">
 
-**MIT License** · Copyright (c) 2025 Syntaxure Labs
+**MIT License** · Copyright (c) 2026 Syntaxure Labs
 
 <br />
 

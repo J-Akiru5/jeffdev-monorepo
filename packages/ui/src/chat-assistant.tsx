@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { usePathname } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -14,7 +15,7 @@ interface Message {
   timestamp: Date;
 }
 
-interface ChatAssistantProps {
+export interface ChatAssistantProps {
   className?: string;
   apiEndpoint: string;
   title?: string;
@@ -38,6 +39,12 @@ export function ChatAssistant({
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const pathname = usePathname();
+
+  // Close chat automatically on route change
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
 
   // Auto-scroll to bottom when new messages arrive
   const scrollToBottom = useCallback(() => {
@@ -54,6 +61,43 @@ export function ChatAssistant({
       inputRef.current.focus();
     }
   }, [isOpen]);
+
+  // Listen for custom 'open-chat' events from other components
+  useEffect(() => {
+    const handleOpenChat = (e: Event) => {
+      const customEvent = e as CustomEvent<{ message?: string }>;
+      setIsOpen(true);
+      if (customEvent.detail?.message) {
+        setMessages((prev) => {
+          // Prevent duplicate messages if fired multiple times
+          if (prev.length > 0 && prev[prev.length - 1]?.content === customEvent.detail?.message) {
+            return prev;
+          }
+          return [
+            ...prev,
+            {
+              id: `assistant-event-${Date.now()}`,
+              role: "assistant",
+              content: customEvent.detail?.message ?? '',
+              timestamp: new Date(),
+            },
+          ];
+        });
+      }
+    };
+
+    const handleCloseChat = () => {
+      setIsOpen(false);
+    };
+
+    window.addEventListener("open-chat", handleOpenChat);
+    window.addEventListener("close-chat", handleCloseChat);
+    
+    return () => {
+      window.removeEventListener("open-chat", handleOpenChat);
+      window.removeEventListener("close-chat", handleCloseChat);
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
