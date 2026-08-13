@@ -1,7 +1,7 @@
 /**
  * Rate limiting for Prism Engine API routes.
  *
- * Delegates to the shared Upstash-backed rate limiter in @syntaxure/ui.
+ * Delegates to the shared Upstash-backed rate limiter in @syntaxure/redis.
  * Supports tier-based limits: free, default, strict, pro, team, enterprise.
  */
 

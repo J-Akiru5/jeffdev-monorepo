@@ -26,19 +26,30 @@ function getRedis(): Redis {
 
 /**
  * Retrieve a cached string value by key.
- * Returns null if the key does not exist or has expired.
+ * Returns null if the key does not exist, has expired, or Redis is
+ * unconfigured/unreachable — a cache miss must never be fatal.
  */
 export async function getCachedResponse(key: string): Promise<string | null> {
-  return await getRedis().get<string>(key);
+  try {
+    return await getRedis().get<string>(key);
+  } catch (error) {
+    console.error(`[@syntaxure/redis] getCachedResponse failed for key="${key}" — treating as cache miss:`, error);
+    return null;
+  }
 }
 
 /**
  * Store a string value with an optional TTL (default: 300 seconds / 5 minutes).
+ * No-ops (instead of throwing) if Redis is unconfigured/unreachable.
  */
 export async function cacheResponse(
   key: string,
   value: string,
   ttlSeconds: number = 300,
 ): Promise<void> {
-  await getRedis().set(key, value, { ex: ttlSeconds });
+  try {
+    await getRedis().set(key, value, { ex: ttlSeconds });
+  } catch (error) {
+    console.error(`[@syntaxure/redis] cacheResponse failed for key="${key}" — skipping cache write:`, error);
+  }
 }

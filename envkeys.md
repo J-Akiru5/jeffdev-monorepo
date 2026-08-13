@@ -111,29 +111,31 @@
 
 #### Private
 
-| Variable                            | Description                                                               | Source             |
-| ----------------------------------- | ------------------------------------------------------------------------- | ------------------ |
-| `SUPABASE_SERVICE_ROLE_KEY`         | 🔒 Supabase service role key (also used for `prism_*` Postgres tables)    | Supabase Dashboard |
-| `GEMINI_API_KEY`                    | 🔒 Gemini AI API key                                                      | Google AI Studio   |
-| `AZURE_OPENAI_ENDPOINT`             | 🔒 Azure OpenAI endpoint                                                  | Azure Portal       |
-| `AZURE_OPENAI_API_KEY`              | 🔒 Azure OpenAI API key                                                   | Azure Portal       |
-| `AZURE_OPENAI_DEPLOYMENT_NAME`      | Model deployment (default: `gpt-4o-mini`)                                 | Azure Portal       |
-| `AZURE_OPENAI_EMBEDDING_DEPLOYMENT` | Embedding model (default: `text-embedding-3-small`)                       | Azure Portal       |
-| `SENTRY_DSN`                        | 🔒 Sentry secret DSN                                                      | Sentry Dashboard   |
-| `SENTRY_ORG`                        | Sentry organization: `jeffdev`                                            | Sentry Dashboard   |
-| `SENTRY_PROJECT`                    | Sentry project: `prism-engine`                                            | Sentry Dashboard   |
-| `SENTRY_AUTH_TOKEN`                 | 🔒 Sentry auth token (required for source map uploads)                    | Sentry Dashboard   |
-| `RESEND_API_KEY`                    | 🔒 Transactional email API key                                            | Resend Dashboard   |
-| `PAYPAL_CLIENT_ID`                  | PayPal client ID                                                          | PayPal Developer   |
-| `PAYPAL_CLIENT_SECRET`              | 🔒 PayPal client secret                                                   | PayPal Developer   |
-| `PAYPAL_WEBHOOK_ID`                 | 🔒 PayPal webhook verification ID                                         | PayPal Developer   |
-| `PAYPAL_PLAN_PRO_MONTHLY`           | PayPal plan ID: pro-monthly                                               | PayPal Developer   |
-| `PAYPAL_PLAN_PRO_ANNUAL`            | PayPal plan ID: pro-annual                                                | PayPal Developer   |
-| `PAYPAL_PLAN_TEAM_MONTHLY`          | PayPal plan ID: team-monthly                                              | PayPal Developer   |
-| `PAYPAL_PLAN_TEAM_ANNUAL`           | PayPal plan ID: team-annual                                               | PayPal Developer   |
-| `PAYPAL_MODE`                       | `live` or `sandbox`                                                       | You set            |
-| `N8N_WEBHOOK_URL`                   | Optional — n8n automation endpoint                                        | n8n                |
-| `PRISM_API_KEY`                     | 🔒 Internal API key — **must match** `prism-mcp-server`'s `PRISM_API_KEY` | You generate       |
+| Variable                            | Description                                                                                                                                   | Source             |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `SUPABASE_SERVICE_ROLE_KEY`         | 🔒 Supabase service role key (also used for `prism_*` Postgres tables)                                                                        | Supabase Dashboard |
+| `UPSTASH_REDIS_REST_URL`            | 🔒 Upstash Redis REST URL — used for API rate limiting + response caching. Optional: rate limiting fails open (no burst throttling) if unset. | Upstash Dashboard  |
+| `UPSTASH_REDIS_REST_TOKEN`          | 🔒 Upstash Redis REST token                                                                                                                   | Upstash Dashboard  |
+| `GEMINI_API_KEY`                    | 🔒 Gemini AI API key                                                                                                                          | Google AI Studio   |
+| `AZURE_OPENAI_ENDPOINT`             | 🔒 Azure OpenAI endpoint                                                                                                                      | Azure Portal       |
+| `AZURE_OPENAI_API_KEY`              | 🔒 Azure OpenAI API key                                                                                                                       | Azure Portal       |
+| `AZURE_OPENAI_DEPLOYMENT_NAME`      | Model deployment (default: `gpt-4o-mini`)                                                                                                     | Azure Portal       |
+| `AZURE_OPENAI_EMBEDDING_DEPLOYMENT` | Embedding model (default: `text-embedding-3-small`)                                                                                           | Azure Portal       |
+| `SENTRY_DSN`                        | 🔒 Sentry secret DSN                                                                                                                          | Sentry Dashboard   |
+| `SENTRY_ORG`                        | Sentry organization: `jeffdev`                                                                                                                | Sentry Dashboard   |
+| `SENTRY_PROJECT`                    | Sentry project: `prism-engine`                                                                                                                | Sentry Dashboard   |
+| `SENTRY_AUTH_TOKEN`                 | 🔒 Sentry auth token (required for source map uploads)                                                                                        | Sentry Dashboard   |
+| `RESEND_API_KEY`                    | 🔒 Transactional email API key                                                                                                                | Resend Dashboard   |
+| `PAYPAL_CLIENT_ID`                  | PayPal client ID                                                                                                                              | PayPal Developer   |
+| `PAYPAL_CLIENT_SECRET`              | 🔒 PayPal client secret                                                                                                                       | PayPal Developer   |
+| `PAYPAL_WEBHOOK_ID`                 | 🔒 PayPal webhook verification ID                                                                                                             | PayPal Developer   |
+| `PAYPAL_PLAN_PRO_MONTHLY`           | PayPal plan ID: pro-monthly                                                                                                                   | PayPal Developer   |
+| `PAYPAL_PLAN_PRO_ANNUAL`            | PayPal plan ID: pro-annual                                                                                                                    | PayPal Developer   |
+| `PAYPAL_PLAN_TEAM_MONTHLY`          | PayPal plan ID: team-monthly                                                                                                                  | PayPal Developer   |
+| `PAYPAL_PLAN_TEAM_ANNUAL`           | PayPal plan ID: team-annual                                                                                                                   | PayPal Developer   |
+| `PAYPAL_MODE`                       | `live` or `sandbox`                                                                                                                           | You set            |
+| `N8N_WEBHOOK_URL`                   | Optional — n8n automation endpoint                                                                                                            | n8n                |
+| `PRISM_API_KEY`                     | 🔒 Internal API key — **must match** `prism-mcp-server`'s `PRISM_API_KEY`                                                                     | You generate       |
 
 ### Dependencies (key)
 

@@ -2,8 +2,8 @@
 export {
   checkRateLimit,
   getRateLimitHeaders,
-} from "./rate-limit";
-export type { RateLimitTier, RateLimitResult } from "./rate-limit";
+} from "./rate-limit.js";
+export type { RateLimitTier, RateLimitResult } from "./rate-limit.js";
 
 // Response caching (server-only — Upstash Redis)
-export { getCachedResponse, cacheResponse } from "./cache";
+export { getCachedResponse, cacheResponse } from "./cache.js";

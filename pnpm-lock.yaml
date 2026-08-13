@@ -920,6 +920,12 @@ importers:
       "@repo/typescript-config":
         specifier: workspace:*
         version: link:../typescript-config
+      "@types/node":
+        specifier: ^22.15.3
+        version: 22.19.7
+      vitest:
+        specifier: ^4.0.16
+        version: 4.0.17(@opentelemetry/api@1.9.1)(@types/node@22.19.7)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.9.0)
 
   packages/sentry-config:
     dependencies:

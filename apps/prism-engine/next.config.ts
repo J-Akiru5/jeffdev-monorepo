@@ -50,8 +50,6 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   output: process.platform === "win32" ? undefined : "standalone",
 
-  serverExternalPackages: ["mongodb", "gremlin"],
-
   images: {
     remotePatterns: [
       // TODO: Add Supabase Storage URL pattern when images are hosted there
