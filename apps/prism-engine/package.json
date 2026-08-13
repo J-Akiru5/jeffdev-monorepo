@@ -14,7 +14,9 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "seed:keandrew": "dotenv -e .env.local -- tsx scripts/seed-keandrew.ts",
-    "seed:founder": "dotenv -e .env.local -- tsx scripts/seed-founder.ts"
+    "seed:founder": "dotenv -e .env.local -- tsx scripts/seed-founder.ts",
+    "e2e:create-test-user": "dotenv -e .env.local -- tsx scripts/create-e2e-test-user.ts",
+    "e2e:delete-test-user": "dotenv -e .env.local -- tsx scripts/create-e2e-test-user.ts --delete"
   },
   "dependencies": {
     "@codesandbox/sandpack-react": "^2.20.0",

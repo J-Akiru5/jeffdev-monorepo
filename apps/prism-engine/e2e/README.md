@@ -1,5 +1,10 @@
 # prism-engine E2E tests
 
+> Handing this off to another AI agent (OpenCode, DeepSeek, etc.) to run?
+> Point it at [`AGENT_RUNBOOK.md`](./AGENT_RUNBOOK.md) instead of this file —
+> it's the same information as a literal step-by-step with verification
+> checkpoints, written for something following it mechanically.
+
 These run against a **real environment** — real Supabase Auth, real
 `prism_*` Postgres tables. There's no mock/stub backend here; the point of
 `prism-migration-smoke.spec.ts` is proving the Cosmos DB → Postgres
@@ -14,12 +19,23 @@ works against a live database, not a fixture.
    pnpm --filter prism-engine exec playwright install chromium
    ```
 
-2. Create a **disposable test account** in whatever Supabase project you're
-   pointing at — don't use your personal/founder account, these tests create
-   and delete real rows under it. Easiest way: sign up normally through
-   `/sign-up` in the environment you're testing, or use
-   `supabase.auth.admin.createUser()` the same way `scripts/seed-founder.ts`
-   does.
+2. Provision a **disposable test account** — don't use your personal/founder
+   account, these tests create and delete real rows under it. There's a
+   script for this that also grants the `pro` tier the MCP step needs
+   (a free-tier account 403s there regardless of whether the migration
+   works):
+
+   ```bash
+   dotenv -e .env.local -- pnpm --filter prism-engine run e2e:create-test-user
+   ```
+
+   This writes a gitignored `apps/prism-engine/.env.e2e.local` with the
+   generated `E2E_TEST_EMAIL`/`E2E_TEST_PASSWORD` — load it alongside your
+   own env in step 3. Tear the account down when you're done:
+
+   ```bash
+   dotenv -e .env.local -- pnpm --filter prism-engine run e2e:delete-test-user
+   ```
 
 3. Set environment variables for the run:
 
@@ -44,8 +60,12 @@ works against a live database, not a fixture.
 ## Run
 
 ```bash
-pnpm --filter prism-engine run test:e2e
+dotenv -e .env.e2e.local -e .env.local -- pnpm --filter prism-engine run test:e2e
 ```
+
+(`-e .env.e2e.local` picks up the credentials `e2e:create-test-user` just
+generated; omit it if you set `E2E_TEST_EMAIL`/`E2E_TEST_PASSWORD` some
+other way.)
 
 Or a single file:
 
