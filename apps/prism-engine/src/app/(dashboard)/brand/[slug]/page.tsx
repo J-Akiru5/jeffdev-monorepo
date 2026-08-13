@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { ArrowLeft, Download, Settings } from "lucide-react";
 import type { BrandDoc } from "@/lib/types";
 
@@ -27,8 +27,16 @@ export default async function BrandPage({ params }: Props) {
   const userId = user.id;
 
   // Fetch brand
-  const brandsCollection = await getCollection("brands");
-  const brand = (await brandsCollection.findOne({ userId, slug })) as BrandDoc | null;
+  const db = getPrismDb();
+  const { data } = await db
+    .from("prism_brands")
+    .select(
+      "_id:id, userId:user_id, slug, companyName:company_name, tagline, industry, colors, typography, voice, imagery, spacing, createdAt:created_at, updatedAt:updated_at",
+    )
+    .eq("user_id", userId)
+    .eq("slug", slug)
+    .maybeSingle();
+  const brand = data as unknown as BrandDoc | null;
 
   if (!brand) {
     notFound();

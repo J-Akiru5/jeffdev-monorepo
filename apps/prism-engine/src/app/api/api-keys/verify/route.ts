@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
 import crypto from "crypto";
 
@@ -16,11 +16,13 @@ import crypto from "crypto";
  */
 async function getUserTier(userId: string): Promise<SubscriptionTier> {
   try {
-    const subscriptionsCollection = await getCollection("subscriptions");
-    const subscription = await subscriptionsCollection.findOne({
-      userId,
-      status: { $in: ["active", "trialing"] },
-    });
+    const db = getPrismDb();
+    const { data: subscription } = await db
+      .from("prism_subscriptions")
+      .select("tier")
+      .eq("user_id", userId)
+      .in("status", ["active", "trialing"])
+      .maybeSingle();
 
     if (!subscription) {
       return "free";
@@ -55,13 +57,15 @@ export async function POST(request: NextRequest) {
     // Hash the provided key to compare with stored hash
     const keyHash = crypto.createHash("sha256").update(apiKey).digest("hex");
 
-    const apiKeysCollection = await getCollection("apiKeys");
+    const db = getPrismDb();
 
     // Find key by hash
-    const keyDoc = await apiKeysCollection.findOne({
-      keyHash,
-      revokedAt: { $exists: false },
-    });
+    const { data: keyDoc } = await db
+      .from("prism_api_keys")
+      .select("userId:user_id, name")
+      .eq("key_hash", keyHash)
+      .is("revoked_at", null)
+      .maybeSingle();
 
     if (!keyDoc) {
       return NextResponse.json(
@@ -71,10 +75,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Update last used timestamp
-    await apiKeysCollection.updateOne(
-      { keyHash },
-      { $set: { lastUsedAt: new Date().toISOString() } },
-    );
+    await db
+      .from("prism_api_keys")
+      .update({ last_used_at: new Date().toISOString() })
+      .eq("key_hash", keyHash);
 
     // Get user's tier
     const tier = await getUserTier(keyDoc.userId);

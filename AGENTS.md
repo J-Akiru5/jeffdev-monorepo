@@ -22,21 +22,21 @@ CI order: `check-types` → `lint` → `test` → `build`. Run in that sequence 
 
 ## Apps & Ports
 
-| App                     | Port | Stack                               |
-| ----------------------- | ---- | ----------------------------------- |
-| `apps/prism-docs`       | 3002 | Nextra 4                            |
-| `apps/prism-admin`      | 3004 | Next.js 16 + Supabase + Clerk       |
-| `apps/prism-engine`     | 3001 | Next.js 16 + Supabase + Cosmos DB   |
-| `apps/prism-manage`     | 3007 | Next.js 16 + Supabase               |
-| `apps/prism-mcp-server` | —    | Node.js + MCP SDK (stdio transport) |
-| `apps/syntaxure-labs`   | 3000 | Next.js 16 + Supabase               |
-| `apps/prism-analytics`  | 8000 | Python FastAPI + Supabase + pandas  |
-| `apps/syntaxure-pm`     | 3008 | Next.js 16 + Supabase (docs + PM)   |
+| App                     | Port | Stack                                   |
+| ----------------------- | ---- | --------------------------------------- |
+| `apps/prism-docs`       | 3002 | Nextra 4                                |
+| `apps/prism-admin`      | 3004 | Next.js 16 + Supabase + Clerk           |
+| `apps/prism-engine`     | 3001 | Next.js 16 + Supabase (Auth + Postgres) |
+| `apps/prism-manage`     | 3007 | Next.js 16 + Supabase                   |
+| `apps/prism-mcp-server` | —    | Node.js + MCP SDK (stdio transport)     |
+| `apps/syntaxure-labs`   | 3000 | Next.js 16 + Supabase                   |
+| `apps/prism-analytics`  | 8000 | Python FastAPI + Supabase + pandas      |
+| `apps/syntaxure-pm`     | 3008 | Next.js 16 + Supabase (docs + PM)       |
 
 ## Architecture Rules
 
 - **No cross-app imports.** Shared code goes in `packages/` (`@syntaxure/ui`, `@syntaxure-labs/db`, `@repo/eslint-config`, `@repo/typescript-config`, `prism-context-engine`).
-- DB clients are singletons via `@syntaxure-labs/db` — use `getPrismContainer()` (Cosmos) or Firestore exports.
+- DB clients are singletons via `@syntaxure-labs/db` — use `getPrismDb()` (Prism's Postgres tables, `@syntaxure-labs/db/prism`) or the shared Prisma client (`@syntaxure-labs/db/prisma`).
 - UI components live in `packages/ui/src/` — check there before creating new ones in apps.
 - `@repo/typescript-config` and `@repo/eslint-config` are shared; apps extend them.
 
@@ -52,7 +52,7 @@ CI order: `check-types` → `lint` → `test` → `build`. Run in that sequence 
 
 - **Unit tests:** Vitest. **E2E:** Playwright.
 - MCP server must be built before CLI tests: `pnpm --filter prism-mcp-server run build`.
-- DB integration tests skip if `MONGODB_URI` not set (`.skipIf` pattern).
+- DB integration tests skip if `NEXT_PUBLIC_SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` not set (`.skipIf` pattern).
 - Focused test: `pnpm --filter <package> run test` (e.g., `pnpm --filter prism-mcp-server run test`).
 
 ## Release
@@ -81,6 +81,6 @@ CI order: `check-types` → `lint` → `test` → `build`. Run in that sequence 
 
 - Secrets via **Doppler**: `doppler run -- <command>`. Never commit `.env` files.
 - Tailwind CSS v4, PostCSS config in each app.
-- Docker Compose at root (`docker-compose.yml`) for local Cosmos DB (Mongo 7) + all apps.
+- Docker Compose at root (`docker-compose.yml`) builds/runs all apps; there's no local Postgres container — every app points at the cloud Supabase project via env vars. (Prism moved off a local Cosmos/Mongo container onto the same Supabase project as everything else — see `PRISM_MIGRATION.md`.)
 - `syncpack` manages dependency versions across workspaces: `npx syncpack list-mismatches` / `npx syncpack fix-mismatches`.
 - **Port assignments:** Labs=3000, Engine=3001, Docs=3002, Admin=3004, Manage=3007, MCP=3003, Analytics=8000. Each app must set `PORT=<n>` in its Doppler config or `package.json` dev script.

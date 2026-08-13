@@ -5,7 +5,7 @@
  *
  * This server implements the Model Context Protocol (MCP) to provide
  * architectural rules and context to AI coding assistants. It connects
- * to Azure Cosmos DB (MongoDB API) to fetch real rules.
+ * to Postgres (Supabase) to fetch real rules.
  *
  * @example
  * # Build and run
@@ -30,8 +30,7 @@ import {
   ReadResourceRequestSchema,
   InitializeRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { ObjectId, type Document } from "@syntaxure-labs/db/cosmos";
-import { getCollection, closeConnection } from "@syntaxure-labs/db/cosmos";
+import { getPrismDb, isValidId } from "@syntaxure-labs/db/prism";
 import { handlePrismScan } from "./tools/prism-scan.js";
 import { handleGetSkill } from "./tools/get-skill.js";
 import { handleListSkills } from "./tools/list-skills.js";
@@ -156,21 +155,11 @@ async function validateApiKey(): Promise<void> {
 }
 
 // =============================================================================
-// DATABASE CONNECTION (via @syntaxure-labs/db singleton)
+// DATABASE CONNECTION (via @syntaxure-labs/db/prism — Postgres/Supabase)
 // =============================================================================
-
-let _rulesCollection: Awaited<ReturnType<typeof getCollection>> | null = null;
-
-/**
- * Get the rules collection from the shared DB connection.
- * Cached after first successful fetch to avoid repeated singleton resolution.
- * @syntaxure-labs/db manages the singleton MongoClient with reconnection.
- */
-async function getRulesCollection() {
-  if (_rulesCollection) return _rulesCollection;
-  _rulesCollection = await getCollection("rules");
-  return _rulesCollection;
-}
+// getPrismDb() returns a service-role Supabase client; @syntaxure/supabase's
+// createAdmin() already caches the client as a module-level singleton, so
+// there's no need for a local cache here the way the Mongo client needed one.
 
 // =============================================================================
 // MCP SERVER
@@ -236,15 +225,16 @@ server.setRequestHandler(InitializeRequestSchema, async (request) => {
 
 server.setRequestHandler(ListResourcesRequestSchema, async () => {
   try {
-    const rules = await getRulesCollection();
-    const allRules = await rules
-      .find({ isPublic: true })
-      .project({ name: 1, tags: 1, category: 1 })
-      .toArray();
+    // Note: the Cosmos-era query here filtered on `rules.isPublic`, a field
+    // no insert path ever set (rule visibility is a `ruleSets` concept, not
+    // a `rules` one) — this always returned zero resources in production.
+    // prism_rules has no is_public column for the same reason; preserved
+    // as an always-empty result rather than inventing a new column.
+    const allRules: { id: string; name: string; category: string; tags: string[] }[] = [];
 
     return {
-      resources: allRules.map((r: Document) => ({
-        uri: `prism://rules/${r._id.toString()}`,
+      resources: allRules.map((r) => ({
+        uri: `prism://rules/${r.id}`,
         name: r.name,
         mimeType: "text/markdown",
         description: `[${r.category}] Tags: ${(r.tags || []).join(", ")}`,
@@ -265,13 +255,25 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
   const id = uri.replace("prism://rules/", "");
 
   try {
-    const rules = await getRulesCollection();
+    const db = getPrismDb();
+    const ruleSelect = "name, category, priority, tags, content";
 
-    let rule;
-    try {
-      rule = await rules.findOne({ _id: new ObjectId(id) });
-    } catch {
-      rule = await rules.findOne({ name: id });
+    let rule: { name: string; category: string; priority: number; tags: string[]; content: string } | null = null;
+    if (isValidId(id)) {
+      const { data } = await db
+        .from("prism_rules")
+        .select(ruleSelect)
+        .eq("id", id)
+        .maybeSingle();
+      rule = data;
+    }
+    if (!rule) {
+      const { data } = await db
+        .from("prism_rules")
+        .select(ruleSelect)
+        .eq("name", id)
+        .maybeSingle();
+      rule = data;
     }
 
     if (!rule) {
@@ -406,7 +408,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             projectId: {
               type: "string",
               description:
-                "Optional Prism project ID to sync results to Cosmos DB",
+                "Optional Prism project ID to sync results to the database",
             },
             model: {
               type: "string",
@@ -884,16 +886,23 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         } else {
           // Fetch from database with offline fallback
           try {
-            const rules = await getRulesCollection();
-            const query: Record<string, unknown> = { isActive: true };
-            if (category) query.category = category;
-            if (tag) query.tags = tag;
-            if (projectId) query.projectId = projectId;
+            const db = getPrismDb();
+            let ruleQuery = db
+              .from("prism_rules")
+              .select(
+                "_id:id, name, content, priority, category, tags, updatedAt:updated_at, skillsContent:skills_content",
+              )
+              .eq("is_active", true);
+            if (category) ruleQuery = ruleQuery.eq("category", category);
+            if (tag) ruleQuery = ruleQuery.contains("tags", [tag]);
+            if (projectId) ruleQuery = ruleQuery.eq("project_id", projectId);
 
-            foundRules = (await rules
-              .find(query)
-              .sort({ priority: 1 })
-              .toArray()) as unknown as RuleDoc[];
+            const { data, error: queryError } = await ruleQuery.order(
+              "priority",
+              { ascending: true },
+            );
+            if (queryError) throw queryError;
+            foundRules = (data ?? []) as unknown as RuleDoc[];
 
             // Cache rules for next call
             setCached(rulesCacheKey, foundRules);
@@ -1049,17 +1058,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const violations: string[] = [];
 
         // Fetch pattern-based rules from database
-        const rulesDb = await getRulesCollection();
-        const query: Record<string, unknown> = {
-          isActive: true,
-          pattern: { $exists: true, $ne: null },
-        };
-        if (category) query.category = category;
+        const db = getPrismDb();
+        let patternQuery = db
+          .from("prism_rules")
+          .select("name, category, content, pattern, severity, priority")
+          .eq("is_active", true)
+          .not("pattern", "is", null);
+        if (category) patternQuery = patternQuery.eq("category", category);
 
-        const patternRules = await rulesDb
-          .find(query)
-          .sort({ priority: 1 })
-          .toArray();
+        const { data: patternRulesData } = await patternQuery.order(
+          "priority",
+          { ascending: true },
+        );
+        const patternRules = patternRulesData ?? [];
 
         // Check code against each pattern rule
         for (const rule of patternRules) {
@@ -1243,9 +1254,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               `**Server:** ${SERVER_NAME} v${SERVER_VERSION}`,
               `**Project:** ${currentProject ? `${currentProject.name} (${currentProject.framework})` : "Not detected"}`,
               `**Authenticated:** ${authenticatedUserId ? `Yes (${authenticatedTier})` : "No"}`,
-              verbose ? `**Database:** ${process.env.MONGODB_URI ? "Configured" : "Not configured"}` : "",
+              verbose ? `**Database:** ${process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY ? "Configured" : "Not configured"}` : "",
               verbose ? `**AI Provider:** ${process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY ? "Gemini" : process.env.AZURE_OPENAI_ENDPOINT ? "Azure OpenAI" : "Not configured"}` : "",
-              verbose ? `**Gremlin Ranking:** ${process.env.USE_GREMLIN_RANKING === "true" ? "Enabled" : "Disabled"}` : "",
+              verbose ? `**Rule Graph Ranking:** ${process.env.USE_GREMLIN_RANKING === "true" ? "Enabled" : "Disabled"}` : "",
             ].filter(Boolean).join("\n"),
           }],
         };
@@ -1317,9 +1328,9 @@ async function main() {
   );
 
   // Startup env checks — warn early about missing config
-  if (!process.env.MONGODB_URI) {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     console.error(
-      `[${SERVER_NAME}] ⚠️  MONGODB_URI not set. Database tools will fail until it is configured.`,
+      `[${SERVER_NAME}] ⚠️  NEXT_PUBLIC_SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY not set. Database tools will fail until they are configured.`,
     );
   }
   const hasGemini = process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
@@ -1356,9 +1367,11 @@ async function main() {
 }
 
 // Graceful shutdown
+// Note: the Postgres/Supabase client is stateless HTTP (PostgREST), unlike
+// the old Mongo driver's persistent TCP connection — there's no connection
+// to explicitly close on shutdown anymore.
 async function shutdown(signal: string) {
   console.error(`[${SERVER_NAME}] Received ${signal}, shutting down...`);
-  await closeConnection().catch(() => {});
   process.exit(0);
 }
 
@@ -1367,6 +1380,5 @@ process.on("SIGTERM", () => shutdown("SIGTERM"));
 
 main().catch(async (error) => {
   console.error(`[${SERVER_NAME}] Fatal error:`, error);
-  await closeConnection().catch(() => {});
   process.exit(1);
 });

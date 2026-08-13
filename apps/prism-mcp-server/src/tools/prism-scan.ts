@@ -101,17 +101,17 @@ export async function handlePrismScan(
     );
   }
 
-  // Sync to Cosmos if projectId provided
+  // Sync to the database if projectId provided
   if (projectId && userId) {
     try {
-      const { saveRulesToCosmos } = await import("../lib/rule-generator.js");
-      await saveRulesToCosmos(
+      const { saveRulesToDb } = await import("../lib/rule-generator.js");
+      await saveRulesToDb(
         generated.rulesMd,
         generated.skillsMd,
         projectId,
         userId,
       );
-      steps.push(`☁️  Synced to Cosmos DB (project: ${projectId})`);
+      steps.push(`☁️  Synced to database (project: ${projectId})`);
     } catch (error) {
       steps.push(
         `⚠️  Cloud sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,

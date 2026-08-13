@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCollection } from "@syntaxure-labs/db/cosmos";
-import { ObjectId } from "mongodb";
+import { getPrismDb, isValidId } from "@syntaxure-labs/db/prism";
 import { authenticate, errorResponse } from "@/lib/api-auth";
 
 const FORMATS = [
@@ -175,18 +174,22 @@ export async function GET(
   if (auth instanceof Response) return auth;
 
   const { id } = await params;
-  if (!ObjectId.isValid(id)) return errorResponse("Invalid brand ID", 400);
+  if (!isValidId(id)) return errorResponse("Invalid brand ID", 400);
 
   const { searchParams } = new URL(request.url);
   const format = searchParams.get("format") || "cursor";
   if (!FORMATS.includes(format as (typeof FORMATS)[number]))
     return errorResponse("Invalid format", 400);
 
-  const brands = await getCollection("brands");
-  const brand = await brands.findOne({
-    _id: new ObjectId(id),
-    userId: auth.userId,
-  });
+  const db = getPrismDb();
+  const { data: brand } = await db
+    .from("prism_brands")
+    .select(
+      "companyName:company_name, tagline, industry, colors, typography, voice, spacing",
+    )
+    .eq("id", id)
+    .eq("user_id", auth.userId)
+    .maybeSingle();
   if (!brand) return errorResponse("Brand not found", 404);
 
   const doc = brand as unknown as BrandDoc;

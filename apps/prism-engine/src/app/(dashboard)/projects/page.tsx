@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Plus, FolderKanban } from "lucide-react";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { createClient } from "@/lib/supabase/server";
 import type { ProjectDoc } from "@/lib/types";
 
@@ -20,13 +20,17 @@ export default async function ProjectsPage() {
 
   const userId = user.id;
 
-  // Fetch user's projects from Cosmos DB
-  const projectsCollection = await getCollection("projects");
-  const projects = (await projectsCollection
-    .find({ userId })
-    .sort({ createdAt: -1 })
-    .limit(20)
-    .toArray()) as unknown as ProjectDoc[];
+  // Fetch user's projects from Postgres
+  const db = getPrismDb();
+  const { data } = await db
+    .from("prism_projects")
+    .select(
+      "_id:id, userId:user_id, name, slug, designSystem:design_system, stack, visibility, createdAt:created_at, updatedAt:updated_at",
+    )
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(20);
+  const projects = (data ?? []) as unknown as ProjectDoc[];
 
   return (
     <div className="space-y-8">

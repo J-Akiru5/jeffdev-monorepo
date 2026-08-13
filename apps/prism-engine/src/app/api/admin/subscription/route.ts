@@ -10,7 +10,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db/cosmos";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { z } from "zod";
 
 async function requireAdmin(user: unknown): Promise<void> {
@@ -40,11 +40,15 @@ export async function GET(request: NextRequest) {
 
   try {
     await requireAdmin(user);
-    const subscriptions = await getCollection("subscriptions");
+    const db = getPrismDb();
     const targetUserId = new URL(request.url).searchParams.get("userId");
 
     if (targetUserId) {
-      const sub = await subscriptions.findOne({ userId: targetUserId });
+      const { data: sub } = await db
+        .from("prism_subscriptions")
+        .select("tier, status, createdAt:created_at, updatedAt:updated_at")
+        .eq("user_id", targetUserId)
+        .maybeSingle();
       if (!sub) {
         return NextResponse.json({
           userId: targetUserId,
@@ -61,14 +65,16 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const allSubs = await subscriptions
-      .find({})
-      .sort({ updatedAt: -1 })
-      .limit(100)
-      .toArray();
+    const { data: allSubs } = await db
+      .from("prism_subscriptions")
+      .select(
+        "_id:id, userId:user_id, tier, status, createdAt:created_at, updatedAt:updated_at",
+      )
+      .order("updated_at", { ascending: false })
+      .limit(100);
 
     return NextResponse.json({
-      subscriptions: allSubs.map((sub) => ({
+      subscriptions: (allSubs ?? []).map((sub) => ({
         id: sub._id.toString(),
         userId: sub.userId,
         tier: sub.tier,
@@ -76,7 +82,7 @@ export async function GET(request: NextRequest) {
         createdAt: sub.createdAt,
         updatedAt: sub.updatedAt,
       })),
-      count: allSubs.length,
+      count: (allSubs ?? []).length,
     });
   } catch (error) {
     if (error instanceof Error && error.message === "Forbidden") {
@@ -116,28 +122,35 @@ export async function PATCH(request: NextRequest) {
     }
 
     const { userId, tier } = parsed.data;
-    const subscriptions = await getCollection("subscriptions");
+    const db = getPrismDb();
     const now = new Date();
 
-    const result = await subscriptions.updateOne(
-      { userId },
+    const { data: existing } = await db
+      .from("prism_subscriptions")
+      .select("id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    const { error } = await db.from("prism_subscriptions").upsert(
       {
-        $set: {
-          tier,
-          status: "active",
-          updatedAt: now,
-          modifiedBy: adminUserId,
-        },
-        $setOnInsert: {
-          userId,
-          createdAt: now,
-          paypalSubscriptionId: null,
-          currentPeriodStart: now,
-          currentPeriodEnd: new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000),
-        },
+        user_id: userId,
+        tier,
+        status: "active",
+        updated_at: now.toISOString(),
+        modified_by: adminUserId,
+        ...(existing
+          ? {}
+          : {
+              current_period_start: now.toISOString(),
+              current_period_end: new Date(
+                now.getTime() + 365 * 24 * 60 * 60 * 1000,
+              ).toISOString(),
+            }),
       },
-      { upsert: true },
+      { onConflict: "user_id" },
     );
+
+    if (error) throw error;
 
     console.log(`[admin/subscription] ${adminUserId} set ${userId} → ${tier}`);
     return NextResponse.json({
@@ -145,7 +158,7 @@ export async function PATCH(request: NextRequest) {
       userId,
       tier,
       message: `Updated to ${tier}`,
-      upserted: result.upsertedCount > 0,
+      upserted: !existing,
     });
   } catch (error) {
     if (error instanceof Error && error.message === "Forbidden") {

@@ -9,7 +9,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
@@ -34,24 +34,19 @@ export async function GET(request: NextRequest) {
   // DEV MODE: Directly activate subscription (no PayPal required)
   if (isDev) {
     try {
-      const subscriptionsCollection = await getCollection("subscriptions");
+      const db = getPrismDb();
 
       // Upsert the subscription
-      await subscriptionsCollection.updateOne(
-        { userId },
+      const { error } = await db.from("prism_subscriptions").upsert(
         {
-          $set: {
-            userId,
-            tier,
-            status: "active",
-            updatedAt: new Date().toISOString(),
-          },
-          $setOnInsert: {
-            createdAt: new Date().toISOString(),
-          },
+          user_id: userId,
+          tier,
+          status: "active",
+          updated_at: new Date().toISOString(),
         },
-        { upsert: true },
+        { onConflict: "user_id" },
       );
+      if (error) throw error;
 
       // Redirect to subscription page with success message
       const url = new URL("/subscription", request.url);

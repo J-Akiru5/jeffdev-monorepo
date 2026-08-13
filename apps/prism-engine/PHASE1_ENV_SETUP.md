@@ -21,11 +21,8 @@ AZURE_OPENAI_DEPLOYMENT_NAME=gpt-4o-mini
 ### Existing Variables (Already Configured)
 
 ```bash
-# Cosmos DB / MongoDB
-MONGODB_URI=your-cosmos-connection-string
-COSMOS_DATABASE_NAME=prism
-
-# Supabase Authentication
+# Supabase (Postgres data + Auth) — Prism moved off Azure Cosmos DB onto
+# this project's Supabase Postgres instance. See PRISM_MIGRATION.md.
 NEXT_PUBLIC_SUPABASE_URL=<your-supabase-url>
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-supabase-anon-key>
 SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>

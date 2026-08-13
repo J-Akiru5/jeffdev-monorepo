@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCollection } from "@syntaxure-labs/db/cosmos";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { z } from "zod";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
 import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
@@ -49,26 +49,27 @@ export async function GET(request: NextRequest) {
   const detail = searchParams.get("detail");
   const modifiedAfter = searchParams.get("modifiedAfter");
 
-  const rules = await getCollection("rules");
-  const query: Record<string, unknown> = {
-    createdBy: auth.userId,
-    isActive: active,
-  };
+  const db = getPrismDb();
+  let query = db
+    .from("prism_rules")
+    .select(
+      "_id:id, name, description, category, content, priority, tags, pattern, severity, source, isActive:is_active, createdAt:created_at, updatedAt:updated_at, skillsContent:skills_content, projectId:project_id",
+      { count: "exact" },
+    )
+    .eq("created_by", auth.userId)
+    .eq("is_active", active);
   if (category && (RULE_CATEGORIES as readonly string[]).includes(category))
-    query.category = category;
-  if (tag) query.tags = tag;
-  if (search) query.name = { $regex: search, $options: "i" };
-  if (modifiedAfter) {
-    query.updatedAt = { $gte: modifiedAfter };
-  }
+    query = query.eq("category", category);
+  if (tag) query = query.contains("tags", [tag]);
+  if (search) query = query.ilike("name", `%${search}%`);
+  if (modifiedAfter) query = query.gte("updated_at", modifiedAfter);
 
-  const total = await rules.countDocuments(query);
-  const items = await rules
-    .find(query)
-    .sort({ priority: 1, createdAt: -1 })
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .toArray();
+  const { data: itemsRaw, count } = await query
+    .order("priority", { ascending: true })
+    .order("created_at", { ascending: false })
+    .range((page - 1) * limit, page * limit - 1);
+  const items = itemsRaw ?? [];
+  const total = count ?? 0;
 
   const isFull = detail === "full";
   const response = successResponse(
@@ -128,20 +129,37 @@ export async function POST(request: NextRequest) {
       422,
     );
 
-  const rules = await getCollection("rules");
+  const db = getPrismDb();
   const now = new Date().toISOString();
-  const doc = {
-    ...parsed.data,
-    source: parsed.data.source || "manual",
-    createdBy: auth.userId,
-    isActive: true,
-    createdAt: now,
-    updatedAt: now,
-  };
+  const { projectId, source, ...rest } = parsed.data;
+  const { data: inserted, error } = await db
+    .from("prism_rules")
+    .insert({
+      ...rest,
+      project_id: projectId || null,
+      source: source || "manual",
+      created_by: auth.userId,
+      is_active: true,
+      created_at: now,
+      updated_at: now,
+    })
+    .select("id")
+    .single();
 
-  const result = await rules.insertOne(doc);
+  if (error || !inserted) {
+    return errorResponse("Failed to create rule", 500);
+  }
+
   const response = successResponse(
-    { id: result.insertedId.toString(), ...doc },
+    {
+      id: inserted.id,
+      ...parsed.data,
+      source: source || "manual",
+      createdBy: auth.userId,
+      isActive: true,
+      createdAt: now,
+      updatedAt: now,
+    },
     { created: true },
   );
   Object.entries(

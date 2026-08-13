@@ -46,16 +46,18 @@ export async function handlePrismIntercept(
   }
 
   try {
-    const { getCollection } = await import("@syntaxure-labs/db/cosmos");
-    const rules = await getCollection("rules");
+    const { getPrismDb } = await import("@syntaxure-labs/db/prism");
+    const db = getPrismDb();
 
-    const query: Record<string, unknown> = {
-      isActive: true,
-      pattern: { $exists: true, $ne: null },
-    };
-    if (projectId) query.projectId = projectId;
+    let query = db
+      .from("prism_rules")
+      .select("_id:id, name, content, priority, category, tags, pattern, severity")
+      .eq("is_active", true)
+      .not("pattern", "is", null);
+    if (projectId) query = query.eq("project_id", projectId);
 
-    const patternRules = await rules.find(query).sort({ priority: 1 }).toArray();
+    const { data } = await query.order("priority", { ascending: true });
+    const patternRules = data ?? [];
 
     if (patternRules.length === 0) {
       return {

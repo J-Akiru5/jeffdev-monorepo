@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
 import crypto from "crypto";
 
@@ -31,11 +31,13 @@ function generateApiKey(): { key: string; hash: string; prefix: string } {
  */
 async function getUserTier(userId: string): Promise<SubscriptionTier> {
   try {
-    const subscriptionsCollection = await getCollection("subscriptions");
-    const subscription = await subscriptionsCollection.findOne({
-      userId,
-      status: { $in: ["active", "trialing"] },
-    });
+    const db = getPrismDb();
+    const { data: subscription } = await db
+      .from("prism_subscriptions")
+      .select("tier")
+      .eq("user_id", userId)
+      .in("status", ["active", "trialing"])
+      .maybeSingle();
 
     if (!subscription) {
       return "free";
@@ -72,22 +74,19 @@ export async function GET() {
 
   try {
     const tier = await getUserTier(userId);
-    const apiKeysCollection = await getCollection("apiKeys");
+    const db = getPrismDb();
 
     // Fetch non-revoked keys for this user
-    const keys = await apiKeysCollection
-      .find({ userId, revokedAt: { $exists: false } })
-      .sort({ createdAt: -1 })
-      .toArray();
+    const { data: keys } = await db
+      .from("prism_api_keys")
+      .select(
+        "id, name, keyPrefix:key_prefix, lastUsedAt:last_used_at, createdAt:created_at",
+      )
+      .eq("user_id", userId)
+      .is("revoked_at", null)
+      .order("created_at", { ascending: false });
 
-    // Mask the keys (only show prefix + last 4 chars of hash for identification)
-    const maskedKeys = keys.map((key) => ({
-      id: key.id,
-      name: key.name,
-      keyPrefix: key.keyPrefix,
-      lastUsedAt: key.lastUsedAt,
-      createdAt: key.createdAt,
-    }));
+    const maskedKeys = keys ?? [];
 
     return NextResponse.json({
       keys: maskedKeys,
@@ -147,15 +146,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKeysCollection = await getCollection("apiKeys");
+    const db = getPrismDb();
 
     // Count existing non-revoked keys
-    const existingCount = await apiKeysCollection.countDocuments({
-      userId,
-      revokedAt: { $exists: false },
-    });
+    const { count: existingCount } = await db
+      .from("prism_api_keys")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .is("revoked_at", null);
 
-    if (keyLimit !== -1 && existingCount >= keyLimit) {
+    if (keyLimit !== -1 && (existingCount ?? 0) >= keyLimit) {
       return NextResponse.json(
         {
           error: `You have reached your limit of ${keyLimit} API key(s). Revoke an existing key or upgrade your plan.`,
@@ -169,13 +169,13 @@ export async function POST(request: NextRequest) {
     const id = generateId();
     const now = new Date().toISOString();
 
-    await apiKeysCollection.insertOne({
+    await db.from("prism_api_keys").insert({
       id,
-      userId,
-      keyHash: hash,
-      keyPrefix: prefix,
+      user_id: userId,
+      key_hash: hash,
+      key_prefix: prefix,
       name,
-      createdAt: now,
+      created_at: now,
     });
 
     // Return the full key ONCE - it will never be shown again

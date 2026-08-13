@@ -1,10 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { ArrowLeft, BookOpen, Sparkles, ListOrdered } from "lucide-react";
 import { SkillsList, type SkillItem } from "./skills-list";
-import type { SkillDoc } from "@/lib/types";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -26,21 +25,29 @@ export default async function ProjectSkillsPage({ params }: Props) {
   }
 
   const userId = user.id;
+  const db = getPrismDb();
 
   // Fetch project
-  const projectsCollection = await getCollection("projects");
-  const project = await projectsCollection.findOne({ userId, slug });
+  const { data: project } = await db
+    .from("prism_projects")
+    .select("id, name")
+    .eq("user_id", userId)
+    .eq("slug", slug)
+    .maybeSingle();
 
   if (!project) {
     notFound();
   }
 
   // Fetch associated skills
-  const skillsCollection = await getCollection("skills");
-  const skills = await skillsCollection
-    .find({ projectId: project._id.toString() })
-    .sort({ createdAt: -1 })
-    .toArray();
+  const { data: skillRows } = await db
+    .from("prism_skills")
+    .select(
+      "_id:id, name, category, description, steps, isActive:is_active, source",
+    )
+    .eq("project_id", project.id)
+    .order("created_at", { ascending: false });
+  const skills = skillRows ?? [];
 
   return (
     <div className="space-y-8">
@@ -90,18 +97,15 @@ export default async function ProjectSkillsPage({ params }: Props) {
         <div className="lg:col-span-2">
           <SkillsList
             skills={skills.map(
-              (doc): SkillItem => {
-                const s = doc as unknown as SkillDoc;
-                return {
-                  id: s._id.toString(),
-                  name: s.name || "Untitled Skill",
-                  category: s.category || "other",
-                  description: s.description || "",
-                  stepCount: s.steps?.length || 0,
-                  isActive: s.isActive !== false,
-                  source: s.source || "manual",
-                };
-              },
+              (s): SkillItem => ({
+                id: s._id.toString(),
+                name: s.name || "Untitled Skill",
+                category: s.category || "other",
+                description: s.description || "",
+                stepCount: (s.steps as unknown[] | null)?.length || 0,
+                isActive: s.isActive !== false,
+                source: s.source || "manual",
+              }),
             )}
             projectSlug={slug}
           />

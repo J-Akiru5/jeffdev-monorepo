@@ -1,6 +1,6 @@
 "use server";
 
-import { getCollection, ObjectId } from "@syntaxure-labs/db";
+import { getPrismDb, isValidId } from "@syntaxure-labs/db/prism";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { enhanceRuleWithAI } from "@/lib/gemini";
@@ -32,33 +32,33 @@ export async function updateRule(
   const content = formData.get("content") as string;
   const slug = formData.get("slug") as string;
 
-  if (!ruleId || !content) {
+  if (!ruleId || !content || !isValidId(ruleId)) {
     return { error: "Missing required fields" };
   }
 
   try {
-    const rulesCollection = await getCollection("rules");
+    const db = getPrismDb();
 
-    // Verify the rule belongs to the user
-    const rule = await rulesCollection.findOne({
-      _id: new ObjectId(ruleId),
-      userId,
-    });
+    // Verify the rule belongs to the user.
+    // Note: the pre-migration Cosmos code checked a `userId` field here while
+    // most of the rest of the app used `createdBy` for the same concept (see
+    // PRISM_MIGRATION.md). Standardized on `created_by` during this port.
+    const { data: rule } = await db
+      .from("prism_rules")
+      .select("id")
+      .eq("id", ruleId)
+      .eq("created_by", userId)
+      .maybeSingle();
 
     if (!rule) {
       return { error: "Rule not found" };
     }
 
     // Update the rule
-    await rulesCollection.updateOne(
-      { _id: new ObjectId(ruleId) },
-      {
-        $set: {
-          content,
-          updatedAt: new Date(),
-        },
-      },
-    );
+    await db
+      .from("prism_rules")
+      .update({ content, updated_at: new Date().toISOString() })
+      .eq("id", ruleId);
 
     revalidatePath(`/projects/${slug}`);
     revalidatePath(`/projects/${slug}/rules/${ruleId}/edit`);

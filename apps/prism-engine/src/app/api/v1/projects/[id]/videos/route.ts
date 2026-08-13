@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCollection } from "@syntaxure-labs/db/cosmos";
-import { ObjectId } from "mongodb";
+import { getPrismDb, isValidId } from "@syntaxure-labs/db/prism";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
 
 export async function GET(
@@ -11,13 +10,15 @@ export async function GET(
   if (auth instanceof Response) return auth;
 
   const { id } = await params;
-  if (!ObjectId.isValid(id)) return errorResponse("Invalid project ID", 400);
+  if (!isValidId(id)) return errorResponse("Invalid project ID", 400);
 
-  const projects = await getCollection("projects");
-  const project = await projects.findOne({
-    _id: new ObjectId(id),
-    userId: auth.userId,
-  });
+  const db = getPrismDb();
+  const { data: project } = await db
+    .from("prism_projects")
+    .select("id")
+    .eq("id", id)
+    .eq("user_id", auth.userId)
+    .maybeSingle();
   if (!project) return errorResponse("Project not found", 404);
 
   const { searchParams } = new URL(request.url);
@@ -27,17 +28,16 @@ export async function GET(
     Math.max(1, parseInt(searchParams.get("limit") || "20")),
   );
 
-  const videos = await getCollection("videos");
-  const projectId = project._id.toString();
-  const query = { projectId };
-
-  const total = await videos.countDocuments(query);
-  const items = await videos
-    .find(query)
-    .sort({ createdAt: -1 })
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .toArray();
+  const { data: itemsRaw, count } = await db
+    .from("prism_videos")
+    .select("_id:id, title, status, duration, transcript, createdAt:created_at", {
+      count: "exact",
+    })
+    .eq("project_id", project.id)
+    .order("created_at", { ascending: false })
+    .range((page - 1) * limit, page * limit - 1);
+  const items = itemsRaw ?? [];
+  const total = count ?? 0;
 
   return successResponse(
     items.map((v) => ({

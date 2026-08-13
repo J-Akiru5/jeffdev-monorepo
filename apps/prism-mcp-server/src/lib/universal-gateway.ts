@@ -151,13 +151,19 @@ async function handleGovern(
     };
   }
 
-  const { getCollection } = await import("@syntaxure-labs/db/cosmos");
-  const rules = await getCollection("rules");
+  const { getPrismDb } = await import("@syntaxure-labs/db/prism");
+  const db = getPrismDb();
 
-  const query: Record<string, unknown> = { isActive: true };
-  if (projectId) query.projectId = projectId;
+  let query = db
+    .from("prism_rules")
+    .select(
+      "_id:id, name, content, priority, category, tags, pattern, severity",
+    )
+    .eq("is_active", true);
+  if (projectId) query = query.eq("project_id", projectId);
 
-  const allRules = (await rules.find(query).toArray()) as unknown as RuleDoc[];
+  const { data } = await query;
+  const allRules = (data ?? []) as unknown as RuleDoc[];
 
   // Compile rules
   const compiled = compileRules(allRules);
@@ -247,13 +253,20 @@ async function handleValidate(
     };
   }
 
-  const { getCollection } = await import("@syntaxure-labs/db/cosmos");
-  const rules = await getCollection("rules");
+  const { getPrismDb } = await import("@syntaxure-labs/db/prism");
+  const db = getPrismDb();
 
-  const query: Record<string, unknown> = { isActive: true, pattern: { $exists: true, $ne: null } };
-  if (projectId) query.projectId = projectId;
+  let query = db
+    .from("prism_rules")
+    .select(
+      "_id:id, name, content, priority, category, tags, pattern, severity",
+    )
+    .eq("is_active", true)
+    .not("pattern", "is", null);
+  if (projectId) query = query.eq("project_id", projectId);
 
-  const allRules = (await rules.find(query).toArray()) as unknown as RuleDoc[];
+  const { data } = await query;
+  const allRules = (data ?? []) as unknown as RuleDoc[];
   const compiled = compileRules(allRules);
 
   const result = compiled.combinedValidator(code);
@@ -293,13 +306,19 @@ async function handleExport(
 ): Promise<GatewayResponse> {
   const { projectId, teamId, format = "copilot" } = request;
 
-  const { getCollection } = await import("@syntaxure-labs/db/cosmos");
-  const rules = await getCollection("rules");
+  const { getPrismDb } = await import("@syntaxure-labs/db/prism");
+  const db = getPrismDb();
 
-  const query: Record<string, unknown> = { isActive: true };
-  if (projectId) query.projectId = projectId;
+  let query = db
+    .from("prism_rules")
+    .select(
+      "_id:id, name, content, priority, category, tags, pattern, severity",
+    )
+    .eq("is_active", true);
+  if (projectId) query = query.eq("project_id", projectId);
 
-  const allRules = (await rules.find(query).toArray()) as unknown as RuleDoc[];
+  const { data } = await query;
+  const allRules = (data ?? []) as unknown as RuleDoc[];
 
   // Load memory
   let memoryContext = "";
@@ -415,14 +434,20 @@ async function handleHealth(
   let memoryCount = 0;
 
   try {
-    const { getCollection } = await import("@syntaxure-labs/db/cosmos");
-    const rules = await getCollection("rules");
-    ruleCount = await rules.countDocuments({ isActive: true });
+    const { getPrismDb } = await import("@syntaxure-labs/db/prism");
+    const db = getPrismDb();
+    const countOpts = { count: "exact" as const, head: true };
 
-    const memories = await getCollection("governance_memory");
-    const memQuery: Record<string, unknown> = {};
-    if (projectId) memQuery.projectId = projectId;
-    memoryCount = await memories.countDocuments(memQuery);
+    const { count: rc } = await db
+      .from("prism_rules")
+      .select("id", countOpts)
+      .eq("is_active", true);
+    ruleCount = rc ?? 0;
+
+    let memQuery = db.from("prism_governance_memory").select("id", countOpts);
+    if (projectId) memQuery = memQuery.eq("project_id", projectId);
+    const { count: mc } = await memQuery;
+    memoryCount = mc ?? 0;
   } catch {
     // DB not available
   }

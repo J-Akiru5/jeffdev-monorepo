@@ -67,9 +67,13 @@ export async function GET() {
 
   try {
     // Fetch subscription from database
-    const { getCollection } = await import("@syntaxure-labs/db/cosmos");
-    const subscriptions = await getCollection("subscriptions");
-    const subscription = await subscriptions.findOne({ userId });
+    const { getPrismDb } = await import("@syntaxure-labs/db/prism");
+    const db = getPrismDb();
+    const { data: subscription } = await db
+      .from("prism_subscriptions")
+      .select("tier, status")
+      .eq("user_id", userId)
+      .maybeSingle();
 
     if (!subscription) {
       // No subscription found, return free tier defaults

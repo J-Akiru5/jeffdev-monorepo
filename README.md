@@ -57,7 +57,7 @@ This monorepo powers **Syntaxure Labs** — a technology startup building high-p
 ├──────────────────────────────────────────────────────────────────────┤
 │  packages/                                                           │
 │  ├── @syntaxure/ui         → Ghost Glow component library           │
-│  ├── @syntaxure-labs/db    → Firebase + Cosmos DB clients           │
+│  ├── @syntaxure-labs/db    → Prisma schema + Postgres clients       │
 │  ├── @syntaxure/supabase   → Supabase SSR client (server/browser)   │
 │  ├── @syntaxure/redis      → Upstash Redis (rate-limit, cache)     │
 │  ├── @syntaxure/sentry-config → Sentry error monitoring             │
@@ -73,17 +73,17 @@ This monorepo powers **Syntaxure Labs** — a technology startup building high-p
 
 ## ◈ Tech Stack
 
-| Layer           | Technology                                         |
-| --------------- | -------------------------------------------------- |
-| **Framework**   | Next.js 16 (App Router)                            |
-| **UI**          | React 19, Tailwind CSS v4, Headless UI             |
-| **Database**    | Supabase (primary), Azure Cosmos DB (prism-engine) |
-| **Auth**        | Supabase Auth                                      |
-| **AI Protocol** | Model Context Protocol (MCP)                       |
-| **Secrets**     | Doppler                                            |
-| **Monorepo**    | Turborepo + pnpm workspaces                        |
-| **CI/CD**       | GitHub Actions, Vercel                             |
-| **Analytics**   | Python FastAPI, pandas, Vercel Analytics           |
+| Layer           | Technology                                       |
+| --------------- | ------------------------------------------------ |
+| **Framework**   | Next.js 16 (App Router)                          |
+| **UI**          | React 19, Tailwind CSS v4, Headless UI           |
+| **Database**    | Supabase (Postgres, all apps incl. prism-engine) |
+| **Auth**        | Supabase Auth                                    |
+| **AI Protocol** | Model Context Protocol (MCP)                     |
+| **Secrets**     | Doppler                                          |
+| **Monorepo**    | Turborepo + pnpm workspaces                      |
+| **CI/CD**       | GitHub Actions, Vercel                           |
+| **Analytics**   | Python FastAPI, pandas, Vercel Analytics         |
 
 ---
 
@@ -112,7 +112,7 @@ The primary marketing site, CRM, and client-facing platform. Handles quotes, inv
 
 SaaS platform for developers to manage AI context rules. Brand management, video context pipeline, and AI component generation.
 
-**Stack**: Next.js 16, Supabase Auth, Cosmos DB
+**Stack**: Next.js 16, Supabase Auth, Supabase Postgres
 
 </td>
 </tr>
@@ -173,7 +173,7 @@ Documentation site and project management platform with Supabase backend, Upstas
 
 AI context server implementing the Model Context Protocol. Enables coding assistants to query architectural rules directly.
 
-**Stack**: Node.js, MCP SDK, Cosmos DB
+**Stack**: Node.js, MCP SDK, Supabase Postgres
 
 </td>
 </tr>
@@ -201,7 +201,7 @@ Python FastAPI analytics service for business intelligence, reporting, and data-
 | Package                         | Name                         | Description                                                                                                                        |
 | ------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | `packages/ui`                   | **@syntaxure/ui**            | Ghost Glow component library — Button, Card, Input, Badge, ProgressBar, DataTable, and the SyntaxureLogo with holographic gradient |
-| `packages/db`                   | **@syntaxure-labs/db**       | Unified database clients for Firebase and Azure Cosmos DB with Zod validation schemas                                              |
+| `packages/db`                   | **@syntaxure-labs/db**       | Prisma schema + Postgres/Supabase clients (incl. Prism) with Zod validation schemas                                                |
 | `packages/supabase`             | **@syntaxure/supabase**      | Supabase SSR client with server, browser, admin, and middleware exports for Next.js 16                                             |
 | `packages/redis`                | **@syntaxure/redis**         | Upstash Redis integration with rate-limiting and caching utilities                                                                 |
 | `packages/sentry-config`        | **@syntaxure/sentry-config** | Sentry error monitoring configuration for Next.js applications                                                                     |

@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { z } from "zod";
 import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
 import crypto from "crypto";
@@ -31,11 +31,13 @@ const SaveComponentSchema = z.object({
 
 async function getUserTier(userId: string): Promise<SubscriptionTier> {
   try {
-    const subscriptionsCollection = await getCollection("subscriptions");
-    const subscription = await subscriptionsCollection.findOne({
-      userId,
-      status: { $in: ["active", "trialing"] },
-    });
+    const db = getPrismDb();
+    const { data: subscription } = await db
+      .from("prism_subscriptions")
+      .select("tier")
+      .eq("user_id", userId)
+      .in("status", ["active", "trialing"])
+      .maybeSingle();
 
     if (!subscription) {
       return "free";
@@ -69,28 +71,23 @@ export async function GET() {
 
   try {
     const tier = await getUserTier(userId);
-    const componentsCollection = await getCollection("components");
+    const db = getPrismDb();
 
-    const components = await componentsCollection
-      .find({ userId })
-      .sort({ createdAt: -1 })
-      .toArray();
+    const { data: components } = await db
+      .from("prism_components")
+      .select(
+        "id, name, description, designSystem:design_system, stack, createdAt:created_at",
+      )
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
 
-    // Serialize for client
-    const serialized = components.map((c) => ({
-      id: c.id,
-      name: c.name,
-      description: c.description,
-      designSystem: c.designSystem,
-      stack: c.stack,
-      createdAt: c.createdAt,
-    }));
+    const serialized = components ?? [];
 
     return NextResponse.json({
       components: serialized,
       tier,
       limit: TIER_LIMITS[tier].components,
-      count: components.length,
+      count: serialized.length,
     });
   } catch (error) {
     console.error("[Components] GET error:", error);
@@ -135,12 +132,15 @@ export async function POST(request: NextRequest) {
     const tier = await getUserTier(userId);
     const limit = TIER_LIMITS[tier].components;
 
-    const componentsCollection = await getCollection("components");
+    const db = getPrismDb();
 
     // Count existing components
-    const existingCount = await componentsCollection.countDocuments({ userId });
+    const { count: existingCount } = await db
+      .from("prism_components")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId);
 
-    if (limit !== -1 && existingCount >= limit) {
+    if (limit !== -1 && (existingCount ?? 0) >= limit) {
       return NextResponse.json(
         {
           error: `You have reached your limit of ${limit} component(s). Upgrade your plan for more.`,
@@ -153,17 +153,17 @@ export async function POST(request: NextRequest) {
     const id = generateId();
     const now = new Date().toISOString();
 
-    await componentsCollection.insertOne({
+    await db.from("prism_components").insert({
       id,
-      userId,
+      user_id: userId,
       name,
       description: description || "",
       code,
       rules: rules || "",
-      designSystem,
+      design_system: designSystem,
       stack,
-      createdAt: now,
-      updatedAt: now,
+      created_at: now,
+      updated_at: now,
     });
 
     return NextResponse.json({

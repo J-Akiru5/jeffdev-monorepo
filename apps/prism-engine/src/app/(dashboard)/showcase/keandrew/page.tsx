@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import Link from "next/link";
 import { ArrowLeft, Code, Palette } from "lucide-react";
 import type { BrandDoc } from "@/lib/types";
@@ -13,19 +13,29 @@ export default async function KeandrewShowcasePage() {
   await supabase.auth.getUser();
 
   // Fetch Keandrew data
-  const brandsCollection = await getCollection("brands");
-  const rulesCollection = await getCollection("rules");
-  const componentsCollection = await getCollection("components");
+  const db = getPrismDb();
 
-  const brand = (await brandsCollection.findOne({
-    slug: "keandrew-photography",
-  })) as BrandDoc | null;
-  const rules = await rulesCollection
-    .find({ tags: { $in: ["keandrew"] } })
-    .toArray();
-  const components = await componentsCollection
-    .find({ name: { $regex: /^Keandrew/ } })
-    .toArray();
+  const { data: brandRow } = await db
+    .from("prism_brands")
+    .select(
+      "_id:id, companyName:company_name, tagline, colors, createdAt:created_at",
+    )
+    .eq("slug", "keandrew-photography")
+    .maybeSingle();
+  const brand = brandRow as unknown as BrandDoc | null;
+
+  const { data: rules } = await db
+    .from("prism_rules")
+    .select("name, category, tags, content")
+    .overlaps("tags", ["keandrew"]);
+
+  const { data: componentRows } = await db
+    .from("prism_components")
+    .select("name, code, designSystem:design_system")
+    .ilike("name", "Keandrew%");
+
+  const rulesList = rules ?? [];
+  const components = componentRows ?? [];
 
   if (!brand) {
     return (
@@ -131,10 +141,10 @@ export default async function KeandrewShowcasePage() {
       <section>
         <h2 className="text-lg font-medium text-white mb-4 flex items-center gap-2">
           <Code className="h-5 w-5 text-cyan-400" />
-          Prism Rules ({rules.length})
+          Prism Rules ({rulesList.length})
         </h2>
         <div className="grid md:grid-cols-2 gap-4">
-          {rules.map((rule, i) => (
+          {rulesList.map((rule, i) => (
             <div
               key={i}
               className="rounded-md border border-white/5 bg-white/2 p-4 hover:border-white/10 transition-colors"
@@ -178,7 +188,7 @@ export default async function KeandrewShowcasePage() {
                     {comp.name as string}
                   </h3>
                   <p className="text-xs text-white/40 mt-1">
-                    {comp.category as string}
+                    {comp.designSystem as string}
                   </p>
                 </div>
                 <span className="text-xs text-white/30 group-open:rotate-180 transition-transform">

@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCollection } from "@syntaxure-labs/db/cosmos";
-import { ObjectId } from "mongodb";
+import { getPrismDb, isValidId } from "@syntaxure-labs/db/prism";
 import { z } from "zod";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
 
@@ -27,6 +26,17 @@ const UpdateSkillSchema = z.object({
   isActive: z.boolean().optional(),
 });
 
+function toColumns(data: z.infer<typeof UpdateSkillSchema>): Record<string, unknown> {
+  const cols: Record<string, unknown> = {};
+  if (data.name !== undefined) cols.name = data.name;
+  if (data.description !== undefined) cols.description = data.description;
+  if (data.category !== undefined) cols.category = data.category;
+  if (data.steps !== undefined) cols.steps = data.steps;
+  if (data.tags !== undefined) cols.tags = data.tags;
+  if (data.isActive !== undefined) cols.is_active = data.isActive;
+  return cols;
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -35,17 +45,21 @@ export async function GET(
   if (auth instanceof Response) return auth;
 
   const { id } = await params;
-  if (!ObjectId.isValid(id)) return errorResponse("Invalid skill ID", 400);
+  if (!isValidId(id)) return errorResponse("Invalid skill ID", 400);
 
-  const skills = await getCollection("skills");
-  const skill = await skills.findOne({
-    _id: new ObjectId(id),
-    createdBy: auth.userId,
-  });
+  const db = getPrismDb();
+  const { data: skill } = await db
+    .from("prism_skills")
+    .select(
+      "projectId:project_id, name, description, category, steps, tags, isActive:is_active, source, createdBy:created_by, createdAt:created_at, updatedAt:updated_at",
+    )
+    .eq("id", id)
+    .eq("created_by", auth.userId)
+    .maybeSingle();
   if (!skill) return errorResponse("Skill not found", 404);
 
   const response = successResponse({
-    id: skill._id.toString(),
+    id,
     projectId: skill.projectId || null,
     name: skill.name,
     description: skill.description,
@@ -73,7 +87,7 @@ export async function PATCH(
   if (auth instanceof Response) return auth;
 
   const { id } = await params;
-  if (!ObjectId.isValid(id)) return errorResponse("Invalid skill ID", 400);
+  if (!isValidId(id)) return errorResponse("Invalid skill ID", 400);
 
   let body: unknown;
   try {
@@ -89,17 +103,22 @@ export async function PATCH(
       422,
     );
 
-  const skills = await getCollection("skills");
-  const existing = await skills.findOne({
-    _id: new ObjectId(id),
-    createdBy: auth.userId,
-  });
+  const db = getPrismDb();
+  const { data: existing } = await db
+    .from("prism_skills")
+    .select("name, description, category, steps, tags, isActive:is_active")
+    .eq("id", id)
+    .eq("created_by", auth.userId)
+    .maybeSingle();
   if (!existing) return errorResponse("Skill not found", 404);
 
-  const updates = { ...parsed.data, updatedAt: new Date().toISOString() };
-  await skills.updateOne({ _id: new ObjectId(id) }, { $set: updates });
+  const updatedAt = new Date().toISOString();
+  await db
+    .from("prism_skills")
+    .update({ ...toColumns(parsed.data), updated_at: updatedAt })
+    .eq("id", id);
 
-  return successResponse({ id, ...existing, ...updates });
+  return successResponse({ id, ...existing, ...parsed.data, updatedAt });
 }
 
 export async function DELETE(
@@ -110,14 +129,17 @@ export async function DELETE(
   if (auth instanceof Response) return auth;
 
   const { id } = await params;
-  if (!ObjectId.isValid(id)) return errorResponse("Invalid skill ID", 400);
+  if (!isValidId(id)) return errorResponse("Invalid skill ID", 400);
 
-  const skills = await getCollection("skills");
-  const result = await skills.deleteOne({
-    _id: new ObjectId(id),
-    createdBy: auth.userId,
-  });
-  if (result.deletedCount === 0) return errorResponse("Skill not found", 404);
+  const db = getPrismDb();
+  const { data: deleted } = await db
+    .from("prism_skills")
+    .delete()
+    .eq("id", id)
+    .eq("created_by", auth.userId)
+    .select("id");
+  if (!deleted || deleted.length === 0)
+    return errorResponse("Skill not found", 404);
 
   return successResponse({ id, deleted: true });
 }

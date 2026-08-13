@@ -1,7 +1,6 @@
 import { NextRequest } from "next/server";
-import { getCollection } from "@syntaxure-labs/db/cosmos";
+import { getPrismDb, isValidId } from "@syntaxure-labs/db/prism";
 import { z } from "zod";
-import { ObjectId } from "mongodb";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
 
 const PublishSchema = z.object({
@@ -19,24 +18,28 @@ export async function GET(request: NextRequest) {
   );
   const search = searchParams.get("q");
 
-  const ruleSets = await getCollection("ruleSets");
-  const query: Record<string, unknown> = { isPublic: true };
-  if (search) query.name = { $regex: search, $options: "i" };
+  const db = getPrismDb();
+  let query = db
+    .from("prism_rule_sets")
+    .select(
+      "_id:id, name, description, ruleIds:rule_ids, createdBy:created_by, createdAt:created_at",
+      { count: "exact" },
+    )
+    .eq("is_public", true);
+  if (search) query = query.ilike("name", `%${search}%`);
 
-  const total = await ruleSets.countDocuments(query);
-  const items = await ruleSets
-    .find(query)
-    .sort({ createdAt: -1 })
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .toArray();
+  const { data: itemsRaw, count } = await query
+    .order("created_at", { ascending: false })
+    .range((page - 1) * limit, page * limit - 1);
+  const items = itemsRaw ?? [];
+  const total = count ?? 0;
 
   return successResponse(
     items.map((rs) => ({
       id: rs._id.toString(),
       name: rs.name,
       description: rs.description,
-      ruleCount: rs.rules?.length || 0,
+      ruleCount: rs.ruleIds?.length || 0,
       createdBy: rs.createdBy,
       createdAt: rs.createdAt,
     })),
@@ -62,34 +65,51 @@ export async function POST(request: NextRequest) {
       422,
     );
 
-  const rules = await getCollection("rules");
-  const existingRules = await rules
-    .find({
-      _id: { $in: parsed.data.rules.map((id) => new ObjectId(id)) },
-      createdBy: auth.userId,
-    })
-    .toArray();
-  if (existingRules.length !== parsed.data.rules.length) {
+  if (!parsed.data.rules.every((id) => isValidId(id))) {
+    return errorResponse("One or more rule IDs are invalid", 422);
+  }
+
+  const db = getPrismDb();
+  const { data: existingRules } = await db
+    .from("prism_rules")
+    .select("id")
+    .in("id", parsed.data.rules)
+    .eq("created_by", auth.userId);
+  if ((existingRules ?? []).length !== parsed.data.rules.length) {
     return errorResponse(
       "One or more rule IDs are invalid or do not belong to you",
       422,
     );
   }
 
-  const ruleSets = await getCollection("ruleSets");
   const now = new Date().toISOString();
-  const doc = {
-    name: parsed.data.name,
-    description: parsed.data.description || "",
-    rules: parsed.data.rules,
-    isPublic: true,
-    createdBy: auth.userId,
-    createdAt: now,
-  };
+  const { data: inserted, error } = await db
+    .from("prism_rule_sets")
+    .insert({
+      name: parsed.data.name,
+      description: parsed.data.description || "",
+      rule_ids: parsed.data.rules,
+      is_public: true,
+      created_by: auth.userId,
+      created_at: now,
+    })
+    .select("id")
+    .single();
 
-  const result = await ruleSets.insertOne(doc);
+  if (error || !inserted) {
+    return errorResponse("Failed to publish rule set", 500);
+  }
+
   return successResponse(
-    { id: result.insertedId.toString(), ...doc },
+    {
+      id: inserted.id,
+      name: parsed.data.name,
+      description: parsed.data.description || "",
+      rules: parsed.data.rules,
+      isPublic: true,
+      createdBy: auth.userId,
+      createdAt: now,
+    },
     { created: true },
   );
 }

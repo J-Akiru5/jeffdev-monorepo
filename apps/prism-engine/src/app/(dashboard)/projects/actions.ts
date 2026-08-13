@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -74,27 +74,33 @@ export async function createProject(
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 
+  const db = getPrismDb();
+
   // Check for duplicate slug
-  const projectsCollection = await getCollection("projects");
-  const existing = await projectsCollection.findOne({ userId, slug });
+  const { data: existing } = await db
+    .from("prism_projects")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("slug", slug)
+    .maybeSingle();
 
   if (existing) {
     return { error: { name: ["A project with this name already exists"] } };
   }
 
-  // Create project document
-  const project = {
-    userId,
+  // Create project row
+  const { error } = await db.from("prism_projects").insert({
+    user_id: userId,
     name,
     slug,
-    designSystem,
+    design_system: designSystem,
     stack,
     visibility: "private",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
+  });
 
-  await projectsCollection.insertOne(project);
+  if (error) {
+    return { error: { name: ["Failed to create project"] } };
+  }
 
   // Revalidate and redirect
   revalidatePath("/projects");
@@ -141,18 +147,21 @@ export async function updateProject(
     return { error: { general: "Project not found" } };
   }
 
-  const projectsCollection = await getCollection("projects");
+  const db = getPrismDb();
 
   const updateData: Record<string, unknown> = {
-    updatedAt: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   };
 
   if (name) updateData.name = name;
   if (stack) updateData.stack = stack;
-  if (designSystem) updateData.designSystem = designSystem;
-   
+  if (designSystem) updateData.design_system = designSystem;
 
-  await projectsCollection.updateOne({ userId, slug }, { $set: updateData });
+  await db
+    .from("prism_projects")
+    .update(updateData)
+    .eq("user_id", userId)
+    .eq("slug", slug);
 
   revalidatePath(`/projects/${slug}`);
   revalidatePath(`/projects/${slug}/settings`);
@@ -184,21 +193,25 @@ export async function deleteProject(
     return { error: { general: "Project not found" } };
   }
 
-  const projectsCollection = await getCollection("projects");
-  const rulesCollection = await getCollection("rules");
+  const db = getPrismDb();
 
   // Find project first
-  const project = await projectsCollection.findOne({ userId, slug });
+  const { data: project } = await db
+    .from("prism_projects")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("slug", slug)
+    .maybeSingle();
 
   if (!project) {
     return { error: { general: "Project not found" } };
   }
 
-  // Delete associated rules
-  await rulesCollection.deleteMany({ projectId: project._id.toString() });
-
-  // Delete project
-  await projectsCollection.deleteOne({ _id: project._id, userId });
+  // Delete associated rules, then the project
+  // (prism_rules.project_id has ON DELETE SET NULL, so rules are deleted
+  // explicitly first to match the original Cosmos cascade behavior)
+  await db.from("prism_rules").delete().eq("project_id", project.id);
+  await db.from("prism_projects").delete().eq("id", project.id).eq("user_id", userId);
 
   revalidatePath("/projects");
   redirect("/projects");
@@ -244,12 +257,15 @@ export async function createRule(
 
   const projectSlug = formData.get("projectSlug") as string;
 
+  const db = getPrismDb();
+
   // Find project
-  const projectsCollection = await getCollection("projects");
-  const project = await projectsCollection.findOne({
-    userId,
-    slug: projectSlug,
-  });
+  const { data: project } = await db
+    .from("prism_projects")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("slug", projectSlug)
+    .maybeSingle();
 
   if (!project) {
     return { error: { general: "Project not found" } };
@@ -269,20 +285,17 @@ export async function createRule(
 
   const { name, category, content, priority, pattern, severity } = parsed.data;
 
-  // Create rule document
-  const rulesCollection = await getCollection("rules");
-  await rulesCollection.insertOne({
-    projectId: project._id.toString(),
-    createdBy: userId,
+  // Create rule row
+  await db.from("prism_rules").insert({
+    project_id: project.id,
+    created_by: userId,
     name,
     category,
     content,
     priority,
     pattern: pattern || null,
     severity: severity || "warning",
-    isActive: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    is_active: true,
   });
 
   revalidatePath(`/projects/${projectSlug}`);

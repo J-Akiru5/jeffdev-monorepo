@@ -1,8 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCollection, ObjectId } from "@syntaxure-labs/db";
+import { getPrismDb, isValidId } from "@syntaxure-labs/db/prism";
 import { notFound } from "next/navigation";
 import { RuleEditForm } from "./rule-edit-form";
-import type { RuleDoc } from "@/lib/types";
 
 interface Props {
   params: Promise<{ slug: string; ruleId: string }>;
@@ -25,20 +24,31 @@ export default async function RuleEditPage({ params }: Props) {
 
   const userId = user.id;
 
+  if (!isValidId(ruleId)) {
+    notFound();
+  }
+
+  const db = getPrismDb();
+
   // Fetch project
-  const projectsCollection = await getCollection("projects");
-  const project = await projectsCollection.findOne({ userId, slug });
+  const { data: project } = await db
+    .from("prism_projects")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("slug", slug)
+    .maybeSingle();
 
   if (!project) {
     notFound();
   }
 
   // Fetch rule
-  const rulesCollection = await getCollection("rules");
-  const rule = (await rulesCollection.findOne({
-    _id: new ObjectId(ruleId),
-    projectId: project._id.toString(),
-  })) as RuleDoc | null;
+  const { data: rule } = await db
+    .from("prism_rules")
+    .select("id, name, category, priority, content, description")
+    .eq("id", ruleId)
+    .eq("project_id", project.id)
+    .maybeSingle();
 
   if (!rule) {
     notFound();
@@ -46,7 +56,7 @@ export default async function RuleEditPage({ params }: Props) {
 
   // Serialize rule for client component
   const serializedRule = {
-    _id: rule._id.toString(),
+    _id: rule.id,
     name: rule.name,
     category: rule.category || "general",
     priority: rule.priority || 50,

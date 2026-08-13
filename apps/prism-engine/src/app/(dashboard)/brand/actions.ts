@@ -1,8 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
-import type { Document } from "mongodb";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -159,11 +158,11 @@ export async function createBrand(
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 
-  // Create brand document
-  const brand = {
-    userId,
+  const db = getPrismDb();
+  const { error } = await db.from("prism_brands").insert({
+    user_id: userId,
     slug,
-    companyName: data.companyName,
+    company_name: data.companyName,
     tagline: data.tagline,
     industry: data.industry,
     colors: data.colors,
@@ -175,11 +174,11 @@ export async function createBrand(
     },
     imagery: data.imagery,
     spacing: data.spacing,
-    createdAt: new Date().toISOString(),
-  };
+  });
 
-  const brandsCollection = await getCollection("brands");
-  await brandsCollection.insertOne(brand);
+  if (error) {
+    return { error: { general: ["Failed to create brand"] } };
+  }
 
   // Revalidate and redirect
   revalidatePath("/brand");
@@ -189,7 +188,7 @@ export async function createBrand(
 /**
  * Get user's brands
  */
-export async function getUserBrands(): Promise<Document[]> {
+export async function getUserBrands(): Promise<Record<string, unknown>[]> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -201,20 +200,25 @@ export async function getUserBrands(): Promise<Document[]> {
 
   const userId = user.id;
 
-  const brandsCollection = await getCollection("brands");
+  const db = getPrismDb();
+  const { data } = await db
+    .from("prism_brands")
+    .select(
+      "_id:id, userId:user_id, slug, companyName:company_name, tagline, industry, colors, typography, voice, imagery, spacing, createdAt:created_at, updatedAt:updated_at",
+    )
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(20);
 
-  // Only show user's own brands
-  return brandsCollection
-    .find({ userId })
-    .sort({ createdAt: -1 })
-    .limit(20)
-    .toArray();
+  return data ?? [];
 }
 
 /**
  * Get a single brand by slug
  */
-export async function getBrand(slug: string): Promise<Document | null> {
+export async function getBrand(
+  slug: string,
+): Promise<Record<string, unknown> | null> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -226,8 +230,17 @@ export async function getBrand(slug: string): Promise<Document | null> {
 
   const userId = user.id;
 
-  const brandsCollection = await getCollection("brands");
-  return brandsCollection.findOne({ userId, slug });
+  const db = getPrismDb();
+  const { data } = await db
+    .from("prism_brands")
+    .select(
+      "_id:id, userId:user_id, slug, companyName:company_name, tagline, industry, colors, typography, voice, imagery, spacing, createdAt:created_at, updatedAt:updated_at",
+    )
+    .eq("user_id", userId)
+    .eq("slug", slug)
+    .maybeSingle();
+
+  return data;
 }
 
 /**
@@ -296,29 +309,28 @@ export async function updateBrand(
 
   const data = parsed.data;
 
-  const brandsCollection = await getCollection("brands");
+  const db = getPrismDb();
 
   // Update brand
-  await brandsCollection.updateOne(
-    { userId, slug },
-    {
-      $set: {
-        companyName: data.companyName,
-        tagline: data.tagline,
-        industry: data.industry,
-        colors: data.colors,
-        typography: data.typography,
-        voice: {
-          personality: data.voice.personality,
-          formality: data.voice.formality,
-          keywords: data.voice.keywords,
-        },
-        imagery: data.imagery,
-        spacing: data.spacing,
-        updatedAt: new Date().toISOString(),
+  await db
+    .from("prism_brands")
+    .update({
+      company_name: data.companyName,
+      tagline: data.tagline,
+      industry: data.industry,
+      colors: data.colors,
+      typography: data.typography,
+      voice: {
+        personality: data.voice.personality,
+        formality: data.voice.formality,
+        keywords: data.voice.keywords,
       },
-    },
-  );
+      imagery: data.imagery,
+      spacing: data.spacing,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("user_id", userId)
+    .eq("slug", slug);
 
   // Revalidate and redirect
   revalidatePath("/brand");
@@ -341,8 +353,8 @@ export async function deleteBrand(slug: string) {
 
   const userId = user.id;
 
-  const brandsCollection = await getCollection("brands");
-  await brandsCollection.deleteOne({ userId, slug });
+  const db = getPrismDb();
+  await db.from("prism_brands").delete().eq("user_id", userId).eq("slug", slug);
 
   revalidatePath("/brand");
   redirect("/brand");

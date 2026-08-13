@@ -1,5 +1,24 @@
 # Changelog
 
+# 3.1.0 (2026-08-13)
+
+### Breaking Changes
+
+- **Prism Context Engine: Cosmos DB → Postgres.** The Azure Cosmos DB account
+  (MongoDB API + Gremlin graph) backing prism-engine, prism-admin, and
+  prism-mcp-server is retired. All 14 collections (`projects`, `rules`,
+  `skills`, `components`, `brands`, `ruleSets`, `apiKeys`, `subscriptions`,
+  `usage`, `generations`, `videos`, `prism_telemetry`, `governance_memory`,
+  `users`) now live in this project's Supabase Postgres instance as
+  `prism_*` tables (see `supabase/migrations/20260813000001_prism_context_engine.sql`).
+  `packages/db` exports `./prism` (Postgres/Supabase) in place of the old
+  `./cosmos` and `./cosmos-gremlin`. The Gremlin rules graph is replaced by
+  a `prism_rule_edges` table plus a GIN-indexed `tags` array (no more
+  graph traversal — see `PRISM_MIGRATION.md` for the full writeup, including
+  the pre-existing data-shape bugs fixed opportunistically during the port).
+  No Cosmos data was migrated — the account was already unreachable when
+  this migration was written; every `prism_*` table starts empty.
+
 # 3.0.0 (2026-06-01)
 
 ### Features
@@ -273,10 +292,10 @@ Cursor can now query architectural rules directly from the database.
 
 ## Version History
 
-| Version | Date       | Highlight                                    |
-| ------- | ---------- | -------------------------------------------- |
+| Version | Date       | Highlight                                             |
+| ------- | ---------- | ----------------------------------------------------- |
 | 3.0.0   | 2026-06-01 | 🏗️ Database Normalization (3NF) + Admin Consolidation |
-| 2.0.0   | 2026-05-24 | 🚀 Supabase Migration + Monorepo Restructure |
-| 1.0.0   | 2026-05-22 | 🏢 JeffDev Studio Release                    |
-| 0.1.3   | 2026-01-03 | 🎨 Brand Management + Video Context Pipeline |
-| 0.1.0   | 2026-01-01 | 🌱 Genesis - MCP Server + DB Connected       |
+| 2.0.0   | 2026-05-24 | 🚀 Supabase Migration + Monorepo Restructure          |
+| 1.0.0   | 2026-05-22 | 🏢 JeffDev Studio Release                             |
+| 0.1.3   | 2026-01-03 | 🎨 Brand Management + Video Context Pipeline          |
+| 0.1.0   | 2026-01-01 | 🌱 Genesis - MCP Server + DB Connected                |
