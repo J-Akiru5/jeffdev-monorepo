@@ -26,6 +26,10 @@ CREATE INDEX IF NOT EXISTS idx_blog_posts_slug ON blog_posts (slug);
 -- RLS policies
 ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public can read published blog posts" ON blog_posts;
+DROP POLICY IF EXISTS "Authenticated can read all blog posts" ON blog_posts;
+DROP POLICY IF EXISTS "Service role can manage blog posts" ON blog_posts;
+
 -- Public can read published posts
 CREATE POLICY "Public can read published blog posts"
   ON blog_posts FOR SELECT
