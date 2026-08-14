@@ -9,6 +9,7 @@ import {
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { CommunityTabs } from "@/components/sections/community-tabs";
+import { CommunityHeroVideo } from "@/components/sections/community-hero-video";
 import { ReleaseTimeline } from "@/components/sections/release-timeline";
 import { createClient } from "@/lib/supabase/server";
 import { getPublishedCommunityPosts } from "@/app/actions/community";
@@ -118,6 +119,9 @@ export default async function CommunityPage() {
                 projects, and connect with the community.
               </p>
             </div>
+
+            {/* Marketing Video (renders nothing until NEXT_PUBLIC_COMMUNITY_HERO_VIDEO_URL is set) */}
+            <CommunityHeroVideo />
 
             {/* Quick Stats */}
             <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
