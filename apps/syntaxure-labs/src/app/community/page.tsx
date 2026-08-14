@@ -78,7 +78,11 @@ export default async function CommunityPage() {
   return (
     <>
       <Header />
-      <main className="pt-32 pb-16">
+
+      {/* Full-viewport cinematic hero video — loops muted, scroll hint after first play */}
+      <CommunityHeroVideo />
+
+      <main id="community-content" className="pt-32 pb-16">
         {/* Desktop Absolute Back Button (Sits on the left side, professional style) */}
         <div className="hidden xl:flex absolute left-[max(2rem,calc(50%-54rem))] top-36 z-50">
           <Link
@@ -119,9 +123,6 @@ export default async function CommunityPage() {
                 projects, and connect with the community.
               </p>
             </div>
-
-            {/* Marketing Video (renders nothing until NEXT_PUBLIC_COMMUNITY_HERO_VIDEO_URL is set) */}
-            <CommunityHeroVideo />
 
             {/* Quick Stats */}
             <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-4">
