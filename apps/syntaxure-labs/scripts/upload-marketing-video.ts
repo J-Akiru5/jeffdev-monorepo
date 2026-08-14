@@ -59,7 +59,7 @@ const MIME_BY_EXT: Record<string, string> = {
   ".mov": "video/quicktime",
 };
 
-async function main() {
+async function main(inputPath: string, destFilenameArg: string | undefined) {
   const ext = extname(inputPath).toLowerCase();
   const contentType = MIME_BY_EXT[ext];
 
@@ -122,4 +122,4 @@ async function main() {
   );
 }
 
-main();
+main(inputPath, destFilenameArg);
