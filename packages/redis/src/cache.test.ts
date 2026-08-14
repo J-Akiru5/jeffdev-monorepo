@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { getCachedResponse, cacheResponse } from "./cache.js";
+import { getCachedResponse, cacheResponse } from "./cache";
 
 describe("cache — fail-open behavior", () => {
   const ENV_KEYS = ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"] as const;

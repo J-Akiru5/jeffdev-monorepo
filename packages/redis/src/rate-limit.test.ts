@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { checkRateLimit } from "./rate-limit.js";
+import { checkRateLimit } from "./rate-limit";
 
 describe("checkRateLimit — fail-open behavior", () => {
   const ENV_KEYS = ["UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN"] as const;
