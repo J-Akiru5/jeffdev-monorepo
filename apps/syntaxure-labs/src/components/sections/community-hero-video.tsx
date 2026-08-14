@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PlayCircle, ArrowUpRight } from "lucide-react";
+import { Volume2, ArrowUpRight } from "lucide-react";
 
 /**
  * Community Hero Video
@@ -10,8 +10,9 @@ import { PlayCircle, ArrowUpRight } from "lucide-react";
  *
  * Renders nothing if the env var isn't set yet, so this ships safely before
  * the video file has been uploaded — the section just appears once the URL
- * is configured and the app is redeployed. No client-side JS needed; the
- * browser's native <video controls> handles play/pause/fullscreen.
+ * is configured and the app is redeployed. Autoplays muted + looped (the
+ * only way browsers allow autoplay without a user gesture); native
+ * `controls` still let visitors unmute, pause, or go fullscreen.
  */
 // Public Supabase Storage URL — not a secret, safe to bake in as the default
 // so the section works out of the box. Override via env var if the video
@@ -31,7 +32,11 @@ export function CommunityHeroVideo() {
       <div className="relative aspect-video w-full bg-black">
         <video
           controls
-          preload="metadata"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
           poster={posterUrl}
           className="h-full w-full"
         >
@@ -43,9 +48,9 @@ export function CommunityHeroVideo() {
           .
         </video>
         <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-2 rounded-md border border-white/[0.08] bg-black/50 px-3 py-1.5 backdrop-blur-md">
-          <PlayCircle className="h-4 w-4 text-cyan-400" />
+          <Volume2 className="h-4 w-4 text-cyan-400" />
           <span className="font-mono text-[10px] uppercase tracking-wider text-white/70">
-            Watch the story
+            Playing muted — tap to unmute
           </span>
         </div>
       </div>
