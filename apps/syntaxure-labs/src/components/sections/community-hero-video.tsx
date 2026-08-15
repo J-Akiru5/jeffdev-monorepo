@@ -24,12 +24,15 @@ import { ChevronDown } from "lucide-react";
  */
 const DEFAULT_VIDEO_URL =
   "https://uswduulrqwzovctdoiao.supabase.co/storage/v1/object/public/marketing/community-hero.mp4";
+const DEFAULT_MOBILE_VIDEO_URL =
+  "https://uswduulrqwzovctdoiao.supabase.co/storage/v1/object/public/marketing/community-hero-mobile.mp4";
 
 export function CommunityHeroVideo() {
   const videoUrl =
     process.env.NEXT_PUBLIC_COMMUNITY_HERO_VIDEO_URL || DEFAULT_VIDEO_URL;
   const mobileVideoUrl =
-    process.env.NEXT_PUBLIC_COMMUNITY_HERO_VIDEO_MOBILE_URL;
+    process.env.NEXT_PUBLIC_COMMUNITY_HERO_VIDEO_MOBILE_URL ||
+    DEFAULT_MOBILE_VIDEO_URL;
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showScrollHint, setShowScrollHint] = useState(false);
