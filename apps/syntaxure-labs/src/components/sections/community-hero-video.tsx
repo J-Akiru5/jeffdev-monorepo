@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 
 /**
@@ -9,14 +9,18 @@ import { ChevronDown } from "lucide-react";
  * Full-viewport cinematic marketing video shown at the top of /community.
  * Autoplays muted, loops indefinitely. No player controls — pure visual.
  *
- * After the video completes its first loop, a subtle "Scroll" indicator
- * fades in at the bottom of the viewport, hinting that content continues
- * below. Clicking it smooth-scrolls to the community content.
+ * Responsive video sources:
+ *   Desktop/tablet (≥768px) — landscape 16:9 video (default)
+ *   Mobile (<768px) — portrait 9:16 video when available via
+ *     NEXT_PUBLIC_COMMUNITY_HERO_VIDEO_MOBILE_URL; falls back to the
+ *     desktop video if unset.
  *
- * Implementation detail: the native `loop` attribute is intentionally
- * omitted. Instead we listen for the `ended` event, show the scroll hint
- * on the first fire, and manually restart playback. This gives us a clean
- * hook into loop count without polling `currentTime`.
+ * Scroll hint (desktop only):
+ *   After the video completes its first loop, a subtle "Scroll ↓"
+ *   indicator fades in. Hidden on mobile to keep the hero clean.
+ *
+ * Loop detection: the native `loop` attribute is intentionally omitted.
+ * We listen for `ended`, count loops, and manually restart playback.
  */
 const DEFAULT_VIDEO_URL =
   "https://uswduulrqwzovctdoiao.supabase.co/storage/v1/object/public/marketing/community-hero.mp4";
@@ -24,16 +28,32 @@ const DEFAULT_VIDEO_URL =
 export function CommunityHeroVideo() {
   const videoUrl =
     process.env.NEXT_PUBLIC_COMMUNITY_HERO_VIDEO_URL || DEFAULT_VIDEO_URL;
+  const mobileVideoUrl =
+    process.env.NEXT_PUBLIC_COMMUNITY_HERO_VIDEO_MOBILE_URL;
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showScrollHint, setShowScrollHint] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const hasShownHint = useRef(false);
+
+  // Detect mobile viewport for responsive video source
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  // Use portrait video on mobile if available, otherwise fall back to desktop
+  const activeVideoUrl =
+    isMobile && mobileVideoUrl ? mobileVideoUrl : videoUrl;
 
   const handleEnded = useCallback(() => {
     if (!hasShownHint.current) {
       hasShownHint.current = true;
       setShowScrollHint(true);
     }
-    // Restart playback manually (no `loop` attr so `ended` fires each time)
     videoRef.current?.play();
   }, []);
 
@@ -47,8 +67,9 @@ export function CommunityHeroVideo() {
 
   return (
     <section className="relative h-dvh w-full overflow-hidden bg-black">
-      {/* Video — fills viewport, crops via object-cover for any aspect ratio */}
+      {/* Video — fills viewport via object-cover; key forces remount on source swap */}
       <video
+        key={activeVideoUrl}
         ref={videoRef}
         autoPlay
         muted
@@ -57,18 +78,17 @@ export function CommunityHeroVideo() {
         onEnded={handleEnded}
         className="absolute inset-0 h-full w-full object-cover"
       >
-        <source src={videoUrl} type="video/mp4" />
+        <source src={activeVideoUrl} type="video/mp4" />
       </video>
 
-      {/* Bottom gradient — keeps the scroll hint readable over any video frame */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/50 to-transparent" />
+      {/* Bottom gradient + scroll hint — desktop/tablet only */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 hidden h-32 bg-gradient-to-t from-black/50 to-transparent md:block" />
 
-      {/* Scroll hint — fades in after first loop completes */}
       <button
         type="button"
         onClick={scrollToContent}
         aria-label="Scroll to content"
-        className={`absolute bottom-8 left-1/2 -translate-x-1/2 flex cursor-pointer flex-col items-center gap-1.5 transition-opacity duration-1000 ${
+        className={`absolute bottom-8 left-1/2 hidden -translate-x-1/2 cursor-pointer flex-col items-center gap-1.5 transition-opacity duration-1000 md:flex ${
           showScrollHint ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       >
