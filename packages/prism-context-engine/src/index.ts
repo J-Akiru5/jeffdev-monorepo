@@ -18,6 +18,7 @@
  * - prism api-keys    : Manage API keys
  * - prism doctor      : Health check — verify all Prism systems
  * - prism status      : Quick snapshot of current Prism state
+ * - prism check       : The Pass — enforce local .prism/rules.json on written files
  */
 
 import { Command } from "commander";
@@ -63,13 +64,14 @@ import {
 } from "./commands/api-keys.js";
 import { doctor } from "./commands/doctor.js";
 import { status } from "./commands/status.js";
+import { check } from "./commands/check.js";
 
 const program = new Command();
 
 program
   .name("prism")
   .description("Prism Context Engine CLI - Context Governance for LLMs")
-  .version("1.1.2");
+  .version("1.2.0");
 
 program
   .command("login")
@@ -346,5 +348,20 @@ program
   .description("Quick snapshot of your current Prism state")
   .option("--json", "Output as JSON")
   .action((opts) => status(opts));
+
+// Check (the Pass)
+program
+  .command("check")
+  .description(
+    "The Pass — enforce local rules against files (agent hook or lint mode)",
+  )
+  .argument("[files...]", "Files or directories to check")
+  .option("--rules <path>", "Path to .prism/rules.json (default: nearest ancestor)")
+  .option(
+    "--hook",
+    "Agent hook mode: read a PostToolUse event JSON from stdin, exit 2 on blocking violations",
+  )
+  .option("--format <format>", "Hook message format", "claude-code")
+  .action((files, opts) => check(files, opts));
 
 program.parse();
