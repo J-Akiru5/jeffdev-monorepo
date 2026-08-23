@@ -19,6 +19,9 @@ CREATE INDEX IF NOT EXISTS idx_testimonials_featured ON testimonials (featured, 
 -- RLS policies
 ALTER TABLE testimonials ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Public can read testimonials" ON testimonials;
+DROP POLICY IF EXISTS "Service role can manage testimonials" ON testimonials;
+
 -- Public can read all testimonials
 CREATE POLICY "Public can read testimonials"
   ON testimonials FOR SELECT

@@ -15,15 +15,22 @@ CREATE TABLE IF NOT EXISTS pm_tasks (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Indexes
-CREATE INDEX idx_pm_tasks_status ON pm_tasks(status);
-CREATE INDEX idx_pm_tasks_priority ON pm_tasks(priority);
-CREATE INDEX idx_pm_tasks_category ON pm_tasks(category);
-CREATE INDEX idx_pm_tasks_deadline ON pm_tasks(deadline);
-CREATE INDEX idx_pm_tasks_created_by ON pm_tasks(created_by);
+-- Indexes (IF NOT EXISTS — this table was already present on the remote
+-- database before this migration was recorded as applied, so re-running
+-- must be a safe no-op rather than erroring on duplicate objects)
+CREATE INDEX IF NOT EXISTS idx_pm_tasks_status ON pm_tasks(status);
+CREATE INDEX IF NOT EXISTS idx_pm_tasks_priority ON pm_tasks(priority);
+CREATE INDEX IF NOT EXISTS idx_pm_tasks_category ON pm_tasks(category);
+CREATE INDEX IF NOT EXISTS idx_pm_tasks_deadline ON pm_tasks(deadline);
+CREATE INDEX IF NOT EXISTS idx_pm_tasks_created_by ON pm_tasks(created_by);
 
 -- RLS
 ALTER TABLE pm_tasks ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view all pm_tasks" ON pm_tasks;
+DROP POLICY IF EXISTS "Users can insert their own pm_tasks" ON pm_tasks;
+DROP POLICY IF EXISTS "Users can update their own pm_tasks" ON pm_tasks;
+DROP POLICY IF EXISTS "Users can delete their own pm_tasks" ON pm_tasks;
 
 CREATE POLICY "Users can view all pm_tasks" ON pm_tasks
   FOR SELECT USING (true);
@@ -45,6 +52,8 @@ BEGIN
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS pm_tasks_updated_at ON pm_tasks;
 
 CREATE TRIGGER pm_tasks_updated_at
   BEFORE UPDATE ON pm_tasks

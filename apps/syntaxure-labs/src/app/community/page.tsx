@@ -9,6 +9,7 @@ import {
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { CommunityTabs } from "@/components/sections/community-tabs";
+import { CommunityHeroVideo } from "@/components/sections/community-hero-video";
 import { ReleaseTimeline } from "@/components/sections/release-timeline";
 import { createClient } from "@/lib/supabase/server";
 import { getPublishedCommunityPosts } from "@/app/actions/community";
@@ -77,7 +78,11 @@ export default async function CommunityPage() {
   return (
     <>
       <Header />
-      <main className="pt-32 pb-16">
+
+      {/* Full-viewport cinematic hero video — loops muted, scroll hint after first play */}
+      <CommunityHeroVideo />
+
+      <main id="community-content" className="pt-32 pb-16">
         {/* Desktop Absolute Back Button (Sits on the left side, professional style) */}
         <div className="hidden xl:flex absolute left-[max(2rem,calc(50%-54rem))] top-36 z-50">
           <Link

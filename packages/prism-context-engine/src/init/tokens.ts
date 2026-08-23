@@ -1,5 +1,5 @@
-import { existsSync, readFileSync } from "fs";
-import { join } from "path";
+import { existsSync, readdirSync, readFileSync } from "fs";
+import { join, relative } from "path";
 import { pathToFileURL } from "url";
 
 export interface ColorToken {
@@ -47,27 +47,51 @@ const TAILWIND_CONFIG_CANDIDATES = [
 ];
 
 const HEX_VALUE_RE = /^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
-const CUSTOM_PROP_RE = /--([a-zA-Z0-9-]+)\s*:\s*([^;]+);/g;
+const CUSTOM_PROP_RE_SOURCE = "--([a-zA-Z0-9-]+)\\s*:\\s*([^;]+);";
 
 function extractCssCustomProperties(
   cssPath: string,
   relPath: string,
 ): ColorToken[] {
   const content = readFileSync(cssPath, "utf8");
+  return extractCustomPropsFromText(content, relPath);
+}
+
+/** Phase 4 Batch B: text-based core so SFC harvesters (Vue/Svelte style
+ *  blocks) and the repo scanner reuse ONE matching pipeline. */
+export function extractCustomPropsFromText(
+  content: string,
+  displayPath: string,
+): ColorToken[] {
   const found: ColorToken[] = [];
-  CUSTOM_PROP_RE.lastIndex = 0;
+  const re = new RegExp(CUSTOM_PROP_RE_SOURCE, "g");
   let match: RegExpExecArray | null;
-  while ((match = CUSTOM_PROP_RE.exec(content)) !== null) {
+  while ((match = re.exec(content)) !== null) {
     const name = match[1]!;
     const value = match[2]!.trim();
     if (!HEX_VALUE_RE.test(value)) continue;
     found.push({
       hex: value.toLowerCase(),
       varRef: `var(--${name})`,
-      source: relPath,
+      source: displayPath,
     });
   }
   return found;
+}
+
+/**
+ * Phase 4 Batch B: for Vue/Svelte files, return ONLY <style> block content
+ * concatenated (scoped/module/lang attributes irrelevant to token regex).
+ * Everything else returns the full file text.
+ */
+export function harvestStyleContent(filePath: string, content: string): string {
+  const lower = filePath.toLowerCase();
+  if (!lower.endsWith(".vue") && !lower.endsWith(".svelte")) return content;
+  const blocks: string[] = [];
+  const re = /<style\b[^>]*>([\s\S]*?)<\/style>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(content)) !== null) blocks.push(m[1]!);
+  return blocks.join("\n");
 }
 
 function flattenColorValues(
@@ -175,11 +199,24 @@ export async function extractTokens(cwd: string): Promise<ExtractedTokens> {
   const cssFilesScanned: string[] = [];
   const seenHex = new Set<string>();
 
+  // Phase 4 Batch A: priority candidates first (globals.css locations),
+  // then a bounded walk over every other .css/.scss in the workspace so
+  // plain-CSS and SCSS projects get token coverage without hand-listing.
+  const absTargets = new Map<string, string>(); // abs -> display path
   for (const candidate of CSS_CANDIDATES) {
     const abs = join(cwd, candidate);
-    if (!existsSync(abs)) continue;
-    cssFilesScanned.push(candidate);
-    for (const token of extractCssCustomProperties(abs, candidate)) {
+    if (existsSync(abs)) absTargets.set(abs, candidate);
+  }
+  for (const abs of walkStyleFiles(cwd)) {
+    if (!absTargets.has(abs)) {
+      absTargets.set(abs, relative(cwd, abs) || abs);
+    }
+  }
+
+  for (const [abs, display] of absTargets) {
+    cssFilesScanned.push(display);
+    const content = harvestStyleContent(abs, readFileSync(abs, "utf8"));
+    for (const token of extractCustomPropsFromText(content, display)) {
       if (seenHex.has(token.hex)) continue;
       seenHex.add(token.hex);
       colorTokens.push(token);
@@ -193,4 +230,60 @@ export async function extractTokens(cwd: string): Promise<ExtractedTokens> {
     cssFilesScanned,
     ...tailwindConfig,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Phase 4 Batch A: workspace style-file walker (plain CSS + SCSS).
+// ---------------------------------------------------------------------------
+
+const WALK_EXTENSIONS = [".css", ".scss", ".vue", ".svelte"];
+const WALK_EXCLUDES = new Set([
+  "node_modules",
+  "dist",
+  "build",
+  "out",
+  "coverage",
+  ".git",
+  ".next",
+  ".nuxt",
+  ".output",
+  ".svelte-kit",
+]);
+const MAX_WALK_DEPTH = 10;
+const MAX_WALKED_FILES = 200;
+
+/** Bounded depth-first collection of .css/.scss files, excluding vendored
+ *  and build output directories. Deterministic order (sorted per dir) so
+ *  output is stable run-to-run. */
+function walkStyleFiles(cwd: string): string[] {
+  const found: string[] = [];
+
+  function walk(dir: string, depth: number): void {
+    if (depth > MAX_WALK_DEPTH || found.length >= MAX_WALKED_FILES) return;
+    let entries;
+    try {
+      entries = readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    const sorted = [...entries].sort((a, b) => (a.name < b.name ? -1 : 1));
+    // Two passes: directories first keeps stack depth shallow on wide trees.
+    for (const entry of sorted) {
+      if (!entry.isDirectory()) continue;
+      if (WALK_EXCLUDES.has(entry.name) || entry.name.startsWith(".")) continue;
+      walk(join(dir, entry.name), depth + 1);
+      if (found.length >= MAX_WALKED_FILES) return;
+    }
+    for (const entry of sorted) {
+      if (entry.isDirectory()) continue;
+      const lower = entry.name.toLowerCase();
+      if (WALK_EXTENSIONS.some((ext) => lower.endsWith(ext))) {
+        found.push(join(dir, entry.name));
+        if (found.length >= MAX_WALKED_FILES) return;
+      }
+    }
+  }
+
+  walk(cwd, 0);
+  return found;
 }
