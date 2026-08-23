@@ -59,6 +59,9 @@ export interface FilePlacementCheck {
 export interface RequiredImportCheck {
   type: "required_import";
   specifier: string;
+  /** Optional path regex — only files whose normalized path matches are
+   *  required to import the specifier (e.g. pytest only in test files). */
+  includePattern?: string;
   message?: string;
 }
 

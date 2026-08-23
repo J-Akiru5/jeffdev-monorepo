@@ -253,6 +253,21 @@ function validateRequiredImport(
     "required_import",
   );
   const out: CheckBlock = { type: "required_import", specifier };
+  if (check.includePattern !== undefined) {
+    const includePattern = requireNonEmptyString(
+      ruleId,
+      check.includePattern,
+      "required_import",
+    );
+    try {
+      new RegExp(includePattern);
+    } catch (err) {
+      throw new RulesParseError(
+        `rule "${ruleId}": includePattern does not compile: ${(err as Error).message}`,
+      );
+    }
+    out.includePattern = includePattern;
+  }
   if (check.message !== undefined) out.message = check.message as string;
   return out;
 }

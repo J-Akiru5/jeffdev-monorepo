@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "kotlin/no-bang-bang",
+      "category": "architecture",
+      "severity": "warn",
+      "extensions": [".kt"],
+      "instruction": "Avoid the not-null assertion operator !! — handle nullability explicitly (Kotlin coding conventions / detex UnsafeCallOnNullableType).",
+      "check": {
+        "type": "forbidden_pattern",
+        "pattern": "\\w!!",
+        "message": "Replace !! with safe calls, requireNotNull, or an explicit check."
+      }
+    },
+    {
+      "id": "kotlin/no-globalscope",
+      "category": "architecture",
+      "severity": "block",
+      "extensions": [".kt"],
+      "instruction": "GlobalScope is a structural-concurrency hazard — use lifecycle-scoped CoroutineScope instead (official coroutine guidance).",
+      "check": {
+        "type": "forbidden_pattern",
+        "pattern": "\\bGlobalScope\\b"
+      }
+    },
+    {
+      "id": "kotlin/composables-pascalcase-in-ui-components",
+      "category": "styling",
+      "severity": "warn",
+      "extensions": [".kt"],
+      "instruction": "Compose UI files live under ui/components and are named for their primary composable in PascalCase.",
+      "check": {
+        "type": "file_placement",
+        "matchPattern": "^[A-Z]\\w*(Screen|Card|Button|Row|Column)\\.kt$",
+        "directory": "src/main/java/ui/components"
+      }
+    },
+    {
+      "id": "kotlin/screens-are-composable",
+      "category": "architecture",
+      "severity": "warn",
+      "extensions": [".kt"],
+      "instruction": "*Screen.kt files define composables, so they must import androidx.compose.runtime.",
+      "check": {
+        "type": "required_import",
+        "specifier": "androidx.compose.runtime",
+        "includePattern": "(^|/)ui/components/\\w+Screen\\.kt$"
+      }
+    }
+  ]
+}

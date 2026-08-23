@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "flutter/widgets-pascalcase-in-lib-widgets",
+      "category": "architecture",
+      "severity": "warn",
+      "extensions": [".dart"],
+      "instruction": "Widget files use PascalCase and live under lib/widgets/.",
+      "check": {
+        "type": "file_placement",
+        "matchPattern": "^[A-Z]\\w*\\.dart$",
+        "directory": "lib/widgets"
+      }
+    },
+    {
+      "id": "flutter/no-print-use-debugprint",
+      "category": "architecture",
+      "severity": "warn",
+      "extensions": [".dart"],
+      "instruction": "Never ship print() — use debugPrint (stripped in release) or a logger. Mirrors the avoid_print lint.",
+      "check": {
+        "type": "forbidden_pattern",
+        "pattern": "\\bprint\\(",
+        "message": "Use debugPrint or a logger instead of print."
+      }
+    },
+    {
+      "id": "flutter/widgets-import-material",
+      "category": "architecture",
+      "severity": "warn",
+      "extensions": [".dart"],
+      "instruction": "Widget files must import the Material library they render with.",
+      "check": {
+        "type": "required_import",
+        "specifier": "package:flutter/material.dart",
+        "includePattern": "(^|/)lib/widgets/[^/]+\\.dart$"
+      }
+    },
+    {
+      "id": "flutter/dart-files-snake-case",
+      "category": "styling",
+      "severity": "warn",
+      "extensions": [".dart"],
+      "instruction": "Dart file names are snake_case (Effective Dart). Widget files are exempt via their own PascalCase placement rule above.",
+      "check": {
+        "type": "naming_pattern",
+        "pattern": "^(?:[a-z0-9]+_?)*$|^[A-Z]"
+      }
+    }
+  ]
+}
