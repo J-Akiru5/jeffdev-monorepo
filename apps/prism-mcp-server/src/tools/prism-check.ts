@@ -32,28 +32,26 @@ export async function handlePrismCheck(input: PrismCheckInput): Promise<ToolOutp
   }
 
   try {
-    const { getCollection } = await import("@syntaxure-labs/db/cosmos");
-    const rules = await getCollection("rules");
+    const { getPrismDb, isValidId } = await import("@syntaxure-labs/db/prism");
+    const db = getPrismDb();
 
-    const query: Record<string, unknown> = {
-      isActive: true,
-      pattern: { $exists: true, $ne: null },
-    };
+    let query = db
+      .from("prism_rules")
+      .select("_id:id, name, category, content, pattern, severity, priority")
+      .eq("is_active", true)
+      .not("pattern", "is", null);
     if (ruleIds && ruleIds.length > 0) {
-      const { ObjectId } = await import("mongodb");
-      query._id = {
-        $in: ruleIds.map((id) =>
-          ObjectId.isValid(id) ? new ObjectId(id) : id,
-        ),
-      };
+      query = query.in("id", ruleIds.filter((id) => isValidId(id)));
     }
-    if (projectId) query.projectId = projectId;
-    if (category) query.category = category;
+    if (projectId) query = query.eq("project_id", projectId);
+    if (category) query = query.eq("category", category);
 
-    const patternRules = await rules
-      .find(query)
-      .sort({ priority: 1 })
-      .toArray();
+    const { data: patternRulesData, error: queryError } = await query.order(
+      "priority",
+      { ascending: true },
+    );
+    if (queryError) throw queryError;
+    const patternRules = patternRulesData ?? [];
 
     if (patternRules.length === 0) {
       return {

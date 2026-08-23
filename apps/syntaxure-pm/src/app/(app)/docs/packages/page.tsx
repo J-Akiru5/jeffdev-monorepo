@@ -4,17 +4,17 @@ const packages = [
   {
     name: "@syntaxure-labs/db",
     exportName: "db",
-    description: "The Data Nexus — unified database access layer for Cosmos DB, Gremlin graph, and Prisma (PostgreSQL).",
+    description: "The Data Nexus — unified database access layer for Prisma/Supabase Postgres, including Prism's tables.",
     features: [
-      "Cosmos DB singleton client with connection pooling (maxPoolSize: 10)",
-      "Gremlin graph client for rule relationships",
+      "Prism Postgres client (service-role Supabase) for prism_* tables",
+      "Rule-graph helpers (relates_to/conflicts_with edges, tag overlap) replacing the old Gremlin graph",
       "Prisma client for Supabase PostgreSQL",
       "Zod schemas as single source of truth for data structures",
       "Webhook publisher for n8n automation",
     ],
     exports: [
       { name: "@syntaxure-labs/db", description: "Main export (Zod schemas, types)" },
-      { name: "@syntaxure-labs/db/cosmos", description: "MongoDB/Cosmos DB client" },
+      { name: "@syntaxure-labs/db/prism", description: "Prism Postgres client + rule-graph helpers" },
       { name: "@syntaxure-labs/db/schema", description: "Zod validation schemas" },
       { name: "@syntaxure-labs/db/prisma", description: "Prisma client singleton" },
       { name: "@syntaxure-labs/db/prisma-types", description: "Prisma-generated types" },

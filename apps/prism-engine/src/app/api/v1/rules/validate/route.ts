@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCollection } from "@syntaxure-labs/db/cosmos";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { z } from "zod";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
 import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
@@ -41,15 +41,19 @@ export async function POST(request: NextRequest) {
     line?: number;
   }> = [];
 
-  const rules = await getCollection("rules");
-  const query: Record<string, unknown> = {
-    isActive: true,
-    pattern: { $exists: true, $ne: null },
-  };
-  if (category) query.category = category;
-  if (auth.source === "api_key") query.createdBy = auth.userId;
+  const db = getPrismDb();
+  let query = db
+    .from("prism_rules")
+    .select("name, severity, content, pattern, priority")
+    .eq("is_active", true)
+    .not("pattern", "is", null);
+  if (category) query = query.eq("category", category);
+  if (auth.source === "api_key") query = query.eq("created_by", auth.userId);
 
-  const patternRules = await rules.find(query).sort({ priority: 1 }).toArray();
+  const { data: patternRulesData } = await query.order("priority", {
+    ascending: true,
+  });
+  const patternRules = patternRulesData ?? [];
 
   for (const rule of patternRules) {
     if (!rule.pattern) continue;

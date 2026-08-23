@@ -4,9 +4,10 @@ echo "=== VERCEL IGNORE BUILD STEP ==="
 echo "Target: prism-docs"
 echo "Current Branch: $VERCEL_GIT_COMMIT_REF"
 
-# 1. Only deploy on main branch
-if [ "$VERCEL_GIT_COMMIT_REF" != "main" ]; then
-  echo "🛑 Skipped: Build triggered on non-main branch ($VERCEL_GIT_COMMIT_REF)."
+# 1. Only build on main (production) or staging (preview) — everything else
+#    (develop, feature branches, etc.) is intentionally never deployed.
+if [ "$VERCEL_GIT_COMMIT_REF" != "main" ] && [ "$VERCEL_GIT_COMMIT_REF" != "staging" ]; then
+  echo "🛑 Skipped: Build triggered on non-deploy branch ($VERCEL_GIT_COMMIT_REF). Only main/staging deploy."
   exit 0;
 fi
 

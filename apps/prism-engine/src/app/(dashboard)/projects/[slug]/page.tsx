@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import {
   ArrowLeft,
   Download,
@@ -33,28 +33,35 @@ export default async function ProjectPage({ params }: Props) {
   }
 
   const userId = user.id;
+  const db = getPrismDb();
 
   // Fetch project
-  const projectsCollection = await getCollection("projects");
-  const project = await projectsCollection.findOne({ userId, slug });
+  const { data: project } = await db
+    .from("prism_projects")
+    .select("id, name, slug, designSystem:design_system, stack")
+    .eq("user_id", userId)
+    .eq("slug", slug)
+    .maybeSingle();
 
   if (!project) {
     notFound();
   }
 
   // Fetch associated rules
-  const rulesCollection = await getCollection("rules");
-  const rules = await rulesCollection
-    .find({ projectId: project._id.toString() })
-    .sort({ priority: 1 })
-    .limit(20)
-    .toArray();
+  const { data: ruleRows } = await db
+    .from("prism_rules")
+    .select("_id:id, name, category, priority, isActive:is_active, content")
+    .eq("project_id", project.id)
+    .order("priority", { ascending: true })
+    .limit(20);
+  const rules = ruleRows ?? [];
 
   // Fetch skills count
-  const skillsCollection = await getCollection("skills");
-  const skillsCount = await skillsCollection.countDocuments({
-    projectId: project._id.toString(),
-  });
+  const { count: skillsCountRaw } = await db
+    .from("prism_skills")
+    .select("id", { count: "exact", head: true })
+    .eq("project_id", project.id);
+  const skillsCount = skillsCountRaw ?? 0;
 
   return (
     <div className="space-y-8">

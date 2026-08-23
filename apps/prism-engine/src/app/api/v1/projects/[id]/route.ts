@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCollection } from "@syntaxure-labs/db/cosmos";
-import { ObjectId } from "mongodb";
+import { getPrismDb, isValidId } from "@syntaxure-labs/db/prism";
 import { z } from "zod";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
 
@@ -27,23 +26,24 @@ export async function GET(
   if (auth instanceof Response) return auth;
 
   const { id } = await params;
-  if (!ObjectId.isValid(id)) return errorResponse("Invalid project ID", 400);
+  if (!isValidId(id)) return errorResponse("Invalid project ID", 400);
 
-  const projects = await getCollection("projects");
-  const project = await projects.findOne({
-    _id: new ObjectId(id),
-    userId: auth.userId,
-  });
+  const db = getPrismDb();
+  const { data: project } = await db
+    .from("prism_projects")
+    .select(
+      "_id:id, name, slug, designSystem:design_system, stack, createdAt:created_at, updatedAt:updated_at",
+    )
+    .eq("id", id)
+    .eq("user_id", auth.userId)
+    .maybeSingle();
   if (!project) return errorResponse("Project not found", 404);
 
   const projectId = project._id.toString();
-  const [rules, videos] = await Promise.all([
-    getCollection("rules"),
-    getCollection("videos"),
-  ]);
-  const [ruleCount, videoCount] = await Promise.all([
-    rules.countDocuments({ projectId }),
-    videos.countDocuments({ projectId }),
+  const countOpts = { count: "exact" as const, head: true };
+  const [{ count: ruleCount }, { count: videoCount }] = await Promise.all([
+    db.from("prism_rules").select("id", countOpts).eq("project_id", projectId),
+    db.from("prism_videos").select("id", countOpts).eq("project_id", projectId),
   ]);
 
   return successResponse({
@@ -52,8 +52,8 @@ export async function GET(
     slug: project.slug,
     designSystem: project.designSystem,
     stack: project.stack,
-    ruleCount,
-    videoCount,
+    ruleCount: ruleCount ?? 0,
+    videoCount: videoCount ?? 0,
     createdAt: project.createdAt,
     updatedAt: project.updatedAt,
   });
@@ -67,7 +67,7 @@ export async function PATCH(
   if (auth instanceof Response) return auth;
 
   const { id } = await params;
-  if (!ObjectId.isValid(id)) return errorResponse("Invalid project ID", 400);
+  if (!isValidId(id)) return errorResponse("Invalid project ID", 400);
 
   let body: unknown;
   try {
@@ -83,17 +83,25 @@ export async function PATCH(
       422,
     );
 
-  const projects = await getCollection("projects");
-  const existing = await projects.findOne({
-    _id: new ObjectId(id),
-    userId: auth.userId,
-  });
+  const db = getPrismDb();
+  const { data: existing } = await db
+    .from("prism_projects")
+    .select("_id:id, name, slug, designSystem:design_system, stack, createdAt:created_at")
+    .eq("id", id)
+    .eq("user_id", auth.userId)
+    .maybeSingle();
   if (!existing) return errorResponse("Project not found", 404);
 
-  const updates = { ...parsed.data, updatedAt: new Date().toISOString() };
-  await projects.updateOne({ _id: new ObjectId(id) }, { $set: updates });
+  const updatedAt = new Date().toISOString();
+  const columns: Record<string, unknown> = { updated_at: updatedAt };
+  if (parsed.data.name !== undefined) columns.name = parsed.data.name;
+  if (parsed.data.stack !== undefined) columns.stack = parsed.data.stack;
+  if (parsed.data.designSystem !== undefined)
+    columns.design_system = parsed.data.designSystem;
 
-  return successResponse({ id, ...existing, ...updates });
+  await db.from("prism_projects").update(columns).eq("id", id);
+
+  return successResponse({ id, ...existing, ...parsed.data, updatedAt });
 }
 
 export async function DELETE(
@@ -104,20 +112,21 @@ export async function DELETE(
   if (auth instanceof Response) return auth;
 
   const { id } = await params;
-  if (!ObjectId.isValid(id)) return errorResponse("Invalid project ID", 400);
+  if (!isValidId(id)) return errorResponse("Invalid project ID", 400);
 
-  const projects = await getCollection("projects");
-  const project = await projects.findOne({
-    _id: new ObjectId(id),
-    userId: auth.userId,
-  });
+  const db = getPrismDb();
+  const { data: project } = await db
+    .from("prism_projects")
+    .select("id")
+    .eq("id", id)
+    .eq("user_id", auth.userId)
+    .maybeSingle();
   if (!project) return errorResponse("Project not found", 404);
 
-  const projectId = project._id.toString();
-  const [rulesColl] = await Promise.all([getCollection("rules")]);
+  const projectId = project.id;
   await Promise.all([
-    rulesColl.deleteMany({ projectId }),
-    projects.deleteOne({ _id: new ObjectId(id) }),
+    db.from("prism_rules").delete().eq("project_id", projectId),
+    db.from("prism_projects").delete().eq("id", id),
   ]);
 
   return successResponse({ id, deleted: true });

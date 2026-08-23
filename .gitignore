@@ -11,9 +11,14 @@ node_modules
 .env.development.local
 .env.test.local
 .env.production.local
+.env.e2e.local
 
 # Testing
 coverage
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
 
 # Logs
 ts_errors.log

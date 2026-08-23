@@ -4,13 +4,13 @@
  * POST /api/webhooks/paypal
  * Handles PayPal subscription events with:
  * - Cryptographic signature verification
- * - Idempotency (dedup via webhook_events table)
+ * - Idempotency (dedup via the existing Postgres `webhook_events` table)
  * - Payment receipt emails
  * - Audit trail logging
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
 
@@ -71,7 +71,8 @@ async function verifyPayPalWebhook(
 }
 
 // =============================================================================
-// Idempotency Check
+// Idempotency Check (Postgres `webhook_events` — shared with the agency app,
+// already existed pre-migration; Prism just points at it now too)
 // =============================================================================
 
 async function isEventProcessed(
@@ -79,9 +80,13 @@ async function isEventProcessed(
   eventId: string,
 ): Promise<boolean> {
   try {
-    const { getCollection } = await import("@syntaxure-labs/db");
-    const events = await getCollection("webhook_events");
-    const existing = await events.findOne({ provider, eventId });
+    const db = getPrismDb();
+    const { data: existing } = await db
+      .from("webhook_events")
+      .select("id")
+      .eq("provider", provider)
+      .eq("event_id", eventId)
+      .maybeSingle();
     return !!existing;
   } catch {
     return false;
@@ -95,21 +100,16 @@ async function markEventProcessing(
   payload: unknown,
 ): Promise<void> {
   try {
-    const { getCollection } = await import("@syntaxure-labs/db");
-    const events = await getCollection("webhook_events");
-    await events.updateOne(
-      { provider, eventId },
+    const db = getPrismDb();
+    await db.from("webhook_events").upsert(
       {
-        $set: {
-          provider,
-          eventId,
-          eventType,
-          payload,
-          status: "processing",
-          createdAt: new Date(),
-        },
+        provider,
+        event_id: eventId,
+        event_type: eventType,
+        payload,
+        status: "processing",
       },
-      { upsert: true },
+      { onConflict: "provider,event_id" },
     );
   } catch (error) {
     console.error("[webhook] Failed to mark event processing:", error);
@@ -121,12 +121,12 @@ async function markEventCompleted(
   eventId: string,
 ): Promise<void> {
   try {
-    const { getCollection } = await import("@syntaxure-labs/db");
-    const events = await getCollection("webhook_events");
-    await events.updateOne(
-      { provider, eventId },
-      { $set: { status: "completed", processedAt: new Date() } },
-    );
+    const db = getPrismDb();
+    await db
+      .from("webhook_events")
+      .update({ status: "completed", processed_at: new Date().toISOString() })
+      .eq("provider", provider)
+      .eq("event_id", eventId);
   } catch (error) {
     console.error("[webhook] Failed to mark event completed:", error);
   }
@@ -138,12 +138,16 @@ async function markEventFailed(
   error: string,
 ): Promise<void> {
   try {
-    const { getCollection } = await import("@syntaxure-labs/db");
-    const events = await getCollection("webhook_events");
-    await events.updateOne(
-      { provider, eventId },
-      { $set: { status: "failed", error, processedAt: new Date() } },
-    );
+    const db = getPrismDb();
+    await db
+      .from("webhook_events")
+      .update({
+        status: "failed",
+        error,
+        processed_at: new Date().toISOString(),
+      })
+      .eq("provider", provider)
+      .eq("event_id", eventId);
   } catch (err) {
     console.error("[webhook] Failed to mark event failed:", err);
   }
@@ -337,27 +341,28 @@ async function handleSubscriptionActivated(
   const tier = getTierFromPlanId(resource.plan_id);
   const nextBilling = resource.billing_info?.next_billing_time;
   const now = new Date();
+  const currentPeriodEnd = nextBilling
+    ? new Date(nextBilling)
+    : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-  const subscriptions = await getCollection("subscriptions");
-  await subscriptions.updateOne(
-    { userId },
+  const db = getPrismDb();
+  const { data: existing } = await db
+    .from("prism_subscriptions")
+    .select("id")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  await db.from("prism_subscriptions").upsert(
     {
-      $set: {
-        tier,
-        status: "active",
-        paypalSubscriptionId: resource.id,
-        currentPeriodEnd: nextBilling
-          ? new Date(nextBilling)
-          : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000),
-        updatedAt: now,
-      },
-      $setOnInsert: {
-        userId,
-        currentPeriodStart: now,
-        createdAt: now,
-      },
+      user_id: userId,
+      tier,
+      status: "active",
+      paypal_subscription_id: resource.id,
+      current_period_end: currentPeriodEnd.toISOString(),
+      updated_at: now.toISOString(),
+      ...(existing ? {} : { current_period_start: now.toISOString() }),
     },
-    { upsert: true },
+    { onConflict: "user_id" },
   );
 
   // Send receipt email
@@ -373,49 +378,48 @@ async function handleSubscriptionActivated(
 }
 
 async function handleSubscriptionCancelled(userId: string) {
-  const subscriptions = await getCollection("subscriptions");
-  await subscriptions.updateOne(
-    { userId },
-    { $set: { status: "cancelled", updatedAt: new Date() } },
-  );
+  const db = getPrismDb();
+  await db
+    .from("prism_subscriptions")
+    .update({ status: "cancelled", updated_at: new Date().toISOString() })
+    .eq("user_id", userId);
 }
 
 async function handleSubscriptionSuspended(userId: string) {
-  const subscriptions = await getCollection("subscriptions");
-  await subscriptions.updateOne(
-    { userId },
-    { $set: { status: "past_due", updatedAt: new Date() } },
-  );
+  const db = getPrismDb();
+  await db
+    .from("prism_subscriptions")
+    .update({ status: "past_due", updated_at: new Date().toISOString() })
+    .eq("user_id", userId);
 }
 
 async function handlePaymentCompleted(
   userId: string,
-  resource: PayPalEvent["resource"],
+  _resource: PayPalEvent["resource"],
 ) {
-  const usage = await getCollection("usage");
+  const db = getPrismDb();
   const now = new Date();
   const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
-  await usage.updateOne(
-    { userId, month },
+  await db.from("prism_usage").upsert(
     {
-      $set: {
-        aiGenerations: 0,
-        rulesCreated: 0,
-        componentsCreated: 0,
-        updatedAt: now,
-      },
+      user_id: userId,
+      month,
+      ai_generations: 0,
+      rules_created: 0,
+      components_created: 0,
+      updated_at: now.toISOString(),
     },
-    { upsert: true },
+    { onConflict: "user_id,month" },
   );
 }
 
 async function handlePaymentFailed(userId: string) {
-  const subscriptions = await getCollection("subscriptions");
-  await subscriptions.updateOne(
-    { userId },
-    { $set: { status: "past_due", updatedAt: new Date() } },
-  );
+  const db = getPrismDb();
+  await db
+    .from("prism_subscriptions")
+    .update({ status: "past_due", updated_at: new Date().toISOString() })
+    .eq("user_id", userId);
 
   // Send failure email to actual email address
   const email = await getUserEmail(userId);

@@ -3,12 +3,15 @@
  * GET  /api/notifications — fetch current preferences
  * POST /api/notifications — save preferences
  *
- * Preferences stored in Cosmos DB users collection under notificationPrefs field.
+ * Preferences stored on `user_profiles.notification_prefs` (Postgres/Supabase).
+ * Previously lived in the Cosmos DB `users` collection, keyed by `supabaseId`
+ * — folded into user_profiles during the Cosmos → Postgres migration since
+ * user_profiles.id already IS the Supabase auth user id.
  */
 
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { z } from "zod";
 
 const PrefsSchema = z.object({
@@ -37,9 +40,13 @@ export async function GET() {
   const userId = user.id;
 
   try {
-    const users = await getCollection("users");
-    const doc = await users.findOne({ supabaseId: userId });
-    const prefs = doc?.notificationPrefs ?? DEFAULT_PREFS;
+    const db = getPrismDb();
+    const { data: profile } = await db
+      .from("user_profiles")
+      .select("notificationPrefs:notification_prefs")
+      .eq("id", userId)
+      .maybeSingle();
+    const prefs = profile?.notificationPrefs ?? DEFAULT_PREFS;
     return NextResponse.json({ prefs });
   } catch {
     return NextResponse.json({ prefs: DEFAULT_PREFS });
@@ -73,17 +80,14 @@ export async function POST(req: Request) {
   }
 
   try {
-    const users = await getCollection("users");
-    await users.updateOne(
-      { supabaseId: userId },
-      {
-        $set: {
-          notificationPrefs: parsed.data,
-          updatedAt: new Date().toISOString(),
-        },
-      },
-      { upsert: true },
-    );
+    const db = getPrismDb();
+    await db
+      .from("user_profiles")
+      .update({
+        notification_prefs: parsed.data,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", userId);
     return NextResponse.json({ success: true, prefs: parsed.data });
   } catch {
     return NextResponse.json(

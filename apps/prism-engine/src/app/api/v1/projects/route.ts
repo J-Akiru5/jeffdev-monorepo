@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCollection } from "@syntaxure-labs/db/cosmos";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { z } from "zod";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
 import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
@@ -45,48 +45,53 @@ export async function GET(request: NextRequest) {
   const designSystem = searchParams.get("designSystem");
   const modifiedAfter = searchParams.get("modifiedAfter");
 
-  const projects = await getCollection("projects");
-  const query: Record<string, unknown> = { userId: auth.userId };
+  const db = getPrismDb();
+  let query = db
+    .from("prism_projects")
+    .select(
+      "_id:id, name, slug, designSystem:design_system, stack, createdAt:created_at, updatedAt:updated_at",
+      { count: "exact" },
+    )
+    .eq("user_id", auth.userId);
   if (stack && STACKS.includes(stack as (typeof STACKS)[number]))
-    query.stack = stack;
+    query = query.eq("stack", stack);
   if (
     designSystem &&
     DESIGN_SYSTEMS.includes(designSystem as (typeof DESIGN_SYSTEMS)[number])
   )
-    query.designSystem = designSystem;
-  if (modifiedAfter) query.updatedAt = { $gte: modifiedAfter };
+    query = query.eq("design_system", designSystem);
+  if (modifiedAfter) query = query.gte("updated_at", modifiedAfter);
 
-  const total = await projects.countDocuments(query);
-  const items = await projects
-    .find(query)
-    .sort({ createdAt: -1 })
-    .skip((page - 1) * limit)
-    .limit(limit)
-    .toArray();
-
-  const rules = await getCollection("rules");
-  const videos = await getCollection("videos");
+  const { data: itemsRaw, count } = await query
+    .order("created_at", { ascending: false })
+    .range((page - 1) * limit, page * limit - 1);
+  const items = itemsRaw ?? [];
+  const total = count ?? 0;
 
   const projectIds = items.map((p) => p._id.toString());
 
-  // Batch count queries using aggregation instead of N+1
-  const [ruleCounts, videoCounts] = await Promise.all([
-    rules
-      .aggregate([
-        { $match: { projectId: { $in: projectIds } } },
-        { $group: { _id: "$projectId", count: { $sum: 1 } } },
-      ])
-      .toArray(),
-    videos
-      .aggregate([
-        { $match: { projectId: { $in: projectIds } } },
-        { $group: { _id: "$projectId", count: { $sum: 1 } } },
-      ])
-      .toArray(),
-  ]);
+  // Batch count rules/videos per project (avoids N+1) via GROUP BY-equivalent
+  // aggregation. Postgres/PostgREST has no `.groupBy()` helper, so this is
+  // done with one query per related table and reduced in-process — the row
+  // volume here (rules/videos for a page of <=50 projects) is small.
+  const [{ data: ruleRows }, { data: videoRows }] =
+    projectIds.length > 0
+      ? await Promise.all([
+          db.from("prism_rules").select("project_id").in("project_id", projectIds),
+          db.from("prism_videos").select("project_id").in("project_id", projectIds),
+        ])
+      : [{ data: [] }, { data: [] }];
 
-  const ruleCountMap = new Map(ruleCounts.map((r) => [r._id, r.count]));
-  const videoCountMap = new Map(videoCounts.map((v) => [v._id, v.count]));
+  const ruleCountMap = new Map<string, number>();
+  for (const r of ruleRows ?? []) {
+    const pid = r.project_id as string;
+    ruleCountMap.set(pid, (ruleCountMap.get(pid) || 0) + 1);
+  }
+  const videoCountMap = new Map<string, number>();
+  for (const v of videoRows ?? []) {
+    const pid = v.project_id as string;
+    videoCountMap.set(pid, (videoCountMap.get(pid) || 0) + 1);
+  }
 
   const enriched = items.map((p) => {
     const projectId = p._id.toString();
@@ -140,26 +145,48 @@ export async function POST(request: NextRequest) {
   const { name, designSystem, stack } = parsed.data;
   const slug = slugify(name);
 
-  const projects = await getCollection("projects");
-  const existing = await projects.findOne({ userId: auth.userId, slug });
+  const db = getPrismDb();
+  const { data: existing } = await db
+    .from("prism_projects")
+    .select("id")
+    .eq("user_id", auth.userId)
+    .eq("slug", slug)
+    .maybeSingle();
   if (existing)
     return errorResponse("A project with this name already exists", 409);
 
   const now = new Date().toISOString();
-  const doc = {
-    userId: auth.userId,
-    name,
-    slug,
-    designSystem,
-    stack,
-    visibility: "private",
-    createdAt: now,
-    updatedAt: now,
-  };
+  const { data: inserted, error } = await db
+    .from("prism_projects")
+    .insert({
+      user_id: auth.userId,
+      name,
+      slug,
+      design_system: designSystem,
+      stack,
+      visibility: "private",
+      created_at: now,
+      updated_at: now,
+    })
+    .select("id")
+    .single();
 
-  const result = await projects.insertOne(doc);
+  if (error || !inserted) {
+    return errorResponse("Failed to create project", 500);
+  }
+
   const response = successResponse(
-    { id: result.insertedId.toString(), ...doc },
+    {
+      id: inserted.id,
+      userId: auth.userId,
+      name,
+      slug,
+      designSystem,
+      stack,
+      visibility: "private",
+      createdAt: now,
+      updatedAt: now,
+    },
     { created: true },
   );
   Object.entries(

@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
 
 /**
@@ -18,11 +18,13 @@ export async function getUserTier(): Promise<SubscriptionTier> {
   }
 
   try {
-    const subscriptionsCollection = await getCollection("subscriptions");
-    const subscription = await subscriptionsCollection.findOne({
-      userId: user.id,
-      status: { $in: ["active", "trialing"] },
-    });
+    const db = getPrismDb();
+    const { data: subscription } = await db
+      .from("prism_subscriptions")
+      .select("tier")
+      .eq("user_id", user.id)
+      .in("status", ["active", "trialing"])
+      .maybeSingle();
 
     if (!subscription) {
       return "free";
@@ -50,13 +52,17 @@ export async function canUseIdeSync(): Promise<{
  * Get user's usage stats
  */
 export async function getUsageStats(userId: string) {
-  const projectsCollection = await getCollection("projects");
-  const rulesCollection = await getCollection("rules");
-
-  const [projectCount, ruleCount] = await Promise.all([
-    projectsCollection.countDocuments({ userId }),
-    rulesCollection.countDocuments({ userId }),
+  const db = getPrismDb();
+  const [{ count: projectCount }, { count: ruleCount }] = await Promise.all([
+    db
+      .from("prism_projects")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId),
+    db
+      .from("prism_rules")
+      .select("id", { count: "exact", head: true })
+      .eq("created_by", userId),
   ]);
 
-  return { projectCount, ruleCount };
+  return { projectCount: projectCount || 0, ruleCount: ruleCount || 0 };
 }

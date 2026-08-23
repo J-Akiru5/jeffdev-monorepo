@@ -1,7 +1,15 @@
 {
   "extends": "@repo/typescript-config/react-library.json",
   "compilerOptions": {
-    "outDir": "dist"
+    "outDir": "dist",
+    // This package is consumed directly (un-transpiled) by Next.js apps via
+    // Turbopack/webpack, not run as plain Node ESM. "bundler" resolution
+    // matches how those bundlers actually resolve relative TS imports —
+    // NodeNext would otherwise require ".js" extensions on specifiers that
+    // point at ".ts" files, which tsc accepts but Turbopack cannot resolve
+    // (it looks for a literal cache.js, not cache.ts).
+    "module": "ESNext",
+    "moduleResolution": "bundler"
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]

@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCollection } from "@syntaxure-labs/db/cosmos";
-import { ObjectId } from "mongodb";
+import { getPrismDb, isValidId } from "@syntaxure-labs/db/prism";
 import { z } from "zod";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
 
@@ -60,6 +59,20 @@ const UpdateBrandSchema = z.object({
     .optional(),
 });
 
+// Maps camelCase request fields to Postgres column names for the update payload.
+function toColumns(data: z.infer<typeof UpdateBrandSchema>): Record<string, unknown> {
+  const cols: Record<string, unknown> = {};
+  if (data.companyName !== undefined) cols.company_name = data.companyName;
+  if (data.tagline !== undefined) cols.tagline = data.tagline;
+  if (data.industry !== undefined) cols.industry = data.industry;
+  if (data.colors !== undefined) cols.colors = data.colors;
+  if (data.typography !== undefined) cols.typography = data.typography;
+  if (data.voice !== undefined) cols.voice = data.voice;
+  if (data.imagery !== undefined) cols.imagery = data.imagery;
+  if (data.spacing !== undefined) cols.spacing = data.spacing;
+  return cols;
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -68,13 +81,17 @@ export async function GET(
   if (auth instanceof Response) return auth;
 
   const { id } = await params;
-  if (!ObjectId.isValid(id)) return errorResponse("Invalid brand ID", 400);
+  if (!isValidId(id)) return errorResponse("Invalid brand ID", 400);
 
-  const brands = await getCollection("brands");
-  const brand = await brands.findOne({
-    _id: new ObjectId(id),
-    userId: auth.userId,
-  });
+  const db = getPrismDb();
+  const { data: brand } = await db
+    .from("prism_brands")
+    .select(
+      "_id:id, slug, companyName:company_name, tagline, industry, colors, typography, voice, imagery, spacing, createdAt:created_at, updatedAt:updated_at",
+    )
+    .eq("id", id)
+    .eq("user_id", auth.userId)
+    .maybeSingle();
   if (!brand) return errorResponse("Brand not found", 404);
 
   return successResponse({
@@ -101,7 +118,7 @@ export async function PATCH(
   if (auth instanceof Response) return auth;
 
   const { id } = await params;
-  if (!ObjectId.isValid(id)) return errorResponse("Invalid brand ID", 400);
+  if (!isValidId(id)) return errorResponse("Invalid brand ID", 400);
 
   let body: unknown;
   try {
@@ -117,17 +134,24 @@ export async function PATCH(
       422,
     );
 
-  const brands = await getCollection("brands");
-  const existing = await brands.findOne({
-    _id: new ObjectId(id),
-    userId: auth.userId,
-  });
+  const db = getPrismDb();
+  const { data: existing } = await db
+    .from("prism_brands")
+    .select(
+      "_id:id, slug, companyName:company_name, tagline, industry, colors, typography, voice, imagery, spacing, createdAt:created_at",
+    )
+    .eq("id", id)
+    .eq("user_id", auth.userId)
+    .maybeSingle();
   if (!existing) return errorResponse("Brand not found", 404);
 
-  const updates = { ...parsed.data, updatedAt: new Date().toISOString() };
-  await brands.updateOne({ _id: new ObjectId(id) }, { $set: updates });
+  const updatedAt = new Date().toISOString();
+  await db
+    .from("prism_brands")
+    .update({ ...toColumns(parsed.data), updated_at: updatedAt })
+    .eq("id", id);
 
-  return successResponse({ id, ...existing, ...updates });
+  return successResponse({ id, ...existing, ...parsed.data, updatedAt });
 }
 
 export async function DELETE(
@@ -138,14 +162,17 @@ export async function DELETE(
   if (auth instanceof Response) return auth;
 
   const { id } = await params;
-  if (!ObjectId.isValid(id)) return errorResponse("Invalid brand ID", 400);
+  if (!isValidId(id)) return errorResponse("Invalid brand ID", 400);
 
-  const brands = await getCollection("brands");
-  const result = await brands.deleteOne({
-    _id: new ObjectId(id),
-    userId: auth.userId,
-  });
-  if (result.deletedCount === 0) return errorResponse("Brand not found", 404);
+  const db = getPrismDb();
+  const { data: deleted } = await db
+    .from("prism_brands")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", auth.userId)
+    .select("id");
+  if (!deleted || deleted.length === 0)
+    return errorResponse("Brand not found", 404);
 
   return successResponse({ id, deleted: true });
 }

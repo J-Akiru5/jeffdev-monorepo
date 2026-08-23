@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { NextResponse } from "next/server";
 import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
 
@@ -68,11 +68,13 @@ export async function GET() {
  */
 async function getUserTier(userId: string): Promise<SubscriptionTier> {
   try {
-    const subscriptionsCollection = await getCollection("subscriptions");
-    const subscription = await subscriptionsCollection.findOne({
-      userId,
-      status: { $in: ["active", "trialing"] },
-    });
+    const db = getPrismDb();
+    const { data: subscription } = await db
+      .from("prism_subscriptions")
+      .select("tier")
+      .eq("user_id", userId)
+      .in("status", ["active", "trialing"])
+      .maybeSingle();
 
     if (!subscription) {
       return "free";

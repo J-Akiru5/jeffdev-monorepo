@@ -1,232 +1,194 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import { homedir } from "os";
+/**
+ * init command — the local onboarding path
+ *
+ * Zero network, zero account. Inspects the project's own package.json,
+ * globals.css, and Tailwind config to generate a starter `.prism/rules.json`
+ * (the same v1 shape `prism check` already parses and `prism pull` fetches
+ * from the dashboard), then wires the Claude Code PostToolUse hook into
+ * `.claude/settings.json` so the Pass starts enforcing immediately.
+ *
+ * Never overwrites `.prism/rules.json` or `.claude/settings.json` without
+ * confirmation — see writeRulesFile() and wireClaudeHook().
+ */
+
+import chalk from "chalk";
+import { existsSync } from "fs";
 import { join } from "path";
-import { createInterface } from "readline";
+import { atomicWriteFileSync } from "../util/atomic-write.js";
+import { promptYesNo } from "../util/prompt.js";
+import { detectProject } from "../init/detect.js";
+import { extractTokens } from "../init/tokens.js";
+import { generateRuleSet } from "../init/generate-rules.js";
+import { wireClaudeHook } from "../init/hook.js";
 
-const CONFIG_DIR = join(homedir(), ".prism");
-const TOKEN_FILE = join(CONFIG_DIR, "token");
-
-const CURSOR_CONFIG_DIR = join(homedir(), ".cursor");
-const CURSOR_MCP_FILE = join(CURSOR_CONFIG_DIR, "mcp.json");
-
-const WINDSURF_CONFIG_DIR = join(homedir(), ".windsurf");
-const WINDSURF_MCP_FILE = join(WINDSURF_CONFIG_DIR, "mcp.json");
-
-const VSCODE_USER_DIR =
-  process.platform === "win32"
-    ? join(process.env.APPDATA || "", "Code", "User")
-    : join(homedir(), "Library", "Application Support", "Code", "User");
-const VSCODE_SETTINGS_FILE = join(VSCODE_USER_DIR, "settings.json");
-
-const CLAUDE_CONFIG_DIR = join(
-  homedir(),
-  "Library",
-  "Application Support",
-  "Claude",
-);
-const CLAUDE_CONFIG_FILE = join(
-  CLAUDE_CONFIG_DIR,
-  "claude_desktop_config.json",
-);
-
-interface McpServerConfig {
-  command: string;
-  args: string[];
-  env?: Record<string, string>;
+export interface InitOptions {
+  yes?: boolean;
+  force?: boolean;
+  /** Internal — lets tests point init() at a fixture directory instead of
+   *  the real process.cwd(). Not exposed as a CLI flag. */
+  cwd?: string;
 }
 
-function prompt(question: string): Promise<string> {
-  const rl = createInterface({ input: process.stdin, output: process.stdout });
-  return new Promise((resolve) => {
-    rl.question(question, (answer) => {
-      rl.close();
-      resolve(answer.trim().toLowerCase());
-    });
-  });
+export async function init(options: InitOptions = {}): Promise<void> {
+  const cwd = options.cwd ?? process.cwd();
+  console.log(chalk.bold("◈ Prism Context Engine — init\n"));
+  console.log(chalk.dim("  Scanning this project. No network calls.\n"));
+
+  const detection = detectProject(cwd);
+  const tokens = await extractTokens(cwd);
+  const ruleSet = generateRuleSet(detection, tokens);
+
+  printDetection(detection);
+  printTokens(tokens);
+
+  const rulesPath = join(cwd, ".prism", "rules.json");
+  const rulesWritten = await writeRulesFile(rulesPath, ruleSet, options);
+
+  const hookResult = wireClaudeHook(cwd);
+  printHookResult(hookResult);
+
+  printSummary(ruleSet, rulesWritten, rulesPath);
 }
 
-function loadSavedToken(): string | null {
-  try {
-    if (existsSync(TOKEN_FILE)) {
-      return readFileSync(TOKEN_FILE, "utf-8").trim();
-    }
-  } catch {
-    /* ignore */
-  }
-  return null;
-}
-
-function buildMcpConfig(): McpServerConfig {
-  const token = process.env.PRISM_TOKEN || loadSavedToken() || "";
-  const config: McpServerConfig = {
-    command: "npx",
-    args: ["prism-context-engine", "serve"],
-  };
-  if (token) {
-    config.env = { PRISM_TOKEN: token };
-  }
-  // Pass database URI if available (for direct Cosmos DB connection)
-  if (process.env.MONGODB_URI) {
-    config.env = { ...config.env, MONGODB_URI: process.env.MONGODB_URI };
-  }
-  if (process.env.GEMINI_API_KEY) {
-    config.env = { ...config.env, GEMINI_API_KEY: process.env.GEMINI_API_KEY };
-  }
-  return config;
-}
-
-async function setupCursor(): Promise<boolean> {
-  const dir = CURSOR_CONFIG_DIR;
-  const file = CURSOR_MCP_FILE;
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
-  }
-  let mcpConfig: Record<string, unknown> = {};
-  if (existsSync(file)) {
-    try {
-      mcpConfig = JSON.parse(readFileSync(file, "utf-8"));
-    } catch {
-      /* ignore */
-    }
-  }
-  const mcpServers =
-    (mcpConfig.mcpServers as Record<string, McpServerConfig>) || {};
-  mcpServers.prism = buildMcpConfig();
-  mcpConfig.mcpServers = mcpServers;
-  writeFileSync(file, JSON.stringify(mcpConfig, null, 2));
-  console.log(`  ✓ Created ${file}`);
-  return true;
-}
-
-async function setupWindsurf(): Promise<boolean> {
-  const dir = WINDSURF_CONFIG_DIR;
-  const file = WINDSURF_MCP_FILE;
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
-  }
-  let mcpConfig: Record<string, unknown> = {};
-  if (existsSync(file)) {
-    try {
-      mcpConfig = JSON.parse(readFileSync(file, "utf-8"));
-    } catch {
-      /* ignore */
-    }
-  }
-  const mcpServers =
-    (mcpConfig.mcpServers as Record<string, McpServerConfig>) || {};
-  mcpServers.prism = buildMcpConfig();
-  mcpConfig.mcpServers = mcpServers;
-  writeFileSync(file, JSON.stringify(mcpConfig, null, 2));
-  console.log(`  ✓ Created ${file}`);
-  return true;
-}
-
-async function setupVSCode(): Promise<boolean> {
-  const file = VSCODE_SETTINGS_FILE;
-  if (!existsSync(file)) {
-    console.log("  ⚠ VS Code settings file not found. Skipping.");
-    return false;
-  }
-  let settings: Record<string, unknown> = {};
-  try {
-    settings = JSON.parse(readFileSync(file, "utf-8"));
-  } catch {
-    /* ignore */
-  }
-  settings["prism.token"] = process.env.PRISM_TOKEN || loadSavedToken() || "";
-  writeFileSync(file, JSON.stringify(settings, null, 2));
-  console.log(`  ✓ Updated ${file}`);
-  console.log(
-    "  ℹ Install Prism extension from VS Code marketplace for full support.",
-  );
-  return true;
-}
-
-async function setupClaudeDesktop(): Promise<boolean> {
-  const dir = CLAUDE_CONFIG_DIR;
-  const file = CLAUDE_CONFIG_FILE;
-  if (!existsSync(dir)) return false;
-  let config: Record<string, unknown> = {};
-  if (existsSync(file)) {
-    try {
-      config = JSON.parse(readFileSync(file, "utf-8"));
-    } catch {
-      /* ignore */
-    }
-  }
-  const mcpServers =
-    (config.mcpServers as Record<string, McpServerConfig>) || {};
-  mcpServers.prism = buildMcpConfig();
-  config.mcpServers = mcpServers;
-  writeFileSync(file, JSON.stringify(config, null, 2));
-  console.log(`  ✓ Created ${file}`);
-  return true;
-}
-
-export async function init(): Promise<void> {
-  console.log("◈ Prism Context Engine — IDE Setup\n");
-
-  const token = process.env.PRISM_TOKEN || loadSavedToken();
-  if (!token) {
-    console.log("⚠ No authentication token found.");
-    console.log("  Run `prism login` first or set PRISM_TOKEN.\n");
-    const answer = await prompt("Continue without token? (y/N): ");
-    if (answer !== "y") {
-      console.log("❌ Setup cancelled. Run `prism login` first.");
-      process.exit(1);
-    }
-  }
-
-  const detected: string[] = [];
-
-  if (existsSync(CURSOR_CONFIG_DIR)) {
-    detected.push("Cursor");
-  }
-  if (existsSync(WINDSURF_CONFIG_DIR)) {
-    detected.push("Windsurf");
-  }
-  if (existsSync(VSCODE_SETTINGS_FILE)) {
-    detected.push("VS Code");
-  }
-  if (existsSync(CLAUDE_CONFIG_DIR)) {
-    detected.push("Claude Desktop");
-  }
-
-  if (detected.length === 0) {
-    console.log("⚠ No supported IDEs detected.");
-    console.log("  Supported: Cursor, Windsurf, VS Code, Claude Desktop");
+function printDetection(detection: ReturnType<typeof detectProject>): void {
+  if (!detection.hasPackageJson) {
     console.log(
-      "\n  You can manually configure your IDE by adding to MCP config:",
+      chalk.yellow("⚠ No package.json found — detection is limited.\n"),
     );
-    console.log(JSON.stringify(buildMcpConfig(), null, 2));
     return;
   }
+  const parts: string[] = [];
+  parts.push(
+    detection.isNextjs
+      ? `Next.js ${detection.nextVersion ?? ""}`.trim()
+      : "Next.js: not detected",
+  );
+  if (detection.isNextjs) {
+    const router =
+      detection.router === "both"
+        ? "app + pages routers"
+        : detection.router === "none"
+          ? "router not found"
+          : `${detection.router} router`;
+    parts.push(router);
+  }
+  parts.push(
+    detection.hasTailwind
+      ? `Tailwind ${detection.tailwindVersion ?? ""}`.trim()
+      : "Tailwind: not detected",
+  );
+  console.log(`Detected: ${chalk.cyan(parts.join(" · "))}\n`);
+}
 
-  console.log(`Detected: ${detected.join(", ")}\n`);
+function printTokens(tokens: Awaited<ReturnType<typeof extractTokens>>): void {
+  if (tokens.cssFilesScanned.length > 0) {
+    console.log(
+      `${chalk.green("✓")} Scanned ${tokens.cssFilesScanned.join(", ")}`,
+    );
+  } else {
+    console.log(`${chalk.yellow("⚠")} No globals.css found in common locations`);
+  }
+  console.log(
+    `${chalk.green("✓")} Found ${chalk.bold(String(tokens.colorTokens.length))} color token(s) as CSS custom properties`,
+  );
+  if (tokens.tailwindConfigFile) {
+    const via = tokens.tailwindConfigParsedViaRegexFallback
+      ? "regex fallback, best-effort"
+      : "parsed directly";
+    console.log(
+      `${chalk.green("✓")} ${tokens.tailwindConfigFile} found (${via}) — ${tokens.tailwindConfigColorCount} theme color(s) (informational; enforced via the CSS token rule above, not directly)`,
+    );
+  }
+  console.log("");
+}
 
-  for (const ide of detected) {
-    const answer = await prompt(`Install Prism for ${ide}? (Y/n): `);
-    if (answer === "" || answer === "y" || answer === "yes") {
-      switch (ide) {
-        case "Cursor":
-          await setupCursor();
-          break;
-        case "Windsurf":
-          await setupWindsurf();
-          break;
-        case "VS Code":
-          await setupVSCode();
-          break;
-        case "Claude Desktop":
-          await setupClaudeDesktop();
-          break;
+async function writeRulesFile(
+  rulesPath: string,
+  ruleSet: Awaited<ReturnType<typeof generateRuleSet>>,
+  options: InitOptions,
+): Promise<boolean> {
+  const exists = existsSync(rulesPath);
+  if (exists && !options.force) {
+    let proceed: boolean;
+    if (options.yes) {
+      console.log(
+        chalk.yellow(
+          "⚠ .prism/rules.json already exists — leaving it untouched (pass --force to regenerate).",
+        ),
+      );
+      proceed = false;
+    } else {
+      proceed = await promptYesNo(
+        ".prism/rules.json already exists. Overwrite it with a freshly generated starter?",
+        false,
+      );
+      if (!proceed) {
+        console.log(chalk.dim("  Kept the existing .prism/rules.json.\n"));
       }
     }
+    if (!proceed) return false;
   }
 
-  console.log("\n✓ Setup complete! Restart your IDE(s) to activate Prism.");
+  atomicWriteFileSync(rulesPath, `${JSON.stringify(ruleSet, null, 2)}\n`);
   console.log(
-    "  The full MCP server (prism serve) will start automatically when your IDE connects.",
+    `${chalk.green("✓")} Wrote ${chalk.bold(String(ruleSet.rules.length))} rule(s) to .prism/rules.json`,
   );
-  console.log("  Run `prism sync` to pre-cache rules for offline use.\n");
+  console.log("");
+  return true;
+}
+
+function printHookResult(result: ReturnType<typeof wireClaudeHook>): void {
+  switch (result.outcome) {
+    case "created":
+      console.log(`${chalk.green("✓")} Created .claude/settings.json with the Pass hook wired in`);
+      break;
+    case "merged":
+      console.log(`${chalk.green("✓")} Merged the Pass hook into the existing .claude/settings.json`);
+      break;
+    case "already-present":
+      console.log(`${chalk.green("✓")} .claude/settings.json already has the Pass hook wired in`);
+      break;
+    case "invalid-json":
+      console.log(
+        chalk.yellow(
+          "⚠ .claude/settings.json exists but isn't valid JSON — left it untouched. Add the hook manually:",
+        ),
+      );
+      console.log(
+        chalk.dim(
+          '  { "hooks": { "PostToolUse": [{ "matcher": "Write|Edit", "hooks": [{ "type": "command", "command": "npx @prism-engine/cli check --hook --format claude-code" }] }] } }',
+        ),
+      );
+      break;
+  }
+  console.log("");
+}
+
+function printSummary(
+  ruleSet: Awaited<ReturnType<typeof generateRuleSet>>,
+  rulesWritten: boolean,
+  rulesPath: string,
+): void {
+  console.log(chalk.bold("Done.\n"));
+  if (rulesWritten) {
+    for (const rule of ruleSet.rules) {
+      const kind = rule.check ? rule.check.type : "advisory-only";
+      console.log(`  ${chalk.cyan("•")} ${rule.id} ${chalk.dim(`(${kind})`)}`);
+    }
+    console.log("");
+  }
+  console.log(chalk.dim(`  rules file: ${rulesPath}`));
+  console.log(
+    chalk.bold("\nNext: ") +
+      "write or edit a file in this project — the hook runs automatically.",
+  );
+  console.log(
+    chalk.dim(
+      "  Or check by hand:  ",
+    ) + chalk.cyan("prism check <file>"),
+  );
+  console.log(
+    chalk.dim("  Team on the dashboard? Sync their rules:  ") +
+      chalk.cyan("prism pull"),
+  );
 }

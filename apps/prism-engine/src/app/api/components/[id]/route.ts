@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 
 // =============================================================================
 // GET - Get Single Component
@@ -31,8 +31,15 @@ export async function GET(
   const { id } = await params;
 
   try {
-    const componentsCollection = await getCollection("components");
-    const component = await componentsCollection.findOne({ id, userId });
+    const db = getPrismDb();
+    const { data: component } = await db
+      .from("prism_components")
+      .select(
+        "id, name, description, code, rules, designSystem:design_system, stack, createdAt:created_at, updatedAt:updated_at",
+      )
+      .eq("id", id)
+      .eq("user_id", userId)
+      .maybeSingle();
 
     if (!component) {
       return NextResponse.json(
@@ -83,10 +90,15 @@ export async function DELETE(
   const { id } = await params;
 
   try {
-    const componentsCollection = await getCollection("components");
+    const db = getPrismDb();
 
     // Verify ownership
-    const component = await componentsCollection.findOne({ id, userId });
+    const { data: component } = await db
+      .from("prism_components")
+      .select("id")
+      .eq("id", id)
+      .eq("user_id", userId)
+      .maybeSingle();
 
     if (!component) {
       return NextResponse.json(
@@ -95,7 +107,7 @@ export async function DELETE(
       );
     }
 
-    await componentsCollection.deleteOne({ id, userId });
+    await db.from("prism_components").delete().eq("id", id).eq("user_id", userId);
 
     return NextResponse.json({ success: true, message: "Component deleted" });
   } catch (error) {

@@ -189,12 +189,14 @@ export function getTierDisplayName(tier: SubscriptionTier): string {
  */
 export async function getUserTier(userId: string): Promise<SubscriptionTier> {
   try {
-    const { getCollection } = await import("@syntaxure-labs/db/cosmos");
-    const subscriptions = await getCollection("subscriptions");
-    const sub = await subscriptions.findOne({
-      userId,
-      status: { $in: ["active", "trialing"] },
-    });
+    const { getPrismDb } = await import("@syntaxure-labs/db/prism");
+    const db = getPrismDb();
+    const { data: sub } = await db
+      .from("prism_subscriptions")
+      .select("tier")
+      .eq("user_id", userId)
+      .in("status", ["active", "trialing"])
+      .maybeSingle();
     return (sub?.tier as SubscriptionTier) || "free";
   } catch {
     return "free";

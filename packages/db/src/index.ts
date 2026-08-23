@@ -3,41 +3,32 @@
  * @description The "Data Nexus" - unified database access for the JeffDev ecosystem.
  *
  * This package provides:
- * - MongoDB / Cosmos DB client for Prism
- * - Gremlin graph client for Cosmos DB
+ * - Prisma schema / Postgres access (Supabase) for the Agency + Prism apps
+ * - Prism-specific Postgres helpers (`./prism`) — replaces the old Cosmos DB
+ *   (MongoDB API + Gremlin) client. See PRISM_MIGRATION.md at the repo root.
  * - Shared Zod schemas for type-safe validation
  *
  * @example
- * // Cosmos DB (Prism)
- * import { getCollection } from "@syntaxure-labs/db/cosmos";
- * const rules = await getCollection("rules");
+ * // Prism (Postgres/Supabase)
+ * import { getPrismDb } from "@syntaxure-labs/db/prism";
+ * const db = getPrismDb();
+ * const { data: rules } = await db.from("prism_rules").select("*");
  *
  * // Schemas
  * import { UserSchema, RuleSchema } from "@syntaxure-labs/db/schema";
  */
 
-// Cosmos/MongoDB exports
+// Prism (Postgres/Supabase) exports
 export {
-  getMongoClient,
-  getDatabase,
-  getCollection,
-  closeConnection,
-  ObjectId,
-  type Db,
-  type Collection,
-  type Document,
-  type MongoClient,
-} from "./cosmos";
-
-// Cosmos/Gremlin exports
-export {
-  getGremlinClient,
-  closeGremlinClient,
+  getPrismDb,
+  isValidId,
   getRulesByProject,
   getRelatedRules,
   getConflictingRules,
   getRulesByTags,
-} from "./cosmos-gremlin";
+  getTagOverlapRuleIds,
+  type PrismRuleRow,
+} from "./prism";
 
 // Webhook Publisher (n8n integration)
 export {

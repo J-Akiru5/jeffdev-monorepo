@@ -6,7 +6,7 @@
 
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
 
 // =============================================================================
@@ -15,11 +15,13 @@ import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
 
 async function getUserTier(userId: string): Promise<SubscriptionTier> {
   try {
-    const subscriptionsCollection = await getCollection("subscriptions");
-    const subscription = await subscriptionsCollection.findOne({
-      userId,
-      status: { $in: ["active", "trialing"] },
-    });
+    const db = getPrismDb();
+    const { data: subscription } = await db
+      .from("prism_subscriptions")
+      .select("tier")
+      .eq("user_id", userId)
+      .in("status", ["active", "trialing"])
+      .maybeSingle();
 
     if (!subscription) {
       return "free";
@@ -62,32 +64,27 @@ export async function GET() {
     const tier = await getUserTier(userId);
     const limits = TIER_LIMITS[tier];
 
-    // Get collections
-    const [
-      projectsCollection,
-      rulesCollection,
-      componentsCollection,
-      generationsCollection,
-    ] = await Promise.all([
-      getCollection("projects"),
-      getCollection("rules"),
-      getCollection("components"),
-      getCollection("generations"),
-    ]);
+    const db = getPrismDb();
+    const countOpts = { count: "exact" as const, head: true };
 
     // Count usage
     const monthStart = getMonthStart();
 
-    const [projectCount, ruleCount, componentCount, generationCount] =
-      await Promise.all([
-        projectsCollection.countDocuments({ userId }),
-        rulesCollection.countDocuments({ createdBy: userId }),
-        componentsCollection.countDocuments({ userId }),
-        generationsCollection.countDocuments({
-          userId,
-          createdAt: { $gte: monthStart.toISOString() },
-        }),
-      ]);
+    const [
+      { count: projectCount },
+      { count: ruleCount },
+      { count: componentCount },
+      { count: generationCount },
+    ] = await Promise.all([
+      db.from("prism_projects").select("id", countOpts).eq("user_id", userId),
+      db.from("prism_rules").select("id", countOpts).eq("created_by", userId),
+      db.from("prism_components").select("id", countOpts).eq("user_id", userId),
+      db
+        .from("prism_generations")
+        .select("id", countOpts)
+        .eq("user_id", userId)
+        .gte("created_at", monthStart.toISOString()),
+    ]);
 
     // Build response
     const formatLimit = (limit: number) => (limit === -1 ? "unlimited" : limit);
@@ -96,19 +93,19 @@ export async function GET() {
       tier,
       usage: {
         projects: {
-          used: projectCount,
+          used: projectCount ?? 0,
           limit: formatLimit(limits.projects),
         },
         rules: {
-          used: ruleCount,
+          used: ruleCount ?? 0,
           limit: formatLimit(limits.rules),
         },
         components: {
-          used: componentCount,
+          used: componentCount ?? 0,
           limit: formatLimit(limits.components),
         },
         aiGenerations: {
-          used: generationCount,
+          used: generationCount ?? 0,
           limit: formatLimit(limits.aiGenerations),
         },
       },

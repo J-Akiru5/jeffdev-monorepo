@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCollection } from "@syntaxure-labs/db/cosmos";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
 
 export async function GET(
@@ -11,8 +11,15 @@ export async function GET(
 
   const { id } = await params;
 
-  const components = await getCollection("components");
-  const component = await components.findOne({ id, userId: auth.userId });
+  const db = getPrismDb();
+  const { data: component } = await db
+    .from("prism_components")
+    .select(
+      "id, name, description, code, rules, designSystem:design_system, stack, createdAt:created_at, updatedAt:updated_at",
+    )
+    .eq("id", id)
+    .eq("user_id", auth.userId)
+    .maybeSingle();
   if (!component) return errorResponse("Component not found", 404);
 
   return successResponse({

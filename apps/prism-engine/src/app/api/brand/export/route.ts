@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 
 /**
  * Brand Export API
@@ -38,8 +38,15 @@ export async function GET(request: NextRequest) {
   }
 
   // Fetch brand
-  const brandsCollection = await getCollection("brands");
-  const brand = await brandsCollection.findOne({ userId: user.id, slug });
+  const db = getPrismDb();
+  const { data: brand } = await db
+    .from("prism_brands")
+    .select(
+      "companyName:company_name, tagline, industry, colors, typography, voice, spacing",
+    )
+    .eq("user_id", user.id)
+    .eq("slug", slug)
+    .maybeSingle();
 
   if (!brand) {
     return NextResponse.json({ error: "Brand not found" }, { status: 404 });

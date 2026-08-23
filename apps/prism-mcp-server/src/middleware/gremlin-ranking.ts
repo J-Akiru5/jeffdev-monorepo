@@ -1,13 +1,20 @@
 /**
- * Gremlin graph ranking for Prism smart-select.
+ * Rule-graph ranking for Prism smart-select.
  *
- * Uses Cosmos DB Gremlin graph relationships to boost (or penalize) rule
- * relevance scores on top of embedding-based similarity.
+ * Uses Postgres relationship signals (tag overlap on `prism_rules.tags`,
+ * `prism_rule_edges` for explicit relates_to/conflicts_with links) to boost
+ * (or penalize) rule relevance scores on top of embedding-based similarity.
+ *
+ * This used to run against the Cosmos DB Gremlin graph API — see
+ * PRISM_MIGRATION.md. The module/file name and the `USE_GREMLIN_RANKING`
+ * env var are kept as-is to avoid an unnecessary rename; the underlying
+ * query is a plain-array-overlap query plus an edge-table join now, not a
+ * graph traversal.
  *
  * Design:
- * - Given a task embedding + a list of candidate rule IDs, query the graph
+ * - Given a task embedding + a list of candidate rule IDs, query Postgres
  *   for additional relevance signals: tag overlap, "relates_to" edges,
- *   "conflicts_with" edges, and priority neighbors.
+ *   "conflicts_with" edges.
  * - Returns a BoostMap: a flat record of `ruleId → boostMultiplier`.
  *
  * Feature flag: USE_GREMLIN_RANKING (default: "false")
@@ -16,9 +23,6 @@
  */
 
 import type { RankedRule } from "./smart-select.js";
-
-// Gremlin is an optional dependency — loaded dynamically when the feature flag is on.
-// If the package is not installed, gremlin ranking will be silently disabled.
 
 // ---------------------------------------------------------------------------
 // Types
@@ -53,7 +57,7 @@ export const DEFAULT_GREMLIN_CONFIG: GremlinRankingConfig = {
 // ---------------------------------------------------------------------------
 
 /**
- * Check whether Gremlin graph ranking is enabled.
+ * Check whether rule-graph ranking is enabled.
  * Controlled by USE_GREMLIN_RANKING env var (default: "false").
  */
 export function isGremlinRankingEnabled(): boolean {
@@ -65,15 +69,15 @@ export function isGremlinRankingEnabled(): boolean {
 // ---------------------------------------------------------------------------
 
 /**
- * Compute a Gremlin-based boost map for the given ranked rules.
+ * Compute a rule-graph-based boost map for the given ranked rules.
  *
  * Steps:
- * 1. Take the top `seedCount` rules as "seed" vertices.
+ * 1. Take the top `seedCount` rules as "seed" rules.
  * 2. For each seed, fetch its tags, related rules, and conflicting rules
- *    from the Gremlin graph.
+ *    from Postgres.
  * 3. Compute boosts:
- *    - Tag overlap: +tagMatchBonus per shared tag with a seed
- *    - Related: +relatedRuleBoost if a rule is "relates_to" a seed
+ *    - Tag overlap: +tagMatchBonus per rule sharing a tag with a seed
+ *    - Related: +relatedRuleBoost if a rule "relates_to" a seed
  *    - Conflicting: +conflictPenalty if a rule "conflicts_with" a seed
  * 4. Return flat BoostMap.
  */
@@ -88,21 +92,8 @@ export async function computeGremlinBoosts(
   const boosts: BoostMap = {};
 
   try {
-    // Dynamically import Gremlin client (safe — only called when feature is on)
-    const { getGremlinClient } = await import("@syntaxure-labs/db");
-
-    // Load gremlin package dynamically (optional dependency)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let P: any;
-    try {
-      const gremlin = await import("gremlin");
-      P = gremlin.default?.process?.P ?? gremlin.process?.P;
-    } catch {
-      console.error("[gremlin-ranking] gremlin package not installed, skipping graph boosts");
-      return {};
-    }
-
-    const g = getGremlinClient();
+    const { getPrismDb } = await import("@syntaxure-labs/db/prism");
+    const db = getPrismDb();
 
     // 1. Seed rules = top similarity
     const seeds = rankedRules
@@ -112,65 +103,52 @@ export async function computeGremlinBoosts(
 
     // 2. For each seed, fetch tags, related, and conflicting
     for (const seed of seeds) {
-      // Fetch tags for this seed rule
-      const seedTags = (await g
-        .V(seed.id)
-        .outE("tagged_with")
-        .inV()
-        .values("name")
-        .toList()
-        .catch(() => [])) as string[];
+      const { data: seedRow } = await db
+        .from("prism_rules")
+        .select("tags")
+        .eq("id", seed.id)
+        .maybeSingle();
+      const seedTags = (seedRow?.tags as string[] | null) ?? [];
 
       if (seedTags.length === 0) continue;
 
-      // Fetch all rules that share at least one tag with the seed
-      const taggedRules = (await g
-        .V()
-        .hasLabel("tag")
-        .has("name", P.within(seedTags))
-        .inE("tagged_with")
-        .outV()
-        .hasLabel("rule")
-        .dedup()
-        .id()
-        .toList()
-        .catch(() => [] as string[])) as string[];
-
-      // Tag overlap boost
-      for (const ruleId of taggedRules) {
+      // Tag overlap boost: rules sharing at least one tag with the seed
+      const { data: taggedRows } = await db
+        .from("prism_rules")
+        .select("id")
+        .overlaps("tags", seedTags)
+        .neq("id", seed.id);
+      for (const row of taggedRows ?? []) {
+        const ruleId = row.id as string;
         boosts[ruleId] = (boosts[ruleId] || 1) + config.tagMatchBonus;
       }
 
       // Related rules boost (relates_to edges)
-      const relatedIds = (await g
-        .V(seed.id)
-        .outE("relates_to")
-        .inV()
-        .id()
-        .toList()
-        .catch(() => [] as string[])) as string[];
-
-      for (const ruleId of relatedIds) {
+      const { data: relatedEdges } = await db
+        .from("prism_rule_edges")
+        .select("to_rule_id")
+        .eq("from_rule_id", seed.id)
+        .eq("edge_type", "relates_to");
+      for (const edge of relatedEdges ?? []) {
+        const ruleId = edge.to_rule_id as string;
         boosts[ruleId] = (boosts[ruleId] || 1) + config.relatedRuleBoost;
       }
 
       // Conflict penalty
-      const conflictIds = (await g
-        .V(seed.id)
-        .outE("conflicts_with")
-        .inV()
-        .id()
-        .toList()
-        .catch(() => [] as string[])) as string[];
-
-      for (const ruleId of conflictIds) {
+      const { data: conflictEdges } = await db
+        .from("prism_rule_edges")
+        .select("to_rule_id")
+        .eq("from_rule_id", seed.id)
+        .eq("edge_type", "conflicts_with");
+      for (const edge of conflictEdges ?? []) {
+        const ruleId = edge.to_rule_id as string;
         boosts[ruleId] = (boosts[ruleId] || 1) + config.conflictPenalty;
       }
     }
   } catch (error) {
-    // Gremlin unavailable — silently return no boosts
+    // DB unavailable — silently return no boosts
     console.error(
-      "[gremlin-ranking] Gremlin query failed, continuing without graph boosts:",
+      "[gremlin-ranking] Rule-graph query failed, continuing without boosts:",
       error instanceof Error ? error.message : error,
     );
   }

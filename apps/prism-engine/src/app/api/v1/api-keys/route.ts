@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { getCollection } from "@syntaxure-labs/db/cosmos";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { z } from "zod";
 import crypto from "crypto";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
@@ -21,24 +21,24 @@ export async function GET(request: NextRequest) {
   const auth = await authenticate(request);
   if (auth instanceof Response) return auth;
 
-  const apiKeys = await getCollection("apiKeys");
-  const keys = await apiKeys
-    .find({ userId: auth.userId, revokedAt: { $exists: false } })
-    .sort({ createdAt: -1 })
-    .toArray();
+  const db = getPrismDb();
+  const { data: keys } = await db
+    .from("prism_api_keys")
+    .select(
+      "id, name, keyPrefix:key_prefix, lastUsedAt:last_used_at, createdAt:created_at",
+    )
+    .eq("user_id", auth.userId)
+    .is("revoked_at", null)
+    .order("created_at", { ascending: false });
+
+  const items = keys ?? [];
 
   const limits =
     TIER_LIMITS[auth.tier as keyof typeof TIER_LIMITS] || TIER_LIMITS.free;
-  const canCreate = limits.apiKeys === -1 || keys.length < limits.apiKeys;
+  const canCreate = limits.apiKeys === -1 || items.length < limits.apiKeys;
 
   return successResponse({
-    keys: keys.map((k) => ({
-      id: k.id,
-      name: k.name,
-      keyPrefix: k.keyPrefix,
-      lastUsedAt: k.lastUsedAt,
-      createdAt: k.createdAt,
-    })),
+    keys: items,
     limit: limits.apiKeys,
     canCreate,
   });
@@ -64,13 +64,14 @@ export async function POST(request: NextRequest) {
   if (limits.apiKeys === 0)
     return errorResponse("API keys not available on your plan", 403);
 
-  const apiKeys = await getCollection("apiKeys");
-  const existingCount = await apiKeys.countDocuments({
-    userId: auth.userId,
-    revokedAt: { $exists: false },
-  });
+  const db = getPrismDb();
+  const { count: existingCount } = await db
+    .from("prism_api_keys")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", auth.userId)
+    .is("revoked_at", null);
 
-  if (limits.apiKeys !== -1 && existingCount >= limits.apiKeys) {
+  if (limits.apiKeys !== -1 && (existingCount ?? 0) >= limits.apiKeys) {
     return errorResponse(
       `API key limit reached (${limits.apiKeys}). Revoke an existing key or upgrade.`,
       403,
@@ -81,13 +82,13 @@ export async function POST(request: NextRequest) {
   const id = generateId();
   const now = new Date().toISOString();
 
-  await apiKeys.insertOne({
+  await db.from("prism_api_keys").insert({
     id,
-    userId: auth.userId,
-    keyHash: hash,
-    keyPrefix: prefix,
+    user_id: auth.userId,
+    key_hash: hash,
+    key_prefix: prefix,
     name: parsed.data.name,
-    createdAt: now,
+    created_at: now,
   });
 
   return successResponse(

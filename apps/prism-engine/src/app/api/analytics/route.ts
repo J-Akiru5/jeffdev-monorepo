@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 
 /**
  * GET /api/analytics
@@ -20,43 +20,57 @@ export async function GET() {
   const userId = user.id;
 
   try {
-    const projectsCollection = await getCollection("projects");
-    const rulesCollection = await getCollection("rules");
-    const skillsCollection = await getCollection("skills");
-    const componentsCollection = await getCollection("components");
+    const db = getPrismDb();
+    const countOpts = { count: "exact" as const, head: true };
 
     const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const monthStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      1,
+    ).toISOString();
 
     const [
-      totalProjects,
-      totalRules,
-      totalSkills,
-      totalComponents,
-      recentProjects,
-      recentRules,
-      recentGenerations,
+      { count: totalProjects },
+      { count: totalRules },
+      { count: totalSkills },
+      { count: totalComponents },
+      { count: recentProjects },
+      { count: recentRules },
+      { count: recentGenerations },
     ] = await Promise.all([
-      projectsCollection.countDocuments({ userId }),
-      rulesCollection.countDocuments({ createdBy: userId }),
-      skillsCollection.countDocuments({ createdBy: userId }),
-      componentsCollection.countDocuments({ userId }),
-      projectsCollection.countDocuments({ userId, createdAt: { $gte: monthStart } }),
-      rulesCollection.countDocuments({ createdBy: userId, createdAt: { $gte: monthStart } }),
-      componentsCollection.countDocuments({ userId, createdAt: { $gte: monthStart } }),
+      db.from("prism_projects").select("id", countOpts).eq("user_id", userId),
+      db.from("prism_rules").select("id", countOpts).eq("created_by", userId),
+      db.from("prism_skills").select("id", countOpts).eq("created_by", userId),
+      db.from("prism_components").select("id", countOpts).eq("user_id", userId),
+      db
+        .from("prism_projects")
+        .select("id", countOpts)
+        .eq("user_id", userId)
+        .gte("created_at", monthStart),
+      db
+        .from("prism_rules")
+        .select("id", countOpts)
+        .eq("created_by", userId)
+        .gte("created_at", monthStart),
+      db
+        .from("prism_components")
+        .select("id", countOpts)
+        .eq("user_id", userId)
+        .gte("created_at", monthStart),
     ]);
 
     return NextResponse.json({
       totals: {
-        projects: totalProjects,
-        rules: totalRules,
-        skills: totalSkills,
-        components: totalComponents,
+        projects: totalProjects ?? 0,
+        rules: totalRules ?? 0,
+        skills: totalSkills ?? 0,
+        components: totalComponents ?? 0,
       },
       thisMonth: {
-        projects: recentProjects,
-        rules: recentRules,
-        components: recentGenerations,
+        projects: recentProjects ?? 0,
+        rules: recentRules ?? 0,
+        components: recentGenerations ?? 0,
       },
       updatedAt: now.toISOString(),
     });

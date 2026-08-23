@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import {
   FolderKanban,
   FileJson,
@@ -43,56 +43,76 @@ export default async function DashboardPage() {
     now.getTime() - 60 * 24 * 60 * 60 * 1000,
   ).toISOString();
 
-  // Fetch all collections
-  const projectsCollection = await getCollection("projects");
-  const rulesCollection = await getCollection("rules");
-  const generationsCollection = await getCollection("generations");
+  // Fetch counts from Postgres
+  const db = getPrismDb();
+  const countOpts = { count: "exact" as const, head: true };
 
   const [
-    projectCount,
-    projectPrev,
-    ruleCount,
-    rulePrev,
-    genCount,
-    genPrev,
+    { count: projectCount },
+    { count: projectPrev },
+    { count: ruleCount },
+    { count: rulePrev },
+    { count: genCount },
+    { count: genPrev },
   ] = await Promise.all([
-    projectsCollection.countDocuments({
-      userId,
-      createdAt: { $gte: thirtyDaysAgo },
-    }),
-    projectsCollection.countDocuments({
-      userId,
-      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo },
-    }),
-    rulesCollection.countDocuments({
-      createdBy: userId,
-      createdAt: { $gte: thirtyDaysAgo },
-    }),
-    rulesCollection.countDocuments({
-      createdBy: userId,
-      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo },
-    }),
-    generationsCollection.countDocuments({
-      userId,
-      createdAt: { $gte: thirtyDaysAgo },
-    }),
-    generationsCollection.countDocuments({
-      userId,
-      createdAt: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo },
-    }),
+    db
+      .from("prism_projects")
+      .select("id", countOpts)
+      .eq("user_id", userId)
+      .gte("created_at", thirtyDaysAgo),
+    db
+      .from("prism_projects")
+      .select("id", countOpts)
+      .eq("user_id", userId)
+      .gte("created_at", sixtyDaysAgo)
+      .lt("created_at", thirtyDaysAgo),
+    db
+      .from("prism_rules")
+      .select("id", countOpts)
+      .eq("created_by", userId)
+      .gte("created_at", thirtyDaysAgo),
+    db
+      .from("prism_rules")
+      .select("id", countOpts)
+      .eq("created_by", userId)
+      .gte("created_at", sixtyDaysAgo)
+      .lt("created_at", thirtyDaysAgo),
+    db
+      .from("prism_generations")
+      .select("id", countOpts)
+      .eq("user_id", userId)
+      .gte("created_at", thirtyDaysAgo),
+    db
+      .from("prism_generations")
+      .select("id", countOpts)
+      .eq("user_id", userId)
+      .gte("created_at", sixtyDaysAgo)
+      .lt("created_at", thirtyDaysAgo),
   ]);
 
-  const recentProjects = await projectsCollection
-    .find({ userId })
-    .sort({ updatedAt: -1 })
-    .limit(3)
-    .toArray();
+  const { data: recentProjects } = await db
+    .from("prism_projects")
+    .select("_id:id, name, slug, description, stack, updatedAt:updated_at")
+    .eq("user_id", userId)
+    .order("updated_at", { ascending: false })
+    .limit(3);
 
   // Also fetch totals for card display
-  const [totalProjects, totalRules] = await Promise.all([
-    projectsCollection.countDocuments({ userId }),
-    rulesCollection.countDocuments({ createdBy: userId }),
-  ]);
+  const [{ count: totalProjectsRaw }, { count: totalRulesRaw }] =
+    await Promise.all([
+      db.from("prism_projects").select("id", countOpts).eq("user_id", userId),
+      db.from("prism_rules").select("id", countOpts).eq("created_by", userId),
+    ]);
+
+  const totalProjects = totalProjectsRaw ?? 0;
+  const totalRules = totalRulesRaw ?? 0;
+  const safeProjectCount = projectCount ?? 0;
+  const safeProjectPrev = projectPrev ?? 0;
+  const safeRuleCount = ruleCount ?? 0;
+  const safeRulePrev = rulePrev ?? 0;
+  const safeGenCount = genCount ?? 0;
+  const safeGenPrev = genPrev ?? 0;
+  const projects = recentProjects ?? [];
 
   // Helper to compute trend
   const calcTrend = (
@@ -108,8 +128,8 @@ export default async function DashboardPage() {
   };
 
   let greetingMsg = "Welcome to Prism Context Engine. Your architecture is being monitored and optimized.";
-  if (recentProjects.length > 0) {
-    const lastProject = recentProjects[0];
+  if (projects.length > 0) {
+    const lastProject = projects[0];
     if (lastProject) {
       const daysSince = Math.floor((now.getTime() - new Date(lastProject.updatedAt || now).getTime()) / (1000 * 3600 * 24));
       if (daysSince > 7) {
@@ -162,7 +182,7 @@ export default async function DashboardPage() {
           icon={<FolderKanban className="h-4 w-4" />}
           intent="cyan"
           href="/projects"
-          trend={calcTrend(projectCount, projectPrev)}
+          trend={calcTrend(safeProjectCount, safeProjectPrev)}
         />
         <MetricTile
           label="Context Rules"
@@ -170,14 +190,14 @@ export default async function DashboardPage() {
           icon={<FileJson className="h-4 w-4" />}
           intent="purple"
           href="/projects"
-          trend={calcTrend(ruleCount, rulePrev)}
+          trend={calcTrend(safeRuleCount, safeRulePrev)}
         />
         <MetricTile
           label="AI Generations"
-          value={genCount}
+          value={safeGenCount}
           icon={<Sparkles className="h-4 w-4" />}
           href="/generate"
-          trend={calcTrend(genCount, genPrev)}
+          trend={calcTrend(safeGenCount, safeGenPrev)}
         />
       </div>
 
@@ -194,9 +214,9 @@ export default async function DashboardPage() {
               action={{ label: "View All", href: "/projects" }}
             />
 
-            {recentProjects.length > 0 ? (
+            {projects.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-4">
-                {recentProjects.map((project: any) => (
+                {projects.map((project: any) => (
                   <Link
                     key={project._id.toString()}
                     href={`/projects/${project.slug}`}

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getCollection } from "@syntaxure-labs/db/cosmos";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { createHash } from "crypto";
 
 interface AuthResult {
@@ -16,23 +16,28 @@ export async function authenticate(
 
   if (apiKey) {
     const hash = createHash("sha256").update(apiKey).digest("hex");
-    const apiKeysColl = await getCollection("apiKeys");
-    const record = await apiKeysColl.findOne({
-      keyHash: hash,
-      revokedAt: null,
-    });
+    const db = getPrismDb();
+    const { data: record } = await db
+      .from("prism_api_keys")
+      .select("id, userId:user_id")
+      .eq("key_hash", hash)
+      .is("revoked_at", null)
+      .maybeSingle();
     if (!record) {
       return NextResponse.json(
         { error: "Invalid API key" },
         { status: 401 },
       ) as NextResponse;
     }
-    await apiKeysColl.updateOne(
-      { _id: record._id },
-      { $set: { lastUsedAt: new Date().toISOString() } },
-    );
-    const subscriptions = await getCollection("subscriptions");
-    const sub = await subscriptions.findOne({ userId: record.userId });
+    await db
+      .from("prism_api_keys")
+      .update({ last_used_at: new Date().toISOString() })
+      .eq("id", record.id);
+    const { data: sub } = await db
+      .from("prism_subscriptions")
+      .select("tier")
+      .eq("user_id", record.userId)
+      .maybeSingle();
     return {
       userId: record.userId,
       tier: (sub?.tier as string) || "free",
@@ -52,8 +57,12 @@ export async function authenticate(
     ) as NextResponse;
   }
 
-  const subscriptions = await getCollection("subscriptions");
-  const sub = await subscriptions.findOne({ userId: user.id });
+  const db = getPrismDb();
+  const { data: sub } = await db
+    .from("prism_subscriptions")
+    .select("tier")
+    .eq("user_id", user.id)
+    .maybeSingle();
   const tier = (sub?.tier as string) || "free";
 
   return { userId: user.id, tier, source: "supabase" };

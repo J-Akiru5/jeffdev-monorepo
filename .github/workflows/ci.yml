@@ -18,7 +18,7 @@ on:
     branches: [main]
     paths-ignore: ["**.md"]
   push:
-    branches: [main, develop]
+    branches: [main, develop, staging]
     paths-ignore: ["**.md"]
 
 concurrency:
@@ -242,7 +242,16 @@ jobs:
 
           # Remove leading comma
           apps=$(echo "$apps" | sed 's/^,//')
-          echo "apps=[$apps]" >> "$GITHUB_OUTPUT"
+
+          # Build a valid JSON array (bare "prism-engine,syntaxure-pm" is NOT
+          # valid JSON — fromJson() in the build job's matrix needs quoted
+          # elements, or it errors out and the "build" job never runs at all).
+          if [ -n "$apps" ]; then
+            apps_json="[\"$(echo "$apps" | sed 's/,/","/g')\"]"
+          else
+            apps_json="[]"
+          fi
+          echo "apps=$apps_json" >> "$GITHUB_OUTPUT"
 
   # ─── Step 3: Build (gated on typecheck + lint + test passing) ────────────
   build:

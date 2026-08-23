@@ -114,31 +114,31 @@
 
 #### Private
 
-| Variable                            | Description                                                               | Source             |
-| ----------------------------------- | ------------------------------------------------------------------------- | ------------------ |
-| `SUPABASE_SERVICE_ROLE_KEY`         | 🔒 Supabase service role key                                              | Supabase Dashboard |
-| `MONGODB_URI`                       | 🔒 Azure Cosmos DB MongoDB connection string                              | Azure Portal       |
-| `COSMOS_DATABASE_NAME`              | Database name (default: `prism`)                                          | You set            |
-| `GEMINI_API_KEY`                    | 🔒 Gemini AI API key                                                      | Google AI Studio   |
-| `AZURE_OPENAI_ENDPOINT`             | 🔒 Azure OpenAI endpoint                                                  | Azure Portal       |
-| `AZURE_OPENAI_API_KEY`              | 🔒 Azure OpenAI API key                                                   | Azure Portal       |
-| `AZURE_OPENAI_DEPLOYMENT_NAME`      | Model deployment (default: `gpt-4o-mini`)                                 | Azure Portal       |
-| `AZURE_OPENAI_EMBEDDING_DEPLOYMENT` | Embedding model (default: `text-embedding-3-small`)                       | Azure Portal       |
-| `SENTRY_DSN`                        | 🔒 Sentry secret DSN                                                      | Sentry Dashboard   |
-| `SENTRY_ORG`                        | Sentry organization: `jeffdev`                                            | Sentry Dashboard   |
-| `SENTRY_PROJECT`                    | Sentry project: `prism-engine`                                            | Sentry Dashboard   |
-| `SENTRY_AUTH_TOKEN`                 | 🔒 Sentry auth token (required for source map uploads)                    | Sentry Dashboard   |
-| `RESEND_API_KEY`                    | 🔒 Transactional email API key                                            | Resend Dashboard   |
-| `PAYPAL_CLIENT_ID`                  | PayPal client ID                                                          | PayPal Developer   |
-| `PAYPAL_CLIENT_SECRET`              | 🔒 PayPal client secret                                                   | PayPal Developer   |
-| `PAYPAL_WEBHOOK_ID`                 | 🔒 PayPal webhook verification ID                                         | PayPal Developer   |
-| `PAYPAL_PLAN_PRO_MONTHLY`           | PayPal plan ID: pro-monthly                                               | PayPal Developer   |
-| `PAYPAL_PLAN_PRO_ANNUAL`            | PayPal plan ID: pro-annual                                                | PayPal Developer   |
-| `PAYPAL_PLAN_TEAM_MONTHLY`          | PayPal plan ID: team-monthly                                              | PayPal Developer   |
-| `PAYPAL_PLAN_TEAM_ANNUAL`           | PayPal plan ID: team-annual                                               | PayPal Developer   |
-| `PAYPAL_MODE`                       | `live` or `sandbox`                                                       | You set            |
-| `N8N_WEBHOOK_URL`                   | Optional — n8n automation endpoint                                        | n8n                |
-| `PRISM_API_KEY`                     | 🔒 Internal API key — **must match** `prism-mcp-server`'s `PRISM_API_KEY` | You generate       |
+| Variable                            | Description                                                                                                                                   | Source             |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `SUPABASE_SERVICE_ROLE_KEY`         | 🔒 Supabase service role key (also used for `prism_*` Postgres tables)                                                                        | Supabase Dashboard |
+| `UPSTASH_REDIS_REST_URL`            | 🔒 Upstash Redis REST URL — used for API rate limiting + response caching. Optional: rate limiting fails open (no burst throttling) if unset. | Upstash Dashboard  |
+| `UPSTASH_REDIS_REST_TOKEN`          | 🔒 Upstash Redis REST token                                                                                                                   | Upstash Dashboard  |
+| `GEMINI_API_KEY`                    | 🔒 Gemini AI API key                                                                                                                          | Google AI Studio   |
+| `AZURE_OPENAI_ENDPOINT`             | 🔒 Azure OpenAI endpoint                                                                                                                      | Azure Portal       |
+| `AZURE_OPENAI_API_KEY`              | 🔒 Azure OpenAI API key                                                                                                                       | Azure Portal       |
+| `AZURE_OPENAI_DEPLOYMENT_NAME`      | Model deployment (default: `gpt-4o-mini`)                                                                                                     | Azure Portal       |
+| `AZURE_OPENAI_EMBEDDING_DEPLOYMENT` | Embedding model (default: `text-embedding-3-small`)                                                                                           | Azure Portal       |
+| `SENTRY_DSN`                        | 🔒 Sentry secret DSN                                                                                                                          | Sentry Dashboard   |
+| `SENTRY_ORG`                        | Sentry organization: `jeffdev`                                                                                                                | Sentry Dashboard   |
+| `SENTRY_PROJECT`                    | Sentry project: `prism-engine`                                                                                                                | Sentry Dashboard   |
+| `SENTRY_AUTH_TOKEN`                 | 🔒 Sentry auth token (required for source map uploads)                                                                                        | Sentry Dashboard   |
+| `RESEND_API_KEY`                    | 🔒 Transactional email API key                                                                                                                | Resend Dashboard   |
+| `PAYPAL_CLIENT_ID`                  | PayPal client ID                                                                                                                              | PayPal Developer   |
+| `PAYPAL_CLIENT_SECRET`              | 🔒 PayPal client secret                                                                                                                       | PayPal Developer   |
+| `PAYPAL_WEBHOOK_ID`                 | 🔒 PayPal webhook verification ID                                                                                                             | PayPal Developer   |
+| `PAYPAL_PLAN_PRO_MONTHLY`           | PayPal plan ID: pro-monthly                                                                                                                   | PayPal Developer   |
+| `PAYPAL_PLAN_PRO_ANNUAL`            | PayPal plan ID: pro-annual                                                                                                                    | PayPal Developer   |
+| `PAYPAL_PLAN_TEAM_MONTHLY`          | PayPal plan ID: team-monthly                                                                                                                  | PayPal Developer   |
+| `PAYPAL_PLAN_TEAM_ANNUAL`           | PayPal plan ID: team-annual                                                                                                                   | PayPal Developer   |
+| `PAYPAL_MODE`                       | `live` or `sandbox`                                                                                                                           | You set            |
+| `N8N_WEBHOOK_URL`                   | Optional — n8n automation endpoint                                                                                                            | n8n                |
+| `PRISM_API_KEY`                     | 🔒 Internal API key — **must match** `prism-mcp-server`'s `PRISM_API_KEY`                                                                     | You generate       |
 
 ### Dependencies (key)
 
@@ -276,22 +276,22 @@
 
 ### Environment Variables
 
-| Variable                            | Description                                                  | Source       |
-| ----------------------------------- | ------------------------------------------------------------ | ------------ |
-| `MONGODB_URI`                       | 🔒 Cosmos DB connection string                               | Azure Portal |
-| `COSMOS_DATABASE_NAME`              | Database name (default: `prism`)                             | You set      |
-| `AZURE_OPENAI_ENDPOINT`             | 🔒 Azure OpenAI endpoint                                     | Azure Portal |
-| `AZURE_OPENAI_API_KEY`              | 🔒 Azure OpenAI API key                                      | Azure Portal |
-| `AZURE_OPENAI_DEPLOYMENT_NAME`      | Model deployment name                                        | Azure Portal |
-| `AZURE_OPENAI_EMBEDDING_DEPLOYMENT` | Embedding model name                                         | Azure Portal |
-| `GEMINI_MODEL`                      | Gemini model name (fallback)                                 | You set      |
-| `PRISM_API_KEY`                     | 🔒 API key — **must match** `prism-engine`'s `PRISM_API_KEY` | You generate |
-| `PRISM_API_URL`                     | Prism Engine URL (e.g. `https://prism.syntaxure.dev`)        | You set      |
-| `USE_GREMLIN_RANKING`               | `true`/`false` — Gremlin graph ranking                       | You set      |
+| Variable                            | Description                                                                       | Source             |
+| ----------------------------------- | --------------------------------------------------------------------------------- | ------------------ |
+| `NEXT_PUBLIC_SUPABASE_URL`          | Supabase project URL (same project as prism-engine)                               | Supabase Dashboard |
+| `SUPABASE_SERVICE_ROLE_KEY`         | 🔒 Supabase service role key — reads/writes `prism_*` tables                      | Supabase Dashboard |
+| `AZURE_OPENAI_ENDPOINT`             | 🔒 Azure OpenAI endpoint                                                          | Azure Portal       |
+| `AZURE_OPENAI_API_KEY`              | 🔒 Azure OpenAI API key                                                           | Azure Portal       |
+| `AZURE_OPENAI_DEPLOYMENT_NAME`      | Model deployment name                                                             | Azure Portal       |
+| `AZURE_OPENAI_EMBEDDING_DEPLOYMENT` | Embedding model name                                                              | Azure Portal       |
+| `GEMINI_MODEL`                      | Gemini model name (fallback)                                                      | You set            |
+| `PRISM_API_KEY`                     | 🔒 API key — **must match** `prism-engine`'s `PRISM_API_KEY`                      | You generate       |
+| `PRISM_API_URL`                     | Prism Engine URL (e.g. `https://prism.syntaxure.dev`)                             | You set            |
+| `USE_GREMLIN_RANKING`               | `true`/`false` — rule-graph ranking (Postgres-backed now, see PRISM_MIGRATION.md) | You set            |
 
 ### Dependencies (key)
 
-`@modelcontextprotocol/sdk`, `@google/generative-ai`, `openai`, `mongodb`, `playwright`, `gpt-tokenizer`, `@syntaxure-labs/db` (workspace)
+`@modelcontextprotocol/sdk`, `@google/generative-ai`, `openai`, `@syntaxure-labs/db` (workspace), `@syntaxure/supabase` (workspace), `playwright`, `gpt-tokenizer`
 
 **⚠️ Note:** Uses `playwright` in production (web scraping) — needs headless browser environment.
 
@@ -332,12 +332,12 @@ docker run -p 8000:8000 prism-analytics
 
 ## 🏗️ Workspace Packages (built automatically by pnpm)
 
-| Package                   | Path                         | Purpose                                             |
-| ------------------------- | ---------------------------- | --------------------------------------------------- |
-| `@syntaxure/ui`           | `packages/ui`                | Shared UI components (Button, Card, Badge, etc.)    |
-| `@syntaxure-labs/db`      | `packages/db`                | Database clients: Cosmos DB (MongoDB API) + Gremlin |
-| `@repo/typescript-config` | `packages/typescript-config` | Shared TypeScript configurations                    |
-| `@repo/eslint-config`     | `packages/eslint-config`     | Shared ESLint configurations                        |
+| Package                   | Path                         | Purpose                                                 |
+| ------------------------- | ---------------------------- | ------------------------------------------------------- |
+| `@syntaxure/ui`           | `packages/ui`                | Shared UI components (Button, Card, Badge, etc.)        |
+| `@syntaxure-labs/db`      | `packages/db`                | Prisma schema + Postgres/Supabase clients (incl. Prism) |
+| `@repo/typescript-config` | `packages/typescript-config` | Shared TypeScript configurations                        |
+| `@repo/eslint-config`     | `packages/eslint-config`     | Shared ESLint configurations                            |
 
 ---
 
@@ -387,8 +387,7 @@ Then populate each with the env vars listed above.
 
 - [ ] All code pushed to `develop` branch
 - [ ] Merge `develop` → `main` (or deploy from `develop`)
-- [ ] Supabase project created and migrations run (`supabase/marketing_schema.sql`)
-- [ ] Azure Cosmos DB instance running with MongoDB API
+- [ ] Supabase project created and migrations run (`supabase/marketing_schema.sql`, incl. `supabase/migrations/20260813000001_prism_context_engine.sql` for Prism)
 - [ ] All API keys and secrets obtained from providers
 - [ ] Doppler project created for new environment
 
