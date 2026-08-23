@@ -1,0 +1,102 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "styling/brand-color-tokens",
+      "category": "styling",
+      "severity": "block",
+      "instruction": "Brand colors must reference their CSS variable tokens from app/globals.css.",
+      "check": {
+        "type": "required_token",
+        "tokenSet": "brand-colors",
+        "tokenMap": {
+          "#06b6d4": "var(--brand-primary)",
+          "#8b5cf6": "var(--brand-accent)",
+          "#0f172a": "var(--brand-dark)"
+        },
+        "message": "Use the brand token instead of the raw color."
+      }
+    },
+    {
+      "id": "styling/no-raw-hex-colors",
+      "category": "styling",
+      "severity": "block",
+      "instruction": "Every color comes from the design tokens defined in app/globals.css.",
+      "check": {
+        "type": "forbidden_pattern",
+        "pattern": "#(?!(?:06b6d4|8b5cf6|0f172a)\\b)[0-9a-fA-F]{8}\\b|#(?!(?:06b6d4|8b5cf6|0f172a)\\b)[0-9a-fA-F]{6}\\b|#[0-9a-fA-F]{3}\\b",
+        "allowlist": ["#FFFFFF", "#fff"],
+        "fix": "var(--brand-primary)",
+        "message": "Use the design token, not a hex literal."
+      }
+    },
+    {
+      "id": "styling/no-arbitrary-scale-values",
+      "category": "styling",
+      "severity": "warn",
+      "instruction": "Use Tailwind scale utilities instead of arbitrary pixel values.",
+      "extensions": [".tsx"],
+      "check": {
+        "type": "arbitrary_value",
+        "properties": [
+          "w",
+          "max-w",
+          "min-w",
+          "h",
+          "min-h",
+          "p",
+          "px",
+          "py",
+          "pt",
+          "pb",
+          "pl",
+          "pr",
+          "m",
+          "mx",
+          "my",
+          "mt",
+          "mb",
+          "gap",
+          "text",
+          "rounded"
+        ],
+        "message": "Pick the closest scale utility."
+      }
+    },
+    {
+      "id": "security/no-lodash",
+      "category": "security",
+      "severity": "block",
+      "instruction": "Never import lodash; use native Array/Object methods or lodash-es.",
+      "check": {
+        "type": "banned_import",
+        "specifiers": ["lodash"],
+        "message": "Use native methods or lodash-es."
+      }
+    },
+    {
+      "id": "architecture/no-db-in-components",
+      "category": "architecture",
+      "severity": "block",
+      "instruction": "Components never import database clients directly; go through a server action or data layer.",
+      "extensions": [".tsx", ".ts"],
+      "check": {
+        "type": "banned_import",
+        "specifiers": ["@syntaxure-labs/db", "@supabase/supabase-js"],
+        "message": "Move data access behind a server action or data layer."
+      }
+    },
+    {
+      "id": "testing/no-focused-tests",
+      "category": "testing",
+      "severity": "warn",
+      "instruction": "Never commit focused (.only) or skipped (.skip) tests.",
+      "extensions": [".test.ts", ".test.tsx", ".spec.ts", ".spec.tsx"],
+      "check": {
+        "type": "forbidden_pattern",
+        "pattern": "\\.(only|skip)\\s*\\(",
+        "message": "Remove .only/.skip before committing."
+      }
+    }
+  ]
+}

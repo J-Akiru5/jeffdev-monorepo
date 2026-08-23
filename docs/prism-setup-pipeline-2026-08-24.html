@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Setup Pipeline — MVP Report · 2026-08-24</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0D12; --bg2:#0E1219; --panel:#11161F; --panel2:#141B26; --line:#1D2530;
+    --cyan:#22D3EE; --violet:#8B7BFF; --text:#E6EBF2; --dim:#8B95A5; --dim2:#5C6577;
+    --ok:#34D399; --warn:#FBBF24; --bad:#F87171;
+    --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+    --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.65;font-size:16px}
+  .wrap{max-width:1100px;margin:0 auto;padding:48px 28px 96px}
+  .kicker{font-family:var(--mono);font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan)}
+  h1{font-size:2.5rem;font-weight:800;line-height:1.14;margin:.6rem 0 .3rem;text-wrap:balance}
+  h1 .accent{color:var(--violet)}
+  h2{font-size:1.35rem;font-weight:700;margin:3.2rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--line)}
+  h2 .idx{font-family:var(--mono);color:var(--cyan);font-weight:500;margin-right:.6rem}
+  h3{font-size:1rem;font-weight:600;margin:1.5rem 0 .6rem;color:var(--cyan)}
+  p{margin:.7rem 0;color:var(--text);max-width:74ch}
+  .lede{font-size:1.06rem;border-left:3px solid var(--cyan);padding:.9rem 1.2rem;background:var(--bg2);border-radius:0 10px 10px 0;margin:1.6rem 0;max-width:none}
+  code,.mono{font-family:var(--mono);font-size:.86em;background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:.1em .38em;color:var(--cyan)}
+  pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1.1rem 1.25rem;overflow-x:auto;margin:.9rem 0}
+  pre code{background:none;border:none;padding:0;color:var(--text);font-size:.83rem;line-height:1.55}
+  .term{background:#070A0F;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:1rem 0}
+  .term-bar{display:flex;align-items:center;gap:.4rem;padding:.55rem .8rem;background:var(--panel2);border-bottom:1px solid var(--line)}
+  .term-dot{width:9px;height:9px;border-radius:50%;background:var(--dim2)}
+  .term-title{font-family:var(--mono);font-size:.72rem;color:var(--dim);margin-left:.5rem}
+  .term pre{border:none;border-radius:0;margin:0;background:transparent}
+  .term pre code{color:#C9D4E3}
+  .term .cmd{color:var(--cyan)}
+  .term .ok{color:var(--ok)}
+  .term .warn{color:var(--warn)}
+  table{width:100%;border-collapse:collapse;margin:.9rem 0;font-size:.92rem}
+  th{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);text-align:left;padding:.55rem .75rem;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:.6rem .75rem;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  .tablewrap{overflow-x:auto}
+  .pill{display:inline-block;font-family:var(--mono);font-size:.68rem;font-weight:700;letter-spacing:.06em;border-radius:999px;padding:.16em .7em;white-space:nowrap}
+  .pill.ok{color:var(--ok);background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.35)}
+  .pill.block{color:var(--bad);background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35)}
+  .pill.warn{color:var(--warn);background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.35)}
+  .pill.info{color:var(--violet);background:rgba(139,123,255,.1);border:1px solid rgba(139,123,255,.35)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.9rem;margin:1.1rem 0}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1rem 1.15rem}
+  .card .n{font-family:var(--mono);font-size:1.5rem;font-weight:700;color:var(--cyan);font-variant-numeric:tabular-nums}
+  .card .l{font-size:.8rem;color:var(--dim);margin-top:.15rem}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;align-items:start}
+  @media (max-width:760px){.two-col{grid-template-columns:1fr}}
+  ul{margin:.6rem 0 .6rem 1.3rem;max-width:74ch} li{margin:.32rem 0}
+  .note{background:rgba(139,123,255,.07);border:1px solid rgba(139,123,255,.25);border-radius:10px;padding:.85rem 1.1rem;margin:1rem 0;font-size:.93rem;max-width:none}
+  .note.warn{background:rgba(251,191,36,.06);border-color:rgba(251,191,36,.25)}
+  .decision{border:1px solid var(--line);border-radius:10px;padding:.9rem 1.15rem;margin:.8rem 0;background:var(--panel)}
+  .decision .q{font-weight:600;margin-bottom:.35rem}
+  .decision .a{font-family:var(--mono);font-size:.78rem;color:var(--cyan)}
+  .footer{margin-top:4rem;padding-top:1.2rem;border-top:1px solid var(--line);font-family:var(--mono);font-size:.75rem;color:var(--dim)}
+  a{color:var(--cyan)}
+  .filelist{list-style:none;margin:.8rem 0 0;font-family:var(--mono);font-size:.82rem}
+  .filelist li{display:flex;justify-content:space-between;gap:1rem;padding:.32rem 0;border-bottom:1px dashed var(--line)}
+  .filelist li:last-child{border-bottom:none}
+  .filelist .tag{color:var(--dim);font-size:.75rem;flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="kicker">Prism Context Engine · KWADRA TBI MVP · Wed Aug 26 demo</div>
+<h1>The Setup Pipeline<span class="accent">.</span> From a bare repo to enforcement, one command.</h1>
+<div class="mono" style="color:var(--dim);font-size:.82rem">branch <span style="color:var(--cyan)">feat/prism-pass</span> → develop · prism-context-engine 1.2.0 · unpublished · builds on <span style="color:var(--cyan)">07c41ba</span> (the Pass)</div>
+
+<div class="lede">
+The Pass could already enforce rules — it just had no way to get a <code>rules.json</code> onto a machine except by hand. This ships the two paths that fix that: <code>prism init</code>, which reads a project's own <code>globals.css</code> and Tailwind config and generates a working starter rule set with <strong>zero network calls and zero account</strong>, and <code>prism pull</code>, which fetches a team's rules from a new dashboard endpoint and <strong>fails safe on every error path</strong> — network, auth, or malformed response — so a bad pull can never break a working setup. Both write the exact same unchanged rules.json v1 shape. The dashboard is the upgrade, not the gate: a developer gets real enforcement from their own design system before they ever see a login screen.
+</div>
+
+<div class="grid">
+  <div class="card"><div class="n">0</div><div class="l">network calls made by <code style="padding:0;background:none;border:none">prism init</code></div></div>
+  <div class="card"><div class="n">14</div><div class="l">real color tokens auto-detected from apps/prism-engine's own globals.css</div></div>
+  <div class="card"><div class="n">56</div><div class="l">new tests (39 CLI + 17 dashboard) — all green</div></div>
+  <div class="card"><div class="n">142 ✓</div><div class="l">tests passing across both packages, tsc clean, eslint 0 errors</div></div>
+</div>
+
+<h2><span class="idx">01</span>Inspection first — two things weren't what the brief assumed</h2>
+<p>Branch: staying on <code>feat/prism-pass</code>. It's already ahead of <code>origin/develop</code> by exactly the one commit this work depends on (the rule engine + v1 schema), working tree clean, nothing else in flight touches it. Target is still <code>develop</code>; this stacks rather than branching fresh.</p>
+<p>Reading the existing rule engine and the dashboard's storage before writing anything surfaced two real forks that weren't visible from the task brief alone:</p>
+<div class="two-col">
+  <div class="note warn">
+    <strong>1. <code style="padding:0;background:none;border:none">prism init</code> already existed.</strong> It was a cloud-token MCP-wiring command for Cursor/Windsurf/VS Code/Claude Desktop — nothing like the local onboarding flow this task describes. Unpublished package, so the rename was safe: the old command moved to <code>prism ide-setup</code>.
+  </div>
+  <div class="note warn">
+    <strong>2. The dashboard's rule storage doesn't match v1.</strong> <code>prism_rules</code> (Postgres/Supabase, migrated off Cosmos) uses <code>category: performance|documentation|custom|…</code> and <code>severity: error|warning|info</code> — not v1's four categories and two severities. And <code>prism_brands</code>, which holds real design tokens, has <strong>no relation to <code>prism_projects</code> at all</strong> — so server-side token-derived checks were off the table without a schema change, which was out of scope.
+  </div>
+</div>
+<p>One thing was already solved: <code>authenticate()</code> in the dashboard's API layer already accepts an <code>x-api-key</code> header against a hashed lookup in <code>prism_api_keys</code> — exactly the "API key auth only" the brief asked for, reused as-is.</p>
+
+<h2><span class="idx">02</span>Decisions made before writing code</h2>
+<p>Four choices were forks, not defaults, so they went to Jeff before any implementation: naming collision resolution, the token-extraction execution model, how <code>prism pull</code> identifies a project, and how the dashboard endpoint maps categories/severities that don't exist in v1.</p>
+<div class="decision">
+  <div class="q">prism init naming collision</div>
+  <div class="a">→ Reclaim `init` for the local flow; old command becomes `prism ide-setup`.</div>
+</div>
+<div class="decision">
+  <div class="q">Tailwind config extraction</div>
+  <div class="a">→ Dynamic import for .js/.mjs/.cjs (accurate — same load path Tailwind itself uses); regex fallback for .ts (no TS runtime available) and as a safety net if the import throws.</div>
+</div>
+<div class="decision">
+  <div class="q">How prism pull picks a project</div>
+  <div class="a">→ Refined in the room: not a flat `projectSlug` string but `{ activeProject, projects: { [slug]: { id, lastPulled } } }` in `.prism/config.json` — additive, never assumes exactly one entry, so `prism projects use &lt;slug&gt;` / `prism projects list` can land later with zero config migration. Confirmed as fact, not assumption: API keys are user-scoped in `prism_api_keys` (no `project_id` column) — one key legitimately lists and fetches every project a user owns.</div>
+</div>
+<div class="decision">
+  <div class="q">Dashboard category/severity mapping</div>
+  <div class="a">→ error→block, warning/info→warn. performance/documentation/custom (the DB default) fold into architecture rather than being dropped — nothing a user authored in the dashboard silently vanishes on pull.</div>
+</div>
+
+<h2><span class="idx">03</span>prism init — the local path</h2>
+<p>Detection reads only the project's own files: <code>package.json</code> for Next.js/Tailwind and their versions, directory layout for app-vs-pages router. Token extraction has two tiers —</p>
+<ul>
+  <li><strong>CSS custom properties</strong> from <code>globals.css</code> (checked across the common Next.js locations, app-root and <code>src/</code>-nested) — this covers Tailwind v4's CSS-first <code>@theme{}</code> tokens for free, since those are custom properties too. Hex-valued ones become a <code>required_token</code> rule; duplicate hex values keep their first-seen variable name.</li>
+  <li><strong>Tailwind config colors</strong> — dynamically imported for <code>.js/.mjs/.cjs</code> (flattening nested palettes accurately, including spreads and computed keys a regex can't see), regex-extracted for <code>.ts</code> or if the import throws. These are informational only in the summary — with no CSS variable behind them there's nothing safe to enforce a swap to — but their presence still emits the <code>arbitrary_value</code> rule guarding the scale.</li>
+</ul>
+<p>Every generated rule ships at <code class="mono">severity: warn</code>, never <code class="mono">block</code> — these come from regex heuristics against a codebase they've never been run on before, and a false positive shouldn't stop an agent's write on day one. Promoting a rule is a one-line edit.</p>
+<p>Hook wiring merges <code>.claude/settings.json</code>: every existing key and matcher is preserved, a second run is a no-op (checks for an existing <code>prism check --hook</code> command before adding one), and malformed existing JSON is left untouched with a manual-fix snippet printed instead of being clobbered. Same discipline for <code>.prism/rules.json</code> itself — an existing file is never overwritten without <code>--force</code> or an explicit "yes" at the prompt; under <code>--yes</code> (the CI/demo flag) the safe default is to <em>skip</em>, not silently regenerate. The empty case (no tokens found at all) still writes valid JSON — a single advisory rule with no <code>check</code> field explaining what was searched and where to go next — rather than failing or emitting something <code>JSON.parse</code> can't read.</p>
+
+<h2><span class="idx">04</span>prism pull — the synced path</h2>
+<p>Reads the API key from <code>PRISM_API_KEY</code> or <code>.prism/config.json</code>, resolves a project (via <code>--project</code>, the stored <code>activeProject</code>, or a prompt — first project as the Enter-through default, auto-picked under <code>--yes</code>), fetches <code>GET /api/v1/projects/:id/rules/pass</code>, and writes the result straight through the same <code>parseRuleSet</code> validator the engine trusts — so a response has to actually be valid v1 before it ever touches disk. Every write, rules.json and config.json alike, goes through a temp-file-then-rename so a killed process can't leave a half-written file.</p>
+<div class="tablewrap">
+<table>
+<tr><th>Failure</th><th>Behavior</th><th>Exit</th></tr>
+<tr><td>No API key found</td><td>Warn with exactly where it looked; existing rules.json untouched</td><td><span class="pill ok">0</span></td></tr>
+<tr><td>Network error (DNS, timeout, offline)</td><td>Warn with the underlying error; existing rules.json untouched</td><td><span class="pill ok">0</span></td></tr>
+<tr><td>401 / other non-2xx</td><td>Warn with HTTP status + server error message; existing rules.json untouched</td><td><span class="pill ok">0</span></td></tr>
+<tr><td>Malformed / schema-invalid response</td><td>Warn — caught by the same v1 validator prism check uses; existing rules.json untouched</td><td><span class="pill ok">0</span></td></tr>
+<tr><td>Success</td><td>Atomic write, <code style="padding:0;background:none;border:none">lastPulled</code> recorded in config.json</td><td><span class="pill ok">0</span></td></tr>
+</table>
+</div>
+<p class="mono" style="font-size:.82rem;color:var(--dim)">All five paths covered by tests with a mocked fetch exercising the real request shape (URL, `x-api-key` header, JSON body) the live endpoint expects.</p>
+
+<h2><span class="idx">05</span>Dashboard endpoint</h2>
+<p><code>GET /api/v1/projects/:id/rules/pass</code> — read-only, reuses the existing <code>authenticate()</code> (no new auth system), returns the v1 envelope directly rather than the usual <code>{ data, meta }</code> wrapper every other v1 route uses, because this response body <em>is</em> the file content <code>prism pull</code> writes verbatim.</p>
+<div class="tablewrap">
+<table>
+<tr><th>prism_rules field</th><th>v1 field</th><th>Mapping</th></tr>
+<tr><td><code style="padding:0;background:none;border:none">severity: error</code></td><td><code style="padding:0;background:none;border:none">block</code></td><td>1:1</td></tr>
+<tr><td><code style="padding:0;background:none;border:none">severity: warning | info</code></td><td><code style="padding:0;background:none;border:none">warn</code></td><td>v1 has no third severity</td></tr>
+<tr><td><code style="padding:0;background:none;border:none">category: architecture / styling / security / testing</code></td><td>same</td><td>passthrough</td></tr>
+<tr><td><code style="padding:0;background:none;border:none">category: performance / documentation / custom</code></td><td><code style="padding:0;background:none;border:none">architecture</code></td><td>folded, not dropped — "custom" is the DB's own default category</td></tr>
+<tr><td><code style="padding:0;background:none;border:none">pattern</code> (compiles as regex)</td><td><code style="padding:0;background:none;border:none">check: forbidden_pattern</code></td><td>enforced</td></tr>
+<tr><td><code style="padding:0;background:none;border:none">pattern</code> null or doesn't compile</td><td>no <code style="padding:0;background:none;border:none">check</code></td><td>advisory-only — one bad stored pattern can't break the whole pull</td></tr>
+<tr><td><code style="padding:0;background:none;border:none">id</code> (UUID)</td><td><code style="padding:0;background:none;border:none">id</code></td><td>kept as-is — stable across repeat pulls, which matters more here than a pretty slug</td></tr>
+</table>
+</div>
+<p>The mapping logic lives in its own pure module (<code>prism-rules-transform.ts</code>) specifically so it's unit-testable without mocking Supabase/Next.js — 17 tests cover every branch above.</p>
+<div class="note">Not attempted: deriving <code>required_token</code>/<code>arbitrary_value</code> checks server-side from <code>prism_brands</code> token data. There's no foreign key from a project to a brand in the current schema, and adding one was explicitly out of scope ("Cosmos DB schemas or migrations beyond adding one read endpoint"). Local <code>prism init</code> is the only path that derives checks from real token data today; a project↔brand link is the natural follow-up once this ships.</div>
+
+<h2><span class="idx">06</span>Verification</h2>
+<div class="tablewrap">
+<table>
+<tr><th>Package</th><th>Typecheck</th><th>Lint</th><th>Tests</th></tr>
+<tr><td><code style="padding:0;background:none;border:none">prism-context-engine</code></td><td><span class="pill ok">clean</span></td><td><span class="pill ok">0 errors</span> <span style="color:var(--dim);font-size:.8rem">(3 pre-existing warnings in kitchen.ts, untouched)</span></td><td><span class="pill ok">125 / 125</span> <span style="color:var(--dim);font-size:.8rem">(+39 new, 2 pre-existing skips)</span></td></tr>
+<tr><td><code style="padding:0;background:none;border:none">prism-engine</code> (dashboard)</td><td><span class="pill ok">clean</span></td><td><span class="pill ok">0 errors</span></td><td><span class="pill ok">17 / 17</span> new</td></tr>
+</table>
+</div>
+<p><code>prism init</code> ran against real content from two apps in this monorepo — copied into isolated fixtures (not run in-place, to avoid dropping <code>.prism/</code>/<code>.claude/</code> files into tracked app directories):</p>
+<div class="tablewrap">
+<table>
+<tr><th>Project</th><th>Stack detected</th><th>Color tokens</th><th>Rules generated</th></tr>
+<tr><td>apps/prism-engine's own design system</td><td>Next.js 16.1.4 · app router · Tailwind ^4.1.18</td><td><strong>14</strong> real hex tokens, including a dark/light theme pair correctly resolved to the same variable name at two different values</td><td><code style="padding:0;background:none;border:none">required_token</code> + <code style="padding:0;background:none;border:none">arbitrary_value</code></td></tr>
+<tr><td>apps/prism-docs</td><td>Next.js 16.1.4 · app router · Tailwind ^4.1.18 (config present)</td><td>0 — theme colors reference <code style="padding:0;background:none;border:none">var(--…)</code>, not literal hex</td><td><code style="padding:0;background:none;border:none">arbitrary_value</code> only (Tailwind detected, no hex to enforce)</td></tr>
+</table>
+</div>
+<p>Then closed the loop: wrote a file violating the just-generated rules and ran <code>prism check</code> against it directly — real detection against a real generated rule set, not a fixture built to pass.</p>
+
+<h2><span class="idx">07</span>Terminal transcript — prism init, start to finish</h2>
+<p>Exactly what a developer sees running <code>prism init --yes</code> against apps/prism-engine's real <code>package.json</code> and <code>globals.css</code>, copied into an isolated directory:</p>
+<div class="term">
+  <div class="term-bar"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span><span class="term-title">prism-engine-copy — zsh</span></div>
+  <pre><code>$ <span class="cmd">node dist/index.js init --yes</span>
+◈ Prism Context Engine — init
+
+  Scanning this project. No network calls.
+
+Detected: Next.js 16.1.4 · app router · Tailwind ^4.1.18
+
+<span class="ok">✓</span> Scanned src/app/globals.css
+<span class="ok">✓</span> Found <b>14</b> color token(s) as CSS custom properties
+
+<span class="ok">✓</span> Wrote 2 rule(s) to .prism/rules.json
+
+<span class="ok">✓</span> Created .claude/settings.json with the Pass hook wired in
+
+Done.
+
+  • styling/design-tokens (required_token)
+  • styling/no-arbitrary-tailwind-values (arbitrary_value)
+
+  rules file: ~/prism-engine-copy/.prism/rules.json
+
+Next: write or edit a file in this project — the hook runs automatically.
+  Or check by hand:  prism check &lt;file&gt;
+  Team on the dashboard? Sync their rules:  prism pull</code></pre>
+</div>
+<p>Re-running the same command afterward (still <code>--yes</code>, rules.json now exists) is a clean no-op on both fronts — proof the "never overwrite without confirmation" rule actually holds under the CI flag, not just in a unit test:</p>
+<div class="term">
+  <div class="term-bar"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span><span class="term-title">prism-engine-copy — zsh</span></div>
+  <pre><code>$ <span class="cmd">node dist/index.js init --yes</span>
+   <span style="color:var(--dim)">… detection + token scan, same as above …</span>
+
+<span class="warn">⚠</span> .prism/rules.json already exists — leaving it untouched (pass --force to regenerate).
+<span class="ok">✓</span> .claude/settings.json already has the Pass hook wired in</code></pre>
+</div>
+<p>And closing the loop — a file written against the just-generated rules, checked by hand:</p>
+<div class="term">
+  <div class="term-bar"><span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span><span class="term-title">prism-engine-copy — zsh</span></div>
+  <pre><code>$ <span class="cmd">node dist/index.js check src/app/BadBanner.tsx</span>
+src/app/BadBanner.tsx
+  <span class="warn">WARN</span>  src/app/BadBanner.tsx:2 [warn] styling/design-tokens: Use the CSS variable
+    token instead of the raw hex value. Found '#050505' — replace it with
+    'var(--color-void)'.
+  <span class="warn">WARN</span>  src/app/BadBanner.tsx:2 [warn] styling/no-arbitrary-tailwind-values: Pick
+    the closest Tailwind scale utility instead of an arbitrary value.
+    Found 'w-[327px]'.
+  <span class="warn">WARN</span>  src/app/BadBanner.tsx:2 [warn] styling/no-arbitrary-tailwind-values: Pick
+    the closest Tailwind scale utility instead of an arbitrary value.
+    Found 'p-[13px]'.
+prism check: 3 warning violation(s) across 1 file(s).</code></pre>
+</div>
+
+<h2><span class="idx">08</span>Files touched</h2>
+<ul class="filelist">
+  <li><span>packages/prism-context-engine/src/commands/init.ts</span><span class="tag">new — local onboarding</span></li>
+  <li><span>packages/prism-context-engine/src/commands/pull.ts</span><span class="tag">new — synced onboarding</span></li>
+  <li><span>packages/prism-context-engine/src/commands/ide-setup.ts</span><span class="tag">renamed from init.ts</span></li>
+  <li><span>packages/prism-context-engine/src/init/{detect,tokens,generate-rules,hook}.ts</span><span class="tag">new</span></li>
+  <li><span>packages/prism-context-engine/src/rules/project-config.ts</span><span class="tag">new — .prism/config.json</span></li>
+  <li><span>packages/prism-context-engine/src/util/{atomic-write,prompt}.ts</span><span class="tag">new — shared helpers</span></li>
+  <li><span>packages/prism-context-engine/src/index.ts</span><span class="tag">wired init/pull/ide-setup</span></li>
+  <li><span>packages/prism-context-engine/README.md</span><span class="tag">documented both paths</span></li>
+  <li><span>apps/prism-engine/.../api/v1/projects/[id]/rules/pass/route.ts</span><span class="tag">new endpoint</span></li>
+  <li><span>apps/prism-engine/src/lib/prism-rules-transform.ts</span><span class="tag">new — mapping logic</span></li>
+  <li><span>+ 7 new test files</span><span class="tag">56 new tests total</span></li>
+</ul>
+
+<h2><span class="idx">09</span>Out of scope / what's next</h2>
+<ul>
+  <li>No new runtime dependency was added — inline prompts follow the readline pattern already used by <code>sync</code>/<code>ide-setup</code>, no clack/inquirer needed.</li>
+  <li>The dashboard endpoint wasn't smoke-tested against a live server in this session — no Supabase credentials in this environment. Coverage instead comes from 17 unit tests on the mapping logic plus <code>prism pull</code>'s own tests, which exercise the exact wire contract (URL shape, <code>x-api-key</code> header, response envelope) a live server has to satisfy.</li>
+  <li>Follow-up, not blocking Wednesday: a real <code>project_id</code> on <code>prism_brands</code> would let the dashboard endpoint derive <code>required_token</code>/<code>arbitrary_value</code> checks the same way local <code>prism init</code> does, closing the gap between the two paths.</li>
+  <li><code>prism projects use &lt;slug&gt;</code> / <code>prism projects list</code> — the config.json shape was built additive specifically so these can land later with no migration.</li>
+</ul>
+
+<div class="footer">
+  prism-context-engine 1.2.0 (unpublished) · apps/prism-engine dashboard · feat/prism-pass → develop · generated 2026-08-24
+</div>
+
+</div>
+</body>
+</html>

@@ -33,18 +33,19 @@
 
 #### Public (`NEXT_PUBLIC_`)
 
-| Variable                                  | Description                                                                | Source                                     |
-| ----------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------ |
-| `NEXT_PUBLIC_SITE_URL`                    | `https://jeffdev.studio`                                                   | You set                                    |
-| `NEXT_PUBLIC_BASE_URL`                    | Same as `NEXT_PUBLIC_SITE_URL` — keep in sync                              | You set                                    |
-| `NEXT_PUBLIC_SUPABASE_URL`                | Supabase project URL                                                       | Supabase Dashboard                         |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY`           | Supabase anon/public key                                                   | Supabase Dashboard                         |
-| `NEXT_PUBLIC_PAYPAL_CLIENT_ID`            | PayPal client-side ID                                                      | PayPal Developer                           |
-| `NEXT_PUBLIC_GCASH_NUMBER`                | GCash number for proof upload                                              | You set                                    |
-| `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`    | Google Search Console code                                                 | Google Search Console                      |
-| `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID`     | GA4 measurement ID (optional)                                              | Firebase Console                           |
-| `NEXT_PUBLIC_COMMUNITY_HERO_VIDEO_URL`    | Public URL of the /community marketing video (Supabase `marketing` bucket) | `scripts/upload-marketing-video.ts` output |
-| `NEXT_PUBLIC_COMMUNITY_HERO_VIDEO_POSTER` | Optional poster/thumbnail image URL for the video                          | Same bucket, optional                      |
+| Variable                                      | Description                                                                | Source                                     |
+| --------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------ |
+| `NEXT_PUBLIC_SITE_URL`                        | `https://jeffdev.studio`                                                   | You set                                    |
+| `NEXT_PUBLIC_BASE_URL`                        | Same as `NEXT_PUBLIC_SITE_URL` — keep in sync                              | You set                                    |
+| `NEXT_PUBLIC_SUPABASE_URL`                    | Supabase project URL                                                       | Supabase Dashboard                         |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`               | Supabase anon/public key                                                   | Supabase Dashboard                         |
+| `NEXT_PUBLIC_PAYPAL_CLIENT_ID`                | PayPal client-side ID                                                      | PayPal Developer                           |
+| `NEXT_PUBLIC_GCASH_NUMBER`                    | GCash number for proof upload                                              | You set                                    |
+| `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`        | Google Search Console code                                                 | Google Search Console                      |
+| `NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID`         | GA4 measurement ID (optional)                                              | Firebase Console                           |
+| `NEXT_PUBLIC_COMMUNITY_HERO_VIDEO_URL`        | Public URL of the /community marketing video (Supabase `marketing` bucket) | `scripts/upload-marketing-video.ts` output |
+| `NEXT_PUBLIC_COMMUNITY_HERO_VIDEO_MOBILE_URL` | Portrait 9:16 video for mobile (<768px); falls back to desktop if unset    | Same bucket, optional                      |
+| `NEXT_PUBLIC_COMMUNITY_HERO_VIDEO_POSTER`     | Optional poster/thumbnail image URL for the video                          | Same bucket, optional                      |
 
 #### Private
 

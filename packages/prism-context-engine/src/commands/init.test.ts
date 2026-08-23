@@ -1,127 +1,152 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { existsSync, mkdirSync, writeFileSync, rmSync, readFileSync } from "fs";
+import { describe, it, expect, afterEach, vi } from "vitest";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
+import { parseRuleSet } from "../rules/parse.js";
 
-describe("prism init command", () => {
-  const tmpDir = join(tmpdir(), `prism-init-test-${Date.now()}`);
-  const cursorDir = join(tmpDir, ".cursor");
-  const windsurfDir = join(tmpDir, ".windsurf");
+const promptYesNoMock = vi.fn();
+vi.mock("../util/prompt.js", () => ({
+  promptYesNo: (...args: unknown[]) => promptYesNoMock(...args),
+  promptText: vi.fn(),
+}));
 
-  beforeEach(() => {
-    mkdirSync(tmpDir, { recursive: true });
-  });
+// Imported after the mock declaration; vitest hoists vi.mock() above this,
+// so init.ts's `import { promptYesNo } from "../util/prompt.js"` resolves
+// to the mock at module-load time either way — this ordering just keeps
+// the file readable top-to-bottom.
+const { init } = await import("./init.js");
 
+function makeTmpDir(label: string): string {
+  const dir = join(
+    tmpdir(),
+    `prism-init-cmd-${label}-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+  );
+  mkdirSync(dir, { recursive: true });
+  return dir;
+}
+
+function rulesPath(dir: string): string {
+  return join(dir, ".prism", "rules.json");
+}
+
+describe("prism init (local onboarding)", () => {
+  const dirs: string[] = [];
   afterEach(() => {
-    rmSync(tmpDir, { recursive: true, force: true });
+    for (const dir of dirs.splice(0)) rmSync(dir, { recursive: true, force: true });
+    promptYesNoMock.mockReset();
   });
 
-  it("should detect Cursor when .cursor directory exists", () => {
-    mkdirSync(cursorDir, { recursive: true });
-    expect(existsSync(cursorDir)).toBe(true);
+  it("handles the empty case: writes a valid, advisory-only starter and wires the hook", async () => {
+    const dir = makeTmpDir("empty");
+    dirs.push(dir);
+
+    await init({ cwd: dir, yes: true });
+
+    expect(existsSync(rulesPath(dir))).toBe(true);
+    const ruleSet = JSON.parse(readFileSync(rulesPath(dir), "utf8"));
+    expect(() => parseRuleSet(JSON.stringify(ruleSet))).not.toThrow();
+    expect(ruleSet.rules.every((r: { check?: unknown }) => !r.check)).toBe(true);
+    expect(existsSync(join(dir, ".claude", "settings.json"))).toBe(true);
   });
 
-  it("should detect Windsurf when .windsurf directory exists", () => {
-    mkdirSync(windsurfDir, { recursive: true });
-    expect(existsSync(windsurfDir)).toBe(true);
-  });
-
-  it("should write valid MCP config for Cursor", () => {
-    mkdirSync(cursorDir, { recursive: true });
-    const config = {
-      mcpServers: {
-        prism: {
-          command: "npx",
-          args: ["prism-context-engine", "connect"],
-        },
-      },
-    };
-    writeFileSync(join(cursorDir, "mcp.json"), JSON.stringify(config, null, 2));
-    const saved = JSON.parse(
-      readFileSync(join(cursorDir, "mcp.json"), "utf-8"),
+  it("generates real, valid enforceable rules from a Next.js + Tailwind + globals.css project", async () => {
+    const dir = makeTmpDir("real-project");
+    dirs.push(dir);
+    writeFileSync(
+      join(dir, "package.json"),
+      JSON.stringify({
+        dependencies: { next: "15.1.0" },
+        devDependencies: { tailwindcss: "3.4.1" },
+      }),
     );
-    expect(saved.mcpServers.prism.command).toBe("npx");
-    expect(saved.mcpServers.prism.args).toContain("connect");
-  });
-
-  it("should not overwrite existing Cursor MCP entries", () => {
-    mkdirSync(cursorDir, { recursive: true });
-    const config = {
-      mcpServers: {
-        existingTool: { command: "node", args: ["existing.js"] },
-      },
-    };
-    writeFileSync(join(cursorDir, "mcp.json"), JSON.stringify(config, null, 2));
-    const saved = JSON.parse(
-      readFileSync(join(cursorDir, "mcp.json"), "utf-8"),
+    mkdirSync(join(dir, "app"), { recursive: true });
+    writeFileSync(
+      join(dir, "app", "globals.css"),
+      `:root {\n  --brand-primary: #06b6d4;\n}\n`,
     );
-    expect(saved.mcpServers.existingTool).toBeDefined();
-  });
 
-  it("should include PRISM_TOKEN env var when token is available", () => {
-    const token = "test-token-123";
-    const config = {
-      command: "npx",
-      args: ["prism-context-engine", "connect"],
-      env: { PRISM_TOKEN: token },
-    };
-    expect(config.env?.PRISM_TOKEN).toBe(token);
-  });
+    await init({ cwd: dir, yes: true });
 
-  it("should omit PRISM_TOKEN env var when no token", () => {
-    const config = {
-      command: "npx",
-      args: ["prism-context-engine", "connect"],
-    };
-    expect(config.env).toBeUndefined();
-  });
-});
-
-describe("IDE detection helpers", () => {
-  const originalPlatform = process.platform;
-  const originalAppData = process.env.APPDATA;
-
-  afterEach(() => {
-    Object.defineProperty(process, "platform", { value: originalPlatform });
-    process.env.APPDATA = originalAppData;
-  });
-
-  it("should use APPDATA for VS Code path on Windows", () => {
-    Object.defineProperty(process, "platform", { value: "win32" });
-    process.env.APPDATA = "C:\\Users\\test\\AppData\\Roaming";
-    const vscodePath = join(
-      process.env.APPDATA,
-      "Code",
-      "User",
-      "settings.json",
+    const ruleSet = JSON.parse(readFileSync(rulesPath(dir), "utf8"));
+    expect(() => parseRuleSet(JSON.stringify(ruleSet))).not.toThrow();
+    const ids = ruleSet.rules.map((r: { id: string }) => r.id);
+    expect(ids).toContain("styling/design-tokens");
+    expect(ids).toContain("styling/no-arbitrary-tailwind-values");
+    // Regression (2026-08-24 E2E): the token rule must block (warns are
+    // invisible to the agent in hook mode) and must not apply to .css
+    // (the tokens' own definition lines would self-flag).
+    const tokenRule = ruleSet.rules.find(
+      (r: { id: string }) => r.id === "styling/design-tokens",
     );
-    expect(vscodePath).toContain("AppData");
-    expect(vscodePath).toContain(join("Code", "User", "settings.json"));
+    expect(tokenRule.severity).toBe("block");
+    expect(tokenRule.extensions).not.toContain(".css");
   });
 
-  it("should use Library path for VS Code on macOS", () => {
-    Object.defineProperty(process, "platform", { value: "darwin" });
-    const vscodePath = join(
-      "/Users/test",
-      "Library",
-      "Application Support",
-      "Code",
-      "User",
-      "settings.json",
+  it("merges the hook into an existing .claude/settings.json without dropping other keys", async () => {
+    const dir = makeTmpDir("merge-settings");
+    dirs.push(dir);
+    mkdirSync(join(dir, ".claude"), { recursive: true });
+    writeFileSync(
+      join(dir, ".claude", "settings.json"),
+      JSON.stringify({ permissions: { allow: ["Bash(git *)"] } }),
     );
-    expect(vscodePath).toContain(
-      join("Library", "Application Support", "Code"),
+
+    await init({ cwd: dir, yes: true });
+
+    const settings = JSON.parse(
+      readFileSync(join(dir, ".claude", "settings.json"), "utf8"),
     );
+    expect(settings.permissions.allow).toEqual(["Bash(git *)"]);
+    expect(settings.hooks.PostToolUse.length).toBeGreaterThan(0);
   });
 
-  it("should use Library path for Claude Desktop on macOS", () => {
-    const claudePath = join(
-      "/Users/test",
-      "Library",
-      "Application Support",
-      "Claude",
-      "claude_desktop_config.json",
-    );
-    expect(claudePath).toContain(join("Claude", "claude_desktop_config.json"));
+  it("--yes leaves an existing .prism/rules.json untouched (never silently overwrites)", async () => {
+    const dir = makeTmpDir("yes-no-overwrite");
+    dirs.push(dir);
+    mkdirSync(join(dir, ".prism"), { recursive: true });
+    writeFileSync(rulesPath(dir), "EXISTING");
+
+    await init({ cwd: dir, yes: true });
+
+    expect(readFileSync(rulesPath(dir), "utf8")).toBe("EXISTING");
+    expect(promptYesNoMock).not.toHaveBeenCalled();
+  });
+
+  it("--force overwrites an existing .prism/rules.json without prompting", async () => {
+    const dir = makeTmpDir("force-overwrite");
+    dirs.push(dir);
+    mkdirSync(join(dir, ".prism"), { recursive: true });
+    writeFileSync(rulesPath(dir), "EXISTING");
+
+    await init({ cwd: dir, force: true });
+
+    expect(readFileSync(rulesPath(dir), "utf8")).not.toBe("EXISTING");
+    expect(promptYesNoMock).not.toHaveBeenCalled();
+    expect(() => parseRuleSet(readFileSync(rulesPath(dir), "utf8"))).not.toThrow();
+  });
+
+  it("without --yes/--force, prompts and honors a declined overwrite", async () => {
+    const dir = makeTmpDir("prompt-decline");
+    dirs.push(dir);
+    mkdirSync(join(dir, ".prism"), { recursive: true });
+    writeFileSync(rulesPath(dir), "EXISTING");
+    promptYesNoMock.mockResolvedValue(false);
+
+    await init({ cwd: dir });
+
+    expect(promptYesNoMock).toHaveBeenCalled();
+    expect(readFileSync(rulesPath(dir), "utf8")).toBe("EXISTING");
+  });
+
+  it("without --yes/--force, prompts and honors an accepted overwrite", async () => {
+    const dir = makeTmpDir("prompt-accept");
+    dirs.push(dir);
+    mkdirSync(join(dir, ".prism"), { recursive: true });
+    writeFileSync(rulesPath(dir), "EXISTING");
+    promptYesNoMock.mockResolvedValue(true);
+
+    await init({ cwd: dir });
+
+    expect(readFileSync(rulesPath(dir), "utf8")).not.toBe("EXISTING");
   });
 });

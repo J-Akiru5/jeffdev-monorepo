@@ -1,6 +1,6 @@
 {
   "buildCommand": "pnpm turbo build --filter=prism-engine",
-  "installCommand": "pnpm install --frozen-lockfile",
+  "installCommand": "npm i -g napi-postinstall && pnpm install --frozen-lockfile",
   "outputDirectory": ".next",
   "framework": "nextjs"
 }
