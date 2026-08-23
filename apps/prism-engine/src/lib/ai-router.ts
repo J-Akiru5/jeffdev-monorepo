@@ -1,10 +1,17 @@
 import type { ExtractedRule, RuleExtractionResult } from "./deepseek";
 
-export type AIProvider = "deepseek" | "gemini" | "azure";
+export type AIProvider = "opencode" | "deepseek" | "gemini" | "azure";
 
+/**
+ * Phase 3: OpenCode Zen is the primary provider when configured (free
+ * models first, MIMO default — see lib/opencode.ts). An explicit
+ * AI_PROVIDER env still wins so existing deployments are untouched.
+ */
 export function getAIProvider(): AIProvider {
-  const provider = (process.env.AI_PROVIDER || "deepseek").toLowerCase() as AIProvider;
-  return provider;
+  const explicit = process.env.AI_PROVIDER;
+  if (explicit) return explicit.toLowerCase() as AIProvider;
+  if (process.env.OPENCODE_API_KEY) return "opencode";
+  return "deepseek";
 }
 
 export async function generateChatCompletion(params: {
@@ -13,10 +20,23 @@ export async function generateChatCompletion(params: {
   temperature?: number;
   maxTokens?: number;
   responseFormat?: "json_object" | "text";
+  /** Phase 3 multi-model selection: honoured by the opencode provider. */
+  model?: string;
 }): Promise<string> {
   const provider = getAIProvider();
 
   switch (provider) {
+    case "opencode": {
+      const { opencodeChat } = await import("./opencode");
+      return opencodeChat({
+        systemPrompt: params.systemPrompt,
+        userPrompt: params.userPrompt,
+        temperature: params.temperature,
+        maxTokens: params.maxTokens,
+        json: params.responseFormat === "json_object",
+        model: params.model,
+      });
+    }
     case "deepseek": {
       const { generateChatCompletion } = await import("./deepseek");
       return generateChatCompletion(params);

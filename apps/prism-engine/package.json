@@ -27,6 +27,7 @@
     "@supabase/supabase-js": "^2.47.0",
     "@syntaxure/ui": "workspace:*",
     "@syntaxure-labs/db": "workspace:*",
+    "@prism-engine/cli": "workspace:*",
     "@syntaxure/sentry-config": "workspace:*",
     "@syntaxure/supabase": "workspace:*",
     "@syntaxure/redis": "workspace:*",
