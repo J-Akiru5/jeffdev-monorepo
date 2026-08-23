@@ -3,6 +3,10 @@ import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { z } from "zod";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
 import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
+import {
+  assertWithinProjectCap,
+  projectCapMessage,
+} from "@/lib/subscriptions";
 
 const STACKS = ["react", "nextjs", "react-native"] as const;
 const DESIGN_SYSTEMS = [
@@ -141,6 +145,12 @@ export async function POST(request: NextRequest) {
       parsed.error.issues.map((e) => e.message).join(", "),
       422,
     );
+
+  // Phase 0 tier enforcement: block NEW creates at the per-tier project cap.
+  // Existing over-cap projects stay fully accessible (grandfathered).
+  const cap = await assertWithinProjectCap(auth.userId);
+  if (!cap.allowed)
+    return errorResponse(projectCapMessage(cap), 403);
 
   const { name, designSystem, stack } = parsed.data;
   const slug = slugify(name);

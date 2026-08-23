@@ -202,3 +202,59 @@ export async function getUserTier(userId: string): Promise<SubscriptionTier> {
     return "free";
   }
 }
+
+export interface ProjectCapResult {
+  allowed: boolean;
+  tier: SubscriptionTier;
+  /** Max projects for this tier; -1 means unlimited. */
+  limit: number;
+  /**
+   * Current project count. -1 when the tier is unlimited and the count
+   * query was skipped (there is nothing to enforce against).
+   */
+  currentCount: number;
+}
+
+/**
+ * Enforce the per-tier project cap at CREATE time only.
+ *
+ * Grandfathering contract: existing rows are never touched, hidden, or
+ * migrated — a user over their cap (e.g. downgraded from Pro with 3 projects
+ * on Free's 1-project limit) keeps full access to what exists and simply
+ * cannot create another until they delete down under the cap or upgrade.
+ *
+ * Tier source of truth is prism_subscriptions.tier via getUserTier() — NOT
+ * user_profiles.tier, which admin overrides write to while having no effect
+ * on enforcement (known Phase 1 bug).
+ */
+export async function assertWithinProjectCap(
+  userId: string,
+): Promise<ProjectCapResult> {
+  const tier = await getUserTier(userId);
+  const limit = TIER_LIMITS[tier].projects;
+
+  if (limit === -1) {
+    return { allowed: true, tier, limit, currentCount: -1 };
+  }
+
+  try {
+    const { getPrismDb } = await import("@syntaxure-labs/db/prism");
+    const db = getPrismDb();
+    const { count } = await db
+      .from("prism_projects")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId);
+    const currentCount = count ?? 0;
+    return { allowed: currentCount < limit, tier, limit, currentCount };
+  } catch {
+    // Fail open on infrastructure errors — an outage must not lock users
+    // out of creating projects (same philosophy as the Pass hook).
+    return { allowed: true, tier, limit, currentCount: -1 };
+  }
+}
+
+/** Human-facing rejection message for a failed project-cap check. */
+export function projectCapMessage(cap: ProjectCapResult): string {
+  const plan = getTierDisplayName(cap.tier);
+  return `Your ${plan} plan includes ${cap.limit} project${cap.limit === 1 ? "" : "s"} — you currently have ${cap.currentCount}. Delete a project or upgrade to add more.`;
+}
