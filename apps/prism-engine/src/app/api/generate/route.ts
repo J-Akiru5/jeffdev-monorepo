@@ -48,39 +48,26 @@ async function getMonthlyUsage(userId: string): Promise<number> {
   }
 }
 
-async function trackGeneration(userId: string): Promise<void> {
+/**
+ * Atomically bump this month's ai_generations counter via the
+ * bump_prism_ai_generations RPC (20260823000002 migration). Replaces the
+ * racy read-modify-write. Returns the new value, or null when the RPC is
+ * unavailable (enforcement then degrades to the preflight read).
+ */
+async function bumpAiGenerations(
+  userId: string,
+  delta: number,
+): Promise<number | null> {
   try {
-    const now = new Date();
-    const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
     const db = getPrismDb();
-
-    const { data: existing } = await db
-      .from("prism_usage")
-      .select("id, aiGenerations:ai_generations")
-      .eq("user_id", userId)
-      .eq("month", month)
-      .maybeSingle();
-
-    if (existing) {
-      await db
-        .from("prism_usage")
-        .update({
-          ai_generations: (existing.aiGenerations as number) + 1,
-          updated_at: now.toISOString(),
-        })
-        .eq("id", existing.id);
-    } else {
-      await db.from("prism_usage").insert({
-        user_id: userId,
-        month,
-        ai_generations: 1,
-        rules_created: 0,
-        components_created: 0,
-        updated_at: now.toISOString(),
-      });
-    }
+    const { data, error } = await db.rpc("bump_prism_ai_generations", {
+      p_user_id: userId,
+      p_delta: delta,
+    });
+    if (error) throw error;
+    return typeof data === "number" ? data : null;
   } catch {
-    // non-blocking
+    return null;
   }
 }
 
@@ -161,7 +148,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await trackGeneration(userId);
+    // Atomic claim BEFORE generation: the RPC increments month usage in one
+    // server-side step, closing the concurrent-request race. If the claim
+    // itself crosses the limit (preflight raced), refund and reject.
+    const claimed = await bumpAiGenerations(userId, 1);
+    if (limit !== -1 && claimed !== null && claimed > limit) {
+      await bumpAiGenerations(userId, -1);
+      return NextResponse.json(
+        {
+          error: `Monthly AI generation limit reached (${limit}/month). Upgrade to Pro for more.`,
+        },
+        { status: 403 },
+      );
+    }
 
     // Generate component
     let component;
@@ -172,6 +171,8 @@ export async function POST(request: NextRequest) {
         stack,
       });
     } catch (genError) {
+      // Refund: failed generations must not consume quota.
+      if (claimed !== null) await bumpAiGenerations(userId, -1);
       console.error("[Generate] Gemini API error:", genError);
       const message =
         genError instanceof Error ? genError.message : "Unknown Gemini error";
