@@ -3,6 +3,10 @@ import Link from "next/link";
 import { Check, X, Sparkles, ChevronDown } from "lucide-react";
 import { getPricingPlans, getComparisonTable, getPricingFAQs } from "@/lib/pricing-db";
 import { PublicNav } from "@/components/layout/public-nav";
+import {
+  getVisitorCurrency,
+  formatMonthlyPrice,
+} from "@/lib/currency";
 
 export const metadata = {
   title: "Pricing | Prism Context Engine",
@@ -10,11 +14,17 @@ export const metadata = {
     "Choose the right plan for your context governance needs. Start free, upgrade when you need more power.",
 };
 
-export default async function PublicPricingPage() {
-  const [plans, comparisonFeatures, faqs] = await Promise.all([
+export default async function PublicPricingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ currency?: string }>;
+}) {
+  const { currency: currencyOverride } = await searchParams;
+  const [plans, comparisonFeatures, faqs, currency] = await Promise.all([
     getPricingPlans(),
     getComparisonTable(),
     getPricingFAQs(),
+    getVisitorCurrency(currencyOverride),
   ]);
   return (
     <main className="min-h-screen flex flex-col">
@@ -77,7 +87,11 @@ export default async function PublicPricingPage() {
                 ) : (
                   <div className="flex items-baseline gap-1">
                     <span className="text-3xl font-bold text-[var(--text-primary)]">
-                      ${plan.price.monthly}
+                      {formatMonthlyPrice(
+                        plan.price.monthly,
+                        plan.pricePhp.monthly,
+                        currency,
+                      )}
                     </span>
                     <span className="text-[var(--text-secondary)]">/month</span>
                   </div>

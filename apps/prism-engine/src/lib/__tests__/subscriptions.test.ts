@@ -17,11 +17,21 @@ describe("TIER_LIMITS", () => {
     }
   });
 
-  it("free tier has the lowest limits", () => {
+  it("free tier: unlimited local work, 1 synced project, small AI taste", () => {
     const free = TIER_LIMITS.free;
-    expect(free.projects).toBe(1);
-    expect(free.rules).toBe(10);
-    expect(free.components).toBe(5);
+    expect(free.projects).toBe(1); // synced projects
+    expect(free.rules).toBe(-1); // local rules are free forever (roadmap v1.0)
+    expect(free.components).toBe(-1);
+    expect(free.aiGenerations).toBe(25);
+    expect(free.apiKeys).toBe(1); // enough for `prism pull` on the synced project
+    expect(free.ideSync).toBe(false);
+  });
+
+  it("pro tier: unlimited synced artifacts under the roadmap model", () => {
+    expect(TIER_LIMITS.pro.projects).toBe(-1);
+    expect(TIER_LIMITS.pro.rules).toBe(-1);
+    expect(TIER_LIMITS.pro.components).toBe(-1);
+    expect(TIER_LIMITS.pro.aiGenerations).toBe(500);
   });
 
   it("enterprise tier has unlimited everything", () => {
@@ -35,9 +45,8 @@ describe("TIER_LIMITS", () => {
   });
 
   it("pro tier allows at least 5 projects", () => {
-    expect(TIER_LIMITS.pro.projects).toBe(5);
-    expect(TIER_LIMITS.pro.rules).toBe(100);
-    expect(TIER_LIMITS.pro.components).toBe(50);
+    expect(TIER_LIMITS.pro.projects).toBe(-1);
+    expect(TIER_LIMITS.pro.ideSync).toBe(true);
   });
 
   it("team tier allows 10 team members", () => {
@@ -89,6 +98,41 @@ describe("Pricing display", () => {
   it("tier slugs match expected format", () => {
     const slugs = Object.keys(TIER_LIMITS);
     expect(slugs).toEqual(["free", "pro", "team", "enterprise"]);
+  });
+});
+
+describe("Phase 2 pricing model (roadmap v1.0)", () => {
+  it("prices Pro at ₱299/$8 monthly, 10× annual", async () => {
+    const mod = await import("@/lib/subscriptions");
+    expect(mod.TIER_PRICES.pro.monthly).toEqual({ php: 299, usd: 8 });
+    expect(mod.TIER_PRICES.pro.annual).toEqual({ php: 2990, usd: 80 });
+  });
+
+  it("prices Team per-seat at ₱249/$7 with a 3-seat minimum", async () => {
+    const mod = await import("@/lib/subscriptions");
+    expect(mod.TIER_PRICES.team.monthly).toEqual({ php: 249, usd: 7 });
+    expect(mod.TIER_PRICES.team.annual).toEqual({ php: 2490, usd: 70 });
+    expect(mod.TEAM_MIN_SEATS).toBe(3);
+  });
+
+  it("annual is exactly 10× monthly for every paid tier", async () => {
+    const mod = await import("@/lib/subscriptions");
+    for (const tier of ["pro", "team"] as const) {
+      const p = mod.TIER_PRICES[tier];
+      expect(p.annual.usd).toBe(p.monthly.usd! * 10);
+      expect(p.annual.php).toBe(p.monthly.php! * 10);
+    }
+  });
+
+  it("keeps `prism pull` working on Free via the single API key", async () => {
+    // Regression: free.apiKeys was 0 under the old model, which made the
+    // synced project unsyncable.
+    expect(TIER_LIMITS.free.apiKeys).toBeGreaterThanOrEqual(1);
+  });
+
+  it("canUseFeature still blocks the synced-project cap for Free", () => {
+    expect(canUseFeature("free", "projects", 1)).toBe(false);
+    expect(canUseFeature("pro", "projects", 999)).toBe(true); // unlimited
   });
 });
 
@@ -172,15 +216,16 @@ describe("assertWithinProjectCap", () => {
     expect(cap.currentCount).toBe(2);
   });
 
-  it("blocks a pro user at 5 of 5, allows at 4 of 5", async () => {
-    state.db = makeFakeDb({ sub: { tier: "pro" }, projectCount: 5 }) as never;
+  it("never caps paid tiers on projects (unlimited under the roadmap model)", async () => {
+    state.db = makeFakeDb({ sub: { tier: "pro" }, projectCount: 500 }) as never;
     const mod = await import("@/lib/subscriptions");
-    expect((await mod.assertWithinProjectCap("user-1")).allowed).toBe(false);
-
-    state.db = makeFakeDb({ sub: { tier: "pro" }, projectCount: 4 }) as never;
     const cap = await mod.assertWithinProjectCap("user-1");
     expect(cap.allowed).toBe(true);
-    expect(cap.currentCount).toBe(4);
+    expect(cap.limit).toBe(-1);
+    expect(cap.currentCount).toBe(-1); // count query skipped for unlimited
+
+    state.db = makeFakeDb({ sub: { tier: "team" }, projectCount: 999 }) as never;
+    expect((await mod.assertWithinProjectCap("user-1")).allowed).toBe(true);
   });
 
   it("skips the COUNT query entirely on unlimited tiers (-1)", async () => {

@@ -10,6 +10,11 @@ import {
 } from "lucide-react";
 import { GlassPanel, Button, Badge, PageContainer } from "@syntaxure/ui";
 import { getPricingPlans, getPricingFAQs } from "@/lib/pricing-db";
+import {
+  getVisitorCurrency,
+  formatMonthlyPrice,
+} from "@/lib/currency";
+import { UpgradeButtons } from "./upgrade-buttons";
 import type { SubscriptionDoc } from "@/lib/types";
 
 /**
@@ -20,6 +25,7 @@ type SubscriptionSearchParams = {
   checkout?: string;
   status?: string;
   message?: string;
+  currency?: string;
 };
 
 export default async function SubscriptionPage({
@@ -39,7 +45,8 @@ export default async function SubscriptionPage({
   // Checkout flow reports back via query params. Production checkout is not
   // wired yet (Phase 2), so "pending" is surfaced honestly instead of
   // leaving the Upgrade button looking broken.
-  const { checkout, status, message } = await searchParams;
+  const { checkout, status, message, currency: currencyOverride } =
+    await searchParams;
 
   const userId = user.id;
   const db = getPrismDb();
@@ -69,6 +76,7 @@ export default async function SubscriptionPage({
   const ruleCount = ruleCountRaw ?? 0;
 
   const currentTier = subscription?.tier || "free";
+  const currency = await getVisitorCurrency(currencyOverride);
 
   // Build pricing cards from dynamic data
   const tierIcons: Record<string, typeof Crown | undefined> = {
@@ -142,33 +150,51 @@ export default async function SubscriptionPage({
           const Icon = tierIcons[plan.tier_slug];
           const isCurrent = currentTier === plan.tier_slug;
 
-          // Format price display
-          let priceDisplay: string;
+          // Regional price display (PH sees pesos, everyone else USD)
+          const priceDisplay = formatMonthlyPrice(
+            plan.price.monthly,
+            plan.pricePhp.monthly,
+            currency,
+          );
           let periodDisplay: string;
           if (plan.pricePhp.monthly === null) {
-            priceDisplay = "Custom";
             periodDisplay = "";
           } else if (plan.pricePhp.monthly === 0) {
-            priceDisplay = "₱0";
             periodDisplay = "";
+          } else if (plan.tier_slug === "team") {
+            periodDisplay = "/seat/month";
           } else {
-            priceDisplay = `₱${plan.pricePhp.monthly.toLocaleString()}`;
             periodDisplay = "/month";
           }
 
-          // Determine button label and href
+          // Determine button label and CTA
           let buttonLabel: string;
           let href: string | undefined;
+          let actions: React.ReactNode;
           if (isCurrent) {
             buttonLabel = "Current Plan";
+            actions = null;
           } else if (plan.tier_slug === "free") {
-            buttonLabel = "Downgrade";
+            buttonLabel = "Included";
+            actions = null;
           } else if (plan.tier_slug === "enterprise") {
             buttonLabel = "Contact Sales";
             href = "mailto:enterprise@syntaxure.dev";
+            actions = null;
+          } else if (
+            plan.tier_slug === "pro" ||
+            plan.tier_slug === "team"
+          ) {
+            // Phase 2: real PayPal Subscriptions checkout (sandbox first).
+            buttonLabel = "Upgrade";
+            actions = (
+              <UpgradeButtons
+                tier={plan.tier_slug as "pro" | "team"}
+              />
+            );
           } else {
             buttonLabel = "Upgrade";
-            href = `/api/subscriptions/checkout?tier=${plan.tier_slug}`;
+            actions = null;
           }
 
           return (
@@ -185,6 +211,7 @@ export default async function SubscriptionPage({
               buttonLabel={buttonLabel}
               disabled={isCurrent}
               href={href}
+              actions={actions}
             />
           );
         })}
@@ -221,6 +248,7 @@ function PricingCard({
   buttonLabel,
   disabled,
   href,
+  actions,
 }: {
   name: string;
   description: string;
@@ -233,6 +261,8 @@ function PricingCard({
   buttonLabel: string;
   disabled?: boolean;
   href?: string;
+  /** Custom CTA node (e.g. PayPal checkout buttons) replacing the default. */
+  actions?: React.ReactNode;
 }) {
   return (
     <div
@@ -277,7 +307,9 @@ function PricingCard({
         ))}
       </ul>
 
-      {href ? (
+      {actions ? (
+        actions
+      ) : href ? (
         <Button
           variant={popular ? "primary" : "secondary"}
           className="w-full"
