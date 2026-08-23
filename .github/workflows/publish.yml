@@ -1,0 +1,78 @@
+name: Publish CLI
+
+# Phase 1 roadmap item: CI npm publishing (none existed — releases were manual).
+#
+# SAFETY MODEL:
+# - Manual dispatch only. No automatic publish on merge; a human decides.
+# - Requires the NPM_TOKEN repository secret (granular token scoped to
+#   @prism-engine, Read+write). Without it the job exits early with a clear
+#   message instead of failing mysteriously.
+# - Refuses to publish a version that already exists on npm (npm publish
+#   would fail anyway; the pre-check makes the reason obvious in logs).
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "publish" to confirm'
+        required: true
+        default: ""
+
+concurrency:
+  group: publish-cli
+  cancel-in-progress: false
+
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+  NODE_VERSION: "22"
+
+jobs:
+  publish:
+    name: Build & publish @prism-engine/cli
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.confirm == 'publish' }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check for NPM_TOKEN secret
+        if: ${{ secrets.NPM_TOKEN == '' }}
+        run: |
+          echo "::error::NPM_TOKEN secret is not set. Add a granular npm token (scoped to @prism-engine, read+write) to repository secrets."
+          exit 1
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          registry-url: "https://registry.npmjs.org"
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck + tests
+        run: |
+          pnpm --filter ./packages/prism-context-engine run check-types
+          pnpm --filter ./packages/prism-context-engine run test
+
+      - name: Build
+        run: pnpm --filter ./packages/prism-context-engine run build
+
+      - name: Pack (inspect what will ship)
+        working-directory: packages/prism-context-engine
+        run: npm pack --dry-run
+
+      - name: Publish
+        working-directory: packages/prism-context-engine
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          NAME=$(node -p "require('./package.json').name")
+          EXISTING=$(npm view "$NAME@$VERSION" version 2>/dev/null || true)
+          if [ "$EXISTING" = "$VERSION" ]; then
+            echo "::error::$NAME@$VERSION is already published. Bump the version first."
+            exit 1
+          fi
+          npm publish --access public
