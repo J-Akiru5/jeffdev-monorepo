@@ -109,3 +109,59 @@ describe("extractTokens", () => {
     expect(result.tailwindConfigParsedViaRegexFallback).toBe(true);
   });
 });
+
+describe("extractTokens Batch A - workspace CSS/SCSS walker", () => {
+  const dirs: string[] = [];
+  afterEach(() => {
+    for (const dir of dirs.splice(0)) rmSync(dir, { recursive: true, force: true });
+  });
+
+  function write(dir: string, rel: string, content: string): void {
+    const full = join(dir, rel);
+    const parent = full.slice(0, Math.max(full.lastIndexOf("/"), full.lastIndexOf("\\")));
+    if (parent) mkdirSync(parent, { recursive: true });
+    writeFileSync(full, content);
+  }
+
+  it("discovers custom properties in non-globals CSS and SCSS files", async () => {
+    const dir = makeTmpDir("walker");
+    dirs.push(dir);
+    write(dir, join("styles", "theme.css"), ":root {\n  --brand-teal: #14b8a6;\n}\n");
+    write(dir, join("scss", "_palette.scss"), ".card {\n  --space-y: #0ea5e9;\n}\n");
+    write(dir, join("node_modules", "fake-pkg", "evil.css"), "--should-not-appear: #ff0000;\n");
+
+    const result = await extractTokens(dir);
+
+    const hexes = result.colorTokens.map((t) => t.hex);
+    expect(hexes).toContain("#14b8a6"); // css found via walker
+    expect(hexes).toContain("#0ea5e9"); // scss custom prop found ($vars not needed)
+    expect(hexes).not.toContain("#ff0000"); // node_modules excluded
+
+    expect(result.cssFilesScanned.some((f) => f.includes("theme.css"))).toBe(true);
+    expect(result.cssFilesScanned.some((f) => f.endsWith("_palette.scss"))).toBe(true);
+    expect(result.cssFilesScanned.some((f) => f.includes("fake-pkg"))).toBe(false);
+  });
+
+  it("deduplicates identical hex values across css and scss sources", async () => {
+    const dir = makeTmpDir("dedup");
+    dirs.push(dir);
+    write(dir, "a.css", ":root {\n  --one: #123456;\n}\n");
+    write(dir, "b.scss", ".x {\n  --two: #123456;\n}\n");
+
+    const result = await extractTokens(dir);
+    expect(result.colorTokens.filter((t) => t.hex === "#123456")).toHaveLength(1);
+  });
+
+  it("keeps priority globals.css display path first when walker runs", async () => {
+    const dir = makeTmpDir("priority");
+    dirs.push(dir);
+    write(dir, join("app", "globals.css"), ":root {\n  --g: #abcdef;\n}\n");
+    write(dir, "other.css", "--o: #123abc;\n");
+
+    const result = await extractTokens(dir);
+    expect(result.cssFilesScanned[0]).toBe("app/globals.css");
+    expect(result.colorTokens.map((t) => t.hex)).toEqual(
+      expect.arrayContaining(["#abcdef", "#123abc"]),
+    );
+  });
+});
