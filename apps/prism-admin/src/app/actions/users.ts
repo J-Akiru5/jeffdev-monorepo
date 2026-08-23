@@ -4,14 +4,13 @@ import { revalidatePath } from "next/cache";
 import { getPrismDb } from "@syntaxure-labs/db/prism";
 
 /**
- * Note: this used to update a Cosmos DB `users` collection keyed by a Mongo
- * ObjectId, which was a separate record from the one the rest of Prism reads
- * tier from (`subscriptions`/now `prism_subscriptions`, keyed by Supabase
- * user id) — so this admin control never actually affected what the app
- * enforced. It's been pointed at `user_profiles` (keyed by the real Supabase
- * user id) during the Postgres migration, which is at least consistent and
- * queryable, but the underlying disconnect from `prism_subscriptions.tier`
- * is a pre-existing product question, not something fixed here.
+ * Override a user's subscription tier.
+ *
+ * Writes prism_subscriptions — the table the engine actually enforces
+ * (authenticate() and getUserTier() both read it, status-filtered) — using
+ * the same upsert shape as engine's own /api/admin/subscription handler.
+ * user_profiles.tier is updated secondarily for display consistency only;
+ * it has no enforcement effect.
  */
 export async function overrideUserTier(
   userId: string,
@@ -19,11 +18,26 @@ export async function overrideUserTier(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const db = getPrismDb();
-    const { error } = await db
+    const now = new Date().toISOString();
+
+    // Primary write: what the product enforces.
+    const { error: subError } = await db.from("prism_subscriptions").upsert(
+      {
+        user_id: userId,
+        tier,
+        status: "active",
+        modified_by: "prism-admin",
+        updated_at: now,
+      },
+      { onConflict: "user_id" },
+    );
+    if (subError) throw subError;
+
+    // Secondary sync: display-only; failures here are non-fatal.
+    await db
       .from("user_profiles")
-      .update({ tier, updated_at: new Date().toISOString() })
+      .update({ tier, updated_at: now })
       .eq("id", userId);
-    if (error) throw error;
 
     revalidatePath("/admin/users");
     return { success: true };
