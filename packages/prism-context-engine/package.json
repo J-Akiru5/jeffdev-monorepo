@@ -1,5 +1,5 @@
 {
-  "name": "prism-context-engine",
+  "name": "@prism-engine/cli",
   "version": "1.2.0",
   "description": "Prism Context Engine — Context Governance for LLMs. MCP server that gives AI coding assistants (Cursor, Claude, Windsurf, VS Code) your project's architectural rules, design system, and security constraints.",
   "type": "module",

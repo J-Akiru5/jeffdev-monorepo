@@ -4,9 +4,9 @@ import { join } from "path";
 /** The command `prism init` wires into .claude/settings.json's PostToolUse
  *  hook. Uses `npx` rather than a relative path into this monorepo's own
  *  bin/prism.js — the generated file has to work in any real end-user
- *  project that installed prism-context-engine, not just here. */
+ *  project that installed @prism-engine/cli, not just here. */
 export const HOOK_COMMAND =
-  "npx prism-context-engine check --hook --format claude-code";
+  "npx @prism-engine/cli check --hook --format claude-code";
 
 export type HookWireOutcome =
   | "created"

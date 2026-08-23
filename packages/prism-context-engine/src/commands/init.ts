@@ -156,7 +156,7 @@ function printHookResult(result: ReturnType<typeof wireClaudeHook>): void {
       );
       console.log(
         chalk.dim(
-          '  { "hooks": { "PostToolUse": [{ "matcher": "Write|Edit", "hooks": [{ "type": "command", "command": "npx prism-context-engine check --hook --format claude-code" }] }] } }',
+          '  { "hooks": { "PostToolUse": [{ "matcher": "Write|Edit", "hooks": [{ "type": "command", "command": "npx @prism-engine/cli check --hook --format claude-code" }] }] } }',
         ),
       );
       break;

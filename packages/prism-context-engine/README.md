@@ -22,6 +22,8 @@ prism pull
 
 `prism init` never touches the network — it reads your own `package.json`, `globals.css`, and Tailwind config. `prism pull` is the upgrade path once you have a Prism Cloud account: same output file, same v1 schema, just sourced from the team's dashboard rules instead of this repo's own CSS/Tailwind config. Neither requires interaction: pass `--yes` for CI.
 
+Generated severity policy: the auto-detected token rule ships at `block` (its matches are exact hex literals lifted from your own source, so hits are real), scoped to code files (`.tsx/.jsx/.ts/.js/.html`) so your tokens' own definition lines in CSS never self-flag. The arbitrary-Tailwind-brackets rule ships at `warn` (heuristic — it will flag scaffold code) and never stops an agent's write; promote it to `"block"` in `.prism/rules.json` by hand once you trust it.
+
 ## Quick Start — full IDE/MCP setup (Cursor, Windsurf, VS Code, Claude Desktop)
 
 ```bash
