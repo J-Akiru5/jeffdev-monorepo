@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { getPrismDb, isValidId } from "@syntaxure-labs/db/prism";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
 import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
 import type { RuleDoc, BrandDoc } from "@/lib/types";
@@ -996,6 +997,25 @@ async function handleToolCall(
       }
 
       const db = getPrismDb();
+
+      // Ownership guard: only attach to a project the caller owns.
+      if (projectId) {
+        const { data: project } = await db
+          .from("prism_projects")
+          .select("id")
+          .eq("id", projectId)
+          .eq("user_id", userId)
+          .maybeSingle();
+        if (!project) {
+          return {
+            content: [
+              { type: "text", text: "Error: project not found or not owned by you" },
+            ],
+            error: true,
+          };
+        }
+      }
+
       const { data: inserted, error: insertError } = await db
         .from("prism_rules")
         .insert({
@@ -1153,6 +1173,18 @@ async function handleToolCall(
         return {
           content: [{ type: "text", text: "Error: prompt is required" }],
         };
+
+      // AI spend guard: this tool bypasses /api/generate's monthly quota, so
+      // hold it to a strict per-minute burst ceiling (solidity scan §1.3).
+      const aiRl = await checkRateLimit(`ai:mcp-generate:${userId}`, "strict");
+      if (!aiRl.allowed) {
+        return {
+          content: [
+            { type: "text", text: "Rate limit exceeded: max 10 component generations per minute." },
+          ],
+          error: true,
+        };
+      }
 
       const { generateComponent } = await import("@/lib/gemini");
       const component = await generateComponent({

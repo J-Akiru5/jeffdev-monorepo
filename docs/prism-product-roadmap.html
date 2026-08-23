@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRISM — Product Roadmap &amp; Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0D12;--bg-raise:#111620;--bg-sink:#070A0E;
+  --line:#1E2634;--line-hot:#2C3A4E;
+  --ink:#E6EDF5;--ink-dim:#8494A8;--ink-faint:#5A6B80;
+  --cyan:#22D3EE;--violet:#8B7BFF;--amber:#F5B34A;--rose:#FF6B81;--green:#4ADE80;
+  --mono:'JetBrains Mono',ui-monospace,monospace;--sans:'Inter',system-ui,sans-serif;
+  --prose:76ch;--wide:1180px;--pad:clamp(18px,5vw,80px);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:16.5px;line-height:1.68;-webkit-font-smoothing:antialiased}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.prose{max-width:var(--prose);margin:0 auto;padding:0 var(--pad)}
+.wide{max-width:var(--wide);margin:0 auto;padding:0 var(--pad)}
+h1,h2,h3,h4{line-height:1.18;letter-spacing:-.022em;margin:0}
+h2{font-size:clamp(24px,4.4vw,37px);font-weight:700}
+h3{font-size:clamp(18px,2.8vw,22px);font-weight:650;margin-top:2.4em}
+h4{font-size:15.5px;font-weight:650;margin-top:1.8em}
+p{margin:1.05em 0}
+code{font-family:var(--mono);font-size:.87em;color:var(--cyan);
+  background:rgba(34,211,238,.07);padding:1px 5px;border-radius:4px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.19em;
+  text-transform:uppercase;color:var(--cyan);font-weight:500}
+section{padding:clamp(44px,8vw,84px) 0;border-bottom:1px solid var(--line)}
+section:nth-of-type(even){background:var(--bg-sink)}
+.hero{padding:clamp(50px,10vw,105px) var(--pad) clamp(36px,7vw,66px);
+  border-bottom:1px solid var(--line);
+  background:radial-gradient(900px 380px at 12% -10%,rgba(34,211,238,.10),transparent 62%),
+    radial-gradient(700px 340px at 88% 0%,rgba(139,123,255,.10),transparent 60%)}
+.hero h1{font-size:clamp(30px,6.6vw,56px);font-weight:700;margin:.34em 0 0;letter-spacing:-.035em}
+.hero .sub{color:var(--ink-dim);font-size:clamp(15.5px,2.4vw,19px);margin-top:1em;max-width:62ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px;font-family:var(--mono);font-size:11px}
+.meta span{border:1px solid var(--line-hot);border-radius:5px;padding:5px 11px;color:var(--ink-faint)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin:24px 0}
+.stat{background:var(--bg-raise);border:1px solid var(--line);border-radius:9px;padding:17px}
+.stat b{display:block;font-family:var(--mono);font-size:clamp(20px,3.3vw,27px);
+  font-weight:700;color:var(--cyan);letter-spacing:-.03em;line-height:1.1}
+.stat.v b{color:var(--violet)}.stat.a b{color:var(--amber)}.stat.r b{color:var(--rose)}
+.stat.g b{color:var(--green)}
+.stat small{display:block;color:var(--ink-dim);font-size:12.5px;margin-top:7px;line-height:1.5}
+.thesis{border-left:2px solid var(--cyan);padding:4px 0 4px 20px;margin:2em 0;
+  font-size:clamp(16.5px,2.5vw,20px);line-height:1.55;font-weight:500}
+.twrap{overflow-x:auto;margin:22px 0;border:1px solid var(--line);border-radius:9px}
+table{border-collapse:collapse;width:100%;min-width:620px;font-size:13.5px}
+th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--bg-sink);font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--ink-faint);font-weight:500}
+tr:last-child td{border-bottom:none}
+td strong{color:var(--ink)}
+.call{border:1px solid var(--line);border-left:3px solid var(--amber);border-radius:9px;
+  background:rgba(245,179,74,.045);padding:17px 19px;margin:22px 0}
+.call.risk{border-left-color:var(--rose);background:rgba(255,107,129,.05)}
+.call.win{border-left-color:var(--cyan);background:rgba(34,211,238,.045)}
+.call .ctag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--amber);font-weight:500}
+.call.risk .ctag{color:var(--rose)}.call.win .ctag{color:var(--cyan)}
+.call p{margin:.5em 0 0}
+ul.body{padding-left:19px;margin:1em 0}
+ul.body li{margin:.45em 0;color:var(--ink-dim)}
+ul.body li strong{color:var(--ink)}
+strong{color:var(--ink);font-weight:600}
+.pill{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:4px;
+  border:1px solid var(--line-hot);color:var(--ink-faint);white-space:nowrap;display:inline-block}
+.pill.ox{color:var(--cyan);border-color:rgba(34,211,238,.4)}
+.pill.cc{color:var(--violet);border-color:rgba(139,123,255,.4)}
+.pill.cp{color:var(--amber);border-color:rgba(245,179,74,.4)}
+.pill.jeff{color:var(--green);border-color:rgba(74,222,128,.4)}
+
+/* phase rail */
+.rail{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:11px;margin:26px 0}
+.ph{background:var(--bg-raise);border:1px solid var(--line);border-top:3px solid var(--line-hot);
+  border-radius:9px;padding:16px}
+.ph.p0{border-top-color:var(--rose)}.ph.p1{border-top-color:var(--cyan)}
+.ph.p2{border-top-color:var(--violet)}.ph.p3{border-top-color:var(--amber)}
+.ph.p4{border-top-color:var(--green)}.ph.p5{border-top-color:#7C8AA0}
+.ph .pn{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--ink-faint)}
+.ph h4{margin:.5em 0 .35em;font-size:15px}
+.ph p{margin:0;font-size:13px;color:var(--ink-dim);line-height:1.55}
+
+/* pricing cards */
+.tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px;margin:24px 0}
+.tier{background:var(--bg-raise);border:1px solid var(--line);border-radius:10px;padding:18px}
+.tier.hi{border-color:rgba(34,211,238,.35);background:rgba(34,211,238,.03)}
+.tier .tn{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
+.tier .tp{font-size:22px;font-weight:700;margin:.35em 0 .1em;letter-spacing:-.02em}
+.tier .tp small{font-size:12.5px;font-weight:400;color:var(--ink-faint)}
+.tier ul{list-style:none;padding:0;margin:12px 0 0;font-size:13px;color:var(--ink-dim)}
+.tier li{padding:5px 0 5px 15px;position:relative;line-height:1.5}
+.tier li:before{content:'·';position:absolute;left:2px;color:var(--cyan)}
+
+/* tracker */
+.tracker{background:var(--bg-raise);border:1px solid var(--line);border-radius:10px;
+  padding:clamp(16px,3vw,24px);margin:24px 0}
+.tracker-bar{height:8px;background:var(--bg-sink);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+.tracker-fill{height:100%;width:0;border-radius:99px;
+  background:linear-gradient(90deg,var(--cyan),var(--violet));transition:width .3s ease}
+.tracker-pct{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);margin-top:9px;letter-spacing:.07em}
+.tracker-list{list-style:none;margin:16px 0 0;padding:0}
+.tracker-list li{border-top:1px solid var(--line)}
+.tracker-list label{display:flex;align-items:flex-start;gap:11px;padding:11px 2px;
+  min-height:44px;cursor:pointer;font-size:14px;color:var(--ink-dim);line-height:1.5}
+.tracker-list input{appearance:none;width:17px;height:17px;flex:none;margin-top:3px;
+  border:1.5px solid var(--line-hot);border-radius:4px;background:var(--bg-sink);cursor:pointer}
+.tracker-list input:checked{background:var(--cyan);border-color:var(--cyan)}
+.tracker-list input:checked+span{color:var(--ink-faint);text-decoration:line-through}
+.tracker-list input:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+.tgroup{font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--violet);padding:15px 0 4px;border-top:1px solid var(--line)}
+.tracker-list li.tgroup-li{border-top:none}
+.tag{font-family:var(--mono);font-size:9.5px;color:var(--ink-faint);
+  border:1px solid var(--line-hot);border-radius:3px;padding:1px 5px;margin-left:6px;white-space:nowrap}
+footer{padding:40px var(--pad);color:var(--ink-faint);font-family:var(--mono);font-size:11.5px}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wide" style="padding:0">
+    <div class="eyebrow">Syntaxure Labs · Product Roadmap · v1.0</div>
+    <h1>PRISM — from demo to product</h1>
+    <p class="sub">Six phases from Wednesday's check-in to a public, open-source release with a pricing model developers don't compare to Claude.</p>
+    <div class="meta"><span>AUG 2026</span><span>OPEN CORE</span><span>FREE LOCAL FOREVER</span><span>3 AGENTS</span></div>
+  </div>
+</header>
+
+<section>
+  <div class="wide"><div class="eyebrow">TL;DR</div><h2 style="margin-top:.3em">The one screen</h2></div>
+  <div class="wide">
+    <div class="stats">
+      <div class="stat r"><b>2</b><small>things to fix before Wednesday. Everything else waits — the demo already works.</small></div>
+      <div class="stat"><b>₱0</b><small>local enforcement, forever. The Pass is regex on their machine; it costs us nothing.</small></div>
+      <div class="stat v"><b>3</b><small>agents, split by file domain so they never collide: Ox, Claude Code, Copilot.</small></div>
+      <div class="stat a"><b>~166</b><small>subscribers to break even at ₱299 vs 46 at $18. Enterprise is the real revenue.</small></div>
+    </div>
+    <div class="prose" style="padding:0">
+      <p><strong>Wednesday is a check-in, not a launch.</strong> Fix the tier cap so the dashboard stops showing 2/1 projects, stop the Upgrade button dead-ending, rehearse interactively. Nothing else.</p>
+      <p><strong>The pricing fix is structural, not a number.</strong> Give away enforcement — it has zero marginal cost and it's what makes Prism feel like "another Claude" when gated. Charge for the Kitchen, sync, AI generation, and teams. Open-source the CLI and engine, which unlocks a fundamentally better DOST-ASTI conversation.</p>
+      <p><strong>The biggest risk isn't in this roadmap's features.</strong> It's in Ox's own "not fixed" list: tier limits enforced nowhere, admin tier grants writing to the wrong table, a PayPal webhook that skips signature verification. Those are Phase 1 and they come before anything new.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wide"><div class="eyebrow">01 — Position</div><h2 style="margin-top:.3em">Fixing "another Claude"</h2></div>
+  <div class="prose" style="padding:0 var(--pad)">
+    <p>A developer with Claude already has an agent that writes decent code. Prism, presented as a paid subscription with "AI Generations" as a headline dashboard metric, reads as a second AI tool competing for the same budget line. That objection is a positioning failure, not a price objection — and dropping the price alone wouldn't have fixed it.</p>
+    <div class="thesis">Claude makes one agent write well. Prism makes every agent write <em>your</em> way — and keeps doing it when there are five of you.</div>
+    <p>The structural fix follows from one fact: <strong>the Pass costs Syntaxure nothing to run.</strong> It's regex executing on the user's own machine. Gating a zero-marginal-cost feature behind a subscription is the worst possible trade — it maximises friction and captures nothing. Give it away, and "there's nothing to buy" answers the objection before it's raised.</p>
+    <p>What genuinely costs money is inference, hosting, and sync. Those get priced. And because the AI layer runs on OpenCode free models, even that cost stays near zero — which means the free tier can be generous rather than defensive.</p>
+
+    <h3>Sequencing: solo devs now, enterprise later</h3>
+    <p>The first users are new-generation agentic developers — people whose workflow is already agent-first and who haven't ossified around a senior dev's habits. They will not pay, and that's correct: they're the distribution, not the revenue. Free local CLI and TUI, open source, no account required.</p>
+    <p>Revenue comes later from corporates and BPOs, with DOST-ASTI credibility as the bridge. That ordering means the break-even model needs revisiting — 46 subscribers at $18 was a different business than this one. Enterprise seats and on-prem licences are the line that actually closes the gap, and the solo tier's job is to make those conversations warm.</p>
+    <div class="call">
+      <div class="ctag">Honest tension</div>
+      <p>Free-forever local slows monetisation and pushes break-even out. That's a real cost, accepted deliberately in exchange for adoption and the open-source position. Worth restating plainly to KWADRA rather than presenting the old 46-subscriber model as though nothing changed — a founder who revises a model with reasoning reads stronger than one who doesn't notice it broke.</p>
+    </div>
+  </div>
+  <div class="wide">
+    <div class="tiers">
+      <div class="tier hi"><div class="tn">Free · forever</div><div class="tp">₱0</div>
+        <ul><li>Unlimited local enforcement</li><li>Unlimited local rules</li><li>CLI + TUI, open source</li><li>1 synced project</li><li>Small AI generation quota</li></ul></div>
+      <div class="tier"><div class="tn">Pro · solo</div><div class="tp">₱299 <small>/mo · ~$8 intl</small></div>
+        <ul><li>Unlimited synced projects</li><li>Full Kitchen dashboard</li><li>AI rule + skill generation</li><li>Sandbox preview</li><li>Cross-machine sync</li></ul></div>
+      <div class="tier"><div class="tn">Team</div><div class="tp">₱249 <small>/seat · min 3</small></div>
+        <ul><li>Shared constitution</li><li>Team rule governance</li><li>Higher AI quota</li><li>Audit trail</li><li>The real wedge: consistency</li></ul></div>
+      <div class="tier"><div class="tn">Enterprise</div><div class="tp">Annual</div>
+        <ul><li>On-prem, zero egress</li><li>BPO / regulated buyers</li><li>SSO, support SLA</li><li>Where revenue actually lives</li></ul></div>
+    </div>
+    <p class="prose" style="padding:0;color:var(--ink-dim);font-size:14px">Regional pricing is the mechanism, not a discount — ₱299 and $8 are the same product priced to local purchasing power. Both Paddle and Stripe support this natively; PayPal (already integrated) handles the rails for now.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wide"><div class="eyebrow">02 — Phases</div><h2 style="margin-top:.3em">Six phases</h2></div>
+  <div class="wide">
+    <div class="rail">
+      <div class="ph p0"><div class="pn">PHASE 0 · 3 DAYS</div><h4>Wednesday</h4><p>Tier cap visible bug, Upgrade dead-end, interactive rehearsal. Nothing else ships.</p></div>
+      <div class="ph p1"><div class="pn">PHASE 1 · WEEK 1</div><h4>Correctness debt</h4><p>Ox's "not fixed" list. Tier enforcement, admin grants, webhook verification, quota race.</p></div>
+      <div class="ph p2"><div class="pn">PHASE 2 · WEEK 2</div><h4>Pricing &amp; payments</h4><p>New model implemented, regional pricing, upgrade → PayPal checkout that works.</p></div>
+      <div class="ph p3"><div class="pn">PHASE 3 · WEEK 2–3</div><h4>OpenCode AI layer</h4><p>Rules creator, skills creator, sandbox. MIMO default, free models first.</p></div>
+      <div class="ph p4"><div class="pn">PHASE 4 · WEEK 3–4</div><h4>Breadth</h4><p>More languages and stacks, more check types, Cursor/Windsurf formatters.</p></div>
+      <div class="ph p5"><div class="pn">PHASE 5 · WEEK 4+</div><h4>Open source + launch</h4><p>Licence, TUI, docs rewrite, real monitoring, public release.</p></div>
+    </div>
+  </div>
+
+  <div class="prose" style="padding:0 var(--pad)">
+    <h3>Phase 0 — Wednesday only</h3>
+    <p>Three days. The correction loop works, is published, and is rehearsed headlessly. Two things are demo-visible and worth fixing; a third is the last real risk.</p>
+    <ul class="body">
+      <li><strong>Tier cap.</strong> The dashboard shows 2/1 projects on Free with a red overflow bar. Anyone glancing at the screen sees a system not enforcing its own rules.</li>
+      <li><strong>Upgrade dead-end.</strong> If someone clicks Upgrade during the demo and nothing happens, that's the moment they remember. Either wire it or make it say "coming soon" honestly.</li>
+      <li><strong>Interactive rehearsal.</strong> Every run so far has been headless. Headless and interactive Claude Code sessions can surface output differently, and you're presenting the interactive one.</li>
+    </ul>
+    <p>"Generate Skill — Coming Soon" stays. At a check-in it reads as roadmap, not gap.</p>
+
+    <h3>Phase 1 — Correctness debt</h3>
+    <p>Everything here comes from Ox's own deferred list. None of it is new work; all of it is things currently wrong.</p>
+    <div class="twrap"><table>
+      <thead><tr><th>Issue</th><th>Why it matters</th><th>Owner</th></tr></thead>
+      <tbody>
+        <tr><td><strong>TIER_LIMITS enforced nowhere</strong></td><td>Projects, rules, and seat caps exist as constants but nothing checks them. This is the 2/1 bug, and it means paid tiers are unenforceable.</td><td><span class="pill ox">Ox</span></td></tr>
+        <tr><td><strong>Admin grants are inert</strong></td><td>Admin writes <code>user_profiles.tier</code>; the engine reads <code>prism_subscriptions.tier</code>. You cannot manually grant a demo account a paid tier today.</td><td><span class="pill ox">Ox</span></td></tr>
+        <tr><td><strong>Pricing constants contradict copy</strong></td><td>$18 vs $12, 5 vs 10 rules. Pitching a price the code doesn't implement.</td><td><span class="pill ox">Ox</span></td></tr>
+        <tr><td><strong>PayPal webhook unverified</strong></td><td>Admin's copy skips signature verification when <code>PAYPAL_WEBHOOK_ID</code> is unset and has no event dedupe — a forge-a-subscription hole.</td><td><span class="pill ox">Ox</span></td></tr>
+        <tr><td><strong>Two PayPal webhooks exist</strong></td><td>Nobody knows which URL is registered. Consolidate to one verified, idempotent handler.</td><td><span class="pill jeff">Jeff</span> <span class="pill ox">Ox</span></td></tr>
+        <tr><td><strong>Quota race</strong></td><td><code>/api/generate</code> monthly quota is non-atomic read-modify-write and pre-charges failures.</td><td><span class="pill ox">Ox</span></td></tr>
+        <tr><td><strong>DB hygiene</strong></td><td>FK-less <code>created_by</code>, missing composite index on (project_id, is_active, priority), <code>paypal_subscription_id</code> not UNIQUE.</td><td><span class="pill ox">Ox</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="call risk">
+      <div class="ctag">Do this before anything new</div>
+      <p>Building a pricing model on top of tier limits that aren't enforced means shipping a paid product that gives everything away. Phase 1 is not optional groundwork — it's the thing that makes Phase 2 mean anything.</p>
+    </div>
+
+    <h3>Phase 2 — Pricing &amp; payments</h3>
+    <p>Implement the model above. Free tier genuinely unlimited locally; paid tiers enforced by the Phase 1 machinery. Regional pricing by detected locale with a manual override. Upgrade flow actually reaching PayPal checkout and returning to a correct subscription state.</p>
+    <p>PayPal only — PayMaya and GCash are a later addition once the model is settled and the existing integration is verified. Adding a second payment rail while the first one has an unverified webhook would be compounding a problem.</p>
+
+    <h3>Phase 3 — OpenCode AI layer</h3>
+    <p>One shared client for all AI features: auto model selection defaulting to MIMO, free models prioritised, image input supported. Three consumers:</p>
+    <ul class="body">
+      <li><strong>Rules creator</strong> — describe a convention in plain language, get a rule with a working <code>check</code> block. This is the highest-value AI feature because authoring check blocks by hand is the main friction in the Kitchen.</li>
+      <li><strong>Skills creator</strong> — replaces the current "Coming Soon" screen. Describe a workflow, get a procedural guide for agents.</li>
+      <li><strong>Sandbox preview</strong> — run a constitution against sample code and see what would be caught, before deploying it. Tier-limited by run count.</li>
+    </ul>
+    <div class="call win">
+      <div class="ctag">Why this is cheap</div>
+      <p>Free models via OpenCode means the AI layer's marginal cost is near zero. That's what makes a generous free tier viable, and it's why the AI features can be a Pro differentiator without becoming a cost centre.</p>
+    </div>
+
+    <h3>Phase 4 — Breadth</h3>
+    <p>Today Prism enforces TypeScript, JSX, and Tailwind. A broad user base needs more: Vue and Svelte, plain CSS and SCSS, Python and Go for non-frontend conventions, and check types beyond the current four — naming patterns, file placement, required imports.</p>
+    <p>Also: Cursor and Windsurf hook formatters behind the existing <code>--format</code> flag. The generic naming was chosen for exactly this, so it should be additive rather than structural.</p>
+
+    <h3>Phase 5 — Open source + launch</h3>
+    <p>Licence the CLI and rule engine, write CONTRIBUTING and a real README, audit history before promoting the repo. Ship the TUI as the free tier's local Kitchen. Rewrite the docs app — it currently leads with video-to-context extraction, which is deprecated. Replace hardcoded monitoring with real Sentry coverage across the ~53 unhandled <code>console.error</code> sites.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wide"><div class="eyebrow">03 — Orchestration</div><h2 style="margin-top:.3em">Three agents, zero collisions</h2></div>
+  <div class="prose" style="padding:0 var(--pad)">
+    <p>The split is by file domain, not by task type. Each agent owns directories the others never touch, so parallel work can't produce a merge conflict.</p>
+  </div>
+  <div class="wide">
+    <div class="twrap"><table>
+      <thead><tr><th>Agent</th><th>Owns</th><th>Never touches</th><th>Workspace</th></tr></thead>
+      <tbody>
+        <tr><td><span class="pill ox">Ox</span> <strong>Backend</strong></td><td><code>apps/prism-engine/src/app/api/**</code>, <code>src/lib/**</code>, <code>packages/prism-context-engine/**</code>, Supabase migrations</td><td>Dashboard UI, docs app</td><td>Main worktree, <code>feat/prism-*</code></td></tr>
+        <tr><td><span class="pill cc">Claude Code</span> <strong>Frontend</strong></td><td><code>apps/prism-engine/src/app/(dashboard)/**</code>, components, pricing page, upgrade flow, TUI</td><td>API routes, lib, migrations</td><td>Separate worktree, <code>feat/prism-ui-*</code></td></tr>
+        <tr><td><span class="pill cp">Copilot</span> <strong>Docs</strong></td><td><code>apps/prism-docs/**</code></td><td>Everything else</td><td>Cloud, PR to <code>main</code></td></tr>
+      </tbody>
+    </table></div>
+  </div>
+  <div class="prose" style="padding:0 var(--pad)">
+    <div class="call">
+      <div class="ctag">The worktree rule</div>
+      <p>Two agents in the same directory is a race, not parallelism. Before starting Claude Code alongside Ox, create a separate checkout: <code>git worktree add ../prism-ui feat/prism-ui-pricing</code>. Point the second IDE there. One branch each, merged to <code>develop</code> separately.</p>
+    </div>
+    <p>All three merge to <code>develop</code>, never to <code>main</code> directly. <code>main</code> is promotion-only, and it triggers a production Vercel deploy — so a merge to main during a build week should be a deliberate act with a rehearsal behind it, not a routine step.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wide"><div class="eyebrow">04 — Open questions</div><h2 style="margin-top:.3em">Still undecided</h2></div>
+  <div class="prose" style="padding:0 var(--pad)">
+    <ul class="body">
+      <li><strong>Which PayPal webhook is registered?</strong> Cannot be answered from the repo — check the PayPal dashboard. Until known, subscription state is not trustworthy.</li>
+      <li><strong>Break-even model revision.</strong> The 46-subscriber figure assumed a different pricing structure. Needs recalculating before the next KWADRA financial conversation.</li>
+      <li><strong>Open-source licence choice.</strong> MIT maximises adoption; AGPL prevents a competitor hosting your engine as a service. Given the enterprise/on-prem plan, worth thinking about rather than defaulting.</li>
+      <li><strong>Start Media 60/40.</strong> Still no written MOU, and it now touches an open-source decision — worth confirming what the arrangement covers before the CLI is licensed publicly.</li>
+      <li><strong>TUI scope.</strong> A local Kitchen (browse constitution, live violation feed) or just a nicer <code>init</code>? Different builds.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="wide"><div class="eyebrow">05 — Tracker</div><h2 style="margin-top:.3em">Everything, in order</h2></div>
+  <div class="wide">
+    <p class="prose" style="padding:0">State persists locally in this browser. Tags show the owning agent.</p>
+    <div class="tracker">
+      <div class="tracker-bar"><div class="tracker-fill" id="fill"></div></div>
+      <div class="tracker-pct" id="pct">0% complete</div>
+      <ul class="tracker-list" id="list">
+        <li class="tgroup tgroup-li">Phase 0 — Wednesday (3 days)</li>
+        <li><label><input type="checkbox"><span>Enforce project cap so Free stops showing 2/1 <span class="tag">OX</span></span></label></li>
+        <li><label><input type="checkbox"><span>Upgrade button: wire it, or make it honestly say "coming soon" <span class="tag">CC</span></span></label></li>
+        <li><label><input type="checkbox"><span>Rehearse the demo interactively (all runs so far were headless) <span class="tag">JEFF</span></span></label></li>
+        <li><label><input type="checkbox"><span>Record backup video of the correction loop <span class="tag">JEFF</span></span></label></li>
+        <li><label><input type="checkbox"><span>Promote guard pack: develop → main → staging <span class="tag">JEFF</span></span></label></li>
+
+        <li class="tgroup tgroup-li">Phase 1 — Correctness debt</li>
+        <li><label><input type="checkbox"><span>Enforce TIER_LIMITS: projects, rules, team members <span class="tag">OX</span></span></label></li>
+        <li><label><input type="checkbox"><span>Fix admin tier grants writing to the wrong table <span class="tag">OX</span></span></label></li>
+        <li><label><input type="checkbox"><span>Reconcile pricing constants with pricing copy <span class="tag">OX</span></span></label></li>
+        <li><label><input type="checkbox"><span>Determine which PayPal webhook URL is registered <span class="tag">JEFF</span></span></label></li>
+        <li><label><input type="checkbox"><span>Consolidate to one verified, idempotent PayPal webhook <span class="tag">OX</span></span></label></li>
+        <li><label><input type="checkbox"><span>Make /api/generate quota atomic; stop pre-charging failures <span class="tag">OX</span></span></label></li>
+        <li><label><input type="checkbox"><span>DB: FKs on created_by, composite index, UNIQUE on paypal_subscription_id <span class="tag">OX</span></span></label></li>
+        <li><label><input type="checkbox"><span>Set up CI npm publishing (none exists today) <span class="tag">OX</span></span></label></li>
+
+        <li class="tgroup tgroup-li">Phase 2 — Pricing &amp; payments</li>
+        <li><label><input type="checkbox"><span>Implement free-forever local tier (unlimited enforcement) <span class="tag">OX</span></span></label></li>
+        <li><label><input type="checkbox"><span>Implement Pro / Team / Enterprise tier definitions <span class="tag">OX</span></span></label></li>
+        <li><label><input type="checkbox"><span>Regional pricing by locale with manual override <span class="tag">OX</span></span></label></li>
+        <li><label><input type="checkbox"><span>Rebuild pricing page against new model <span class="tag">CC</span></span></label></li>
+        <li><label><input type="checkbox"><span>Upgrade flow → PayPal checkout → correct subscription state <span class="tag">CC</span></span></label></li>
+        <li><label><input type="checkbox"><span>Team seats: invite, roles, shared constitution <span class="tag">OX</span></span></label></li>
+        <li><label><input type="checkbox"><span>Recalculate break-even under the new model <span class="tag">JEFF</span></span></label></li>
+
+        <li class="tgroup tgroup-li">Phase 3 — OpenCode AI layer</li>
+        <li><label><input type="checkbox"><span>OpenCode client: auto model pick, MIMO default, free models first <span class="tag">OX</span></span></label></li>
+        <li><label><input type="checkbox"><span>Rules creator: plain language → rule with working check block <span class="tag">OX</span></span></label></li>
+        <li><label><input type="checkbox"><span>Skills creator: replace "Coming Soon" screen <span class="tag">OX</span></span></label></li>
+        <li><label><input type="checkbox"><span>Sandbox preview: run constitution against sample code <span class="tag">CC</span></span></label></li>
+        <li><label><input type="checkbox"><span>Tier-limit sandbox runs and AI generations <span class="tag">OX</span></span></label></li>
+        <li><label><input type="checkbox"><span>Dashboard headline metric → violations caught, not AI generations <span class="tag">CC</span></span></label></li>
+
+        <li class="tgroup tgroup-li">Phase 4 — Breadth</li>
+        <li><label><input type="checkbox"><span>Vue and Svelte token extraction <span class="tag">OX</span></span></label></li>
+        <li><label><input type="checkbox"><span>Plain CSS / SCSS support <span class="tag">OX</span></span></label></li>
+        <li><label><input type="checkbox"><span>Non-frontend stacks: Python, Go naming and structure rules <span class="tag">OX</span></span></label></li>
+        <li><label><input type="checkbox"><span>New check types: naming pattern, file placement, required import <span class="tag">OX</span></span></label></li>
+        <li><label><input type="checkbox"><span>Cursor + Windsurf formatters behind --format <span class="tag">OX</span></span></label></li>
+
+        <li class="tgroup tgroup-li">Phase 5 — Open source + launch</li>
+        <li><label><input type="checkbox"><span>Choose licence (MIT vs AGPL — consider on-prem plans) <span class="tag">JEFF</span></span></label></li>
+        <li><label><input type="checkbox"><span>CONTRIBUTING, README, issue templates <span class="tag">CP</span></span></label></li>
+        <li><label><input type="checkbox"><span>Audit git history before promoting the public repo <span class="tag">CP</span></span></label></li>
+        <li><label><input type="checkbox"><span>Ship the TUI as the free tier's local Kitchen <span class="tag">CC</span></span></label></li>
+        <li><label><input type="checkbox"><span>Docs rewrite: remove video-to-context, document the Pass <span class="tag">CP</span></span></label></li>
+        <li><label><input type="checkbox"><span>Real Sentry coverage across ~53 console.error sites <span class="tag">OX</span></span></label></li>
+        <li><label><input type="checkbox"><span>Replace hardcoded "System Operational" with a real check <span class="tag">OX</span></span></label></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wide" style="padding:0">SYNTAXURE LABS · PRISM PRODUCT ROADMAP v1.0 · AUG 2026<br>
+  Principle: we don't ship a project, we deliver a product.</div>
+</footer>
+
+<script>
+(function(){
+  const KEY='prism-roadmap-tracker-v1';
+  const boxes=document.querySelectorAll('#list input[type=checkbox]');
+  let saved={};
+  try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){saved={}}
+  function update(){
+    let done=0;boxes.forEach(b=>{if(b.checked)done++});
+    const pct=Math.round(100*done/boxes.length);
+    document.getElementById('fill').style.width=pct+'%';
+    document.getElementById('pct').textContent=pct+'% complete · '+done+' of '+boxes.length;
+  }
+  boxes.forEach((b,i)=>{
+    b.checked=!!saved[i];
+    b.addEventListener('change',()=>{
+      let s={};try{s=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){s={}}
+      s[i]=b.checked;
+      try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}
+      update();
+    });
+  });
+  update();
+})();
+</script>
+</body>
+</html>

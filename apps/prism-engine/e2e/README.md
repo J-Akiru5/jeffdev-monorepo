@@ -8,7 +8,7 @@
 These run against a **real environment** — real Supabase Auth, real
 `prism_*` Postgres tables. There's no mock/stub backend here; the point of
 `prism-migration-smoke.spec.ts` is proving the Cosmos DB → Postgres
-migration (see [`PRISM_MIGRATION.md`](../../../PRISM_MIGRATION.md)) actually
+migration (see [`PRISM_MIGRATION.md`](../../../../docs/prism/PRISM_MIGRATION.md)) actually
 works against a live database, not a fixture.
 
 ## Setup

@@ -132,6 +132,20 @@ export async function POST(request: NextRequest) {
   const db = getPrismDb();
   const now = new Date().toISOString();
   const { projectId, source, ...rest } = parsed.data;
+
+  // Ownership guard: a caller may only attach a rule to a project it owns —
+  // the pass endpoint serves rules by project_id, so an unverified projectId
+  // would be a cross-tenant injection vector.
+  if (projectId) {
+    const { data: project } = await db
+      .from("prism_projects")
+      .select("id")
+      .eq("id", projectId)
+      .eq("user_id", auth.userId)
+      .maybeSingle();
+    if (!project) return errorResponse("Project not found", 404);
+  }
+
   const { data: inserted, error } = await db
     .from("prism_rules")
     .insert({

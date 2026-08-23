@@ -245,9 +245,7 @@ Developer types in IDE
 
   ```json
   {
-    "rules": [
-      { "id": "...", "title": "...", "priority": "high", "content": "..." }
-    ],
+    "rules": [{ "id": "...", "title": "...", "priority": "high", "content": "..." }],
     "skills": [
       {
         "id": "...",

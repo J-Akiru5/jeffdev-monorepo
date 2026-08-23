@@ -5,6 +5,10 @@ import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import {
+  assertWithinProjectCap,
+  projectCapMessage,
+} from "@/lib/subscriptions";
 
 /**
  * 🛡️ Zod Gate - Project Creation Schema
@@ -33,6 +37,7 @@ export type CreateProjectState = {
     name?: string[];
     designSystem?: string[];
     stack?: string[];
+    general?: string;
   };
 } | null;
 
@@ -54,6 +59,14 @@ export async function createProject(
   }
 
   const userId = user.id;
+
+  // Phase 0 tier enforcement: block NEW creates at the per-tier project cap.
+  // Existing over-cap projects are grandfathered and stay fully accessible;
+  // only this create is rejected until the user deletes down or upgrades.
+  const cap = await assertWithinProjectCap(userId);
+  if (!cap.allowed) {
+    return { error: { general: projectCapMessage(cap) } };
+  }
 
   // Validate input
   const parsed = CreateProjectSchema.safeParse({

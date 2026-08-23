@@ -7,7 +7,16 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { type SubscriptionTier } from "@/lib/subscriptions";
+import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
+
+/** Free-tier limit summary used when no subscription row exists yet. */
+function freeLimits() {
+  return {
+    rules: TIER_LIMITS.free.rules,
+    components: TIER_LIMITS.free.components,
+    aiGenerations: TIER_LIMITS.free.aiGenerations,
+  };
+}
 
 const PAYPAL_API_URL =
   process.env.PAYPAL_MODE === "live"
@@ -80,11 +89,7 @@ export async function GET() {
       return NextResponse.json({
         tier: "free" as SubscriptionTier,
         status: "active",
-        limits: {
-          rules: 5,
-          components: 3,
-          aiGenerations: 10,
-        },
+        limits: freeLimits(),
       });
     }
 
@@ -107,11 +112,7 @@ export async function GET() {
     return NextResponse.json({
       tier: "free" as SubscriptionTier,
       status: "active",
-      limits: {
-        rules: 5,
-        components: 3,
-        aiGenerations: 10,
-      },
+      limits: freeLimits(),
     });
   }
 }

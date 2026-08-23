@@ -22,6 +22,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrismDb, isValidId } from "@syntaxure-labs/db/prism";
 import { authenticate, errorResponse } from "@/lib/api-auth";
+import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 import { toV1Rule, type PrismRulesRow } from "@/lib/prism-rules-transform";
 
 export async function GET(
@@ -30,6 +31,11 @@ export async function GET(
 ) {
   const auth = await authenticate(request);
   if (auth instanceof Response) return auth;
+
+  // The CLI hot path: ~4 DB ops/hit including a last_used_at write. Rate
+  // limit like every other v1 route so a polling loop can't hammer Supabase.
+  const rl = await checkRateLimit(`pass:${auth.userId}`, auth.tier);
+  if (!rl.allowed) return errorResponse("Rate limit exceeded", 429, getRateLimitHeaders(rl));
 
   const { id } = await params;
   if (!isValidId(id)) return errorResponse("Invalid project ID", 400);

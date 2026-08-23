@@ -11,6 +11,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { z } from "zod";
 
 // Zod validation schema
@@ -100,28 +101,25 @@ export async function PATCH(request: NextRequest) {
     const { userId, tier } = parsed.data;
     const now = new Date().toISOString();
     const admin = getAdminClient();
-    const subs = admin.from("subscriptions");
+    const prismSubs = getPrismDb().from("prism_subscriptions");
     const profiles = admin.from("user_profiles");
 
-    // Upsert subscription record
-    const { error: subError } = await subs
-      .upsert({
-      user_id: userId,
-      plan: tier,
-      status: "active",
-      billing_cycle: "monthly",
-      amount: "0",
-      currency: "USD",
-      current_period_start: now,
-      current_period_end: new Date(
-        Date.now() + 365 * 24 * 60 * 60 * 1000,
-      ).toISOString(),
-      metadata: { modified_by: adminUser.id, source: "admin_override" },
-      updated_at: now,
-    }, {
-      onConflict: "user_id",
-      ignoreDuplicates: false,
-    });
+    // Primary write: prism_subscriptions is what the engine enforces
+    // (authenticate()/getUserTier()). The legacy agency `subscriptions`
+    // table is NOT read by prism-engine and must not be the target.
+    const { error: subError } = await prismSubs.upsert(
+      {
+        user_id: userId,
+        tier,
+        status: "active",
+        modified_by: `prism-admin:${adminUser.id}`,
+        updated_at: now,
+      },
+      {
+        onConflict: "user_id",
+        ignoreDuplicates: false,
+      },
+    );
 
     if (subError) {
       console.error("[admin/subscription] Upsert error:", subError);
