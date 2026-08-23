@@ -167,3 +167,34 @@ branch feat/prism-phase4-breadth - STOPPED AT CHECKPOINT per task gate - languag
 </div>
 </body>
 </html>
+<h2 class="cp"><span class="idx">BATCH A RESULT</span>Plain CSS + SCSS - landed and verified</h2>
+<p>Estimate held - beat it. Estimated 0.75 day; actual active time <b>~45 minutes</b>. The harvest layer turned out to be a bounded workspace walker feeding the EXISTING regex pipeline, exactly as proposed. No matching logic changed.</p>
+<pre><code>Real scaffold verification (vite vanilla-ts, outside monorepo):
+Detected: Next.js not detected / Tailwind not detected
+Scanned: src\style.css, styles\palette.scss   <- walker found BOTH
+Found 15 color token(s) as CSS custom properties
+Wrote 1 rule(s) + all three agent hook configs (claude/cursor/antigravity)</code></pre>
+<p>Walker details: depth-10 bounded, 200-file cap, excludes node_modules/dist/build/.next/.nuxt/.output/.svelte-kit/coverage/dotdirs, deterministic sort, $scss vars deliberately skipped per your ruling.</p>
+
+<h2><span class="idx">07R</span>THE TABLE (revised) - split by check family per ruling</h2>
+<table>
+<tr><th>Stack</th><th>Token family<br>(required_token, arbitrary_value)</th><th>Structural family<br>(naming_pattern, file_placement, forbidden_pattern, required_import, banned_import)</th></tr>
+<tr><td>TypeScript / JS / TSX / JSX</td><td><span class="pill ok">FULL</span> (css+tailwind extraction)</td><td><span class="pill ok">FULL</span></td></tr>
+<tr><td>Plain CSS</td><td><span class="pill ok">BATCH A - full</span></td><td><span class="pill ok">FULL</span></td></tr>
+<tr><td>SCSS</td><td><span class="pill ok">BATCH A - custom props only</span> ($vars compile away, skipped by ruling)</td><td><span class="pill ok">FULL</span></td></tr>
+<tr><td>Vue SFC</td><td><span class="pill warn">Batch B - regex splitter, no compiler dep</span></td><td><span class="pill warn">Batch B</span></td></tr>
+<tr><td>Svelte</td><td><span class="pill warn">Batch B - after Vue lands</span></td><td><span class="pill warn">Batch B</span></td></tr>
+<tr><td>Dart / Flutter</td><td><span class="pill bad">NOT TARGETED</span> (tokens in Dart code)</td><td><span class="pill ok">EXAMPLE PACK SHIPPED</span> flutter-rules.json</td></tr>
+<tr><td>Kotlin / Compose</td><td><span class="pill bad">NOT TARGETED</span></td><td><span class="pill ok">EXAMPLE PACK SHIPPED</span> kotlin-rules.json</td></tr>
+<tr><td>SwiftUI</td><td><span class="pill bad">NOT TARGETED</span></td><td><span class="pill info">same shape as kotlin pack, on request</span></td></tr>
+<tr><td>Python</td><td><span class="pill bad">N/A</span></td><td><span class="pill ok">EXAMPLE PACK SHIPPED</span> python-rules.json (+ required_import now speaks python syntax)</td></tr>
+<tr><td>Go</td><td>N/A</td><td><span class="pill info">required_import speaks go import blocks; pack on request</span></td></tr>
+<tr><td>Rust / Swift (generic)</td><td>N/A</td><td><span class="pill ok">structural verified in tests</span> (.rs/.swift covered in suite)</td></tr>
+<tr><td>Claude Code</td><td colspan="2"><span class="pill ok">ENFORCEMENT verified E2E</span></td></tr>
+<tr><td>Cursor</td><td colspan="2"><span class="pill warn">CLI verified exit 2 - in-agent firing unverified headlessly</span></td></tr>
+<tr><td>Antigravity 2.0</td><td colspan="2"><span class="pill warn">hooks.json wired - in-agent firing unverified headlessly</span></td></tr>
+<tr><td>Claude Desktop</td><td colspan="2"><span class="pill info">MCP advisory only - no hooks system exists</span></td></tr>
+<tr><td>VS Code (Copilot/Cline/Roo)</td><td colspan="2"><span class="pill info">investigation only - advisory via MCP is the honest surface today</span></td></tr>
+</table>
+
+<div class="foot">SYNTAXURE LABS - Prism Phase 4 Batch A complete - Batch B (Vue + Svelte via regex splitter, no compiler dependency) awaits your go.</div>
