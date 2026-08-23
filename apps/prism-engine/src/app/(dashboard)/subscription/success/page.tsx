@@ -16,7 +16,12 @@ type Status = "loading" | "success" | "pending" | "error";
 
 export default function SubscriptionSuccessPage() {
   const searchParams = useSearchParams();
-  const subscriptionId = searchParams.get("subscriptionId") || "";
+  // PayPal redirects back with snake_case `subscription_id`; keep supporting
+  // camelCase for manual/test links.
+  const subscriptionId =
+    searchParams.get("subscriptionId") ||
+    searchParams.get("subscription_id") ||
+    "";
   const [status, setStatus] = useState<Status>("loading");
   const [tier, setTier] = useState("pro");
   const [message, setMessage] = useState("Confirming your subscription...");

@@ -33,47 +33,51 @@ export interface TierLimits {
 }
 
 export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
-  // Free: taste the governance layer, no MCP access
+  // Free · forever (roadmap v1.0): local enforcement costs us $0, so it is
+  // never gated. Unlimited local rules; the cap that remains is on SYNCED
+  // artifacts (1 synced project). Small AI quota so the Kitchen is tasteable;
+  // 1 API key so `prism pull` works for the synced project.
   // Cost to us: $0 (all local computation)
   free: {
-    rules: 10,
-    components: 5,
-    projects: 1,
-    aiGenerations: 0, // no AI features
-    codeValidations: 50, // limited check/fix (free, local computation)
+    rules: -1, // unlimited — local rules were never ours to count
+    components: -1,
+    projects: 1, // the one SYNCED project
+    aiGenerations: 25, // taste of the Kitchen (OpenCode free models keep this ~$0)
+    codeValidations: -1, // local computation
     teamMembers: 0,
-    ideSync: false, // no MCP
-    apiKeys: 0,
-    gitHooks: false,
+    ideSync: false, // MCP is a paid feature
+    apiKeys: 1, // exactly enough for CLI sync of the synced project
+    gitHooks: true, // local
     restGateway: false,
     fileExport: true, // always free
     governanceMemory: false,
     ruleCompiler: false,
   },
-  // Pro: individual developers, full governance
-  // Cost to us: ~$2.40/month per user (embeddings + occasional chat)
+  // Pro · solo (roadmap v1.0): ₱299/mo (~$8 intl). Unlimited synced projects,
+  // full Kitchen, AI rule/skill generation, sandbox preview, cross-machine sync.
+  // Cost to us: near $0 on OpenCode free models; embeddings negligible.
   pro: {
-    rules: 100,
-    components: 50,
-    projects: 5,
-    aiGenerations: 500, // ~$0.30/month in AI costs
+    rules: -1,
+    components: -1,
+    projects: -1,
+    aiGenerations: 500,
     codeValidations: -1, // unlimited (free, local)
     teamMembers: 0,
     ideSync: true, // MCP access
-    apiKeys: 2,
+    apiKeys: 3,
     gitHooks: true,
     restGateway: true,
     fileExport: true,
     governanceMemory: true,
     ruleCompiler: true,
   },
-  // Team: small teams, collaboration
+  // Team (roadmap v1.0): ₱249/seat/mo, min 3 seats. The consistency wedge.
   // Cost to us: ~$7.20/month per team (3x Pro usage)
   team: {
-    rules: -1, // unlimited
+    rules: -1,
     components: -1,
     projects: -1,
-    aiGenerations: 2000, // ~$1.20/month in AI costs
+    aiGenerations: 2000,
     codeValidations: -1, // unlimited
     teamMembers: 10,
     ideSync: true,
@@ -84,7 +88,7 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
     governanceMemory: true,
     ruleCompiler: true,
   },
-  // Enterprise: everything unlimited
+  // Enterprise: everything unlimited, on-prem zero egress
   enterprise: {
     rules: -1,
     components: -1,
@@ -102,20 +106,24 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
   },
 };
 
+/** Team plan bills per seat; fewer than this many seats cannot check out. */
+export const TEAM_MIN_SEATS = 3;
+
 export const TIER_PRICES = {
-  // Pro: $12/mo (cost to us: ~$2.40, margin: 80%)
-  // Includes: MCP access, 500 AI generations, unlimited validations, git hooks
+  // Pro · solo: ₱299/mo ≈ $8 intl (regional pricing is the mechanism, not a
+  // discount). Annual = 10× monthly (2 months free).
+  // Includes: unlimited synced projects, Kitchen, 500 AI generations, MCP sync
   pro: {
-    monthly: { php: 660, usd: 12 },
-    annual: { php: 6600, usd: 120 },
+    monthly: { php: 299, usd: 8 },
+    annual: { php: 2990, usd: 80 },
   },
-  // Team: $36/mo (cost to us: ~$7.20, margin: 80%)
-  // Includes: everything in Pro + 2000 AI gen, 10 members, unlimited rules
+  // Team: ₱249/seat/mo ≈ $7 intl, minimum 3 seats. Annual = 10× monthly.
+  // Includes: everything in Pro + 2000 AI gen, 10 members, shared constitution
   team: {
-    monthly: { php: 1980, usd: 36 },
-    annual: { php: 19800, usd: 360 },
+    monthly: { php: 249, usd: 7 },
+    annual: { php: 2490, usd: 70 },
   },
-  // Enterprise: custom pricing
+  // Enterprise: custom annual pricing
   enterprise: {
     monthly: { php: null, usd: null },
     annual: { php: null, usd: null },
