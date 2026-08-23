@@ -13,6 +13,13 @@ function makeTmpDir(label: string): string {
   return dir;
 }
 
+function write(dir: string, rel: string, content: string): void {
+  const full = join(dir, rel);
+  const parent = full.slice(0, Math.max(full.lastIndexOf("/"), full.lastIndexOf("\\")));
+  if (parent) mkdirSync(parent, { recursive: true });
+  writeFileSync(full, content);
+}
+
 describe("extractTokens", () => {
   const dirs: string[] = [];
   afterEach(() => {
@@ -116,12 +123,6 @@ describe("extractTokens Batch A - workspace CSS/SCSS walker", () => {
     for (const dir of dirs.splice(0)) rmSync(dir, { recursive: true, force: true });
   });
 
-  function write(dir: string, rel: string, content: string): void {
-    const full = join(dir, rel);
-    const parent = full.slice(0, Math.max(full.lastIndexOf("/"), full.lastIndexOf("\\")));
-    if (parent) mkdirSync(parent, { recursive: true });
-    writeFileSync(full, content);
-  }
 
   it("discovers custom properties in non-globals CSS and SCSS files", async () => {
     const dir = makeTmpDir("walker");
@@ -163,5 +164,85 @@ describe("extractTokens Batch A - workspace CSS/SCSS walker", () => {
     expect(result.colorTokens.map((t) => t.hex)).toEqual(
       expect.arrayContaining(["#abcdef", "#123abc"]),
     );
+  });
+});
+describe("extractTokens Batch B - Vue/Svelte style-block harvesting", () => {
+  const dirs: string[] = [];
+  afterEach(() => {
+    for (const dir of dirs.splice(0)) rmSync(dir, { recursive: true, force: true });
+  });
+
+
+  it("harvests tokens from multiple Vue SFC style blocks and ignores script-side vars", async () => {
+    const dir = makeTmpDir("vue");
+    dirs.push(dir);
+    write(
+      dir,
+      join("src", "App.vue"),
+      `<script setup lang="ts">\n` +
+        `const debugHex = "#000000"; // must NOT be extracted\n` +
+        `</script>\n\n` +
+        `<template><div class="card" /></template>\n\n` +
+        `<style scoped>\n.card {\n  --card-bg: #101828;\n}\n</style>\n\n` +
+        `<style lang="scss">\n.panel {\n  --panel-border: #334155;\n}\n</style>\n`,
+    );
+
+    const result = await extractTokens(dir);
+    const hexes = result.colorTokens.map((t) => t.hex);
+    expect(hexes).toContain("#101828"); // scoped block
+    expect(hexes).toContain("#334155"); // lang=scss block
+    expect(hexes).not.toContain("#000000"); // script-side ignored
+    expect(result.cssFilesScanned.some((f) => f.endsWith("App.vue"))).toBe(true);
+  });
+
+  it("harvests Svelte style blocks", async () => {
+    const dir = makeTmpDir("svelte");
+    dirs.push(dir);
+    write(
+      dir,
+      "src/App.svelte",
+      "<script>\nlet x = '#123123';\n</script>\n\n<main>\n<h1>hi</h1>\n</main>\n\n<style>\nmain {\n  --page-pad: #22c55e;\n}\n</style>\n",
+    );
+
+    const result = await extractTokens(dir);
+    const hexes = result.colorTokens.map((t) => t.hex);
+    expect(hexes).toContain("#22c55e");
+    expect(hexes).not.toContain("#123123");
+  });
+
+  it("detect flags Vue and Svelte projects from package.json", async () => {
+    const { detectProject } = await import("./detect.js");
+    const dir = makeTmpDir("detect");
+    dirs.push(dir);
+    write(
+      dir,
+      "package.json",
+      JSON.stringify({
+        dependencies: { vue: "^3.5.0" },
+        devDependencies: { svelte: "^5.0.0" },
+      }),
+    );
+    const d = detectProject(dir);
+    expect(d.hasVue).toBe(true);
+    expect(d.hasSvelte).toBe(true);
+  });
+});
+
+describe("scanRepo customProperties (dashboard-facing)", () => {
+  const dirs: string[] = [];
+  afterEach(() => {
+    for (const dir of dirs.splice(0)) rmSync(dir, { recursive: true, force: true });
+  });
+  it("aggregates custom props across css/scss/vue sources", async () => {
+    const { scanRepo } = await import("../commands/repo-scanner.js");
+    const dir = makeTmpDir("scanrepo");
+    dirs.push(dir);
+    write(dir, join("src", "tokens.css"), ":root {\n  --brand: #abcdef;\n}\n");
+    write(dir, join("src", "App.vue"), "<style>\n.x {\n  --accent: #654321;\n}\n</style>\n");
+
+    const report = await scanRepo(dir);
+    expect(report.customProperties).toBeDefined();
+    expect(report.customProperties!["#abcdef"]).toBe("var(--brand)");
+    expect(report.customProperties!["#654321"]).toBe("var(--accent)");
   });
 });

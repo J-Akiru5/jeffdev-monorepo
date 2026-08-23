@@ -115,6 +115,8 @@ function printDetection(detection: ReturnType<typeof detectProject>): void {
       ? `Tailwind ${detection.tailwindVersion ?? ""}`.trim()
       : "Tailwind: not detected",
   );
+  if (detection.hasVue) parts.push("Vue");
+  if (detection.hasSvelte) parts.push("Svelte");
   console.log(`Detected: ${chalk.cyan(parts.join(" · "))}\n`);
 }
 
