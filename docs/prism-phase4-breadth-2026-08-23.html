@@ -198,3 +198,30 @@ Wrote 1 rule(s) + all three agent hook configs (claude/cursor/antigravity)</code
 </table>
 
 <div class="foot">SYNTAXURE LABS - Prism Phase 4 Batch A complete - Batch B (Vue + Svelte via regex splitter, no compiler dependency) awaits your go.</div>
+<h2 class="cp"><span class="idx">BATCH B RESULT</span>Vue + Svelte - landed and verified (phase 4 language breadth COMPLETE)</h2>
+<p>Estimate held again. Estimated 1-1.5 days for Vue + 0.75 for Svelte; actual combined active time <b>~70 minutes</b>. The regex block-splitter handled every real-world variation the scaffolds threw at it: scoped attributes, lang=scss blocks, multiple style sections per SFC, and script-side variables correctly ignored.</p>
+<pre><code>Vite vue-ts scaffold (outside monorepo):
+Detected: ... Vue
+Scanned: src\components\HelloWorld.vue, src\App.vue, src\style.css, styles\tokens.css
+Found 14 color token(s) - hooks wired for claude/cursor/antigravity
+
+Vite svelte-ts scaffold:
+Detected: ... Svelte
+Scanned: src\lib\Counter.svelte, src\App.svelte, src\app.css
+Found 13 color token(s)
+
+DASHBOARD-FACING PROOF - scanRepo on the svelte scaffold returns:
+{"#f97316":"var(--svelte-brand)", "#aa3bff":"var(--accent)", ...}
+That customProperties payload is what prism sync --repo feeds to the engine
+extract/AI pipeline and what populates project token data in the dashboard
+for ANY stack.</code></pre>
+<p><b>New capability note:</b> repo-scanner now harvests customProperties across css/scss/vue/svelte during every --repo walk, so Phase 3 rules-creator and extract flows see design tokens from Vue/Svelte projects without any further changes.</p>
+
+<h2><span class="idx">FINAL</span>Phase 4 status - all batches complete</h2>
+<ul class="body">
+<li><b>Agents:</b> Cursor + Antigravity + Claude Code enforcement formats shipped; Claude Desktop confirmed MCP-only; VS Code trio investigated (advisory via MCP is today's honest surface).</li>
+<li><b>Check types:</b> naming_pattern, file_placement, required_import added (7 total), with Python/Go import syntax support and includePattern scoping.</li>
+<li><b>Languages:</b> plain CSS, SCSS, Vue SFC, Svelte extraction shipped (Batch A+B). Python/Go confirmed free via structural checks with shipped example packs.</li>
+<li><b>Packaging:</b> tarball cold-install re-verified after every batch.</li>
+</ul>
+<p><b>Remaining for open-source launch = Phase 5 only:</b> licence choice (Jeff), docs rewrite, TUI, Sentry coverage, history audit.</p>
