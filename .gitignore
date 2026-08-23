@@ -44,3 +44,7 @@ yarn-error.log*
 .DS_Store
 *.pem
 nul
+
+# Generated configuration scan dumps
+PRISM_CONFIG_SCAN.md
+*_CONFIG_SCAN.md
