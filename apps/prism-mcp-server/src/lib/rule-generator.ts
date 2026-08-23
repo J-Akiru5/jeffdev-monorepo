@@ -133,6 +133,19 @@ export async function saveRulesToDb(
 ): Promise<void> {
   const { getPrismDb } = await import("@syntaxure-labs/db/prism");
   const db = getPrismDb();
+  // Ownership guard: projectId/userId arrive from the local tool's args, so
+  // verify the project actually belongs to this user before writing —
+  // otherwise any local caller could inject rules into a foreign project
+  // (the pass endpoint serves rules purely by project_id).
+  const { data: project } = await db
+    .from("prism_projects")
+    .select("id")
+    .eq("id", projectId)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (!project) {
+    throw new Error("Project not found or not owned by this user");
+  }
   // Note: the Cosmos-era version also wrote a stray `id: "scan-<ts>"` field
   // alongside Mongo's own auto _id — nothing ever read it, and it isn't a
   // valid UUID, so it's dropped rather than ported; prism_rules.id (the real

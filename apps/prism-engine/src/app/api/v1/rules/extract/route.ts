@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
+import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 import { generateChatCompletion } from "@/lib/ai-router";
 
 interface RepoScanData {
@@ -20,6 +21,12 @@ interface RepoScanData {
 export async function POST(request: NextRequest) {
   const auth = await authenticate(request);
   if (auth instanceof Response) return auth;
+
+  // AI spend guard: this endpoint calls the LLM on every request and has no
+  // monthly quota — hold it to a strict per-minute ceiling (solidity scan §1.3).
+  const rl = await checkRateLimit(`extract:${auth.userId}`, "strict");
+  if (!rl.allowed)
+    return errorResponse("Rate limit exceeded", 429, getRateLimitHeaders(rl));
 
   let body: { scan: RepoScanData };
   try {

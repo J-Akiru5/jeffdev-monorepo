@@ -13,6 +13,7 @@ import { z } from "zod";
 import crypto from "crypto";
 import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { generateComponent, generateRulesFromComponent } from "@/lib/gemini";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
 
 async function getUserTier(userId: string): Promise<SubscriptionTier> {
@@ -138,6 +139,17 @@ export async function POST(request: NextRequest) {
     }
 
     const tier = await getUserTier(userId);
+
+    // Burst ceiling alongside the monthly quota — the quota alone allowed a
+    // subscriber to burn their whole month in one burst window.
+    const burst = await checkRateLimit(`generate:${userId}`, tier);
+    if (!burst.allowed) {
+      return NextResponse.json(
+        { error: "Rate limit exceeded. Slow down and try again shortly." },
+        { status: 429 },
+      );
+    }
+
     const monthlyUsage = await getMonthlyUsage(userId);
     const limit = TIER_LIMITS[tier].aiGenerations;
     if (limit !== -1 && monthlyUsage >= limit) {
