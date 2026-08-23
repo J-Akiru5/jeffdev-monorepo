@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Pass — MVP Report · 2026-08-23</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0D12; --bg2:#0E1219; --panel:#11161F; --line:#1D2530;
+    --cyan:#22D3EE; --violet:#8B7BFF; --text:#E6EBF2; --dim:#8B95A5;
+    --ok:#34D399; --warn:#FBBF24; --bad:#F87171;
+    --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+    --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.65;font-size:16px}
+  .wrap{max-width:1080px;margin:0 auto;padding:48px 28px 96px}
+  .kicker{font-family:var(--mono);font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan)}
+  h1{font-size:2.4rem;font-weight:800;line-height:1.15;margin:.6rem 0 .3rem}
+  h1 .accent{color:var(--violet)}
+  h2{font-size:1.35rem;font-weight:700;margin:3rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--line)}
+  h2 .idx{font-family:var(--mono);color:var(--cyan);font-weight:500;margin-right:.6rem}
+  h3{font-size:1rem;font-weight:600;margin:1.4rem 0 .6rem;color:var(--cyan)}
+  p{margin:.7rem 0;color:var(--text)}
+  .lede{font-size:1.06rem;border-left:3px solid var(--cyan);padding:.9rem 1.2rem;background:var(--bg2);border-radius:0 10px 10px 0;margin:1.6rem 0}
+  code,.mono{font-family:var(--mono);font-size:.86em;background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:.1em .38em;color:var(--cyan)}
+  pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1.1rem 1.25rem;overflow-x:auto;margin:.9rem 0}
+  pre code{background:none;border:none;padding:0;color:var(--text);font-size:.83rem;line-height:1.55}
+  table{width:100%;border-collapse:collapse;margin:.9rem 0;font-size:.92rem}
+  th{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);text-align:left;padding:.55rem .75rem;border-bottom:1px solid var(--line)}
+  td{padding:.6rem .75rem;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  .pill{display:inline-block;font-family:var(--mono);font-size:.68rem;font-weight:700;letter-spacing:.06em;border-radius:999px;padding:.14em .7em}
+  .pill.ok{color:var(--ok);background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.35)}
+  .pill.block{color:var(--bad);background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35)}
+  .pill.warn{color:var(--warn);background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.35)}
+  .pill.info{color:var(--violet);background:rgba(139,123,255,.1);border:1px solid rgba(139,123,255,.35)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.9rem;margin:1.1rem 0}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1rem 1.15rem}
+  .card .n{font-family:var(--mono);font-size:1.5rem;font-weight:700;color:var(--cyan)}
+  .card .l{font-size:.8rem;color:var(--dim);margin-top:.15rem}
+  ul{margin:.6rem 0 .6rem 1.3rem} li{margin:.32rem 0}
+  .note{background:rgba(139,123,255,.07);border:1px solid rgba(139,123,255,.25);border-radius:10px;padding:.85rem 1.1rem;margin:1rem 0;font-size:.93rem}
+  .footer{margin-top:4rem;padding-top:1.2rem;border-top:1px solid var(--line);font-family:var(--mono);font-size:.75rem;color:var(--dim)}
+  a{color:var(--cyan)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="kicker">Prism Context Engine · KWADRA TBI MVP · Wed Aug 26 demo</div>
+<h1>The Pass<span class="accent">.</span> Local rule enforcement, closed loop.</h1>
+<div class="mono" style="color:var(--dim);font-size:.82rem">branch <span style="color:var(--cyan)">feat/prism-pass</span> → develop · prism-context-engine 1.1.2 → <span style="color:var(--cyan)">1.2.0</span> · unpublished</div>
+
+<div class="lede">
+The Pass turns Prism from a rule <em>delivery</em> system into a rule <em>enforcement</em> system. A Claude Code PostToolUse hook runs the new regex-based engine (<code>prism check --hook</code>) against every file an agent writes; any <strong>block</strong>-severity violation exits&nbsp;2 and feeds a precise correction — file, line, exact offending value, exact replacement — back into the agent's context, and the agent fixes itself on its own next turn. Both delivery mechanisms were spike-verified against the installed Claude Code v2.1.175 before any production code was written, and the full Wednesday demo was rehearsed end-to-end headlessly: the agent wrote a banner violating four rules and self-corrected every blocking one without a single human turn.
+</div>
+
+<div class="grid">
+  <div class="card"><div class="n">2/2</div><div class="l">spike mechanisms verified live (exit2+stderr, JSON block)</div></div>
+  <div class="card"><div class="n">4+1</div><div class="l">check types shipped: forbidden_pattern, required_token, banned_import, arbitrary_value + advisory-only</div></div>
+  <div class="card"><div class="n">86 ✓</div><div class="l">tests passing (22 new), tsc clean, eslint 0 errors</div></div>
+  <div class="card"><div class="n">0 deps</div><div class="l">added to the published package</div></div>
+</div>
+
+<h2><span class="idx">01</span>Spike — verified before building</h2>
+<p>Mandated gate: prove a hook message actually reaches the agent's context and drives unprompted self-correction, using the installed Claude Code (<span class="mono">v2.1.175</span>), not documented behaviour. Two throwaway projects, forced violations, headless runs with full transcript capture:</p>
+<table>
+  <tr><th>Mechanism</th><th>Result</th><th>Evidence</th></tr>
+  <tr><td class="mono">exit 2 + stderr</td><td><span class="pill ok">PASS</span></td><td>Write blocked → agent's immediate next action was an Edit replacing <code>#3B82F6</code> with <code>var(--brand-primary)</code>; agent later quotes the hook message verbatim ("per the hook's design-token instruction")</td></tr>
+  <tr><td class="mono">exit 0 + JSON <code>{decision:"block",reason}</code></td><td><span class="pill ok">PASS</span></td><td>Identical loop, second run: Write blocked → unprompted Edit at +8s</td></tr>
+</table>
+<p><strong>Chosen:</strong> exit&nbsp;2&nbsp;+&nbsp;stderr. Simplest contract, no stdout-schema drift risk across CC versions, and fail-open falls out naturally (anything ≠&nbsp;2 passes through). The formatter stays swappable per your generic-format requirement.</p>
+
+<h2><span class="idx">02</span><code>.prism/rules.json</code> — the v1 contract</h2>
+<p>This is the schema tomorrow's dashboard endpoint generates against. Versioned envelope, optional <code>check</code> makes a rule machine-enforceable; rules without it remain advisory and flow through the MCP path unchanged.</p>
+<pre><code>{
+  "version": 1,
+  "rules": [
+    {
+      "id": "styling/brand-color-tokens",       // required, unique, "&lt;category&gt;/&lt;name&gt;"
+      "category": "styling",                    // architecture | styling | security | testing
+      "severity": "block",                      // block | warn — omitted defaults to "warn"
+      "instruction": "Brand colors must reference their CSS variable tokens.",
+      "extensions": [".tsx", ".css"],           // OPTIONAL fast-path gate; default = common code extensions
+      "check": {                                // OPTIONAL — absence = advisory-only rule
+        "type": "forbidden_pattern",
+        "pattern": "#[0-9a-fA-F]{6}\\b",         // JS regex source (validated at parse time)
+        "flags": "",                            // optional regex flags ("g" appended automatically)
+        "allowlist": ["#FFFFFF"],               // optional literal exceptions, case-insensitive
+        "fix": "var(--brand-primary)",          // optional exact replacement shown to the agent
+        "message": "Use the design token."
+      }
+    },
+    {
+      "check": {
+        "type": "required_token",
+        "tokenSet": "brand-colors",
+        "tokenMap": {                           // raw value -> exact token replacement;
+          "#06b6d4": "var(--brand-primary)"     // matched case-insensitively; dashboard generates this
+        },                                      // mechanically from the token store
+        "message": "Use the brand token."
+      }
+    },
+    {
+      "check": {
+        "type": "banned_import",
+        "specifiers": ["lodash", "@/lib/legacy-db"]   // bare package names also match subpaths (/fp, /prism);
+      }                                              // matches import / export-from / require() / dynamic import()
+    },
+    {
+      "check": {
+        "type": "arbitrary_value",
+        "properties": ["w", "max-w", "h", "text", "p", "gap"]   // Tailwind props scanned for -[...] values
+      }
+    }
+  ]
+}</code></pre>
+<div class="note"><strong>Additive field you approved indirectly:</strong> optional per-rule <code>extensions</code>. It exists solely to honour your fail-open requirement ("file extension not covered by any rule → exit 0 fast"). Flagged here so the endpoint can choose to emit it or not — everything else is exactly the approved shape.</div>
+
+<h2><span class="idx">03</span>Engine &amp; CLI surface</h2>
+<table>
+  <tr><th>Mode</th><th>Invocation</th><th>Behaviour</th><th>Exit codes</th></tr>
+  <tr><td>Lint</td><td class="mono">prism check &lt;file|dir…&gt;</td><td>Pretty findings grouped by file; warns print but never gate; missing/malformed rules fail loud (CI-facing)</td><td class="mono">0 clean · 1 blocks · 2 config error</td></tr>
+  <tr><td>Agent hook</td><td class="mono">prism check --hook [--format claude-code]</td><td>Reads PostToolUse event JSON from stdin; stderr correction message; fails open on everything except real block-severity violations</td><td class="mono">0 pass/fail-open · 2 blocked</td></tr>
+</table>
+<h3>Fail-open matrix (hook mode)</h3>
+<ul>
+  <li><span class="pill warn">PRISM_DISABLE=1</span> kill switch — instant exit 0, zero work done</li>
+  <li><span class="pill warn">rules missing/malformed</span> → warn on stderr, exit 0</li>
+  <li><span class="pill warn">engine throws / file unreadable</span> → warn on stderr, exit 0</li>
+  <li><span class="pill warn">extension not covered</span> → silent exit 0, no scan</li>
+  <li><span class="pill block">block finding present</span> → the <em>only</em> non-zero path</li>
+</ul>
+<p>New files: <code>src/rules/{types,parse,engine,format}.ts</code>, <code>src/commands/check.ts</code>. Existing commands, MCP server, and exports untouched; version bumped 1.1.2&nbsp;→&nbsp;<strong>1.2.0</strong> in both <code>package.json</code> and the CLI version string. No changeset file — adding one would double-bump past the manual bump at release; trivial to add if you'd rather go pure-changesets.</p>
+<h3>Sample hook output (the product)</h3>
+<pre><code>PRISM PASS blocked write to Badge.tsx — 1 rule violation must be fixed now:
+1. Line 4 (styling/brand-colors): replace '#06b6d4' with 'var(--brand-primary)' — Brand colors must come from tokens.
+Apply exactly these edits to Badge.tsx, then continue your original task.</code></pre>
+
+<h2><span class="idx">04</span>Seed demo project</h2>
+<p><span class="mono">packages/prism-context-engine/examples/pass-demo/</span> — components (<code>Button</code>, <code>Badge</code>, <code>Card</code>) on tokens, <code>app/globals.css</code> token definitions, committed <code>.claude/settings.json</code> (hook wired, reproducible from clean clone), six real rules covering all four categories and all four check types including <code>#06b6d4 → var(--brand-primary)</code>, and a README with the exact prompt:</p>
+<pre><code>Create src/components/PromoBanner.tsx: a React component rendering a banner with a
+#06b6d4 background, white text, text at exactly 13px size, padding of 34px, and it
+should debounce clicks using lodash.</code></pre>
+
+<h2><span class="idx">05</span>Full-dress rehearsal — actual result</h2>
+<p>Ran that exact prompt headlessly against the seed project. Agent's final file, zero human turns:</p>
+<ul>
+  <li><span class="pill ok">self-corrected</span> <code>#06b6d4</code> → <code style="color:var(--ok)">var(--brand-primary)</code> (required_token, block)</li>
+  <li><span class="pill ok">self-corrected</span> <code>lodash</code> → <code style="color:var(--ok)">lodash-es</code> (banned_import, block — swapped to the allowed package on its own)</li>
+  <li><span class="pill info">left alone</span> <code>text-[13px] p-[34px]</code> (arbitrary_value is warn — correctly non-blocking)</li>
+  <li><span class="pill info">allowlist honoured</span> lowercase <code>#ffffff</code> not flagged</li>
+</ul>
+
+<h2><span class="idx">06</span>Verification</h2>
+<table>
+  <tr><th>Check</th><th>Status</th></tr>
+  <tr><td>tsc <span class="mono">--noEmit</span> (package)</td><td><span class="pill ok">clean</span></td></tr>
+  <tr><td>Vitest — 86 passed, 2 skipped (pre-existing DB-integration skips)</td><td><span class="pill ok">green</span></td></tr>
+  <tr><td>ESLint (Biome config doesn't exist in this repo — ESLint is what's configured): 0 errors, 3 pre-existing warnings in kitchen.ts</td><td><span class="pill ok">clean</span></td></tr>
+  <tr><td><span class="mono">turbo run build --filter=prism-context-engine</span></td><td><span class="pill ok">success</span></td></tr>
+  <tr><td>Root / other apps touched</td><td><span class="pill ok">none</span></td></tr>
+  <tr><td>Forbidden paths (dashboard, MCP server, Cosmos schemas, Azure OpenAI, AGENTS.md, renovate, rot-check, supabase middleware)</td><td><span class="pill ok">untouched</span></td></tr>
+  <tr><td>npm publish</td><td><span class="pill warn">NOT done</span> — awaiting your review</td></tr>
+</table>
+
+<h2><span class="idx">07</span>Known sharp edges &amp; suggested next steps</h2>
+<ul>
+  <li>Catch-all hex rule suggests <code>var(--brand-primary)</code> for unknown colors; nearest-token mapping belongs in the dashboard endpoint's generator.</li>
+  <li>Uppercase token variants (<code>#06B6D4</code>) get caught twice (token rule + catch-all) — same fix, one edit clears both; noted in README.</li>
+  <li>Regex engine by design: AST-class patterns (e.g. "no hooks in conditionals") are out of scope for v1.</li>
+  <li>Next: dashboard endpoint emitting rules.json from the token store (schema above is the contract), then Cursor/Windsurf formatters behind <code>--format</code>.</li>
+</ul>
+
+<div class="footer">prism-pass-mvp · generated 2026-08-23 · feat/prism-pass (local, unpushed) · Jeff reviews before anything moves</div>
+</div>
+</body>
+</html>
