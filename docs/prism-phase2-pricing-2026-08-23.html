@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase 2 — Pricing Model & PayPal Checkout — 2026-08-23</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A0D12;--bg2:#0E1219;--panel:#11161F;--line:#1D2530;--cyan:#22D3EE;--violet:#8B7BFF;
+--text:#E6EBF2;--dim:#8B95A5;--ok:#34D399;--warn:#FBBF24;--bad:#F87171;
+--mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;--sans:'Inter',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.65;font-size:16px}
+.wrap{max-width:1080px;margin:0 auto;padding:48px 28px 96px}
+.kicker{font-family:var(--mono);font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan)}
+h1{font-size:2.4rem;font-weight:800;line-height:1.15;margin:.6rem 0 .3rem}
+h1 .accent{color:var(--violet)}
+h2{font-size:1.35rem;font-weight:700;margin:3rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--line)}
+h2 .idx{font-family:var(--mono);color:var(--cyan);font-weight:500;margin-right:.6rem}
+h3{font-size:1rem;font-weight:600;margin:1.4rem 0 .6rem;color:var(--cyan)}
+p{margin:.7rem 0}
+.lede{font-size:1.06rem;border-left:3px solid var(--cyan);padding:.9rem 1.2rem;background:var(--bg2);border-radius:0 10px 10px 0;margin:1.6rem 0}
+code,.mono{font-family:var(--mono);font-size:.86em;background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:.1em .38em;color:var(--cyan)}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1.1rem 1.25rem;overflow-x:auto;margin:.9rem 0}
+pre code{background:none;border:none;padding:0;color:var(--text);font-size:.83rem;line-height:1.55}
+table{width:100%;border-collapse:collapse;margin:.9rem 0;font-size:.92rem}
+th{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);text-align:left;padding:.55rem .75rem;border-bottom:1px solid var(--line)}
+td{padding:.6rem .75rem;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+.pill{display:inline-block;font-family:var(--mono);font-size:.68rem;font-weight:700;letter-spacing:.06em;border-radius:999px;padding:.14em .7em}
+.pill.ok{color:var(--ok);background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.35)}
+.pill.warn{color:var(--warn);background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.35)}
+.pill.info{color:var(--violet);background:rgba(139,123,255,.1);border:1px solid rgba(139,123,255,.35)}
+.note{border:1px dashed rgba(139,123,255,.45);border-radius:10px;padding:.85rem 1.1rem;margin:1rem 0;background:rgba(139,123,255,.05);font-size:.94rem}
+.note b{color:var(--violet)}
+ul.body{margin:.7rem 0 .7rem 1.3rem}
+ul.body li{margin:.45em 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.9rem;margin:1.1rem 0}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem}
+.card .label{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.card .val{font-size:1.5rem;font-weight:700;margin-top:.25rem}
+.foot{margin-top:4rem;padding-top:1.2rem;border-top:1px solid var(--line);font-family:var(--mono);font-size:.72rem;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="kicker">Syntaxure Labs · Prism · Phase 2 Report</div>
+<h1>Enforcement goes free. <span class="accent">The money gets real.</span></h1>
+<p class="mono" style="color:var(--dim)">docs/prism-phase2-pricing-2026-08-23.html · branch <code style="font-size:1em">feat/prism-phase2-pricing</code> → PR #78 · sandbox-first</p>
+
+<div class="lede">
+<b>Summary.</b> Phase 2 implements the roadmap's structural pricing fix end to end. The tier model now matches the product philosophy — Free is genuinely free forever (unlimited local rules and enforcement, one synced project, a 25-generation AI taste), and what costs us money gets priced (Pro ₱299/~$8 with unlimited synced projects and the Kitchen, Team ₱249/seat min 3, Enterprise custom). Regional pricing ships: PH visitors see pesos via Vercel geo detection, everyone else USD, with URL/header overrides for testing and previews. The dead-ended Upgrade button finally reaches real money — it drives PayPal Subscriptions through the env-driven plan-ID flow that already existed server-side but was never connected to any UI, sandbox-first by decision. One latent product bug died in passing: under the old model Free had zero API keys, which made <code>prism pull</code> impossible exactly where the model promised a synced project.
+</div>
+
+<div class="grid">
+  <div class="card"><div class="label">Delivered</div><div class="val">2A–2D</div><div class="label">tiers · page · regional · checkout</div></div>
+  <div class="card"><div class="label">Tests</div><div class="val" style="color:var(--ok)">66 ✓</div><div class="label">+6 pricing-model regressions</div></div>
+  <div class="card"><div class="label">Teams (seats)</div><div class="val" style="color:var(--warn)">DEFERRED</div><div class="label">by decision — design pass next</div></div>
+  <div class="card"><div class="label">PayPal mode</div><div class="val">SANDBOX</div><div class="label">live needs your plan IDs</div></div>
+</div>
+
+<h2><span class="idx">01</span>Decisions locked before code (per primer)</h2>
+<table>
+  <tr><th>Question</th><th>Your ruling</th></tr>
+  <tr><td>Free AI quota</td><td>25/month; Free loses its rules cap entirely</td></tr>
+  <tr><td>Annual billing</td><td>10× monthly everywhere paid (Pro ₱2,990/$80)</td></tr>
+  <tr><td>PayPal environment</td><td>Sandbox first; env-driven plan IDs so code ships inert until configured</td></tr>
+  <tr><td>Team seats infra</td><td>Deferred — constants ship now, invites/shared-constitution schema get their own pass</td></tr>
+</table>
+
+<h2><span class="idx">02</span>What changed</h2>
+<h3>Tier model — src/lib/subscriptions.ts</h3>
+<pre><code>free:       rules -1 · components -1 · projects 1 · aiGenerations 25
+            apiKeys 1  (regression: was 0, which broke "prism pull" forever)
+            ideSync false — MCP stays paid
+pro:        everything unlimited synced · aiGenerations 500 · MCP true
+team:       unlimited + pooled 2000 AI · teamMembers 10
+enterprise: all -1
+
+TIER_PRICES pro:  ₱299 / $8 monthly   → ₱2,990 / $80 annual
+TIER_PRICES team: ₱249 / $7 per seat  → ₱2,490 / $70 annual
+TEAM_MIN_SEATS = 3</code></pre>
+
+<h3>Regional pricing — src/lib/currency.ts</h3>
+<p><code>getVisitorCurrency()</code>: Vercel geo header (<code>x-vercel-ip-country === "PH"</code> → pesos) with two override layers — <code>?currency=PHP|USD</code> URL param wins over geo, <code>x-prism-currency</code> header exists for tests/admin previews. Both the public <code>/pricing</code> page and the dashboard subscription page render through <code>formatMonthlyPrice()</code>.</p>
+
+<h3>Checkout — the flow that already existed, finally plugged in</h3>
+<pre><code>Subscription card [Subscribe monthly] / [Annual — 2 months free]
+  → POST /api/subscriptions {tier, billing}          (existing endpoint)
+  → PayPal /v1/billing/subscriptions {plan_id from env, custom_id: userId}
+  → redirect to approval URL
+  → buyer approves → returns to /subscription/success?subscription_id=…
+  → success page polls /api/subscription-status (never trusts URL params)
+  → BILLING.SUBSCRIPTION.ACTIVATED webhook flips prism_subscriptions
+    (consolidated verified+idempotent handler from Phase 1)</code></pre>
+<ul class="body">
+  <li>Fixed: success page read camelCase <code>subscriptionId</code>; PayPal sends snake_case <code>subscription_id</code>. Now accepts both.</li>
+  <li>Fixed: <code>/api/subscriptions</code> GET hardcoded the dead 5/3/10 free limits; derives from TIER_LIMITS.</li>
+  <li>Old GET <code>/api/subscriptions/checkout</code> stub left untouched for dev-mode direct activation in development.</li>
+</ul>
+
+<h3>Pricing display data</h3>
+<p>New migration <code>20260823000003_prism_phase2_pricing_model.sql</code> updates live <code>pricing_plans</code> rows (features/comparison/taglines/prices) to the roadmap language; fallbacks in <code>pricing-db.ts</code> mirror it exactly. The pricing pages are data-driven, so applying the migration updates them automatically.</p>
+
+<h2><span class="idx">03</span>Verification</h2>
+<pre><code>prism-engine tests: 66 passed (+6 new pricing-model regressions incl.
+  "annual == 10x monthly", "Free keeps >=1 API key", "unlimited tiers never capped")
+check-types: clean · eslint touched files: 0 errors</code></pre>
+
+<h2><span class="idx">04</span>Jeff-action checklist for live sandbox checkout</h2>
+<table>
+  <tr><th>#</th><th>Action</th></tr>
+  <tr><td>1</td><td>Apply migration <code>20260823000003</code> in Supabase SQL editor</td></tr>
+  <tr><td>2</td><td>PayPal developer dashboard (sandbox): create Product → four Plans (pro monthly/annual, team monthly/annual). Note each plan ID.</td></tr>
+  <tr><td>3</td><td>Doppler/Vercel env for prism-engine: <code>PAYPAL_MODE=sandbox</code>, <code>PAYPAL_CLIENT_ID</code>, <code>PAYPAL_CLIENT_SECRET</code>, <code>PAYPAL_PLAN_PRO_MONTHLY</code>, <code>PAYPAL_PLAN_PRO_ANNUAL</code>, <code>PAYPAL_PLAN_TEAM_MONTHLY</code>, <code>PAYPAL_PLAN_TEAM_ANNUAL</code>, plus <code>PAYPAL_WEBHOOK_ID</code> (sandbox webhook)</td></tr>
+  <tr><td>4</td><td>Register the engine webhook URL in the sandbox app's webhook settings</td></tr>
+  <tr><td>5</td><td>Test buy with a sandbox buyer account → confirm prism_subscriptions flips active via webhook</td></tr>
+</table>
+<div class="note"><b>Going live later:</b> flip <code>PAYPAL_MODE=live</code>, swap client credentials + plan IDs for live ones created in the production PayPal account, register the same URL there. Code changes: none.</div>
+
+<h2><span class="idx">05</span>Honest notes</h2>
+<ul class="body">
+  <li>Team checkout bills ONE seat subscription per PayPal plan today — per-seat quantity selection and proration arrive with the seats infrastructure (deferred by your call). Until then Team checkout effectively represents the minimum-3-seat commitment handled off-band.</li>
+  <li>The consolidated webhook writes whatever tier the plan maps to via PAYPAL_PLAN_TEAM_* envs; if those are unset, everything defaults to "pro". Set them before selling Team.</li>
+  <li>No automated tests cover the live PayPal HTTP calls (sandbox integration test needs real creds) — manual verification step 5 above is the coverage until then.</li>
+  <li>Phase 3 (OpenCode AI layer) and Phase 4 breadth remain untouched, per phase order. Phase 5 items (Sentry coverage, real health check) also pending.</li>
+</ul>
+
+<div class="foot">SYNTAXURE LABS · Prism Phase 2 execution · Ox/backend session 2026-08-23<br>PR #78 feat/prism-phase2-pricing → develop · roadmap v1.0 remains source of truth</div>
+
+</div>
+</body>
+</html>
