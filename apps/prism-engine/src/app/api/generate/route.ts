@@ -14,6 +14,10 @@ import crypto from "crypto";
 import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { generateComponent, generateRulesFromComponent } from "@/lib/gemini";
 import { checkRateLimit } from "@/lib/rate-limit";
+import {
+  claimAiGeneration,
+  refundAiGeneration,
+} from "@/lib/usage";
 import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
 
 async function getUserTier(userId: string): Promise<SubscriptionTier> {
@@ -45,29 +49,6 @@ async function getMonthlyUsage(userId: string): Promise<number> {
     return (record?.aiGenerations as number) || 0;
   } catch {
     return 0;
-  }
-}
-
-/**
- * Atomically bump this month's ai_generations counter via the
- * bump_prism_ai_generations RPC (20260823000002 migration). Replaces the
- * racy read-modify-write. Returns the new value, or null when the RPC is
- * unavailable (enforcement then degrades to the preflight read).
- */
-async function bumpAiGenerations(
-  userId: string,
-  delta: number,
-): Promise<number | null> {
-  try {
-    const db = getPrismDb();
-    const { data, error } = await db.rpc("bump_prism_ai_generations", {
-      p_user_id: userId,
-      p_delta: delta,
-    });
-    if (error) throw error;
-    return typeof data === "number" ? data : null;
-  } catch {
-    return null;
   }
 }
 
@@ -151,9 +132,9 @@ export async function POST(request: NextRequest) {
     // Atomic claim BEFORE generation: the RPC increments month usage in one
     // server-side step, closing the concurrent-request race. If the claim
     // itself crosses the limit (preflight raced), refund and reject.
-    const claimed = await bumpAiGenerations(userId, 1);
+    const claimed = await claimAiGeneration(userId);
     if (limit !== -1 && claimed !== null && claimed > limit) {
-      await bumpAiGenerations(userId, -1);
+      await refundAiGeneration(userId);
       return NextResponse.json(
         {
           error: `Monthly AI generation limit reached (${limit}/month). Upgrade to Pro for more.`,
@@ -172,7 +153,7 @@ export async function POST(request: NextRequest) {
       });
     } catch (genError) {
       // Refund: failed generations must not consume quota.
-      if (claimed !== null) await bumpAiGenerations(userId, -1);
+      await refundAiGeneration(userId);
       console.error("[Generate] Gemini API error:", genError);
       const message =
         genError instanceof Error ? genError.message : "Unknown Gemini error";
