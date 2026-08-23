@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>@prism-engine/cli 1.2.0 — Publish &amp; Verification Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0D12; --bg2:#0E1219; --panel:#11161F; --line:#1D2530;
+    --cyan:#22D3EE; --violet:#8B7BFF; --text:#E6EBF2; --dim:#8B95A5;
+    --ok:#34D399; --warn:#FBBF24; --bad:#F87171;
+    --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+    --sans:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.65;font-size:16px}
+  .wrap{max-width:1080px;margin:0 auto;padding:48px 28px 96px}
+  .kicker{font-family:var(--mono);font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan)}
+  h1{font-size:2.4rem;font-weight:800;line-height:1.15;margin:.6rem 0 .3rem}
+  h1 .accent{color:var(--violet)}
+  h2{font-size:1.35rem;font-weight:700;margin:3rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--line)}
+  h2 .idx{font-family:var(--mono);color:var(--cyan);font-weight:500;margin-right:.6rem}
+  h3{font-size:1rem;font-weight:600;margin:1.4rem 0 .6rem;color:var(--cyan)}
+  p{margin:.7rem 0;color:var(--text)}
+  .lede{font-size:1.06rem;border-left:3px solid var(--cyan);padding:.9rem 1.2rem;background:var(--bg2);border-radius:0 10px 10px 0;margin:1.6rem 0}
+  code,.mono{font-family:var(--mono);font-size:.86em;background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:.1em .38em;color:var(--cyan)}
+  pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1.1rem 1.25rem;overflow-x:auto;margin:.9rem 0}
+  pre code{background:none;border:none;padding:0;color:var(--text);font-size:.83rem;line-height:1.55}
+  table{width:100%;border-collapse:collapse;margin:.9rem 0;font-size:.92rem}
+  th{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);text-align:left;padding:.55rem .75rem;border-bottom:1px solid var(--line)}
+  td{padding:.6rem .75rem;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  .pill{display:inline-block;font-family:var(--mono);font-size:.68rem;font-weight:700;letter-spacing:.06em;border-radius:999px;padding:.14em .7em}
+  .pill.ok{color:var(--ok);background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.35)}
+  .pill.block{color:var(--bad);background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35)}
+  .pill.warn{color:var(--warn);background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.35)}
+  .pill.info{color:var(--violet);background:rgba(139,123,255,.1);border:1px solid rgba(139,123,255,.35)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.9rem;margin:1.1rem 0}
+  .card{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem}
+  .card .label{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+  .card .val{font-size:1.5rem;font-weight:700;margin-top:.25rem}
+  .term{background:#070A0E;border:1px solid var(--line);border-radius:10px;margin:1rem 0;overflow:hidden}
+  .term-bar{display:flex;align-items:center;gap:.5rem;padding:.5rem .9rem;border-bottom:1px solid var(--line);background:var(--bg2)}
+  .term-bar .dot{width:9px;height:9px;border-radius:50%}
+  .term-title{font-family:var(--mono);font-size:.72rem;color:var(--dim);margin-left:.4rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .term pre{background:none;border:none;border-radius:0;margin:0;padding:.95rem 1.15rem;font-size:.78rem;line-height:1.62}
+  .term pre code{color:#C7D0DC;font-size:.78rem}
+  .t-p{color:var(--cyan)}.t-ok{color:var(--ok)}.t-warn{color:var(--warn)}.t-bad{color:var(--bad)}.t-dim{color:#66707F}.t-hl{color:var(--violet)}
+  .note{border:1px dashed rgba(139,123,255,.45);border-radius:10px;padding:.85rem 1.1rem;margin:1rem 0;background:rgba(139,123,255,.05);font-size:.94rem}
+  .note b{color:var(--violet)}
+  .foot{margin-top:4rem;padding-top:1.2rem;border-top:1px solid var(--line);font-family:var(--mono);font-size:.72rem;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="kicker">JeffDev Studio · Prism Context Engine · Publish Report</div>
+<h1><span class="accent">@prism-engine/cli</span> 1.2.0 — published &amp; cold-verified</h1>
+<p class="mono" style="color:var(--dim)">docs/prism-publish-1.2.0-2026-08-24.html · branch flow feat/prism-pass → develop → main · KWADRA TBI demo Wednesday Aug 26</p>
+
+<div class="lede">
+  <b>Summary.</b> The Pass, the setup pipeline, and the E2E fixes shipped to npm as <code>@prism-engine/cli@1.2.0</code> on Aug 23, replacing seven-month-old 1.0.3 as the package <code>npx</code> serves. The repo's premise that merging to main auto-publishes turned out to be false — no workflow contains any npm publisher or token — so after landing both merges cleanly (zero conflicts) the publish was executed manually under Jeff's own authenticated identity, OTP-approved interactively in a browser because npm's non-terminal sessions redact the web-auth URL. Before anything merged, the tarball was packed and verified outside the monorepo; during the rename two latent dead-command bugs were caught and fixed (generated Claude hooks and IDE MCP configs pointed at <code>prism-context-engine</code>, a name that has never existed on npm). The final section below is the proof that matters for Wednesday: from an empty npx cache, <code>npx @prism-engine/cli@latest init</code> scaffolds correct rules and wires a hook whose cold execution blocks a violating write with exit code 2.
+</div>
+
+<div class="grid">
+  <div class="card"><div class="label">Published</div><div class="val" style="color:var(--ok)">1.2.0</div><div class="label">dist-tag latest · was 1.0.3</div></div>
+  <div class="card"><div class="label">Merges</div><div class="val" style="color:var(--ok)">0 conflicts</div><div class="label">develop fb8b288 · main 6b92635</div></div>
+  <div class="card"><div class="label">Cold npx init</div><div class="val" style="color:var(--ok)">WORKS</div><div class="label">fresh cache, registry fetch</div></div>
+  <div class="card"><div class="label">Cold hook block</div><div class="val" style="color:var(--ok)">EXIT 2</div><div class="label">rehearsed message format</div></div>
+</div>
+
+<h2><span class="idx">01</span>Pre-flight inspection — what didn't match the brief</h2>
+<table>
+  <tr><th>Expected</th><th>Found</th><th>Consequence</th></tr>
+  <tr><td>"main auto-publishes to npm" via workflow</td><td><b>No npm publishing exists anywhere in CI.</b> <code>release.yml</code> only builds and opens a Changesets Version PR; zero <code>NPM_TOKEN</code>/<code>NODE_AUTH_TOKEN</code>/<code>changeset publish</code> across every workflow; <code>.changeset/</code> had no pending entry.</td><td>Merging to main alone would have silently published nothing. Publish done manually instead.</td></tr>
+  <tr><td>Rename keeps "the same npx command"</td><td>Impossible: generated hook string <code>npx prism-context-engine …</code> and IDE MCP args referenced a name <b>never published to npm</b>. Post-rename it could only 404.</td><td>Both strings updated to <code>@prism-engine/cli</code> (approved before changing). Enforcement behaviour identical.</td></tr>
+  <tr><td>Credentials available for manual publish</td><td><code>npm whoami</code> → 401 at session start.</td><td>Jeff ran <code>npm login</code>; publish executed under his identity (<code>j-akiru</code>).</td></tr>
+</table>
+
+<h2><span class="idx">02</span>The rename commit (0820032)</h2>
+<p><code>package.json</code>: name → <code>@prism-engine/cli</code>, version stays 1.2.0, bin <code>prism</code>, files <code>[dist, bin, README.md, LICENSE]</code>, scoped-public access. Source changes limited to three self-referencing strings:</p>
+<pre><code>src/init/hook.ts        HOOK_COMMAND   "npx prism-context-engine check …" → "npx @prism-engine/cli check …"
+src/commands/init.ts    invalid-json hint string            → same replacement
+src/commands/ide-setup.ts  MCP config args ["prism-context-engine","serve"] → ["@prism-engine/cli","serve"] (+ 3 test expectations)</code></pre>
+<p>Suite after rename: <span class="pill ok">126 passed</span> · typecheck clean · eslint 0 errors. Committed through lint-staged hooks without issue.</p>
+
+<h2><span class="idx">03</span>Tarball verified BEFORE any merge (private failure is cheap)</h2>
+<div class="term"><div class="term-bar"><span class="dot" style="background:#F87171"></span><span class="dot" style="background:#FBBF24"></span><span class="dot" style="background:#34D399"></span><span class="term-title">pack + contents + outside-monorepo install — verbatim (abridged where marked)</span></div>
+<pre><code><span class="t-p">$ pnpm run build && pnpm pack --pack-destination C:\...\opencode</span>
+C:\Users\Lenovo\AppData\Local\Temp\opencode\prism-engine-cli-1.2.0.tgz
+
+<span class="t-p">$ tar -tzf prism-engine-cli-1.2.0.tgz</span>
+package/LICENSE
+package/bin/prism.js
+package/dist/index.js
+package/dist/commands/check.js      <span class="t-ok">← the Pass ships</span>
+package/dist/commands/init.js       <span class="t-ok">← local onboarding ships</span>
+package/dist/commands/pull.js       <span class="t-ok">← dashboard sync ships</span>
+package/dist/commands/ide-setup.js  <span class="t-ok">← renamed ide-setup ships</span>
+package/dist/rules/engine.js
+… 109 entries total
+
+<span class="t-p">$ (temp dir outside monorepo) npm install prism-engine-cli-1.2.0.tgz</span>
+installed: @prism-engine/cli@1.2.0
+
+<span class="t-p">$ npx prism --version</span>
+1.2.0
+<span class="t-p">$ npx prism --help</span>
+init [options]              Local onboarding — scan design tokens…
+pull [options]              Synced onboarding — fetch .prism/rules.json…
+ide-setup                   Auto-detect IDEs (Cursor/Windsurf/VS Code…
+check [options] [files...]  The Pass — enforce local rules against files
+
+<span class="t-p">$ (scratch Next.js project) npx prism init --yes</span>
+Detected: Next.js 16.3.2 · app router · Tailwind ^4
+✓ Found 2 color token(s) as CSS custom properties
+✓ Wrote 2 rule(s) to .prism/rules.json
+✓ Created .claude/settings.json with the Pass hook wired in
+
+<span class="t-p">$ hook command in generated settings.json</span>
+<span class="t-hl">npx @prism-engine/cli check --hook --format claude-code</span>
+<span class="t-p">$ token rule severity</span>
+block</code></pre></div>
+
+<h2><span class="idx">04</span>Landing the branches</h2>
+<table>
+  <tr><th>Merge</th><th>Commit</th><th>Conflicts</th><th>Pushed</th></tr>
+  <tr><td><code>origin/develop</code> fast-forward, then <code>feat/prism-pass</code> --no-ff</td><td class="mono">fb8b288</td><td><span class="pill ok">none</span></td><td>yes</td></tr>
+  <tr><td><code>origin/main</code> fast-forward, then <code>develop</code> --no-ff</td><td class="mono">6b92635</td><td><span class="pill ok">none</span></td><td>yes</td></tr>
+</table>
+<p>Pushing main triggered no npm activity (none exists — §01) and may trigger Vercel production deploys for changed apps, per the repo's deploy gating; flagged and accepted by Jeff before the push.</p>
+
+<h2><span class="idx">05</span>The publish itself — including what fought back</h2>
+<ul>
+  <li><b>EOTP.</b> First <code>npm publish</code> failed with <code>code EOTP</code>: Jeff's account requires interactive 2FA on publishes.</li>
+  <li><b>Redacted auth URL.</b> The web-auth URL prints as <code>***</code> whenever npm isn't attached to a real terminal — captured output and even npm's own debug logs are redacted, so the URL cannot be relayed through a tool session. Documented here so nobody burns an hour rediscovering this.</li>
+  <li><b>Resolution.</b> The publish was relaunched in its own visible console window on Jeff's desktop (<code>Start-Process npm.cmd publish</code> with working directory preset). That window is a real TTY: it printed the full <code>npmjs.com/auth/cli/…</code> URL, Jeff approved in-browser, and the window completed the publish. Registry polling confirmed the flip within seconds of approval.</li>
+</ul>
+<div class="note"><b>For next time:</b> this account now publishes via interactive browser OTP from a real terminal only. If CI publishing is wanted post-demo, use a granular access token in GitHub secrets plus a proper publish step — but expect npm's 2026 policy shifts around 2FA-bypassing tokens to need testing, not assuming.</div>
+
+<h2><span class="idx">06</span>THE PROOF — complete cold-install transcript</h2>
+<p>Fresh temp directory, hand-seeded minimal Next.js 16.3.2 + Tailwind ^4 scratch project, npx cache cleared of everything not locked by unrelated processes (our package had never been cached under the new name). Every line below is verbatim.</p>
+
+<div class="term"><div class="term-bar"><span class="dot" style="background:#F87171"></span><span class="dot" style="background:#FBBF24"></span><span class="dot" style="background:#34D399"></span><span class="term-title">STEP 6 · registry state + cold npx fetch — COMPLETE, verbatim</span></div>
+<pre><code><span class="t-p">$ cd C:\Users\Lenovo\AppData\Local\Temp\opencode\cold-verify\scratch-next</span>
+<span class="t-p">$ npm view "@prism-engine/cli" version dist-tags</span>
+version = '1.2.0'
+dist-tags = { latest: '1.2.0' }
+
+<span class="t-p">$ npx --yes "@prism-engine/cli@latest" --version</span>
+1.2.0</code></pre></div>
+
+<div class="term"><div class="term-bar"><span class="dot" style="background:#F87171"></span><span class="dot" style="background:#FBBF24"></span><span class="dot" style="background:#34D399"></span><span class="term-title">STEP 6 · cold init against the scratch project — COMPLETE, verbatim</span></div>
+<pre><code><span class="t-p">$ npx --yes "@prism-engine/cli@latest" init --yes</span>
+◈ Prism Context Engine — init
+
+  Scanning this project. No network calls.
+
+Detected: Next.js 16.3.2 · app router · Tailwind ^4
+
+<span class="t-ok">✓ Scanned app/globals.css</span>
+<span class="t-ok">✓ Found 2 color token(s) as CSS custom properties</span>
+
+<span class="t-ok">✓ Wrote 2 rule(s) to .prism/rules.json</span>
+
+<span class="t-ok">✓ Created .claude/settings.json with the Pass hook wired in</span>
+
+Done.
+
+  • styling/design-tokens (required_token)
+  • styling/no-arbitrary-tailwind-values (arbitrary_value)
+
+  rules file: C:\Users\Lenovo\AppData\Local\Temp\opencode\cold-verify\scratch-next\.prism\rules.json
+
+Next: write or edit a file in this project — the hook runs automatically.
+  Or check by hand:  prism check &lt;file&gt;
+  Team on the dashboard? Sync their rules:  prism pull
+EXIT: 0
+
+<span class="t-p">$ generated hook command:</span>
+<span class="t-hl">npx @prism-engine/cli check --hook --format claude-code</span>
+<span class="t-p">$ token rule severity:</span>
+block</code></pre></div>
+
+<div class="term"><div class="term-bar"><span class="dot" style="background:#F87171"></span><span class="dot" style="background:#FBBF24"></span><span class="dot" style="background:#34D399"></span><span class="term-title">STEP 6 · cold hook enforcement — COMPLETE, verbatim (violating file planted first)</span></div>
+<pre><code><span class="t-dim"># app/Violation.tsx planted containing:</span>
+export const c = &lt;div style={{ background: "#06b6d4" }} /&gt;;
+
+<span class="t-p">$ '{"tool_name":"Write","tool_input":{"file_path":"…\\scratch-next\\app\\Violation.tsx"}}'
+    | npx --yes "@prism-engine/cli@latest" check --hook --format claude-code</span>
+npm warn Unknown project config "enable-corepack". This will stop working in the next major version of npm.
+npm warn Unknown project config "shamefully-hoist". This will stop working in the next major version of npm.
+npm warn Unknown project config "strict-peer-dependencies". This will stop working in the next major version of npm.
+npm warn Unknown project config "public-hoist-pattern". This will stop working in the next major version of npm.
+<span class="t-hl">PRISM PASS blocked write to Violation.tsx — 1 rule violation must be fixed now:</span>
+<span class="t-hl">1. Line 1 (styling/design-tokens): replace '#06b6d4' with 'var(--brand-primary)' — Use the CSS variable token instead of the raw hex value.</span>
+Apply exactly these edits to Violation.tsx, then continue your original task.
+HOOK EXIT: 2</code></pre></div>
+
+<div class="lede" style="border-left-color:var(--ok)">
+<b>Verdict.</b> From a clean machine state, <code>npx @prism-engine/cli@latest init</code> fetches 1.2.0 from the registry, detects the stack, extracts tokens, writes valid rules at the rehearsed severities, and wires a hook that — when cold-executed — blocks violating writes with exit 2 and the exact message format the demo script expects. The four npm warnings above are cosmetic local-config noise on this machine, not part of the product output.
+</div>
+
+<h2><span class="idx">07</span>State of the world after publish</h2>
+<table>
+  <tr><th>Thing</th><th>State</th></tr>
+  <tr><td>npm <code>@prism-engine/cli</code></td><td><span class="pill ok">1.2.0 = latest</span> (109 files, sha512-JG9kkYF1WtpbS…Mg7YyXEzMiLFw==)</td></tr>
+  <tr><td>git branches</td><td><code>origin/main</code> @ 6b92635, <code>origin/develop</code> @ fb8b288; local <code>feat/prism-pass</code> fully contained in both (not pushed separately — nothing unique remains)</td></tr>
+  <tr><td>Working tree</td><td>clean except untracked docs reports (this file, E2E report, older audits) — left uncommitted deliberately</td></tr>
+  <tr><td>CI npm publishing</td><td><span class="pill warn">still absent</span> — deliberate; see post-demo cleanup</td></tr>
+</table>
+
+<h2><span class="idx">08</span>Post-demo cleanup ledger (explicitly NOT done now)</h2>
+<ul>
+  <li>Rename to <code>@syntaxure/*</code> if desired, plus docs sweep — deferred per instruction.</li>
+  <li>Add a real CI publish path (granular token in GH secrets + <code>changesets publish</code> step or equivalent), tested against npm's current 2FA policies — Monday-night-risky, skipped.</li>
+  <li>A changeset entry for 1.2.0 was never created, so the Changesets Version PR machinery has nothing to say about this release; changelog history starts at whatever the next release documents.</li>
+  <li>Old <code>prism-context-engine</code> examples dir inside the package references the old command string in prose — harmless, worth a pass later.</li>
+</ul>
+
+<div class="foot">
+jeffdev-monorepo · packages/prism-context-engine → @prism-engine/cli@1.2.0<br>
+published 2026-08-23 ~02:55 UTC+8 by j-akiru (interactive browser OTP, visible-console method)<br>
+cold-install evidence preserved at %TEMP%\opencode\cold-verify\scratch-next (.prism/, .claude/, app/Violation.tsx)
+</div>
+
+</div>
+</body>
+</html>

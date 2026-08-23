@@ -5,7 +5,7 @@
  * This package provides:
  * - Prisma schema / Postgres access (Supabase) for the Agency + Prism apps
  * - Prism-specific Postgres helpers (`./prism`) — replaces the old Cosmos DB
- *   (MongoDB API + Gremlin) client. See PRISM_MIGRATION.md at the repo root.
+ *   (MongoDB API + Gremlin) client. See docs/prism/PRISM_MIGRATION.md.
  * - Shared Zod schemas for type-safe validation
  *
  * @example
