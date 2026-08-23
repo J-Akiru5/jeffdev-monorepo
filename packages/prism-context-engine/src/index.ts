@@ -3,7 +3,14 @@
  *
  * Commands:
  * - prism login       : Authenticate with Prism Cloud
- * - prism init        : Auto-detect IDEs and configure MCP connection
+ * - prism init        : Local onboarding — scan design tokens, generate
+ *                        .prism/rules.json, wire the Claude Code hook.
+ *                        Zero network, zero account required.
+ * - prism pull         : Synced onboarding — fetch .prism/rules.json from
+ *                        Prism Cloud for a signed-in team. Fails safe.
+ * - prism ide-setup    : Auto-detect IDEs and configure MCP connection
+ *                        (was `prism init` before the Pass local-onboarding
+ *                        path claimed that name — see 07c41ba/this commit)
  * - prism sync        : Sync data from Prism Cloud to local cache
  * - prism serve       : Start MCP server (for IDE integration)
  * - prism connect     : URL scanning for rule extraction
@@ -32,7 +39,9 @@ import {
   deleteRule,
 } from "./commands/rules.js";
 import { connect } from "./commands/connect.js";
+import { ideSetup } from "./commands/ide-setup.js";
 import { init } from "./commands/init.js";
+import { pull } from "./commands/pull.js";
 import {
   listProjects,
   viewProject,
@@ -80,8 +89,31 @@ program
 
 program
   .command("init")
-  .description("Auto-detect IDEs and configure MCP connection")
-  .action(init);
+  .description(
+    "Local onboarding — scan design tokens, generate .prism/rules.json, wire the Claude Code hook. No network, no account.",
+  )
+  .option("--yes", "Skip prompts and accept defaults (for CI)")
+  .option(
+    "--force",
+    "Overwrite an existing .prism/rules.json without prompting",
+  )
+  .action((opts) => init(opts));
+
+program
+  .command("pull")
+  .description(
+    "Synced onboarding — fetch .prism/rules.json from Prism Cloud for your team. Fails safe: never breaks an existing rules.json.",
+  )
+  .option("-p, --project <slug>", "Project slug to pull rules for")
+  .option("--yes", "Skip prompts; auto-pick a project if needed (for CI)")
+  .action((opts) => pull(opts));
+
+program
+  .command("ide-setup")
+  .description(
+    "Auto-detect IDEs (Cursor/Windsurf/VS Code/Claude Desktop) and configure MCP connection",
+  )
+  .action(ideSetup);
 
 program
   .command("sync")
