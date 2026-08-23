@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "python/modules-snake-case",
+      "category": "styling",
+      "severity": "warn",
+      "extensions": [".py"],
+      "instruction": "Module and package names are snake_case (PEP 8).",
+      "check": {
+        "type": "naming_pattern",
+        "pattern": "^(?:[a-z0-9]+_?)*$|^(?:__init__|__main__)$"
+      }
+    },
+    {
+      "id": "python/tests-live-in-tests-dir",
+      "category": "testing",
+      "severity": "warn",
+      "extensions": [".py"],
+      "instruction": "Test modules live in the tests/ directory (pytest discovery layout).",
+      "check": {
+        "type": "file_placement",
+        "matchPattern": "^(?:test_[^/]*|[^/]*_test)\\.py$",
+        "directory": "tests"
+      }
+    },
+    {
+      "id": "python/tests-import-pytest",
+      "category": "testing",
+      "severity": "warn",
+      "extensions": [".py"],
+      "instruction": "Every pytest module imports pytest — fixtures, marks, and raises belong to it.",
+      "check": {
+        "type": "required_import",
+        "specifier": "pytest",
+        "includePattern": "(^|/)(?:test_[^/]*|[^/]*_test)\\.py$"
+      }
+    },
+    {
+      "id": "python/no-bare-except",
+      "category": "architecture",
+      "severity": "warn",
+      "extensions": [".py"],
+      "instruction": "Never use a bare except: — catch specific exceptions (PEP 8 / ruff E722).",
+      "check": {
+        "type": "forbidden_pattern",
+        "pattern": "^\\s*except\\s*:",
+        "message": "Catch specific exception types instead of bare except."
+      }
+    },
+    {
+      "id": "python/no-debugger-leftovers",
+      "category": "architecture",
+      "severity": "block",
+      "extensions": [".py"],
+      "instruction": "Debuggers must never be committed — remove breakpoint() calls and pdb imports before finishing.",
+      "check": {
+        "type": "forbidden_pattern",
+        "pattern": "^\\s*(?:breakpoint\\(\\)|import pdb\\b)",
+        "flags": "gm"
+      }
+    }
+  ]
+}

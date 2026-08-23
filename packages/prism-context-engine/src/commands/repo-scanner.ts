@@ -1,4 +1,5 @@
 import { readFileSync, existsSync, readdirSync, statSync } from "fs";
+import { extractCustomPropsFromText } from "../init/tokens.js";
 import { join, relative, basename, extname } from "path";
 
 export interface RepoScanReport {
@@ -22,6 +23,9 @@ export interface RepoScanReport {
     languages: Record<string, number>;
   };
   configs: Record<string, unknown>;
+  /** Design-token custom properties found in css/scss/vue/svelte sources:
+   *  hex (lowercase) -> var reference. Feeds token rules for any stack. */
+  customProperties?: Record<string, string>;
   summary: string;
 }
 
@@ -76,6 +80,7 @@ export async function scanRepo(repoPath: string): Promise<RepoScanReport> {
   let dirCount = 0;
   const languages: Record<string, number> = {};
   const configs: Record<string, unknown> = {};
+  const customProperties: Record<string, string> = {};
 
   // Scan config files
   for (const cfg of CONFIG_FILES) {
@@ -129,6 +134,19 @@ export async function scanRepo(repoPath: string): Promise<RepoScanReport> {
         fileCount++;
         const ext = extname(entry).toLowerCase();
         if (ext) languages[ext] = (languages[ext] || 0) + 1;
+
+        // Phase 4: harvest design tokens for ANY stack incl. Vue/Svelte.
+        if (ext === ".css" || ext === ".scss" || ext === ".vue" || ext === ".svelte") {
+          try {
+            const styleText = readFileSync(full, "utf-8");
+            const relDisplay = relative(repoPath, full);
+            for (const token of extractCustomPropsFromText(styleText, relDisplay)) {
+              if (!customProperties[token.hex]) customProperties[token.hex] = token.varRef;
+            }
+          } catch {
+            /* skip unreadable style source */
+          }
+        }
 
         if (SOURCE_EXTENSIONS.has(ext)) {
           // Track file naming convention
@@ -193,6 +211,7 @@ export async function scanRepo(repoPath: string): Promise<RepoScanReport> {
     imports,
     structure: { directories: dirs, fileCount, dirCount, languages },
     configs,
+    customProperties,
     summary,
   };
 }

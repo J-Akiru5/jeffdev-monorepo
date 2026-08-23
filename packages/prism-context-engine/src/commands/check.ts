@@ -16,8 +16,16 @@ import chalk from "chalk";
 import { readFileSync, readdirSync, statSync } from "fs";
 import { dirname, extname, join, resolve } from "path";
 import { findRulesPath, loadRuleSet } from "../rules/parse.js";
-import { applicableExtensions, checkContent } from "../rules/engine.js";
-import { formatHookClaudeCode, formatPretty } from "../rules/format.js";
+import {
+  applicableExtensions,
+  checkContent,
+} from "../rules/engine.js";
+import {
+  formatHookClaudeCode,
+  formatHookForAgent,
+  formatPretty,
+  normalizeHookFormat,
+} from "../rules/format.js";
 import type { Finding, RuleSet } from "../rules/types.js";
 
 const MAX_STDIN_BYTES = 1024 * 1024;
@@ -29,9 +37,36 @@ interface CheckOptions {
   format?: string;
 }
 
+/**
+ * Hook event payloads differ per agent. Claude Code nests the path under
+ * tool_input; Cursor sends file_path at the top level (its hooks.json
+ * auto-mapping of .claude settings also emits Cursor's shape); Antigravity
+ * uses camelCase. Accepting the superset keeps the Claude Code contract
+ * byte-identical while making one formatter serve every agent.
+ */
 interface HookEvent {
-  tool_name?: string;
+  tool_name?: unknown;
+  hook_event_name?: unknown;
   tool_input?: { file_path?: unknown };
+  file_path?: unknown;
+  filePath?: unknown;
+}
+
+function extractFilePath(event: HookEvent): string | null {
+  const nested = event.tool_input?.file_path;
+  if (typeof nested === "string" && nested.length > 0) return nested;
+  if (typeof event.file_path === "string" && event.file_path.length > 0)
+    return event.file_path;
+  if (typeof event.filePath === "string" && event.filePath.length > 0)
+    return event.filePath;
+  return null;
+}
+
+function extractToolName(event: HookEvent): string | null {
+  if (typeof event.tool_name === "string") return event.tool_name;
+  if (typeof event.hook_event_name === "string")
+    return event.hook_event_name;
+  return null;
 }
 
 export async function check(
@@ -39,25 +74,26 @@ export async function check(
   options: CheckOptions = {},
 ): Promise<void> {
   if (options.hook) {
-    await runHook();
+    await runHook(options.format);
     return;
   }
   runStandalone(files, options.rules);
 }
 
-async function runHook(): Promise<void> {
+async function runHook(formatFlag?: string): Promise<void> {
   if (process.env.PRISM_DISABLE === "1") return;
 
-  const event = await readStdinJson();
+  const format = normalizeHookFormat(formatFlag);
+
+  const event = (await readStdinJson()) as HookEvent | null;
   if (!event) return;
-  if (
-    typeof event.tool_name === "string" &&
-    !HOOK_TOOL_PATTERN.test(event.tool_name)
-  ) {
+
+  const toolName = extractToolName(event);
+  if (toolName !== null && !HOOK_TOOL_PATTERN.test(toolName)) {
     return;
   }
-  const filePath = event.tool_input?.file_path;
-  if (typeof filePath !== "string" || filePath.length === 0) return;
+  const filePath = extractFilePath(event);
+  if (!filePath) return;
 
   let ruleSet: RuleSet;
   try {
@@ -95,7 +131,11 @@ async function runHook(): Promise<void> {
   const blocks = findings.filter((f) => f.severity === "block");
   if (blocks.length === 0) return;
 
-  process.stderr.write(`${formatHookClaudeCode(filePath, blocks)}\n`);
+  const output =
+    format === "claude-code"
+      ? formatHookClaudeCode(filePath, blocks)
+      : formatHookForAgent(format, filePath, blocks);
+  process.stderr.write(`${output}\n`);
   process.exitCode = 2;
 }
 

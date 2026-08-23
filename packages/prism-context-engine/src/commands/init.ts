@@ -16,10 +16,17 @@ import { existsSync } from "fs";
 import { join } from "path";
 import { atomicWriteFileSync } from "../util/atomic-write.js";
 import { promptYesNo } from "../util/prompt.js";
-import { detectProject } from "../init/detect.js";
+import {
+  detectProject,
+} from "../init/detect.js";
 import { extractTokens } from "../init/tokens.js";
 import { generateRuleSet } from "../init/generate-rules.js";
-import { wireClaudeHook } from "../init/hook.js";
+import {
+  wireAntigravityHook,
+  wireClaudeHook,
+  wireCursorHook,
+  type AgentWireResult,
+} from "../init/hook.js";
 
 export interface InitOptions {
   yes?: boolean;
@@ -47,7 +54,38 @@ export async function init(options: InitOptions = {}): Promise<void> {
   const hookResult = wireClaudeHook(cwd);
   printHookResult(hookResult);
 
+  // Phase 4: Cursor + Antigravity wiring (best-effort, additive). Claude
+  // Desktop has no hooks system — MCP advisory only, handled by ide-setup.
+  for (const [agent, result] of [
+    ["Cursor", wireCursorHook(cwd)],
+    ["Antigravity", wireAntigravityHook(cwd)],
+  ] as Array<[string, AgentWireResult]>) {
+    printAgentHookResult(agent, result);
+  }
+
   printSummary(ruleSet, rulesWritten, rulesPath);
+}
+
+function printAgentHookResult(
+  agent: string,
+  result: AgentWireResult,
+): void {
+  switch (result.outcome) {
+    case "created":
+      console.log(`${chalk.green("✓")} Created ${agent} hook (${result.path})`);
+      break;
+    case "merged":
+      console.log(`${chalk.green("✓")} Merged Pass into existing ${agent} hooks`);
+      break;
+    case "already-present":
+      console.log(`${chalk.green("✓")} ${agent} already has the Pass wired in`);
+      break;
+    case "invalid-json":
+      console.log(
+        chalk.yellow(`⚠ ${agent} config exists but isn't valid JSON — left untouched.`),
+      );
+      break;
+  }
 }
 
 function printDetection(detection: ReturnType<typeof detectProject>): void {
@@ -77,6 +115,8 @@ function printDetection(detection: ReturnType<typeof detectProject>): void {
       ? `Tailwind ${detection.tailwindVersion ?? ""}`.trim()
       : "Tailwind: not detected",
   );
+  if (detection.hasVue) parts.push("Vue");
+  if (detection.hasSvelte) parts.push("Svelte");
   console.log(`Detected: ${chalk.cyan(parts.join(" · "))}\n`);
 }
 

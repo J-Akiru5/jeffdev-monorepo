@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phase 4 Breadth - Formatters, Check Types, Checkpoint - 2026-08-23</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A0D12;--bg2:#0E1219;--panel:#11161F;--line:#1D2530;--cyan:#22D3EE;--violet:#8B7BFF;
+--text:#E6EBF2;--dim:#8B95A5;--ok:#34D399;--warn:#FBBF24;--bad:#F87171;
+--mono:JetBrains Mono,ui-monospace,Menlo,Consolas,monospace;--sans:Inter,system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.65;font-size:16px}
+.wrap{max-width:1080px;margin:0 auto;padding:48px 28px 96px}
+.kicker{font-family:var(--mono);font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan)}
+h1{font-size:2.4rem;font-weight:800;line-height:1.15;margin:.6rem 0 .3rem}
+h1 .accent{color:var(--violet)}
+h2{font-size:1.35rem;font-weight:700;margin:3rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--line)}
+h2 .idx{font-family:var(--mono);color:var(--cyan);font-weight:500;margin-right:.6rem}
+h3{font-size:1rem;font-weight:600;margin:1.4rem 0 .6rem;color:var(--cyan)}
+p{margin:.7rem 0}
+.lede{font-size:1.06rem;border-left:3px solid var(--cyan);padding:.9rem 1.2rem;background:var(--bg2);border-radius:0 10px 10px 0;margin:1.6rem 0}
+code,.mono{font-family:var(--mono);font-size:.86em;background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:.1em .38em;color:var(--cyan)}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1.1rem 1.25rem;overflow-x:auto;margin:.9rem 0}
+pre code{background:none;border:none;padding:0;color:var(--text);font-size:.83rem;line-height:1.55}
+table{width:100%;border-collapse:collapse;margin:.9rem 0;font-size:.92rem}
+th{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);text-align:left;padding:.55rem .75rem;border-bottom:1px solid var(--line)}
+td{padding:.6rem .75rem;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+.pill{display:inline-block;font-family:var(--mono);font-size:.68rem;font-weight:700;letter-spacing:.06em;border-radius:999px;padding:.14em .7em}
+.pill.ok{color:var(--ok);background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.35)}
+.pill.warn{color:var(--warn);background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.35)}
+.pill.info{color:var(--violet);background:rgba(139,123,255,.1);border:1px solid rgba(139,123,255,.35)}
+.note{border:1px dashed rgba(139,123,255,.45);border-radius:10px;padding:.85rem 1.1rem;margin:1rem 0;background:rgba(139,123,255,.05);font-size:.94rem}
+.note b{color:var(--violet)}
+ul.body{margin:.7rem 0 .7rem 1.3rem}
+ul.body li{margin:.45em 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.9rem;margin:1.1rem 0}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem}
+.card .label{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.card .val{font-size:1.5rem;font-weight:700;margin-top:.25rem}
+.cp{border:2px solid #FBBF24;border-left-width:6px;border-radius:10px;padding:1.1rem 1.3rem;margin:1.6rem 0;background:rgba(251,191,36,.04)}
+.cp h2{margin-top:0;border:none}
+.foot{margin-top:4rem;padding-top:1.2rem;border-top:1px solid var(--line);font-family:var(--mono);font-size:.72rem;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="kicker">Syntaxure Labs - Prism - Phase 4 Report + Checkpoint</div>
+<h1>Breadth part one: <span class="accent">agents and check types</span> - languages paused at your gate</h1>
+<p class="mono" style="color:var(--dim)">docs/prism-phase4-breadth-2026-08-23.html - branch feat/prism-phase4-breadth - nothing merged or published per constraints</p>
+<div class="lede">
+<b>Summary.</b> Phase 4 landed its first two slices and stopped exactly where you gated it. The agent-formatter slice grew teeth during research: Cursor ships a real hooks system whose payloads our parser silently ignored (top-level file_path instead of Claude Code nested shape), so the deliverable became a tolerant input adapter plus a wired --format cursor - and Antigravity 2.0 ships an official hooks system that mirrors Claude Code matcher/hooks schema almost exactly, making it config wiring rather than a new formatter. Windsurf was dropped per your survey; Claude Desktop confirmed to have no hooks system at all (MCP-advisory only, already handled by ide-setup). All three live formats verified against the packed tarball with exit 2 and correct per-agent lead lines; the Claude Code contract is byte-identical under regression test. The three new check types - naming_pattern, file_placement, required_import - are additive type values with parse-time regex compilation, fail-open path scans, and 15 new tests (suite now 148). Language breadth is analyzed in the checkpoint below and NOT started.
+</div>
+<div class="grid">
+<div class="card"><div class="label">Check types</div><div class="val">4 to 7</div><div class="label">additive values only</div></div>
+<div class="card"><div class="label">Agent formats</div><div class="val">1 to 3</div><div class="label">claude-code untouched</div></div>
+<div class="card"><div class="label">Tests</div><div class="val" style="color:var(--ok)">148 ok</div><div class="label">+22 this phase</div></div>
+<div class="card"><div class="label">Tarball smoke</div><div class="val" style="color:var(--ok)">PASS</div><div class="label">subpath + formats cold-tested</div></div>
+</div>
+<h2><span class="idx">01</span>Inspection findings - extension points real vs assumed</h2>
+<table>
+<tr><th>Assumed</th><th>Reality found</th></tr>
+<tr><td>--format flag plumbed through hook</td><td><b>Declared but never consumed.</b> index.ts registered it, CheckOptions stored it, runHook() ignored it - formatHookClaudeCode hardcoded. Extension point created additively.</td></tr>
+<tr><td>Formatter abstraction over agents</td><td>None existed - two concrete functions only. Created formatHookForAgent registry; formatHookClaudeCode preserved verbatim.</td></tr>
+<tr><td>Single hook payload shape</td><td>Claude-only nested shape parsed. Cursor/Antigravity shapes were silent no-ops. Superset adapter added without touching original path.</td></tr>
+<tr><td>Token extraction ready for more languages</td><td>One fixed candidates list + two regexes + Tailwind config import. No style-block harvesting layer yet - see checkpoint section 05.</td></tr>
+<tr><td>Check dispatch extensible</td><td>Confirmed genuinely additive: switch case + validator + interface per type.</td></tr>
+</table>
+<h2><span class="idx">02</span>Agent targets (amended) - mechanisms verified first</h2>
+<table>
+<tr><th>Agent</th><th>Mechanism found</th><th>Shipped</th><th>Verification status</th></tr>
+<tr><td><b>Claude Desktop</b> (33%)</td><td><b>No hooks system exists.</b> MCP-advisory only. Config detection/wiring already shipped in ide-setup.</td><td>Nothing new needed - confirmed config detection, not a formatter.</td><td><span class="pill warn">not installed locally</span> wiring unverified live</td></tr>
+<tr><td><b>Cursor</b> (22%)</td><td>Real hooks system: .cursor/hooks.json, afterFileEdit event, stdin JSON top-level file_path, exit 2 = block on blocking events. Post-write only - cannot veto like PreToolUse.</td><td>Tolerant payload adapter (fixes silent no-op), --format cursor output, init writes/merges hooks.json idempotently.</td><td><span class="pill warn">CLI verified - in-agent firing unverified headlessly</span></td></tr>
+<tr><td><b>Antigravity</b> (Jeff + others)</td><td>Antigravity 2.0 official hooks: .agents/hooks.json or ~/.gemini/config/, PostToolUse matcher+hooks arrays nearly identical to Claude Code, camelCase stdin/stdout JSON.</td><td>Config wiring via init (same contract family - no formatter divergence beyond lead line).</td><td><span class="pill warn">installed ok - config verified - in-agent firing unverified</span></td></tr>
+<tr><td><s>Windsurf</s></td><td>Dropped per n=9 survey (0%).</td><td>-</td><td>-</td></tr>
+<tr><td><b>VS Code</b> (44%, deferred)</td><td>Three different extensions, three different answers - investigated, NOT built. See section 06.</td><td>-</td><td>-</td></tr>
+</table>
+<div class="note"><b>Integration warning:</b> Cursor can auto-map .claude/settings.json hooks when third-party skill mapping is enabled - but emits Cursor-shaped payloads. Running BOTH auto-mapping AND native hooks.json produces duplicate corrections. Pick one surface per project.</div>
+<h2><span class="idx">03</span>New check types (additive, tested)</h2>
+<pre><code>// naming_pattern - file base name must match (PascalCase components)
+{"type":"naming_pattern","pattern":"^[A-Z][A-Za-z0-9]*$"}
+
+// file_placement - matched files must live under directory
+{"type":"file_placement","matchPattern":"^use[A-Z]","directory":"src/hooks"}
+
+// required_import - every covered file must import the specifier
+{"type":"required_import","specifier":"@/lib/safe-fetch"}</code></pre>
+<ul class="body">
+<li>Additive type values only - zero changes to existing four types or any top-level field. v1 schema intact.</li>
+<li>All regexes compile at PARSE time (bad rules fail loudly at load), path-aware scans fail open if bypassed.</li>
+<li>Severity model unchanged: exact-match checks can hand-promote to block; judgment calls stay warn.</li>
+<li>15 new tests incl. Windows-path placement normalization and dynamic-import matching.</li>
+<li>Honest scope note: naming_pattern matches FILE names today. Symbol-level needs per-language parsing - flagged, not silently claimed.</li>
+</ul>
+<h2><span class="idx">04</span>Packaging verification</h2>
+<pre><code>pnpm pack  -> prism-engine-cli-1.2.0.tgz
+npm install tarball (cold temp dir)
+node import @prism-engine/cli/rules  -> SUBPATH OK: function / function
+afterFileEdit cursor payload | npx prism check --hook --format cursor   -> EXIT 2
+claude nested payload        | ... --format antigravity                 -> EXIT 2
+claude nested payload        | ... --format claude-code                 -> EXIT 2 (byte-identical text)</code></pre>
+<h2 class="cp"><span class="idx">CHECKPOINT</span>Language breadth analysis - awaiting your approval, nothing built</h2>
+
+<h3>Current extraction reality</h3>
+<p>One regex pair (--name: custom properties filtered to hex) scanned across a hardcoded list of seven globals.css paths, plus Tailwind config dynamic-import with a regex fallback. No AST, no style-block awareness, no per-format adapters. That narrowness is why it works.</p>
+
+<h3>What each target actually requires</h3>
+<table>
+<tr><th>Target</th><th>Shared with existing path</th><th>Divergent work</th><th>Honest estimate</th></tr>
+<tr><td><b>Plain CSS</b></td><td>~90% - the existing custom-prop regex works unchanged; tokens just live outside globals.css too.</td><td>Replace the fixed 7-path candidate list with a workspace walker (src/**/*.css minus node_modules/dist). Dedup logic already handles light/dark duplicates.</td><td>0.5 day incl. tests + scaffold verification</td></tr>
+<tr><td><b>SCSS</b></td><td>Custom properties inside .scss = identical to CSS once the file is included in the walk (~95% shared).</td><td>SCSS $variables are a second token species that COMPILES AWAY - enforcing var($x) in TSX is meaningless post-build. Recommendation: v1 treats SCSS as CSS for custom props only and skips $vars entirely; enforcing them inside .scss files themselves is possible later via forbidden_pattern hand rules.</td><td>+0.25 day on top of CSS</td></tr>
+<tr><td><b>Vue SFC</b></td><td>Token matching itself is shared once style text is harvested.</td><td>SFC block splitting: multiple &lt;style&gt; blocks per file, lang="scss|less|postcss" variants (pulls SCSS complexity in), scoped/module attributes. Two implementation routes: @vue/compiler-sfc dependency (accurate, NEW DEPENDENCY decision needed) vs regex block-splitter (no dep, ~95% accurate on well-formed SFCs).</td><td>1-1.5 days + dependency ruling</td></tr>
+<tr><td><b>Svelte</b></td><td>Same harvester shape as Vue but simpler: one optional &lt;style&gt; block, no lang variants in practice.</td><td>Block splitter only. Reuses everything else.</td><td>~0.75 day after Vue lands</td></tr>
+</table>
+
+<h3>Proposed order and total</h3>
+<p>plain CSS -> SCSS -> Vue -> Svelte. Cumulative estimate: <b>2.5-3 days of focused work</b>, one language per commit, each verified against a real scaffolded project outside the monorepo like the original E2E. The shared-infrastructure shape I would build first: a harvestStyleBlocks(filePath) adapter layer feeding the EXISTING custom-property pipeline unchanged, so the matching core stays single-source.</p>
+
+<h3>Python / Go verdict (your step 6 question)</h3>
+<p>Nearly free, but not through extraction. They have no design-token concept, so only naming_pattern and file_placement apply - and both are pure PATH checks that already work on ANY extension today: a user can hand-write {"extensions":[".py"],"check":{"type":"naming_pattern",...}} right now and it enforces correctly. required_import as built does NOT cover Python/Go import syntax (unquoted imports), which would be a per-language matcher extension later. Verdict: zero engine code needed; this is documentation + optionally widening DEFAULT_EXTENSIONS guidance, not extractor work.</p>
+
+<h3>Decisions needed from you to leave checkpoint</h3>
+<ul class="body">
+<li><b>Approve order/scope</b>: CSS -> SCSS -> Vue -> Svelte at ~2.5-3 days?</li>
+<li><b>Vue route</b>: @vue/compiler-sfc dependency (accurate, needs your sign-off per new-dependency rule) vs regex splitter (no dep)?</li>
+<li><b>SCSS $vars</b>: confirm skip-for-v1 recommendation.</li>
+<li><b>Symbol-level naming</b> (functions/classes inside files): confirm deferred - it requires per-language parsing and would triple estimates.</li>
+</ul>
+
+<h2><span class="idx">06</span>VS Code trio - investigation only, per amendment</h2>
+<table>
+<tr><th>Extension</th><th>What it can consume today</th><th>Honest verdict</th></tr>
+<tr><td><b>GitHub Copilot</b></td><td>Instructions files (.github/copilot-instructions.md) inject context; chat participants exist. NO post-write hook surface, no exit-code channel into its loop.</td><td>Advisory-only at best (rules-style). Enforcement impossible today - matches your suspicion about completion mode.</td></tr>
+<tr><td><b>Cline</b></td><td>Agentic with tool loop; supports .clinerules context and has an auto-approve + feedback channel. A post-write command hook exists in recent versions but payload contract is undocumented/unstable.</td><td>Possible enforcement target AFTER contract stabilizes - worth re-checking quarterly, not building blind now.</td></tr>
+<tr><td><b>Roo Code</b></td><td>Cline fork with custom modes + .roo/rules context injection. Hook surface same caveat as Cline.</td><td>Same verdict as Cline - watch, don't build.</td></tr>
+</table>
+<p style="color:var(--dim);font-size:.9rem">None of the three extensions is installed on this machine, so none of these could be verified against a live instance - knowledge-based assessment flagged accordingly. The universal fallback for ALL VS Code agents today: our MCP server (prism serve) provides advisory rule access everywhere, which is exactly why Phase 3's MCP investment matters.</p>
+
+<h2><span class="idx">07</span>The table - every check type and stack after this work</h2>
+<table>
+<tr><th>Check type</th><th>Status</th><th>Severity guidance</th><th>Applies to</th></tr>
+<tr><td>forbidden_pattern</td><td><span class="pill ok">v1 shipped</span></td><td>either</td><td>all default extensions</td></tr>
+<tr><td>required_token</td><td><span class="pill ok">v1 shipped</span></td><td>block (exact match)</td><td>code files (init-generated: tsx/jsx/ts/js/html)</td></tr>
+<tr><td>banned_import</td><td><span class="pill ok">v1 shipped</span></td><td>block (exact match)</td><td>js-family + html/vue/svelte</td></tr>
+<tr><td>arbitrary_value</td><td><span class="pill ok">v1 shipped</span></td><td>warn (judgment)</td><td>.tsx/.jsx</td></tr>
+<tr><td>naming_pattern</td><td><span class="pill info">Phase 4 new</span></td><td>either (file names)</td><td>any extension set</td></tr>
+<tr><td>file_placement</td><td><span class="pill info">Phase 4 new</span></td><td>either (path check)</td><td>any extension set</td></tr>
+<tr><td>required_import</td><td><span class="pill info">Phase 4 new</span></td><td>warn or block</td><td>quoted-import languages (js/ts family)</td></tr>
+</table>
+<table>
+<tr><th>Stack</th><th>Token extraction</th><th>Check coverage</th></tr>
+<tr><td>TypeScript / JavaScript / TSX / JSX</td><td>via globals.css + Tailwind config</td><td><span class="pill ok">full</span> all 7 types</td></tr>
+<tr><td>Tailwind (config)</td><td><span class="pill ok">shipped v1</span> js/mjs/cjs import + ts regex</td><td>-</td></tr>
+<tr><td>Plain CSS</td><td><span class="pill warn">checkpoint - approved next</span></td><td>all types (css in defaults)</td></tr>
+<tr><td>SCSS</td><td><span class="pill warn">checkpoint - custom props only</span></td><td>same as CSS ($vars skipped v1)</td></tr>
+<tr><td>Vue SFC</td><td><span class="pill warn">checkpoint - needs dep ruling</span></td><td>all types on script/style text</td></tr>
+<tr><td>Svelte</td><td><span class="pill warn">checkpoint - after Vue</span></td><td>same shape as Vue</td></tr>
+<tr><td>Python / Go</td><td>N/A (no design tokens)</td><td>naming_pattern + file_placement already work via hand-written extensions</td></tr>
+<tr><td>Agents</td><td colspan="2">Claude Code (verified E2E) - Cursor (CLI verified, agent firing pending) - Antigravity (config verified, agent firing pending) - Claude Desktop (MCP advisory only) - VS Code trio (advisory/fallback via MCP)</td></tr>
+</table>
+
+<div class="foot">SYNTAXURE LABS - Prism Phase 4 breadth part one - Ox/backend session 2026-08-23<br>
+branch feat/prism-phase4-breadth - STOPPED AT CHECKPOINT per task gate - language extractors not started</div>
+
+</div>
+</body>
+</html>
+<h2 class="cp"><span class="idx">BATCH A RESULT</span>Plain CSS + SCSS - landed and verified</h2>
+<p>Estimate held - beat it. Estimated 0.75 day; actual active time <b>~45 minutes</b>. The harvest layer turned out to be a bounded workspace walker feeding the EXISTING regex pipeline, exactly as proposed. No matching logic changed.</p>
+<pre><code>Real scaffold verification (vite vanilla-ts, outside monorepo):
+Detected: Next.js not detected / Tailwind not detected
+Scanned: src\style.css, styles\palette.scss   <- walker found BOTH
+Found 15 color token(s) as CSS custom properties
+Wrote 1 rule(s) + all three agent hook configs (claude/cursor/antigravity)</code></pre>
+<p>Walker details: depth-10 bounded, 200-file cap, excludes node_modules/dist/build/.next/.nuxt/.output/.svelte-kit/coverage/dotdirs, deterministic sort, $scss vars deliberately skipped per your ruling.</p>
+
+<h2><span class="idx">07R</span>THE TABLE (revised) - split by check family per ruling</h2>
+<table>
+<tr><th>Stack</th><th>Token family<br>(required_token, arbitrary_value)</th><th>Structural family<br>(naming_pattern, file_placement, forbidden_pattern, required_import, banned_import)</th></tr>
+<tr><td>TypeScript / JS / TSX / JSX</td><td><span class="pill ok">FULL</span> (css+tailwind extraction)</td><td><span class="pill ok">FULL</span></td></tr>
+<tr><td>Plain CSS</td><td><span class="pill ok">BATCH A - full</span></td><td><span class="pill ok">FULL</span></td></tr>
+<tr><td>SCSS</td><td><span class="pill ok">BATCH A - custom props only</span> ($vars compile away, skipped by ruling)</td><td><span class="pill ok">FULL</span></td></tr>
+<tr><td>Vue SFC</td><td><span class="pill warn">Batch B - regex splitter, no compiler dep</span></td><td><span class="pill warn">Batch B</span></td></tr>
+<tr><td>Svelte</td><td><span class="pill warn">Batch B - after Vue lands</span></td><td><span class="pill warn">Batch B</span></td></tr>
+<tr><td>Dart / Flutter</td><td><span class="pill bad">NOT TARGETED</span> (tokens in Dart code)</td><td><span class="pill ok">EXAMPLE PACK SHIPPED</span> flutter-rules.json</td></tr>
+<tr><td>Kotlin / Compose</td><td><span class="pill bad">NOT TARGETED</span></td><td><span class="pill ok">EXAMPLE PACK SHIPPED</span> kotlin-rules.json</td></tr>
+<tr><td>SwiftUI</td><td><span class="pill bad">NOT TARGETED</span></td><td><span class="pill info">same shape as kotlin pack, on request</span></td></tr>
+<tr><td>Python</td><td><span class="pill bad">N/A</span></td><td><span class="pill ok">EXAMPLE PACK SHIPPED</span> python-rules.json (+ required_import now speaks python syntax)</td></tr>
+<tr><td>Go</td><td>N/A</td><td><span class="pill info">required_import speaks go import blocks; pack on request</span></td></tr>
+<tr><td>Rust / Swift (generic)</td><td>N/A</td><td><span class="pill ok">structural verified in tests</span> (.rs/.swift covered in suite)</td></tr>
+<tr><td>Claude Code</td><td colspan="2"><span class="pill ok">ENFORCEMENT verified E2E</span></td></tr>
+<tr><td>Cursor</td><td colspan="2"><span class="pill warn">CLI verified exit 2 - in-agent firing unverified headlessly</span></td></tr>
+<tr><td>Antigravity 2.0</td><td colspan="2"><span class="pill warn">hooks.json wired - in-agent firing unverified headlessly</span></td></tr>
+<tr><td>Claude Desktop</td><td colspan="2"><span class="pill info">MCP advisory only - no hooks system exists</span></td></tr>
+<tr><td>VS Code (Copilot/Cline/Roo)</td><td colspan="2"><span class="pill info">investigation only - advisory via MCP is the honest surface today</span></td></tr>
+</table>
+
+<div class="foot">SYNTAXURE LABS - Prism Phase 4 Batch A complete - Batch B (Vue + Svelte via regex splitter, no compiler dependency) awaits your go.</div>
+<h2 class="cp"><span class="idx">BATCH B RESULT</span>Vue + Svelte - landed and verified (phase 4 language breadth COMPLETE)</h2>
+<p>Estimate held again. Estimated 1-1.5 days for Vue + 0.75 for Svelte; actual combined active time <b>~70 minutes</b>. The regex block-splitter handled every real-world variation the scaffolds threw at it: scoped attributes, lang=scss blocks, multiple style sections per SFC, and script-side variables correctly ignored.</p>
+<pre><code>Vite vue-ts scaffold (outside monorepo):
+Detected: ... Vue
+Scanned: src\components\HelloWorld.vue, src\App.vue, src\style.css, styles\tokens.css
+Found 14 color token(s) - hooks wired for claude/cursor/antigravity
+
+Vite svelte-ts scaffold:
+Detected: ... Svelte
+Scanned: src\lib\Counter.svelte, src\App.svelte, src\app.css
+Found 13 color token(s)
+
+DASHBOARD-FACING PROOF - scanRepo on the svelte scaffold returns:
+{"#f97316":"var(--svelte-brand)", "#aa3bff":"var(--accent)", ...}
+That customProperties payload is what prism sync --repo feeds to the engine
+extract/AI pipeline and what populates project token data in the dashboard
+for ANY stack.</code></pre>
+<p><b>New capability note:</b> repo-scanner now harvests customProperties across css/scss/vue/svelte during every --repo walk, so Phase 3 rules-creator and extract flows see design tokens from Vue/Svelte projects without any further changes.</p>
+
+<h2><span class="idx">FINAL</span>Phase 4 status - all batches complete</h2>
+<ul class="body">
+<li><b>Agents:</b> Cursor + Antigravity + Claude Code enforcement formats shipped; Claude Desktop confirmed MCP-only; VS Code trio investigated (advisory via MCP is today's honest surface).</li>
+<li><b>Check types:</b> naming_pattern, file_placement, required_import added (7 total), with Python/Go import syntax support and includePattern scoping.</li>
+<li><b>Languages:</b> plain CSS, SCSS, Vue SFC, Svelte extraction shipped (Batch A+B). Python/Go confirmed free via structural checks with shipped example packs.</li>
+<li><b>Packaging:</b> tarball cold-install re-verified after every batch.</li>
+</ul>
+<p><b>Remaining for open-source launch = Phase 5 only:</b> licence choice (Jeff), docs rewrite, TUI, Sentry coverage, history audit.</p>

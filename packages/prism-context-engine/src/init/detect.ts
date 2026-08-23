@@ -2,6 +2,8 @@ import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 
 export interface ProjectDetection {
+  hasVue?: boolean;
+  hasSvelte?: boolean;
   hasPackageJson: boolean;
   isNextjs: boolean;
   nextVersion?: string;
@@ -78,5 +80,11 @@ export function detectProject(cwd: string): ProjectDetection {
     hasTailwind: tailwindVersion !== undefined,
     tailwindVersion,
     tailwindMajor: majorVersion(tailwindVersion),
+    hasVue:
+      readVersion(deps, "vue") !== undefined ||
+      readVersion(devDeps, "vue") !== undefined,
+    hasSvelte:
+      readVersion(deps, "svelte") !== undefined ||
+      readVersion(devDeps, "svelte") !== undefined,
   };
 }

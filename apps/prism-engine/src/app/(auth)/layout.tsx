@@ -2,6 +2,13 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { SyntaxureLogo } from "@syntaxure/ui";
 
+// Auth pages create a Supabase browser client at render time. Forcing
+// dynamic rendering keeps production behavior identical (these pages were
+// never cacheable — they read live session state) while letting builds
+// succeed in environments where NEXT_PUBLIC_SUPABASE_* is injected only at
+// runtime (e.g. the staging Vercel project).
+export const dynamic = "force-dynamic";
+
 export default function AuthLayout({
   children,
 }: {
