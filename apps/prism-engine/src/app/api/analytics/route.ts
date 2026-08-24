@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getPrismDb } from "@syntaxure-labs/db/prism";
@@ -75,7 +76,7 @@ export async function GET() {
       updatedAt: now.toISOString(),
     });
   } catch (error) {
-    console.error("Analytics fetch error:", error);
+    logError("app/api/analytics/route", "Analytics fetch error:", error);
     return NextResponse.json(
       { error: "Failed to fetch analytics" },
       { status: 500 },

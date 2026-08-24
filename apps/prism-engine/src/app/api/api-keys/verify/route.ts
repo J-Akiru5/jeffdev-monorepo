@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 /**
  * API Key Verification (for MCP Server)
  *
@@ -109,7 +110,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("[API Keys] Verify error:", error);
+    logError("app/api/api-keys/verify/route", "[API Keys] Verify error:", error);
     return NextResponse.json(
       { valid: false, error: "Verification failed" },
       { status: 500 },

@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 /**
  * Components API
  *
@@ -90,7 +91,7 @@ export async function GET() {
       count: serialized.length,
     });
   } catch (error) {
-    console.error("[Components] GET error:", error);
+    logError("app/api/components/route", "[Components] GET error:", error);
     return NextResponse.json(
       { error: "Failed to fetch components" },
       { status: 500 },
@@ -172,7 +173,7 @@ export async function POST(request: NextRequest) {
       message: "Component saved to library",
     });
   } catch (error) {
-    console.error("[Components] POST error:", error);
+    logError("app/api/components/route", "[Components] POST error:", error);
     return NextResponse.json(
       { error: "Failed to save component" },
       { status: 500 },

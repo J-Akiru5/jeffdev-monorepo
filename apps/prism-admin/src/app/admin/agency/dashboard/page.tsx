@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { SystemStatusBadge } from "@/components/system-status-badge";
 import {
   MessageSquare,
   Mail,
@@ -74,8 +75,7 @@ export default async function AgencyDashboardPage() {
           <p className="text-sm text-white/50">Syntaxure Labs Overview</p>
         </div>
         <div className="flex items-center gap-2 text-xs text-white/40 font-mono">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          All systems operational
+          <SystemStatusBadge />
         </div>
       </div>
 

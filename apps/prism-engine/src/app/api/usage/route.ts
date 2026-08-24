@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 /**
  * Usage API
  *
@@ -112,7 +113,7 @@ export async function GET() {
       resetDate: getNextMonthStart().toISOString(),
     });
   } catch (error) {
-    console.error("[Usage] GET error:", error);
+    logError("app/api/usage/route", "[Usage] GET error:", error);
     return NextResponse.json(
       { error: "Failed to fetch usage stats" },
       { status: 500 },

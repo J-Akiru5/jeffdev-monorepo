@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 import { createClient } from "@/lib/supabase/server";
 import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { NextResponse } from "next/server";
@@ -49,7 +50,7 @@ export async function GET() {
       upgradeUrl: ideSync ? undefined : "/subscription",
     });
   } catch (error) {
-    console.error("[Auth Verify] Error:", error);
+    logError("app/api/auth/verify/route", "[Auth Verify] Error:", error);
     return NextResponse.json(
       {
         success: false,

@@ -1,5 +1,6 @@
 "use client";
 
+import { logError } from "@/lib/log-error";
 import { useEffect } from "react";
 import Link from "next/link";
 
@@ -15,7 +16,7 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Prism Engine Error:", error);
+    logError("app/error", "Prism Engine Error:", error);
   }, [error]);
 
   return (

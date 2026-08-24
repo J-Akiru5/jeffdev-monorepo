@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 import type { ExtractedRule, RuleExtractionResult } from "./deepseek";
 
 export type AIProvider = "opencode" | "deepseek" | "gemini" | "azure";
@@ -156,7 +157,7 @@ If the video doesn't contain technical content suitable for rule extraction, ret
       processingTime: Date.now() - startTime,
     };
   } catch (error) {
-    console.error(`[AI Router] Rule extraction failed (provider=${provider}):`, error);
+    logError("lib/ai-router", `[AI Router] Rule extraction failed (provider=${provider}):`, error);
     throw new Error(
       `Failed to extract rules: ${error instanceof Error ? error.message : "Unknown error"}`,
     );

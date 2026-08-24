@@ -1,4 +1,5 @@
-/**
+
+import { logError } from "@/lib/log-error";/**
  * Single Component API
  *
  * GET    /api/components/[id] - Get component details
@@ -60,7 +61,7 @@ export async function GET(
       updatedAt: component.updatedAt,
     });
   } catch (error) {
-    console.error("[Components] GET single error:", error);
+    logError("app/api/components/[id]/route", "[Components] GET single error:", error);
     return NextResponse.json(
       { error: "Failed to fetch component" },
       { status: 500 },
@@ -111,7 +112,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, message: "Component deleted" });
   } catch (error) {
-    console.error("[Components] DELETE error:", error);
+    logError("app/api/components/[id]/route", "[Components] DELETE error:", error);
     return NextResponse.json(
       { error: "Failed to delete component" },
       { status: 500 },

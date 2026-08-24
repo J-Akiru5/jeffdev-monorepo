@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 /**
  * Subscriptions API
  *
@@ -108,7 +109,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("[subscriptions] GET error:", error);
+    logError("app/api/subscriptions/route", "[subscriptions] GET error:", error);
     return NextResponse.json({
       tier: "free" as SubscriptionTier,
       status: "active",
@@ -185,7 +186,7 @@ export async function POST(request: NextRequest) {
     const subscription = await response.json();
 
     if (!response.ok) {
-      console.error("PayPal error:", subscription);
+      logError("app/api/subscriptions/route", "PayPal error:", subscription);
       return NextResponse.json(
         { error: "Failed to create subscription" },
         { status: 500 },
@@ -202,7 +203,7 @@ export async function POST(request: NextRequest) {
       approvalUrl: approvalLink?.href,
     });
   } catch (error) {
-    console.error("Subscription error:", error);
+    logError("app/api/subscriptions/route", "Subscription error:", error);
     return NextResponse.json(
       { error: "Failed to process subscription" },
       { status: 500 },

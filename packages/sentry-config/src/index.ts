@@ -35,10 +35,17 @@ export function withSentry(
   return withSentryConfig(nextConfig, {
     org: SENTRY_ORG,
     project,
+    // Releases + source-map upload require SENTRY_AUTH_TOKEN. When unset
+    // (local dev, preview builds) Sentry skips upload with a warning.
+    authToken: process.env.SENTRY_AUTH_TOKEN || "",
     silent: !process.env.CI,
     widenClientFileUpload: false,
-    reactComponentAnnotation: { enabled: true },
     tunnelRoute: "/monitoring",
-    disableLogger: true,
+    // Phase 5: migrated from deprecated top-level keys per @sentry/nextjs
+    // notices in Turbopack builds (disableLogger, reactComponentAnnotation).
+    webpack: {
+      treeshake: { removeDebugLogging: true },
+      reactComponentAnnotation: { enabled: true },
+    },
   });
 }

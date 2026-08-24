@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 /**
  * Subscription Checkout
  *
@@ -55,7 +56,7 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.redirect(url);
     } catch (error) {
-      console.error("[Checkout] Dev mode error:", error);
+      logError("app/api/subscriptions/checkout/route", "[Checkout] Dev mode error:", error);
       const url = new URL("/subscription", request.url);
       url.searchParams.set("status", "error");
       return NextResponse.redirect(url);
