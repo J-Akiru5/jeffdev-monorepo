@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 import OpenAI from "openai";
 
 let _deepseekClient: OpenAI | null = null;
@@ -127,7 +128,7 @@ If the video doesn't contain technical content suitable for rule extraction, ret
       processingTime: Date.now() - startTime,
     };
   } catch (error) {
-    console.error("[DeepSeek] Rule extraction failed:", error);
+    logError("lib/deepseek", "[DeepSeek] Rule extraction failed:", error);
     throw new Error(
       `Failed to extract rules from transcript: ${error instanceof Error ? error.message : "Unknown error"}`,
     );
@@ -165,7 +166,7 @@ export async function generateChatCompletion(params: {
     }
     return content;
   } catch (error) {
-    console.error("[DeepSeek] Chat completion failed:", error);
+    logError("lib/deepseek", "[DeepSeek] Chat completion failed:", error);
     throw new Error(
       `DeepSeek chat completion failed: ${error instanceof Error ? error.message : "Unknown error"}`,
     );

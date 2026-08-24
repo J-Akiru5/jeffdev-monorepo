@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 /**
  * PayPal Webhook Handler
  *
@@ -29,7 +30,7 @@ async function verifyPayPalWebhook(
   body: string,
 ): Promise<boolean> {
   if (!PAYPAL_WEBHOOK_ID) {
-    console.error(
+    logError("app/api/webhooks/paypal/route", 
       "[paypal-webhook] PAYPAL_WEBHOOK_ID not set — rejecting webhook",
     );
     return false;
@@ -65,7 +66,7 @@ async function verifyPayPalWebhook(
     };
     return result.verification_status === "SUCCESS";
   } catch (error) {
-    console.error("[paypal-webhook] Verification error:", error);
+    logError("app/api/webhooks/paypal/route", "[paypal-webhook] Verification error:", error);
     return false;
   }
 }
@@ -112,7 +113,7 @@ async function markEventProcessing(
       { onConflict: "provider,event_id" },
     );
   } catch (error) {
-    console.error("[webhook] Failed to mark event processing:", error);
+    logError("app/api/webhooks/paypal/route", "[webhook] Failed to mark event processing:", error);
   }
 }
 
@@ -128,7 +129,7 @@ async function markEventCompleted(
       .eq("provider", provider)
       .eq("event_id", eventId);
   } catch (error) {
-    console.error("[webhook] Failed to mark event completed:", error);
+    logError("app/api/webhooks/paypal/route", "[webhook] Failed to mark event completed:", error);
   }
 }
 
@@ -149,7 +150,7 @@ async function markEventFailed(
       .eq("provider", provider)
       .eq("event_id", eventId);
   } catch (err) {
-    console.error("[webhook] Failed to mark event failed:", err);
+    logError("app/api/webhooks/paypal/route", "[webhook] Failed to mark event failed:", err);
   }
 }
 
@@ -189,7 +190,7 @@ export async function POST(request: NextRequest) {
     // 1. Verify signature
     const isValid = await verifyPayPalWebhook(request, rawBody);
     if (!isValid) {
-      console.error("[paypal-webhook] Signature verification failed");
+      logError("app/api/webhooks/paypal/route", "[paypal-webhook] Signature verification failed");
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
@@ -206,7 +207,7 @@ export async function POST(request: NextRequest) {
     const userId = resource.custom_id;
 
     if (!userId) {
-      console.error("[paypal-webhook] No userId in payload");
+      logError("app/api/webhooks/paypal/route", "[paypal-webhook] No userId in payload");
       await markEventCompleted("paypal", eventId);
       return NextResponse.json({ received: true });
     }
@@ -241,7 +242,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("[paypal-webhook] Error:", error);
+    logError("app/api/webhooks/paypal/route", "[paypal-webhook] Error:", error);
     return NextResponse.json(
       { error: "Webhook processing failed" },
       { status: 500 },
@@ -300,7 +301,7 @@ async function sendReceiptEmail(
       `,
     });
   } catch (error) {
-    console.error("[paypal-webhook] Receipt email failed:", error);
+    logError("app/api/webhooks/paypal/route", "[paypal-webhook] Receipt email failed:", error);
   }
 }
 
@@ -326,7 +327,7 @@ async function sendPaymentFailureEmail(email: string) {
       `,
     });
   } catch (error) {
-    console.error("[paypal-webhook] Failure email failed:", error);
+    logError("app/api/webhooks/paypal/route", "[paypal-webhook] Failure email failed:", error);
   }
 }
 

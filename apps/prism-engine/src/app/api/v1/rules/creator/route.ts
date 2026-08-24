@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 /**
  * POST /api/v1/rules/creator — Phase 3 rules creator.
  *
@@ -85,7 +86,7 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     // Refund: our failures are not the user's AI spend.
     await refundAiGeneration(auth.userId);
-    console.error("[rules/creator] generation failed:", err);
+    logError("app/api/v1/rules/creator/route", "[rules/creator] generation failed:", err);
     return errorResponse(
       `Could not generate a rule: ${(err as Error).message}`,
       502,

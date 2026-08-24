@@ -1,35 +1,25 @@
 /**
- * Health Check Endpoint
- * GET /api/health
+ * GET /api/health — Phase 5: real subsystem checks.
  *
- * Used by `prism doctor` to verify Prism Cloud is reachable.
- * Returns 200 if the server is up; does not require authentication.
+ * Verifies Supabase reachability (lightweight head-count query) and Upstash
+ * Redis reachability (ping). Public booleans only — no counts, no error
+ * text, no secrets. Consumed by prism CLI doctor, the prism-admin
+ * SystemStatus badge, and external uptime pingers.
+ *
+ * Semantics: Supabase unreachable -> "degraded". Redis unconfigured passes
+ * (feature absent, mirrors rate-limiter fail-open); configured-but-down ->
+ * "degraded". Never throws.
  */
 
-import { NextResponse } from "next/server";
-import { readFileSync } from "fs";
-import { join } from "path";
+import { NextRequest, NextResponse } from "next/server";
+import { buildHealthReport } from "@/lib/engine-health";
 
-function getVersion(): string {
-  try {
-    const pkg = JSON.parse(
-      readFileSync(join(process.cwd(), "package.json"), "utf-8"),
-    );
-    return pkg.version || "0.0.0";
-  } catch {
-    return "0.0.0";
-  }
-}
+export const dynamic = "force-dynamic";
 
-export async function GET() {
-  return NextResponse.json({
-    status: "ok",
-    service: "prism-engine",
-    version: getVersion(),
-    timestamp: new Date().toISOString(),
-    memory: {
-      heapUsed: process.memoryUsage().heapUsed,
-      heapTotal: process.memoryUsage().heapTotal,
-    },
+export async function GET(_request: NextRequest) {
+  const report = await buildHealthReport();
+  return NextResponse.json(report, {
+    status: 200,
+    headers: { "Cache-Control": "no-store" },
   });
 }

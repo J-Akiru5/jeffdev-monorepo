@@ -1,5 +1,7 @@
+
 "use client";
 
+import { logError } from "@/lib/log-error";
 import { useState, useActionState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -67,7 +69,7 @@ export function RuleEditForm({ rule }: RuleEditFormProps) {
         setEnhanceError(result.error || "Enhancement failed");
       }
     } catch (error) {
-      console.error("Enhancement failed:", error);
+      logError("app/(dashboard)/projects/[slug]/rules/[ruleId]/edit/rule-edit-form", "Enhancement failed:", error);
       setEnhanceError(
         error instanceof Error ? error.message : "Enhancement failed",
       );

@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 /**
  * POST /api/v1/sandbox/run — Phase 3 sandbox preview.
  *
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
     if (err instanceof SandboxValidationError) {
       return errorResponse(err.message, 422);
     }
-    console.error("[sandbox/run] unexpected error:", err);
+    logError("app/api/v1/sandbox/run/route", "[sandbox/run] unexpected error:", err);
     return errorResponse("Sandbox execution failed", 500);
   }
 }

@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 /**
  * Admin Subscription API
  *
@@ -88,7 +89,7 @@ export async function GET(request: NextRequest) {
     if (error instanceof Error && error.message === "Forbidden") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
-    console.error("[admin/subscription] GET error:", error);
+    logError("app/api/admin/subscription/route", "[admin/subscription] GET error:", error);
     return NextResponse.json(
       { error: "Failed to fetch subscriptions" },
       { status: 500 },
@@ -164,7 +165,7 @@ export async function PATCH(request: NextRequest) {
     if (error instanceof Error && error.message === "Forbidden") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
-    console.error("[admin/subscription] PATCH error:", error);
+    logError("app/api/admin/subscription/route", "[admin/subscription] PATCH error:", error);
     return NextResponse.json({ error: "Failed to update" }, { status: 500 });
   }
 }

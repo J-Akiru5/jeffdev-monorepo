@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 /**
  * Subscription Status API
  *
@@ -68,7 +69,7 @@ export async function GET(request: NextRequest) {
       message: "Waiting for webhook confirmation.",
     });
   } catch (error) {
-    console.error("[subscription-status] Error:", error);
+    logError("app/api/subscription-status/route", "[subscription-status] Error:", error);
     return NextResponse.json({
       status: "pending",
       tier: "free",

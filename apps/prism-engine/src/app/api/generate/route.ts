@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 /**
  * Component Generation API
  *
@@ -99,7 +100,7 @@ export async function POST(request: NextRequest) {
 
     // 🔑 Pre-flight: verify GEMINI_API_KEY exists
     if (!process.env.GEMINI_API_KEY) {
-      console.error("[Generate] GEMINI_API_KEY is not set in environment");
+      logError("app/api/generate/route", "[Generate] GEMINI_API_KEY is not set in environment");
       return NextResponse.json(
         { error: "AI service is not configured. Please contact support." },
         { status: 503 },
@@ -154,7 +155,7 @@ export async function POST(request: NextRequest) {
     } catch (genError) {
       // Refund: failed generations must not consume quota.
       await refundAiGeneration(userId);
-      console.error("[Generate] Gemini API error:", genError);
+      logError("app/api/generate/route", "[Generate] Gemini API error:", genError);
       const message =
         genError instanceof Error ? genError.message : "Unknown Gemini error";
       return NextResponse.json(
@@ -176,7 +177,7 @@ export async function POST(request: NextRequest) {
         rules = rulesResult.rules;
       } catch (rulesError) {
         // Don't fail the whole request if rules generation fails
-        console.error("[Generate] Rules generation failed:", rulesError);
+        logError("app/api/generate/route", "[Generate] Rules generation failed:", rulesError);
       }
     }
 
@@ -189,9 +190,9 @@ export async function POST(request: NextRequest) {
         type: "component",
         prompt: prompt.slice(0, 200), // Store first 200 chars of prompt
       });
-    } catch (logError) {
+    } catch (logFailure) {
       // Don't fail the request if logging fails
-      console.error("[Generate] Failed to log generation:", logError);
+      logError("app/api/generate/route", "[Generate] Failed to log generation:", logFailure);
     }
 
     return NextResponse.json({
@@ -200,7 +201,7 @@ export async function POST(request: NextRequest) {
       rules,
     });
   } catch (error) {
-    console.error("[Generate] Unhandled error:", error);
+    logError("app/api/generate/route", "[Generate] Unhandled error:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
       { error: `Failed to generate component: ${message}` },
