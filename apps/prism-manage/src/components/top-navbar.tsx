@@ -42,7 +42,11 @@ import {
   GitBranch,
 } from "lucide-react";
 import { WorkspaceSwitcher } from "@/components/workspace-switcher";
+<<<<<<< Updated upstream
 import { useWorkspaceStore } from "@/stores/workspace-store";
+=======
+import { NotificationPanel } from "@/components/notification-panel";
+>>>>>>> Stashed changes
 
 function AccountMenu() {
   const { user, loading, signOut } = useAuth();
