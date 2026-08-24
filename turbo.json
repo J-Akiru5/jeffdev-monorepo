@@ -1,7 +1,7 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
-  "globalEnv": ["NODE_ENV", "CI"],
+  "globalEnv": ["NODE_ENV", "CI", "SANDBOX_TIMEOUT_MS", "PRISM_SANDBOX_CLI_ENTRY", "SANDBOX_CHILD_MAX_OLD_SPACE_MB"],
   "remoteCache": {
     "signature": true
   },

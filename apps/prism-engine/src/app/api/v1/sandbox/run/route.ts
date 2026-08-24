@@ -1,17 +1,25 @@
 /**
- * POST /api/v1/sandbox/run — Phase 3 sandbox preview.
+ * POST /api/v1/sandbox/run — Phase 3 sandbox preview, Phase 4.5 boundary.
  *
- * Deterministic: parses the submitted rules.json v1 envelope with the REAL
- * Prism engine (prism-context-engine/rules) and reports what the Pass would
- * flag against sample files. No AI, no quota burn — but auth + burst limits
- * still apply because it executes user-supplied patterns server-side.
+ * Deterministic: evaluates the submitted rules.json v1 envelope with the
+ * REAL Prism engine running as a SUBPROCESS (arm's-length from this
+ * process; hard-killed on timeout). No AI, no quota burn — but auth +
+ * burst limits still apply because it executes user-supplied patterns
+ * server-side.
+ *
+ * Error mapping:
+ *   invalid envelope / rejected pattern -> 422 (with reason)
+ *   evaluator timeout                   -> 504
+ *   spawn/malformed/child failure       -> 500 (logged)
  */
 
 import { NextRequest } from "next/server";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
 import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 import {
+  SandboxRejectedPatternError,
   SandboxRequestSchema,
+  SandboxSpawnError,
   SandboxValidationError,
   runSandbox,
 } from "@/lib/sandbox";
@@ -39,13 +47,26 @@ export async function POST(request: NextRequest) {
     );
 
   try {
-    const result = runSandbox(parsed.data);
+    const result = await runSandbox(parsed.data);
     return successResponse(result);
   } catch (err) {
     if (err instanceof SandboxValidationError) {
       return errorResponse(err.message, 422);
     }
-    console.error("[sandbox/run] unexpected error:", err);
+    if (err instanceof SandboxRejectedPatternError) {
+      return errorResponse(err.message, 422);
+    }
+    if (
+      err instanceof SandboxSpawnError &&
+      err.code === "TIMEOUT"
+    ) {
+      console.error("[sandbox/run] evaluation timed out and was killed:", err.message);
+      return errorResponse(
+        "Sandbox evaluation timed out and was killed. Simplify or split your rules.",
+        504,
+      );
+    }
+    console.error("[sandbox/run] spawn error:", err);
     return errorResponse("Sandbox execution failed", 500);
   }
 }
