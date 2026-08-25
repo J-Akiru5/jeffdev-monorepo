@@ -99,7 +99,13 @@ export async function PATCH(
   if (parsed.data.designSystem !== undefined)
     columns.design_system = parsed.data.designSystem;
 
-  await db.from("prism_projects").update(columns).eq("id", id);
+  // Re-scope by owner in the UPDATE itself — the earlier SELECT no longer
+  // proves ownership by the time the write lands (TOCTOU, solidity scan §3).
+  await db
+    .from("prism_projects")
+    .update(columns)
+    .eq("id", id)
+    .eq("user_id", auth.userId);
 
   return successResponse({ id, ...existing, ...parsed.data, updatedAt });
 }
