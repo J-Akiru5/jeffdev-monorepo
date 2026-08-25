@@ -402,6 +402,11 @@ async function handlePaymentCompleted(
   const now = new Date();
   const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
+  // Insert-if-absent only: this row is just a month placeholder — the
+  // bump_prism_ai_generations RPC auto-creates each new month on first use.
+  // A blind upsert used to OVERWRITE ai_generations back to 0 whenever a
+  // PAYMENT.SALE.COMPLETED arrived mid-month (retried/late payment),
+  // silently gifting the remainder of the plan quota.
   await db.from("prism_usage").upsert(
     {
       user_id: userId,
@@ -411,7 +416,7 @@ async function handlePaymentCompleted(
       components_created: 0,
       updated_at: now.toISOString(),
     },
-    { onConflict: "user_id,month" },
+    { onConflict: "user_id,month", ignoreDuplicates: true },
   );
 }
 
