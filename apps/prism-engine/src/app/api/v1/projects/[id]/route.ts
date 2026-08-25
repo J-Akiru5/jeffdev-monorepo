@@ -130,8 +130,13 @@ export async function DELETE(
   if (!project) return errorResponse("Project not found", 404);
 
   const projectId = project.id;
+  // Delete attached children before the project itself. The DB FKs are the
+  // backstop, but doing it here keeps cleanup deterministic regardless of
+  // which client deletes the row — skills used to survive with project_id
+  // SET NULL and accumulate invisible orphans (solidity scan §2.3).
   await Promise.all([
     db.from("prism_rules").delete().eq("project_id", projectId),
+    db.from("prism_skills").delete().eq("project_id", projectId),
     db.from("prism_projects").delete().eq("id", id),
   ]);
 
