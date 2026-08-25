@@ -8,31 +8,11 @@ import { logError } from "@/lib/log-error";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getPrismDb } from "@syntaxure-labs/db/prism";
-import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
+import { TIER_LIMITS, getUserTier } from "@/lib/subscriptions";
 
 // =============================================================================
 // HELPERS
 // =============================================================================
-
-async function getUserTier(userId: string): Promise<SubscriptionTier> {
-  try {
-    const db = getPrismDb();
-    const { data: subscription } = await db
-      .from("prism_subscriptions")
-      .select("tier")
-      .eq("user_id", userId)
-      .in("status", ["active", "trialing"])
-      .maybeSingle();
-
-    if (!subscription) {
-      return "free";
-    }
-
-    return (subscription.tier as SubscriptionTier) || "free";
-  } catch {
-    return "free";
-  }
-}
 
 function getMonthStart(): Date {
   const now = new Date();

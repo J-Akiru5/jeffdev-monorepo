@@ -94,13 +94,20 @@ export async function GET() {
       });
     }
 
-    // Return actual subscription data
-    const tier = (subscription.tier as SubscriptionTier) || "free";
+    // Effective tier follows billing enforcement semantics: only an
+    // active/trialing row grants its tier — cancelled/past_due falls back
+    // to free (same rule as getUserTier()). Raw status is still reported
+    // so the dashboard can explain WHY the tier dropped.
+    const effectiveTier = ["active", "trialing"].includes(
+      subscription.status || "",
+    )
+      ? ((subscription.tier as SubscriptionTier) || "free")
+      : "free";
     const { TIER_LIMITS } = await import("@/lib/subscriptions");
-    const limits = TIER_LIMITS[tier];
+    const limits = TIER_LIMITS[effectiveTier];
 
     return NextResponse.json({
-      tier,
+      tier: effectiveTier,
       status: subscription.status || "active",
       limits: {
         rules: limits.rules,

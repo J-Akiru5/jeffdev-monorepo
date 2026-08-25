@@ -2,10 +2,16 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { getPrismDb } from "@syntaxure-labs/db/prism";
-import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
+import {
+  TIER_LIMITS,
+  getUserTier as getTierForUser,
+  type SubscriptionTier,
+} from "@/lib/subscriptions";
 
 /**
- * Get user's current subscription tier
+ * Get user's current subscription tier.
+ * Thin session wrapper over the canonical getUserTier() in lib/subscriptions
+ * so tier resolution has exactly one implementation (billing source of truth).
  */
 export async function getUserTier(): Promise<SubscriptionTier> {
   const supabase = await createClient();
@@ -17,23 +23,7 @@ export async function getUserTier(): Promise<SubscriptionTier> {
     return "free";
   }
 
-  try {
-    const db = getPrismDb();
-    const { data: subscription } = await db
-      .from("prism_subscriptions")
-      .select("tier")
-      .eq("user_id", user.id)
-      .in("status", ["active", "trialing"])
-      .maybeSingle();
-
-    if (!subscription) {
-      return "free";
-    }
-
-    return (subscription.tier as SubscriptionTier) || "free";
-  } catch {
-    return "free";
-  }
+  return getTierForUser(user.id);
 }
 
 /**

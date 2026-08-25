@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getPrismDb, isValidId } from "@syntaxure-labs/db/prism";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
-import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
+import { TIER_LIMITS, getUserTier } from "@/lib/subscriptions";
 import type { RuleDoc, BrandDoc } from "@/lib/types";
 
 /**
@@ -1356,23 +1356,5 @@ async function handleToolCall(
 
     default:
       throw new Error(`Unknown tool: ${name}`);
-  }
-}
-
-/**
- * Get user tier
- */
-async function getUserTier(userId: string): Promise<SubscriptionTier> {
-  try {
-    const db = getPrismDb();
-    const { data: sub } = await db
-      .from("prism_subscriptions")
-      .select("tier")
-      .eq("user_id", userId)
-      .in("status", ["active", "trialing"])
-      .maybeSingle();
-    return (sub?.tier as SubscriptionTier) || "free";
-  } catch {
-    return "free";
   }
 }

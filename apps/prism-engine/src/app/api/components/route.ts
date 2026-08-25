@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { z } from "zod";
-import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
+import { TIER_LIMITS, getUserTier } from "@/lib/subscriptions";
 import crypto from "crypto";
 
 // =============================================================================
@@ -29,26 +29,6 @@ const SaveComponentSchema = z.object({
 // =============================================================================
 // HELPERS
 // =============================================================================
-
-async function getUserTier(userId: string): Promise<SubscriptionTier> {
-  try {
-    const db = getPrismDb();
-    const { data: subscription } = await db
-      .from("prism_subscriptions")
-      .select("tier")
-      .eq("user_id", userId)
-      .in("status", ["active", "trialing"])
-      .maybeSingle();
-
-    if (!subscription) {
-      return "free";
-    }
-
-    return (subscription.tier as SubscriptionTier) || "free";
-  } catch {
-    return "free";
-  }
-}
 
 function generateId(): string {
   return `comp_${crypto.randomBytes(12).toString("hex")}`;

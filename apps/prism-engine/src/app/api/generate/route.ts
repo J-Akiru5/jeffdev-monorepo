@@ -19,22 +19,7 @@ import {
   claimAiGeneration,
   refundAiGeneration,
 } from "@/lib/usage";
-import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
-
-async function getUserTier(userId: string): Promise<SubscriptionTier> {
-  try {
-    const db = getPrismDb();
-    const { data: sub } = await db
-      .from("prism_subscriptions")
-      .select("tier")
-      .eq("user_id", userId)
-      .in("status", ["active", "trialing"])
-      .maybeSingle();
-    return (sub?.tier as SubscriptionTier) || "free";
-  } catch {
-    return "free";
-  }
-}
+import { TIER_LIMITS, getUserTier, type SubscriptionTier } from "@/lib/subscriptions";
 
 async function getMonthlyUsage(userId: string): Promise<number> {
   try {

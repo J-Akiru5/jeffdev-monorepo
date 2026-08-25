@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 export const dynamic = "force-dynamic";
 
 import { createClient } from "@/lib/supabase/server";
-import { getPrismDb } from "@syntaxure-labs/db/prism";
+import { getUserTier } from "@/lib/subscriptions";
 import DashboardShell from "@/components/layout/dashboard-shell";
 
 /**
@@ -23,20 +23,12 @@ export default async function DashboardLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-  /* ── Subscription tier ── */
+  /* ── Subscription tier — resolved through the canonical getUserTier()
+     (active/trialing only) so a cancelled subscriber no longer sees a paid
+     badge the API would refuse to honor. ── */
   let currentTier = "free";
   if (user) {
-    try {
-      const db = getPrismDb();
-      const { data: sub } = await db
-        .from("prism_subscriptions")
-        .select("tier")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      currentTier = sub?.tier || "free";
-    } catch {
-      currentTier = "free";
-    }
+    currentTier = await getUserTier(user.id);
   }
 
   /* ── Derived display values ── */

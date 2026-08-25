@@ -1,8 +1,7 @@
 import { logError } from "@/lib/log-error";
 import { createClient } from "@/lib/supabase/server";
-import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { NextResponse } from "next/server";
-import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
+import { TIER_LIMITS, getUserTier } from "@/lib/subscriptions";
 
 /**
  * Auth Verify API
@@ -61,28 +60,5 @@ export async function GET() {
       },
       { status: 500 },
     );
-  }
-}
-
-/**
- * Get user's subscription tier
- */
-async function getUserTier(userId: string): Promise<SubscriptionTier> {
-  try {
-    const db = getPrismDb();
-    const { data: subscription } = await db
-      .from("prism_subscriptions")
-      .select("tier")
-      .eq("user_id", userId)
-      .in("status", ["active", "trialing"])
-      .maybeSingle();
-
-    if (!subscription) {
-      return "free";
-    }
-
-    return (subscription.tier as SubscriptionTier) || "free";
-  } catch {
-    return "free";
   }
 }
