@@ -3,6 +3,10 @@ import { getPrismDb, isValidId } from "@syntaxure-labs/db/prism";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
 import { TIER_LIMITS, getUserTier } from "@/lib/subscriptions";
+import {
+  claimAiGeneration,
+  refundAiGeneration,
+} from "@/lib/usage";
 import type { RuleDoc, BrandDoc } from "@/lib/types";
 
 /**
@@ -1186,26 +1190,50 @@ async function handleToolCall(
         };
       }
 
-      const { generateComponent } = await import("@/lib/gemini");
-      const component = await generateComponent({
-        prompt,
-        designSystem:
-          (args?.designSystem as
-            | "jdstudio"
-            | "bare-minimum"
-            | "glassmorphic"
-            | "8bit-nostalgia") || "jdstudio",
-        stack: (args?.stack as "react" | "nextjs" | "react-native") || "nextjs",
-      });
+      // Monthly quota — claim before work, refund on failure, same contract
+      // as /api/generate so MCP generations count against the same plan cap.
+      const userTier = await getUserTier(userId);
+      const claimed = await claimAiGeneration(userId);
+      if (
+        TIER_LIMITS[userTier].aiGenerations !== -1 &&
+        claimed !== null &&
+        claimed > TIER_LIMITS[userTier].aiGenerations
+      ) {
+        await refundAiGeneration(userId);
+        return {
+          content: [
+            { type: "text", text: "Monthly AI generation limit reached. Upgrade your plan for more." },
+          ],
+          error: true,
+        };
+      }
 
-      return {
-        content: [
-          {
-            type: "text",
-            text: `# Generated Component\n\n\`\`\`tsx\n${component.code}\n\`\`\`${component.explanation ? `\n\n## Explanation\n${component.explanation}` : ""}`,
-          },
-        ],
-      };
+      try {
+        const { generateComponent } = await import("@/lib/gemini");
+        const component = await generateComponent({
+          prompt,
+          designSystem:
+            (args?.designSystem as
+              | "jdstudio"
+              | "bare-minimum"
+              | "glassmorphic"
+              | "8bit-nostalgia") || "jdstudio",
+          stack: (args?.stack as "react" | "nextjs" | "react-native") || "nextjs",
+        });
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: `# Generated Component\n\n\`\`\`tsx\n${component.code}\n\`\`\`${component.explanation ? `\n\n## Explanation\n${component.explanation}` : ""}`,
+            },
+          ],
+        };
+      } catch (genError) {
+        // Refund: failed generations must not consume quota.
+        await refundAiGeneration(userId);
+        throw genError;
+      }
     }
 
     case "search_marketplace": {
