@@ -19,7 +19,7 @@ import {
   claimAiGeneration,
   refundAiGeneration,
 } from "@/lib/usage";
-import { TIER_LIMITS, getUserTier, type SubscriptionTier } from "@/lib/subscriptions";
+import { TIER_LIMITS, getUserTier } from "@/lib/subscriptions";
 
 async function getMonthlyUsage(userId: string): Promise<number> {
   try {

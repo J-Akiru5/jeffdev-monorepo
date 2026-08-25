@@ -13,7 +13,6 @@ import { logError } from "@/lib/log-error";
 import { NextRequest, NextResponse } from "next/server";
 import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { Resend } from "resend";
-import { createClient } from "@supabase/supabase-js";
 
 const PAYPAL_WEBHOOK_ID = process.env.PAYPAL_WEBHOOK_ID;
 const PAYPAL_API_URL =
