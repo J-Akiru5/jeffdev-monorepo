@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prism Live Demo Guide - Antigravity - 2026-08-24</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A0D12;--bg2:#0E1219;--panel:#11161F;--line:#1D2530;--cyan:#22D3EE;--violet:#8B7BFF;
+--text:#E6EBF2;--dim:#8B95A5;--ok:#34D399;--warn:#FBBF24;--bad:#F87171;
+--mono:JetBrains Mono,ui-monospace,Menlo,Consolas,monospace;--sans:Inter,system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.65;font-size:16px}
+.wrap{max-width:980px;margin:0 auto;padding:48px 28px 96px}
+.kicker{font-family:var(--mono);font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan)}
+h1{font-size:2.2rem;font-weight:800;line-height:1.15;margin:.6rem 0 .3rem}
+h1 .accent{color:var(--violet)}
+h2{font-size:1.3rem;font-weight:700;margin:2.8rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--line)}
+h2 .idx{font-family:var(--mono);color:var(--cyan);font-weight:500;margin-right:.6rem}
+h3{font-size:.95rem;font-weight:600;margin:1.3rem 0 .5rem;color:var(--cyan)}
+p{margin:.7rem 0}
+.lede{font-size:1.05rem;border-left:3px solid var(--cyan);padding:.9rem 1.2rem;background:var(--bg2);border-radius:0 10px 10px 0;margin:1.6rem 0}
+code,.mono{font-family:var(--mono);font-size:.86em;background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:.1em .38em;color:var(--cyan)}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1.1rem 1.25rem;overflow-x:auto;margin:.9rem 0}
+pre code{background:none;border:none;padding:0;color:var(--text);font-size:.84rem;line-height:1.6}
+.prompt{background:linear-gradient(135deg,rgba(34,211,238,.06),rgba(139,123,255,.06));border:1px solid rgba(34,211,238,.3);border-radius:10px;padding:1rem 1.25rem;margin:1rem 0}
+.prompt .plabel{font-family:var(--mono);font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--violet);font-weight:700;margin-bottom:.4rem}
+.prompt .ptext{font-family:var(--mono);font-size:.95rem;color:var(--text);font-weight:600}
+.branch{border-radius:10px;padding:1rem 1.25rem;margin:1rem 0}
+.branch.a{border:1px solid rgba(52,211,153,.35);background:rgba(52,211,153,.05)}
+.branch.b{border:1px solid rgba(251,191,36,.35);background:rgba(251,191,36,.05)}
+.branch .blabel{font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.branch.a .blabel{color:var(--ok)}
+.branch.b .blabel{color:var(--warn)}
+.branch p{margin:.4rem 0}
+.note{border:1px dashed rgba(139,123,255,.45);border-radius:10px;padding:.85rem 1.1rem;margin:1rem 0;background:rgba(139,123,255,.05);font-size:.94rem}
+.note b{color:var(--violet)}
+table{width:100%;border-collapse:collapse;margin:.9rem 0;font-size:.92rem}
+th{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);text-align:left;padding:.55rem .75rem;border-bottom:1px solid var(--line)}
+td{padding:.6rem .75rem;border-bottom:1px solid var(--line);vertical-align:top}
+ul.body{margin:.7rem 0 .7rem 1.3rem}
+ul.body li{margin:.45em 0}
+.foot{margin-top:4rem;padding-top:1.2rem;border-top:1px solid var(--line);font-family:var(--mono);font-size:.72rem;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="kicker">Syntaxure Labs - Prism - Live Demo Guide</div>
+<h1>Governance over Generation: <span class="accent">the Antigravity run</span></h1>
+<p class="mono" style="color:var(--dim)">docs/prism-demo-guide-antigravity-2026-08-24.html - one folder, one IDE, one sentence</p>
+
+<div class="lede">
+<b>The arc.</b> We never state a hex code. We ask the agent for a button "based on our design constitution" - and Prism does the rest: either the agent reads the constitution and complies on the first write, or it guesses, and the Pass intercepts the write and forces self-correction. Both outcomes are the product. This guide scripts both branches so nothing live can surprise you.
+</div>
+
+<h2><span class="idx">0</span>Pre-flight - one time, in Antigravity's terminal</h2>
+<pre><code># folder already open + npm install done (your current state)
+mkdir styles
+(echo :root { &amp; echo   --brand-primary: #06b6d4; &amp; echo   --text-main: #0a0a0a; &amp; echo   --brand-danger: #ef4444; &amp; echo }) > styles\globals.css
+
+npx prism init --yes
+dir .prism     :: constitution
+dir .agents    :: antigravity hook (Pass wired)</code></pre>
+<p>The <code>--brand-danger</code> token is deliberate: it powers Act II without you ever naming a hex.</p>
+
+<h2><span class="idx">1</span>ACT I - the constitution prompt</h2>
+<div class="prompt">
+<div class="plabel">Paste into the Antigravity agent chat</div>
+<div class="ptext">"Please make a Button component based on our design constitution."</div>
+</div>
+<p>That is the entire prompt. No hex, no file path, no framework. The word <i>constitution</i> is doing the work - it tells the agent governance exists, and Prism decides what happens next.</p>
+
+<h3>Branch A - the agent complies on first write</h3>
+<div class="branch a">
+<div class="blabel">What you say while it writes</div>
+<p>"Notice what just happened. Nobody told it a color. It opened our constitution, found the design tokens, and wrote <code>var(--brand-primary)</code> on the first attempt. That is governance guiding generation - before any review, before any PR."</p>
+</div>
+<p>Then go straight to Act II for the enforcement beat.</p>
+
+<h3>Branch B - the agent guesses (raw hex appears)</h3>
+<div class="branch b">
+<div class="blabel">What you say while the Pass fires</div>
+<p>"And here is the moment that sells it. The agent didn't know our palette - it guessed a hex. Watch the write get intercepted: exit code 2, a named file, a line number, and the exact replacement. The agent is now fixing itself. No reviewer. No PR. No tomorrow."</p>
+</div>
+<p>Both branches converge: the file on disk ends up token-clean. <code>type src\Button.tsx</code> to prove it.</p>
+
+<h2><span class="idx">2</span>ACT II - the enforcement beat (guaranteed violation)</h2>
+<p>Branch A agents that complied once may comply again - so force the test with a request the constitution constrains but the agent cannot look up:</p>
+<div class="prompt">
+<div class="plabel">Follow-up prompt</div>
+<div class="ptext">"Great. Now add a Danger variant to the Button - use our brand red for it."</div>
+</div>
+<p>"Our brand red" is unknowable unless the agent re-reads the constitution. If it hardcodes <code>#ef4444</code> or <code>red</code>, the Pass flags it and demands <code>var(--brand-danger)</code>. If it checks the constitution first - say so: <i>"it learned. The correction from thirty seconds ago is now baked into its behavior."</i></p>
+
+<h2><span class="idx">3</span>Receipts - close the loop deterministically</h2>
+<pre><code>npx prism check src\Button.tsx
+:: "no violations found"  (or lists remaining warns, none blocking)
+
+type src\Button.tsx</code></pre>
+<p>Final line for mentors: <i>"This file is the entire product. A versioned constitution that any agent, any IDE, and any CI pipeline can read and enforce - today Claude Code, Cursor, and Antigravity. Tomorrow, whatever ships next."</i></p>
+
+<h2><span class="idx">4</span>Fallback ladder (if live firing misbehaves)</h2>
+<table>
+<tr><th>If</th><th>Do</th><th>Say</th></tr>
+<tr><td>Antigravity hook doesn't intercept</td><td>Run <code>npx prism check src\Button.tsx</code> - deterministic findings, zero agent dependency</td><td>"The enforcement engine is standalone - the IDE integration is one layer on top."</td></tr>
+<tr><td>Want the verified path instead</td><td>Same demo in <b>Claude Code</b> - identical folder, identical prompt (E2E-verified twice this week)</td><td>"Works across agents - that's the point."</td></tr>
+<tr><td>Agent asks where rules come from</td><td><code>type .prism\rules.json</code></td><td>"Versioned, human-readable, team-shareable."</td></tr>
+</table>
+
+<h2><span class="idx">5</span>Mentor quick-card (BMC / market / infra)</h2>
+<table>
+<tr><th>Question</th><th>Answer</th></tr>
+<tr><td>"Why pay when Cursor/Claude have free rules files?"</td><td>Rules files suggest. Prism enforces - in-loop, cross-agent, with tokens, sync, and audit. One constitution, every tool.</td></tr>
+<tr><td>"Cost per user?"</td><td>~zero. Enforcement is regex on their machine. We bill for sync, Kitchen, AI authoring, teams.</td></tr>
+<tr><td>"Competitors?"</td><td>Native rules files (suggestions), CodeRabbit/Greptile (post-hoc PR review), SonarQube/ESLint (CI linters). Nobody enforces at write-time across agents. In-house grep scripts are the real Phase-0 competitor - we're the productized version.</td></tr>
+<tr><td>"Infra cost?"</td><td>~&#8369;800/mo today. Scale path: &#8369;300K capex for owned hardware colocated at ~&#8369;15K/mo - or client-funded appliance inside an Enterprise on-prem licence.</td></tr>
+<tr><td>"Break-even?"</td><td>~166 Pro subs at &#8369;299 - but enterprise on-prem deals close the gap faster than seat volume.</td></tr>
+<tr><td>"Vendor lock?"</td><td>Open-source engine, AGPL core + MIT-facing CLI. The constitution is a plain JSON file users own.</td></tr>
+</table>
+
+<div class="note"><b>Known non-blockers (pre-briefed, don't improvise):</b> the 2 npm audit highs are transitive deps - "queued for open-source hygiene pass." A stale <code>code</code> shim error just means VS Code moved - "we demo on Antigravity, which is also a supported hook target." If asked about the AGPL licence: "engine core AGPL for copyleft protection; the boundary to proprietary services is a process boundary, by design."</div>
+
+<div class="foot">SYNTAXURE LABS - Prism live demo guide - Antigravity native run - 2026-08-24<br>Backup of record: Claude Code path (E2E-verified) + npx prism check (deterministic)</div>
+</div>
+</body>
+</html>
