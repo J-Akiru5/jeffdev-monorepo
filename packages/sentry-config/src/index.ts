@@ -32,20 +32,34 @@ export function withSentry(
   project: string,
   options?: { tracesSampleRate?: number },
 ) {
-  return withSentryConfig(nextConfig, {
-    org: SENTRY_ORG,
-    project,
-    // Releases + source-map upload require SENTRY_AUTH_TOKEN. When unset
-    // (local dev, preview builds) Sentry skips upload with a warning.
-    authToken: process.env.SENTRY_AUTH_TOKEN || "",
-    silent: !process.env.CI,
+  // Phase 5 hotfix: release/sourcemap upload requires ALL THREE of org,
+  // project, and auth token to be valid. When any is missing (e.g. Vercel
+  // projects before SENTRY_ORG was set), attempting the upload fails
+  // loudly mid-build ("Project not found", "projects are invalid").
+  // Gate instead: runtime DSN telemetry is unaffected; upload only runs
+  // when fully configured.
+  const uploadConfigured = Boolean(
+    SENTRY_ORG && process.env.SENTRY_AUTH_TOKEN,
+  );
+
+  const base = {
+    silent: true,
     widenClientFileUpload: false,
     tunnelRoute: "/monitoring",
-    // Phase 5: migrated from deprecated top-level keys per @sentry/nextjs
-    // notices in Turbopack builds (disableLogger, reactComponentAnnotation).
     webpack: {
       treeshake: { removeDebugLogging: true },
       reactComponentAnnotation: { enabled: true },
     },
+  };
+
+  if (!uploadConfigured) {
+    return withSentryConfig(nextConfig, base);
+  }
+
+  return withSentryConfig(nextConfig, {
+    ...base,
+    org: SENTRY_ORG,
+    project,
+    authToken: process.env.SENTRY_AUTH_TOKEN || "",
   });
 }
