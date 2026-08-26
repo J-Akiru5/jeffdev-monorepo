@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 /**
  * n8n Webhook Receiver
  *
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
     // Verify internal API key
     const apiKey = request.headers.get("X-Api-Key");
     if (!INTERNAL_API_KEY) {
-      console.error("[n8n-relay] PRISM_API_KEY not configured — rejecting request");
+      logError("app/api/webhooks/n8n/route", "[n8n-relay] PRISM_API_KEY not configured — rejecting request");
       return NextResponse.json({ error: "Server misconfiguration" }, { status: 500 });
     }
     if (apiKey !== INTERNAL_API_KEY) {
@@ -103,7 +104,7 @@ export async function POST(request: Request) {
     });
 
     if (!response.ok) {
-      console.error(
+      logError("app/api/webhooks/n8n/route", 
         `[n8n-relay] n8n returned ${response.status}: ${response.statusText}`,
       );
       return NextResponse.json(
@@ -115,7 +116,7 @@ export async function POST(request: Request) {
     console.log(`[n8n-relay] ✅ Event ${event.event} relayed to n8n successfully`);
     return NextResponse.json({ received: true, relayed: true });
   } catch (error) {
-    console.error("[n8n-relay] Error processing event:", error);
+    logError("app/api/webhooks/n8n/route", "[n8n-relay] Error processing event:", error);
     return NextResponse.json(
       { error: "Failed to process event" },
       { status: 500 },

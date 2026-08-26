@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 /**
  * API Key Verification (for MCP Server)
  *
@@ -8,31 +9,8 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getPrismDb } from "@syntaxure-labs/db/prism";
-import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
+import { TIER_LIMITS, getUserTier } from "@/lib/subscriptions";
 import crypto from "crypto";
-
-/**
- * Get user's subscription tier from database
- */
-async function getUserTier(userId: string): Promise<SubscriptionTier> {
-  try {
-    const db = getPrismDb();
-    const { data: subscription } = await db
-      .from("prism_subscriptions")
-      .select("tier")
-      .eq("user_id", userId)
-      .in("status", ["active", "trialing"])
-      .maybeSingle();
-
-    if (!subscription) {
-      return "free";
-    }
-
-    return (subscription.tier as SubscriptionTier) || "free";
-  } catch {
-    return "free";
-  }
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -109,7 +87,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("[API Keys] Verify error:", error);
+    logError("app/api/api-keys/verify/route", "[API Keys] Verify error:", error);
     return NextResponse.json(
       { valid: false, error: "Verification failed" },
       { status: 500 },

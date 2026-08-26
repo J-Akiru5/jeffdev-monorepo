@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 /**
  * Pricing Data — Database-backed with hardcoded fallback
  *
@@ -187,7 +188,7 @@ async function fetchPlans(): Promise<DBPricingPlan[]> {
     if (error) throw error;
     return (data || []) as DBPricingPlan[];
   } catch (error) {
-    console.error("[pricing-db] Failed to fetch from DB:", error);
+    logError("lib/pricing-db", "[pricing-db] Failed to fetch from DB:", error);
     return [];
   }
 }
@@ -204,7 +205,7 @@ async function fetchFAQs(): Promise<DBPricingFAQ[]> {
     if (error) throw error;
     return (data || []) as DBPricingFAQ[];
   } catch (error) {
-    console.error("[pricing-db] Failed to fetch FAQs from DB:", error);
+    logError("lib/pricing-db", "[pricing-db] Failed to fetch FAQs from DB:", error);
     return [];
   }
 }

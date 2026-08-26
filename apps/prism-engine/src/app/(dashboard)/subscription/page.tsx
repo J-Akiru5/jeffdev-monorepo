@@ -75,7 +75,12 @@ export default async function SubscriptionPage({
   const projectCount = projectCountRaw ?? 0;
   const ruleCount = ruleCountRaw ?? 0;
 
-  const currentTier = subscription?.tier || "free";
+  // Effective tier mirrors billing enforcement (active/trialing only) so a
+  // cancelled subscriber sees Free here — not a plan the API refuses to honor.
+  const currentTier =
+    subscription && ["active", "trialing"].includes(subscription.status || "")
+      ? subscription.tier || "free"
+      : "free";
   const currency = await getVisitorCurrency(currencyOverride);
 
   // Build pricing cards from dynamic data

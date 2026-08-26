@@ -1,5 +1,6 @@
 "use client";
 
+import { logError } from "@/lib/log-error";
 import { useState, useCallback } from "react";
 import { Copy, Check } from "lucide-react";
 
@@ -77,7 +78,7 @@ export function CodeBlock({ code, filename, showCopy = true }: CodeBlockProps) {
     try {
       return highlightSyntax(code);
     } catch (error) {
-      console.error("Highlighting failed:", error);
+      logError("components/ui/code-block", "Highlighting failed:", error);
       // Fallback to escaped HTML
       return code
         .replace(/&/g, "&amp;")

@@ -1,5 +1,7 @@
 "use client";
 
+import { logError } from "@/lib/log-error";
+
 /**
  * Pricing Grid Component
  *
@@ -45,10 +47,10 @@ export function PricingGrid({ currentTier = "free" }: PricingGridProps) {
       } else if (data.redirect) {
         router.push(data.redirect);
       } else {
-        console.error("No approval URL returned");
+        logError("components/subscription/pricing-grid", "No approval URL returned");
       }
     } catch (error) {
-      console.error("Subscription error:", error);
+      logError("components/subscription/pricing-grid", "Subscription error:", error);
     }
   };
 

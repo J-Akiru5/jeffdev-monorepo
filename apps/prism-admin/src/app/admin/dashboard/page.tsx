@@ -1,3 +1,4 @@
+import { SystemStatusBadge } from "@/components/system-status-badge";
 import { createClient } from "@/lib/supabase/server";
 import {
   Users,
@@ -111,10 +112,7 @@ export default async function DashboardPage() {
           <h1 className="text-2xl font-bold text-white">Dashboard</h1>
           <p className="text-sm text-white/50">Mission Control Overview</p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-white/40 font-mono">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          System Operational
-        </div>
+        <SystemStatusBadge />
       </div>
 
       {/* Stats Grid */}

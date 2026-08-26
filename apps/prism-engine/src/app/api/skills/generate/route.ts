@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 /**
  * POST /api/skills/generate — Phase 3 skills creator.
  *
@@ -172,7 +173,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (err) {
     await refundAiGeneration(userId);
-    console.error("[skills/generate] failed:", err);
+    logError("app/api/skills/generate/route", "[skills/generate] failed:", err);
     return NextResponse.json(
       { error: `Could not generate the skill: ${(err as Error).message}` },
       { status: 502 },

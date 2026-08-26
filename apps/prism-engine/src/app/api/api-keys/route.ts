@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 /**
  * API Keys Management
  *
@@ -97,7 +98,7 @@ export async function GET() {
         maskedKeys.length < TIER_LIMITS[tier].apiKeys,
     });
   } catch (error) {
-    console.error("[API Keys] GET error:", error);
+    logError("app/api/api-keys/route", "[API Keys] GET error:", error);
     return NextResponse.json(
       { error: "Failed to fetch API keys" },
       { status: 500 },
@@ -188,7 +189,7 @@ export async function POST(request: NextRequest) {
       message: "Copy this key now. It will not be shown again.",
     });
   } catch (error) {
-    console.error("[API Keys] POST error:", error);
+    logError("app/api/api-keys/route", "[API Keys] POST error:", error);
     return NextResponse.json(
       { error: "Failed to generate API key" },
       { status: 500 },

@@ -1,5 +1,6 @@
 "use client";
 
+import { logError } from "@/lib/log-error";
 import Link from "next/link";
 import { useAuth } from "@syntaxure/ui";
 import { useState, useEffect, useCallback } from "react";
@@ -495,7 +496,7 @@ function SubscriptionUsageSection() {
           setUsage(data);
         }
       } catch (error) {
-        console.error("Failed to fetch usage:", error);
+        logError("app/(dashboard)/settings/page", "Failed to fetch usage:", error);
       } finally {
         setLoading(false);
       }
