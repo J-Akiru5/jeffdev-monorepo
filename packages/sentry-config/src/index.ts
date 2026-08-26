@@ -59,7 +59,11 @@ export function withSentry(
   return withSentryConfig(nextConfig, {
     ...base,
     org: SENTRY_ORG,
-    project,
+    // SENTRY_PROJECT override: the Vercel/Sentry project slug must match
+    // what exists in the Sentry org exactly, or uploads 400 with
+    // "projects are invalid". Set SENTRY_PROJECT when the slug differs
+    // from the app's default.
+    project: process.env.SENTRY_PROJECT || project,
     authToken: process.env.SENTRY_AUTH_TOKEN || "",
   });
 }
