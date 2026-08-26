@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 /**
  * Pricing Data — Database-backed with hardcoded fallback
  *
@@ -76,33 +77,33 @@ export interface PricingFAQItem {
 const FALLBACK_PLANS: PricingPlanData[] = [
   {
     name: "Free",
-    tagline: "Get started with the basics",
+    tagline: "Agent governance, free forever",
     tier_slug: "free",
     price: { monthly: 0, annual: 0 },
     pricePhp: { monthly: 0, annual: 0 },
-    features: ["5 rules", "3 components", "1 project", "10 AI generations/month", "Export as Markdown"],
+    features: ["Unlimited local enforcement", "Unlimited local rules", "CLI + TUI (open source)", "1 synced project", "25 AI generations/month"],
     popular: false,
     cta: "Get Started",
     href: "/sign-up",
   },
   {
     name: "Pro",
-    tagline: "For serious developers",
+    tagline: "For solo developers shipping agent-first",
     tier_slug: "pro",
-    price: { monthly: 18, annual: 180 },
-    pricePhp: { monthly: 990, annual: 9900 },
-    features: ["Unlimited rules", "Unlimited components", "10 projects", "500 AI generations/month", "IDE auto-sync", "All design systems", "All stack templates", "Priority support"],
+    price: { monthly: 8, annual: 80 },
+    pricePhp: { monthly: 299, annual: 2990 },
+    features: ["Unlimited synced projects", "Full Kitchen dashboard", "AI rule & skill generation", "Sandbox preview", "Cross-machine sync", "IDE auto-sync (MCP)", "Priority support"],
     popular: true,
     cta: "Start Free Trial",
     href: "/sign-up",
   },
   {
     name: "Team",
-    tagline: "Collaborate with your team",
+    tagline: "One constitution, every agent",
     tier_slug: "team",
-    price: { monthly: 54, annual: 540 },
-    pricePhp: { monthly: 2990, annual: 29900 },
-    features: ["Everything in Pro", "Unlimited projects", "2,000 AI generations/month", "Up to 10 team members", "Shared component library", "Team rule management", "Admin dashboard"],
+    price: { monthly: 7, annual: 70 },
+    pricePhp: { monthly: 249, annual: 2490 },
+    features: ["Everything in Pro", "Shared constitution", "Team rule governance", "2,000 AI generations/month (pooled)", "Audit trail", "Up to 10 seats"],
     popular: false,
     cta: "Start Free Trial",
     href: "/sign-up",
@@ -121,10 +122,10 @@ const FALLBACK_PLANS: PricingPlanData[] = [
 ];
 
 const FALLBACK_COMPARISON: ComparisonRow[] = [
-  { name: "Rules", free: "5", pro: "Unlimited", team: "Unlimited", enterprise: "Unlimited" },
-  { name: "Components", free: "3", pro: "Unlimited", team: "Unlimited", enterprise: "Unlimited" },
-  { name: "Projects", free: "1", pro: "10", team: "Unlimited", enterprise: "Unlimited" },
-  { name: "AI Generations/mo", free: "10", pro: "500", team: "2,000", enterprise: "Unlimited" },
+  { name: "Rules", free: "Unlimited", pro: "Unlimited", team: "Unlimited", enterprise: "Unlimited" },
+  { name: "Components", free: "Unlimited", pro: "Unlimited", team: "Unlimited", enterprise: "Unlimited" },
+  { name: "Synced Projects", free: "1", pro: "Unlimited", team: "Unlimited", enterprise: "Unlimited" },
+  { name: "AI Generations/mo", free: "25", pro: "500", team: "2,000", enterprise: "Unlimited" },
   { name: "IDE Auto-sync", free: false, pro: true, team: true, enterprise: true },
   { name: "Team Members", free: "-", pro: "-", team: "10", enterprise: "Unlimited" },
   { name: "Shared Library", free: false, pro: false, team: true, enterprise: true },
@@ -187,7 +188,7 @@ async function fetchPlans(): Promise<DBPricingPlan[]> {
     if (error) throw error;
     return (data || []) as DBPricingPlan[];
   } catch (error) {
-    console.error("[pricing-db] Failed to fetch from DB:", error);
+    logError("lib/pricing-db", "[pricing-db] Failed to fetch from DB:", error);
     return [];
   }
 }
@@ -204,7 +205,7 @@ async function fetchFAQs(): Promise<DBPricingFAQ[]> {
     if (error) throw error;
     return (data || []) as DBPricingFAQ[];
   } catch (error) {
-    console.error("[pricing-db] Failed to fetch FAQs from DB:", error);
+    logError("lib/pricing-db", "[pricing-db] Failed to fetch FAQs from DB:", error);
     return [];
   }
 }

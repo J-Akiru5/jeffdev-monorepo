@@ -1,5 +1,10 @@
-import { describe, it, expect } from "vitest";
-import { TIER_LIMITS, canUseFeature, getTierDisplayName, type SubscriptionTier } from "@/lib/subscriptions";
+import { describe, it, expect, vi, beforeAll } from "vitest";
+import {
+  TIER_LIMITS,
+  canUseFeature,
+  getTierDisplayName,
+  type SubscriptionTier,
+} from "@/lib/subscriptions";
 
 describe("TIER_LIMITS", () => {
   it("defines limits for all tiers", () => {
@@ -12,11 +17,21 @@ describe("TIER_LIMITS", () => {
     }
   });
 
-  it("free tier has the lowest limits", () => {
+  it("free tier: unlimited local work, 1 synced project, small AI taste", () => {
     const free = TIER_LIMITS.free;
-    expect(free.projects).toBe(1);
-    expect(free.rules).toBe(10);
-    expect(free.components).toBe(5);
+    expect(free.projects).toBe(1); // synced projects
+    expect(free.rules).toBe(-1); // local rules are free forever (roadmap v1.0)
+    expect(free.components).toBe(-1);
+    expect(free.aiGenerations).toBe(25);
+    expect(free.apiKeys).toBe(1); // enough for `prism pull` on the synced project
+    expect(free.ideSync).toBe(false);
+  });
+
+  it("pro tier: unlimited synced artifacts under the roadmap model", () => {
+    expect(TIER_LIMITS.pro.projects).toBe(-1);
+    expect(TIER_LIMITS.pro.rules).toBe(-1);
+    expect(TIER_LIMITS.pro.components).toBe(-1);
+    expect(TIER_LIMITS.pro.aiGenerations).toBe(500);
   });
 
   it("enterprise tier has unlimited everything", () => {
@@ -30,9 +45,8 @@ describe("TIER_LIMITS", () => {
   });
 
   it("pro tier allows at least 5 projects", () => {
-    expect(TIER_LIMITS.pro.projects).toBe(5);
-    expect(TIER_LIMITS.pro.rules).toBe(100);
-    expect(TIER_LIMITS.pro.components).toBe(50);
+    expect(TIER_LIMITS.pro.projects).toBe(-1);
+    expect(TIER_LIMITS.pro.ideSync).toBe(true);
   });
 
   it("team tier allows 10 team members", () => {
@@ -84,5 +98,178 @@ describe("Pricing display", () => {
   it("tier slugs match expected format", () => {
     const slugs = Object.keys(TIER_LIMITS);
     expect(slugs).toEqual(["free", "pro", "team", "enterprise"]);
+  });
+});
+
+describe("Phase 2 pricing model (roadmap v1.0)", () => {
+  it("prices Pro at ₱299/$8 monthly, 10× annual", async () => {
+    const mod = await import("@/lib/subscriptions");
+    expect(mod.TIER_PRICES.pro.monthly).toEqual({ php: 299, usd: 8 });
+    expect(mod.TIER_PRICES.pro.annual).toEqual({ php: 2990, usd: 80 });
+  });
+
+  it("prices Team per-seat at ₱249/$7 with a 3-seat minimum", async () => {
+    const mod = await import("@/lib/subscriptions");
+    expect(mod.TIER_PRICES.team.monthly).toEqual({ php: 249, usd: 7 });
+    expect(mod.TIER_PRICES.team.annual).toEqual({ php: 2490, usd: 70 });
+    expect(mod.TEAM_MIN_SEATS).toBe(3);
+  });
+
+  it("annual is exactly 10× monthly for every paid tier", async () => {
+    const mod = await import("@/lib/subscriptions");
+    for (const tier of ["pro", "team"] as const) {
+      const p = mod.TIER_PRICES[tier];
+      expect(p.annual.usd).toBe(p.monthly.usd! * 10);
+      expect(p.annual.php).toBe(p.monthly.php! * 10);
+    }
+  });
+
+  it("keeps `prism pull` working on Free via the single API key", async () => {
+    // Regression: free.apiKeys was 0 under the old model, which made the
+    // synced project unsyncable.
+    expect(TIER_LIMITS.free.apiKeys).toBeGreaterThanOrEqual(1);
+  });
+
+  it("canUseFeature still blocks the synced-project cap for Free", () => {
+    expect(canUseFeature("free", "projects", 1)).toBe(false);
+    expect(canUseFeature("pro", "projects", 999)).toBe(true); // unlimited
+  });
+});
+
+// ---------------------------------------------------------------------------
+// assertWithinProjectCap (Phase 0 project-cap enforcement)
+//
+// getUserTier() reads prism_subscriptions via getPrismDb(); the cap check
+// counts prism_projects. Both go through one fake Supabase client whose
+// chain shape matches only what these functions actually call.
+// ---------------------------------------------------------------------------
+
+const state = vi.hoisted(() => ({ db: null as null | Record<string, unknown> }));
+
+vi.mock("@syntaxure-labs/db/prism", () => ({
+  getPrismDb: () => state.db,
+}));
+
+function makeFakeDb(opts: {
+  sub?: { tier: string } | null;
+  projectCount?: number;
+  failCount?: boolean;
+}) {
+  return {
+    from(table: string) {
+      if (table === "prism_subscriptions") {
+        const q = {} as Record<string, unknown> & {
+          select: () => unknown;
+          eq: () => unknown;
+          in: () => unknown;
+        };
+        q.select = () => q;
+        q.eq = () => q;
+        q.in =
+          () =>
+          ({ maybeSingle: () => Promise.resolve({ data: opts.sub ?? null }) });
+        return q;
+      }
+      if (table === "prism_projects") {
+        const q = {} as Record<string, unknown> & { select: () => unknown; eq: () => unknown };
+        q.select =
+          () =>
+          ({
+            eq: () => {
+              if (opts.failCount) return Promise.reject(new Error("db down"));
+              return Promise.resolve({ count: opts.projectCount ?? 0, error: null });
+            },
+          });
+        return q;
+      }
+      throw new Error(`unexpected table: ${table}`);
+    },
+  };
+}
+
+describe("assertWithinProjectCap", () => {
+  beforeAll(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("allows a free user under the cap (0 of 1)", async () => {
+    state.db = makeFakeDb({ sub: null, projectCount: 0 }) as never;
+    const { assertWithinProjectCap } = await import("@/lib/subscriptions");
+    const cap = await assertWithinProjectCap("user-1");
+    expect(cap).toEqual({
+      allowed: true,
+      tier: "free",
+      limit: 1,
+      currentCount: 0,
+    });
+  });
+
+  it("blocks a free user at the cap and reports grandfathered counts", async () => {
+    // Jeff's exact demo situation: 2 existing projects on Free's 1-project limit.
+    // Enforcement must block NEW creates while both existing rows stay intact.
+    state.db = makeFakeDb({ sub: null, projectCount: 2 }) as never;
+    const { assertWithinProjectCap } = await import("@/lib/subscriptions");
+    const cap = await assertWithinProjectCap("user-1");
+    expect(cap.allowed).toBe(false);
+    expect(cap.tier).toBe("free");
+    expect(cap.limit).toBe(1);
+    expect(cap.currentCount).toBe(2);
+  });
+
+  it("never caps paid tiers on projects (unlimited under the roadmap model)", async () => {
+    state.db = makeFakeDb({ sub: { tier: "pro" }, projectCount: 500 }) as never;
+    const mod = await import("@/lib/subscriptions");
+    const cap = await mod.assertWithinProjectCap("user-1");
+    expect(cap.allowed).toBe(true);
+    expect(cap.limit).toBe(-1);
+    expect(cap.currentCount).toBe(-1); // count query skipped for unlimited
+
+    state.db = makeFakeDb({ sub: { tier: "team" }, projectCount: 999 }) as never;
+    expect((await mod.assertWithinProjectCap("user-1")).allowed).toBe(true);
+  });
+
+  it("skips the COUNT query entirely on unlimited tiers (-1)", async () => {
+    const tables: string[] = [];
+    const base = makeFakeDb({ sub: { tier: "enterprise" }, projectCount: 99 });
+    state.db = {
+      from: (table: string) => {
+        tables.push(table);
+        return (
+          base as unknown as { from: (t: string) => unknown }
+        ).from(table);
+      },
+    } as never;
+    const { assertWithinProjectCap } = await import("@/lib/subscriptions");
+    const cap = await assertWithinProjectCap("user-1");
+    expect(cap.allowed).toBe(true);
+    expect(cap.limit).toBe(-1);
+    expect(cap.currentCount).toBe(-1);
+    expect(tables).not.toContain("prism_projects");
+  });
+
+  it("fails open when the count query errors (infra outage must not lock users out)", async () => {
+    state.db = makeFakeDb({ sub: null, projectCount: 0, failCount: true }) as never;
+    const { assertWithinProjectCap } = await import("@/lib/subscriptions");
+    const cap = await assertWithinProjectCap("user-1");
+    expect(cap.allowed).toBe(true);
+  });
+
+  it("reads tier from prism_subscriptions only (never user_profiles)", async () => {
+    state.db = makeFakeDb({ sub: { tier: "pro" }, projectCount: 5 }) as never;
+    const { assertWithinProjectCap } = await import("@/lib/subscriptions");
+    const cap = await assertWithinProjectCap("user-1");
+    expect(cap.tier).toBe("pro");
+  });
+});
+
+describe("projectCapMessage", () => {
+  it("uses singular for a 1-project plan and names the way out", async () => {
+    state.db = makeFakeDb({ sub: null, projectCount: 2 }) as never;
+    const mod = await import("@/lib/subscriptions");
+    const msg = mod.projectCapMessage(await mod.assertWithinProjectCap("u"));
+    expect(msg).toContain("Free plan includes 1 project —");
+    expect(msg).toContain("you currently have 2");
+    expect(msg.toLowerCase()).toContain("upgrade");
+    expect(msg).not.toContain("projects —"); // no plural slip
   });
 });

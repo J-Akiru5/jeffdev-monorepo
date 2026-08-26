@@ -3,7 +3,7 @@
  * @description Postgres (Supabase) access for the Prism Context Engine.
  *
  * Replaces `./cosmos` (Azure Cosmos DB, MongoDB API) and `./cosmos-gremlin`
- * (Cosmos DB Gremlin graph). See PRISM_MIGRATION.md at the repo root for the
+ * (Cosmos DB Gremlin graph). See docs/prism/PRISM_MIGRATION.md for the
  * full migration writeup.
  *
  * Design notes:

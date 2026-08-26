@@ -1,7 +1,13 @@
 import { NextRequest } from "next/server";
 import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { authenticate, errorResponse, successResponse } from "@/lib/api-auth";
+import { checkRateLimit, getRateLimitHeaders } from "@/lib/rate-limit";
 import { generateChatCompletion } from "@/lib/ai-router";
+import {
+  claimAiGeneration,
+  refundAiGeneration,
+} from "@/lib/usage";
+import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
 
 interface RepoScanData {
   root?: string;
@@ -21,6 +27,12 @@ export async function POST(request: NextRequest) {
   const auth = await authenticate(request);
   if (auth instanceof Response) return auth;
 
+  // AI spend guard: this endpoint calls the LLM on every request and has no
+  // monthly quota — hold it to a strict per-minute ceiling (solidity scan §1.3).
+  const rl = await checkRateLimit(`extract:${auth.userId}`, "strict");
+  if (!rl.allowed)
+    return errorResponse("Rate limit exceeded", 429, getRateLimitHeaders(rl));
+
   let body: { scan: RepoScanData };
   try {
     body = await request.json();
@@ -30,6 +42,27 @@ export async function POST(request: NextRequest) {
 
   if (!body.scan || !body.scan.structure) {
     return errorResponse("Valid scan report with structure is required", 400);
+  }
+
+  // Monthly quota: same claim-before-work / refund-on-failure contract as
+  // the rules creator and /api/generate — a burst ceiling alone let callers
+  // run the LLM far past their plan's monthly cap.
+  const tier = auth.tier as SubscriptionTier;
+  if (TIER_LIMITS[tier].aiGenerations === 0) {
+    return errorResponse(
+      "AI features are not included in your plan. Upgrade to Pro to extract rules.",
+      403,
+    );
+  }
+
+  const claimed = await claimAiGeneration(auth.userId);
+  if (
+    TIER_LIMITS[tier].aiGenerations !== -1 &&
+    claimed !== null &&
+    claimed > TIER_LIMITS[tier].aiGenerations
+  ) {
+    await refundAiGeneration(auth.userId);
+    return errorResponse("Monthly AI generation limit reached.", 403);
   }
 
   try {
@@ -169,6 +202,8 @@ Return ONLY the JSON array.`;
       modelUsed: (process.env.AI_PROVIDER || "deepseek"),
     });
   } catch (error) {
+    // Refund: our failures are not the user's AI spend.
+    await refundAiGeneration(auth.userId);
     return errorResponse(
       `Rule extraction failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       500,

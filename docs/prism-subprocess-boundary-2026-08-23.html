@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subprocess Boundary + Regex DoS Guard - 2026-08-23</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A0D12;--bg2:#0E1219;--panel:#11161F;--line:#1D2530;--cyan:#22D3EE;--violet:#8B7BFF;
+--text:#E6EBF2;--dim:#8B95A5;--ok:#34D399;--warn:#FBBF24;--bad:#F87171;
+--mono:JetBrains Mono,ui-monospace,Menlo,Consolas,monospace;--sans:Inter,system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.65;font-size:16px}
+.wrap{max-width:1080px;margin:0 auto;padding:48px 28px 96px}
+.kicker{font-family:var(--mono);font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan)}
+h1{font-size:2.4rem;font-weight:800;line-height:1.15;margin:.6rem 0 .3rem}
+h1 .accent{color:var(--violet)}
+h2{font-size:1.35rem;font-weight:700;margin:3rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--line)}
+h2 .idx{font-family:var(--mono);color:var(--cyan);font-weight:500;margin-right:.6rem}
+p{margin:.7rem 0}
+.lede{font-size:1.06rem;border-left:3px solid var(--cyan);padding:.9rem 1.2rem;background:var(--bg2);border-radius:0 10px 10px 0;margin:1.6rem 0}
+code,.mono{font-family:var(--mono);font-size:.86em;background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:.1em .38em;color:var(--cyan)}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1.1rem 1.25rem;overflow-x:auto;margin:.9rem 0}
+pre code{background:none;border:none;padding:0;color:var(--text);font-size:.83rem;line-height:1.55}
+table{width:100%;border-collapse:collapse;margin:.9rem 0;font-size:.92rem}
+th{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);text-align:left;padding:.55rem .75rem;border-bottom:1px solid var(--line)}
+td{padding:.6rem .75rem;border-bottom:1px solid var(--line);vertical-align:top}
+.pill{display:inline-block;font-family:var(--mono);font-size:.68rem;font-weight:700;letter-spacing:.06em;border-radius:999px;padding:.14em .7em}
+.pill.ok{color:var(--ok);background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.35)}
+.pill.warn{color:var(--warn);background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.35)}
+.note{border:1px dashed rgba(139,123,255,.45);border-radius:10px;padding:.85rem 1.1rem;margin:1rem 0;background:rgba(139,123,255,.05);font-size:.94rem}
+.note b{color:var(--violet)}
+ul.body{margin:.7rem 0 .7rem 1.3rem}
+ul.body li{margin:.45em 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.9rem;margin:1.1rem 0}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem}
+.card .label{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.card .val{font-size:1.5rem;font-weight:700;margin-top:.25rem}
+.foot{margin-top:4rem;padding-top:1.2rem;border-top:1px solid var(--line);font-family:var(--mono);font-size:.72rem;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="kicker">Syntaxure Labs - Prism - Phase 4.5 Report</div>
+<h1>The engine moves out of process: <span class="accent">AGPL boundary + ReDoS kill switch</span></h1>
+<p class="mono" style="color:var(--dim)">docs/prism-subprocess-boundary-2026-08-23.html - branch feat/prism-subprocess-boundary - merged to develop @ 101aef4</p>
+<div class="lede">
+<b>Summary.</b> The sandbox preview no longer imports the rule engine in-process. It now spawns <code>@prism-engine/cli sandbox-eval</code> as a memory-capped child process speaking a versioned JSON stdio contract, closing the AGPL copyleft exposure ahead of relicensing and turning the worst-case regex denial-of-service from "hang the server forever" into "SIGTERM at 5s, SIGKILL at 6s, structured 504 to the caller." Defense in depth starts earlier: every user-supplied pattern passes a dual-layer safety gate (internal nested-quantifier fast-reject + safe-regex star-height analysis) and is rejected with reasons before any child spawns. All four required test scenarios pass against the real built CLI - including a hard-kill proof where a stubborn child records its pid, ignores SIGTERM, and is verified dead by pid afterwards. The ./rules public export is retained, and the packed tarball was cold-install re-verified end to end.
+</div>
+<div class="grid">
+<div class="card"><div class="label">Boundary</div><div class="val" style="color:var(--ok)">SPAWNED</div><div class="label">in-process import removed</div></div>
+<div class="card"><div class="label">Hard timeout</div><div class="val">5s / 256MB</div><div class="label">SIGKILL enforced, env-tunable</div></div>
+<div class="card"><div class="label">Regex gate</div><div class="val" style="color:var(--ok)">2 LAYERS</div><div class="label">heuristic + safe-regex</div></div>
+<div class="card"><div class="label">Integrated tests</div><div class="val" style="color:var(--ok)">287 ok</div><div class="label">91+191+5 across packages</div></div>
+</div>
+<h2><span class="idx">01</span>Stdio contract v1 (public surface on @prism-engine/cli)</h2>
+<pre><code>Command : npx @prism-engine/cli sandbox-eval
+stdin   : {"v":1,
+           "rulesJson":"&lt;full rules.json v1 envelope, stringified&gt;",
+           "files":[{"path":"app/Bad.tsx","content":"..."}, ...]}
+          limits mirror the HTTP route: 20 files x 64KB, rulesJson 256KB
+
+stdout  : {"v":1,"ok":true,
+           "result":{"ruleCount":n,"filesScanned":n,
+                     "findings":[{file,line,severity,ruleId,message,
+                                  offending,replacement?}],
+                     "summary":{"blocks":n,"warns":n}}}
+
+stderr  : {"v":1,"ok":false,
+           "error":{"code":"INPUT_MALFORMED"|"INPUT_INVALID"|
+                              "INVALID_RULES"|"EVAL_ERROR",
+                    "message":"human readable"}}
+exit    : 0 on success | 3 on any error (NEVER 2 - that is the Pass hook
+          blocking contract and must stay unambiguous)</code></pre>
+<p>RulesParseError inside the evaluator maps to code <code>INVALID_RULES</code> specifically so callers can distinguish "your rules file is bad" (422-class) from internal crashes (500-class).</p>
+<h2><span class="idx">02</span>Caller side (apps/prism-engine/src/lib/sandbox.ts)</h2>
+<ul class="body">
+<li><b>Front door:</b> collectUserPatterns() walks the parsed envelope for every <code>pattern</code>/<code>matchPattern</code> string; each passes dual-layer validation. First rejection throws SandboxRejectedPatternError with pattern + reasons - nothing is spawned.</li>
+<li><b>Spawn:</b> process.execPath with --max-old-space-size=256 running the resolved CLI entry (createRequire resolution, PRISM_SANDBOX_CLI_ENTRY override hatch for tests/ops). Hard timer: SIGTERM at SANDBOX_TIMEOUT_MS (default 5000, declared in turbo globalEnv), SIGKILL grace window after 1s.</li>
+<li><b>Mapping:</b> stderr error envelopes route INVALID_RULES to the legacy SandboxValidationError surface (route 422 unchanged); TIMEOUT -> 504; malformed stdout/child crash -> clean 500 via logError. Response SUCCESS shape is byte-compatible with the old in-process result.</li>
+<li><b>Runtime pinning:</b> next.config outputFileTracingIncludes pins node_modules/@prism-engine/** into the sandbox route lambda so the spawned entry exists on Vercel even though the app no longer imports the package statically.</li>
+</ul>
+<h2><span class="idx">03</span>Timeout-kill PROOF (test output shape)</h2>
+<pre><code>Stub child: records own pid to PID_FILE, ignores SIGTERM, idles forever.
+runSandbox(timeoutMs: 300)
+
+assertions:
+  caught instanceof SandboxSpawnError      -> true
+  code === "TIMEOUT"                       -> true
+  elapsed &lt; 2500ms                         -> true   (SIGTERM 300ms + 1s grace)
+  PID_FILE exists                          -> true   (child RAN)
+  process.kill(childPid, 0) throws ESRCH   -> true   (child is DEAD)</code></pre>
+<p>The pid-death assertion is the platform-neutral proof of an actual kill - signal-delivery markers are meaningless on Windows where cross-process kills are uncatchable TerminateProcess calls.</p>
+<h2><span class="idx">04</span>Vercel spawn feasibility (the flagged risk, answered)</h2>
+<table>
+<tr><th>Question</th><th>Answer</th></tr>
+<tr><td>Can Vercel Node functions spawn processes?</td><td>Yes - they run as AWS Lambda Node functions; child_process works for executables present in the function bundle.</td></tr>
+<tr><td>Will the CLI exist in the bundle?</td><td>Staging build logs already show it installed+built (<code>@prism-engine/cli 1.2.0</code>). outputFileTracingIncludes now pins it per-route so tracing cannot silently drop it once the static import disappears.</td></tr>
+<tr><th colspan="3"><span class="pill warn">Residual honesty:</span> production-lambda confirmation lands on the next staging promote (branch previews are gated off in this repo). Local end-to-end spawn + pack verification are green; failure mode if tracing regresses is a clean SPAWN_UNAVAILABLE 500, not a hang.</th></tr>
+</table>
+<h2><span class="idx">05</span>Verification matrix</h2>
+<pre><code>engine tests        91 passed (incl. 9 boundary tests)
+cli tests          191 passed
+redis tests          5 passed
+types                4 packages clean
+eslint               0 errors
+npm pack cold-install: ./rules export OK + sandbox-eval EXIT 0 w/ findings
+integrated develop   101aef4 - all roadmap phases combined</code></pre>
+<h2><span class="idx">06</span>Jeff checklist</h2>
+<table>
+<tr><th>#</th><th>Action</th></tr>
+<tr><td>1</td><td>Next staging promote doubles as the production-lambda spawn confirmation - watch one sandbox run there.</td></tr>
+<tr><td>2</td><td>safe-regex added as approved dependency (MIT). Flag if you want it swapped for another detector pre-open-source.</td></tr>
+<tr><td>3</td><td>AGPL licence file change remains a separate follow-up task AFTER this boundary merges everywhere - per instruction, untouched here.</td></tr>
+</table>
+<div class="foot">SYNTAXURE LABS - Prism Phase 4.5 subprocess boundary - Ox/backend session 2026-08-23<br>Merged to develop 101aef4. Staging/main promotion intentionally held pending environment stabilization.</div>
+</div>
+</body>
+</html>

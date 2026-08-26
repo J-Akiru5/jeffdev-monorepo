@@ -37,6 +37,9 @@ export async function authenticate(
       .from("prism_subscriptions")
       .select("tier")
       .eq("user_id", record.userId)
+      // Only an active/trialing subscription grants its tier — a cancelled or
+      // past-due row must fall back to free (matches getUserTier semantics).
+      .in("status", ["active", "trialing"])
       .maybeSingle();
     return {
       userId: record.userId,
@@ -62,6 +65,7 @@ export async function authenticate(
     .from("prism_subscriptions")
     .select("tier")
     .eq("user_id", user.id)
+    .in("status", ["active", "trialing"])
     .maybeSingle();
   const tier = (sub?.tier as string) || "free";
 

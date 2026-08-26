@@ -13,6 +13,9 @@ const CHECK_TYPES = [
   "required_token",
   "banned_import",
   "arbitrary_value",
+  "naming_pattern",
+  "file_placement",
+  "required_import",
 ] as const;
 
 const CATEGORIES: RuleCategory[] = [
@@ -167,8 +170,106 @@ function validateCheck(ruleId: string, rawCheck: unknown): CheckBlock {
       return validateBannedImport(ruleId, check);
     case "arbitrary_value":
       return validateArbitraryValue(ruleId, check);
+    case "naming_pattern":
+      return validateNamingPattern(ruleId, check);
+    case "file_placement":
+      return validateFilePlacement(ruleId, check);
+    case "required_import":
+      return validateRequiredImport(ruleId, check);
   }
   throw new RulesParseError(`rule "${ruleId}": unknown check type`);
+}
+
+function requireNonEmptyString(
+  ruleId: string,
+  value: unknown,
+  field: string,
+): string {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new RulesParseError(
+      `rule "${ruleId}": ${field} requires a non-empty string`,
+    );
+  }
+  return value;
+}
+
+/** Phase 4 breadth validators. Each new type compiles its regexes here so a
+ *  bad pattern fails at parse time instead of silently failing open at scan
+ *  time. */
+function validateNamingPattern(
+  ruleId: string,
+  check: Record<string, unknown>,
+): CheckBlock {
+  const pattern = requireNonEmptyString(ruleId, check.pattern, "naming_pattern");
+  try {
+    new RegExp(pattern);
+  } catch (err) {
+    throw new RulesParseError(
+      `rule "${ruleId}": pattern does not compile: ${(err as Error).message}`,
+    );
+  }
+  const out: CheckBlock = { type: "naming_pattern", pattern };
+  if (check.message !== undefined) out.message = check.message as string;
+  return out;
+}
+
+function validateFilePlacement(
+  ruleId: string,
+  check: Record<string, unknown>,
+): CheckBlock {
+  const matchPattern = requireNonEmptyString(
+    ruleId,
+    check.matchPattern,
+    "file_placement",
+  );
+  const directory = requireNonEmptyString(
+    ruleId,
+    check.directory,
+    "file_placement",
+  );
+  try {
+    new RegExp(matchPattern);
+  } catch (err) {
+    throw new RulesParseError(
+      `rule "${ruleId}": matchPattern does not compile: ${(err as Error).message}`,
+    );
+  }
+  const out: CheckBlock = {
+    type: "file_placement",
+    matchPattern,
+    directory,
+  };
+  if (check.message !== undefined) out.message = check.message as string;
+  return out;
+}
+
+function validateRequiredImport(
+  ruleId: string,
+  check: Record<string, unknown>,
+): CheckBlock {
+  const specifier = requireNonEmptyString(
+    ruleId,
+    check.specifier,
+    "required_import",
+  );
+  const out: CheckBlock = { type: "required_import", specifier };
+  if (check.includePattern !== undefined) {
+    const includePattern = requireNonEmptyString(
+      ruleId,
+      check.includePattern,
+      "required_import",
+    );
+    try {
+      new RegExp(includePattern);
+    } catch (err) {
+      throw new RulesParseError(
+        `rule "${ruleId}": includePattern does not compile: ${(err as Error).message}`,
+      );
+    }
+    out.includePattern = includePattern;
+  }
+  if (check.message !== undefined) out.message = check.message as string;
+  return out;
 }
 
 function validateForbiddenPattern(

@@ -1,5 +1,7 @@
+
 "use server";
 
+import { logError } from "@/lib/log-error";
 import { getPrismDb, isValidId } from "@syntaxure-labs/db/prism";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
@@ -65,7 +67,7 @@ export async function updateRule(
 
     return { success: true };
   } catch (error) {
-    console.error("Failed to update rule:", error);
+    logError("app/(dashboard)/projects/[slug]/rules/[ruleId]/edit/actions", "Failed to update rule:", error);
     return { error: "Failed to update rule" };
   }
 }
@@ -102,7 +104,7 @@ export async function enhanceRule(
       suggestions: result.suggestions,
     };
   } catch (error) {
-    console.error("Failed to enhance rule:", error);
+    logError("app/(dashboard)/projects/[slug]/rules/[ruleId]/edit/actions", "Failed to enhance rule:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Enhancement failed",

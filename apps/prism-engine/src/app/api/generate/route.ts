@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 /**
  * Component Generation API
  *
@@ -13,22 +14,12 @@ import { z } from "zod";
 import crypto from "crypto";
 import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { generateComponent, generateRulesFromComponent } from "@/lib/gemini";
-import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
-
-async function getUserTier(userId: string): Promise<SubscriptionTier> {
-  try {
-    const db = getPrismDb();
-    const { data: sub } = await db
-      .from("prism_subscriptions")
-      .select("tier")
-      .eq("user_id", userId)
-      .in("status", ["active", "trialing"])
-      .maybeSingle();
-    return (sub?.tier as SubscriptionTier) || "free";
-  } catch {
-    return "free";
-  }
-}
+import { checkRateLimit } from "@/lib/rate-limit";
+import {
+  claimAiGeneration,
+  refundAiGeneration,
+} from "@/lib/usage";
+import { TIER_LIMITS, getUserTier } from "@/lib/subscriptions";
 
 async function getMonthlyUsage(userId: string): Promise<number> {
   try {
@@ -44,42 +35,6 @@ async function getMonthlyUsage(userId: string): Promise<number> {
     return (record?.aiGenerations as number) || 0;
   } catch {
     return 0;
-  }
-}
-
-async function trackGeneration(userId: string): Promise<void> {
-  try {
-    const now = new Date();
-    const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-    const db = getPrismDb();
-
-    const { data: existing } = await db
-      .from("prism_usage")
-      .select("id, aiGenerations:ai_generations")
-      .eq("user_id", userId)
-      .eq("month", month)
-      .maybeSingle();
-
-    if (existing) {
-      await db
-        .from("prism_usage")
-        .update({
-          ai_generations: (existing.aiGenerations as number) + 1,
-          updated_at: now.toISOString(),
-        })
-        .eq("id", existing.id);
-    } else {
-      await db.from("prism_usage").insert({
-        user_id: userId,
-        month,
-        ai_generations: 1,
-        rules_created: 0,
-        components_created: 0,
-        updated_at: now.toISOString(),
-      });
-    }
-  } catch {
-    // non-blocking
   }
 }
 
@@ -130,7 +85,7 @@ export async function POST(request: NextRequest) {
 
     // 🔑 Pre-flight: verify GEMINI_API_KEY exists
     if (!process.env.GEMINI_API_KEY) {
-      console.error("[Generate] GEMINI_API_KEY is not set in environment");
+      logError("app/api/generate/route", "[Generate] GEMINI_API_KEY is not set in environment");
       return NextResponse.json(
         { error: "AI service is not configured. Please contact support." },
         { status: 503 },
@@ -138,6 +93,17 @@ export async function POST(request: NextRequest) {
     }
 
     const tier = await getUserTier(userId);
+
+    // Burst ceiling alongside the monthly quota — the quota alone allowed a
+    // subscriber to burn their whole month in one burst window.
+    const burst = await checkRateLimit(`generate:${userId}`, tier);
+    if (!burst.allowed) {
+      return NextResponse.json(
+        { error: "Rate limit exceeded. Slow down and try again shortly." },
+        { status: 429 },
+      );
+    }
+
     const monthlyUsage = await getMonthlyUsage(userId);
     const limit = TIER_LIMITS[tier].aiGenerations;
     if (limit !== -1 && monthlyUsage >= limit) {
@@ -149,7 +115,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await trackGeneration(userId);
+    // Atomic claim BEFORE generation: the RPC increments month usage in one
+    // server-side step, closing the concurrent-request race. If the claim
+    // itself crosses the limit (preflight raced), refund and reject.
+    const claimed = await claimAiGeneration(userId);
+    if (limit !== -1 && claimed !== null && claimed > limit) {
+      await refundAiGeneration(userId);
+      return NextResponse.json(
+        {
+          error: `Monthly AI generation limit reached (${limit}/month). Upgrade to Pro for more.`,
+        },
+        { status: 403 },
+      );
+    }
 
     // Generate component
     let component;
@@ -160,7 +138,9 @@ export async function POST(request: NextRequest) {
         stack,
       });
     } catch (genError) {
-      console.error("[Generate] Gemini API error:", genError);
+      // Refund: failed generations must not consume quota.
+      await refundAiGeneration(userId);
+      logError("app/api/generate/route", "[Generate] Gemini API error:", genError);
       const message =
         genError instanceof Error ? genError.message : "Unknown Gemini error";
       return NextResponse.json(
@@ -182,7 +162,7 @@ export async function POST(request: NextRequest) {
         rules = rulesResult.rules;
       } catch (rulesError) {
         // Don't fail the whole request if rules generation fails
-        console.error("[Generate] Rules generation failed:", rulesError);
+        logError("app/api/generate/route", "[Generate] Rules generation failed:", rulesError);
       }
     }
 
@@ -195,9 +175,9 @@ export async function POST(request: NextRequest) {
         type: "component",
         prompt: prompt.slice(0, 200), // Store first 200 chars of prompt
       });
-    } catch (logError) {
+    } catch (logFailure) {
       // Don't fail the request if logging fails
-      console.error("[Generate] Failed to log generation:", logError);
+      logError("app/api/generate/route", "[Generate] Failed to log generation:", logFailure);
     }
 
     return NextResponse.json({
@@ -206,7 +186,7 @@ export async function POST(request: NextRequest) {
       rules,
     });
   } catch (error) {
-    console.error("[Generate] Unhandled error:", error);
+    logError("app/api/generate/route", "[Generate] Unhandled error:", error);
     const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
       { error: `Failed to generate component: ${message}` },

@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 /**
  * Subscriptions API
  *
@@ -7,7 +8,16 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { type SubscriptionTier } from "@/lib/subscriptions";
+import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
+
+/** Free-tier limit summary used when no subscription row exists yet. */
+function freeLimits() {
+  return {
+    rules: TIER_LIMITS.free.rules,
+    components: TIER_LIMITS.free.components,
+    aiGenerations: TIER_LIMITS.free.aiGenerations,
+  };
+}
 
 const PAYPAL_API_URL =
   process.env.PAYPAL_MODE === "live"
@@ -80,21 +90,24 @@ export async function GET() {
       return NextResponse.json({
         tier: "free" as SubscriptionTier,
         status: "active",
-        limits: {
-          rules: 5,
-          components: 3,
-          aiGenerations: 10,
-        },
+        limits: freeLimits(),
       });
     }
 
-    // Return actual subscription data
-    const tier = (subscription.tier as SubscriptionTier) || "free";
+    // Effective tier follows billing enforcement semantics: only an
+    // active/trialing row grants its tier — cancelled/past_due falls back
+    // to free (same rule as getUserTier()). Raw status is still reported
+    // so the dashboard can explain WHY the tier dropped.
+    const effectiveTier = ["active", "trialing"].includes(
+      subscription.status || "",
+    )
+      ? ((subscription.tier as SubscriptionTier) || "free")
+      : "free";
     const { TIER_LIMITS } = await import("@/lib/subscriptions");
-    const limits = TIER_LIMITS[tier];
+    const limits = TIER_LIMITS[effectiveTier];
 
     return NextResponse.json({
-      tier,
+      tier: effectiveTier,
       status: subscription.status || "active",
       limits: {
         rules: limits.rules,
@@ -103,15 +116,11 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("[subscriptions] GET error:", error);
+    logError("app/api/subscriptions/route", "[subscriptions] GET error:", error);
     return NextResponse.json({
       tier: "free" as SubscriptionTier,
       status: "active",
-      limits: {
-        rules: 5,
-        components: 3,
-        aiGenerations: 10,
-      },
+      limits: freeLimits(),
     });
   }
 }
@@ -184,7 +193,7 @@ export async function POST(request: NextRequest) {
     const subscription = await response.json();
 
     if (!response.ok) {
-      console.error("PayPal error:", subscription);
+      logError("app/api/subscriptions/route", "PayPal error:", subscription);
       return NextResponse.json(
         { error: "Failed to create subscription" },
         { status: 500 },
@@ -201,7 +210,7 @@ export async function POST(request: NextRequest) {
       approvalUrl: approvalLink?.href,
     });
   } catch (error) {
-    console.error("Subscription error:", error);
+    logError("app/api/subscriptions/route", "Subscription error:", error);
     return NextResponse.json(
       { error: "Failed to process subscription" },
       { status: 500 },

@@ -53,3 +53,27 @@ export async function cacheResponse(
     console.error(`[@syntaxure/redis] cacheResponse failed for key="${key}" — skipping cache write:`, error);
   }
 }
+
+/**
+ * Health-check ping for the shared Redis instance (Phase 5 monitoring).
+ * Never throws: returns ok:false with configured:false when env vars are
+ * missing, ok:false when unreachable, and measured latency when healthy.
+ */
+export async function pingRedis(): Promise<{
+  ok: boolean;
+  configured: boolean;
+  latencyMs: number;
+}> {
+  const configured = Boolean(
+    process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN,
+  );
+  if (!configured) return { ok: false, configured: false, latencyMs: 0 };
+
+  const start = Date.now();
+  try {
+    await getRedis().ping();
+    return { ok: true, configured: true, latencyMs: Date.now() - start };
+  } catch {
+    return { ok: false, configured: true, latencyMs: Date.now() - start };
+  }
+}

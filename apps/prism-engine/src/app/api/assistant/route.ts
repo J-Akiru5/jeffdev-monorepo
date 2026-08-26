@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import {
@@ -142,7 +143,7 @@ Provide a helpful, accurate response based on the product context above.`;
       headers: { ...getRateLimitHeaders(rlResult), "X-Cache": "MISS" },
     });
   } catch (error) {
-    console.error("Prism Engine assistant error:", error);
+    logError("app/api/assistant/route", "Prism Engine assistant error:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     if (errorMessage.includes("API key")) {
       return NextResponse.json({ error: "AI service authentication failed. Please check configuration." }, { status: 503 });

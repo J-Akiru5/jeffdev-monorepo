@@ -1,4 +1,5 @@
-/**
+
+import { logError } from "@/lib/log-error";/**
  * API Key Revocation
  *
  * DELETE /api/api-keys/[id] - Revoke an API key
@@ -66,7 +67,7 @@ export async function DELETE(
       message: "API key has been revoked",
     });
   } catch (error) {
-    console.error("[API Keys] DELETE error:", error);
+    logError("app/api/api-keys/[id]/route", "[API Keys] DELETE error:", error);
     return NextResponse.json(
       { error: "Failed to revoke API key" },
       { status: 500 },

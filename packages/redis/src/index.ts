@@ -6,4 +6,4 @@ export {
 export type { RateLimitTier, RateLimitResult } from "./rate-limit";
 
 // Response caching (server-only — Upstash Redis)
-export { getCachedResponse, cacheResponse } from "./cache";
+export { getCachedResponse, cacheResponse, pingRedis } from "./cache";

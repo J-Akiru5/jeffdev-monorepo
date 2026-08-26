@@ -99,7 +99,13 @@ export async function PATCH(
   if (parsed.data.designSystem !== undefined)
     columns.design_system = parsed.data.designSystem;
 
-  await db.from("prism_projects").update(columns).eq("id", id);
+  // Re-scope by owner in the UPDATE itself — the earlier SELECT no longer
+  // proves ownership by the time the write lands (TOCTOU, solidity scan §3).
+  await db
+    .from("prism_projects")
+    .update(columns)
+    .eq("id", id)
+    .eq("user_id", auth.userId);
 
   return successResponse({ id, ...existing, ...parsed.data, updatedAt });
 }
@@ -124,8 +130,13 @@ export async function DELETE(
   if (!project) return errorResponse("Project not found", 404);
 
   const projectId = project.id;
+  // Delete attached children before the project itself. The DB FKs are the
+  // backstop, but doing it here keeps cleanup deterministic regardless of
+  // which client deletes the row — skills used to survive with project_id
+  // SET NULL and accumulate invisible orphans (solidity scan §2.3).
   await Promise.all([
     db.from("prism_rules").delete().eq("project_id", projectId),
+    db.from("prism_skills").delete().eq("project_id", projectId),
     db.from("prism_projects").delete().eq("id", id),
   ]);
 

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prism Roadmap Execution — Phase 0 + 1 — 2026-08-23</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A0D12;--bg2:#0E1219;--panel:#11161F;--line:#1D2530;--cyan:#22D3EE;--violet:#8B7BFF;
+--text:#E6EBF2;--dim:#8B95A5;--ok:#34D399;--warn:#FBBF24;--bad:#F87171;
+--mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;--sans:'Inter',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.65;font-size:16px}
+.wrap{max-width:1080px;margin:0 auto;padding:48px 28px 96px}
+.kicker{font-family:var(--mono);font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;color:var(--cyan)}
+h1{font-size:2.4rem;font-weight:800;line-height:1.15;margin:.6rem 0 .3rem}
+h1 .accent{color:var(--violet)}
+h2{font-size:1.35rem;font-weight:700;margin:3rem 0 1rem;padding-bottom:.5rem;border-bottom:1px solid var(--line)}
+h2 .idx{font-family:var(--mono);color:var(--cyan);font-weight:500;margin-right:.6rem}
+h3{font-size:1rem;font-weight:600;margin:1.4rem 0 .6rem;color:var(--cyan)}
+p{margin:.7rem 0}
+.lede{font-size:1.06rem;border-left:3px solid var(--cyan);padding:.9rem 1.2rem;background:var(--bg2);border-radius:0 10px 10px 0;margin:1.6rem 0}
+code,.mono{font-family:var(--mono);font-size:.86em;background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:.1em .38em;color:var(--cyan)}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:1.1rem 1.25rem;overflow-x:auto;margin:.9rem 0}
+pre code{background:none;border:none;padding:0;color:var(--text);font-size:.83rem;line-height:1.55}
+table{width:100%;border-collapse:collapse;margin:.9rem 0;font-size:.92rem}
+th{font-family:var(--mono);font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);text-align:left;padding:.55rem .75rem;border-bottom:1px solid var(--line)}
+td{padding:.6rem .75rem;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+.pill{display:inline-block;font-family:var(--mono);font-size:.68rem;font-weight:700;letter-spacing:.06em;border-radius:999px;padding:.14em .7em}
+.pill.ok{color:var(--ok);background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.35)}
+.pill.warn{color:var(--warn);background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.35)}
+.pill.info{color:var(--violet);background:rgba(139,123,255,.1);border:1px solid rgba(139,123,255,.35)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:.9rem;margin:1.1rem 0}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem}
+.card .label{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.card .val{font-size:1.5rem;font-weight:700;margin-top:.25rem}
+.note{border:1px dashed rgba(139,123,255,.45);border-radius:10px;padding:.85rem 1.1rem;margin:1rem 0;background:rgba(139,123,255,.05);font-size:.94rem}
+.note b{color:var(--violet)}
+ul.body{margin:.7rem 0 .7rem 1.3rem}
+ul.body li{margin:.45em 0}
+.foot{margin-top:4rem;padding-top:1.2rem;border-top:1px solid var(--line);font-family:var(--mono);font-size:.72rem;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="kicker">Syntaxure Labs · Prism · Roadmap Execution Report</div>
+<h1>Phase 0 closed out. <span class="accent">Phase 1 paid down.</span></h1>
+<p class="mono" style="color:var(--dim)">docs/prism-roadmap-execution-2026-08-23.html · develop @ <code style="font-size:1em">89866ab</code> · KWADRA check-in Wednesday Aug 26</p>
+
+<div class="lede">
+<b>Summary.</b> With the three-agent split collapsed into a single implementer, this session finished Phase 0 and cleared every implementation item in Phase 1 of the product roadmap. Wednesday's demo-visible bug is dead at both layers: the per-tier project cap is now enforced in the REST API and in the dashboard's own create action through one shared helper (<code>assertWithinProjectCap</code>), with existing over-cap projects grandfathered untouched — Jeff's own 2-on-Free account is the acceptance contract. The Upgrade button now tells the truth instead of silently doing nothing. Phase 1 paid down: admin tier grants actually work again (they were writing tables the engine never reads), the unverified duplicate PayPal webhook was made fail-closed and idempotent against the enforced table, pricing copy now matches enforcement constants ($12 Pro / 5 projects / 100 rules, not $18/unlimited/10), the AI quota race is closed by an atomic Postgres RPC that refunds failures, the orphan-prone schema debt has a ready-to-apply integrity migration, and CI npm publishing exists behind an explicit human confirmation gate.
+</div>
+
+<div class="grid">
+  <div class="card"><div class="label">Phase status</div><div class="val" style="color:var(--ok)">0 ✓ · 1 ✓</div><div class="label">implementation items</div></div>
+  <div class="card"><div class="label">Commits on develop</div><div class="val">7 + PR#77</div><div class="label">b230b73 → 89866ab</div></div>
+  <div class="card"><div class="label">Tests</div><div class="val" style="color:var(--ok)">318 pass</div><div class="label">60+132+126 across packages</div></div>
+  <div class="card"><div class="label">Migrations awaiting apply</div><div class="val" style="color:var(--warn)">2</div><div class="label">Jeff · Supabase dashboard</div></div>
+</div>
+
+<h2><span class="idx">01</span>Phase 0 — Wednesday items</h2>
+<table>
+  <tr><th>Item</th><th>What shipped</th><th>Evidence</th></tr>
+  <tr><td>Project cap enforcement (API)</td><td><code>assertWithinProjectCap(userId)</code> in <code>src/lib/subscriptions.ts</code>; wired into <code>POST /api/v1/projects</code>. Tier from <code>prism_subscriptions.tier</code> via getUserTier (status-filtered) — never user_profiles.tier. Unlimited tiers skip the COUNT query entirely; infra errors fail OPEN.</td><td>PR #77 merged (<code>039f861</code>)</td></tr>
+  <tr><td>Project cap enforcement (dashboard)</td><td><code>(dashboard)/projects/actions.ts</code> createProject calls the same helper first thing after auth; rejection renders as an amber banner atop the new-project form via a new <code>general</error>` field.</td><td><code>635d761</code></td></tr>
+  <tr><td>Upgrade dead-end</td><td>Root cause found: checkout route redirected back with <code>status/message</code> params the subscription page never read. Page now accepts searchParams and shows honest banners: amber "coming soon / free during beta", green dev-activation confirmation, red error.</td><td><code>635d761</code></td></tr>
+  <tr><td>Grandfathering contract</td><td>Create-time-only enforcement. Existing over-cap rows are never touched or hidden; over-cap users simply cannot create until they delete down or upgrade. Regression test encodes Jeff's exact 2-on-Free case.</td><td>7 new tests</td></tr>
+</table>
+<div class="note"><b>Left for Jeff (tracker):</b> interactive rehearsal, backup video, guard-pack promotion decision.</div>
+
+<h2><span class="idx">02</span>Phase 1 — correctness debt</h2>
+<table>
+  <tr><th>Roadmap item</th><th>Resolution</th><th>Commit</th></tr>
+  <tr><td>Admin tier grants inert</td><td><code>overrideUserTier</code> action and the PATCH API route now upsert <code>prism_subscriptions</code> (engine's canonical shape incl. modified_by); user_profiles.tier kept as display-only sync. The PATCH route was additionally writing the legacy <i>agency</i> subscriptions table — repointed via getPrismDb because the admin client types prism_* as never.</td><td><code>839178c</code></td></tr>
+  <tr><td>PayPal webhook skips verification</td><td>Fails CLOSED (503) when PAYPAL_WEBHOOK_ID/client creds unset — previously accepted unverified events. Full idempotency via shared webhook_events table. All writes repointed to prism_subscriptions with correct column mapping, so whichever URL PayPal has registered now writes enforced data.</td><td><code>839178c</code></td></tr>
+  <tr><td>Pricing contradicts code</td><td>New migration updates live pricing_plans rows; fallback constants aligned. Free: 10 rules / 5 components / no AI line. Pro: $12·₱660, 100 rules, 50 components, 5 projects. Team: $36·₱1980. (Phase 2 replaces the model wholesale — until then pitch = product.)</td><td><code>c91b201</code></td></tr>
+  <tr><td>Quota race + pre-charging</td><td><code>bump_prism_ai_generations(user, delta)</code> RPC claims quota atomically server-side (UTC month bucket); generation failure refunds. Preflight read kept as fast-fail; RPC absence degrades to it.</td><td><code>c91b201</code></td></tr>
+  <tr><td>DB hygiene</td><td>Migration <code>20260823000002</code>: NOT-VALID FKs on the three created_by columns (+NOT NULL relaxation so ON DELETE SET NULL works), composite indexes (project_id, is_active, priority, created_at DESC) and (created_by, …), guarded UNIQUE on paypal_subscription_id that warns instead of failing when dupes exist.</td><td><code>c91b201</code></td></tr>
+  <tr><td>No CI npm publishing</td><td><code>publish.yml</code>: manual dispatch requiring typed confirmation; fails fast without NPM_TOKEN secret; typecheck+tests+dry-run pack before publish; refuses already-published versions.</td><td><code>89866ab</code></td></tr>
+</table>
+
+<h2><span class="idx">03</span>Verification</h2>
+<pre><code>prism-engine        tests: 60 passed (53 + 7 cap regressions)   types: clean
+prism-mcp-server    tests: 132 passed                           types: clean
+@prism-engine/cli   tests: 126 passed | 2 skipped               types: clean
+prism-admin         tests: none exist yet                       types: clean
+eslint on all touched files: 0 errors
+working tree: clean · all pushed to origin/develop</code></pre>
+
+<h2><span class="idx">04</span>Jeff-action ledger</h2>
+<table>
+  <tr><th>#</th><th>Action</th><th>Why it can't be mine</th></tr>
+  <tr><td>1</td><td>Apply the two Supabase migrations (<code>20260823000001</code> pricing, <code>20260823000002</code> integrity) via dashboard/CLI</td><td>Live cloud DB write — deliberate human gate</td></tr>
+  <tr><td>2</td><td>Check which PayPal webhook URL is registered; retire the loser</td><td>Only visible in the PayPal dashboard</td></tr>
+  <tr><td>3</td><td>Promotion decision: develop → main (deploys guards + caps to prod), then main → staging sync (also clears current staging drift)</td><td>Held per your earlier review-first call; tracker assigns it to you</td></tr>
+  <tr><td>4</td><td>Add NPM_TOKEN granular secret if CI publishing should be usable</td><td>Secrets live in GitHub settings</td></tr>
+  <tr><td>5</td><td>Interactive demo rehearsal + backup recording</td><td>Human-only</td></tr>
+</table>
+<div class="note"><b>Sequencing note for Wednesday:</b> apply migrations (1) BEFORE promoting (3) — the pricing banner copy assumes updated rows, and the generate route's RPC needs the function to exist (it degrades gracefully if absent, but you want the atomic path live).</div>
+
+<h2><span class="idx">05</span>Honest notes</h2>
+<ul class="body">
+  <li>The FK constraints ship <b>NOT VALID</b>: they enforce all future writes immediately, but pre-existing sentinel rows stay unvalidated until someone runs <code>VALIDATE CONSTRAINT</code> after confirming/cleaning legacy data. Documented inside the migration.</li>
+  <li>The UNIQUE(paypal_subscription_id) constraint self-disables with a WARNING if duplicates exist today rather than failing the whole migration.</li>
+  <li>Team-member caps remain unenforceable until teams infrastructure exists (Phase 2) — nothing to count against.</li>
+  <li>Rules-cap enforcement was explicitly deferred to keep this session within the phase split; it is the natural next slice using the same pattern as assertWithinProjectCap.</li>
+  <li>Phase 2 payments work (regional pricing mechanics, real PayPal checkout) starts only on your go — touching payments requires your explicit sign-off per the primer.</li>
+</ul>
+
+<div class="foot">SYNTAXURE LABS · Prism roadmap execution · Ox/backend session 2026-08-23<br>develop 89866ab · docs/prism-product-roadmap.html tracker remains the source of truth</div>
+
+</div>
+</body>
+</html>

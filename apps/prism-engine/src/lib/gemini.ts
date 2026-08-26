@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 /**
  * Gemini AI Client
  *
@@ -71,7 +72,7 @@ Return ONLY valid JSON in this format:
     }
     return JSON.parse(jsonMatch[0]);
   } catch (parseError) {
-    console.error("[gemini] Failed to parse generateComponent response:", parseError);
+    logError("lib/gemini", "[gemini] Failed to parse generateComponent response:", parseError);
     return {
       code: "// Error generating component",
       explanation: response,
@@ -251,7 +252,7 @@ Respond with ONLY valid JSON:
       processingTime: Date.now() - startTime,
     };
   } catch (error) {
-    console.error("[Gemini] Enhancement failed:", error);
+    logError("lib/gemini", "[Gemini] Enhancement failed:", error);
     throw new Error(
       `Failed to enhance rule: ${error instanceof Error ? error.message : "Unknown error"}`,
     );

@@ -1,3 +1,4 @@
+import { logError } from "@/lib/log-error";
 /**
  * Components API
  *
@@ -9,7 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { z } from "zod";
-import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
+import { TIER_LIMITS, getUserTier } from "@/lib/subscriptions";
 import crypto from "crypto";
 
 // =============================================================================
@@ -28,26 +29,6 @@ const SaveComponentSchema = z.object({
 // =============================================================================
 // HELPERS
 // =============================================================================
-
-async function getUserTier(userId: string): Promise<SubscriptionTier> {
-  try {
-    const db = getPrismDb();
-    const { data: subscription } = await db
-      .from("prism_subscriptions")
-      .select("tier")
-      .eq("user_id", userId)
-      .in("status", ["active", "trialing"])
-      .maybeSingle();
-
-    if (!subscription) {
-      return "free";
-    }
-
-    return (subscription.tier as SubscriptionTier) || "free";
-  } catch {
-    return "free";
-  }
-}
 
 function generateId(): string {
   return `comp_${crypto.randomBytes(12).toString("hex")}`;
@@ -90,7 +71,7 @@ export async function GET() {
       count: serialized.length,
     });
   } catch (error) {
-    console.error("[Components] GET error:", error);
+    logError("app/api/components/route", "[Components] GET error:", error);
     return NextResponse.json(
       { error: "Failed to fetch components" },
       { status: 500 },
@@ -172,7 +153,7 @@ export async function POST(request: NextRequest) {
       message: "Component saved to library",
     });
   } catch (error) {
-    console.error("[Components] POST error:", error);
+    logError("app/api/components/route", "[Components] POST error:", error);
     return NextResponse.json(
       { error: "Failed to save component" },
       { status: 500 },

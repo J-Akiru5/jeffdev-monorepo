@@ -1,5 +1,5 @@
 import { readFileSync } from "fs";
-import { extname } from "path";
+import { basename, extname } from "path";
 import { ruleSeverity } from "./parse.js";
 import type {
   CheckBlock,
@@ -115,6 +115,15 @@ function scanRule(
     case "arbitrary_value":
       scanArbitraryValue(filePath, lines, rule, check, findings);
       break;
+    case "naming_pattern":
+      scanNamingPattern(filePath, rule, check, findings);
+      break;
+    case "file_placement":
+      scanFilePlacement(filePath, rule, check, findings);
+      break;
+    case "required_import":
+      scanRequiredImport(filePath, lines, rule, check, findings);
+      break;
   }
 }
 
@@ -226,4 +235,176 @@ function scanArbitraryValue(
     pushFinding(filePath, rule, check, line, match[0], undefined, findings);
     return true;
   });
+}
+
+// ---------------------------------------------------------------------------
+// Phase 4 breadth: path-aware check types. These run once per FILE (not per
+// line) and receive the file path the caller passed in — absolute in hook
+// mode, as-given in standalone mode.
+// ---------------------------------------------------------------------------
+
+/** Line number reported for whole-file violations (naming/placement). */
+const WHOLE_FILE_LINE = 1;
+
+function scanNamingPattern(
+  filePath: string,
+  rule: PrismRule,
+  check: Extract<CheckBlock, { type: "naming_pattern" }>,
+  findings: Finding[],
+): void {
+  const base = basename(filePath);
+  const dot = base.lastIndexOf(".");
+  const stem = dot > 0 ? base.slice(0, dot) : base;
+  let regex: RegExp;
+  try {
+    regex = new RegExp(check.pattern);
+  } catch {
+    // An invalid pattern must never crash a scan — fail open like every
+    // other engine error path.
+    return;
+  }
+  if (!regex.test(stem)) {
+    pushFinding(
+      filePath,
+      rule,
+      check,
+      WHOLE_FILE_LINE,
+      base,
+      undefined,
+      findings,
+    );
+  }
+}
+
+function normalizePathForMatch(p: string): string {
+  return p.replace(/\\/g, "/").toLowerCase();
+}
+
+/** Case-PRESERVING separator normalization for user-supplied regexes
+ *  (includePattern etc.) — their patterns are case-sensitive by design. */
+function normalizeSeparators(p: string): string {
+  return p.replace(/\\/g, "/");
+}
+
+function scanFilePlacement(
+  filePath: string,
+  rule: PrismRule,
+  check: Extract<CheckBlock, { type: "file_placement" }>,
+  findings: Finding[],
+): void {
+  const base = basename(filePath);
+  let regex: RegExp;
+  try {
+    regex = new RegExp(check.matchPattern);
+  } catch {
+    return;
+  }
+  if (!regex.test(base)) return;
+
+  const normalized = normalizePathForMatch(filePath);
+  const dir = normalizePathForMatch(check.directory).replace(/\/+$/, "");
+  // Match either "<dir>/..." or a path ending exactly at ".../<dir>/<file>"
+  // so relative and absolute callers behave identically.
+  const ok =
+    normalized.startsWith(`${dir}/`) || normalized.includes(`/${dir}/`);
+  if (!ok) {
+    pushFinding(
+      filePath,
+      rule,
+      check,
+      WHOLE_FILE_LINE,
+      base,
+      undefined,
+      findings,
+    );
+  }
+}
+
+function looksLikeImportPath(line: string, specifier: string): boolean {
+  const escaped = escapeRegex(specifier);
+  const regex = new RegExp(
+    `\\b(?:from|import|require)\\s*\\(?\\s*["']${escaped}(?:/[\\w.\\-]+)*["']`,
+  );
+  return regex.test(line);
+}
+
+function scanRequiredImport(
+  filePath: string,
+  lines: string[],
+  rule: PrismRule,
+  check: Extract<CheckBlock, { type: "required_import" }>,
+  findings: Finding[],
+): void {
+  // Optional path scoping (e.g. pytest only in test files). Non-matching
+  // paths skip the rule entirely.
+  if (check.includePattern) {
+    let include: RegExp;
+    try {
+      include = new RegExp(check.includePattern);
+    } catch {
+      return;
+    }
+    if (!include.test(normalizeSeparators(filePath))) return;
+  }
+
+  // Union matcher across import syntaxes. A Go file never matches the
+  // Python/JS patterns and vice versa, so trying all three on every covered
+  // file is safe and keeps the rule shape language-agnostic.
+  for (const line of lines) {
+    if (
+      looksLikeImportPath(line, check.specifier) ||
+      matchesPythonImport(line, check.specifier) ||
+      matchesGoImport(line, check.specifier)
+    ) {
+      return;
+    }
+  }
+  pushFinding(
+    filePath,
+    rule,
+    check,
+    WHOLE_FILE_LINE,
+    check.specifier,
+    undefined,
+    findings,
+  );
+}
+
+/**
+ * Python imports (unquoted): `import X`, `import X as Y, Z as W`,
+ * `from X import a` — including relative `from .pkg import x`.
+ * A specifier is satisfied by the exact module or any submodule
+ * (`import pkg.api` satisfies "pkg").
+ */
+export function matchesPythonImport(
+  line: string,
+  specifier: string,
+): boolean {
+  const plain = /^\s*import\s+(.+)$/.exec(line);
+  if (plain) {
+    return plain[1]!
+      .split(",")
+      .map((part) => part.trim().split(/\s+as\s+/)[0]!.trim())
+      .some((name) => name === specifier || name.startsWith(`${specifier}.`));
+  }
+  const from = /^\s*from\s+([\w.]+)\s+import\b/.exec(line);
+  if (from) {
+    const mod = from[1]!;
+    return mod === specifier || mod.startsWith(`${specifier}.`);
+  }
+  return false;
+}
+
+/**
+ * Go imports (quoted paths): `import "fmt"`, aliased `m "pkg"`, and lines
+ * inside an import (...) block — each block line carries its quoted path.
+ */
+export function matchesGoImport(line: string, specifier: string): boolean {
+  // Line-anchored: bare `import "x"`, an import-block interior line
+  // (`    "x"` or `    alias "x"`), trailing comment allowed.
+  const anchored =
+    /^\s*(?:import\s+)?(?:[\w./-]+\s+)?"([^"]+)"\s*(?:\/\/.*)?$/.exec(line);
+  if (!anchored) return false;
+  const path = anchored[1]!;
+  return path === specifier || path.startsWith(`${specifier}/`);
 }

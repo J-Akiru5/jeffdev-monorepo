@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monorepo Cleanup — 2026-08-20</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-alt: #f6f7f9;
+    --border: #e2e5e9;
+    --text: #1c1f24;
+    --text-muted: #5b6270;
+    --accent: #2f6fed;
+    --ok: #1a7f4b;
+    --ok-bg: #e9f8ef;
+    --warn: #a35a00;
+    --warn-bg: #fff4e0;
+    --skip: #6b7280;
+    --skip-bg: #f1f2f4;
+    --danger: #b3271e;
+    --danger-bg: #fdeceb;
+    --code-bg: #f0f1f4;
+    --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg-alt);
+    color: var(--text);
+    line-height: 1.55;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 40px 24px 80px; }
+  header.page {
+    padding: 32px 0 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+  header.page h1 { margin: 0 0 8px; font-size: 1.9rem; letter-spacing: -0.01em; }
+  header.page .meta { color: var(--text-muted); font-size: 0.95rem; }
+  header.page .meta code { background: var(--code-bg); padding: 1px 6px; border-radius: 4px; }
+  .card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+  h2 { font-size: 1.25rem; margin: 0 0 14px; letter-spacing: -0.01em; }
+  h3 { font-size: 1.02rem; margin: 20px 0 8px; }
+  p { margin: 0 0 12px; }
+  ul, ol { margin: 0 0 12px; padding-left: 22px; }
+  li { margin-bottom: 6px; }
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--code-bg);
+    padding: 1px 5px;
+    border-radius: 4px;
+  }
+  pre {
+    background: #16181d;
+    color: #e7e9ee;
+    padding: 14px 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 0.84rem;
+    line-height: 1.5;
+  }
+  pre code { background: none; padding: 0; color: inherit; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 0.92rem; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--text-muted); font-weight: 600; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.02em; }
+  .status {
+    display: inline-block;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+  .status.done { background: var(--ok-bg); color: var(--ok); }
+  .status.pending { background: var(--warn-bg); color: var(--warn); }
+  .status.skipped { background: var(--skip-bg); color: var(--skip); }
+  .status.already { background: var(--skip-bg); color: var(--skip); }
+  .status.investigated { background: #eaf1ff; color: var(--accent); }
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: #f4f8ff;
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin: 14px 0;
+    font-size: 0.94rem;
+  }
+  .callout.warn { border-left-color: var(--warn); background: var(--warn-bg); }
+  .callout.ok { border-left-color: var(--ok); background: var(--ok-bg); }
+  .tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    background: var(--code-bg);
+    padding: 2px 7px;
+    border-radius: 5px;
+    margin: 2px 3px 2px 0;
+  }
+  footer {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 40px;
+  }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <h1>Monorepo Cleanup — jeffdev-monorepo</h1>
+    <div class="meta">
+      Executed 2026-08-20/21 · Branch <code>chore/post-audit-cleanup-2026-08-20</code> →
+      <code>origin/develop</code> · Commit <code>620d040</code><br>
+      Follows up <a href="architecture-audit-2026-08-20.md">the 2026-08-20 architecture &amp; complexity audit</a>,
+      executing the decisions Jeff made against that report's 8 open questions.
+    </div>
+  </header>
+
+  <div class="callout warn">
+    <strong>Re-generated 2026-08-23.</strong> This file and <code>architecture-audit-2026-08-20.md</code>
+    were originally written as untracked files and were lost from disk — likely swept up by a clean/reset
+    step in a separate, concurrently-running agent session in the same working directory, on a different
+    branch (<code>feat/prism-pass</code>). Neither file was ever committed to git, so there was no commit
+    to recover from; this is a verbatim re-write from the content already produced earlier in that
+    session. Everything below describes work that already happened and is safely committed on
+    <code>chore/post-audit-cleanup-2026-08-20</code> (commit <code>620d040</code>) — nothing here was
+    redone or re-run.
+  </div>
+
+  <div class="card">
+    <h2>Who ran this, and how</h2>
+    <p>
+      This session was run by <strong>Claude Code (Sonnet 5)</strong>. It did not start from a clean
+      branch — a prior <strong>opencode</strong> session had already begun the same task on the same
+      branch and was interrupted mid-way (uncommitted, partially applied changes were sitting in the
+      working tree).
+    </p>
+    <h3>Branch strategy</h3>
+    <p>
+      <strong>Resumed the existing branch <code>chore/post-audit-cleanup-2026-08-20</code></strong>
+      rather than creating a new one. It was already checked out, already tracking
+      <code>origin/develop</code> (correct target — never <code>main</code>), and already carried
+      in-progress work matching this exact task. Before building on it, every uncommitted change was
+      individually reviewed (diffs read in full, not assumed correct) rather than either blindly
+      continuing or discarding it. It held up: the prior session's work was substantially complete and
+      correct, so it was verified and committed rather than redone.
+    </p>
+    <p>Other local branches were checked for recency to rule out conflicting active work; nothing
+      touching the same files (<code>ci.yml</code>, <code>AGENTS.md</code>, <code>apps/syntaxure-pm</code>)
+      was in flight elsewhere.</p>
+  </div>
+
+  <div class="card">
+    <h2>What changed</h2>
+    <table>
+      <tr><th>Item</th><th>Status</th><th>Detail</th></tr>
+      <tr>
+        <td><code>apps/syntaxure-pm</code> removed</td>
+        <td><span class="status done">Done</span></td>
+        <td>Directory deleted entirely. <code>prism-manage</code> is now the sole canonical internal ops tool.</td>
+      </tr>
+      <tr>
+        <td><code>ci.yml</code> syntaxure-pm entries</td>
+        <td><span class="status done">Done</span></td>
+        <td>Removed from <code>detect-changes</code> outputs, the changed-files matrix, and the apps-array builder.</td>
+      </tr>
+      <tr>
+        <td><code>docker-compose.yml</code></td>
+        <td><span class="status skipped">N/A</span></td>
+        <td>syntaxure-pm was never listed there — nothing to remove (confirmed against the original audit).</td>
+      </tr>
+      <tr>
+        <td><code>README.md</code></td>
+        <td><span class="status done">Done</span></td>
+        <td>Removed from the app tree diagram and the app-card grid.</td>
+      </tr>
+      <tr>
+        <td><code>docs/README.md</code></td>
+        <td><span class="status done">Done</span></td>
+        <td>Deleted — it was syntaxure-pm's own docs-hub README (install/seed instructions, docs-route map), now orphaned.</td>
+      </tr>
+      <tr>
+        <td><code>pnpm-lock.yaml</code></td>
+        <td><span class="status done">Done</span></td>
+        <td>Regenerated after the workspace member was removed. Verified with <code>pnpm install --frozen-lockfile</code> — passes clean, zero remaining <code>syntaxure-pm</code> references.</td>
+      </tr>
+      <tr>
+        <td><code>AGENTS.md</code> status section</td>
+        <td><span class="status done">Done</span></td>
+        <td>New "App Status — as of 2026-08-20" section added. See below for the exact text.</td>
+      </tr>
+      <tr>
+        <td><code>.github/workflows/deploy.yml</code></td>
+        <td><span class="status already">Already done, pre-existing</span></td>
+        <td>Retired in commit <code>8923842</code> on 2026-08-14, on <code>develop</code> — before this branch existed. Not touched in this session. See callout below.</td>
+      </tr>
+      <tr>
+        <td>Vercel: <code>syntaxure-pm</code> project</td>
+        <td><span class="status done">Removed (live deletion)</span></td>
+        <td><code>prj_OeKtKNlBbXiwdud8bEBxYHDba3qF</code> — confirmed live by Jeff, removed via <code>vercel project rm</code>.</td>
+      </tr>
+      <tr>
+        <td>Vercel: root <code>jeffdev-monorepo</code> project</td>
+        <td><span class="status already">Already gone</span></td>
+        <td><code>prj_2oM8abMn229pM4ixAK2AyyiVv8tl</code> — Jeff confirmed directly against the Vercel API that this project no longer exists (404, absent from the account's project list). <strong>No removal command was run against it</strong> — it would have failed. Only the stale local reference was cleaned up.</td>
+      </tr>
+      <tr>
+        <td>Local <code>.vercel/repo.json</code></td>
+        <td><span class="status done">Done</span></td>
+        <td>Both stale entries (<code>syntaxure-pm</code> and the root <code>jeffdev-monorepo</code> project) removed from the local Vercel CLI link cache. This file is gitignored — a local-machine-only fix so this doesn't misreport "still present" on a future check.</td>
+      </tr>
+    </table>
+
+    <div class="callout ok">
+      <strong>deploy.yml — context, not action taken here.</strong> The audit (written 2026-08-20,
+      checking live GitHub Actions runs on <code>main</code>) found the GitHub-Actions Deploy pipeline
+      broken and redundant with Vercel-native deploys. It turned out that exact fix already existed —
+      Jeff (with Claude's help, per that commit's co-author trailer) had already retired
+      <code>deploy.yml</code> on <code>develop</code> on 2026-08-14, for the same reasoning the audit
+      independently arrived at. It just hadn't been promoted from <code>develop</code> to
+      <code>main</code> yet, which is why the audit's live GitHub Actions check (against <code>main</code>)
+      still saw it running and failing. This branch inherits that fix from <code>develop</code>; nothing
+      further was needed here.
+    </div>
+
+    <h3>AGENTS.md — exact text added</h3>
+    <pre><code>## App Status — as of 2026-08-20
+
+- **Active focus:** apps/prism-engine + packages/prism-context-engine.
+- **Paused (not abandoned):** apps/prism-admin, apps/prism-manage, apps/prism-docs,
+  apps/prism-mcp-server, apps/prism-analytics — deprioritized for bandwidth, to be
+  resumed later. prism-analytics is earmarked as a possible future
+  token-consumption / usage-metrics tracker for Prism.
+- **Retired:** apps/syntaxure-pm (removed 2026-08-20) — apps/prism-manage is the
+  canonical internal ops tool.
+- **Deploys:** Vercel-native Git integration handles app deploys (per-project
+  links in .vercel/repo.json). The GH Actions deploy pipeline (deploy.yml +
+  amondnet/vercel-action) is retired. prism-mcp-server runs locally only,
+  hosting TBD.</code></pre>
+  </div>
+
+  <div class="card">
+    <h2>Vercel cleanup — commands run</h2>
+    <pre><code># Confirmed live by Jeff — executed
+$ vercel project rm syntaxure-pm
+&gt; Success! Project syntaxure-pm removed
+
+# Confirmed already-gone by Jeff (direct API check, 404, not in project list)
+# — NOT run, would have failed against a nonexistent project
+# $ vercel project rm jeffdev-monorepo</code></pre>
+    <p>Both entries were then removed from the local <code>.vercel/repo.json</code> link cache
+      (gitignored, local-machine-only — not part of the commit).</p>
+  </div>
+
+  <div class="card">
+    <h2>Investigated, not changed — Copilot code review</h2>
+    <p>Read-only investigation per the task; no GitHub repo setting was touched.</p>
+    <ul>
+      <li><strong>GitHub's native Copilot code review is enabled and active.</strong> Confirmed directly:
+        <code>copilot-pull-request-reviewer</code> left a genuine 40-file review with 7 comments on
+        PR&nbsp;#75 (the prism-manage/syntaxure-pm PR), and <code>gh run list</code> shows completed
+        "Copilot code review" runs.</li>
+      <li><strong>It runs alongside <code>pr-agent.yml</code> (Codium)</strong> on the same PRs — but
+        Codium is currently <strong>broken</strong>. Its comment on PR&nbsp;#75 (posted via
+        <code>github-actions[bot]</code>, since it authenticates with <code>GITHUB_TOKEN</code>) reads
+        only: <code>"Failed to generate code suggestions for PR."</code></li>
+      <li>Net effect today: no real duplicate-commentary problem, since one bot works and one silently
+        fails — but Codium is burning CI minutes and secrets for zero output. If its config is ever
+        fixed, it would likely start genuinely duplicating Copilot's native review.</li>
+    </ul>
+    <div class="callout warn">
+      <strong>Related, also investigated, also read-only:</strong> <code>main</code> has no classic
+      branch protection configured. A GitHub ruleset literally named <code>"protection"</code> exists on
+      the repo but has <code>"enforcement": "disabled"</code>.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Explicitly left out of scope</h2>
+    <p>Per Jeff's instruction — noted as follow-ups only, nothing touched:</p>
+    <ul>
+      <li><strong>Copilot code review vs. Codium PR-Agent</strong> — investigated above, no action taken. Decide whether to fix or remove <code>pr-agent.yml</code>.</li>
+      <li><strong>Disabled branch-protection ruleset</strong> — exists, is off. Decide whether to enable it now that CI is trustworthy again.</li>
+      <li><strong>Stale Clerk reference in <code>AGENTS.md</code></strong> — the Apps &amp; Ports table still lists <code>prism-admin</code> as "Next.js 16 + Supabase + Clerk," which the original audit already flagged as inaccurate (no Clerk dependency in <code>prism-admin/package.json</code>). Left as-is; not part of this task's scope.</li>
+      <li><strong>Package naming convention</strong> (<code>@syntaxure/*</code> vs. <code>@syntaxure-labs/*</code> vs. <code>@repo/*</code>) — explicitly out of scope per Jeff's decision. Not touched.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Still waiting on Jeff</h2>
+    <ol>
+      <li>Nothing from the original two Vercel-removal action items remains — both are resolved (one removed live, one confirmed already gone).</li>
+      <li>This branch (<code>chore/post-audit-cleanup-2026-08-20</code>, commit <code>620d040</code>) has not been merged, pushed, or opened as a PR — per the standing rule, that's Jeff's call to review and trigger.</li>
+      <li>Promoting the existing <code>deploy.yml</code> retirement from <code>develop</code> to <code>main</code> is outside this task's scope, but worth doing at some point so <code>main</code>'s GitHub Actions stop showing a red Deploy check that no longer reflects reality.</li>
+    </ol>
+  </div>
+
+  <footer>
+    Generated by Claude Code (Sonnet 5) · 2026-08-20/21 · re-generated 2026-08-23 after accidental loss · docs/monorepo-cleanup-2026-08-20.html
+  </footer>
+
+</div>
+</body>
+</html>

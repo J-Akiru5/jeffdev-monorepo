@@ -43,6 +43,16 @@ export default function NewProjectPage() {
 
       {/* Form */}
       <form action={formAction} className="space-y-6">
+        {/* General (non-field) errors — e.g. tier cap reached */}
+        {state?.error?.general && (
+          <div
+            role="alert"
+            className="rounded-md border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-amber-200"
+          >
+            {state.error.general}
+          </div>
+        )}
+
         {/* Project Name */}
         <div className="space-y-2">
           <label

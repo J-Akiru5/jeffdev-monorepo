@@ -1,7 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { getPrismDb, isValidId } from "@syntaxure-labs/db/prism";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { NextRequest, NextResponse } from "next/server";
-import { TIER_LIMITS, type SubscriptionTier } from "@/lib/subscriptions";
+import { TIER_LIMITS, getUserTier } from "@/lib/subscriptions";
+import {
+  claimAiGeneration,
+  refundAiGeneration,
+} from "@/lib/usage";
 import type { RuleDoc, BrandDoc } from "@/lib/types";
 
 /**
@@ -996,6 +1001,25 @@ async function handleToolCall(
       }
 
       const db = getPrismDb();
+
+      // Ownership guard: only attach to a project the caller owns.
+      if (projectId) {
+        const { data: project } = await db
+          .from("prism_projects")
+          .select("id")
+          .eq("id", projectId)
+          .eq("user_id", userId)
+          .maybeSingle();
+        if (!project) {
+          return {
+            content: [
+              { type: "text", text: "Error: project not found or not owned by you" },
+            ],
+            error: true,
+          };
+        }
+      }
+
       const { data: inserted, error: insertError } = await db
         .from("prism_rules")
         .insert({
@@ -1154,26 +1178,62 @@ async function handleToolCall(
           content: [{ type: "text", text: "Error: prompt is required" }],
         };
 
-      const { generateComponent } = await import("@/lib/gemini");
-      const component = await generateComponent({
-        prompt,
-        designSystem:
-          (args?.designSystem as
-            | "jdstudio"
-            | "bare-minimum"
-            | "glassmorphic"
-            | "8bit-nostalgia") || "jdstudio",
-        stack: (args?.stack as "react" | "nextjs" | "react-native") || "nextjs",
-      });
+      // AI spend guard: this tool bypasses /api/generate's monthly quota, so
+      // hold it to a strict per-minute burst ceiling (solidity scan §1.3).
+      const aiRl = await checkRateLimit(`ai:mcp-generate:${userId}`, "strict");
+      if (!aiRl.allowed) {
+        return {
+          content: [
+            { type: "text", text: "Rate limit exceeded: max 10 component generations per minute." },
+          ],
+          error: true,
+        };
+      }
 
-      return {
-        content: [
-          {
-            type: "text",
-            text: `# Generated Component\n\n\`\`\`tsx\n${component.code}\n\`\`\`${component.explanation ? `\n\n## Explanation\n${component.explanation}` : ""}`,
-          },
-        ],
-      };
+      // Monthly quota — claim before work, refund on failure, same contract
+      // as /api/generate so MCP generations count against the same plan cap.
+      const userTier = await getUserTier(userId);
+      const claimed = await claimAiGeneration(userId);
+      if (
+        TIER_LIMITS[userTier].aiGenerations !== -1 &&
+        claimed !== null &&
+        claimed > TIER_LIMITS[userTier].aiGenerations
+      ) {
+        await refundAiGeneration(userId);
+        return {
+          content: [
+            { type: "text", text: "Monthly AI generation limit reached. Upgrade your plan for more." },
+          ],
+          error: true,
+        };
+      }
+
+      try {
+        const { generateComponent } = await import("@/lib/gemini");
+        const component = await generateComponent({
+          prompt,
+          designSystem:
+            (args?.designSystem as
+              | "jdstudio"
+              | "bare-minimum"
+              | "glassmorphic"
+              | "8bit-nostalgia") || "jdstudio",
+          stack: (args?.stack as "react" | "nextjs" | "react-native") || "nextjs",
+        });
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: `# Generated Component\n\n\`\`\`tsx\n${component.code}\n\`\`\`${component.explanation ? `\n\n## Explanation\n${component.explanation}` : ""}`,
+            },
+          ],
+        };
+      } catch (genError) {
+        // Refund: failed generations must not consume quota.
+        await refundAiGeneration(userId);
+        throw genError;
+      }
     }
 
     case "search_marketplace": {
@@ -1324,23 +1384,5 @@ async function handleToolCall(
 
     default:
       throw new Error(`Unknown tool: ${name}`);
-  }
-}
-
-/**
- * Get user tier
- */
-async function getUserTier(userId: string): Promise<SubscriptionTier> {
-  try {
-    const db = getPrismDb();
-    const { data: sub } = await db
-      .from("prism_subscriptions")
-      .select("tier")
-      .eq("user_id", userId)
-      .in("status", ["active", "trialing"])
-      .maybeSingle();
-    return (sub?.tier as SubscriptionTier) || "free";
-  } catch {
-    return "free";
   }
 }

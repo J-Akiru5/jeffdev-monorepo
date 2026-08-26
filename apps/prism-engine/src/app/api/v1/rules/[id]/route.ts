@@ -135,10 +135,12 @@ export async function PATCH(
   if (!existing) return errorResponse("Rule not found", 404);
 
   const updatedAt = new Date().toISOString();
+  // Re-scope by owner in the UPDATE itself (TOCTOU, solidity scan §3).
   await db
     .from("prism_rules")
     .update({ ...toColumns(parsed.data), updated_at: updatedAt })
-    .eq("id", id);
+    .eq("id", id)
+    .eq("created_by", auth.userId);
 
   return successResponse({ id, ...existing, ...parsed.data, updatedAt });
 }

@@ -43,6 +43,13 @@ if (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY && !process.env.NEXT_PUBLIC
 }
 
 const nextConfig: NextConfig = {
+  // Phase 4.5: the sandbox route spawns the @prism-engine/cli binary as a
+  // subprocess. Pin the whole package into this route's lambda bundle so
+  // the spawned entry exists at runtime (Next tracing can miss binaries
+  // that are only referenced via child_process).
+  outputFileTracingIncludes: {
+    "/api/v1/sandbox/run": ["./node_modules/@prism-engine/**"],
+  },
   transpilePackages: ["@syntaxure/ui", "@syntaxure-labs/db"],
   turbopack: {
     root: rootDir,

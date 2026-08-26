@@ -66,7 +66,7 @@ CI order: `check-types` → `lint` → `test` → `build`. Run in that sequence 
 - `.github/copilot-instructions.md` — comprehensive AI agent guide (205 lines)
 - `.agent/rules/` — tech stack, security, design, debugging, SEO, admin guide
 - `.agent/skills/` — Prism development, monorepo patterns, Firestore boundaries, design system
-- `TESTING.md` — detailed test setup and troubleshooting
+- `docs/TESTING.md` — detailed test setup and troubleshooting
 
 ## Build Performance
 
@@ -81,6 +81,6 @@ CI order: `check-types` → `lint` → `test` → `build`. Run in that sequence 
 
 - Secrets via **Doppler**: `doppler run -- <command>`. Never commit `.env` files.
 - Tailwind CSS v4, PostCSS config in each app.
-- Docker Compose at root (`docker-compose.yml`) builds/runs all apps; there's no local Postgres container — every app points at the cloud Supabase project via env vars. (Prism moved off a local Cosmos/Mongo container onto the same Supabase project as everything else — see `PRISM_MIGRATION.md`.)
+- Docker Compose at root (`docker-compose.yml`) builds/runs all apps; there's no local Postgres container — every app points at the cloud Supabase project via env vars. (Prism moved off a local Cosmos/Mongo container onto the same Supabase project as everything else — see `docs/prism/PRISM_MIGRATION.md`.)
 - `syncpack` manages dependency versions across workspaces: `npx syncpack list-mismatches` / `npx syncpack fix-mismatches`.
 - **Port assignments:** Labs=3000, Engine=3001, Docs=3002, Admin=3004, Manage=3007, MCP=3003, Analytics=8000. Each app must set `PORT=<n>` in its Doppler config or `package.json` dev script.

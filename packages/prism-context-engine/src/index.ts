@@ -42,6 +42,7 @@ import { connect } from "./commands/connect.js";
 import { ideSetup } from "./commands/ide-setup.js";
 import { init } from "./commands/init.js";
 import { pull } from "./commands/pull.js";
+import { sandboxEvalMain } from "./commands/sandbox-eval.js";
 import {
   listProjects,
   viewProject,
@@ -385,7 +386,7 @@ program
 program
   .command("check")
   .description(
-    "The Pass — enforce local rules against files (agent hook or lint mode)",
+    "The Pass - enforce local rules against files (agent hook or lint mode)",
   )
   .argument("[files...]", "Files or directories to check")
   .option("--rules <path>", "Path to .prism/rules.json (default: nearest ancestor)")
@@ -395,5 +396,16 @@ program
   )
   .option("--format <format>", "Hook message format", "claude-code")
   .action((files, opts) => check(files, opts));
+
+// Sandbox evaluation (Phase 4.5 arm's-length boundary; contract v1 -
+// stdin/stdout/stderr JSON, exit 3 on error. See commands/sandbox-eval.ts)
+program
+  .command("sandbox-eval")
+  .description(
+    "Evaluate a rules.json envelope against sample files from a JSON stdin contract (v1). Intended for subprocess callers.",
+  )
+  .action(async () => {
+    process.exitCode = await sandboxEvalMain();
+  });
 
 program.parse();

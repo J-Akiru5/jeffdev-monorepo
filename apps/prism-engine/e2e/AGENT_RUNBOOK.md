@@ -8,7 +8,7 @@ to run if the previous one silently failed.
 
 **What this proves:** that `apps/prism-engine` reads and writes real data
 in Postgres (Supabase) correctly, after the Cosmos DB → Postgres migration
-described in [`PRISM_MIGRATION.md`](../../../PRISM_MIGRATION.md) at the repo
+described in [`PRISM_MIGRATION.md`](../../../../docs/prism/PRISM_MIGRATION.md) in docs/prism/
 root. It signs in, creates a project, creates a rule, reads that rule back
 three different ways (dashboard reload, REST API, MCP tool call), and
 checks the PayPal webhook's signature/idempotency handling.
@@ -23,7 +23,7 @@ later step assumes these are true.
 - [ ] You're in the repo root, on the branch/commit that has this
       migration (`git log --oneline -1` should show a Prism/Postgres
       migration commit, or something after it).
-- [ ] `pnpm install` has been run at the repo root (or run it now:
+- [ ] `pnpm install` has been run in docs/prism/ root (or run it now:
       `pnpm install`).
 - [ ] You have a **real, working** `NEXT_PUBLIC_SUPABASE_URL` and
       `SUPABASE_SERVICE_ROLE_KEY` for the Supabase project this
@@ -38,19 +38,18 @@ later step assumes these are true.
       `supabase/migrations/20260813000001_prism_context_engine.sql`. If
       you're not sure, run this and confirm it returns rows, not an error:
       `bash
-    # from repo root, needs the Supabase CLI logged in and linked, OR
-    # run the equivalent query in the Supabase SQL Editor
-    supabase db execute --sql "select table_name from information_schema.tables where table_name like 'prism_%' order by 1;"
-    `
-      Expect to see: `prism_api_keys`, `prism_brands`, `prism_components`,
-      `prism_generations`, `prism_governance_memory`, `prism_projects`,
-      `prism_rule_edges`, `prism_rule_sets`, `prism_rules`,
-      `prism_skills`, `prism_subscriptions`, `prism_telemetry`,
-      `prism_usage`, `prism_videos` (14 tables). If this list is empty or
-      errors, **stop** — the migration SQL hasn't been applied to this
-      database yet, and nothing below will work. That's a prerequisite the
-      user needs to handle (running the migration file), not something
-      this test suite fixes.
+  # from repo root, needs the Supabase CLI logged in and linked, OR
+  # run the equivalent query in the Supabase SQL Editor
+  supabase db execute --sql "select table*name from information_schema.tables where table_name like 'prism*%' order by 1;"
+  `    Expect to see:`prism_api_keys`, `prism_brands`, `prism_components`,
+    `prism_generations`, `prism_governance_memory`, `prism_projects`,
+    `prism_rule_edges`, `prism_rule_sets`, `prism_rules`,
+    `prism_skills`, `prism_subscriptions`, `prism_telemetry`,
+    `prism_usage`, `prism_videos` (14 tables). If this list is empty or
+  errors, **stop** — the migration SQL hasn't been applied to this
+  database yet, and nothing below will work. That's a prerequisite the
+  user needs to handle (running the migration file), not something
+  this test suite fixes.
 
 ---
 
@@ -163,7 +162,7 @@ cd apps/prism-engine
 dotenv -e .env.local -- pnpm run e2e:delete-test-user
 ```
 
-Confirm `git status` at the repo root shows nothing new/untracked before
+Confirm `git status` in docs/prism/ root shows nothing new/untracked before
 finishing (no `.env.e2e.local`, no `playwright-report/`, no `test-results/`
 — all should be gitignored, but verify rather than assume).
 
