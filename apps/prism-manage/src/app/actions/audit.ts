@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { getSyntaxureWorkspaceAccess } from "@/lib/authorization-server";
 
 export interface AuditLogEntry {
   id: string;
@@ -13,9 +14,13 @@ export interface AuditLogEntry {
 }
 
 /**
- * Fetch recent audit logs for the current user's workspace.
+ * Fetch recent audit logs for the Syntaxure Labs workspace.
  * Uses the admin client (service_role) to bypass RLS.
  * Returns paginated results ordered by most recent first.
+ *
+ * Restricted to founders of the Syntaxure Labs workspace: the audit trail
+ * contains platform-wide activity and must not be readable by ordinary
+ * members. Non-founders receive an empty result.
  */
 export async function getAuditLogs(options?: {
   limit?: number;
@@ -31,6 +36,12 @@ export async function getAuditLogs(options?: {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { logs: [], total: 0 };
+
+    // Only founders of the Syntaxure Labs workspace may read the audit trail
+    const access = await getSyntaxureWorkspaceAccess(supabase, user.id);
+    if (!access || access.role !== "founder") {
+      return { logs: [], total: 0 };
+    }
 
     const adminClient = getAdminClient();
 

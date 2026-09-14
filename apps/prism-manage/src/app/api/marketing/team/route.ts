@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requireMarketingAccess } from "@/lib/authorization-server";
 
 const TEAM_COLORS = ["cyan", "purple", "emerald", "amber", "rose"] as const;
 
@@ -14,9 +15,14 @@ export async function GET() {
   }
 
   try {
+    // Server-side RBAC: only founders / Marketing department members may
+    // read the marketing team directory.
+    const access = await requireMarketingAccess(supabase);
+
     const { data: memberships } = await supabase
       .from("workspace_members")
       .select("user_id, role, user_profiles!inner(id, full_name, email)")
+      .eq("workspace_id", access.workspaceId)
       .limit(20);
 
     if (!memberships) {

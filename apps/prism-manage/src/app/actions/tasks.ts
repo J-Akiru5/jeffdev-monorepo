@@ -28,6 +28,38 @@ async function logAudit(event: {
 }
 import { CreateTaskSchema, UpdateTaskSchema } from "@/lib/schemas";
 import type { Task } from "@/lib/schemas";
+import { canApproveTaskStatus } from "@/lib/authorization";
+
+/**
+ * Server-side RBAC for the 'approved' status.
+ *
+ * Mirrors the founder/employee rule that has always existed in
+ * `updateTaskStatus`: employees may never approve workspace tasks.
+ * Personal tasks (no workspace_id) are the owner's own workflow.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function assertCanApproveTask(supabase: any, userId: string, taskId: string) {
+  const { data: task } = await supabase
+    .from("tasks")
+    .select("workspace_id")
+    .eq("id", taskId)
+    .maybeSingle();
+
+  if (!task?.workspace_id) return;
+
+  const { data: membership } = await supabase
+    .from("workspace_members")
+    .select("role")
+    .eq("workspace_id", task.workspace_id)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  const role = (membership?.role as "founder" | "employee" | undefined) ?? null;
+
+  if (!canApproveTaskStatus(role, true)) {
+    throw new Error("Only founders and the CPO can approve tasks");
+  }
+}
 
 // =============================================================================
 // TAG HELPERS (Phase 1B — junction tables)
@@ -280,6 +312,11 @@ export async function toggleTaskComplete(taskId: string, completed: boolean) {
 
   const newStatus = completed ? "approved" : "backlog";
 
+  // Server-side RBAC: only founders/CPO can move a task to "approved"
+  if (completed) {
+    await assertCanApproveTask(supabase, user.id, taskId);
+  }
+
   const { error } = await supabase
     .from("tasks")
     .update({ status: newStatus })
@@ -321,24 +358,7 @@ export async function updateTaskStatus(taskId: string, status: string) {
 
   // Server-side RBAC: only founders/CPO can set status to "approved"
   if (status === "approved") {
-    const { data: task } = await supabase
-      .from("tasks")
-      .select("workspace_id")
-      .eq("id", taskId)
-      .single();
-
-    if (task?.workspace_id) {
-      const { data: membership } = await supabase
-        .from("workspace_members")
-        .select("role")
-        .eq("workspace_id", task.workspace_id)
-        .eq("user_id", user.id)
-        .single();
-
-      if (membership && membership.role === "employee") {
-        throw new Error("Only founders and the CPO can approve tasks");
-      }
-    }
+    await assertCanApproveTask(supabase, user.id, taskId);
   }
 
   const { error } = await supabase
@@ -363,6 +383,11 @@ export async function updateTask(
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
+
+  // Server-side RBAC: generic updates must not bypass the approval rule
+  if (parsed.data.status === "approved") {
+    await assertCanApproveTask(supabase, user.id, taskId);
+  }
 
   const updateData: Record<string, unknown> = {};
   if (parsed.data.title !== undefined) updateData.title = parsed.data.title;

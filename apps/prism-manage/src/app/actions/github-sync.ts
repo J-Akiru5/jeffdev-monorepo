@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import type { MarketingTask } from "@/lib/schemas";
 import { buildLabels, issueToMarketingTask, extractLabels } from "@/lib/github-utils";
 import { createClient } from "@/lib/supabase/server";
+import { requireMarketingAccess } from "@/lib/authorization-server";
 
 function getOctokit() {
   const token = process.env.GITHUB_PAT;
@@ -30,6 +31,12 @@ async function requireAuth() {
   return supabase;
 }
 
+async function requireMarketingAuth() {
+  const supabase = await requireAuth();
+  await requireMarketingAccess(supabase);
+  return supabase;
+}
+
 export async function fetchGitHubIssues(): Promise<
   Array<{
     number: number;
@@ -41,7 +48,7 @@ export async function fetchGitHubIssues(): Promise<
     labels: (string | { name?: string })[];
   }>
 > {
-  await requireAuth();
+  await requireMarketingAuth();
   const octokit = getOctokit();
   const { owner, repo } = getRepoConfig();
 
@@ -77,6 +84,7 @@ export async function syncGitHubIssuesToSupabase(): Promise<{
   if (!user) return { imported: 0, error: "Unauthorized" };
 
   try {
+    await requireMarketingAccess(supabase);
     const issues = await fetchGitHubIssues();
     if (issues.length === 0) return { imported: 0 };
 
@@ -118,7 +126,7 @@ export async function createGitHubIssue(task: {
   ownerIds: string[];
   platform?: string;
 }): Promise<MarketingTask> {
-  await requireAuth();
+  await requireMarketingAuth();
   const octokit = getOctokit();
   const { owner, repo } = getRepoConfig();
 
@@ -155,7 +163,7 @@ export async function updateGitHubIssueStatus(
   issueNumber: number,
   newStatus: "todo" | "in-progress" | "done"
 ): Promise<void> {
-  await requireAuth();
+  await requireMarketingAuth();
   const octokit = getOctokit();
   const { owner, repo } = getRepoConfig();
 
