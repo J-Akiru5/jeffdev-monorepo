@@ -1,6 +1,7 @@
 "use server";
 
 import { getAdminClient } from "@/lib/supabase/admin";
+import { requireRole } from "@/lib/authz";
 import type { ProjectRow, WorkspaceMemberRow, UserProfileRow } from "@/lib/database.types";
 import { revalidatePath } from "next/cache";
 
@@ -10,6 +11,7 @@ import { revalidatePath } from "next/cache";
 
 export async function getWorkspaces() {
   try {
+    await requireRole();
     const admin = getAdminClient();
     const { data: workspaces } = await admin
       .from("workspaces")
@@ -44,6 +46,7 @@ export async function getWorkspaces() {
 
 export async function getWorkspaceDetail(workspaceId: string) {
   try {
+    await requireRole();
     const admin = getAdminClient();
 
     const { data: workspace } = await admin
@@ -118,6 +121,7 @@ export async function adminUpdateMemberRole(
   newRole: "founder" | "employee",
 ) {
   try {
+    await requireRole("admin");
     const admin = getAdminClient();
     const { error } = await admin
       .from("workspace_members")
@@ -143,6 +147,7 @@ export async function adminAssignDepartment(
   departmentId: string | null,
 ) {
   try {
+    await requireRole("admin");
     const admin = getAdminClient();
     const { error } = await admin
       .from("workspace_members")
@@ -164,6 +169,7 @@ export async function adminAssignDepartment(
 
 export async function adminRemoveMember(workspaceId: string, userId: string) {
   try {
+    await requireRole("admin");
     const admin = getAdminClient();
     const { error } = await admin
       .from("workspace_members")
@@ -202,6 +208,7 @@ interface EnrichedProject {
 
 export async function getAllProjects(): Promise<EnrichedProject[]> {
   try {
+    await requireRole();
     const admin = getAdminClient();
     const { data: projects } = await admin
       .from("projects")
@@ -252,6 +259,7 @@ export async function adminCreateProject(input: {
   color?: string;
 }) {
   try {
+    await requireRole();
     const admin = getAdminClient();
     const { data, error } = await admin
       .from("projects")
@@ -286,6 +294,7 @@ export async function adminUpdateProject(
   },
 ) {
   try {
+    await requireRole();
     const admin = getAdminClient();
     const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
     if (input.name !== undefined) updates.name = input.name;
@@ -311,6 +320,7 @@ export async function adminUpdateProject(
 
 export async function adminDeleteProject(id: string) {
   try {
+    await requireRole();
     const admin = getAdminClient();
     await admin.from("tasks").delete().eq("project_id", id);
     const { error } = await admin.from("projects").delete().eq("id", id);

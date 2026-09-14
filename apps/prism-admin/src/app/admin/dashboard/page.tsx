@@ -9,6 +9,7 @@ import {
   TrendingDown,
   Minus,
   ArrowRight,
+  Activity,
 } from "lucide-react";
 import Link from "next/link";
 import { computeMonthlyTrend } from "@/lib/trends";
@@ -26,13 +27,25 @@ export default async function DashboardPage() {
   if (!user) return null;
 
   // Fetch stats from Supabase
-  const [profilesResult, subscriptionsResult] = await Promise.all([
-    supabase.from("user_profiles").select("*", { count: "exact", head: false }),
-    supabase.from("subscriptions").select("*"),
-  ]);
+  const [profilesResult, subscriptionsResult, projectsResult, inquiriesResult] =
+    await Promise.all([
+      supabase
+        .from("user_profiles")
+        .select("*", { count: "exact", head: false }),
+      supabase.from("subscriptions").select("*"),
+      supabase
+        .from("projects")
+        .select("id, status, created_at", { count: "exact" }),
+      supabase
+        .from("contact_messages")
+        .select("id, status, created_at")
+        .or("status.is.null,status.eq.unread"),
+    ]);
 
   const profiles = profilesResult.data || [];
   const subscriptions = subscriptionsResult.data || [];
+  const projects = projectsResult.data || [];
+  const inquiries = inquiriesResult.data || [];
 
   const totalUsers = profiles.length;
   const activeSubscriptions = subscriptions.filter(
@@ -90,16 +103,16 @@ export default async function DashboardPage() {
     },
     {
       label: "Total Projects",
-      value: 0,
+      value: projectsResult.count ?? projects.length,
       icon: FolderKanban,
-      trend: { value: 0, direction: "neutral" as const },
+      trend: computeMonthlyTrend(projects),
       href: "/admin/projects",
     },
     {
       label: "Pending Inquiries",
-      value: 0,
+      value: inquiries.length,
       icon: Mail,
-      trend: { value: 0, direction: "neutral" as const },
+      trend: computeMonthlyTrend(inquiries),
       href: "/admin/inquiries",
     },
   ];
@@ -140,7 +153,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-3">
         <QuickAction
           href="/admin/users"
           title="Manage Users"
@@ -152,6 +165,12 @@ export default async function DashboardPage() {
           title="Client Inquiries"
           description="View and respond to client messages"
           icon={Mail}
+        />
+        <QuickAction
+          href="/api/admin/system-status"
+          title="System Status"
+          description="Supabase, Redis, and Engine health"
+          icon={Activity}
         />
       </div>
 

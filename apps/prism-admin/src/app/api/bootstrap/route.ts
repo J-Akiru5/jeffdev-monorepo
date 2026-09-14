@@ -3,12 +3,21 @@
  *
  * GET /api/bootstrap - Sets the authenticated user as founder in user_profiles table
  *
- * ⚠️  DEVELOPMENT ONLY - Remove or protect in production
+ * ⚠️  DEVELOPMENT ONLY — fails closed everywhere else.
+ *
+ * Three independent gates (all must pass):
+ *   1. NODE_ENV === "development"
+ *   2. ADMIN_BOOTSTRAP_ENABLED === "true" (explicit opt-in)
+ *   3. an authenticated Supabase user
+ *
+ * Authorization never depends solely on NODE_ENV, so a misconfigured
+ * production deploy cannot expose privilege escalation.
  */
 
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { canRunDevOnlyFeature } from "@/lib/authz-roles";
 
 export async function GET() {
   const supabase = await createClient();
@@ -23,11 +32,18 @@ export async function GET() {
     );
   }
 
-  // Check if in development mode
-  const isDev = process.env.NODE_ENV === "development";
-  if (!isDev) {
+  // Fail closed: development mode AND explicit opt-in flag required.
+  const allowed = canRunDevOnlyFeature({
+    nodeEnv: process.env.NODE_ENV,
+    enabledFlag: process.env.ADMIN_BOOTSTRAP_ENABLED,
+    authenticated: true,
+  });
+  if (!allowed) {
     return NextResponse.json(
-      { error: "This endpoint is only available in development mode" },
+      {
+        error:
+          "This endpoint is only available in development mode with ADMIN_BOOTSTRAP_ENABLED=true",
+      },
       { status: 403 },
     );
   }

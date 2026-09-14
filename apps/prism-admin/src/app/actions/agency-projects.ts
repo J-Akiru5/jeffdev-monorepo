@@ -9,6 +9,7 @@
 import { z } from "zod";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logAuditEvent } from "@/lib/audit";
+import { requireRole } from "@/lib/authz";
 import { revalidatePath } from "next/cache";
 import type { MilestoneRow } from "@/lib/database.types";
 
@@ -89,6 +90,7 @@ async function resolveClientId(
 
 export async function createAgencyProject(data: ProjectFormData): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const validated = projectSchema.parse(data);
     const supabase = getAdminClient();
 
@@ -133,7 +135,7 @@ export async function createAgencyProject(data: ProjectFormData): Promise<Action
 
     if (error) throw error;
 
-    await logAuditEvent({ action: "CREATE", resource: "projects", resourceId: validated.slug, details: { title: validated.title } });
+    await logAuditEvent({ action: "CREATE", resource: "projects", resourceId: validated.slug, details: { title: validated.title } }, actor);
     revalidatePath("/admin/agency/projects");
 
     return { success: true };
@@ -146,6 +148,7 @@ export async function createAgencyProject(data: ProjectFormData): Promise<Action
 
 export async function updateAgencyProject(slug: string, data: ProjectFormData): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const validated = projectSchema.parse(data);
     const supabase = getAdminClient();
 
@@ -195,7 +198,7 @@ export async function updateAgencyProject(slug: string, data: ProjectFormData): 
 
     if (updateError) throw updateError;
 
-    await logAuditEvent({ action: "UPDATE", resource: "projects", resourceId: validated.slug, details: { title: validated.title, oldSlug: slug !== validated.slug ? slug : undefined } });
+    await logAuditEvent({ action: "UPDATE", resource: "projects", resourceId: validated.slug, details: { title: validated.title, oldSlug: slug !== validated.slug ? slug : undefined } }, actor);
     revalidatePath("/admin/agency/projects");
     revalidatePath(`/admin/agency/projects/${slug}`);
     if (slug !== validated.slug) revalidatePath(`/admin/agency/projects/${validated.slug}`);
@@ -210,6 +213,7 @@ export async function updateAgencyProject(slug: string, data: ProjectFormData): 
 
 export async function deleteAgencyProject(slug: string): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const { data: existing } = await supabase.from("projects").select("title").eq("slug", slug).maybeSingle();
     if (!existing) return { success: false, error: "Project not found" };
@@ -217,7 +221,7 @@ export async function deleteAgencyProject(slug: string): Promise<ActionResult> {
     const { error: deleteError } = await supabase.from("projects").delete().eq("slug", slug);
     if (deleteError) throw deleteError;
 
-    await logAuditEvent({ action: "DELETE", resource: "projects", resourceId: slug, details: { title: existing.title } });
+    await logAuditEvent({ action: "DELETE", resource: "projects", resourceId: slug, details: { title: existing.title } }, actor);
     revalidatePath("/admin/agency/projects");
 
     return { success: true };
@@ -231,6 +235,7 @@ export async function deleteAgencyProject(slug: string): Promise<ActionResult> {
 
 export async function updateAgencyProjectStatus(slug: string, status: string): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const { data: project } = await supabase.from("projects").select("id, metadata").eq("slug", slug).maybeSingle();
     if (!project) return { success: false, error: "Project not found" };
@@ -242,7 +247,7 @@ export async function updateAgencyProjectStatus(slug: string, status: string): P
     const { error } = await supabase.from("projects").update({ status, metadata, updated_at: new Date().toISOString() }).eq("slug", slug);
     if (error) throw error;
 
-    await logAuditEvent({ action: "STATUS_CHANGE", resource: "projects", resourceId: slug, details: { oldStatus, newStatus: status } });
+    await logAuditEvent({ action: "STATUS_CHANGE", resource: "projects", resourceId: slug, details: { oldStatus, newStatus: status } }, actor);
     revalidatePath("/admin/agency/projects");
     revalidatePath(`/admin/agency/projects/${slug}`);
 
@@ -255,6 +260,7 @@ export async function updateAgencyProjectStatus(slug: string, status: string): P
 
 export async function updateAgencyProjectProgress(slug: string, progress: number): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const validProgress = Math.max(0, Math.min(100, progress));
     const supabase = getAdminClient();
     const { data: project } = await supabase.from("projects").select("id, metadata").eq("slug", slug).maybeSingle();
@@ -266,7 +272,7 @@ export async function updateAgencyProjectProgress(slug: string, progress: number
     const { error } = await supabase.from("projects").update({ metadata, updated_at: new Date().toISOString() }).eq("slug", slug);
     if (error) throw error;
 
-    await logAuditEvent({ action: "UPDATE", resource: "projects", resourceId: slug, details: { field: "progress", value: validProgress } });
+    await logAuditEvent({ action: "UPDATE", resource: "projects", resourceId: slug, details: { field: "progress", value: validProgress } }, actor);
     revalidatePath("/admin/agency/projects");
     revalidatePath(`/admin/agency/projects/${slug}`);
 
@@ -279,6 +285,7 @@ export async function updateAgencyProjectProgress(slug: string, progress: number
 
 export async function updateAgencyProjectDetails(slug: string, data: { status?: string; progress?: number; deadline?: string; startDate?: string; budget?: number; paidAmount?: number; assignedPartner?: string; assignedEmployees?: string[] }): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const { data: project } = await supabase.from("projects").select("id, metadata").eq("slug", slug).maybeSingle();
     if (!project) return { success: false, error: "Project not found" };
@@ -299,7 +306,7 @@ export async function updateAgencyProjectDetails(slug: string, data: { status?: 
     const { error } = await supabase.from("projects").update(updates).eq("slug", slug);
     if (error) throw error;
 
-    await logAuditEvent({ action: "UPDATE", resource: "projects", resourceId: slug, details: data });
+    await logAuditEvent({ action: "UPDATE", resource: "projects", resourceId: slug, details: data }, actor);
     revalidatePath("/admin/agency/projects");
     revalidatePath(`/admin/agency/projects/${slug}`);
 
@@ -314,6 +321,7 @@ export async function updateAgencyProjectDetails(slug: string, data: { status?: 
 
 export async function addAgencyMilestone(slug: string, milestone: { title: string; description?: string; due_date: string; status?: string; deliverables?: string[] }): Promise<ActionResult & { milestone?: unknown }> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const projectId = await getProjectId(slug);
     if (!projectId) return { success: false, error: "Project not found" };
@@ -331,7 +339,7 @@ export async function addAgencyMilestone(slug: string, milestone: { title: strin
 
     if (error) throw error;
 
-    await logAuditEvent({ action: "CREATE", resource: "projects", resourceId: slug, details: { milestone: newMilestone.title } });
+    await logAuditEvent({ action: "CREATE", resource: "projects", resourceId: slug, details: { milestone: newMilestone.title } }, actor);
     revalidatePath(`/admin/agency/projects/${slug}`);
 
     return { success: true, milestone: newMilestone };
@@ -343,6 +351,7 @@ export async function addAgencyMilestone(slug: string, milestone: { title: strin
 
 export async function updateAgencyMilestoneStatus(slug: string, milestoneId: string, status: string): Promise<ActionResult & { progress?: number }> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const projectId = await getProjectId(slug);
     if (!projectId) return { success: false, error: "Project not found" };
@@ -360,7 +369,7 @@ export async function updateAgencyMilestoneStatus(slug: string, milestoneId: str
     metadata.progress = progress;
     await supabase.from("projects").update({ metadata, updated_at: new Date().toISOString() }).eq("slug", slug);
 
-    await logAuditEvent({ action: "STATUS_CHANGE", resource: "projects", resourceId: slug, details: { milestoneId, status } });
+    await logAuditEvent({ action: "STATUS_CHANGE", resource: "projects", resourceId: slug, details: { milestoneId, status } }, actor);
     revalidatePath(`/admin/agency/projects/${slug}`);
 
     return { success: true, progress };
@@ -372,6 +381,7 @@ export async function updateAgencyMilestoneStatus(slug: string, milestoneId: str
 
 export async function deleteAgencyMilestone(slug: string, milestoneId: string): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const projectId = await getProjectId(slug);
     if (!projectId) return { success: false, error: "Project not found" };
@@ -379,7 +389,7 @@ export async function deleteAgencyMilestone(slug: string, milestoneId: string): 
     const { error } = await supabase.from("milestones").delete().eq("id", milestoneId).eq("project_id", projectId);
     if (error) throw error;
 
-    await logAuditEvent({ action: "DELETE", resource: "projects", resourceId: slug, details: { milestoneId } });
+    await logAuditEvent({ action: "DELETE", resource: "projects", resourceId: slug, details: { milestoneId } }, actor);
     revalidatePath(`/admin/agency/projects/${slug}`);
 
     return { success: true };
@@ -391,6 +401,7 @@ export async function deleteAgencyMilestone(slug: string, milestoneId: string): 
 
 export async function toggleAgencyProjectPublish(slug: string, published: boolean): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const { data: project } = await supabase.from("projects").select("id, metadata").eq("slug", slug).maybeSingle();
     if (!project) return { success: false, error: "Project not found" };
@@ -401,7 +412,7 @@ export async function toggleAgencyProjectPublish(slug: string, published: boolea
     const { error } = await supabase.from("projects").update({ published, metadata, updated_at: new Date().toISOString() }).eq("slug", slug);
     if (error) throw error;
 
-    await logAuditEvent({ action: "UPDATE", resource: "projects", resourceId: slug, details: { published } });
+    await logAuditEvent({ action: "UPDATE", resource: "projects", resourceId: slug, details: { published } }, actor);
     revalidatePath("/admin/agency/projects");
     revalidatePath(`/admin/agency/projects/${slug}`);
 

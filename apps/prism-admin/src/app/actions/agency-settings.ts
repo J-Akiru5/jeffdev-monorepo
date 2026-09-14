@@ -8,6 +8,7 @@
 
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logAuditEvent } from "@/lib/audit";
+import { requireRole } from "@/lib/authz";
 import { revalidatePath } from "next/cache";
 
 interface ActionResult {
@@ -32,6 +33,7 @@ export interface AgencySettings {
  */
 export async function getAgencySettings(): Promise<{ success: boolean; data?: AgencySettings; error?: string }> {
   try {
+    await requireRole();
     const supabase = getAdminClient();
     const keys = [
       "agency_business_name",
@@ -77,6 +79,7 @@ export async function getAgencySettings(): Promise<{ success: boolean; data?: Ag
  */
 export async function saveAgencySettings(settings: AgencySettings): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
 
     const rows = [
@@ -97,7 +100,7 @@ export async function saveAgencySettings(settings: AgencySettings): Promise<Acti
 
     if (error) throw error;
 
-    await logAuditEvent({ action: "UPDATE", resource: "site_settings", resourceId: "agency_settings", details: { keys: rows.map((r) => r.key) } });
+    await logAuditEvent({ action: "UPDATE", resource: "site_settings", resourceId: "agency_settings", details: { keys: rows.map((r) => r.key) } }, actor);
     revalidatePath("/admin/agency/settings");
     return { success: true };
   } catch (error) {

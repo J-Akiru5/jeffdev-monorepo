@@ -2,12 +2,19 @@
  * Auth Bridge Import (Dev Only)
  * Imports a Supabase session from another app's export.
  * Only available in development mode for cross-app session sharing.
+ *
+ * Gates (all required — fails closed): NODE_ENV=development,
+ * AUTH_BRIDGE_ENABLED=true. Importing arbitrary sessions is inherently
+ * risky, so the explicit opt-in flag is mandatory in addition to NODE_ENV.
  */
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
-  if (process.env.NODE_ENV !== "development") {
+  if (
+    process.env.NODE_ENV !== "development" ||
+    process.env.AUTH_BRIDGE_ENABLED !== "true"
+  ) {
     return NextResponse.json({ error: "Only available in development mode" }, { status: 403 });
   }
 

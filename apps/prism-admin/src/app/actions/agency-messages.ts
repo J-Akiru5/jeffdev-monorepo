@@ -8,6 +8,7 @@
 
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logAuditEvent } from "@/lib/audit";
+import { requireRole } from "@/lib/authz";
 import { revalidatePath } from "next/cache";
 
 interface ActionResult {
@@ -17,6 +18,7 @@ interface ActionResult {
 
 export async function getAgencyMessages(): Promise<{ success: boolean; data?: any[]; error?: string }> {
   try {
+    await requireRole();
     const supabase = getAdminClient();
     const { data, error } = await supabase
       .from("contact_messages")
@@ -32,6 +34,7 @@ export async function getAgencyMessages(): Promise<{ success: boolean; data?: an
 
 export async function getAgencyMessage(id: string): Promise<any | null> {
   try {
+    await requireRole();
     const supabase = getAdminClient();
     const { data, error } = await supabase
       .from("contact_messages")
@@ -48,6 +51,7 @@ export async function getAgencyMessage(id: string): Promise<any | null> {
 
 export async function updateMessageStatus(id: string, status: string): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const { error } = await supabase
       .from("contact_messages")
@@ -55,7 +59,7 @@ export async function updateMessageStatus(id: string, status: string): Promise<A
       .eq("id", id);
     if (error) throw error;
 
-    await logAuditEvent({ action: "UPDATE", resource: "contact_messages", resourceId: id, details: { status } });
+    await logAuditEvent({ action: "UPDATE", resource: "contact_messages", resourceId: id, details: { status } }, actor);
     revalidatePath("/admin/agency/messages");
     return { success: true };
   } catch (error) {
@@ -66,6 +70,7 @@ export async function updateMessageStatus(id: string, status: string): Promise<A
 
 export async function markAllMessagesRead(): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const { error } = await supabase
       .from("contact_messages")
@@ -73,7 +78,7 @@ export async function markAllMessagesRead(): Promise<ActionResult> {
       .neq("status", "read");
     if (error) throw error;
 
-    await logAuditEvent({ action: "UPDATE", resource: "contact_messages", resourceId: "bulk", details: { action: "mark_all_read" } });
+    await logAuditEvent({ action: "UPDATE", resource: "contact_messages", resourceId: "bulk", details: { action: "mark_all_read" } }, actor);
     revalidatePath("/admin/agency/messages");
     return { success: true };
   } catch (error) {
@@ -84,11 +89,12 @@ export async function markAllMessagesRead(): Promise<ActionResult> {
 
 export async function deleteMessage(id: string): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const { error } = await supabase.from("contact_messages").delete().eq("id", id);
     if (error) throw error;
 
-    await logAuditEvent({ action: "DELETE", resource: "contact_messages", resourceId: id });
+    await logAuditEvent({ action: "DELETE", resource: "contact_messages", resourceId: id }, actor);
     revalidatePath("/admin/agency/messages");
     return { success: true };
   } catch (error) {

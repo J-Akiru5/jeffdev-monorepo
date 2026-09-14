@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { requireRole } from "@/lib/authz";
 import { z } from "zod";
 
 const eventSchema = z.object({
@@ -20,6 +21,7 @@ export async function createEvent(
   input: EventInput,
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const actor = await requireRole();
     const parsed = eventSchema.safeParse(input);
     if (!parsed.success) {
       return { success: false, error: parsed.error.issues[0]?.message };
@@ -31,7 +33,7 @@ export async function createEvent(
     const { data, error } = await adminClient
       .from("calendar_events")
       .insert({
-        user_id: (await adminClient.auth.getUser()).data.user?.id || "",
+        user_id: actor.id,
         title: parsed.data.title,
         description: parsed.data.description,
         start_time: parsed.data.start_time,
@@ -50,7 +52,7 @@ export async function createEvent(
       resource: "calendar_events",
       resourceId: data.id,
       details: { title: parsed.data.title, event_type: parsed.data.event_type },
-    });
+    }, actor);
 
     revalidatePath("/admin/agency/calendar");
     return { success: true };
@@ -67,6 +69,7 @@ export async function updateEvent(
   input: Partial<EventInput>,
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const actor = await requireRole();
     const { logAuditEvent } = await import("@/lib/audit");
     const adminClient = getAdminClient();
 
@@ -91,7 +94,7 @@ export async function updateEvent(
       resource: "calendar_events",
       resourceId: id,
       details: { changes: Object.keys(updates) },
-    });
+    }, actor);
 
     revalidatePath("/admin/agency/calendar");
     return { success: true };
@@ -107,6 +110,7 @@ export async function deleteEvent(
   id: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const actor = await requireRole();
     const { logAuditEvent } = await import("@/lib/audit");
     const adminClient = getAdminClient();
 
@@ -129,7 +133,7 @@ export async function deleteEvent(
       resource: "calendar_events",
       resourceId: id,
       details: { title: event?.title },
-    });
+    }, actor);
 
     revalidatePath("/admin/agency/calendar");
     return { success: true };
