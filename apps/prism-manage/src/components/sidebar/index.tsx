@@ -7,7 +7,7 @@
  * and workspace-aware navigation with RBAC.
  */
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import {
   CheckSquare,
@@ -22,6 +22,7 @@ import {
   GraduationCap,
   Bot,
   LayoutDashboard,
+  FileText,
   ChevronLeft,
   ChevronRight,
   Plus,
@@ -38,6 +39,8 @@ import { SidebarInlineInput } from "./sidebar-inline-input";
 import { SidebarProjectItem } from "./sidebar-project-item";
 import { SidebarDepartments } from "./sidebar-departments";
 import { SidebarBottom } from "./sidebar-bottom";
+import { SidebarPages } from "./sidebar-pages";
+import { getPages, type Page } from "@/app/actions/pages";
 
 interface NavItem {
   label: string;
@@ -102,6 +105,13 @@ export function Sidebar() {
   const [editName, setEditName] = useState("");
   const [showNewListInput, setShowNewListInput] = useState(false);
   const [newListName, setNewListName] = useState("");
+  const [pages, setPages] = useState<Page[]>([]);
+
+  // Fetch pages for the active workspace
+  useEffect(() => {
+    if (!activeWorkspaceId) return;
+    getPages(activeWorkspaceId).then(setPages);
+  }, [activeWorkspaceId]);
 
   const visibleDepartments = useMemo(
     () =>
@@ -244,6 +254,25 @@ export function Sidebar() {
             )}
           </SidebarSection>
           </div>
+        )}
+
+        {/* Pages — both modes */}
+        {activeWorkspaceId && (
+          <SidebarSection
+            title="Pages"
+            collapsed={collapsed}
+            icon={FileText}
+            action={
+              !collapsed ? undefined : undefined
+            }
+          >
+            <SidebarPages
+              workspaceId={activeWorkspaceId}
+              pages={pages}
+              onPagesChange={setPages}
+              collapsed={collapsed}
+            />
+          </SidebarSection>
         )}
 
         {/* Personal Lists */}
