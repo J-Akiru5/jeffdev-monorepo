@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { requireRole } from "@/lib/authz";
 import { z } from "zod";
 
 const caseStudySchema = z.object({
@@ -17,6 +18,7 @@ export async function createCaseStudy(
   input: CaseStudyInput,
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireRole();
     const parsed = caseStudySchema.safeParse(input);
     if (!parsed.success) {
       return { success: false, error: parsed.error.issues[0]?.message };
@@ -47,6 +49,7 @@ export async function updateCaseStudy(
   input: Partial<CaseStudyInput>,
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireRole();
     const adminClient = getAdminClient();
     const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
     if (input.title !== undefined) updates.title = input.title;
@@ -72,6 +75,7 @@ export async function deleteCaseStudy(
   id: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireRole();
     const adminClient = getAdminClient();
     const { error } = await adminClient.from("case_studies").delete().eq("id", id);
 

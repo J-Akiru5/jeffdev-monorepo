@@ -1,11 +1,22 @@
 import { NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { requireRole, AuthzError } from "@/lib/authz";
 
 /**
  * GET /api/agency/dashboard/charts
  * Returns chart data for the agency dashboard (revenue, project statuses, activity)
+ * Protected: manager+ (same gate as the admin layout).
  */
 export async function GET() {
+  try {
+    await requireRole();
+  } catch (error) {
+    if (error instanceof AuthzError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const supabase = getAdminClient();
 
   // Project statuses

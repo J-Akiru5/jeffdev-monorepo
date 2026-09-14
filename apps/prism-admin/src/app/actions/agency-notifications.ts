@@ -7,6 +7,7 @@
  */
 
 import { getAdminClient } from "@/lib/supabase/admin";
+import { requireRole } from "@/lib/authz";
 
 type NotificationCreateInput = {
   user_id: string;
@@ -21,6 +22,7 @@ type NotificationCreateInput = {
  */
 export async function getAgencyNotifications(userId: string, limit = 20) {
   try {
+    await requireRole();
     const supabase = getAdminClient();
     const { data, error } = await supabase
       .from("notifications")
@@ -42,6 +44,7 @@ export async function getAgencyNotifications(userId: string, limit = 20) {
  */
 export async function getAgencyUnreadCount(userId: string): Promise<number> {
   try {
+    await requireRole();
     const supabase = getAdminClient();
     const { count, error } = await supabase
       .from("notifications")
@@ -62,6 +65,7 @@ export async function getAgencyUnreadCount(userId: string): Promise<number> {
  */
 export async function markAgencyNotificationRead(notificationId: string): Promise<{ success: boolean }> {
   try {
+    await requireRole();
     const supabase = getAdminClient();
     const { error } = await supabase.from("notifications").update({ read: true }).eq("id", notificationId);
     if (error) throw error;
@@ -77,6 +81,7 @@ export async function markAgencyNotificationRead(notificationId: string): Promis
  */
 export async function markAllAgencyNotificationsRead(userId: string): Promise<{ success: boolean }> {
   try {
+    await requireRole();
     const supabase = getAdminClient();
     const { error } = await supabase.from("notifications").update({ read: true }).eq("user_id", userId).eq("read", false);
     if (error) throw error;
@@ -92,6 +97,7 @@ export async function markAllAgencyNotificationsRead(userId: string): Promise<{ 
  */
 export async function dismissAgencyNotification(notificationId: string): Promise<{ success: boolean }> {
   try {
+    await requireRole();
     const supabase = getAdminClient();
     const { error } = await supabase.from("notifications").delete().eq("id", notificationId);
     if (error) throw error;
@@ -107,6 +113,7 @@ export async function dismissAgencyNotification(notificationId: string): Promise
  */
 export async function createAgencyNotification(input: NotificationCreateInput): Promise<{ success: boolean; id?: string }> {
   try {
+    await requireRole();
     const supabase = getAdminClient();
     const { data, error } = await supabase.from("notifications").insert({
       ...input,

@@ -162,6 +162,9 @@ function ManageNav({ isFounder }: { isFounder: boolean }) {
           <NavItem href="/admin/settings" icon={Settings}>
             Settings
           </NavItem>
+          <NavItem href="/admin/audit" icon={Activity}>
+            Audit Log
+          </NavItem>
         </>
       )}
     </>

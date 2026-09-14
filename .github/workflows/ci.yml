@@ -122,7 +122,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [prism-context-engine, prism-mcp-server]
+        package: [prism-context-engine, prism-mcp-server, prism-admin]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

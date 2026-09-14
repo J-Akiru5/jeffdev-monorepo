@@ -9,9 +9,9 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPrismDb } from "@syntaxure-labs/db/prism";
+import { requireRole, AuthzError } from "@/lib/authz";
 import { z } from "zod";
 
 // Zod validation schema
@@ -24,16 +24,9 @@ const UpdateTierSchema = z.object({
  * GET - List all subscriptions (for admin overview)
  */
 export async function GET() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
+    await requireRole();
+
     const admin = getAdminClient();
     const { data: subscriptions, error } = await admin
       .from("subscriptions")
@@ -63,6 +56,9 @@ export async function GET() {
       count: subscriptions?.length || 0,
     });
   } catch (error) {
+    if (error instanceof AuthzError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error("[admin/subscription] GET error:", error);
     return NextResponse.json(
       { error: "Failed to fetch subscriptions" },
@@ -75,16 +71,9 @@ export async function GET() {
  * PATCH - Update any user's subscription tier (Admin only)
  */
 export async function PATCH(request: NextRequest) {
-  const supabase = await createClient();
-  const {
-    data: { user: adminUser },
-  } = await supabase.auth.getUser();
-
-  if (!adminUser) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
+    const actor = await requireRole("admin");
+
     const body = await request.json();
     const parsed = UpdateTierSchema.safeParse(body);
 
@@ -112,7 +101,7 @@ export async function PATCH(request: NextRequest) {
         user_id: userId,
         tier,
         status: "active",
-        modified_by: `prism-admin:${adminUser.id}`,
+        modified_by: `prism-admin:${actor.id}`,
         updated_at: now,
       },
       {
@@ -142,7 +131,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     console.log(
-      `[admin/subscription] Admin ${adminUser.id} updated ${userId} to tier: ${tier}`,
+      `[admin/subscription] Admin ${actor.id} updated ${userId} to tier: ${tier}`,
     );
 
     return NextResponse.json({
@@ -152,6 +141,9 @@ export async function PATCH(request: NextRequest) {
       message: `Subscription updated to ${tier} tier`,
     });
   } catch (error) {
+    if (error instanceof AuthzError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error("[admin/subscription] PATCH error:", error);
     return NextResponse.json(
       { error: "Failed to update subscription" },

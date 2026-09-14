@@ -13,9 +13,9 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { pingRedis } from "@syntaxure/redis";
+import { requireRole, AuthzError } from "@/lib/authz";
 
 const ENGINE_HEALTH_URL =
   process.env.ENGINE_HEALTH_URL || "https://prism.syntaxure.dev/api/health";
@@ -95,24 +95,14 @@ async function checkEngine(): Promise<
 }
 
 export async function GET(_request: NextRequest) {
-  // Auth gate mirrors the admin layout role check.
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  // Auth gate mirrors the admin layout role check via the central requireRole.
+  try {
+    await requireRole();
+  } catch (error) {
+    if (error instanceof AuthzError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const admin = getPrismDb();
-  const { data: profile } = await admin
-    .from("user_profiles")
-    .select("role")
-    .eq("id", user.id)
-    .maybeSingle();
-  const role = (profile as { role?: string } | null)?.role;
-  if (!role || !["founder", "admin", "manager"].includes(role)) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const started = Date.now();

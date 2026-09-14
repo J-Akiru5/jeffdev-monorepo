@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { requireRole, AuthzError } from "@/lib/authz";
 import { revalidatePath } from "next/cache";
 import type { PricingPlanRow } from "@/lib/database.types";
 
@@ -11,11 +11,7 @@ function db() {
 // GET — List pricing plans
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    await requireRole();
 
     const { searchParams } = new URL(request.url);
     const app = searchParams.get("app");
@@ -30,6 +26,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: data || [] });
   } catch (error) {
+    if (error instanceof AuthzError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error("[pricing GET] Error:", error);
     return NextResponse.json(
       { error: "Failed to fetch pricing plans" },
@@ -41,11 +40,7 @@ export async function GET(request: NextRequest) {
 // POST — Create a pricing plan
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    await requireRole();
 
     const body = await request.json();
 
@@ -82,6 +77,9 @@ export async function POST(request: NextRequest) {
     revalidatePath("/admin/pricing");
     return NextResponse.json({ data });
   } catch (error) {
+    if (error instanceof AuthzError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error("[pricing POST] Error:", error);
     return NextResponse.json(
       { error: "Failed to create pricing plan" },
@@ -93,11 +91,7 @@ export async function POST(request: NextRequest) {
 // PATCH — Update a pricing plan
 export async function PATCH(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    await requireRole();
 
     const body = await request.json();
     const { id, ...updates } = body;
@@ -137,6 +131,9 @@ export async function PATCH(request: NextRequest) {
     revalidatePath("/admin/pricing");
     return NextResponse.json({ data });
   } catch (error) {
+    if (error instanceof AuthzError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error("[pricing PATCH] Error:", error);
     return NextResponse.json(
       { error: "Failed to update pricing plan" },
@@ -148,11 +145,7 @@ export async function PATCH(request: NextRequest) {
 // DELETE — Delete a pricing plan
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    await requireRole();
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -171,6 +164,9 @@ export async function DELETE(request: NextRequest) {
     revalidatePath("/admin/pricing");
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof AuthzError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error("[pricing DELETE] Error:", error);
     return NextResponse.json(
       { error: "Failed to delete pricing plan" },

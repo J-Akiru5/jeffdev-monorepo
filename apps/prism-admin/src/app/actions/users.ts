@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getPrismDb } from "@syntaxure-labs/db/prism";
+import { requireRole } from "@/lib/authz";
 
 /**
  * Override a user's subscription tier.
@@ -17,6 +18,7 @@ export async function overrideUserTier(
   tier: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireRole("admin");
     const db = getPrismDb();
     const now = new Date().toISOString();
 
@@ -55,6 +57,7 @@ export async function toggleUserStatus(
   currentStatus: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireRole("admin");
     const newStatus = currentStatus === "suspended" ? "active" : "suspended";
     const db = getPrismDb();
     const { error } = await db
@@ -75,6 +78,7 @@ export async function toggleUserStatus(
 }
 
 export async function clearAppCache(): Promise<{ success: boolean; message: string }> {
+  await requireRole("founder");
   revalidatePath("/");
   return { success: true, message: "Cache cleared successfully. All pages will be revalidated on next request." };
 }

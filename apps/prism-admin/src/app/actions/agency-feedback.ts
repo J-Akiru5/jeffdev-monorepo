@@ -8,6 +8,7 @@
 
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logAuditEvent } from "@/lib/audit";
+import { requireRole } from "@/lib/authz";
 import { revalidatePath } from "next/cache";
 
 interface ActionResult {
@@ -17,6 +18,7 @@ interface ActionResult {
 
 export async function getAgencyFeedback(): Promise<{ success: boolean; data?: any[]; error?: string }> {
   try {
+    await requireRole();
     const supabase = getAdminClient();
     const { data, error } = await supabase
       .from("feedback")
@@ -32,6 +34,7 @@ export async function getAgencyFeedback(): Promise<{ success: boolean; data?: an
 
 export async function getAgencyFeedbackItem(id: string): Promise<any | null> {
   try {
+    await requireRole();
     const supabase = getAdminClient();
     const { data, error } = await supabase
       .from("feedback")
@@ -48,6 +51,7 @@ export async function getAgencyFeedbackItem(id: string): Promise<any | null> {
 
 export async function updateFeedbackStatus(id: string, status: string): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const { error } = await supabase
       .from("feedback")
@@ -55,7 +59,7 @@ export async function updateFeedbackStatus(id: string, status: string): Promise<
       .eq("id", id);
     if (error) throw error;
 
-    await logAuditEvent({ action: "UPDATE", resource: "feedback", resourceId: id, details: { status } });
+    await logAuditEvent({ action: "UPDATE", resource: "feedback", resourceId: id, details: { status } }, actor);
     revalidatePath("/admin/agency/feedback");
     return { success: true };
   } catch (error) {
@@ -66,11 +70,12 @@ export async function updateFeedbackStatus(id: string, status: string): Promise<
 
 export async function deleteFeedback(id: string): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const { error } = await supabase.from("feedback").delete().eq("id", id);
     if (error) throw error;
 
-    await logAuditEvent({ action: "DELETE", resource: "feedback", resourceId: id });
+    await logAuditEvent({ action: "DELETE", resource: "feedback", resourceId: id }, actor);
     revalidatePath("/admin/agency/feedback");
     return { success: true };
   } catch (error) {
