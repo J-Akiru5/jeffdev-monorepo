@@ -285,3 +285,142 @@ describe("runSemanticCheck fail-open contract", () => {
     expect(resolveTimeoutMs()).toBe(12000);
   });
 });
+
+describe("runSemanticCheck skip reasons (activity-log observability)", () => {
+  it("reports 429 as 429-RATE-LIMIT and does not retry it", async () => {
+    const onSkip = vi.fn();
+    const fetchFn = vi.fn().mockResolvedValue({ ok: false, status: 429 });
+    const findings = await runSemanticCheck("a.ts", CONTENT, RULES, {
+      apiKey: "sk-test",
+      fetchFn,
+      onSkip,
+    });
+    expect(findings).toEqual([]);
+    expect(onSkip).toHaveBeenCalledTimes(1);
+    expect(onSkip).toHaveBeenCalledWith("429-RATE-LIMIT");
+    expect(fetchFn).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports other HTTP failures with their status", async () => {
+    const onSkip = vi.fn();
+    const fetchFn = vi.fn().mockResolvedValue({ ok: false, status: 503 });
+    const findings = await runSemanticCheck("a.ts", CONTENT, RULES, {
+      apiKey: "sk-test",
+      fetchFn,
+      onSkip,
+    });
+    expect(findings).toEqual([]);
+    expect(onSkip).toHaveBeenCalledTimes(1);
+    expect(onSkip).toHaveBeenCalledWith("HTTP-503");
+  });
+
+  it("reports a timeout as TIMEOUT", async () => {
+    const onSkip = vi.fn();
+    const fetchFn = vi.fn(
+      (_url: string, init?: { signal?: AbortSignal }) =>
+        new Promise((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () =>
+            reject(new Error("aborted")),
+          );
+        }),
+    );
+    const findings = await runSemanticCheck("a.ts", CONTENT, RULES, {
+      apiKey: "sk-test",
+      timeoutMs: 100,
+      fetchFn: fetchFn as unknown as typeof fetch,
+      onSkip,
+    });
+    expect(findings).toEqual([]);
+    expect(onSkip).toHaveBeenCalledTimes(1);
+    expect(onSkip).toHaveBeenCalledWith("TIMEOUT");
+  });
+
+  it("reports a transport failure as NETWORK-ERROR", async () => {
+    const onSkip = vi.fn();
+    const fetchFn = vi.fn().mockRejectedValue(new TypeError("fetch failed"));
+    const findings = await runSemanticCheck("a.ts", CONTENT, RULES, {
+      apiKey: "sk-test",
+      fetchFn,
+      onSkip,
+    });
+    expect(findings).toEqual([]);
+    expect(onSkip).toHaveBeenCalledTimes(1);
+    expect(onSkip).toHaveBeenCalledWith("NETWORK-ERROR");
+  });
+
+  it("reports unparseable model output as MALFORMED-RESPONSE", async () => {
+    const onSkip = vi.fn();
+    const fetchFn = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        candidates: [
+          { content: { parts: [{ text: "I saw no problems" }] } },
+        ],
+      }),
+    });
+    const findings = await runSemanticCheck("a.ts", CONTENT, RULES, {
+      apiKey: "sk-test",
+      fetchFn,
+      onSkip,
+    });
+    expect(findings).toEqual([]);
+    expect(onSkip).toHaveBeenCalledWith("MALFORMED-RESPONSE");
+  });
+
+  it("reports an empty model response as EMPTY-RESPONSE", async () => {
+    const onSkip = vi.fn();
+    const fetchFn = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ candidates: [] }),
+    });
+    const findings = await runSemanticCheck("a.ts", CONTENT, RULES, {
+      apiKey: "sk-test",
+      fetchFn,
+      onSkip,
+    });
+    expect(findings).toEqual([]);
+    expect(onSkip).toHaveBeenCalledWith("EMPTY-RESPONSE");
+  });
+
+  it("reports a missing key as NO-KEY without calling the API", async () => {
+    const onSkip = vi.fn();
+    const fetchFn = vi.fn();
+    const findings = await runSemanticCheck("a.ts", CONTENT, RULES, {
+      apiKey: "",
+      fetchFn,
+      onSkip,
+    });
+    expect(findings).toEqual([]);
+    expect(onSkip).toHaveBeenCalledWith("NO-KEY");
+    expect(fetchFn).not.toHaveBeenCalled();
+  });
+
+  it("does NOT report a skip for a genuine clean verdict ([])", async () => {
+    const onSkip = vi.fn();
+    const fetchFn = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        candidates: [{ content: { parts: [{ text: "[]" }] } }],
+      }),
+    });
+    const findings = await runSemanticCheck("a.ts", CONTENT, RULES, {
+      apiKey: "sk-test",
+      fetchFn,
+      onSkip,
+    });
+    expect(findings).toEqual([]);
+    expect(onSkip).not.toHaveBeenCalled();
+  });
+
+  it("does not let a throwing observer affect the fail-open contract", async () => {
+    const fetchFn = vi.fn().mockResolvedValue({ ok: false, status: 429 });
+    const findings = await runSemanticCheck("a.ts", CONTENT, RULES, {
+      apiKey: "sk-test",
+      fetchFn,
+      onSkip: () => {
+        throw new Error("observer boom");
+      },
+    });
+    expect(findings).toEqual([]);
+  });
+});

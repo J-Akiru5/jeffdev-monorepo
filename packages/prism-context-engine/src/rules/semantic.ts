@@ -14,6 +14,12 @@
  * alone, exactly as it behaved before this layer existed. A slow or dead
  * Gemini can never block or hang the agent.
  *
+ * Observability (logging only): each fail-open path reports a canonical
+ * SemanticSkipReason to the optional onSkip observer so the activity log can
+ * distinguish a degraded check (429, timeout, network, malformed) from a
+ * genuine clean verdict. The observer never affects the return value, timing,
+ * or the fail-open contract.
+ *
  * The call is hard-capped via AbortController — default SEMANTIC_TIMEOUT_MS
  * (12s, well under the 30s hook ceiling), overridable with
  * PRISM_GEMINI_TIMEOUT_MS — leaving the rest of the 30s for the hook's own
@@ -39,11 +45,28 @@ export const SEMANTIC_DEFAULT_MODEL = "gemini-3.6-flash";
 
 const API_HOST = "https://generativelanguage.googleapis.com/v1beta";
 
+/** Canonical fail-open reasons surfaced to observers (activity log). Values
+ *  are stable, grep-friendly tokens derived from the same conditions the
+ *  PRISM_GEMINI_DEBUG stderr lines already report; the raw HTTP status or
+ *  error message stays in the debug output. */
+export type SemanticSkipReason =
+  | "NO-KEY"
+  | "429-RATE-LIMIT"
+  | `HTTP-${number}`
+  | "TIMEOUT"
+  | "NETWORK-ERROR"
+  | "EMPTY-RESPONSE"
+  | "MALFORMED-RESPONSE";
+
 export interface SemanticOptions {
   apiKey?: string;
   model?: string;
   timeoutMs?: number;
   fetchFn?: typeof fetch;
+  /** Observability only: called exactly once when the layer fails open.
+   *  Never affects the return value, timing, or the fail-open contract —
+   *  observer errors are swallowed. */
+  onSkip?: (reason: SemanticSkipReason) => void;
 }
 
 /** Opt-in gate: PRISM_GEMINI_CHECK=1 AND a key. PRISM_DISABLE=1 always wins
@@ -79,7 +102,10 @@ export async function runSemanticCheck(
     options.apiKey ??
     process.env.GEMINI_API_KEY ??
     process.env.GOOGLE_GEMINI_API_KEY;
-  if (!apiKey) return [];
+  if (!apiKey) {
+    notifySkip(options, "NO-KEY");
+    return [];
+  }
 
   const model = options.model ?? process.env.PRISM_GEMINI_MODEL ?? SEMANTIC_DEFAULT_MODEL;
   const timeoutMs = resolveTimeoutMs(options.timeoutMs);
@@ -119,6 +145,12 @@ export async function runSemanticCheck(
         if (response.status >= 500 && attempt < SEMANTIC_MAX_ATTEMPTS) {
           continue;
         }
+        notifySkip(
+          options,
+          response.status === 429
+            ? "429-RATE-LIMIT"
+            : (`HTTP-${response.status}` as SemanticSkipReason),
+        );
         if (process.env.PRISM_GEMINI_DEBUG === "1") {
           console.error(
             `[prism] semantic check skipped: HTTP ${response.status}`,
@@ -131,13 +163,22 @@ export async function runSemanticCheck(
         candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
       };
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!text) return [];
+      if (!text) {
+        notifySkip(options, "EMPTY-RESPONSE");
+        return [];
+      }
 
-      return parseSemanticFindings(text, filePath, content, ruleSet);
+      const parsed = tryParseSemanticFindings(text, filePath, content, ruleSet);
+      if (!parsed.ok) {
+        notifySkip(options, "MALFORMED-RESPONSE");
+        return [];
+      }
+      return parsed.findings;
     } catch (err) {
       if (attempt < SEMANTIC_MAX_ATTEMPTS && Date.now() < deadline) {
         continue;
       }
+      notifySkip(options, classifyFetchFailure(err));
       if (process.env.PRISM_GEMINI_DEBUG === "1") {
         console.error(
           `[prism] semantic check skipped: ${err instanceof Error ? err.message : String(err)}`,
@@ -148,7 +189,34 @@ export async function runSemanticCheck(
       clearTimeout(timer);
     }
   }
+  // Budget exhausted between attempts — the retry never got to run.
+  notifySkip(options, "TIMEOUT");
   return [];
+}
+
+/** Report a fail-open reason without ever letting the observer change the
+ *  hook's behavior. */
+function notifySkip(
+  options: SemanticOptions,
+  reason: SemanticSkipReason,
+): void {
+  try {
+    options.onSkip?.(reason);
+  } catch {
+    // A broken observer must never affect the fail-open contract.
+  }
+}
+
+/** AbortController timeouts surface as AbortError (or an "aborted" message
+ *  from test doubles); everything else that reaches here is a transport
+ *  failure. */
+function classifyFetchFailure(err: unknown): SemanticSkipReason {
+  if (err instanceof Error) {
+    if (err.name === "AbortError" || /abort/i.test(err.message)) {
+      return "TIMEOUT";
+    }
+  }
+  return "NETWORK-ERROR";
 }
 
 /** Explicit option wins; else the PRISM_GEMINI_TIMEOUT_MS env override;
@@ -228,6 +296,10 @@ export interface RawSemanticFinding {
  * Strict, fail-safe parser. Unknown rule ids, non-numeric lines and anything
  * that does not parse are dropped rather than guessed — an invented rule id
  * must never surface in the output. Findings are capped and deduped.
+ *
+ * Collapses "valid empty array" and "unparseable output" to the same [] —
+ * runSemanticCheck uses tryParseSemanticFindings internally when it needs to
+ * tell those two apart for logging.
  */
 export function parseSemanticFindings(
   raw: string,
@@ -235,13 +307,30 @@ export function parseSemanticFindings(
   content: string,
   ruleSet: RuleSet,
 ): Finding[] {
+  const parsed = tryParseSemanticFindings(raw, filePath, content, ruleSet);
+  return parsed.ok ? parsed.findings : [];
+}
+
+type SemanticParseOutcome =
+  | { ok: true; findings: Finding[] }
+  | { ok: false; reason: "MALFORMED-RESPONSE" };
+
+/** Richer internal variant of parseSemanticFindings: a valid JSON array —
+ *  including an empty one — is a successful verdict; anything that cannot be
+ *  read as an array is malformed (a skipped check, not a clean pass). */
+function tryParseSemanticFindings(
+  raw: string,
+  filePath: string,
+  content: string,
+  ruleSet: RuleSet,
+): SemanticParseOutcome {
   const byId = new Map<string, PrismRule>(
     ruleSet.rules.map((rule) => [rule.id, rule]),
   );
   const lineCount = content.split(/\r?\n/).length;
 
   const items = extractJsonArray(raw);
-  if (items.length === 0) return [];
+  if (items === null) return { ok: false, reason: "MALFORMED-RESPONSE" };
 
   const findings: Finding[] = [];
   const seen = new Set<string>();
@@ -255,22 +344,22 @@ export function parseSemanticFindings(
     seen.add(key);
     findings.push(finding);
   }
-  return findings;
+  return { ok: true, findings };
 }
 
-function extractJsonArray(raw: string): RawSemanticFinding[] {
+function extractJsonArray(raw: string): RawSemanticFinding[] | null {
   const start = raw.indexOf("[");
   const end = raw.lastIndexOf("]");
-  if (start === -1 || end <= start) return [];
+  if (start === -1 || end <= start) return null;
   try {
     const parsed = JSON.parse(raw.slice(start, end + 1)) as unknown;
-    if (!Array.isArray(parsed)) return [];
+    if (!Array.isArray(parsed)) return null;
     return parsed.filter(
       (entry): entry is RawSemanticFinding =>
         typeof entry === "object" && entry !== null && !Array.isArray(entry),
     );
   } catch {
-    return [];
+    return null;
   }
 }
 

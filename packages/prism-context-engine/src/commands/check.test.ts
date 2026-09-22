@@ -1,11 +1,13 @@
 import { describe, it, expect } from "vitest";
 import {
+  cleanResult,
   extractFilePath,
   extractProposedContent,
   resolveHookMode,
   shouldBlockStop,
   type HookEvent,
 } from "./check.js";
+import { formatActivityLine } from "../rules/activity.js";
 
 describe("extractFilePath", () => {
   it("reads the Claude Code nested shape (tool_input.file_path)", () => {
@@ -202,5 +204,48 @@ describe("extractProposedContent", () => {
     expect(
       extractProposedContent({ tool_input: { file_path: "src/a.ts" } }),
     ).toEqual({ ok: false, reason: "no-proposed-content" });
+  });
+});
+
+describe("cleanResult (activity.log token for a semantic fail-open)", () => {
+  it("keeps CLEAN for a genuine pass (no skip reason)", () => {
+    expect(cleanResult()).toBe("CLEAN");
+  });
+
+  it("renders each fail-open cause as its own distinguishable token", () => {
+    expect(cleanResult("429-RATE-LIMIT")).toBe("SKIPPED 429-RATE-LIMIT");
+    expect(cleanResult("TIMEOUT")).toBe("SKIPPED TIMEOUT");
+    expect(cleanResult("NETWORK-ERROR")).toBe("SKIPPED NETWORK-ERROR");
+    expect(cleanResult("MALFORMED-RESPONSE")).toBe(
+      "SKIPPED MALFORMED-RESPONSE",
+    );
+    expect(cleanResult("EMPTY-RESPONSE")).toBe("SKIPPED EMPTY-RESPONSE");
+    expect(cleanResult("HTTP-503")).toBe("SKIPPED HTTP-503");
+  });
+
+  it("never collapses a skipped semantic check into CLEAN", () => {
+    const reasons = [
+      "429-RATE-LIMIT",
+      "TIMEOUT",
+      "NETWORK-ERROR",
+      "MALFORMED-RESPONSE",
+    ] as const;
+    for (const reason of reasons) {
+      const token = cleanResult(reason);
+      expect(token).not.toBe("CLEAN");
+      expect(token).toContain(reason);
+    }
+  });
+
+  it("produces a distinct full activity.log line for a rate limit", () => {
+    const line = formatActivityLine(
+      "pre",
+      "src/Button.tsx",
+      cleanResult("429-RATE-LIMIT"),
+      new Date("2026-09-22T00:00:00.000Z"),
+    );
+    expect(line).toBe(
+      "2026-09-22T00:00:00.000Z\tpre\tsrc/Button.tsx\tSKIPPED 429-RATE-LIMIT",
+    );
   });
 });

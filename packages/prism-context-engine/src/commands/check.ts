@@ -49,7 +49,11 @@ import {
   type HookFormat,
 } from "../rules/format.js";
 import type { Finding, RuleSet } from "../rules/types.js";
-import { runSemanticCheck, semanticEnabled } from "../rules/semantic.js";
+import {
+  runSemanticCheck,
+  semanticEnabled,
+  type SemanticSkipReason,
+} from "../rules/semantic.js";
 import {
   appendActivity,
   formatActivityLine,
@@ -328,22 +332,27 @@ async function runPreToolUse(
     return;
   }
 
-  let blocks: Finding[];
+  let check: BlockingCheckResult;
   try {
-    blocks = await collectBlockingFindings(filePath, proposed.content, ruleSet);
+    check = await collectBlockingFindings(filePath, proposed.content, ruleSet);
   } catch (err) {
     console.error(`[prism] check skipped: engine error: ${errorMessage(err)}`);
     logHookEvent(logPath, "pre", filePath, "SKIPPED engine-error");
     return;
   }
 
-  if (blocks.length === 0) {
-    logHookEvent(logPath, "pre", filePath, "CLEAN");
+  if (check.blocks.length === 0) {
+    logHookEvent(
+      logPath,
+      "pre",
+      filePath,
+      cleanResult(check.semanticSkipReason),
+    );
     return;
   }
 
-  logHookEvent(logPath, "pre", filePath, blockedResult(blocks));
-  writeHookCorrection(format, filePath, blocks);
+  logHookEvent(logPath, "pre", filePath, blockedResult(check.blocks));
+  writeHookCorrection(format, filePath, check.blocks);
 }
 
 async function runPostToolUse(
@@ -391,22 +400,27 @@ async function runPostToolUse(
     return;
   }
 
-  let blocks: Finding[];
+  let check: BlockingCheckResult;
   try {
-    blocks = await collectBlockingFindings(filePath, content, ruleSet);
+    check = await collectBlockingFindings(filePath, content, ruleSet);
   } catch (err) {
     console.error(`[prism] check skipped: engine error: ${errorMessage(err)}`);
     logHookEvent(logPath, "post", filePath, "SKIPPED engine-error");
     return;
   }
 
-  if (blocks.length === 0) {
-    logHookEvent(logPath, "post", filePath, "CLEAN");
+  if (check.blocks.length === 0) {
+    logHookEvent(
+      logPath,
+      "post",
+      filePath,
+      cleanResult(check.semanticSkipReason),
+    );
     return;
   }
 
-  logHookEvent(logPath, "post", filePath, blockedResult(blocks));
-  writeHookCorrection(format, filePath, blocks);
+  logHookEvent(logPath, "post", filePath, blockedResult(check.blocks));
+  writeHookCorrection(format, filePath, check.blocks);
 }
 
 /**
@@ -494,6 +508,14 @@ function runStopHook(event: HookEvent, format: HookFormat): void {
   process.exitCode = 2;
 }
 
+interface BlockingCheckResult {
+  blocks: Finding[];
+  /** Set when the semantic layer was attempted and failed open (429, timeout,
+   *  network, malformed response). Used only to decide what activity.log
+   *  records — never to change blocking or exit behavior. */
+  semanticSkipReason?: SemanticSkipReason;
+}
+
 /**
  * Regex first; the semantic layer only when the deterministic pass found no
  * blocking violations (same order the hook has always used). Semantic
@@ -504,12 +526,20 @@ async function collectBlockingFindings(
   filePath: string,
   content: string,
   ruleSet: RuleSet,
-): Promise<Finding[]> {
+): Promise<BlockingCheckResult> {
   const findings = checkContent(filePath, content, ruleSet);
   const blocks = findings.filter((f) => f.severity === "block");
-  if (blocks.length > 0) return blocks;
-  if (!semanticEnabled()) return [];
-  return runSemanticCheck(filePath, content, ruleSet);
+  if (blocks.length > 0) return { blocks };
+  if (!semanticEnabled()) return { blocks: [] };
+
+  let semanticSkipReason: SemanticSkipReason | undefined;
+  const semanticFindings = await runSemanticCheck(filePath, content, ruleSet, {
+    onSkip: (reason) => {
+      semanticSkipReason = reason;
+    },
+  });
+  if (semanticFindings.length > 0) return { blocks: semanticFindings };
+  return { blocks: [], semanticSkipReason };
 }
 
 function isFileEditTool(name: string): boolean {
@@ -556,6 +586,15 @@ function describeFiles(files: string[], source: string): string {
   if (files.length === 0) return `${source}:none`;
   const head = files.slice(0, 3).join(";");
   return files.length > 3 ? `${head};+${files.length - 3} more` : head;
+}
+
+/** Activity-log token for a pass with no blocking findings. When the
+ *  semantic layer was attempted and failed open (rate limit, timeout,
+ *  network, malformed response), the skip reason replaces CLEAN so a
+ *  degraded check is never mistaken for a genuine pass. Logging only —
+ *  exit codes and corrections are unaffected. */
+export function cleanResult(semanticSkipReason?: SemanticSkipReason): string {
+  return semanticSkipReason ? `SKIPPED ${semanticSkipReason}` : "CLEAN";
 }
 
 function blockedResult(blocks: Finding[]): string {
