@@ -25,6 +25,8 @@ import type { Finding, PrismRule, RuleSet } from "./types.js";
 
 export const SEMANTIC_TIMEOUT_MS = 12000;
 export const SEMANTIC_MAX_FINDINGS = 3;
+/** One retry absorbs transient 5xx/network failures. */
+export const SEMANTIC_MAX_ATTEMPTS = 2;
 
 /** Sanity bounds for the env override: never below 1s (a real call needs it),
  *  never at/above the 30s hook ceiling. */
@@ -60,6 +62,12 @@ export function semanticEnabled(): boolean {
  * on every failure path. Findings reference the ruleset's own rule IDs so the
  * correction formatter produces output indistinguishable from a regex catch
  * (unlabeled by design).
+ *
+ * Reliability: temperature 0 keeps the verdict stable run-to-run, and one
+ * bounded retry absorbs transient 5xx/network failures (observed in the
+ * wild: Gemini returning 503). Both attempts share the single timeout
+ * budget, so the worst case stays exactly where it was — fail-open after
+ * timeoutMs.
  */
 export async function runSemanticCheck(
   filePath: string,
@@ -78,50 +86,69 @@ export async function runSemanticCheck(
   const fetchFn = options.fetchFn ?? globalThis.fetch;
 
   const prompt = buildPrompt(filePath, content, ruleSet);
+  const deadline = Date.now() + timeoutMs;
+  const body = JSON.stringify({
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: {
+      responseMimeType: "application/json",
+      maxOutputTokens: 1024,
+      temperature: 0,
+    },
+  });
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  for (let attempt = 1; attempt <= SEMANTIC_MAX_ATTEMPTS; attempt++) {
+    const remaining = deadline - Date.now();
+    if (remaining <= 0) break;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), remaining);
 
-  try {
-    const response = await fetchFn(`${API_HOST}/models/${model}:generateContent`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": apiKey,
-      },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: "application/json",
-          maxOutputTokens: 1024,
+    try {
+      const response = await fetchFn(
+        `${API_HOST}/models/${model}:generateContent`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": apiKey,
+          },
+          body,
+          signal: controller.signal,
         },
-      }),
-      signal: controller.signal,
-    });
-    if (!response.ok) {
+      );
+      if (!response.ok) {
+        if (response.status >= 500 && attempt < SEMANTIC_MAX_ATTEMPTS) {
+          continue;
+        }
+        if (process.env.PRISM_GEMINI_DEBUG === "1") {
+          console.error(
+            `[prism] semantic check skipped: HTTP ${response.status}`,
+          );
+        }
+        return [];
+      }
+
+      const data = (await response.json()) as {
+        candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+      };
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) return [];
+
+      return parseSemanticFindings(text, filePath, content, ruleSet);
+    } catch (err) {
+      if (attempt < SEMANTIC_MAX_ATTEMPTS && Date.now() < deadline) {
+        continue;
+      }
       if (process.env.PRISM_GEMINI_DEBUG === "1") {
-        console.error(`[prism] semantic check skipped: HTTP ${response.status}`);
+        console.error(
+          `[prism] semantic check skipped: ${err instanceof Error ? err.message : String(err)}`,
+        );
       }
       return [];
+    } finally {
+      clearTimeout(timer);
     }
-
-    const data = (await response.json()) as {
-      candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
-    };
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) return [];
-
-    return parseSemanticFindings(text, filePath, content, ruleSet);
-  } catch (err) {
-    if (process.env.PRISM_GEMINI_DEBUG === "1") {
-      console.error(
-        `[prism] semantic check skipped: ${err instanceof Error ? err.message : String(err)}`,
-      );
-    }
-    return [];
-  } finally {
-    clearTimeout(timer);
   }
+  return [];
 }
 
 /** Explicit option wins; else the PRISM_GEMINI_TIMEOUT_MS env override;
