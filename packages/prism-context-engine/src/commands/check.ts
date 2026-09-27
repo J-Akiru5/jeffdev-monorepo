@@ -508,7 +508,9 @@ function runStopHook(event: HookEvent, format: HookFormat): void {
   process.exitCode = 2;
 }
 
-interface BlockingCheckResult {
+/** Shared with the OpenCode throw-path dispatch (rules/opencode.ts), which
+ *  records the exact same activity vocabulary from its own call sites. */
+export interface BlockingCheckResult {
   blocks: Finding[];
   /** Set when the semantic layer was attempted and failed open (429, timeout,
    *  network, malformed response). Used only to decide what activity.log
@@ -522,7 +524,9 @@ interface BlockingCheckResult {
  * findings are returned as-is — its own parser already maps them to the
  * ruleset's severities, and the layer never throws.
  */
-async function collectBlockingFindings(
+/** Exported for the OpenCode throw-path dispatch — same regex-then-semantic
+ *  order, a second call site, not a second pipeline. */
+export async function collectBlockingFindings(
   filePath: string,
   content: string,
   ruleSet: RuleSet,
@@ -597,7 +601,7 @@ export function cleanResult(semanticSkipReason?: SemanticSkipReason): string {
   return semanticSkipReason ? `SKIPPED ${semanticSkipReason}` : "CLEAN";
 }
 
-function blockedResult(blocks: Finding[]): string {
+export function blockedResult(blocks: Finding[]): string {
   const ids = [...new Set(blocks.map((block) => block.ruleId))];
   return `BLOCKED ${ids.join(",")}`;
 }

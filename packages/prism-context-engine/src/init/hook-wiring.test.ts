@@ -2,11 +2,15 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
+import { pathToFileURL } from "url";
 import {
   wireCursorHook,
   wireAntigravityHook,
+  wireOpenCodeHook,
   CURSOR_HOOK_COMMAND,
   ANTIGRAVITY_HOOK_COMMAND,
+  OPENCODE_PLUGIN_PATH,
+  OPENCODE_PLUGIN_MARKER,
 } from "./hook.js";
 
 function makeTmpDir(label: string): string {
@@ -123,6 +127,75 @@ describe("wireAntigravityHook", () => {
       readFileSync(join(dir, ".agents", "hooks.json"), "utf8"),
     );
     expect(doc["prism-pass"].PostToolUse).toHaveLength(1);
+  });
+});
+
+describe("wireOpenCodeHook", () => {
+  let dir: string;
+  beforeEach(() => {
+    dir = makeTmpDir("opencode");
+  });
+
+  it("creates .opencode/plugin/prism.js with the throw-based dispatch", () => {
+    const result = wireOpenCodeHook(dir);
+    expect(result.outcome).toBe("created");
+    expect(result.path).toBe(join(dir, OPENCODE_PLUGIN_PATH));
+
+    const source = readFileSync(result.path, "utf8");
+    expect(source).toContain(OPENCODE_PLUGIN_MARKER);
+    expect(source).toContain('const PLUGIN_ID = "prism-pass-opencode"');
+    expect(source).toContain('"tool.execute.before"');
+    expect(source).toContain('"tool.execute.after"');
+    expect(source).toContain("throw new Error(outcome.message)");
+    expect(source).toContain("@prism-engine/cli/hook-runtime");
+    // Separate surfaces: wiring OpenCode touches nothing Claude/Cursor owns.
+    expect(existsSync(join(dir, ".claude"))).toBe(false);
+    expect(existsSync(join(dir, ".cursor"))).toBe(false);
+  });
+
+  it("is idempotent and never rewrites its own output", () => {
+    const first = wireOpenCodeHook(dir);
+    const before = readFileSync(first.path, "utf8");
+    const second = wireOpenCodeHook(dir);
+    expect(second.outcome).toBe("already-present");
+    expect(readFileSync(first.path, "utf8")).toBe(before);
+  });
+
+  it("leaves a foreign plugin file untouched", () => {
+    const path = join(dir, OPENCODE_PLUGIN_PATH);
+    mkdirSync(join(dir, ".opencode", "plugin"), { recursive: true });
+    const foreign = "export default { id: 'not-ours', server: async () => ({}) };\n";
+    writeFileSync(path, foreign);
+
+    const result = wireOpenCodeHook(dir);
+    expect(result.outcome).toBe("foreign");
+    expect(readFileSync(path, "utf8")).toBe(foreign);
+  });
+
+  it("writes a valid ESM module that registers both hooks and fails open when the CLI isn't installed", async () => {
+    const result = wireOpenCodeHook(dir);
+    const mod = (await import(pathToFileURL(result.path).href)) as {
+      default: {
+        id: string;
+        server: (input: {
+          directory: string;
+        }) => Promise<Record<string, (input: unknown, output?: unknown) => Promise<void>>>;
+      };
+    };
+
+    expect(mod.default.id).toBe("prism-pass-opencode");
+    expect(typeof mod.default.server).toBe("function");
+
+    // @prism-engine/cli is not installed under the temp dir — server()
+    // must still return both hooks (fail open, never throw).
+    const hooks = await mod.default.server({ directory: dir });
+    expect(typeof hooks["tool.execute.before"]).toBe("function");
+    expect(typeof hooks["tool.execute.after"]).toBe("function");
+
+    // Without the runtime, a before-call must NOT throw (allow path).
+    await expect(
+      hooks["tool.execute.before"]({ tool: "write" }, { args: {} }),
+    ).resolves.toBeUndefined();
   });
 });
 

@@ -4,15 +4,16 @@ import type { Finding } from "./types.js";
 const HOOK_MAX_FINDINGS = 5;
 
 /** Hook output formats. `claude-code` is the original, verified contract —
- *  its output bytes must never change. Cursor/Antigravity differ only in the
- *  lead line; the numbered-corrections body is shared because correction
- *  quality IS the product on every agent. */
-export type HookFormat = "claude-code" | "cursor" | "antigravity";
+ *  its output bytes must never change. Cursor/Antigravity/OpenCode differ
+ *  only in the lead line; the numbered-corrections body is shared because
+ *  correction quality IS the product on every agent. */
+export type HookFormat = "claude-code" | "cursor" | "antigravity" | "opencode";
 
 export const HOOK_FORMATS: HookFormat[] = [
   "claude-code",
   "cursor",
   "antigravity",
+  "opencode",
 ];
 
 export function normalizeHookFormat(value: string | undefined): HookFormat {
@@ -62,6 +63,8 @@ function leadLine(format: HookFormat, file: string, count: number): string {
       return `PRISM (Cursor) flagged ${count} ${noun} in ${file} — apply these fixes now:`;
     case "antigravity":
       return `PRISM (Antigravity) flagged ${count} ${noun} in ${basename(file)} — apply these fixes now:`;
+    case "opencode":
+      return `PRISM (OpenCode) flagged ${count} ${noun} in ${basename(file)} — apply these fixes now:`;
     case "claude-code":
       return `PRISM PASS blocked write to ${basename(file)} — ${count} rule ${noun} must be fixed now:`;
   }

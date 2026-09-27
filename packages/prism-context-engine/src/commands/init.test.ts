@@ -149,4 +149,33 @@ describe("prism init (local onboarding)", () => {
 
     expect(readFileSync(rulesPath(dir), "utf8")).not.toBe("EXISTING");
   });
+
+  it("wires the OpenCode plugin alongside the Claude hooks", async () => {
+    const dir = makeTmpDir("opencode-wiring");
+    dirs.push(dir);
+
+    await init({ cwd: dir, yes: true });
+
+    expect(existsSync(join(dir, ".claude", "settings.json"))).toBe(true);
+    const pluginPath = join(dir, ".opencode", "plugin", "prism.js");
+    expect(existsSync(pluginPath)).toBe(true);
+    const source = readFileSync(pluginPath, "utf8");
+    expect(source).toContain("prism-pass-opencode");
+    expect(source).toContain("throw new Error(outcome.message)");
+    expect(source).toContain("@prism-engine/cli/hook-runtime");
+  });
+
+  it("leaves a foreign .opencode/plugin/prism.js untouched", async () => {
+    const dir = makeTmpDir("opencode-foreign");
+    dirs.push(dir);
+    const pluginPath = join(dir, ".opencode", "plugin", "prism.js");
+    mkdirSync(join(dir, ".opencode", "plugin"), { recursive: true });
+    writeFileSync(pluginPath, "export default { id: 'someone-elses' };\n");
+
+    await init({ cwd: dir, yes: true });
+
+    expect(readFileSync(pluginPath, "utf8")).toBe(
+      "export default { id: 'someone-elses' };\n",
+    );
+  });
 });

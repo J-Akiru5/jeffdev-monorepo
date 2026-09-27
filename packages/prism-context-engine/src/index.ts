@@ -91,7 +91,7 @@ program
 program
   .command("init")
   .description(
-    "Local onboarding — scan design tokens, generate .prism/rules.json, wire the Claude Code hooks (PreToolUse + PostToolUse + Stop). No network, no account.",
+    "Local onboarding — scan design tokens, generate .prism/rules.json, wire the Claude Code hooks (PreToolUse + PostToolUse + Stop), Cursor/Antigravity, and the OpenCode plugin. No network, no account.",
   )
   .option("--yes", "Skip prompts and accept defaults (for CI)")
   .option(
