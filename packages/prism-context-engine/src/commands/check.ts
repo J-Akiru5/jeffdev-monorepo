@@ -10,6 +10,13 @@
  *
  * Hook mode fails open: missing/malformed rules, unreadable files, engine
  * errors and kill switch (PRISM_DISABLE=1) all exit 0 without blocking.
+ *
+ * Semantic layer (opt-in, PRISM_GEMINI_CHECK=1 + key): when the deterministic
+ * regex engine finds no blocking violations, a Gemini call (default
+ * gemini-3.6-flash, 12s hard cap, tunable via PRISM_GEMINI_TIMEOUT_MS) checks
+ * the same file for intent-level violations regex cannot see. It is strictly
+ * additive and itself fails open — any error/timeout falls back to the
+ * deterministic result alone.
  */
 
 import chalk from "chalk";
@@ -27,6 +34,10 @@ import {
   normalizeHookFormat,
 } from "../rules/format.js";
 import type { Finding, RuleSet } from "../rules/types.js";
+import {
+  runSemanticCheck,
+  semanticEnabled,
+} from "../rules/semantic.js";
 
 const MAX_STDIN_BYTES = 1024 * 1024;
 const HOOK_TOOL_PATTERN = /Write|Edit/i;
@@ -41,8 +52,9 @@ interface CheckOptions {
  * Hook event payloads differ per agent. Claude Code nests the path under
  * tool_input; Cursor sends file_path at the top level (its hooks.json
  * auto-mapping of .claude settings also emits Cursor's shape); Antigravity
- * uses camelCase. Accepting the superset keeps the Claude Code contract
- * byte-identical while making one formatter serve every agent.
+ * 2.0 nests it under toolCall.args (camelCase keys). Accepting the superset
+ * keeps the Claude Code contract byte-identical while making one formatter
+ * serve every agent.
  */
 interface HookEvent {
   tool_name?: unknown;
@@ -50,15 +62,34 @@ interface HookEvent {
   tool_input?: { file_path?: unknown };
   file_path?: unknown;
   filePath?: unknown;
+  toolCall?: { name?: unknown; args?: Record<string, unknown> };
 }
 
-function extractFilePath(event: HookEvent): string | null {
+/** Path keys Antigravity's file-edit tools may use inside toolCall.args.
+ *  The docs' own payload examples use PascalCase keys (e.g. DirectoryPath
+ *  for list_dir), so both casings are accepted defensively. */
+const TOOL_CALL_PATH_KEYS = [
+  "filePath",
+  "FilePath",
+  "file_path",
+  "path",
+  "file",
+] as const;
+
+export function extractFilePath(event: HookEvent): string | null {
   const nested = event.tool_input?.file_path;
   if (typeof nested === "string" && nested.length > 0) return nested;
   if (typeof event.file_path === "string" && event.file_path.length > 0)
     return event.file_path;
   if (typeof event.filePath === "string" && event.filePath.length > 0)
     return event.filePath;
+  const args = event.toolCall?.args;
+  if (args && typeof args === "object") {
+    for (const key of TOOL_CALL_PATH_KEYS) {
+      const value = args[key];
+      if (typeof value === "string" && value.length > 0) return value;
+    }
+  }
   return null;
 }
 
@@ -129,8 +160,25 @@ async function runHook(formatFlag?: string): Promise<void> {
   }
 
   const blocks = findings.filter((f) => f.severity === "block");
+  if (blocks.length === 0 && semanticEnabled()) {
+    // Semantic layer: regex found nothing blocking — ask the model whether
+    // the code is working around a rule's intent. Fail-open by contract.
+    const semantic = await runSemanticCheck(filePath, content, ruleSet);
+    if (semantic.length > 0) {
+      writeHookCorrection(format, filePath, semantic);
+      return;
+    }
+  }
   if (blocks.length === 0) return;
 
+  writeHookCorrection(format, filePath, blocks);
+}
+
+function writeHookCorrection(
+  format: "claude-code" | "cursor" | "antigravity",
+  filePath: string,
+  blocks: Finding[],
+): void {
   const output =
     format === "claude-code"
       ? formatHookClaudeCode(filePath, blocks)
