@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Prism vs Unenforced — Paired Token-Usage Trial</title>
+<style>
+  :root {
+    --bg:#0A0D12; --bg2:#0E1219; --panel:#11161F; --line:#1D2530;
+    --cyan:#22D3EE; --violet:#8B7BFF; --text:#E6EBF2; --dim:#8B95A5;
+    --ok:#34D399; --warn:#FBBF24; --bad:#F87171;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+    --sans: Inter, system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.65; font-size: 15px; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 48px 28px 96px; }
+  .kicker { font-family: var(--mono); font-size: .75rem; letter-spacing: .18em; text-transform: uppercase; color: var(--cyan); }
+  h1 { font-size: 2rem; font-weight: 800; line-height: 1.15; margin: .6rem 0 .3rem; }
+  h1 .accent { color: var(--violet); }
+  .meta { color: var(--dim); font-size: .85rem; font-family: var(--mono); }
+  h2 { font-size: 1.25rem; font-weight: 700; margin: 3rem 0 1rem; padding-bottom: .5rem; border-bottom: 1px solid var(--line); }
+  h2 .idx { font-family: var(--mono); color: var(--cyan); font-weight: 500; margin-right: .6rem; }
+  p { margin: .7rem 0; }
+  code, .mono { font-family: var(--mono); font-size: .86em; background: var(--panel); border: 1px solid var(--line); border-radius: 5px; padding: .1em .38em; color: var(--cyan); }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .85rem; }
+  th { font-family: var(--mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .1em; color: var(--dim); text-align: left; padding: .55rem .7rem; border-bottom: 1px solid var(--line); }
+  td { padding: .55rem .7rem; border-bottom: 1px solid var(--line); vertical-align: top; font-family: var(--mono); font-size: .82rem; }
+  tr.baseline td { background: rgba(139,123,255,.05); }
+  tr.enforced td { background: rgba(34,211,238,.05); }
+  td.num { text-align: right; }
+  .chart { display: flex; align-items: flex-end; gap: 8px; height: 260px; padding: 10px 6px 0; border-bottom: 1px solid var(--line); }
+  .bar-group { display: flex; flex-direction: column; justify-content: flex-end; height: 100%; flex: 1; align-items: center; gap: 4px; }
+  .bar { width: 60%; min-height: 2px; border-radius: 4px 4px 0 0; position: relative; }
+  .bar.b { background: linear-gradient(180deg, #8B7BFF, #6d5df0); }
+  .bar.e { background: linear-gradient(180deg, #22D3EE, #0ea5c9); }
+  .bar .val { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-family: var(--mono); font-size: .68rem; color: var(--dim); white-space: nowrap; }
+  .group-label { font-family: var(--mono); font-size: .68rem; color: var(--dim); text-align: center; margin-top: 6px; }
+  .legend { display: flex; gap: 20px; margin: .8rem 0; font-family: var(--mono); font-size: .75rem; color: var(--dim); }
+  .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  .callout { border-left: 3px solid var(--cyan); background: var(--bg2); padding: .9rem 1.2rem; border-radius: 0 10px 10px 0; margin: 1.4rem 0; }
+  .callout.amber { border-left-color: var(--warn); }
+  .callout .b { color: var(--cyan); font-weight: 600; }
+  ul { margin: .7rem 0 .7rem 1.3rem; }
+  ul li { margin: .4em 0; }
+  .foot { margin-top: 4rem; padding-top: 1.2rem; border-top: 1px solid var(--line); font-family: var(--mono); font-size: .72rem; color: var(--dim); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="kicker">KWADRA Demo Day · Prism Context Engine</div>
+<h1>Paired Token Trial: <span class="accent">Prism-enforced vs unenforced</span></h1>
+<p class="meta">N = 3 tasks · paired sessions on real Claude Code 2.1.278 (claude-sonnet-5) · transcripts saved alongside this report · every figure parses directly from a JSONL file — no estimates</p>
+
+<h2><span class="idx">1</span>Method</h2>
+<p>
+  Three short component tasks, each run as a <b>baseline</b> session (no Prism hook; a simulated human
+  reviewer catches the violation in a <i>second</i> user turn) and an <b>enforced</b> session (Prism
+  PostToolUse hook active in <code>.claude/settings.json</code>; the agent self-corrects in the <i>same</i> turn
+  after the hook blocks the write with exit-2 + exact fixes). Same starting repo state, same task prompt.
+  The rule of record is the demo's own: <code>forbidden_pattern #[0-9a-fA-F]{6}\b</code> + semantic
+  (Gemini) layer for non-hex equivalents, via the project's <code>.prism/rules.json</code>.
+</p>
+<ul>
+  <li><b>T1</b> — <code>WarningBanner.tsx</code>: brand red <code>#ef4444</code> (regex-class catch)</li>
+  <li><b>T2</b> — <code>CtaButton.tsx</code>: brand primary <code>#06b6d4</code> (regex-class catch)</li>
+  <li><b>T3</b> — <code>InfoPill.tsx</code>: <code>rgb(6, 182, 212)</code> — the rgb() equivalent of
+    <code>#06b6d4</code> (semantic-class catch; regex alone cannot see it)</li>
+</ul>
+
+<h2><span class="idx">2</span>Results — per session, traceable to file</h2>
+<p>
+  Token categories parsed from <code>message.usage</code> on every <code>assistant</code> line:
+  <code>input_tokens</code> (fresh input), <code>output_tokens</code>,
+  <code>cache_creation_input_tokens</code> (cache write), <code>cache_read_input_tokens</code>.
+  User turns = real <code>user</code>-role messages in the transcript. Transcripts copied verbatim to
+  <code>measurement/transcripts/&lt;arm&gt;/</code> before any rotation.
+</p>
+<table>
+  <thead>
+    <tr><th>Trial</th><th>Arm</th><th>Session (saved file)</th><th class="num">Input</th><th class="num">Output</th><th class="num">Cache write</th><th class="num">Cache read</th><th class="num">Total</th><th class="num">User turns</th><th>Outcome</th></tr>
+  </thead>
+  <tbody>
+    <tr class="baseline"><td rowspan="3">T1 WarningBanner</td><td>baseline</td><td>1774b57e (<code>transcripts/baseline/t1-warning-banner-1774b57e…jsonl</code>)</td><td class="num">32</td><td class="num">3,981</td><td class="num">72,095</td><td class="num">861,644</td><td class="num"><b>937,752</b></td><td class="num">2</td><td>hex written → reviewer turn → fixed to token</td></tr>
+    <tr class="enforced"><td>enforced</td><td>e07364ea (<code>transcripts/enforced/t1-warning-banner-e07364ea…jsonl</code>)</td><td class="num">34</td><td class="num">5,227</td><td class="num">79,112</td><td class="num">902,463</td><td class="num"><b>986,836</b></td><td class="num">1</td><td>write blocked (<code>hook_blocking_error</code>), corrected inline to token</td></tr>
+    <tr><td colspan="10" style="color:var(--dim)">Δ total: <b style="color:var(--warn)">+5.2%</b> (enforced spent 1 extra model call in the block-retry loop) — but <b>1 human turn instead of 2</b></td></tr>
+
+    <tr class="baseline"><td rowspan="4">T2 CtaButton</td><td>baseline (reviewer refused)</td><td>14691da8 (<code>transcripts/baseline/t2-cta-button-refused-14691da8…jsonl</code>)</td><td class="num">32</td><td class="num">5,087</td><td class="num">81,599</td><td class="num">846,952</td><td class="num"><b>933,670</b></td><td class="num">2</td><td>reviewer turn <b>rejected by the agent</b> ("no such rule exists") — hex survives on disk</td></tr>
+    <tr class="baseline"><td>baseline (insistent reviewer)</td><td>cd98f959 (<code>transcripts/baseline/t2-cta-button-insistent-cd98f959…jsonl</code>)</td><td class="num">24</td><td class="num">3,067</td><td class="num">76,662</td><td class="num">604,740</td><td class="num"><b>684,493</b></td><td class="num">2</td><td>re-run; directive reviewer ("do not debate") → fixed to token</td></tr>
+    <tr class="enforced"><td>enforced</td><td>47890e4f (<code>transcripts/enforced/t2-cta-button-47890e4f…jsonl</code>)</td><td class="num">20</td><td class="num">3,159</td><td class="num">63,854</td><td class="num">497,300</td><td class="num"><b>564,333</b></td><td class="num">1</td><td>write blocked (<code>hook_blocking_error</code>), corrected inline to token</td></tr>
+    <tr><td colspan="10" style="color:var(--dim)">Δ total: <b style="color:var(--ok)">−39.6%</b> vs refused baseline · <b style="color:var(--ok)">−17.6%</b> vs insistent baseline · 1 human turn instead of 2</td></tr>
+
+    <tr class="baseline"><td rowspan="5">T3 InfoPill</td><td>baseline</td><td>dc4e939e (<code>transcripts/baseline/t3-info-pill-dc4e939e…jsonl</code>)</td><td class="num">22</td><td class="num">2,416</td><td class="num">66,666</td><td class="num">556,227</td><td class="num"><b>625,331</b></td><td class="num">2</td><td>rgb() written → reviewer caught it → fixed to token</td></tr>
+    <tr class="enforced"><td>enforced (semantic layer quota-starved)</td><td>f520dc91 (<code>transcripts/enforced/t3-info-pill-f520dc91…jsonl</code>)</td><td class="num">20</td><td class="num">3,255</td><td class="num">63,184</td><td class="num">498,227</td><td class="num"><b>564,686</b></td><td class="num">1</td><td>rgb() written, <b>NOT caught</b> — Gemini free-tier 429 → Prism failed open by design; violation remains</td></tr>
+    <tr class="enforced"><td>enforced (quota-starved, repeat)</td><td>be14ec54 (<code>transcripts/enforced/t3-info-pill-be14ec54…jsonl</code>)</td><td class="num">22</td><td class="num">2,033</td><td class="num">62,461</td><td class="num">552,863</td><td class="num"><b>617,379</b></td><td class="num">1</td><td>same failure mode, reproduced</td></tr>
+    <tr class="enforced"><td>enforced (quota clear)</td><td>0b56e7bc (<code>transcripts/enforced/t3-info-pill-0b56e7bc…jsonl</code>)</td><td class="num">28</td><td class="num">5,727</td><td class="num">65,779</td><td class="num">731,483</td><td class="num"><b>803,017</b></td><td class="num">1</td><td>agent read the constitution and <b>complied on first write</b> — no violation, no block, token-clean file</td></tr>
+    <tr><td colspan="10" style="color:var(--dim)">Δ total: quota-starved <b style="color:var(--warn)">−9.7%</b> (but enforcement did not happen) · compliance path <b style="color:var(--warn)">+28.4%</b> (agent read rules up front) · baseline needed 2 human turns, every enforced arm 1</td></tr>
+  </tbody>
+</table>
+
+<h2><span class="idx">3</span>Chart — total tokens per session (grouped by task)</h2>
+<div class="legend">
+  <span><span class="swatch" style="background:#8B7BFF"></span>baseline (unenforced)</span>
+  <span><span class="swatch" style="background:#22D3EE"></span>enforced (Prism hook)</span>
+</div>
+<div class="chart">
+  <div class="bar-group">
+    <div class="bar b" style="height:95%"><span class="val">938k</span></div>
+    <div class="bar e" style="height:100%"><span class="val">987k</span></div>
+    <div class="group-label">T1 banner</div>
+  </div>
+  <div class="bar-group">
+    <div class="bar b" style="height:95%"><span class="val">934k</span></div>
+    <div class="bar b" style="height:69%"><span class="val">684k</span></div>
+    <div class="bar e" style="height:57%"><span class="val">564k</span></div>
+    <div class="group-label">T2 cta</div>
+  </div>
+  <div class="bar-group">
+    <div class="bar b" style="height:63%"><span class="val">625k</span></div>
+    <div class="bar e" style="height:57%"><span class="val">565k</span></div>
+    <div class="bar e" style="height:81%"><span class="val">803k</span></div>
+    <div class="group-label">T3 pill</div>
+  </div>
+</div>
+<p class="meta" style="margin-top:8px">T2: baseline shown twice (refused reviewer 934k, insistent 684k) · T3: enforced shown twice (quota-starved 565k, compliance 803k). Bar height ∝ total tokens.</p>
+
+<h2><span class="idx">4</span>What this does — and does not — prove</h2>
+<div class="callout amber">
+  <p><b>Directional evidence, N = 3 paired tasks — not a statistical study.</b> The one number that is
+  <i>consistent and unambiguous</i> across every task is the <b>human round-trip count: 2 → 1</b>. The
+  unenforced path always requires a human to notice, message the agent, and wait; the enforced path
+  resolves in the agent's own turn. The raw-token totals are <b>mixed</b>: inline enforcement was
+  clearly cheaper in T2 (−18% to −40%), roughly a wash in T1 (+5%, one extra model call in the
+  block-retry loop), and more expensive in T3's compliance arm (+28%, the agent read the constitution
+  proactively) — while T3's quota-starved arm shows the fail-open cost of relying on a rate-limited
+  semantic layer (violation silently survived).</p>
+</div>
+<p>
+  <b>Caveats, stated plainly:</b> cache_read tokens dominate every session (85–92% of the total) because
+  each model call re-reads the full context — and cache reads are billed at a heavy discount (0.1×),
+  so raw-token deltas overstate cost deltas. The reviewer beat in T2 also shows the unenforced path is
+  not merely slower but sometimes <i>fails entirely</i> (the agent refused an unverifiable human claim).
+  The T3 semantic catch is network- and quota-dependent (free tier: 20 req/min for gemini-3.6-flash);
+  its failure mode is fail-open by design, which this trial reproduced twice. Token counts came from the
+  saved JSONL files (paths in the table); session ids are printed in each file and in
+  <code>measurement/logs/*.json</code>.
+</p>
+
+<div class="foot">
+  KWADRA Demo Day token-usage trial · generated 2026-09-22 · Claude Code 2.1.278, claude-sonnet-5 ·
+  transcripts: <span class="mono">measurement/transcripts/{baseline,enforced}/</span> · parser:
+  <span class="mono">measurement/scripts/parse-transcript.mjs</span> · standalone HTML, no external assets
+</div>
+
+</div>
+</body>
+</html>

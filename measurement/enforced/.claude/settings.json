@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"C:\\dev\\Next Js\\jeffdev-monorepo-semantic-wt\\packages\\prism-context-engine\\bin\\prism.js\" check --hook --format claude-code"
+          }
+        ]
+      }
+    ]
+  }
+}

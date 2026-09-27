@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "styling/no-raw-hex-colors",
+      "category": "styling",
+      "severity": "block",
+      "instruction": "Do not use raw hex color literals (e.g. #ef4444, #06b6d4) or their equivalent values in other color formats (rgb, hsl, etc.) anywhere in component code. Always reference the design token system instead (e.g. var(--brand-primary)). This applies even when the color is expressed in a non-hex format that resolves to the same banned value.",
+      "check": {
+        "type": "forbidden_pattern",
+        "pattern": "#[0-9a-fA-F]{6}\\b",
+        "message": "Raw hex color values are banned. Use design tokens (e.g. var(--brand-primary)) instead, including equivalent values expressed in other formats like rgb()."
+      }
+    }
+  ]
+}
