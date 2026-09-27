@@ -91,7 +91,7 @@ program
 program
   .command("init")
   .description(
-    "Local onboarding — scan design tokens, generate .prism/rules.json, wire the Claude Code hook. No network, no account.",
+    "Local onboarding — scan design tokens, generate .prism/rules.json, wire the Claude Code hooks (PreToolUse + PostToolUse + Stop). No network, no account.",
   )
   .option("--yes", "Skip prompts and accept defaults (for CI)")
   .option(
@@ -392,7 +392,7 @@ program
   .option("--rules <path>", "Path to .prism/rules.json (default: nearest ancestor)")
   .option(
     "--hook",
-    "Agent hook mode: read a PostToolUse event JSON from stdin, exit 2 on blocking violations",
+    "Agent hook mode: read a PreToolUse/PostToolUse/Stop event JSON from stdin, exit 2 on blocking violations",
   )
   .option("--format <format>", "Hook message format", "claude-code")
   .action((files, opts) => check(files, opts));

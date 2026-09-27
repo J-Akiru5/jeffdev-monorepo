@@ -4,8 +4,9 @@
  * Zero network, zero account. Inspects the project's own package.json,
  * globals.css, and Tailwind config to generate a starter `.prism/rules.json`
  * (the same v1 shape `prism check` already parses and `prism pull` fetches
- * from the dashboard), then wires the Claude Code PostToolUse hook into
- * `.claude/settings.json` so the Pass starts enforcing immediately.
+ * from the dashboard), then wires the Claude Code hooks (PreToolUse halt,
+ * PostToolUse safety net, Stop gate) into `.claude/settings.json` so the
+ * Pass starts enforcing immediately.
  *
  * Never overwrites `.prism/rules.json` or `.claude/settings.json` without
  * confirmation — see writeRulesFile() and wireClaudeHook().
@@ -180,23 +181,39 @@ async function writeRulesFile(
 function printHookResult(result: ReturnType<typeof wireClaudeHook>): void {
   switch (result.outcome) {
     case "created":
-      console.log(`${chalk.green("✓")} Created .claude/settings.json with the Pass hook wired in`);
+      console.log(
+        `${chalk.green("✓")} Created .claude/settings.json with the Pass hooks wired in (PreToolUse + PostToolUse + Stop)`,
+      );
       break;
     case "merged":
-      console.log(`${chalk.green("✓")} Merged the Pass hook into the existing .claude/settings.json`);
+      console.log(
+        `${chalk.green("✓")} Merged the Pass hooks into the existing .claude/settings.json`,
+      );
       break;
     case "already-present":
-      console.log(`${chalk.green("✓")} .claude/settings.json already has the Pass hook wired in`);
+      console.log(
+        `${chalk.green("✓")} .claude/settings.json already has the Pass hooks wired in`,
+      );
       break;
     case "invalid-json":
       console.log(
         chalk.yellow(
-          "⚠ .claude/settings.json exists but isn't valid JSON — left it untouched. Add the hook manually:",
+          "⚠ .claude/settings.json exists but isn't valid JSON — left it untouched. Add the hooks manually:",
         ),
       );
       console.log(
         chalk.dim(
-          '  { "hooks": { "PostToolUse": [{ "matcher": "Write|Edit", "hooks": [{ "type": "command", "command": "npx @prism-engine/cli check --hook --format claude-code" }] }] } }',
+          '  { "hooks": { "PreToolUse": [{ "matcher": "Write|Edit|MultiEdit", "hooks": [{ "type": "command", "command": "npx @prism-engine/cli check --hook --format claude-code" }] }],',
+        ),
+      );
+      console.log(
+        chalk.dim(
+          '              "PostToolUse": [{ "matcher": "Write|Edit", "hooks": [{ "type": "command", "command": "npx @prism-engine/cli check --hook --format claude-code" }] }],',
+        ),
+      );
+      console.log(
+        chalk.dim(
+          '              "Stop": [{ "hooks": [{ "type": "command", "command": "npx @prism-engine/cli check --hook --format claude-code" }] }] } }',
         ),
       );
       break;
