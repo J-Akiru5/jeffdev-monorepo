@@ -2,7 +2,10 @@
  * Prism CLI - Main Entry
  *
  * Commands:
- * - prism login       : Authenticate with Prism Cloud
+ * - prism login       : Authenticate with Prism Cloud (browser or --token)
+ * - prism whoami      : Show the authenticated user + tier
+ * - prism logout      : Clear the saved session token
+ * - prism link        : Link this directory to a Prism Cloud project
  * - prism init        : Local onboarding — scan design tokens, generate
  *                        .prism/rules.json, wire the Claude Code hook.
  *                        Zero network, zero account required.
@@ -30,6 +33,9 @@
 
 import { Command } from "commander";
 import { login } from "./commands/login.js";
+import { whoami } from "./commands/whoami.js";
+import { logout } from "./commands/logout.js";
+import { link } from "./commands/link.js";
 import { sync } from "./commands/sync.js";
 import { serve } from "./commands/serve.js";
 import {
@@ -86,7 +92,27 @@ program
 program
   .command("login")
   .description("Authenticate with Prism Cloud")
-  .action(login);
+  .option("--token <token>", "Verify and save a session token from /auth/cli")
+  .action((opts) => login(opts ?? {}));
+
+program
+  .command("whoami")
+  .description("Show the authenticated Prism user (userId + tier)")
+  .action(whoami);
+
+program
+  .command("logout")
+  .description("Clear the saved Prism session token")
+  .action(logout);
+
+program
+  .command("link")
+  .description(
+    "Link this directory to a Prism Cloud project (persists into .prism/config.json)",
+  )
+  .option("-p, --project <slug>", "Project slug to link (skip the picker)")
+  .option("--yes", "Skip prompts; auto-pick a project if needed")
+  .action((opts) => link(opts ?? {}));
 
 program
   .command("init")

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { createClient as createAnonClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { getSupabaseUrlAndKey } from "@/lib/supabase/env";
 import { getPrismDb } from "@syntaxure-labs/db/prism";
 import { createHash } from "crypto";
 
@@ -9,11 +11,34 @@ interface AuthResult {
   source: "supabase" | "api_key";
 }
 
+/**
+ * Verify a session JWT directly against Supabase's auth server via an
+ * anon-key client (getUser(jwt) overload) — no cookies involved. This is
+ * what lets the Prism CLI authenticate from any machine with
+ * `prism login --token <token>`.
+ *
+ * The anon key is a public client key; Supabase validates the JWT itself.
+ */
+export async function verifyBearerJwt(
+  jwt: string,
+): Promise<{ id: string } | null> {
+  const { url, key } = getSupabaseUrlAndKey();
+  if (!url || !key) return null;
+  const supabase = createAnonClient(url, key);
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(jwt);
+  if (error || !user) return null;
+  return { id: user.id };
+}
+
 export async function authenticate(
   request: Request,
 ): Promise<AuthResult | NextResponse> {
   const apiKey = request.headers.get("x-api-key");
 
+  // API-key path — unchanged, byte-for-byte the same behavior as before.
   if (apiKey) {
     const hash = createHash("sha256").update(apiKey).digest("hex");
     const db = getPrismDb();
@@ -46,6 +71,34 @@ export async function authenticate(
       tier: (sub?.tier as string) || "free",
       source: "api_key",
     };
+  }
+
+  // Session path: Authorization: Bearer <jwt> first (CLI), cookies second
+  // (browser). Both resolve to a Supabase user and behave identically
+  // downstream — the dashboard's RLS/created_by semantics apply the same.
+  const authHeader = request.headers.get("authorization");
+  if (authHeader) {
+    const match = /^Bearer\s+(.+)$/i.exec(authHeader.trim());
+    if (match) {
+      const user = await verifyBearerJwt(match[1]!.trim());
+      if (!user) {
+        return NextResponse.json(
+          { error: "Unauthorized" },
+          { status: 401 },
+        ) as NextResponse;
+      }
+      const { data: sub } = await getPrismDb()
+        .from("prism_subscriptions")
+        .select("tier")
+        .eq("user_id", user.id)
+        .in("status", ["active", "trialing"])
+        .maybeSingle();
+      return {
+        userId: user.id,
+        tier: (sub?.tier as string) || "free",
+        source: "supabase",
+      };
+    }
   }
 
   const supabase = await createClient();

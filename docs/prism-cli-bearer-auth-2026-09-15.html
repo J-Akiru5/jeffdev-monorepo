@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Prism CLI Bearer-Session Auth — Architecture &amp; Change Report</title>
+<style>
+  :root {
+    --bg: #0b0f14; --panel: #111820; --panel2: #0e141b; --border: #1f2a36;
+    --text: #d9e2ec; --dim: #8fa1b3; --faint: #5c6b7a;
+    --cyan: #22d3ee; --green: #34d399; --amber: #fbbf24; --red: #f87171; --purple: #a78bfa;
+    --mono: ui-monospace, "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 48px 24px 96px; background: var(--bg); color: var(--text);
+    font: 15px/1.65 "Segoe UI", system-ui, -apple-system, sans-serif; }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 6px; letter-spacing: -0.02em; }
+  h2 { font-size: 1.2rem; margin: 48px 0 14px; color: #fff; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { font-size: 1rem; margin: 26px 0 8px; color: #fff; }
+  p, li { color: var(--text); }
+  .sub { color: var(--dim); margin: 0 0 4px; }
+  .meta { color: var(--faint); font-size: .85rem; }
+  code, .mono { font-family: var(--mono); font-size: .86em; }
+  code { background: #16202b; border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; color: #a5f3fc; }
+  pre { background: #0a0e13; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;
+    overflow-x: auto; font-family: var(--mono); font-size: .8rem; line-height: 1.55; color: #cfe3f5; }
+  pre .ok { color: var(--green); } pre .bad { color: var(--red); } pre .hl { color: var(--cyan); } pre .warn { color: var(--amber); }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: .88rem; }
+  th, td { text-align: left; vertical-align: top; padding: 9px 11px; border: 1px solid var(--border); }
+  th { background: #131c26; color: #fff; font-weight: 600; white-space: nowrap; }
+  tr:nth-child(even) td { background: var(--panel2); }
+  .pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: .72rem; font-weight: 700; letter-spacing: .04em; }
+  .p-ok { background: rgba(52,211,153,.12); color: var(--green); border: 1px solid rgba(52,211,153,.35); }
+  .p-info { background: rgba(34,211,238,.1); color: var(--cyan); border: 1px solid rgba(34,211,238,.3); }
+  .callout { border-left: 3px solid var(--cyan); background: var(--panel); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+  .callout.red { border-left-color: var(--red); }
+  .callout.amber { border-left-color: var(--amber); }
+  .callout.green { border-left-color: var(--green); }
+  ul { padding-left: 22px; }
+  .foot { margin-top: 64px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--faint); font-size: .8rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Prism CLI — Bearer-Session Authentication</h1>
+<p class="sub">Architecture decision + what changed + why · post-DOST-ASTI-demo work</p>
+<p class="meta">
+  Branch: <code>feat/prism-cli-bearer-auth</code> (worktree) · Base: <code>develop @ 46ebcc2</code> ·
+  Date: 2026-09-15 · Scope: <code>apps/prism-engine</code> (auth) + <code>packages/prism-context-engine</code> (CLI)
+</p>
+
+<h2>1 · Executive summary</h2>
+<div class="callout green">
+  <strong>What shipped:</strong> the CLI's half-built Bearer/session auth path is now real and verified
+  end-to-end against a live backend: <code>prism login --token &lt;token&gt;</code> →
+  <code>prism whoami</code> → <code>prism link</code> → bare <code>prism pull</code> (no API key) →
+  local enforcement. The API-key path (<code>PRISM_API_KEY</code> / <code>x-api-key</code>) is
+  <strong>byte-for-byte untouched</strong> — the diff review confirms zero removed lines in that branch of
+  <code>api-auth.ts</code>, and all pre-existing pull tests pass unchanged.
+</div>
+
+<h2>2 · The root cause (what was actually broken)</h2>
+<table>
+  <tr><th>Claim</th><th>Reality found in code</th></tr>
+  <tr>
+    <td><code>GET /api/auth/verify</code> supports <code>Authorization: Bearer</code></td>
+    <td>Its own docstring says so, but the handler only called <code>createClient()</code> from
+      <code>@/lib/supabase/server</code> — an SSR client bound to <em>cookies</em>. The header was never read.
+      Every CLI verification failed regardless of token validity.</td>
+  </tr>
+  <tr>
+    <td><code>prism login</code> authenticates the developer</td>
+    <td>Stub: opens <code>{apiUrl}/auth/cli</code> — a route that did not exist (404) — then instructs
+      <code>prism login --token &lt;token&gt;</code>, an option that wasn't registered. <code>saveConfig({token})</code>
+      was imported but never called; no code path ever wrote a token to <code>~/.prism/config.json</code>.</td>
+  </tr>
+  <tr>
+    <td>Dashboard commands use the saved session</td>
+    <td><code>projects list</code>, <code>api-keys</code>, etc. send <code>Authorization: Bearer</code> via
+      <code>apiFetch</code> — but the shared server <code>authenticate()</code> helper ignored the header too,
+      so every v1 route rejected session calls (observed live: <code>401 Unauthorized</code>).</td>
+  </tr>
+</table>
+
+<h2>3 · Architecture decision</h2>
+<h3>3.1 One shared bearer path, three call sites</h3>
+<p>
+  Rather than bolting header handling onto only the verify route, the fix lives in the one place every
+  authenticated v1 route already shares — <code>apps/prism-engine/src/lib/api-auth.ts</code> — plus the verify
+  route which reuses the same helper:
+</p>
+<pre>authenticate(request)
+ ├─ x-api-key header present        → sha256 hash → prism_api_keys lookup   <span class="ok">[UNCHANGED, byte-identical]</span>
+ ├─ Authorization: Bearer &lt;jwt&gt;   → anon-key client → supabase.auth.getUser(jwt)   <span class="hl">[NEW]</span>
+ └─ no header                       → cookie-bound SSR client (browser session)     [UNCHANGED]</pre>
+<p>
+  The bearer branch resolves to a real Supabase user and returns <code>source: "supabase"</code> — the exact
+  semantics of a browser session, so downstream behavior (RLS, <code>created_by</code> scoping in
+  <code>rules/validate</code>) is identical. The JWT is validated by Supabase's auth server itself
+  (<code>getUser(jwt)</code> overload); the anon key is a public client key, safe server-side.
+</p>
+<h3>3.2 CLI: session auth layered, API keys untouched</h3>
+<ul>
+  <li><code>prism login --token &lt;token&gt;</code> verifies via <code>/api/auth/verify</code> first, persists
+    <strong>only on success</strong> into the existing global <code>~/.prism/config.json</code>
+    (<code>config.ts</code> schema unchanged). Browser mode now points at the real <code>/auth/cli</code> page.</li>
+  <li><code>prism pull</code> auth resolution: <code>PRISM_API_KEY</code> env → <code>.prism/config.json
+    apiKey</code> → global session token. Every failure mode keeps the exact fail-safe contract
+    (warn + leave <code>rules.json</code> untouched + exit 0). <code>--project &lt;slug&gt;</code> works
+    identically on both auth paths.</li>
+  <li><code>resolveProject()</code> extracted from <code>pull.ts</code> into a shared, auth-agnostic helper
+    (caller passes headers); <code>prism link</code> uses it with Bearer and persists into the existing
+    <code>.prism/config.json</code> shape (<code>activeProject</code> + <code>projects[slug] = {id}</code>) —
+    the same file a bare <code>prism pull</code> already reads.</li>
+  <li><code>prism whoami</code> / <code>prism logout</code> — verify-and-print / clear the global token.
+    Logout does not touch the API-key path by design (CI keeps working).</li>
+</ul>
+<h3>3.3 Tier gating (product decision)</h3>
+<div class="callout">
+  <strong>Decision: the Bearer/login/link/pull path is free-tier accessible</strong> — it matches the
+  existing <code>free.apiKeys: 1</code> allowance ("exactly enough for CLI sync of the synced project") rather
+  than <code>connect</code>'s Pro-gated <code>ideSync</code>. Rationale: the same capability (rules sync)
+  must not be priced differently by auth mechanism. <code>/api/auth/verify</code> still returns
+  <code>tier</code>/<code>ideSync</code> in its payload, so a future Pro gate is a one-line change per call site.
+</div>
+
+<h2>4 · What changed</h2>
+<table>
+  <tr><th>File</th><th>Change</th></tr>
+  <tr><td><code>apps/prism-engine/src/lib/api-auth.ts</code></td><td>Added <code>verifyBearerJwt()</code> (anon-key <code>getUser(jwt)</code>) and a Bearer branch in <code>authenticate()</code>. x-api-key branch untouched.</td></tr>
+  <tr><td><code>apps/prism-engine/src/app/api/auth/verify/route.ts</code></td><td>Reads <code>Authorization: Bearer</code>; delegates JWT verification to the shared helper; cookie fallback preserved.</td></tr>
+  <tr><td><code>apps/prism-engine/src/app/auth/cli/page.tsx</code> (+ copy-button)</td><td>New authenticated page: renders the session token with a copy button and the exact <code>prism login --token</code> command. Redirects to <code>/sign-in</code> without a session. v1-minimal by design.</td></tr>
+  <tr><td><code>packages/prism-context-engine/src/commands/login.ts</code></td><td>Real <code>--token</code> flow: verify → <code>saveConfig({token})</code> → success/failure messaging. Browser mode retargeted to the now-existing page.</td></tr>
+  <tr><td><code>packages/prism-context-engine/src/commands/whoami.ts</code></td><td>New: verify global token, print userId + tier (exit 1 when not logged in).</td></tr>
+  <tr><td><code>packages/prism-context-engine/src/commands/logout.ts</code></td><td>New: clear global token; API-key path unaffected.</td></tr>
+  <tr><td><code>packages/prism-context-engine/src/commands/resolve-project.ts</code></td><td>New: shared project resolution (list → <code>--project</code> match / <code>--yes</code> auto-pick / interactive picker), auth-agnostic.</td></tr>
+  <tr><td><code>packages/prism-context-engine/src/commands/link.ts</code></td><td>New: Bearer-only link; persists <code>activeProject</code> + <code>projects[slug]</code> into <code>.prism/config.json</code>.</td></tr>
+  <tr><td><code>packages/prism-context-engine/src/commands/pull.ts</code></td><td>Auth resolution extended with the session fallback; uses shared resolver; API-key path behavior identical (tests prove it).</td></tr>
+  <tr><td><code>packages/prism-context-engine/src/index.ts</code></td><td>Registered <code>login --token</code>, <code>whoami</code>, <code>logout</code>, <code>link</code>.</td></tr>
+  <tr><td>Tests</td><td><code>link.test.ts</code> (4) + pull Bearer-fallback test (1) added; full CLI suite: <strong>196 passed / 2 skipped</strong>.</td></tr>
+</table>
+
+<h2>5 · Verification evidence (live, not simulated)</h2>
+<h3>5.1 Verify route in isolation (step 1 — curl against a real backend)</h3>
+<pre>$ curl -H "Authorization: Bearer &lt;real Supabase session JWT&gt;" localhost:3001/api/auth/verify
+{"success":true,"userId":"be292df0-…","tier":"pro","ideSync":true,…}   <span class="ok">[200]</span>
+
+$ curl localhost:3001/api/auth/verify                     → 401 "Invalid or expired token"   <span class="ok">[no header]</span>
+$ curl -H "Authorization: Bearer garbage.token" …         → 401 "Invalid or expired token"   <span class="ok">[bad token]</span>
+$ curl localhost:3001/auth/cli                            → 307 → /sign-in                  <span class="ok">[page exists]</span></pre>
+<p>
+  The JWT was minted by a real Supabase sign-in with a disposable Pro-tier test account (provisioned via the
+  repo's <code>create-e2e-test-user</code> script, torn down after verification — account, project, and rule
+  deleted).
+</p>
+<h3>5.2 Full CLI chain (same live backend)</h3>
+<pre>$ prism login --token &lt;jwt&gt;                 → √ Authenticated as be292df0-… (tier: pro)
+$ prism whoami                              → Authenticated · User: be292df0-… · Tier: pro
+$ prism link --project dost-demo            → ✓ Linked this directory to "dost-demo" (7a64a9a6-…)
+$ cat .prism/config.json                    → { "projects": { "dost-demo": { "id": "7a64a9a6-…" } }, "activeProject": "dost-demo" }
+$ prism pull                                → ✓ Pulled 1 rule(s) for "dost-demo" → .prism/rules.json
+$ prism check src                           → BLOCK … #06b6d4 … exit 1     <span class="ok">[pulled rule enforces]</span>
+$ prism logout                              → Logged out. Session token cleared.
+$ cat ~/.prism/config.json                  → { }</pre>
+<p>
+  Chain: <strong>dashboard rule → real sync → local enforcement</strong> — no fixtures, no mocks; the rule was
+  created through the dashboard's own v1 API for the linked project.
+</p>
+
+<h2>6 · Guardrails honored</h2>
+<ul>
+  <li><strong>PRISM_API_KEY / x-api-key path untouched:</strong> <code>git diff</code> on
+    <code>api-auth.ts</code> shows zero removed lines in the api-key branch; all pre-existing
+    <code>pull.test.ts</code> cases (success/401/network/malformed/autopick/--project) pass unchanged.</li>
+  <li><strong>prism pull --project &lt;slug&gt;</strong> still works identically on both auth paths
+    (unit-tested; the shared resolver is auth-agnostic).</li>
+  <li><strong>No schema changes:</strong> <code>config.ts</code> (global) and <code>project-config.ts</code>
+    (local) shapes untouched; <code>saveConfig({token})</code> reuses the existing merge-write.</li>
+  <li><strong>Out of scope untouched:</strong> prism-admin, prism-manage, the rule engine, the dashboard,
+    <code>connect</code> (its Pro gate remains as-is; its previously-dead Bearer flow now also works as a
+    side effect of the shared fix — no code change there).</li>
+  <li><strong>No new dependencies:</strong> engine already depends on <code>@supabase/supabase-js</code>;
+    CLI additions use built-ins.</li>
+</ul>
+
+<h2>7 · Known limitations / follow-ups</h2>
+<ul>
+  <li><code>/auth/cli</code> is v1 copy-paste (no device flow); the token is intentionally rendered into the
+    page HTML as the delivery mechanism — same trust model as any "copy your session token" flow.</li>
+  <li>The session token expires with the Supabase session (default 1h + refresh); a long-lived CLI token
+    (e.g. refresh-token rotation or dedicated CLI tokens) is a future iteration — API keys remain the
+    durable/CI credential.</li>
+  <li>All live verification ran against a local dev server; deploy requires the normal
+    <code>prism-engine</code> build/promote, which was out of scope for this branch.</li>
+</ul>
+
+<div class="foot">
+  Prism Context Engine — bearer-session auth report · generated 2026-09-15 · branch
+  feat/prism-cli-bearer-auth · standalone HTML, no external assets
+</div>
+
+</div>
+</body>
+</html>

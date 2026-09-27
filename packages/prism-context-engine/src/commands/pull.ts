@@ -18,7 +18,11 @@
 import chalk from "chalk";
 import { join } from "path";
 import { atomicWriteFileSync } from "../util/atomic-write.js";
-import { promptText } from "../util/prompt.js";
+import { loadConfig } from "../config.js";
+import {
+  resolveProject,
+  type ResolvedProject,
+} from "./resolve-project.js";
 import {
   loadProjectConfig,
   saveProjectConfig,
@@ -36,17 +40,6 @@ export interface PullOptions {
   cwd?: string;
 }
 
-interface RemoteProjectSummary {
-  id: string;
-  slug: string;
-  name: string;
-}
-
-interface ResolvedProject {
-  slug: string;
-  id: string;
-}
-
 function warn(message: string): void {
   console.warn(chalk.yellow(`[prism pull] ${message}`));
 }
@@ -60,16 +53,26 @@ export async function pull(options: PullOptions = {}): Promise<void> {
   const rulesPath = join(cwd, ".prism", "rules.json");
   const config = loadProjectConfig(cwd);
 
+  // Auth resolution — API key first (unchanged, demo-critical path), then
+  // the global Bearer session token as a fallback. Both paths fail safe
+  // identically: no credentials at all means warn + leave rules.json alone.
   const apiKey = process.env.PRISM_API_KEY || config.apiKey;
-  if (!apiKey) {
+  const sessionToken = apiKey
+    ? undefined
+    : loadConfig().token || process.env.PRISM_TOKEN || undefined;
+
+  if (!apiKey && !sessionToken) {
     warn(
-      "No API key found (checked PRISM_API_KEY and .prism/config.json). Kept .prism/rules.json untouched.",
+      "No credentials found (checked PRISM_API_KEY, .prism/config.json, and the saved session from `prism login`). Kept .prism/rules.json untouched.",
     );
     warn(
-      "Get a key from the Prism dashboard → Settings → API Keys, then set PRISM_API_KEY or add { \"apiKey\": \"...\" } to .prism/config.json.",
+      "Get a key from the Prism dashboard → Settings → API Keys, then set PRISM_API_KEY or add { \"apiKey\": \"...\" } to .prism/config.json — or run `prism login --token <token>` once to save a session.",
     );
     return;
   }
+  const authHeaders: Record<string, string> = apiKey
+    ? { "x-api-key": apiKey }
+    : { Authorization: `Bearer ${sessionToken}` };
   const apiUrl = (
     process.env.PRISM_API_URL ||
     config.apiUrl ||
@@ -82,7 +85,7 @@ export async function pull(options: PullOptions = {}): Promise<void> {
   if (!slug || !projectId) {
     let resolved: ResolvedProject | null;
     try {
-      resolved = await resolveProject(apiUrl, apiKey, options);
+      resolved = await resolveProject(apiUrl, authHeaders, options);
     } catch (err) {
       warn(`Could not resolve a project: ${errorMessage(err)}`);
       warn("Kept .prism/rules.json untouched.");
@@ -106,7 +109,7 @@ export async function pull(options: PullOptions = {}): Promise<void> {
     let res: Response;
     try {
       res = await fetch(`${apiUrl}/api/v1/projects/${projectId}/rules/pass`, {
-        headers: { "x-api-key": apiKey },
+        headers: authHeaders,
       });
     } catch (err) {
       warn(`Could not reach Prism Cloud: ${errorMessage(err)}.`);
@@ -171,53 +174,9 @@ export async function pull(options: PullOptions = {}): Promise<void> {
 }
 
 /**
- * Figure out which Prism Cloud project to pull. Lists the account's
- * projects (one network call) and either matches --project, auto-picks
- * under --yes, or prompts interactively with the first project as the
- * Enter-through default. Returns null when the account has no projects at
- * all; throws (caller fails safe) on any request/response problem.
+ * Figure out which Prism Cloud project to pull.
  */
-async function resolveProject(
-  apiUrl: string,
-  apiKey: string,
-  options: PullOptions,
-): Promise<ResolvedProject | null> {
-  const res = await fetch(`${apiUrl}/api/v1/projects?limit=50`, {
-    headers: { "x-api-key": apiKey },
-  });
-  if (!res.ok) {
-    throw new Error(`listing projects returned HTTP ${res.status}`);
-  }
-  const parsed = (await res.json()) as { data?: RemoteProjectSummary[] };
-  const projects = parsed.data ?? [];
-
-  if (options.project) {
-    const match = projects.find((p) => p.slug === options.project);
-    if (!match) {
-      throw new Error(`no project with slug "${options.project}" found`);
-    }
-    return { slug: match.slug, id: match.id };
-  }
-
-  if (projects.length === 0) return null;
-  if (options.yes || projects.length === 1) {
-    return { slug: projects[0]!.slug, id: projects[0]!.id };
-  }
-
-  console.log("Which project should `prism pull` sync rules from?");
-  for (let i = 0; i < projects.length; i++) {
-    console.log(
-      `  ${chalk.cyan(`[${i + 1}]`)} ${projects[i]!.name} ${chalk.dim(`(${projects[i]!.slug})`)}`,
-    );
-  }
-  const answer = await promptText(`Pick 1-${projects.length}`, "1");
-  const idx = Math.min(
-    Math.max(parseInt(answer, 10) || 1, 1),
-    projects.length,
-  ) - 1;
-  const picked = projects[idx]!;
-  return { slug: picked.slug, id: picked.id };
-}
+// (resolveProject now lives in ./resolve-project.ts — shared with prism link)
 
 // Re-exported so tests can construct a ProjectConfig without importing the
 // module twice under two different type names.

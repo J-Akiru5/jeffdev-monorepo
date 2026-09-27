@@ -63,6 +63,39 @@ describe("pull", () => {
     warnSpy.mockRestore();
   });
 
+  it("falls back to the saved Bearer session token when no API key exists", async () => {
+    const dir = makeTmpDir("bearer-fallback");
+    dirs.push(dir);
+    saveProjectConfig({ projects: {} }, dir);
+    // Simulate a saved session in the global config (same shape login writes)
+    vi.stubEnv("PRISM_TOKEN", "sk_test_session_jwt");
+
+    const fetchMock = vi.fn().mockImplementation((url: string) => {
+      if (url.includes("/api/v1/projects?")) {
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({
+            data: [{ id: "aaa-1", slug: "storefront", name: "Storefront" }],
+          }),
+        });
+      }
+      return Promise.resolve({ ok: true, status: 200, json: async () => validRuleSet });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await pull({ cwd: dir, yes: true });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining("/api/v1/projects/aaa-1/rules/pass"),
+      expect.objectContaining({
+        headers: { Authorization: "Bearer sk_test_session_jwt" },
+      }),
+    );
+    const config = JSON.parse(readFileSync(join(dir, ".prism", "config.json"), "utf8"));
+    expect(config.activeProject).toBe("storefront");
+  });
+
   it("writes .prism/rules.json on a successful pull and records lastPulled", async () => {
     const dir = makeTmpDir("success");
     dirs.push(dir);
