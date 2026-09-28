@@ -37,8 +37,8 @@
  * content, unreadable file, engine error.
  */
 
-import { readFileSync } from "fs";
-import { dirname, extname, isAbsolute, resolve } from "path";
+import { existsSync, readFileSync } from "fs";
+import { dirname, extname, isAbsolute, join, resolve } from "path";
 import { findRulesPath, loadRuleSet } from "./parse.js";
 import { applicableExtensions } from "./engine.js";
 import { formatHookForAgent } from "./format.js";
@@ -96,6 +96,39 @@ const OPENCODE_FILE_TOOLS = new Set([
   "multiedit",
   "apply_patch",
 ]);
+
+/**
+ * Strict mode (fail-closed) — enabled by the presence of `.prism/strict`
+ * in the project directory. Only a human removes the marker; nothing in
+ * any agent-facing message says how. With the marker, an unavailable
+ * engine BLOCKS the gated tools with a fixed "PRISM NOT ACTIVE" message
+ * and a `BLOCKED prism-unavailable:<reason>` activity line instead of
+ * failing open. Without the marker every path below is byte-for-byte the
+ * original fail-open behavior.
+ */
+export const STRICT_MARKER = join(".prism", "strict");
+
+export type StrictUnavailableReason =
+  | "prism-disable"
+  | "rules-missing"
+  | "rules-invalid"
+  | "rules-empty"
+  | "engine-error"
+  | "handler-error"
+  | "runtime-import-failed";
+
+export function strictEnabled(cwd: string | null): boolean {
+  if (!cwd) return false;
+  try {
+    return existsSync(join(cwd, STRICT_MARKER));
+  } catch {
+    return false;
+  }
+}
+
+export function strictUnavailableMessage(reason: StrictUnavailableReason): string {
+  return `PRISM NOT ACTIVE (fail-closed): ${reason}. Stop and tell Jeff. Do not work around this.`;
+}
 
 /**
  * Map an OpenCode tool call into the shared HookEvent shape the existing
@@ -181,6 +214,9 @@ interface OpenCodeTarget {
 interface FileDecision {
   result: string;
   blocks?: { file: string; blocks: NonNullable<BlockingCheckResult["blocks"]> };
+  /** Set when strict mode converted a fail-open skip into an availability
+   *  block; the caller turns it into the thrown message. */
+  unavailable?: StrictUnavailableReason;
 }
 
 /**
@@ -195,49 +231,73 @@ export async function handleOpenCodeToolEvent(
   call: OpenCodeToolCall,
   options: OpenCodeHandleOptions = {},
 ): Promise<OpenCodeOutcome> {
-  if (process.env.PRISM_DISABLE === "1") return allow();
-
   const tool = typeof call.tool === "string" ? call.tool.toLowerCase() : "";
-  if (!OPENCODE_FILE_TOOLS.has(tool)) return allow();
+  const gated = OPENCODE_FILE_TOOLS.has(tool);
 
   const cwd =
     typeof options.cwd === "string" && options.cwd.length > 0
       ? options.cwd
       : null;
 
+  const strict = gated && strictEnabled(cwd);
+
+  if (process.env.PRISM_DISABLE === "1") {
+    if (strict) {
+      const target = resolveTargets(tool, call, cwd)[0];
+      return strictBlock("prism-disable", cwd, phase, target?.path ?? "-");
+    }
+    return allow();
+  }
+
+  if (!gated) return allow();
+
   const targets = resolveTargets(tool, call, cwd);
   const first = targets[0];
   if (!first) return allow();
 
-  let rulesPath: string;
+  const found = findRulesPath(dirname(resolvePath(first.path, cwd)));
+  if (!found) {
+    console.error("[prism] check skipped: no .prism/rules.json found");
+    if (strict) return strictBlock("rules-missing", cwd, phase, first.path);
+    return allow(
+      logged(
+        resolveActivityLogPath(null, cwd),
+        phase,
+        first.path,
+        "SKIPPED no-rules",
+      ),
+    );
+  }
+
   let ruleSet: RuleSet;
   try {
-    const found = findRulesPath(dirname(resolvePath(first.path, cwd)));
-    if (!found) {
-      console.error("[prism] check skipped: no .prism/rules.json found");
-      return allow(
-        logged(
-          resolveActivityLogPath(null, cwd),
-          phase,
-          first.path,
-          "SKIPPED no-rules",
-        ),
-      );
-    }
-    rulesPath = found;
-    ruleSet = loadRuleSet(rulesPath);
+    ruleSet = loadRuleSet(found);
   } catch (err) {
     console.error(`[prism] check skipped: ${errorMessage(err)}`);
+    if (strict) return strictBlock("rules-invalid", cwd, phase, first.path, found);
     return allow();
   }
 
-  const logPath = resolveActivityLogPath(rulesPath, cwd);
+  if (strict && ruleSet.rules.length === 0) {
+    return strictBlock("rules-empty", cwd, phase, first.path, found);
+  }
+
+  const logPath = resolveActivityLogPath(found, cwd);
   const decisions: FileDecision[] = [];
 
   for (const target of targets) {
     decisions.push(
-      await evaluateTarget(phase, target, cwd, logPath, ruleSet),
+      await evaluateTarget(phase, target, cwd, logPath, ruleSet, strict),
     );
+  }
+
+  const unavailable = decisions.find((d) => d.unavailable !== undefined);
+  if (unavailable) {
+    return {
+      status: "block",
+      message: strictUnavailableMessage(unavailable.unavailable!),
+      activityResult: decisions.map((d) => d.result).join(" | ") || null,
+    };
   }
 
   const resultText = decisions.map((d) => d.result).join(" | ");
@@ -252,6 +312,27 @@ export async function handleOpenCodeToolEvent(
     .map(({ blocks }) => formatHookForAgent("opencode", blocks.file, blocks.blocks))
     .join("\n\n");
   return { status: "block", message, activityResult: resultText || null };
+}
+
+/** Strict-mode availability block: logs the fixed prism-unavailable line
+ *  and returns the throw-ready outcome. */
+function strictBlock(
+  reason: StrictUnavailableReason,
+  cwd: string | null,
+  phase: OpenCodePhase,
+  file: string,
+  rulesPath: string | null = null,
+): OpenCodeOutcome {
+  const result = `BLOCKED prism-unavailable:${reason}`;
+  appendActivity(
+    resolveActivityLogPath(rulesPath, cwd),
+    formatActivityLine(phase, file, result),
+  );
+  return {
+    status: "block",
+    message: strictUnavailableMessage(reason),
+    activityResult: result,
+  };
 }
 
 /** Which files does this call want to touch, and how can we see the
@@ -291,6 +372,7 @@ async function evaluateTarget(
   cwd: string | null,
   logPath: string | null,
   ruleSet: RuleSet,
+  strict: boolean,
 ): Promise<FileDecision> {
   const filePath = target.path;
 
@@ -327,6 +409,15 @@ async function evaluateTarget(
     check = await collectBlockingFindings(filePath, content, ruleSet);
   } catch (err) {
     console.error(`[prism] check skipped: engine error: ${errorMessage(err)}`);
+    if (strict) {
+      return decision(
+        logPath,
+        phase,
+        filePath,
+        "BLOCKED prism-unavailable:engine-error",
+        "engine-error",
+      );
+    }
     return decision(logPath, phase, filePath, "SKIPPED engine-error");
   }
 
@@ -349,9 +440,10 @@ function decision(
   phase: OpenCodePhase,
   file: string,
   result: string,
+  unavailable?: StrictUnavailableReason,
 ): FileDecision {
   appendActivity(logPath, formatActivityLine(phase, file, result));
-  return { result };
+  return unavailable !== undefined ? { result, unavailable } : { result };
 }
 
 function allow(activityResult: string | null = null): OpenCodeOutcome {
