@@ -1,7 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronRight, ExternalLink, Power, Search, Trash2 } from "lucide-react";
+import {
+  ChevronRight,
+  ExternalLink,
+  Pencil,
+  Power,
+  Search,
+  Trash2,
+} from "lucide-react";
 import Link from "next/link";
 import {
   distinctCategories,
@@ -60,10 +67,12 @@ function CategoryChip({ category }: { category: string }) {
 
 function RuleRow({
   rule,
+  projectSlug,
   onDelete,
   onToggle,
 }: {
   rule: RuleItem;
+  projectSlug: string;
   onDelete: (id: string) => void;
   onToggle: (id: string, next: boolean) => void;
 }) {
@@ -118,24 +127,30 @@ function RuleRow({
       }`}
     >
       {/* One-line summary row */}
-      <div className="flex items-center gap-2 px-3 py-1.5">
+      <div className="flex items-center gap-1.5 px-3 py-1.5">
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
           aria-expanded={expanded}
           title={expanded ? "Collapse instruction" : "Expand instruction"}
-          className="flex min-w-0 flex-1 items-center gap-2 text-left"
+          className="flex-shrink-0 rounded p-0.5 text-white/30 transition-colors hover:bg-white/5 hover:text-white/60"
         >
           <ChevronRight
-            className={`h-3.5 w-3.5 flex-shrink-0 text-white/30 transition-transform ${
-              expanded ? "rotate-90" : ""
-            }`}
+            className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-90" : ""}`}
           />
-          <span className="truncate text-sm text-white">{rule.name}</span>
+        </button>
+        <Link
+          href={`/projects/${projectSlug}/rules/${rule.id}`}
+          title="View rule"
+          className="group/name flex min-w-0 flex-1 items-center gap-2"
+        >
+          <span className="truncate text-sm text-white transition-colors group-hover/name:text-cyan-300">
+            {rule.name}
+          </span>
           <span className="hidden flex-shrink-0 sm:inline-flex">
             <CategoryChip category={rule.category} />
           </span>
-        </button>
+        </Link>
 
         {/* Actions — toggle/delete behavior unchanged */}
         <div className="flex flex-shrink-0 items-center gap-1">
@@ -143,6 +158,13 @@ function RuleRow({
           <span className="font-mono text-[10px] text-white/30">
             p{rule.priority}
           </span>
+          <Link
+            href={`/projects/${projectSlug}/rules/${rule.id}/edit`}
+            title="Edit rule"
+            className="rounded p-1.5 text-white/25 transition-colors hover:text-cyan-400 hover:bg-cyan-500/10"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </Link>
           <button
             onClick={handleToggle}
             disabled={toggling}
@@ -329,6 +351,7 @@ export function RulesList({
                   <RuleRow
                     key={rule.id}
                     rule={rule}
+                    projectSlug={projectSlug}
                     onDelete={handleDelete}
                     onToggle={handleToggle}
                   />
