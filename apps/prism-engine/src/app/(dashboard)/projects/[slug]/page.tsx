@@ -47,14 +47,25 @@ export default async function ProjectPage({ params }: Props) {
     notFound();
   }
 
-  // Fetch associated rules
+  // Fetch the project's rules (Pro cap is 100 — no small cap here; the stat
+  // below uses its own exact count so it can never be truncated by a list
+  // limit).
   const { data: ruleRows } = await db
     .from("prism_rules")
-    .select("_id:id, name, category, priority, isActive:is_active, content")
+    .select(
+      "_id:id, name, category, priority, isActive:is_active, content, severity",
+    )
     .eq("project_id", project.id)
     .order("priority", { ascending: true })
-    .limit(20);
+    .limit(100);
   const rules = ruleRows ?? [];
+
+  // Exact rule count — mirrors the skills count pattern below.
+  const { count: rulesCountRaw } = await db
+    .from("prism_rules")
+    .select("id", { count: "exact", head: true })
+    .eq("project_id", project.id);
+  const rulesCount = rulesCountRaw ?? 0;
 
   // Fetch skills count
   const { count: skillsCountRaw } = await db
@@ -64,7 +75,7 @@ export default async function ProjectPage({ params }: Props) {
   const skillsCount = skillsCountRaw ?? 0;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Back Link */}
       <Link
         href="/projects"
@@ -107,10 +118,10 @@ export default async function ProjectPage({ params }: Props) {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-3 md:grid-cols-4">
         <StatCard
           label="Rules"
-          value={rules.length.toString()}
+          value={rulesCount.toString()}
           icon={FileJson}
         />
         <StatCard
@@ -126,23 +137,22 @@ export default async function ProjectPage({ params }: Props) {
         <StatCard label="Stack"          value={project.stack} icon={Video} />
       </div>
 
-      {/* Two Column Layout */}
-      <div className="grid gap-8 lg:grid-cols-2">
-        {/* Rules List — interactive client component */}
-        <RulesList
-          rules={rules.map(
-            (r): RuleItem => ({
-              id:            r._id.toString(),
-              name: (r.name as string) || "Untitled",
-              category: (r.category as string) || "general",
-              priority: (r.priority as number) || 50,
-              isActive: r.isActive !== false,
-              content: (r.content as string) || "",
-            }),
-          )}
-          projectSlug={slug}
-        />
-      </div>
+      {/* Rules List — interactive client component, full width so the
+          one-line rows stay readable without long scrolling */}
+      <RulesList
+        rules={rules.map(
+          (r): RuleItem => ({
+            id: r._id.toString(),
+            name: (r.name as string) || "Untitled",
+            category: (r.category as string) || "general",
+            severity: (r.severity as string) || "warning",
+            priority: (r.priority as number) || 50,
+            isActive: r.isActive !== false,
+            content: (r.content as string) || "",
+          }),
+        )}
+        projectSlug={slug}
+      />
 
       {/* Skills Section */}
       <div className="rounded-md border border-white/5 bg-white/[0.01] p-6 mt-8">
@@ -193,14 +203,14 @@ function StatCard({
   icon: typeof FileJson;
 }) {
   return (
-    <div className="rounded-md border border-white/[0.05] bg-white/[0.02] p-4">
+    <div className="rounded-md border border-white/[0.05] bg-white/[0.02] p-3">
       <div className="flex items-center justify-between">
-        <span className="text-xs text-white/40 uppercase tracking-wider">
+        <span className="text-[11px] text-white/40 uppercase tracking-wider">
           {label}
         </span>
-        <Icon className="h-4 w-4 text-white/20" />
+        <Icon className="h-3.5 w-3.5 text-white/20" />
       </div>
-      <p className="text-xl font-semibold text-white mt-2">{value}</p>
+      <p className="text-lg font-semibold text-white mt-1">{value}</p>
     </div>
   );
 }
