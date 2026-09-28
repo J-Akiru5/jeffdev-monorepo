@@ -1,8 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { Trash2, Power, ExternalLink } from "lucide-react";
+import { useMemo, useState } from "react";
+import {
+  ChevronRight,
+  ExternalLink,
+  Pencil,
+  Power,
+  Search,
+  Trash2,
+} from "lucide-react";
 import Link from "next/link";
+import {
+  distinctCategories,
+  filterRules,
+  groupRulesByCategory,
+  normalizeSeverity,
+  type Severity,
+} from "@/lib/rule-list-utils";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -12,46 +26,57 @@ export interface RuleItem {
   id: string;
   name: string;
   category: string;
+  severity: string;
   priority: number;
   isActive: boolean;
   content: string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// RuleCard
+// Chips
 // ─────────────────────────────────────────────────────────────────────────────
 
-function PriorityBadge({ priority }: { priority: number }) {
-  if (priority <= 3) {
-    return (
-      <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-mono font-semibold bg-red-500/15 text-red-400 border border-red-500/20">
-        HIGH
-      </span>
-    );
-  }
-  if (priority <= 7) {
-    return (
-      <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-mono font-semibold bg-amber-500/15 text-amber-400 border border-amber-500/20">
-        MED
-      </span>
-    );
-  }
+const SEVERITY_STYLES: Record<Severity, string> = {
+  error: "bg-red-500/15 text-red-400 border-red-500/20",
+  warning: "bg-amber-500/15 text-amber-400 border-amber-500/20",
+  info: "bg-sky-500/15 text-sky-400 border-sky-500/20",
+};
+
+function SeverityChip({ severity }: { severity: string }) {
+  const value = normalizeSeverity(severity);
   return (
-    <span className="inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-mono font-semibold bg-white/5 text-white/40 border border-white/10">
-      LOW
+    <span
+      className={`inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-mono font-semibold ${SEVERITY_STYLES[value]}`}
+    >
+      {value}
     </span>
   );
 }
 
-function RuleCard({
+function CategoryChip({ category }: { category: string }) {
+  return (
+    <span className="inline-flex items-center rounded border border-white/10 bg-white/5 px-1.5 py-0.5 text-[10px] font-mono text-white/50">
+      {category}
+    </span>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RuleRow — one-line, expands to the full instruction
+// ─────────────────────────────────────────────────────────────────────────────
+
+function RuleRow({
   rule,
+  projectSlug,
   onDelete,
   onToggle,
 }: {
   rule: RuleItem;
+  projectSlug: string;
   onDelete: (id: string) => void;
   onToggle: (id: string, next: boolean) => void;
 }) {
+  const [expanded, setExpanded] = useState(false);
   const [toggling, setToggling] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [isActive, setIsActive] = useState(rule.isActive);
@@ -95,35 +120,51 @@ function RuleCard({
 
   return (
     <div
-      className={`group rounded-md border bg-white/[0.02] p-4 transition-all ${
+      className={`group rounded-md border bg-white/[0.02] transition-colors ${
         isActive
           ? "border-white/[0.07] hover:border-white/[0.12]"
           : "border-white/[0.03] opacity-50 hover:opacity-70"
       }`}
     >
-      <div className="flex items-start justify-between gap-3">
-        {/* Info */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-sm font-medium text-white truncate">
-              {rule.name}
-            </p>
-            <PriorityBadge priority={rule.priority} />
-          </div>
-          <p className="text-xs text-white/40 mt-1 truncate">
-            {rule.category} · Priority {rule.priority}
-          </p>
-          {rule.content && (
-            <p className="text-xs text-white/25 mt-1.5 line-clamp-2 leading-relaxed">
-              {rule.content.slice(0, 120)}
-              {rule.content.length > 120 ? "…" : ""}
-            </p>
-          )}
-        </div>
+      {/* One-line summary row */}
+      <div className="flex items-center gap-1.5 px-3 py-1.5">
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          aria-expanded={expanded}
+          title={expanded ? "Collapse instruction" : "Expand instruction"}
+          className="flex-shrink-0 rounded p-0.5 text-white/30 transition-colors hover:bg-white/5 hover:text-white/60"
+        >
+          <ChevronRight
+            className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-90" : ""}`}
+          />
+        </button>
+        <Link
+          href={`/projects/${projectSlug}/rules/${rule.id}`}
+          title="View rule"
+          className="group/name flex min-w-0 flex-1 items-center gap-2"
+        >
+          <span className="truncate text-sm text-white transition-colors group-hover/name:text-cyan-300">
+            {rule.name}
+          </span>
+          <span className="hidden flex-shrink-0 sm:inline-flex">
+            <CategoryChip category={rule.category} />
+          </span>
+        </Link>
 
-        {/* Actions */}
-        <div className="flex items-center gap-1 flex-shrink-0">
-          {/* Active toggle */}
+        {/* Actions — toggle/delete behavior unchanged */}
+        <div className="flex flex-shrink-0 items-center gap-1">
+          <SeverityChip severity={rule.severity} />
+          <span className="font-mono text-[10px] text-white/30">
+            p{rule.priority}
+          </span>
+          <Link
+            href={`/projects/${projectSlug}/rules/${rule.id}/edit`}
+            title="Edit rule"
+            className="rounded p-1.5 text-white/25 transition-colors hover:text-cyan-400 hover:bg-cyan-500/10"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </Link>
           <button
             onClick={handleToggle}
             disabled={toggling}
@@ -136,8 +177,6 @@ function RuleCard({
           >
             <Power className="h-3.5 w-3.5" />
           </button>
-
-          {/* Delete */}
           <button
             onClick={handleDelete}
             disabled={deleting}
@@ -146,13 +185,23 @@ function RuleCard({
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
-
-          {/* ID */}
-          <span className="font-mono text-[10px] text-white/20 ml-1">
+          <span className="ml-1 hidden font-mono text-[10px] text-white/20 md:inline">
             #{rule.id.slice(-4)}
           </span>
         </div>
       </div>
+
+      {/* Expanded: full instruction */}
+      {expanded && (
+        <div className="border-t border-white/[0.05] px-3 py-2.5">
+          <p className="whitespace-pre-wrap text-xs leading-relaxed text-white/50">
+            {rule.content || "(no instruction)"}
+          </p>
+          <p className="mt-1.5 font-mono text-[10px] text-white/20">
+            {rule.id}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -169,6 +218,8 @@ export function RulesList({
   projectSlug: string;
 }) {
   const [rules, setRules] = useState<RuleItem[]>(initialRules);
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("all");
 
   const handleDelete = (id: string) => {
     setRules((prev) => prev.filter((r) => r.id !== id));
@@ -181,6 +232,14 @@ export function RulesList({
   };
 
   const activeCount = rules.filter((r) => r.isActive).length;
+
+  const categories = useMemo(() => distinctCategories(rules), [rules]);
+  const filtered = useMemo(
+    () => filterRules(rules, query, category === "all" ? null : category),
+    [rules, query, category],
+  );
+  const groups = useMemo(() => groupRulesByCategory(filtered), [filtered]);
+  const filtering = query.trim() !== "" || category !== "all";
 
   return (
     <div>
@@ -209,6 +268,40 @@ export function RulesList({
         </div>
       </div>
 
+      {/* Search + category filter */}
+      {rules.length > 0 && (
+        <div className="mb-3 flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/25" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search rules…"
+              className="w-full rounded-md border border-white/10 bg-white/[0.02] py-1.5 pl-8 pr-2.5 text-xs text-white placeholder:text-white/25 focus:border-cyan-500/40 focus:outline-none"
+            />
+          </div>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="rounded-md border border-white/10 bg-white/[0.02] px-2 py-1.5 text-xs text-white/70 focus:border-cyan-500/40 focus:outline-none"
+          >
+            <option value="all" className="bg-[#0b0e14]">
+              All categories
+            </option>
+            {categories.map((c) => (
+              <option key={c} value={c} className="bg-[#0b0e14]">
+                {c}
+              </option>
+            ))}
+          </select>
+          {filtering && (
+            <span className="flex-shrink-0 font-mono text-[10px] text-white/30">
+              {filtered.length}/{rules.length}
+            </span>
+          )}
+        </div>
+      )}
+
       {rules.length === 0 ? (
         <div className="rounded-md border border-white/5 bg-white/[0.01] p-8 text-center">
           <p className="text-sm text-white/40">
@@ -230,15 +323,41 @@ export function RulesList({
             </Link>
           </div>
         </div>
+      ) : filtered.length === 0 ? (
+        <div className="rounded-md border border-white/5 bg-white/[0.01] p-6 text-center">
+          <p className="text-xs text-white/40">
+            No rules match the current search/filter.
+          </p>
+          <button
+            onClick={() => {
+              setQuery("");
+              setCategory("all");
+            }}
+            className="mt-2 text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+          >
+            Clear filters
+          </button>
+        </div>
       ) : (
-        <div className="space-y-2">
-          {rules.map((rule) => (
-            <RuleCard
-              key={rule.id}
-              rule={rule}
-              onDelete={handleDelete}
-              onToggle={handleToggle}
-            />
+        <div className="space-y-4">
+          {groups.map(({ category: cat, rules: items }) => (
+            <div key={cat}>
+              <h3 className="mb-1.5 flex items-center gap-2 text-[11px] font-medium uppercase tracking-wider text-white/40">
+                {cat}
+                <span className="font-mono text-white/25">{items.length}</span>
+              </h3>
+              <div className="space-y-1.5">
+                {items.map((rule) => (
+                  <RuleRow
+                    key={rule.id}
+                    rule={rule}
+                    projectSlug={projectSlug}
+                    onDelete={handleDelete}
+                    onToggle={handleToggle}
+                  />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       )}
