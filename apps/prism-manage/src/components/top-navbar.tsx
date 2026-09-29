@@ -42,11 +42,8 @@ import {
   GitBranch,
 } from "lucide-react";
 import { WorkspaceSwitcher } from "@/components/workspace-switcher";
-<<<<<<< Updated upstream
 import { useWorkspaceStore } from "@/stores/workspace-store";
-=======
 import { NotificationPanel } from "@/components/notification-panel";
->>>>>>> Stashed changes
 
 function AccountMenu() {
   const { user, loading, signOut } = useAuth();
@@ -77,9 +74,10 @@ function AccountMenu() {
   );
 }
 
-function NotificationBell() {
+function NotificationBell({ onClick }: { onClick: () => void }) {
   return (
     <button
+      onClick={onClick}
       className="relative flex h-8 w-8 items-center justify-center rounded-lg text-white/50 transition-colors hover:bg-white/5 hover:text-white"
       title="Notifications (coming soon)"
     >
@@ -142,6 +140,7 @@ const appNavLinks: AppNavLink[] = [
 export function TopNavbar() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const workspaces = useWorkspaceStore((s) => s.workspaces);
@@ -362,7 +361,15 @@ export function TopNavbar() {
               </div>
             </div>
           }
-          notifications={<NotificationBell />}
+          notifications={
+            <>
+              <NotificationBell onClick={() => setNotificationsOpen(true)} />
+              <NotificationPanel
+                open={notificationsOpen}
+                onClose={() => setNotificationsOpen(false)}
+              />
+            </>
+          }
           accountDropdown={<AccountMenu />}
         />
         <CommandPalette
