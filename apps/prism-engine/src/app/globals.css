@@ -105,6 +105,7 @@
   --color-emerald-accent: var(--color-emerald);
   
   --shadow-glow-cyan: var(--shadow-glow-cyan);
+  --animate-pulse-slow: pulse-slow 8s ease-in-out infinite;
   --shadow-glow-purple: var(--shadow-glow-purple);
 }
 
@@ -121,6 +122,17 @@ html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /*
+   * Not decorative. The scroll-linked sections target the window, whose scroll
+   * container framer-motion resolves to `document.documentElement`; it measures
+   * a target's offset by walking `offsetParent` up to that container and warns
+   * in development when the container is `position: static`, because a static
+   * container makes those offsets unreliable. Positioning `html` gives the walk
+   * a defined endpoint and silences a warning that would otherwise sit in the
+   * console of every page. `body` is deliberately left alone: it is not the
+   * element that check looks at.
+   */
+  position: relative;
 }
 
 body {
@@ -227,9 +239,920 @@ body {
   background-clip: text;
 }
 
+/* ----------------------------------------
+   ANIMATIONS
+   ----------------------------------------
+   pulse-slow only animates opacity on purpose. The elements using it are
+   centred with the -translate-x-1/2 / -translate-y-1/2 utilities, and a
+   keyframe that touched `transform` would silently override those and throw
+   the element off-centre. */
+@keyframes pulse-slow {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* ----------------------------------------
+   THE PRISM — the 3D mark on the landing hero
+   ----------------------------------------
+   These rules previously lived in a `<style jsx>` block inside Prism3D. They
+   live here now because `styled-jsx` is not resolvable from this app under
+   pnpm's strict isolation (it is only a transitive dependency of Next), so the
+   component threw on hydration and took the entire page down with it.
+
+   Two fixes were folded in during the move:
+
+   1. Keyframes are namespaced `prism-*`. A bare `@keyframes pulse` would collide
+      with Tailwind's own `--animate-pulse`, which every skeleton in this app
+      relies on.
+   2. Dark is the DEFAULT branch here, not an override. The old `:global(.dark)`
+      selectors never matched anything: this app sets `data-theme="dark"` and
+      there is no `.dark` class. The prism was therefore always drawing its
+      light-mode edges (rgba(0,0,0,.3) borders) onto the dark canvas, which is
+      why it read as barely there. Light mode is now the override.
+*/
+.prism-scene {
+  width: 200px;
+  height: 300px;
+  perspective: 1000px;
+}
+
+.prism-pivot {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  animation: prism-rotate 20s linear infinite;
+  will-change: transform;
+}
+
+.prism-face {
+  position: absolute;
+  box-sizing: border-box;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  backface-visibility: visible;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 30px rgba(6, 182, 212, 0.3) inset;
+}
+
+/* Rectangular sides */
+.prism-side {
+  width: 200px;
+  height: 300px;
+  background: linear-gradient(
+    135deg,
+    rgba(6, 182, 212, 0.25) 0%,
+    rgba(168, 85, 247, 0.15) 100%
+  );
+  overflow: hidden;
+}
+
+.prism-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 150%;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(6, 182, 212, 0.1) 40%,
+    rgba(168, 85, 247, 0.1) 60%,
+    transparent
+  );
+  transform: translateY(-100%);
+  animation: prism-shine 8s ease-in-out infinite;
+}
+
+/*
+   Triangular prism geometry. Width 200px; apothem (centre to face) for an
+   equilateral triangle of side 200px is 200 / (2 * tan(60deg)) = 57.7px.
+*/
+.prism-side-1 {
+  transform: translateZ(58px);
+}
+.prism-side-2 {
+  transform: rotateY(120deg) translateZ(58px);
+}
+.prism-side-3 {
+  transform: rotateY(240deg) translateZ(58px);
+}
+
+/* Caps. Kept but hidden, preserving the original decision: the triangular caps
+   break the glass line read at this size. */
+.prism-cap {
+  width: 200px;
+  height: 174px; /* sqrt(3)/2 * 200 */
+  border: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.02)
+  );
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+
+.prism-cap-top {
+  transform: rotateX(90deg) translateZ(150px);
+  top: -87px;
+  display: none;
+}
+
+.prism-cap-bottom {
+  transform: rotateX(-90deg) translateZ(242px);
+  bottom: 0;
+  left: 0;
+  display: none;
+}
+
+/* The glowing core inside the glass */
+.prism-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100px;
+  height: 100px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(6, 182, 212, 0.8) 0%,
+    transparent 70%
+  );
+  filter: blur(20px);
+  animation: prism-core-pulse 4s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes prism-rotate {
+  0% {
+    transform: rotateX(0deg) rotateY(0deg);
+  }
+  50% {
+    transform: rotateX(15deg) rotateY(180deg);
+  }
+  100% {
+    transform: rotateX(0deg) rotateY(360deg);
+  }
+}
+
+@keyframes prism-shine {
+  0%,
+  100% {
+    transform: translateY(-100%) rotate(45deg);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(100%) rotate(45deg);
+    opacity: 1;
+  }
+}
+
+@keyframes prism-core-pulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+/* Light mode: darker edges so the glass reads against the pale canvas */
+[data-theme="theme-light"] .prism-face,
+.theme-light .prism-face {
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 30px rgba(6, 182, 212, 0.2) inset;
+}
+
+[data-theme="theme-light"] .prism-side,
+.theme-light .prism-side {
+  background: linear-gradient(
+    135deg,
+    rgba(6, 182, 212, 0.15) 0%,
+    rgba(168, 85, 247, 0.05) 100%
+  );
+}
+
+[data-theme="theme-light"] .prism-cap,
+.theme-light .prism-cap {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.1),
+    rgba(0, 0, 0, 0.02)
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prism-pivot {
+    animation: none;
+    transform: rotateX(15deg) rotateY(180deg);
+  }
+  .prism-shine {
+    animation: none;
+    opacity: 0.5;
+    transform: translateY(50%) rotate(45deg);
+  }
+  .prism-core {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+/*
+ * `background-clip: text` paints the gradient only inside the element's padding
+ * box, so any glyph ink that escapes that box is not clipped, it is simply never
+ * painted. The hero sets `line-height: 1` (Tailwind's `text-7xl` default), which
+ * makes the line box exactly 1em while Inter's ascender plus descender is about
+ * 1.21em, so every descender fell outside the box. That is what cut the tail off
+ * the `g` in "ignore".
+ *
+ * The padding extends the painted area to cover the ink; the negative margin
+ * cancels it again so the heading's layout height, and therefore the whole hero
+ * column, is unchanged. Fix the paint box without moving the page.
+ */
 .text-gradient-holographic {
   background: linear-gradient(135deg, var(--color-cyan), var(--color-purple));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  padding-bottom: 0.22em;
+  margin-bottom: -0.22em;
+}
+
+/*
+ * ============================================================
+ * THE DISPERSION FIELD
+ * ============================================================
+ *
+ * The page's atmosphere. It is the product's own physics rendered as light:
+ * a beam enters a prism and leaves as a spectrum. That is why the palette runs
+ * cyan -> blue -> violet -> magenta -> rose -> amber rather than the usual
+ * two-colour cyan/violet developer glow. A real refraction bends into warm
+ * bands, and including them is the difference between "physics" and "the
+ * standard AI purple blob".
+ *
+ * Performance rules this follows, because a broken background is worse than a
+ * plain one:
+ *
+ *   1. Movement is transform and opacity ONLY, so every stratum stays on the
+ *      compositor. Nothing here animates a layout property or a filter.
+ *   2. The caustics use radial-gradients with soft colour stops instead of
+ *      `filter: blur()`. Soft stops cost nothing to animate; a 28px blur on a
+ *      120vh element costs a re-raster on every frame.
+ *   3. Every keyframe returns to its 0% state at 100%, so the global
+ *      reduced-motion rule (which collapses durations to 0.01ms) freezes these
+ *      at a state that still composes correctly.
+ *   4. The vignette is load-bearing for contrast, not decoration. Body copy sits
+ *      on it at >=4.5:1 as the light moves underneath.
+ */
+
+.dispersion-field {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ---- A. Caustics: the light the whole page sits in ---- */
+.df-caustic {
+  position: absolute;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+.df-caustic-cyan {
+  top: -18%;
+  left: -12%;
+  width: 78vw;
+  height: 78vw;
+  background: radial-gradient(
+    closest-side,
+    rgba(6, 182, 212, 0.4) 0%,
+    rgba(6, 182, 212, 0.12) 42%,
+    transparent 72%
+  );
+  animation: df-drift-1 42s ease-in-out infinite;
+}
+
+.df-caustic-violet {
+  top: 14%;
+  right: -20%;
+  width: 66vw;
+  height: 66vw;
+  background: radial-gradient(
+    closest-side,
+    rgba(139, 92, 246, 0.36) 0%,
+    rgba(139, 92, 246, 0.1) 44%,
+    transparent 74%
+  );
+  animation: df-drift-2 56s ease-in-out infinite;
+}
+
+.df-caustic-rose {
+  bottom: -24%;
+  left: 6%;
+  width: 58vw;
+  height: 58vw;
+  background: radial-gradient(
+    closest-side,
+    rgba(244, 63, 94, 0.22) 0%,
+    rgba(217, 70, 239, 0.14) 40%,
+    transparent 72%
+  );
+  animation: df-drift-3 68s ease-in-out infinite;
+}
+
+.df-caustic-amber {
+  top: 6%;
+  left: 38%;
+  width: 40vw;
+  height: 40vw;
+  background: radial-gradient(
+    closest-side,
+    rgba(251, 146, 60, 0.16) 0%,
+    rgba(251, 146, 60, 0.05) 45%,
+    transparent 74%
+  );
+  animation: df-drift-4 50s ease-in-out infinite;
+}
+
+/*
+ * The diagonal beam that used to live here is gone. At 2px and 130% wide it read
+ * as a scratch across the canvas rather than as light: it was too thin to carry
+ * luminance, it connected to nothing, and away from the prism it looked like a
+ * rendering fault. The hero's own ribbon and fan already say "light entering the
+ * prism", and they say it while anchored to the prism instead of floating free.
+ * Deleting it made the field quieter and removed the artefact.
+ */
+
+/* ---- C. The dispersion fan: the spectrum leaving the prism ---- */
+.df-fan {
+  position: absolute;
+  top: 26%;
+  left: 50%;
+  width: 96vh;
+  height: 96vh;
+  margin: -48vh 0 0 -4vh;
+  transform-origin: 0% 50%;
+  /*
+   * The sweep starts and ends at `transparent`, and that is load-bearing. A
+   * conic gradient fills everything before its first stop with the first stop's
+   * colour, so a sweep that began on `rgba(6, 182, 212, 0.3)` put a hard
+   * boundary at the `from` angle: a ~900px straight ray of full-strength cyan
+   * meeting darkness, crossing the middle of the page. It read as a rendering
+   * fault and not as light, which is exactly how it was reported. Both ends fade
+   * now, so the fan has no edge to draw a line with.
+   */
+  background: conic-gradient(
+    from 148deg at 0% 50%,
+    transparent 0deg,
+    rgba(6, 182, 212, 0.3) 12deg,
+    rgba(59, 130, 246, 0.22) 20deg,
+    rgba(139, 92, 246, 0.26) 29deg,
+    rgba(217, 70, 239, 0.17) 37deg,
+    rgba(244, 63, 94, 0.12) 44deg,
+    rgba(251, 146, 60, 0.1) 50deg,
+    transparent 60deg
+  );
+  filter: blur(18px);
+  mix-blend-mode: screen;
+  opacity: 0.85;
+  animation: df-fan-breathe 30s ease-in-out infinite;
+}
+
+/* ---- D. The lattice: the rules grid, engineered not decorative ---- */
+.df-lattice {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
+  background-size: 72px 72px;
+  -webkit-mask-image: radial-gradient(
+    ellipse 90% 70% at 50% 22%,
+    #000 0%,
+    rgba(0, 0, 0, 0.35) 55%,
+    transparent 92%
+  );
+  mask-image: radial-gradient(
+    ellipse 90% 70% at 50% 22%,
+    #000 0%,
+    rgba(0, 0, 0, 0.35) 55%,
+    transparent 92%
+  );
+  animation: df-lattice-pulse 44s ease-in-out infinite;
+}
+
+/* ---- E. The vignette: keeps body copy legible over the light ---- */
+.df-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 85% 60% at 50% 26%,
+    transparent 0%,
+    rgba(5, 5, 5, 0.42) 58%,
+    rgba(5, 5, 5, 0.86) 100%
+  );
+}
+
+/*
+ * ---- F. Scroll-linked spectral sheen (progressive enhancement) ----
+ *
+ * A wide spectral band whose position is tied to the document scroll instead of
+ * a clock, so the light shifts as the reader moves rather than drifting on an
+ * unrelated timer. Behind `@supports` because scroll-driven animation is not
+ * universal; without it the layer is simply never shown. The `opacity: 0`
+ * default is what makes that safe, and the reveal is declared inside the
+ * `@supports` block so nothing can leave it half-applied.
+ *
+ * The colour stops span the whole gradient axis on purpose. They used to be
+ * compressed into the middle third, which left two hard boundaries running the
+ * height of the viewport; on a wide screen the brighter one crossed the page as
+ * a straight line and read as a rendering fault rather than as light. A wash
+ * has no edge to read as a line, so the layer still shifts with scroll but can
+ * no longer draw one.
+ */
+.df-sheen {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background: linear-gradient(
+    104deg,
+    rgba(6, 182, 212, 0.05) 0%,
+    rgba(6, 182, 212, 0.13) 32%,
+    rgba(139, 92, 246, 0.13) 52%,
+    rgba(244, 63, 94, 0.07) 72%,
+    rgba(251, 146, 60, 0.05) 90%,
+    transparent 100%
+  );
+}
+
+@supports (animation-timeline: scroll()) {
+  .df-sheen {
+    animation: df-sheen-scroll linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0% 100%;
+  }
+}
+
+@keyframes df-sheen-scroll {
+  0% {
+    opacity: 0.25;
+    transform: translate3d(-14%, -6%, 0);
+  }
+  50% {
+    opacity: 0.75;
+    transform: translate3d(4%, 2%, 0);
+  }
+  100% {
+    opacity: 0.3;
+    transform: translate3d(16%, 7%, 0);
+  }
+}
+
+@keyframes df-drift-1 {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(7vw, 5vh, 0) scale(1.14);
+  }
+}
+
+@keyframes df-drift-2 {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.05);
+  }
+  50% {
+    transform: translate3d(-9vw, 7vh, 0) scale(0.94);
+  }
+}
+
+@keyframes df-drift-3 {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(0.96);
+  }
+  50% {
+    transform: translate3d(8vw, -6vh, 0) scale(1.16);
+  }
+}
+
+@keyframes df-drift-4 {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-5vw, 8vh, 0) scale(1.18);
+  }
+}
+
+@keyframes df-fan-breathe {
+  0%,
+  100% {
+    transform: rotate(-3deg) scale(1);
+  }
+  50% {
+    transform: rotate(4deg) scale(1.08);
+  }
+}
+
+@keyframes df-lattice-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+/* Light mode: the field becomes a pale refraction rather than a dark one. */
+[data-theme="theme-light"] .dispersion-field,
+.theme-light .dispersion-field {
+  opacity: 0.55;
+}
+
+[data-theme="theme-light"] .df-vignette,
+.theme-light .df-vignette {
+  background: radial-gradient(
+    ellipse 85% 60% at 50% 26%,
+    transparent 0%,
+    rgba(240, 244, 255, 0.5) 58%,
+    rgba(240, 244, 255, 0.9) 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .df-caustic,
+  .df-fan,
+  .df-lattice,
+  .df-sheen {
+    animation: none;
+  }
+
+}
+
+/*
+ * ============================================================
+ * HERO STAGE
+ * ============================================================
+ *
+ * The scroll-scrubbed hero. An outer element supplies the scroll distance and
+ * the inner `.hero-stage` stays stuck in the viewport with CSS `position:
+ * sticky`, so the sequence is scrubbed by the reader's own scrolling without a
+ * single line of pinning JavaScript or any layout thrash. That matters: the
+ * hero it replaced pinned 300vh with GSAP and revealed itself on scroll, so the
+ * page made no case until you had scrolled twice. Here the headline is complete
+ * and readable on the first frame, and scrolling deepens the scene rather than
+ * unlocking it.
+ *
+ * The light layers below are `transform`-animated only. Blur is applied once at
+ * rest and never re-rasterised, because the parent carries the movement.
+ *
+ * Layering note: the light sits *behind* the prism. `.hero-orbit` wraps the glow,
+ * the fan, the ribbon and the prism so a single transform moves the whole
+ * optical assembly as one object; moving them independently is what makes a
+ * scene like this read as stickers rather than as light.
+ */
+
+.hero-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100svh;
+  overflow: hidden;
+  padding: 4.5rem 1rem 2.5rem;
+}
+
+.hero-column {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 64rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/*
+ * The orbit is deliberately taller than the prism it holds. It has to clear the
+ * prism's scaled height so the stage's `overflow: hidden` never slices the top
+ * vertex off, and the slack it leaves above and below is the only thing keeping
+ * the prism off the eyebrow pill underneath it: at the old height the prism sat
+ * 3px above the pill, which read as a collision rather than as a lockup.
+ *
+ * Heights are keyed to viewport height as well as width, because the whole
+ * column has to fit inside a pinned 100svh stage. Sizing the orbit for a 900px
+ * laptop and letting it ride on a 760px one pushed the facts row past the
+ * bottom of the stage, where `overflow: hidden` cut it off.
+ *
+ * `--prism-scale` travels with the height so the ink-to-air ratio stays constant
+ * instead of the prism growing into its own margin.
+ *
+ * The base value is the phone value, and it is the smallest of the set on
+ * purpose. The payoff frame grows the whole assembly 1.78x, and this number is
+ * what decides whether the grown prism fits between the fixed nav and the index:
+ * measured on a 390x844 screen, the previous 0.52 base drove the glass 18px
+ * through the "WHERE TO LOOK" label at the payoff; 0.4 leaves ~34px of air there
+ * and keeps the first frame at a size that still reads inside the same 190px
+ * orbit. Desktop keeps its own sizes below.
+ */
+.hero-orbit {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  --prism-scale: 0.4;
+  height: 190px;
+}
+
+@media (min-width: 768px) and (max-height: 780px) {
+  .hero-orbit {
+    --prism-scale: 0.46;
+    height: 174px;
+  }
+}
+
+@media (min-width: 768px) and (min-height: 781px) and (max-height: 860px) {
+  .hero-orbit {
+    --prism-scale: 0.58;
+    height: 220px;
+  }
+}
+
+@media (min-width: 768px) and (min-height: 861px) {
+  .hero-orbit {
+    --prism-scale: 0.68;
+    height: 258px;
+  }
+}
+
+/*
+ * Short viewports get their padding back before their type shrinks. The top
+ * value stays above the 64px fixed nav, and the saving is what keeps the facts
+ * row inside the pinned stage on a 760px-tall laptop, where the column is
+ * otherwise ~26px taller than the space available to it.
+ */
+@media (max-height: 820px) {
+  .hero-stage {
+    padding-top: 4.25rem;
+    padding-bottom: 1.5rem;
+  }
+}
+
+/*
+ * Scaled from a custom property rather than a utility class so the breakpoints
+ * above can keep the prism and its orbit in step in one place.
+ */
+.hero-prism {
+  transform: scale(var(--prism-scale, 0.68));
+}
+
+/*
+ * ---- The scroll lock is not here ----
+ *
+ * The hero holds the reader on its payoff frame, twice, so a fast flick cannot
+ * sail past the thing the hero is arguing. That is tempting to express as
+ * `scroll-snap-type` on `html`, and it was, twice. Do not put it back.
+ *
+ * Armed, CSS snapping broke fragment navigation outright: a real click on any
+ * in-page link set `location.hash` and the page never moved from 810 (sampled
+ * every 120ms for three seconds), and "See the block", the hero's only primary
+ * call to action, is one of those links. Unarmed, `proximity` only snaps when a
+ * gesture happens to end near a snap point, so a measured 1200px flick went
+ * straight through to 1200 and the payoff frame was never seen at all.
+ *
+ * There are now several holds rather than one: the hero stops twice on its payoff
+ * frame, and the enforcement section stops once per step. Each one has to be
+ * released by a click, by a fragment, and by the reader's own next gesture, and
+ * none of that is expressible in a CSS declaration, so all of it lives in
+ * `scroll-holds.ts`. That module is the only place that knows these offsets.
+ */
+
+/*
+ * Copy and index share one grid cell, so the sequence cross-fades in place. If
+ * they swapped in the flow instead, the stage would reflow mid-scroll and the
+ * reader's eye would lose the thing it had been tracking. The cell is as tall as
+ * the taller layer, and each layer centres itself inside it.
+ */
+.hero-swap {
+  position: relative;
+  display: grid;
+  width: 100%;
+}
+
+.hero-swap-layer {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-prism-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 46rem;
+  height: 46rem;
+  max-width: 170vw;
+  max-height: 170vw;
+  margin: -23rem 0 0 -23rem;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgba(6, 182, 212, 0.34) 0%,
+    rgba(139, 92, 246, 0.16) 38%,
+    transparent 70%
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.hero-fan {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 74rem;
+  height: 74rem;
+  margin: -37rem 0 0 -2rem;
+  transform-origin: 0% 50%;
+  /*
+   * Faded in at both ends for the same reason as `.df-fan`: a conic sweep that
+   * opens on full-strength cyan draws the `from` angle as a straight edge, and at
+   * this size that edge crosses most of the stage and reads as a seam in the
+   * render rather than as light leaving the glass.
+   */
+  background: conic-gradient(
+    from 150deg at 0% 50%,
+    transparent 0deg,
+    rgba(6, 182, 212, 0.34) 12deg,
+    rgba(59, 130, 246, 0.26) 21deg,
+    rgba(139, 92, 246, 0.3) 31deg,
+    rgba(217, 70, 239, 0.2) 40deg,
+    rgba(244, 63, 94, 0.15) 47deg,
+    rgba(251, 146, 60, 0.12) 53deg,
+    transparent 62deg
+  );
+  filter: blur(20px);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/*
+ * The spectrum crossing the glass: the band of light through the prism's waist,
+ * and the only horizontal element in the hero. Its scale is driven by scroll
+ * progress, so it opens as the reader scrolls.
+ *
+ * It is deliberately *bounded* rather than full-bleed. At `width: 112%` its ends
+ * ran 500px past the prism, where a 2px bar reads as a scratch drawn across the
+ * canvas rather than as light attached to an object: light that leaves a prism
+ * and then keeps travelling past everything in the frame is just a line. It now
+ * terminates inside the prism's own neighbourhood, and the gradient reaches
+ * transparent before either end, so there is no boundary left to see.
+ */
+.hero-ribbon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 30rem;
+  height: 2px;
+  margin: -1px 0 0 -15rem;
+  transform-origin: 50% 50%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(6, 182, 212, 0.42) 22%,
+    rgba(59, 130, 246, 0.46) 40%,
+    rgba(139, 92, 246, 0.46) 56%,
+    rgba(217, 70, 239, 0.36) 70%,
+    rgba(244, 63, 94, 0.28) 82%,
+    transparent 100%
+  );
+  filter: blur(2px);
+  box-shadow: 0 0 24px rgba(6, 182, 212, 0.32);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+/*
+ * Scroll affordance; fades out once the reader has moved.
+ *
+ * Anchored to the right edge rather than centred. The centred column of copy
+ * fills the full stage height on a 900px-tall viewport, so a centred cue at the
+ * bottom collided with the facts row; the facts row is content and the cue is a
+ * hint, so the hint gets out of the way. Hidden under `md` where there is no
+ * spare horizontal room for it.
+ */
+.hero-cue {
+  position: absolute;
+  right: 2rem;
+  bottom: 2rem;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+@media (min-width: 768px) {
+  .hero-cue {
+    display: flex;
+  }
+}
+
+.hero-cue-rail {
+  position: relative;
+  width: 1px;
+  height: 2.5rem;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.hero-cue-rail::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent, var(--color-cyan), transparent);
+  animation: hero-cue-fall 2.4s ease-in-out infinite;
+}
+
+@keyframes hero-cue-fall {
+  0%,
+  100% {
+    transform: translateY(-100%);
+  }
+  50% {
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-cue-rail::after {
+    animation: none;
+    transform: translateY(0);
+  }
+}
+
+/*
+ * ============================================================
+ * THE BLOCK: the pinned, stepped section
+ * ============================================================
+ *
+ * At 1024px and up the enforcement section is one sticky screen. Scrolling into
+ * it pins it, the first scroll stops the page on step 01, the next on 02, and so
+ * on, and 04 releases it. The four holds live in JavaScript
+ * (`enforcement-demo.tsx`) rather than in CSS because each one has to be
+ * releasable by a chosen link, a fragment change and the reader's own gesture,
+ * and none of that fits in a declaration. `scroll-snap-type` was tried twice for
+ * the hero and broke fragment navigation outright; the measurements are in the
+ * comment above `.hero-stage`.
+ *
+ * The region is taller than the stage on purpose. `position: sticky` can only
+ * hold the stage for the length of its parent, so that extra height *is* the room
+ * the four holds are spread across. Remove it and the holds have nowhere to live:
+ * the stage unsticks on the first scroll and the steps fire against a moving
+ * frame.
+ *
+ * The height guard is load-bearing. The two column layout appears at 1024px, but
+ * a short laptop cannot show the whole section at once, and pinning a stage that
+ * is taller than the viewport hides its own bottom row. Below the guard the
+ * section stacks and steps with the scroll instead, which is what the same
+ * component already does on a phone.
+ */
+.the-block-region {
+  position: relative;
+}
+
+@media (min-width: 1024px) and (min-height: 820px) {
+  .the-block-region {
+    height: 168svh;
+  }
+
+  .the-block-stage {
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100svh;
+  }
 }

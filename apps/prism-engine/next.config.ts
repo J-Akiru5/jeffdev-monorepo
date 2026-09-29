@@ -42,6 +42,8 @@ if (process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY && !process.env.NEXT_PUBLIC
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 }
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const nextConfig: NextConfig = {
   // Removed outputFileTracingIncludes for /api/v1/sandbox/run: the
   // ./node_modules/@prism-engine/** glob traversed a pnpm workspace symlink
@@ -82,15 +84,27 @@ const nextConfig: NextConfig = {
           { key: "Referrer-Policy", value: "origin-when-cross-origin" },
         ],
       },
-      {
-        source: "/_next/static/:path*",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
+      // Long-lived caching is ONLY correct for production builds, where chunk
+      // filenames are content-hashed. In development Turbopack reuses the same
+      // chunk URLs while their contents change on every edit, so an `immutable`
+      // response tells the browser to keep executing a stale bundle forever.
+      // The visible symptom is brutal: the app appears permanently broken by an
+      // error you have already fixed, HMR never takes effect, and the Next
+      // devtools overlay reports the error as "stale" because the server is
+      // fine. Guarded rather than removed so production keeps the header.
+      ...(isProduction
+        ? [
+            {
+              source: "/_next/static/:path*",
+              headers: [
+                {
+                  key: "Cache-Control",
+                  value: "public, max-age=31536000, immutable",
+                },
+              ],
+            },
+          ]
+        : []),
       {
         source: "/fonts/:path*",
         headers: [
