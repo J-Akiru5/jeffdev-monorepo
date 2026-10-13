@@ -1,0 +1,50 @@
+# Dashboard Guide
+
+The hosted dashboard at [prism.syntaxure.dev](https://prism.syntaxure.dev) manages your cloud-side projects and rules. The CLI works without it; the dashboard adds team sync, exports, and usage views.
+
+## Pages
+
+These are the pages that exist in the dashboard today:
+
+| Page | Path | What it does |
+|------|------|--------------|
+| Dashboard | `/dashboard` | Overview and recent activity |
+| Projects | `/projects` | Create and manage projects |
+| Branding | `/brand` | Brand profiles (colors, typography, voice) |
+| AI Kitchen | `/generate` | AI component generation, with a Component Library sub-page (`/generate/library`) |
+| Analytics | `/analytics` | Usage stats |
+| Quick Connect | `/quickstart` | Get your IDE connected |
+| Subscription | `/subscription` | Plan and billing |
+| Settings | `/settings` | Account settings and API keys |
+
+## The project page
+
+Each project has four tabs:
+
+- **Rules** — project rules, with Add Rule and Browse Templates
+- **Skills** — project skills
+- **Design System** — design system settings
+- **Stack** — tech stack
+
+The Rules tab also has **Export Rules**, which downloads rules for your editor.
+
+## CLI sync
+
+The dashboard and the CLI share one schema (`.prism/rules.json`, version 1):
+
+```bash
+# Authenticate (opens the browser)
+prism login
+
+# Create an API key in Settings, then:
+export PRISM_API_KEY=your_key_here
+
+# Fetch your team's rules — fails safe
+prism pull
+```
+
+Cloud-side management from the CLI (`prism rules`, `prism projects`, `prism brands`, `prism api-keys`, `prism analytics`) talks to the same dashboard account.
+
+## Subscription
+
+Plans are described on the [Pricing](/pricing) page. The dashboard's Subscription page shows your current tier. Tier limits are enforced by the API (project caps, API key counts, MCP access); local CLI enforcement (`prism check`, `prism init`) is always free and never gated.

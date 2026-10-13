@@ -33,31 +33,28 @@ export const metadata: Metadata = {
     default: "Prism Context Engine - Context Governance for LLMs",
   },
   description:
-    "AI-powered context governance for LLMs. Extract architectural rules from video transcripts, enforce coding standards, and deploy constraints to AI coding assistants via MCP.",
+    "A rules layer for AI coding agents. Prism checks every write against your team's rules and sends corrections back to the agent.",
   applicationName: "Prism Context Engine",
   keywords: [
     "MCP",
     "Model Context Protocol",
-    "AI",
-    "LLM",
+    "AI coding agents",
     "Cursor",
     "Windsurf",
-    "Copilot",
-    "architectural rules",
-    "code standards",
-    "video transcripts",
-    "Azure OpenAI",
+    "Claude Code",
+    "VS Code",
+    "coding standards",
+    "rules engine",
   ],
   authors: [{ name: "Syntaxure Labs", url: "https://jeffdev.studio" }],
   creator: "Syntaxure Labs",
   publisher: "Syntaxure Labs",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:3002",
-  ),
-  openGraph: {
-    title: "Prism Context Engine - Context Governance for LLMs",
-    description:
-      "AI-powered context governance. Extract rules from video, enforce standards via MCP.",
+  ),    openGraph: {
+      title: "Prism Context Engine - Rules for AI Coding Agents",
+      description:
+        "A rules layer for AI coding agents. Check every write against your team's rules.",
     url: "/",
     siteName: "Prism Context Engine",
     images: [
@@ -73,9 +70,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Prism Context Engine - Context Governance for LLMs",
+    title: "Prism Context Engine - Rules for AI Coding Agents",
     description:
-      "AI-powered context governance. Extract rules from video, enforce standards via MCP.",
+      "A rules layer for AI coding agents. Check every write against your team's rules.",
     images: ["/prism-icon.png"],
     creator: "@jeffdevstudio",
   },
@@ -169,7 +166,7 @@ export default async function RootLayout({
               "@type": "WebApplication",
               "name": "Prism Context Engine Documentation",
               "description":
-                "AI-powered context governance for LLMs. Extract architectural rules from video transcripts, enforce coding standards, and deploy constraints to AI coding assistants via MCP.",
+                "A rules layer for AI coding agents. Prism checks every write against your team's rules and sends corrections back to the agent.",
               "url": "https://docs.jeffdev.studio",
               "applicationCategory": "DeveloperApplication",
               "author": {
@@ -192,8 +189,8 @@ export default async function RootLayout({
           <Layout
             banner={
               <Banner storageKey="prism-docs-banner">
-                Prism Context Engine v1.0.3 - Now with FlexSearch &amp; Azure
-                OpenAI!
+                Prism Context Engine v1.2.0 - the CLI works locally with no
+                account. See the Quick Start.
               </Banner>
             }
             navbar={
@@ -250,9 +247,9 @@ export default async function RootLayout({
                         </span>
                       </div>
                       <p className="text-white/50 text-sm leading-relaxed mb-6">
-                        The Context Operating System for developers who ship
-                        fast. Eliminate AI hallucinations with governed context
-                        rules.
+                        A rules layer for AI coding agents. Prism checks every
+                        write against your team's rules and sends corrections
+                        back to the agent.
                       </p>
                       <div className="space-y-2 text-sm">
                         <a
@@ -286,12 +283,12 @@ export default async function RootLayout({
                             Quick Start
                           </a>
                         </li>
-                        <li key="video">
+                        <li key="rules">
                           <a
-                            href={`/${lang}/video`}
+                            href={`/${lang}/rules`}
                             className="text-white/70 hover:text-cyan-400 text-sm transition-colors"
                           >
-                            Video Processing
+                            Rules
                           </a>
                         </li>
                         <li key="integ">
@@ -356,8 +353,8 @@ export default async function RootLayout({
                         Start a Project
                       </h4>
                       <p className="text-white/50 text-sm leading-relaxed mb-6">
-                        Ready to eliminate context pollution? Let&apos;s get you
-                        started.
+                        Install the CLI and run `prism init`. No account
+                        needed.
                       </p>
                       <a
                         href="https://prism.syntaxure.dev/sign-up"

@@ -8,16 +8,15 @@
   "changelog-page": "Changelog",
   "installation": "Installation",
   "quick-start": "Quick Start",
+  "cli-reference": "CLI Reference",
   "---core-concepts": {
     "type": "separator",
     "title": "Core Concepts"
   },
   "concepts": "Concepts",
-  "---video-processing": {
-    "type": "separator",
-    "title": "Video Processing"
+  "video": {
+    "display": "hidden"
   },
-  "video": "Video",
   "---rule-management": {
     "type": "separator",
     "title": "Rule Management"
@@ -27,7 +26,7 @@
     "type": "separator",
     "title": "Integrations"
   },
-  "integrations": "IDE Setup",
+  "integrations": "Hooks and IDE Setup",
   "---advanced": {
     "type": "separator",
     "title": "Advanced"
@@ -42,7 +41,8 @@
     "type": "separator",
     "title": "Resources"
   },
-
+  "dashboard-guide": "Dashboard Guide",
+  "pricing": "Pricing",
   "security-page": "Security & Privacy",
   "guide": {
     "display": "hidden"

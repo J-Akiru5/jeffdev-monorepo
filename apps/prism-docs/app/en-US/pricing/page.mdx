@@ -1,0 +1,55 @@
+# Pricing
+
+Prism Context Engine is free to use locally, forever. Hosted plans add dashboard capacity for teams.
+
+Prices are in Philippine pesos first, with approximate USD.
+
+## Plans
+
+| Plan | Price | Who it is for |
+|------|-------|---------------|
+| **Free** | P0 forever | Solo developers. The full CLI: `prism init`, `prism check`, agent hooks. No account required |
+| **Pro** | P299/month (about $8) | Solo developers who sync with the dashboard |
+| **Team** | P249/seat/month (about $7), minimum 3 seats | Small teams sharing rules |
+| **Enterprise** | Custom pricing, billed yearly | Larger teams |
+
+## What works today
+
+The CLI v1.2.0 is published on npm and works today with no account:
+
+```bash
+npm install -g @prism-engine/cli
+prism init
+```
+
+Local rule enforcement (`prism check`, agent hooks, `.prism/rules.json`) is free and is never gated by a plan.
+
+## Paid plans status
+
+Pro and Team checkout is **planned**. The dashboard's production checkout currently reports that payment integration is coming soon and enables Pro features free during the beta period. Tier limits (project caps, API key counts, MCP access) are already enforced in the dashboard API, and a team's rules can be synced today with `prism login` and `prism pull`.
+
+TODO(confirm): confirm the exact date and mechanism when paid checkout goes live, and whether annual billing (10x monthly) stays as currently coded.
+
+## Plan limits (dashboard)
+
+These limits come from the dashboard's tier configuration:
+
+| Limit | Free | Pro | Team | Enterprise |
+|-------|------|-----|------|------------|
+| Synced projects | 1 | Unlimited | Unlimited | Unlimited |
+| AI generations / month | 25 | 500 | 2000 | Unlimited |
+| API keys | 1 | 3 | 10 | Unlimited |
+| MCP (IDE sync) | No | Yes | Yes | Yes |
+| Team members | — | — | 10 | Unlimited |
+| Local rules and checks | Unlimited | Unlimited | Unlimited | Unlimited |
+
+The Team plan has a minimum of 3 seats.
+
+## Enterprise
+
+Enterprise is billed yearly at custom pricing. Contact Syntaxure Labs to discuss: [syntaxure.dev](https://syntaxure.dev).
+
+## Related
+
+- [Dashboard Guide](/dashboard-guide)
+- [Installation](/installation) — Install the free CLI

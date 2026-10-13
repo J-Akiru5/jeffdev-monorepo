@@ -1,165 +1,116 @@
 # Prism Context Engine
 
-**The Context Operating System for Vibecoders** — Eliminate "Context Pollution" by orchestrating the flow of rules, design systems, and tech stacks between the Cloud and local AI Agents.
+A rules layer for AI coding agents. Prism checks every write your agent makes against your team's rules and sends corrections back to the agent.
 
 ## What is Prism Context Engine?
 
-Prism Context Engine is a complete **AI-powered context governance platform** that:
+AI coding assistants (Cursor, Claude Code, Windsurf, VS Code) write code that often ignores your project's conventions. Prism fixes that with a local rules file and an enforcement hook:
 
-1. **Extracts Rules from Video** - Upload screen recordings, automatically extract architectural patterns using Azure OpenAI
-2. **Enforces Standards** - Deploy rules to AI coding assistants via MCP (Model Context Protocol)
-3. **Enables Semantic Search** - Find relevant architectural discussions using vector embeddings
+1. **Define rules** — `.prism/rules.json` in your repo. Plain JSON. Types include forbidden patterns, required design tokens, banned imports, and more.
+2. **Check every write** — the `prism check` hook runs inside your agent. Violations at `block` severity halt the agent and it corrects itself.
+3. **Sync with the dashboard (optional)** — the hosted dashboard at [prism.syntaxure.dev](https://prism.syntaxure.dev) manages projects, rules, and brand profiles. The CLI works without an account.
 
-### The Core Metaphor
+## Who is it for?
 
-| Concept | Prism Equivalent | Description |
-|---------|------------------|-------------|
-| 🍳 **The Kitchen** | SaaS Dashboard | Where the "Chef" (Developer) mixes ingredients (Next.js, Tailwind, Glassmorphism) |
-| 📜 **The Recipe** | Context Rules | The output file (e.g., `.cursorrules`) containing strict instructions |
-| 🍽️ **The Waiter** | MCP Protocol | Delivers the fresh Recipe directly to the IDE's table |
+Solo developers and small teams first. Larger teams can share rules through the dashboard and the Team plan (see [Pricing](/pricing)).
 
-### Video-to-Context Extraction
-
-**Automated Documentation**: Upload a screen recording of your development workflow. Prism analyzes the video transcript using Azure OpenAI to automatically extract architectural rules, coding patterns, and best practices into actionable context that your AI coding assistant can understand.
-
-Works with:
-- **Cursor** ✅
-- **Windsurf** ✅
-- **Claude (via MCP)** ✅  
-- **VS Code** (via MCP extension)
-- **GitHub Copilot** (coming soon)
-
-Instead of hoping your AI follows best practices, **Prism enforces them**.
-
-## Quick Start
-
-### Option A: Web Dashboard (Recommended)
+## Quick Start (no account required)
 
 ```bash
-# 1. Sign up at the web dashboard
-https://prism.syntaxure.dev/sign-up
+# 1. Install the CLI (Node.js 20 or newer)
+npm install -g @prism-engine/cli
 
-# 2. Create your first project and brand profile
-# 3. Upload a video or manually create rules
-# 4. Export .cursorrules file and paste into your project
+# 2. Generate .prism/rules.json from your project's own config
+#    and wire the agent hooks
+prism init
+
+# 3. Check a file by hand
+prism check src/App.tsx
 ```
 
-### Option B: MCP Server (Advanced)
+`prism init` reads your `package.json`, `globals.css`, and Tailwind config. It makes no network calls.
 
-For real-time sync with your IDE:
+## How it works
 
-```bash
-# 1. Install MCP server globally
-npm install -g @prism/mcp-server
-
-# 2. Configure your IDE (Cursor/Windsurf/VS Code)
-# Add to your MCP settings:
-{
-  "mcpServers": {
-    "prism": {
-      "command": "prism-mcp",
-      "args": ["--api-key", "YOUR_API_KEY"]
-    }
-  }
-}
-
-# 3. Your AI assistant now has live access to your rules
 ```
+┌───────────────────────────────────────────────┐
+│  Your AI coding agent (Cursor, Claude Code…)  │
+│  writes or edits a file                       │
+└──────────────────────┬────────────────────────┘
+                       │ hook event (stdin JSON)
+                       ▼
+┌───────────────────────────────────────────────┐
+│  prism check --hook                           │
+│  reads .prism/rules.json, checks the content  │
+│  exit 2 + correction text on violations       │
+└──────────────────────┬────────────────────────┘
+                       │
+            ┌──────────┴───────────┐
+            │ clean                │ violation
+            ▼                      ▼
+      write proceeds        the agent reads the
+                            correction and fixes
+                            the file
+```
+
+Enforcement is local. Your code never leaves your machine for the check itself.
+
+## The dashboard (optional)
+
+The hosted dashboard at [prism.syntaxure.dev](https://prism.syntaxure.dev) has these pages: Dashboard, Projects, Branding, AI Kitchen, Analytics, Quick Connect, Subscription, and Settings. A project has tabs for Rules, Skills, Design System, and Stack, with Export Rules, Add Rule, and Browse Templates.
+
+Deployed on Vercel, with Supabase as the backend.
 
 ## Core Features
 
-import { Rocket, Video, FileCode, Plug, Settings, Code } from 'lucide-react'
+import { Rocket, FileCode, Plug, Settings, CreditCard } from 'lucide-react'
 
 <Cards>
   <Card icon={<Rocket size={20} />} title="Quick Start" href="/quick-start">
-    Deploy your first rule in 5 minutes
+    Run prism init and block your first violation
   </Card>
-  <Card icon={<Video size={20} />} title="Video Processing" href="/video">
-    Extract rules from screen recordings
+  <Card icon={<FileCode size={20} />} title="Rules" href="/rules">
+    Rule types, categories, and severities
   </Card>
-  <Card icon={<FileCode size={20} />} title="Rule Management" href="/rules">
-    Create, organize, and deploy constraints
+  <Card icon={<Plug size={20} />} title="Hooks and IDE Setup" href="/integrations">
+    Claude Code, Cursor, Antigravity, VS Code, Windsurf
   </Card>
-  <Card icon={<Plug size={20} />} title="IDE Integrations" href="/integrations">
-    Connect to Cursor, Windsurf, and Claude
+  <Card icon={<Settings size={20} />} title="CLI Reference" href="/cli-reference">
+    Every verified command, flag, and example
   </Card>
-  <Card icon={<Settings size={20} />} title="Advanced" href="/advanced">
-    Semantic search and brand profiles
-  </Card>
-  <Card icon={<Code size={20} />} title="API Reference" href="/advanced/api-reference">
-    Programmatic access to rules and transcripts
+  <Card icon={<CreditCard size={20} />} title="Pricing" href="/pricing">
+    Free, Pro, Team, and Enterprise plans
   </Card>
 </Cards>
 
-## Architecture
+## Real-world example
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│              Video Upload (Mux)                             │
-│  Screen recordings → Automatic transcription                │
-└────────────────────────────┬────────────────────────────────┘
-                             │ Webhook
-                             ▼
-┌─────────────────────────────────────────────────────────────┐
-│           Azure OpenAI Processing (GPT-4o-mini)             │
-│  Extract rules + Generate embeddings for search             │
-└────────────────────────────┬────────────────────────────────┘
-                             │
-                             ▼
-┌─────────────────────────────────────────────────────────────┐
-│            Azure Cosmos DB (MongoDB API)                    │
-│    Rules Collection + Video Transcripts + Embeddings        │
-└────────────────────────────┬────────────────────────────────┘
-                             │ MCP Protocol
-                             ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   Your IDE (Cursor/Windsurf)                │
-│  AI follows your rules automatically during coding          │
-└─────────────────────────────────────────────────────────────┘
-```
-
-## What Makes Prism Different?
-
-### 🎥 Video-First Context Capture
-Record your screen while discussing architecture. Prism automatically extracts rules from your explanations.
-
-### 🧠 AI-Powered Rule Extraction
-GPT-4o-mini analyzes transcripts to identify:
-- Architectural patterns
-- Code style conventions
-- Naming rules
-- Testing strategies
-- Security practices
-
-### 🔍 Semantic Search
-Vector embeddings enable finding relevant architectural discussions, not just keyword matching.
-
-### 🚀 Zero-Config MCP Integration
-`npx prism connect` and you're done. Your AI assistant now has context.
-
-## Real-World Example
-
-```typescript
-// Before Prism: Generic code
-const data = await fetch('/api/users');
-
-// After Prism: Enforces your standards
-const { data, error } = await api.users.list();
-if (error) {
-  toast.error(error.message);
-  return;
+```json
+// .prism/rules.json (excerpt)
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "styling/no-magenta",
+      "category": "styling",
+      "severity": "block",
+      "extensions": [".tsx"],
+      "check": {
+        "type": "forbidden_pattern",
+        "pattern": "#ff00ff",
+        "message": "Use the design system palette, not magenta."
+      }
+    }
+  ]
 }
 ```
 
-Your AI assistant learns from your videos that you:
-- Use custom API wrapper with error handling
-- Show errors via toast notifications
-- Follow early return patterns
+With this rule in place, the agent cannot write `#ff00ff` into a `.tsx` file. The hook returns a correction and the agent fixes it.
 
 ## Built by Syntaxure Labs
 
-Prism Context Engine is part of the [Syntaxure Labs](https://jeffdev.studio) ecosystem — enterprise-grade tools for developers who want AI that respects their architecture.
+Prism Context Engine is built by [Syntaxure Labs](https://syntaxure.dev), incubated at KWADRA TBI in Iloilo, Philippines.
 
-**Current Version:** 1.0.3  
-**License:** MIT  
+**Current Version:** 1.2.0
+**License:** Proprietary — © Syntaxure Labs. All rights reserved.
 **Support:** [GitHub Issues](https://github.com/J-Akiru5/jeffdev-monorepo/issues)

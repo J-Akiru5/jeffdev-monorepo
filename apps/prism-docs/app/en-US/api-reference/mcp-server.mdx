@@ -1,197 +1,69 @@
-# MCP Server API
+# MCP Server
 
-The Prism MCP Server exposes tools and resources via the Model Context Protocol.
+The MCP server gives AI assistants tools for reading and enforcing your rules over the Model Context Protocol (stdio transport).
+
+## How it runs
+
+You do not install the MCP server separately. `prism serve` starts it:
+
+```bash
+prism serve            # try full server, fall back to local cache
+prism serve --offline  # local cache only
+```
+
+`prism serve` attempts to spawn the full `prism-mcp-server` (from this repository) and falls back to a built-in lite server that reads the local cache at `~/.prism/rules/rules.json`. Run `prism sync` to populate the cache.
+
+`prism ide-setup` writes the IDE configuration:
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "npx",
+      "args": ["@prism-engine/cli", "serve"],
+      "env": { "PRISM_TOKEN": "<your token>" }
+    }
+  }
+}
+```
+
+TODO(confirm): `prism-mcp-server` is a private workspace package (`"private": true`) and is not published to npm. Is there a public distribution channel, or should the docs state that `prism serve` is the only supported way to run it?
 
 ## Tools
 
-### `get_architectural_rules`
+These are the tools registered by the server (`apps/prism-mcp-server/src/index.ts`):
 
-Retrieve all active architectural rules, optionally filtered by category and tags.
+| Tool | Purpose |
+|------|---------|
+| `get_architectural_rules` | Retrieve active architectural rules |
+| `validate_code_pattern` | Validate a code snippet against active rules |
+| `prism_scan` | Scan content against rules |
+| `get_skill` | Get a skill by id |
+| `list_skills` | List available skills |
+| `prism_check` | Check files against rules |
+| `prism_fix` | Propose fixes for violations |
+| `repo_extract` | Extract rules from a repository (AI-assisted) |
+| `repo_scan` | Scan a repository for conventions |
+| `prism_kitchen` | Context budget operations |
+| `prism_intercept` | Intercept and evaluate a proposed change |
+| `prism_health` | Health check (reports database, AI provider, ranking status) |
+| `prism_compile` | Compile rules |
+| `prism_orchestrate` | Orchestrate a multi-step task (AI) |
+| `prism_memory` | Governance memory |
+| `prism_drip` | Incremental rule delivery |
 
-**Input Schema:**
+TODO(confirm): per-tool input schemas are generated at runtime from the source in `apps/prism-mcp-server/src/`. Publish exact schemas, or keep this list with a pointer to the source?
 
-```typescript
-{
-  category?: "architecture" | "styling" | "security" | "performance" | "testing" | "documentation",
-  tags?: string[]  // Optional: Filter by tags
-}
-```
+## AI providers
 
-**Response:**
+The server's AI-assisted tools route through an AI provider. The router default is Gemini (`AI_PROVIDER` defaults to `gemini` in `apps/prism-mcp-server/src/lib/ai-router.ts`), configured with `GOOGLE_GEMINI_API_KEY` or `GEMINI_API_KEY`. An Azure OpenAI path still exists in the code as an opt-in fallback when Gemini credentials are absent — it is not the default.
 
-```json
-[
-  {
-    "id": "67890abcdef12345",
-    "name": "No Cross-App Imports",
-    "category": "architecture",
-    "tags": ["monorepo", "imports", "turborepo"],
-    "content": "# No Cross-App Imports\n\nNever import code directly...",
-    "priority": 1,
-    "isActive": true,
-    "createdAt": "2024-01-15T10:30:00.000Z"
-  }
-]
-```
+## Plan gating
 
-**Example Usage:**
+The dashboard API gates MCP access by subscription tier: free tier has no MCP sync; Pro and above include it. See [Pricing](/pricing). Local enforcement (`prism check`, hooks) is never gated.
 
-```typescript
-// Get all architecture rules
-await session.callTool("get_architectural_rules", { 
-  category: "architecture" 
-});
+## Related
 
-// Get rules tagged with "react"
-await session.callTool("get_architectural_rules", { 
-  tags: ["react", "components"] 
-});
-```
-
----
-
-### `validate_code_pattern`
-
-Validate a code snippet against active architectural rules.
-
-**Input Schema:**
-
-```typescript
-{
-  code: string,       // Required - The code to validate
-  filePath?: string,  // Optional - File path for context
-  language?: string   // Optional - Programming language (typescript, javascript, python, etc.)
-}
-```
-
-**Response (with violations):**
-
-```json
-{
-  "isValid": false,
-  "violations": [
-    {
-      "ruleId": "67890abcdef12345",
-      "ruleName": "No Cross-App Imports",
-      "severity": "error",
-      "message": "Cross-app import detected in apps/prism-dashboard/src/page.tsx",
-      "suggestion": "Use shared packages (@repo/ui, @jeffdev/db) instead of direct app imports"
-    }
-  ],
-  "summary": "Found 1 violation(s)"
-}
-```
-
-**Response (valid code):**
-
-```json
-{
-  "isValid": true,
-  "violations": [],
-  "summary": "✅ No violations found. Code adheres to all active rules."
-}
-```
-
-**Example Usage:**
-
-```typescript
-await session.callTool("validate_code_pattern", {
-  code: "import { Button } from '../../apps/agency/Button';",
-  filePath: "apps/prism-dashboard/src/components/Header.tsx",
-  language: "typescript"
-});
-```
-
----
-
-### `search_video_transcript`
-
-**🆕 NEW:** Semantically search through video transcripts using AI embeddings.
-
-**Input Schema:**
-
-```typescript
-{
-  query: string,  // Required - Natural language search query
-  topK?: number   // Optional - Number of results to return (default: 3)
-}
-```
-
-**Response:**
-
-```json
-[
-  {
-    "videoTitle": "React Architecture Best Practices",
-    "assetId": "mux-asset-12345",
-    "snippet": "When handling API errors in React, always wrap your fetch calls in try-catch blocks. I prefer using a custom useApi hook that handles errors consistently across the app...",
-    "timestamp": "00:03:42",
-    "similarity": 0.89,
-    "url": "https://stream.mux.com/mux-asset-12345.m3u8"
-  },
-  {
-    "videoTitle": "Error Handling Patterns",
-    "assetId": "mux-asset-67890",
-    "snippet": "For payment processing, never expose raw error messages to users. Log the full error server-side, but return a sanitized message like 'Payment failed. Please try again.'",
-    "timestamp": "00:05:15",
-    "similarity": 0.85,
-    "url": "https://stream.mux.com/mux-asset-67890.m3u8"
-  }
-]
-```
-
-**How It Works:**
-1. Your query is converted to a 1536-dimensional embedding via Azure OpenAI
-2. Cosine similarity calculated against all stored video embeddings
-3. Top K most relevant transcript snippets returned
-4. Results include timestamps for easy video navigation
-
-**Example Usage:**
-
-```typescript
-// Find relevant architecture explanations
-await session.callTool("search_video_transcript", {
-  query: "How should I structure API error handling in React?",
-  topK: 5
-});
-
-// Search for specific patterns
-await session.callTool("search_video_transcript", {
-  query: "payment processing best practices Stripe"
-});
-```
-
-**Requirements:**
-- Azure OpenAI credentials configured (for query embeddings)
-- Videos processed with embeddings (automatic on upload)
-
-See [Semantic Search Guide](/guide/semantic-search) for performance tuning.
-
----
-
-## Resources
-
-Resources are currently **not implemented** in the MCP server. Use tools instead.
-
-## Error Handling
-
-All tools return errors in this format:
-
-```json
-{
-  "content": [{ 
-    "type": "text", 
-    "text": "Error: MONGODB_URI not set in environment" 
-  }],
-  "isError": true
-}
-```
-
-Common errors:
-
-| Error | Cause | Solution |
-|-------|-------|----------|
-| `MONGODB_URI not set` | Missing env variable | Add to MCP config env block |
-| `Failed to connect to database` | Invalid connection string | Verify Cosmos DB URI |
-| `Azure OpenAI credentials missing` | search_video_transcript called without Azure config | Add Azure OpenAI env vars |
-| `No transcripts found` | No videos uploaded | Upload videos via dashboard |
+- [Hooks and IDE Setup](/integrations) — IDE configuration
+- [MCP Protocol concept](/concepts/mcp-protocol)
+- [Dashboard Guide](/dashboard-guide)

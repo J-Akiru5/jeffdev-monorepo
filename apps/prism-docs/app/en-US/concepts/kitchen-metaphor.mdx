@@ -30,15 +30,15 @@ The **Kitchen** is where all preparation happens — it's the Prism web dashboar
 │                   (Prism Dashboard)                         │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
-│  📹 Video Upload        📝 Rule Editor      🎨 Brand Setup  │
+│  📋 Project Tabs        📝 Rule Editor      🎨 Brand Setup  │
 │  ─────────────────     ─────────────────   ─────────────── │
-│  Record yourself       Write and edit      Define design    │
-│  explaining patterns   context rules       system tokens    │
+│  Rules / Skills /      Add Rule, Browse    Define design    │
+│  Design System / Stack Templates, Export  system tokens    │
 │                                                             │
-│  🤖 AI Extraction       📂 Organization     👥 Team Sharing │
+│  🤖 AI Kitchen          📂 Organization     👥 Team Sharing │
 │  ─────────────────     ─────────────────   ─────────────── │
-│  Azure OpenAI turns    Group rules by      Collaborate on  │
-│  video into rules      project/category    shared recipes  │
+│  Generate components   Group rules by      Collaborate on  │
+│  from descriptions     project/category    shared recipes  │
 │                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -47,11 +47,11 @@ The **Kitchen** is where all preparation happens — it's the Prism web dashboar
 
 | Activity | Description |
 |----------|-------------|
-| **Recipe Writing** | Manually write context rules in Markdown |
-| **Recipe Extraction** | Upload video → AI extracts rules automatically |
+| **Recipe Writing** | Add rules in the project's Rules tab (or edit `.prism/rules.json` locally) |
+| **Recipe Templates** | Browse Templates in the project's Rules tab |
 | **Mise en Place** | Organize rules by category, priority, tags |
 | **Menu Planning** | Create brand profiles with design tokens |
-| **Kitchen Staff** | Invite team members to collaborate |
+| **Kitchen Staff** | Invite team members to collaborate (Team plan) |
 
 ---
 
@@ -188,18 +188,18 @@ Here's how all three components work together:
 │                        YOUR WORKFLOW                            │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  1. RECORD          2. UPLOAD           3. EXTRACT              │
+│  1. INIT            2. EDIT             3. ENFORCE              │
 │  ─────────          ─────────           ─────────               │
-│  "Our buttons       Video → Mux         Azure OpenAI            │
-│   use the Ghost     transcription       analyzes transcript     │
-│   Glow pattern..."                      and generates rules     │
+│  prism init         Edit                The hook checks         │
+│  detects your       .prism/rules.json   every write; a          │
+│  tokens + stack     to add rules        block halts the agent   │
 │                                                                 │
 │                                                                 │
-│  4. EDIT            5. DEPLOY           6. CODE                 │
+│  4. PULL            5. SYNC             6. CODE                 │
 │  ─────────          ─────────           ─────────               │
-│  Review and         MCP Server          Ask AI to create        │
-│  refine rules       syncs rules         a button — it           │
-│  in dashboard       to your IDE         follows your rules!     │
+│  prism pull         prism ide-setup     Ask AI to create        │
+│  fetches your       wires MCP into      a button — it           │
+│  team's rules       your editors        follows your rules      │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -221,4 +221,4 @@ The Kitchen/Recipe/Waiter model helps you understand:
 
 - [MCP Protocol Deep Dive](/concepts/mcp-protocol) — Technical details of the "waiter"
 - [Creating Rules](/rules/creating-rules) — Write effective "recipes"
-- [Video Processing](/video/upload) — Automatic rule extraction
+- [Rules reference](/rules) — Rule types, categories, and severities

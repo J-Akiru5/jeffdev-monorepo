@@ -1,29 +1,23 @@
 # Advanced Features
 
-Unlock the full power of Prism Context Engine with semantic search, brand profiles, and API access.
+Brand profiles, the REST API, and the optional semantic check layer.
 
 ## Feature Overview
 
 <Cards>
-  <Card title="Semantic Search" href="/advanced/semantic-search">
-    Find relevant architectural discussions using AI-powered vector search
-  </Card>
   <Card title="Brand Profiles" href="/advanced/brand-profiles">
     Create and manage design system profiles for consistent styling
   </Card>
   <Card title="API Reference" href="/advanced/api-reference">
-    Programmatic access to rules, transcripts, and embeddings
+    Programmatic access to projects, rules, brands, and skills
   </Card>
 </Cards>
 
-## Semantic Search
+## Semantic check layer (local, opt-in)
 
-Use natural language to search across your video transcripts and rules. Prism uses Azure OpenAI embeddings to understand the meaning behind your queries, not just keywords.
+`prism check` can add a Gemini-powered intent-level check on top of the deterministic engine. It runs only when you set `PRISM_GEMINI_CHECK=1` and provide `GEMINI_API_KEY` or `GOOGLE_GEMINI_API_KEY`, is hard-capped at 12 seconds, and fails open. See [Hooks and IDE Setup](/integrations).
 
-**Example queries:**
-- "How should I handle authentication?"
-- "What's the folder structure for components?"
-- "Show me the color palette decisions"
+The hosted semantic search page is [deprecated](/advanced/semantic-search) — the dashboard API has no vector search endpoints today.
 
 ## Brand Profiles
 
@@ -37,8 +31,9 @@ Export profiles as CSS variables, Tailwind config, or include them in your conte
 
 ## API Access
 
-Build custom integrations with the Prism API:
-- Fetch rules programmatically
-- Search transcripts via embedding similarity
-- Create and update rules from your own tools
-- Integrate with CI/CD pipelines
+Build custom integrations with the dashboard REST API (`/api/v1/...`):
+- Projects, rules, brands, components, skills
+- API keys and analytics
+- Marketplace listing
+
+See the [API Reference](/advanced/api-reference).

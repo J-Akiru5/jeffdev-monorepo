@@ -42,15 +42,15 @@ Understanding Model Context Protocol and how Prism uses it.
 
 ## How Prism Uses MCP
 
-Prism implements an MCP server (`@prism/mcp-server`) that:
+Prism's MCP server is started by the CLI (`prism serve`). It is configured per editor by `prism ide-setup`. It:
 
-### 1. Authenticates with Your Account
+### 1. Runs Locally
 
 ```bash
-prism-mcp --api-key YOUR_API_KEY
+npx @prism-engine/cli serve
 ```
 
-The MCP server connects to Prism cloud using your API key.
+The server runs on your machine over stdio. `prism serve` tries the full `prism-mcp-server` and falls back to a built-in lite server reading the local cache (`~/.prism/rules/rules.json`).
 
 ### 2. Fetches Your Rules
 
@@ -70,13 +70,13 @@ AI: "I need styling rules for this button request"
 MCP: "Here are the styling rules: [Ghost Glow pattern, color tokens, etc.]"
 ```
 
-### 4. Enables Semantic Search
+### 4. Serves Governance Tools
 
-For complex questions, the MCP server searches your rules:
+The server exposes tools for rule retrieval and validation (see the [MCP Server page](/api-reference/mcp-server) for the full list):
 
 ```
-AI: "User is asking about error handling patterns"
-MCP: *searches embeddings* "Here are 3 relevant rules about error handling"
+AI: "Validate this snippet against the rules"
+MCP: *prism_check / validate_code_pattern returns findings*
 ```
 
 ---
@@ -117,115 +117,72 @@ MCP: *searches embeddings* "Here are 3 relevant rules about error handling"
 
 ## MCP Tools Provided by Prism
 
-The Prism MCP server exposes these tools to your AI:
+The server registers 16 tools. The full list with descriptions is on the [MCP Server page](/api-reference/mcp-server). Examples:
 
-### `prism_get_rules`
+### `get_architectural_rules`
 
-Fetch all rules for a project.
+Retrieve active architectural rules, optionally filtered.
 
-```json
-{
-  "tool": "prism_get_rules",
-  "parameters": {
-    "project_id": "optional",
-    "category": "optional (styling|architecture|testing)"
-  }
-}
-```
+### `validate_code_pattern`
 
-### `prism_search_rules`
+Validate a code snippet against active rules.
 
-Semantic search across your rules.
+### `prism_check`
 
-```json
-{
-  "tool": "prism_search_rules",
-  "parameters": {
-    "query": "How should I handle API errors?",
-    "limit": 5
-  }
-}
-```
-
-### `prism_get_brand`
-
-Fetch brand profile (design tokens, colors, typography).
-
-```json
-{
-  "tool": "prism_get_brand",
-  "parameters": {
-    "brand_id": "optional"
-  }
-}
-```
+Check files against rules.
 
 ---
 
 ## IDE Configuration
 
+`prism ide-setup` writes these configs for you and asks before touching each IDE:
+
 <Tabs items={['Cursor', 'Windsurf', 'VS Code', 'Claude Desktop']}>
   <Tabs.Tab>
     **Cursor** uses `~/.cursor/mcp.json`:
-    
+
     ```json
     {
       "mcpServers": {
         "prism": {
-          "command": "prism-mcp",
-          "args": ["--api-key", "YOUR_API_KEY"]
+          "command": "npx",
+          "args": ["@prism-engine/cli", "serve"]
         }
       }
     }
     ```
   </Tabs.Tab>
-  
+
   <Tabs.Tab>
-    **Windsurf** uses `~/.codeium/windsurf/mcp_config.json`:
-    
+    **Windsurf** uses `~/.windsurf/mcp.json`:
+
     ```json
     {
       "mcpServers": {
         "prism": {
-          "command": "prism-mcp",
-          "args": ["--api-key", "YOUR_API_KEY"]
+          "command": "npx",
+          "args": ["@prism-engine/cli", "serve"]
         }
       }
     }
     ```
   </Tabs.Tab>
-  
+
   <Tabs.Tab>
-    **VS Code** requires the MCP extension:
-    
-    1. Install "MCP" extension from marketplace
-    2. Open Command Palette → "MCP: Configure Servers"
-    3. Add Prism configuration
-    
-    ```json
-    {
-      "mcpServers": {
-        "prism": {
-          "command": "prism-mcp",
-          "args": ["--api-key", "YOUR_API_KEY"]
-        }
-      }
-    }
-    ```
+    **VS Code**: `prism ide-setup` writes `prism.token` into your user `settings.json`. MCP support depends on the MCP extension you use.
   </Tabs.Tab>
-  
+
   <Tabs.Tab>
     **Claude Desktop** uses `claude_desktop_config.json`:
-    
+
     **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-    **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-    
+
     ```json
     {
       "mcpServers": {
         "prism": {
-          "command": "prism-mcp",
-          "args": ["--api-key", "YOUR_API_KEY"]
+          "command": "npx",
+          "args": ["@prism-engine/cli", "serve"]
         }
       }
     }
@@ -249,11 +206,11 @@ Most IDEs show MCP server status in their UI. Look for:
 You can test the MCP server directly:
 
 ```bash
-# Start in debug mode
-prism-mcp --api-key YOUR_API_KEY --debug
+# Start in offline (cache) mode
+npx @prism-engine/cli serve --offline
 
 # In another terminal, send a test request
-echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | prism-mcp
+echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | npx @prism-engine/cli serve --offline
 ```
 
 ### Common Issues
@@ -274,23 +231,16 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | prism-mcp
 
 ## Security Considerations
 
-### API Key Storage
+### Token Storage
 
-- Never commit API keys to version control
-- Use environment variables when possible
-- Rotate keys periodically
+- The auth token lives in `~/.prism/token`; keep it out of version control
+- `prism ide-setup` passes the token to IDE configs via the `PRISM_TOKEN` env var
 
 ### Data Flow
 
-- Rules are fetched over HTTPS (encrypted)
-- No code leaves your machine — only rule queries
-- MCP server runs locally on your machine
-
-### Permissions
-
-- MCP server only reads rules — it cannot modify them
-- Each API key has project-level access controls
-- Team admins can revoke keys at any time
+- The MCP server runs locally on your machine
+- Rules come from your local `.prism/rules.json` and the local cache
+- No code leaves your machine for rule serving
 
 ---
 
@@ -300,8 +250,7 @@ Prism follows the official MCP specification:
 
 - **Transport**: stdio (standard input/output)
 - **Protocol**: JSON-RPC 2.0
-- **Authentication**: API key in server args or environment variable
-- **Caching**: Local cache with 5-minute TTL
+- **Server command**: `npx @prism-engine/cli serve`
 
 For full protocol details, see [modelcontextprotocol.io](https://modelcontextprotocol.io).
 
