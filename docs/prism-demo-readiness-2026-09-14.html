@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Prism Demo Readiness — DOST-ASTI/NAIRA Pre-Call Verification — 2026-09-14</title>
+<style>
+  :root {
+    --bg: #0b0f14;
+    --panel: #111820;
+    --panel2: #0e141b;
+    --border: #1f2a36;
+    --text: #d9e2ec;
+    --dim: #8fa1b3;
+    --faint: #5c6b7a;
+    --cyan: #22d3ee;
+    --green: #34d399;
+    --amber: #fbbf24;
+    --red: #f87171;
+    --purple: #a78bfa;
+    --mono: ui-monospace, "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 48px 24px 96px;
+    background: var(--bg); color: var(--text);
+    font: 15px/1.65 "Segoe UI", system-ui, -apple-system, sans-serif;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 6px; letter-spacing: -0.02em; }
+  h2 { font-size: 1.2rem; margin: 48px 0 14px; color: #fff; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  h3 { font-size: 1rem; margin: 26px 0 8px; color: #fff; }
+  p, li { color: var(--text); }
+  .sub { color: var(--dim); margin: 0 0 4px; }
+  .meta { color: var(--faint); font-size: .85rem; }
+  code, .mono { font-family: var(--mono); font-size: .86em; }
+  code { background: #16202b; border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; color: #a5f3fc; }
+  pre {
+    background: #0a0e13; border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px; overflow-x: auto; font-family: var(--mono);
+    font-size: .8rem; line-height: 1.55; color: #cfe3f5;
+  }
+  pre .ok { color: var(--green); }
+  pre .bad { color: var(--red); }
+  pre .hl { color: var(--cyan); }
+  pre .warn { color: var(--amber); }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 20px; font-size: .88rem; }
+  th, td { text-align: left; vertical-align: top; padding: 9px 11px; border: 1px solid var(--border); }
+  th { background: #131c26; color: #fff; font-weight: 600; white-space: nowrap; }
+  tr:nth-child(even) td { background: var(--panel2); }
+  .pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: .72rem; font-weight: 700; letter-spacing: .04em; }
+  .p-ok { background: rgba(52,211,153,.12); color: var(--green); border: 1px solid rgba(52,211,153,.35); }
+  .p-bad { background: rgba(248,113,113,.12); color: var(--red); border: 1px solid rgba(248,113,113,.35); }
+  .p-part { background: rgba(251,191,36,.12); color: var(--amber); border: 1px solid rgba(251,191,36,.35); }
+  .p-info { background: rgba(34,211,238,.1); color: var(--cyan); border: 1px solid rgba(34,211,238,.3); }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin: 18px 0; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .card .label { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--faint); }
+  .card .val { font-size: 1.15rem; font-weight: 700; margin: 4px 0 2px; }
+  .card .note { font-size: .8rem; color: var(--dim); }
+  .ok-text { color: var(--green); } .bad-text { color: var(--red); } .warn-text { color: var(--amber); }
+  .callout { border-left: 3px solid var(--cyan); background: var(--panel); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+  .callout.red { border-left-color: var(--red); }
+  .callout.amber { border-left-color: var(--amber); }
+  .callout.green { border-left-color: var(--green); }
+  ul { padding-left: 22px; }
+  .foot { margin-top: 64px; padding-top: 16px; border-top: 1px solid var(--border); color: var(--faint); font-size: .8rem; }
+  .tag { font-size: .72rem; color: var(--faint); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Prism Context Engine — Demo Readiness Verification</h1>
+<p class="sub">DOST-ASTI / NAIRA meeting prep — inspected 2026-09-14 (evening PHT) ahead of the 2:00–3:00 PM call</p>
+<p class="meta">
+  Repo: <code>C:\dev\Next Js\jeffdev-monorepo</code> &nbsp;·&nbsp;
+  Branch: <code>develop</code> @ <code>0bfb305</code> &nbsp;·&nbsp;
+  Mode: diagnosis-only (no repo code modified) &nbsp;·&nbsp;
+  Scope: <code>@prism-engine/cli</code> + prism-admin + prism-manage
+</p>
+
+<h2>1 · Executive summary</h2>
+<div class="cards">
+  <div class="card">
+    <div class="label">CLI core flow</div>
+    <div class="val ok-text">WORKING</div>
+    <div class="note">Verified end-to-end: init → constitution → hook blocks → self-correction loop → pass. Local, deterministic, no LLM, no cloud.</div>
+  </div>
+  <div class="card">
+    <div class="label">prism-admin (Vercel)</div>
+    <div class="val ok-text">WORKING</div>
+    <div class="note">Deployed sign-in + health 200 on <code>admin.syntaxure.dev</code>; Supabase env present; local typecheck clean.</div>
+  </div>
+  <div class="card">
+    <div class="label">prism-manage (Vercel)</div>
+    <div class="val bad-text">BROKEN</div>
+    <div class="note">Committed merge-conflict markers block every build; latest production deploys Error; SSO-protected. Needs a human decision.</div>
+  </div>
+  <div class="card">
+    <div class="label">Local-LLM claim</div>
+    <div class="val ok-text">TRUE for governance</div>
+    <div class="note">Core path calls no model at all; MCP is client-model-agnostic. AI features are provider-configurable but a local inference server is untested.</div>
+  </div>
+  <div class="card">
+    <div class="label">Azure dependency</div>
+    <div class="val ok-text">NONE on demo path</div>
+    <div class="note">No Cosmos/Container Apps/Azure OpenAI calls in init / check / serve. Azure survives only as an optional AI provider branch.</div>
+  </div>
+</div>
+
+<div class="callout green">
+  <strong>Bottom line for the meeting:</strong> the actual demo path — define a constitution locally, let an agent attempt a violating write, watch the Pass intercept it with exact fixes and the agent self-correct — is verifiable and rehearsable tonight from this repo. Prism enforces independently of any model provider, so "runs in front of a local LLM" is structurally true for governance; say <em>that</em>, and do not claim a tested local-inference integration.
+</div>
+
+<h2>2 · Verdict table</h2>
+<table>
+  <thead>
+    <tr><th>Item</th><th>Verdict</th><th>Basis</th><th>Verified / inferred</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>(a) CLI core flow (init → check → hook)</td>
+      <td><span class="pill p-ok">WORKING</span></td>
+      <td>Ran init, hook block (exit 2), corrected file (exit 0), lint, kill switch, offline MCP handshake; 191 unit tests pass</td>
+      <td><strong>Verified</strong> (executed)</td>
+    </tr>
+    <tr>
+      <td>(a.1) Distributed CLI (<code>npx @prism-engine/cli</code>)</td>
+      <td><span class="pill p-ok">WORKING after env fix</span></td>
+      <td>Stale global 0.1.0 shadowed unversioned npx; upgraded to published 1.2.0; generated hook command now exits 2 on violations</td>
+      <td><strong>Verified</strong> (executed + fixed)</td>
+    </tr>
+    <tr>
+      <td>(b) prism-admin</td>
+      <td><span class="pill p-ok">WORKING</span></td>
+      <td>Production deploy Ready, <code>/sign-in</code> 200, <code>/api/health</code> 200, Supabase env names present, local <code>check-types</code> clean</td>
+      <td><strong>Verified</strong> (HTTP + CLI reads); Supabase server-side query not authenticated-tested — <em>inferred</em></td>
+    </tr>
+    <tr>
+      <td>(c) prism-manage</td>
+      <td><span class="pill p-bad">BROKEN</span></td>
+      <td>Merge conflict markers at <code>top-navbar.tsx:45–49</code> on develop/main/staging; latest 3 prod deploys Error; build log evidence; local tsc TS1185</td>
+      <td><strong>Verified</strong> (build log + local typecheck)</td>
+    </tr>
+    <tr>
+      <td>(d) Local-LLM compatibility</td>
+      <td><span class="pill p-part">PARTIAL — true for core, caveated for AI features</span></td>
+      <td>No LLM call in demo path; MCP stdio is model-agnostic; provider layer configurable but no local-server test exists</td>
+      <td><strong>Verified</strong> (code reading + executions) for core; <em>inferred</em> for untested local-server config</td>
+    </tr>
+    <tr>
+      <td>(e) Azure independence of core path</td>
+      <td><span class="pill p-ok">CONFIRMED</span></td>
+      <td>Ran init/check/serve with no cloud env; code shows Azure only under <code>AI_PROVIDER=azure</code>; Cosmos is comment/test residue</td>
+      <td><strong>Verified</strong> (code + runs)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>3 · Repository map (as found, not as assumed)</h2>
+<table>
+  <thead><tr><th>Component</th><th>Repo path</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><code>@prism-engine/cli</code> (Prism Context Engine CLI)</td><td><code>packages/prism-context-engine/</code></td><td>bin: <code>bin/prism.js</code> → <code>dist/index.js</code>; npm name <code>@prism-engine/cli@1.2.0</code></td></tr>
+    <tr><td>MCP server (full, spawned by <code>prism serve</code>)</td><td><code>apps/prism-mcp-server/</code></td><td>Supabase-backed full server; lite local-cache fallback inside the CLI</td></tr>
+    <tr><td>prism-admin (Vercel project <code>prj_HagyudymS7sxDbOrJwl5lTbhhFug</code>)</td><td><code>apps/prism-admin/</code></td><td>Production domain <code>admin.syntaxure.dev</code></td></tr>
+    <tr><td>prism-manage (Vercel project <code>prj_Bu8YTDV3SIeAAEP2UsiUO7z2Yahn</code>)</td><td><code>apps/prism-manage/</code></td><td>Vercel display name <code>jeffdev-monorepo-prism-manage</code>; no custom domain found</td></tr>
+    <tr><td>Prism Cloud API (used by pull/sync/doctor)</td><td><code>apps/prism-engine/</code></td><td>Default base <code>https://prism.syntaxure.dev</code> (<code>packages/prism-context-engine/src/api.ts:12–14</code>)</td></tr>
+  </tbody>
+</table>
+
+<h2>4 · Branch decision</h2>
+<p>
+  Target branch <code>develop</code>; the working tree was already on <code>develop</code>, up to date with <code>origin/develop</code>, HEAD <code>0bfb305</code>.
+  In-flight work was limited to unrelated <code>packages/ui/src/button.tsx</code> edits and untracked docs. No branch switch or worktree was needed:
+  this session produced <strong>no repo code changes</strong>. The only mutation outside the repo is an environment fix documented in §6.
+</p>
+
+<h2>5 · CLI end-to-end evidence (Step 2)</h2>
+
+<h3>5.1 Define a constitution locally — <code>prism init --yes</code></h3>
+<pre>$ cd &lt;fresh sample: package.json (next 16, tailwind 4) + app/globals.css with 4 hex tokens&gt;
+$ node &lt;repo&gt;/packages/prism-context-engine/bin/prism.js init --yes
+
+<span class="hl">◈ Prism Context Engine — init</span>
+
+  Scanning this project. No network calls.
+
+Detected: Next.js 16.1.4 · app router · Tailwind ^4.1.18
+
+<span class="ok">✓</span> Scanned app/globals.css
+<span class="ok">✓</span> Found 4 color token(s) as CSS custom properties
+
+<span class="ok">✓</span> Wrote 2 rule(s) to .prism/rules.json
+
+<span class="ok">✓</span> Created .claude/settings.json with the Pass hook wired in
+
+<span class="ok">✓</span> Created Cursor hook (...)\.cursor\hooks.json
+<span class="ok">✓</span> Created Antigravity hook (...)\.agents\hooks.json
+Done.
+
+  • styling/design-tokens (required_token)
+  • styling/no-arbitrary-tailwind-values (arbitrary_value)</pre>
+<p>
+  Generated constitution maps the four detected tokens to their CSS variables, e.g.
+  <code>#ef4444 → var(--brand-danger)</code>, at <code>block</code> severity, plus an arbitrary-value <code>warn</code> rule.
+  Source of truth: <code>src/commands/init.ts:4,39–48</code>, <code>src/init/tokens.ts</code>, <code>src/init/generate-rules.ts</code>.
+</p>
+
+<h3>5.2 Interception — simulate the agent hook on a violating Write</h3>
+<pre>$ echo '{"hook_event_name":"PostToolUse","tool_name":"Write","tool_input":{"file_path":".../src/components/PromoBanner.tsx"}}' \
+    | node &lt;repo&gt;/packages/prism-context-engine/bin/prism.js check --hook --format claude-code
+
+<span class="bad">PRISM PASS blocked write to PromoBanner.tsx — 2 rule violations must be fixed now:</span>
+1. Line 12 (styling/brand-color-tokens): replace '#06b6d4' with 'var(--brand-primary)' — Use the brand token instead of the raw color.
+2. Line 3 (security/no-lodash): remove 'from "lodash"' — Use native methods or lodash-es.
+Apply exactly these edits to PromoBanner.tsx, then continue your original task.
+<span class="bad">HOOK_EXIT=2</span></pre>
+
+<h3>5.3 Self-correction loop closes</h3>
+<pre>$ &lt;apply the two suggested edits only&gt;
+$ echo '&lt;same hook event&gt;' | node .../bin/prism.js check --hook
+<span class="ok">HOOK_EXIT=0</span>
+
+$ node .../bin/prism.js check src
+  WARN  .../PromoBanner.tsx:11 [warn] styling/no-arbitrary-scale-values: Found 'p-[34px]'.
+  WARN  .../PromoBanner.tsx:11 [warn] styling/no-arbitrary-scale-values: Found 'text-[13px]'.
+prism check: 2 warning violation(s) across 1 file(s).
+<span class="ok">LINT_EXIT=0</span>   (warnings print but do not gate)
+
+$ PRISM_DISABLE=1 ... check --hook
+<span class="ok">KILL_EXIT=0</span>   (kill switch confirmed)</pre>
+<p>
+  The hook path is the exact same code a Claude Code <code>PostToolUse</code> hook triggers
+  (<code>src/commands/check.ts:83–140</code>); exit code 2 feeds the correction text back into the agent's context (Claude Code halt semantics).
+  A real Claude Code binary was <em>not</em> installed on this machine, so the agent-run portion was exercised through its deterministic hook contract
+  rather than a live agent turn. The interception/correction mechanism itself is fully verified.
+</p>
+
+<h3>5.4 MCP serving (context delivery, no model server-side)</h3>
+<pre>$ node .../bin/prism.js serve --offline     # lite local-cache MCP server
+INIT_OK=true
+SERVER={"name":"prism-context-engine","version":"1.0.0"}
+TOOL_COUNT=7
+TOOLS=get_architectural_rules,get_skill,prism_check,validate_code,prism_fix,repo_extract,validate_code_pattern
+
+$ node .../bin/prism.js serve               # full server (Supabase env loaded from repo .env)
+TOOL_COUNT=16
+TOOLS=get_architectural_rules,validate_code_pattern,prism_scan,get_skill,list_skills,prism_check,prism_fix,
+      repo_extract,repo_scan,prism_kitchen,prism_intercept,prism_health,prism_compile,prism_orchestrate,
+      prism_memory,prism_drip</pre>
+
+<h3>5.5 Test suite</h3>
+<pre>$ pnpm --filter @prism-engine/cli run test
+ Test Files  19 passed (19)
+      Tests  <span class="ok">191 passed</span> | 2 skipped (193)</pre>
+
+<h2>6 · Environment finding fixed tonight (one command)</h2>
+<div class="callout amber">
+  <strong>Risk found:</strong> a stale <em>global</em> npm install of <code>@prism-engine/cli</code> (0.1.0, pre-Pass, no <code>check</code> command)
+  shadowed the unversioned <code>npx @prism-engine/cli</code> command that <code>init</code> writes into generated hooks
+  (<code>npx @prism-engine/cli check --hook --format claude-code</code>).
+  On this machine that resolved to the old CLI: <code>error: unknown command 'check'</code> → zero enforcement.
+  If a demo used an <code>init</code>-generated hook rather than the committed pass-demo hook, the Pass would silently not fire.
+</div>
+<pre>$ npm install -g @prism-engine/cli@latest      # 0.1.0 → 1.2.0 (published)
+
+$ echo '&lt;violating write event&gt;' | npx @prism-engine/cli check --hook --format claude-code
+<span class="bad">PRISM PASS blocked write to Hero.tsx — 1 rule violation must be fixed now:</span>
+1. Line 2 (styling/design-tokens): replace '#ef4444' with 'var(--brand-danger)' ...
+<span class="bad">HOOK_EXIT=2</span>   (the exact generated-hook command now enforces)</pre>
+<p class="tag">
+  This was an environment fix only — no repo files, no published package, no Vercel config changed. The committed pass-demo example uses a local
+  <code>node ../../bin/prism.js</code> hook, which was never affected.
+</p>
+
+<h2>7 · prism-admin (Step 3)</h2>
+<table>
+  <thead><tr><th>Check</th><th>Result</th><th>Evidence</th></tr></thead>
+  <tbody>
+    <tr><td>Vercel project / repo path</td><td><span class="pill p-info">prj_HagyudymS7sxDbOrJwl5lTbhhFug → apps/prism-admin</span></td><td><code>vercel project ls --json</code></td></tr>
+    <tr><td>Latest production deploy</td><td>Ready (Aug 26, 19d), aliased to <code>admin.syntaxure.dev</code></td><td><code>vercel ls prism-admin --prod</code></td></tr>
+    <tr><td>Root + sign-in</td><td>307 → <code>/sign-in</code> 200; title "Admin Access - Syntaxure Labs | Prism Admin"; no error markers</td><td>HTTP fetch</td></tr>
+    <tr><td>Health endpoint</td><td><code>{"status":"ok","service":"prism-admin","timestamp":"..."}</code> HTTP 200</td><td><code>https://admin.syntaxure.dev/api/health</code></td></tr>
+    <tr><td>Supabase env vars (Vercel Production)</td><td><code>NEXT_PUBLIC_SUPABASE_URL</code>, <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code>, <code>SUPABASE_PROJECT_ID</code>, <code>SUPABASE_STORAGE_BUCKET</code> all set (encrypted, 112d)</td><td><code>vercel env ls</code> (names only)</td></tr>
+    <tr><td>Local build check on develop</td><td><code>pnpm --filter prism-admin run check-types</code> → clean</td><td>executed</td></tr>
+  </tbody>
+</table>
+<p>
+  No sign of the earlier Supabase-env-var 500 resurfacing in the deployed paths tested.
+  Limitation stated plainly: the sign-in page is client-rendered and I did not execute an authenticated query; the Supabase-attached assertion is
+  inferred from env presence plus non-500 responses, not from an authenticated smoke test.
+</p>
+
+<h2>8 · prism-manage (Step 3) — BROKEN, decision required</h2>
+<div class="callout red">
+  <strong>Root cause (verified):</strong> merge conflict markers are <em>committed</em> in
+  <code>apps/prism-manage/src/components/top-navbar.tsx</code> lines 45–49, introduced by commit <code>0d59a6a</code>
+  ("feat(prism-admin,prism-manage): nav active states, NotificationPanel, layout integration") and present on
+  <code>develop</code>, <code>main</code>, and <code>staging</code>.
+</div>
+<pre>45  &lt;&lt;&lt;&lt;&lt;&lt;&lt; Updated upstream
+46  import { useWorkspaceStore } from "@/stores/workspace-store";
+47  =======
+48  import { NotificationPanel } from "@/components/notification-panel";
+49  &gt;&gt;&gt;&gt;&gt;&gt;&gt; Stashed changes</pre>
+<pre>$ pnpm --filter prism-manage run check-types
+src/components/top-navbar.tsx(45,1): error TS1185: Merge conflict marker encountered.
+src/components/top-navbar.tsx(47,1): error TS1185: Merge conflict marker encountered.
+src/components/top-navbar.tsx(49,1): error TS1185: Merge conflict marker encountered.
+
+Vercel build log (production, Aug 26):
+  prism-manage:build: Merge conflict marker encountered.
+  ERROR  prism-manage#build: hit an error while running the build step
+  status  ● Error</pre>
+<table>
+  <thead><tr><th>Fact</th><th>Detail</th></tr></thead>
+  <tbody>
+    <tr><td>Latest 3 production deploys</td><td>All <code>● Error</code> (Aug 26); prod alias points at the errored deployment</td></tr>
+    <tr><td>Last Ready production deploys</td><td>22d old (pre-<code>0d59a6a</code>)</td></tr>
+    <tr><td>Vercel Deployment Protection</td><td>Enabled (SSO) — external requests to the alias redirect to <code>vercel.com/login</code></td></tr>
+    <tr><td>Local symbol usage</td><td><code>useWorkspaceStore</code> used at lines 147–148; <code>NotificationPanel</code> imported but never referenced in the file</td></tr>
+  </tbody>
+</table>
+<p><strong>Why I stopped:</strong> resolving committed conflict markers means choosing intent from a stashed merge — that is an owner decision, not a one-line typo fix.
+  Options, smallest first:</p>
+<ol>
+  <li><strong>Minimal unblock:</strong> delete the three marker lines, keep <code>useWorkspaceStore</code>, drop the unused <code>NotificationPanel</code> import, build, redeploy. (Loses nothing currently referenced; may abandon intended NotificationPanel integration.)</li>
+  <li><strong>Intentful fix:</strong> wire <code>NotificationPanel</code> into the navbar per commit <code>0d59a6a</code>'s intent, then redeploy.</li>
+  <li><strong>If prism-manage must be shown tomorrow:</strong> additionally lift Deployment Protection (or use an authenticated preview URL) so the meeting room can load it.</li>
+</ol>
+
+<h2>9 · Provider trace — does the CLI hard-code an LLM? (Step 4)</h2>
+<p><strong>Answer: no. The CLI's demo path makes no model call at all; the cloud AI layer is provider-pluggable; there is no hard-coded OpenAI endpoint.</strong></p>
+<table>
+  <thead><tr><th>Path</th><th>What it does</th><th>Citation</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>prism check</code> / hook</td>
+      <td>Deterministic regex rule engine. No network, no AI.</td>
+      <td><code>packages/prism-context-engine/src/commands/check.ts:83–197</code></td>
+    </tr>
+    <tr>
+      <td><code>prism init</code></td>
+      <td>Local filesystem scan → rules. "Zero network, zero account." Package deps contain no AI SDK (MCP SDK, commander, chalk, ora only).</td>
+      <td><code>src/commands/init.ts:4,39–48</code>; <code>package.json:57–62</code></td>
+    </tr>
+    <tr>
+      <td><code>prism generate</code></td>
+      <td>CLI itself does no inference; POSTs <code>/api/generate</code> to Prism Cloud (base URL configurable via <code>PRISM_API_URL</code>/config).</td>
+      <td><code>src/commands/generate.ts:31</code>; <code>src/api.ts:8–16</code></td>
+    </tr>
+    <tr>
+      <td>MCP server AI (optional ranking)</td>
+      <td>Default provider Gemini; Azure only when selected. Embedding failure falls back to priority/keyword sort, so tools still respond without any AI provider.</td>
+      <td><code>apps/prism-mcp-server/src/lib/ai-router.ts:12–33</code>; <code>src/index.ts:994–1007</code></td>
+    </tr>
+    <tr>
+      <td>Engine AI router (cloud)</td>
+      <td>Provider chain: opencode → deepseek (defaults), or explicit <code>AI_PROVIDER</code> azure/gemini. opencode and deepseek both accept OpenAI-compatible base URLs (<code>OPENCODE_BASE_URL</code>, <code>DEEPSEEK_ENDPOINT</code>).</td>
+      <td><code>apps/prism-engine/src/lib/ai-router.ts:4,11–16,45–75</code>; <code>opencode.ts:16–18</code>; <code>deepseek.ts:9–21</code></td>
+    </tr>
+  </tbody>
+</table>
+<div class="callout">
+  <strong>Honest framing for a local-LLM audience:</strong> "The governance layer never calls a model — it enforces rules deterministically and serves context over MCP, so it sits in front of whatever model your client runs. Our AI-completion features route through configurable providers, but we have not yet tested a fully local inference server end-to-end." That is defensible tonight. "Drop-in in front of a local LLM" as a tested integration claim is not.
+</div>
+
+<h2>10 · Azure / Cosmos / Container Apps trace (Step 5)</h2>
+<table>
+  <thead><tr><th>Surface</th><th>Finding</th><th>Impact on demo</th></tr></thead>
+  <tbody>
+    <tr><td>CLI demo path (init/check/serve)</td><td>No Azure, Cosmos, Container Apps, or OpenAI references that execute. Verified by running with no cloud env configured.</td><td><span class="pill p-ok">None</span></td></tr>
+    <tr><td>Cosmos DB</td><td>Removed as a live dependency in the Postgres/Supabase migration. Residual "cosmos" strings are comments, legacy tests, and one prism-admin dashboard tile keyed on <code>MONGODB_URI</code> (renders disconnected — cosmetic).</td><td><span class="pill p-ok">None</span></td></tr>
+    <tr><td>Azure OpenAI</td><td>Optional branch only: engine <code>AI_PROVIDER=azure</code>; MCP router uses Gemini by default. Engine's Azure-only embedding function (<code>azure-openai.ts:13–33</code>) has no call sites on develop.</td><td><span class="pill p-ok">None on demo path</span></td></tr>
+    <tr><td>Container Apps</td><td>No live code reference found in app/package sources; app deployment path is Vercel (per-app <code>vercel.json</code>, Dockerfiles present but not the deployment target).</td><td><span class="pill p-ok">None</span></td></tr>
+    <tr><td>Prism Cloud (CLI pull/sync/doctor)</td><td><code>prism.syntaxure.dev/api/health</code> → 200 <code>{"service":"prism-engine","version":"1.0.5"}</code>. Deployed engine is a 22-day-old build; three newer production deploys (Aug 26) errored <em>post-build</em> at Vercel ("artifact signature error"; build tasks succeeded).</td><td><span class="pill p-part">Cloud up; deploy pipeline needs a look before next engine ship — not demo-blocking</span></td></tr>
+  </tbody>
+</table>
+
+<h2>11 · Recommended pre-meeting checklist</h2>
+<ol>
+  <li><strong>Rehearse from <code>packages/prism-context-engine/examples/pass-demo/</code></strong> — the committed hook uses the local binary (<code>node ../../bin/prism.js</code>) and is immune to the npx/global issue. Run <code>pnpm --filter @prism-engine/cli run build</code> first; bin loads <code>dist/</code>.</li>
+  <li><strong>Choose the demo narrative:</strong> constitution-first prompt ("make a Button based on our design constitution") then the forced-violation branch; standalone <code>prism check src</code> as the deterministic fallback if no agent is available in the room.</li>
+  <li><strong>Decide prism-manage</strong> (minimal marker removal vs. NotificationPanel completion) — or omit manage from the demo and lead with the CLI + admin.</li>
+  <li><strong>Use the local-LLM phrasing in §9</strong>; do not claim a tested local inference integration.</li>
+  <li><strong>Optional:</strong> verify <code>npm view @prism-engine/cli version</code> is 1.2.0 and that any other demo machine has no stale global shadow (<code>npm ls -g --depth=0 | findstr prism</code>).</li>
+</ol>
+
+<h2>12 · Appendix — exact commands run</h2>
+<pre>git fetch --all --prune; git status; git branch -a
+pnpm --filter @prism-engine/cli run build
+node packages/prism-context-engine/bin/prism.js init --yes                  # sample project
+echo '&lt;PostToolUse JSON&gt;' | node packages/prism-context-engine/bin/prism.js check --hook --format claude-code
+node packages/prism-context-engine/bin/prism.js check src
+PRISM_DISABLE=1 ... check --hook
+node packages/prism-context-engine/bin/prism.js serve --offline            # MCP handshake probe
+node packages/prism-context-engine/bin/prism.js serve                      # full server probe
+pnpm --filter @prism-engine/cli run test
+pnpm --filter prism-admin run check-types
+pnpm --filter prism-manage run check-types                                 # fails: conflict markers
+npx @prism-engine/cli --version; npx @prism-engine/cli@latest --version
+npm install -g @prism-engine/cli@latest                                    # the one env fix
+vercel whoami / project ls --json / ls &lt;project&gt; --prod / inspect &lt;url&gt; --logs / env ls
+curl -s admin.syntaxure.dev/api/health
+curl -s https://prism.syntaxure.dev/api/health
+curl -s -o NUL -w "%{http_code}" &lt;production URLs&gt;</pre>
+
+<div class="foot">
+  Generated 2026-09-14 · Prism Context Engine demo-readiness diagnosis · read-only except the global npm upgrade noted in §6 ·
+  HTML standalone, no external assets · intended for the next KWADRA check-in
+</div>
+
+</div>
+</body>
+</html>

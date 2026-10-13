@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prism · Demo Day Runbook · Sep 30</title>
+<style>
+  :root{
+    --bg:#0a0c10; --panel:#12151b; --panel2:#0d1117;
+    --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.14);
+    --text:#ededed; --muted:#98a1b3;
+    --accent:#22D3EE; --ok:#34D399; --warn:#FBBF24; --bad:#F87171;
+    --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Consolas,monospace;
+    --sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 clamp(24px,5vw,80px)}
+  .prose{max-width:760px}
+
+  /* header */
+  header{border-bottom:1px solid var(--line);padding:clamp(32px,6vh,64px) 0 clamp(28px,5vh,48px)}
+  .eyebrow{font:600 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+  h1{font-size:clamp(30px,5.4vw,52px);line-height:1.08;letter-spacing:-.02em;font-weight:700}
+  h1 .accent{color:var(--accent)}
+  .sub{color:var(--muted);margin-top:14px;font-size:clamp(15px,1.6vw,17px);max-width:760px}
+  .facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+  .chip{font:600 12px var(--mono);color:var(--muted);border:1px solid var(--line2);border-radius:999px;padding:5px 12px;white-space:nowrap}
+  .chip b{color:var(--text)}
+
+  section{padding:clamp(40px,7vh,72px) 0;border-bottom:1px solid var(--line)}
+  h2{font-size:clamp(21px,3vw,30px);letter-spacing:-.01em;margin-bottom:10px}
+  h2 .idx{font:600 13px var(--mono);color:var(--accent);margin-right:10px}
+  .lead{color:var(--muted);margin-bottom:26px;max-width:820px}
+  h3{font-size:16px;margin:26px 0 10px}
+  p{margin-bottom:12px}
+  a{color:var(--accent);text-decoration:none}
+  code{font:500 .86em var(--mono);background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:5px;padding:2px 6px;white-space:nowrap}
+
+  /* status cards */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:22px 0}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .stat .k{font:600 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .stat .v{font-size:19px;font-weight:700;margin-top:6px}
+  .stat .d{font-size:13px;color:var(--muted);margin-top:4px}
+  .ok{color:var(--ok)} .warn{color:var(--warn)} .bad{color:var(--bad)} .acc{color:var(--accent)}
+
+  /* callouts */
+  .callout{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:10px;padding:16px 18px;margin:18px 0}
+  .callout.warn-c{border-left-color:var(--warn)}
+  .callout.bad-c{border-left-color:var(--bad)}
+  .callout.ok-c{border-left-color:var(--ok)}
+  .tag{display:inline-block;font:700 10px var(--mono);letter-spacing:.14em;color:var(--accent);border:1px solid rgba(34,211,238,.35);border-radius:5px;padding:2px 8px;margin-bottom:8px}
+  .callout.warn-c .tag{color:var(--warn);border-color:rgba(251,191,36,.35)}
+  .callout.bad-c .tag{color:var(--bad);border-color:rgba(248,113,113,.35)}
+  .callout.ok-c .tag{color:var(--ok);border-color:rgba(52,211,153,.35)}
+
+  /* flow diagram */
+  .flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;margin:26px 0}
+  .fstep{flex:1 1 150px;min-width:150px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .fstep .fk{font:600 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .fstep .fv{font-size:13.5px;font-weight:600;margin-top:5px;line-height:1.35}
+  .fstep .fd{font-size:12px;color:var(--muted);margin-top:4px}
+  .fstep.block{border-color:rgba(248,113,113,.45);background:rgba(248,113,113,.06)}
+  .fstep.block .fk{color:var(--bad)}
+  .fstep.clean{border-color:rgba(52,211,153,.45);background:rgba(52,211,153,.06)}
+  .fstep.clean .fk{color:var(--ok)}
+  .farrow{align-self:center;color:var(--muted);font-size:16px;font-family:var(--mono)}
+  @media(max-width:900px){.farrow{display:none}}
+
+  /* beats */
+  .beats{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin:22px 0}
+  .beat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:10px}
+  .beat.b1{border-top:3px solid var(--bad)} .beat.b2{border-top:3px solid var(--ok)}
+  .beat .num{font:700 11px var(--mono);letter-spacing:.14em;color:var(--muted)}
+  .beat h3{margin:0;font-size:16px}
+  .prompt{font:500 13.5px/1.55 var(--mono);background:var(--panel2);border:1px solid var(--line2);border-radius:8px;padding:12px 14px;color:#dbe7ee}
+  .expect{font-size:13.5px;color:var(--muted)}
+  .expect b{color:var(--text);font-weight:600}
+  .say{font-size:13.5px;border-left:2px solid var(--accent);padding-left:12px;color:var(--muted)}
+  .say em{color:var(--text);font-style:normal}
+
+  /* tables */
+  .tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin:18px 0}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:560px}
+  th{font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:11px 14px;border-bottom:1px solid var(--line2);background:rgba(255,255,255,.02)}
+  td{padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td code{white-space:normal}
+
+  /* terminal */
+  .term{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:16px 18px;margin:16px 0;overflow-x:auto}
+  .term pre{font:500 12.5px/1.7 var(--mono);color:#cfe3ea;white-space:pre}
+  .term .c{color:var(--muted)} .term .g{color:var(--ok)} .term .r{color:var(--bad)}
+
+  /* ladder */
+  .ladder{display:grid;gap:12px;margin:22px 0}
+  .rung{display:grid;grid-template-columns:52px 1fr;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .rung .n{font:700 22px var(--mono);color:var(--accent);line-height:1}
+  .rung h4{font-size:15px;margin-bottom:4px}
+  .rung p{font-size:13.5px;color:var(--muted);margin:0}
+  .rung code{font-size:12px}
+
+  /* tracker */
+  .tracker{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:22px 0}
+  .tracker-bar{height:10px;background:rgba(255,255,255,.07);border-radius:999px;overflow:hidden;margin-bottom:8px}
+  .tracker-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--ok));border-radius:999px;transition:width .25s ease}
+  .tracker-pct{font:600 12px var(--mono);color:var(--muted);margin-bottom:14px}
+  .tracker-list{list-style:none;display:grid;gap:2px}
+  .tracker-list label{display:flex;align-items:flex-start;gap:12px;padding:10px 6px;border-radius:8px;cursor:pointer;font-size:14px;min-height:40px}
+  .tracker-list label:hover{background:rgba(255,255,255,.03)}
+  .tracker-list input{appearance:none;width:20px;height:20px;flex:0 0 20px;margin-top:1px;border:1.5px solid var(--line2);border-radius:6px;background:var(--panel2);cursor:pointer;position:relative}
+  .tracker-list input:checked{background:var(--ok);border-color:var(--ok)}
+  .tracker-list input:checked::after{content:"";position:absolute;left:5.5px;top:2px;width:5px;height:10px;border:solid #0a0c10;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+  .tracker-list input:checked + span{color:var(--muted);text-decoration:line-through}
+
+  footer{padding:36px 0 56px;color:var(--muted);font-size:13px}
+  footer .wrap{display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">KWADRA Kampo Cohort 5 · Demo Day · Wed Sep 30, 2026</div>
+    <h1>Prism live demo <span class="accent">runbook</span></h1>
+    <p class="sub">The enforcement chain is rehearsed and frozen. This page is everything needed to walk in, cold-start in fifteen minutes, and run the demo without a single improvisation. Re-verify the marked items on the morning of the 30th.</p>
+    <div class="facts">
+      <span class="chip">Window <b>3:00–7:00 PM</b></span>
+      <span class="chip">Venue <b>ISAT U · confirm room</b></span>
+      <span class="chip">Demo surface <b>OpenCode</b></span>
+      <span class="chip">Build <b>prism-frozen-d5bf00f</b></span>
+      <span class="chip">Dashboard <b>prism.syntaxure.dev</b></span>
+      <span class="chip">Project <b>prism-live-demo</b></span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ STATUS ============ -->
+<section id="status">
+  <div class="wrap">
+    <h2><span class="idx">01</span>Where things stand</h2>
+    <p class="lead">Everything below was observed on Sep 29 — not assumed. What's left is one desktop-level rehearsal on the morning of, recorded as the fallback video.</p>
+
+    <div class="stats">
+      <div class="stat"><div class="k">Static preflight</div><div class="v ok">READY 11/11</div><div class="d">Frozen strict chain, pinned SHAs, no stale processes</div></div>
+      <div class="stat"><div class="k">Live canary</div><div class="v ok">PASS</div><div class="d">Blocked · file absent · BLOCKED logged</div></div>
+      <div class="stat"><div class="k">Beats 1 &amp; 2</div><div class="v ok">REHEARSED</div><div class="d">Block, then compliant write with CLEAN lines</div></div>
+      <div class="stat"><div class="k">Fail-closed proof</div><div class="v ok">PASS</div><div class="d"><code>PRISM_DISABLE</code> refused, file absent</div></div>
+      <div class="stat"><div class="k">Dashboard</div><div class="v ok">LIVE &amp; VERIFIED</div><div class="d">All rules visible · E2E 6/6 against production</div></div>
+      <div class="stat"><div class="k">Remaining</div><div class="v warn">1 DESKTOP PASS</div><div class="d">Morning-of rehearsal + fallback recording</div></div>
+    </div>
+
+    <div class="callout ok-c">
+      <span class="tag">VERDICT</span>
+      <p><b>Demo-ready.</b> The block path, the compliant-write path, and the fail-closed safety net are all proven live in the demo project. Run the morning checklist, then the beats exactly as written below.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THE CHAIN ============ -->
+<section id="chain">
+  <div class="wrap">
+    <h2><span class="idx">02</span>The chain you're proving</h2>
+    <p class="lead">One rule defined on the dashboard travels to the project, and a violating write from the agent is stopped before it touches disk. Then the agent corrects itself.</p>
+
+    <div class="flow">
+      <div class="fstep"><div class="fk">The rule</div><div class="fv">Dashboard · first-funding</div><div class="fd">"No raw hex colors" · severity block</div></div>
+      <div class="farrow">→</div>
+      <div class="fstep"><div class="fk">Pulled</div><div class="fv">.prism/rules.json</div><div class="fd">Same rule id, local + versioned</div></div>
+      <div class="farrow">→</div>
+      <div class="fstep"><div class="fk">Agent attempts</div><div class="fv">Write #ef4444 into DangerButton</div><div class="fd">A hex the agent was never told about</div></div>
+      <div class="farrow">→</div>
+      <div class="fstep block"><div class="fk">Prism · pre-write</div><div class="fv">BLOCKED before disk</div><div class="fd">Write never lands · BLOCKED logged</div></div>
+      <div class="farrow">→</div>
+      <div class="fstep clean"><div class="fk">Agent corrects</div><div class="fv">Uses var(--brand-danger)</div><div class="fd">Write lands · CLEAN pre + post logged</div></div>
+    </div>
+
+    <div class="callout">
+      <span class="tag">THE LINE</span>
+      <p>"I never told the agent about this rule. The rule came from the project, and the write never reached the file."</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MORNING CHECKLIST ============ -->
+<section id="morning">
+  <div class="wrap">
+    <h2><span class="idx">03</span>Morning-of checklist</h2>
+    <p class="lead">Do these in order, before anyone is watching. Checked state is saved in this browser.</p>
+
+    <div class="tracker">
+      <div class="tracker-bar"><div class="tracker-fill" id="tFill"></div></div>
+      <div class="tracker-pct" id="tPct">0% complete</div>
+      <ul class="tracker-list" id="tList">
+        <li><label><input type="checkbox"><span>Close <b>every</b> OpenCode process (desktop app + any CLI), then relaunch</span></label></li>
+        <li><label><input type="checkbox"><span>Open <code>C:\dev\Next Js\prism-live-demo</code> as a <b>new</b> session</span></label></li>
+        <li><label><input type="checkbox"><span>Run the preflight — must print <b>READY</b>, including check 7 (no stale processes)</span></label></li>
+        <li><label><input type="checkbox"><span>Run the preflight with <code>-Live</code> — blocked canary, file absent, new BLOCKED line</span></label></li>
+        <li><label><input type="checkbox"><span>Run <code>demo-reset.ps1</code> — src restored, log archived and emptied</span></label></li>
+        <li><label><input type="checkbox"><span>Open the log pane in a second terminal, sized to be readable from the back</span></label></li>
+        <li><label><input type="checkbox"><span>One full desktop rehearsal with the exact beats below, then reset again</span></label></li>
+        <li><label><input type="checkbox"><span>Record a clean run — this is fallback rung 3</span></label></li>
+        <li><label><input type="checkbox"><span>Dashboard tab open on first-funding, rule visible and ready</span></label></li>
+        <li><label><input type="checkbox"><span>Freeze: no pulls, no code changes, no branch switches until after the pitch</span></label></li>
+      </ul>
+    </div>
+
+    <div class="term">
+      <pre><span class="c"># run all of these in C:\dev\Next Js\prism-live-demo</span>
+& ".\prism-preflight-demo.ps1"          <span class="c"># static check → READY</span>
+& ".\prism-preflight-demo.ps1" -Live    <span class="c"># real canary (one model call)</span>
+& ".\demo-reset.ps1"                    <span class="c"># restore src, empty the log</span>
+Get-Content ".prism\activity.log" -Tail 20 -Wait   <span class="c"># the log pane</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BEATS ============ -->
+<section id="beats">
+  <div class="wrap">
+    <h2><span class="idx">04</span>On stage — three beats</h2>
+    <p class="lead">Two prompts, typed exactly as written. Beat 2's wording was corrected in the Sep 29 rehearsal: the bare "fix it so it complies" makes the agent correctly answer that the file is already compliant — nothing gets written and no CLEAN line appears. The 2px add-on guarantees a real, compliant write.</p>
+
+    <div class="callout">
+      <span class="tag">BEAT 0 · SETUP SHOT</span>
+      <p>Show the dashboard rule on <b>prism.syntaxure.dev</b> (first-funding → "No raw hex colors", severity <b>block</b>, pattern <code>#[0-9a-fA-F]{6}\b</code>), then the pulled <code>.prism\rules.json</code> — same rule id <code>101e52b0</code> in both places.</p>
+    </div>
+
+    <div class="beats">
+      <div class="beat b1">
+        <div class="num">BEAT 1 · EXPECT A BLOCK</div>
+        <h3>You type</h3>
+        <div class="prompt">In src/DangerButton.tsx, change the border color to #ef4444.</div>
+        <div class="expect"><b>On screen:</b> the write <b>fails</b> — "PRISM (OpenCode) flagged 1 violation in DangerButton.tsx". File unchanged. Log pane gains <code>BLOCKED 101e52b0-…</code>.</div>
+        <div class="say">Then, out loud: <em>"I never told the agent about this rule. The rule came from the project, and the write never reached the file."</em></div>
+      </div>
+      <div class="beat b2">
+        <div class="num">BEAT 2 · EXPECT A CLEAN WRITE</div>
+        <h3>You type</h3>
+        <div class="prompt">Fix it so it complies with the rule, and make the border 2px while you are at it.</div>
+        <div class="expect"><b>On screen:</b> the agent rewrites using <code>var(--brand-danger)</code> — <code>2px solid var(--brand-danger)</code>. Write succeeds. Log pane gains <code>CLEAN</code> pre + post lines.</div>
+        <div class="say">If a beat stalls: <em>"No raw hex colors — Prism blocks it. That's the demo."</em></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FALLBACKS ============ -->
+<section id="fallback">
+  <div class="wrap">
+    <h2><span class="idx">05</span>Fallback ladder</h2>
+    <p class="lead">Decided in advance, so nothing is improvised. Every rung still proves the enforcement mechanism.</p>
+
+    <div class="ladder">
+      <div class="rung"><div class="n">1</div><div>
+        <h4>Live OpenCode <span class="acc">· default</span></h4>
+        <p>Preflight READY and rehearsal passed → run the beats as planned.</p>
+      </div></div>
+      <div class="rung"><div class="n">2</div><div>
+        <h4>Deterministic CLI <span class="acc">· agent stalls, provider errors, no log line</span></h4>
+        <p>Temporarily put a raw hex (e.g. <code>#ef4444</code>) into <code>src/DangerButton.tsx</code>, then run:</p>
+        <div class="term"><pre>node "C:\dev\Next Js\prism-frozen-d5bf00f\packages\prism-context-engine\bin\prism.js" check src</pre></div>
+        <p>Say: "What you're seeing is the enforcement engine itself, triggered directly so you can see the raw decision. In an agent session, the same check runs on every write automatically." Then <code>demo-reset.ps1</code>.</p>
+      </div></div>
+      <div class="rung"><div class="n">3</div><div>
+        <h4>Recording <span class="acc">· laptop or projector problem</span></h4>
+        <p>Play the clean run recorded in the morning.</p>
+      </div></div>
+    </div>
+
+    <h3>If something breaks (before the pitch only)</h3>
+    <div class="tw"><table>
+      <tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr>
+      <tr><td>Preflight: STALE PROCESS</td><td>OpenCode started before the enforcement files changed</td><td>Close every OpenCode process, relaunch, re-run</td></tr>
+      <tr><td>Write succeeds with no log line</td><td>Plugin not loaded in this session</td><td>Stop. Preflight, check the junction target, restart</td></tr>
+      <tr><td>"PRISM NOT ACTIVE (fail-closed)"</td><td>Strict mode detected Prism unavailable</td><td>That's the safety net working. Run the preflight to find the reason</td></tr>
+      <tr><td>Agent refuses to write the violation</td><td>Model declines the instruction</td><td>Reword once (max 2 tries), then rung 2</td></tr>
+      <tr><td>Provider error or queue</td><td>Free-tier model limits</td><td>Switch the session model to a named fallback — rehearse it in the morning if you rely on it</td></tr>
+    </table></div>
+  </div>
+</section>
+
+<!-- ============ COMMANDS ============ -->
+<section id="commands">
+  <div class="wrap">
+    <h2><span class="idx">06</span>Commands, paths, and pins</h2>
+    <p class="lead">Everything the demo touches, in one place. If it's not on this list, it doesn't run today.</p>
+
+    <div class="tw"><table>
+      <tr><th>Item</th><th>Value</th></tr>
+      <tr><td>Demo project</td><td><code>C:\dev\Next Js\prism-live-demo</code> (local git, no remote)</td></tr>
+      <tr><td>Enforcement build</td><td>Tag <code>prism-frozen-d5bf00f</code> · fails closed via <code>.prism\strict</code></td></tr>
+      <tr><td>Demo rule</td><td>first-funding · "No raw hex colors" · <code>#[0-9a-fA-F]{6}\b</code> · severity block · id <code>101e52b0-5191-46ea-80a7-161530e13f9a</code></td></tr>
+      <tr><td>Pull source rules</td><td>5 rules pulled (keep-5 decision) — only the hex rule is narrated</td></tr>
+      <tr><td>Preflight / reset / log</td><td><code>prism-preflight-demo.ps1</code> (+<code>-Live</code>) · <code>demo-reset.ps1</code> · <code>Get-Content .prism\activity.log -Wait -Tail 5</code></td></tr>
+      <tr><td>Deterministic check</td><td><code>node "C:\dev\Next Js\prism-frozen-d5bf00f\packages\prism-context-engine\bin\prism.js" check src</code></td></tr>
+      <tr><td>Stage model</td><td><code>opencode/mimo-v2.6-flash-free</code> — do not switch on the day</td></tr>
+      <tr><td>Semantic layer</td><td>OFF. No API key needed. Never print or persist <code>PRISM_API_KEY</code></td></tr>
+      <tr><td>Windows note</td><td>Use <code>prism.cmd</code>, not <code>prism</code> (the .ps1 shim is blocked)</td></tr>
+      <tr><td>Arm B (do not touch)</td><td>Running · freeze Oct 3 23:59 · blind review Oct 4 · never rehearse in it</td></tr>
+    </table></div>
+
+    <div class="callout bad-c">
+      <span class="tag">NEVER TODAY</span>
+      <p>No <code>prism pull</code> after rehearsal · no branch switches in any folder a hook runs from · no <code>git clean</code> in a frozen worktree · no rehearsal in the Arm B repo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ EVIDENCE ============ -->
+<section id="evidence">
+  <div class="wrap">
+    <h2><span class="idx">07</span>What was proven (Sep 29)</h2>
+    <p class="lead">The rehearsal log, so you can say "verified" on stage and mean it.</p>
+    <div class="tw"><table>
+      <tr><th>Check</th><th>Result</th><th>Evidence</th></tr>
+      <tr><td>Frozen chain integrity</td><td><span class="ok">PASS</span></td><td>Static preflight 11/11: junction → <code>prism-frozen-d5bf00f</code>, pinned dist + plugin SHAs, 5 rules with hex rule pinned, strict marker present, <code>PRISM_DISABLE</code> unset, no stale processes</td></tr>
+      <tr><td>Live canary</td><td><span class="ok">PASS</span></td><td>Real <code>opencode run</code> — blocked, file absent, <code>BLOCKED</code> line logged</td></tr>
+      <tr><td>Beat 1 — violation blocked</td><td><span class="ok">PASS</span></td><td>"PRISM (OpenCode) flagged 1 violation" · file untouched · <code>BLOCKED 101e52b0…</code> logged</td></tr>
+      <tr><td>Beat 2 — compliant write</td><td><span class="ok">PASS</span></td><td><code>2px solid var(--brand-danger)</code> written · <code>CLEAN</code> pre + post logged · <code>prism check</code> clean</td></tr>
+      <tr><td>Fail-closed safety net</td><td><span class="ok">PASS</span></td><td><code>PRISM_DISABLE=1</code> → "PRISM NOT ACTIVE (fail-closed)" · file absent · <code>BLOCKED prism-unavailable:prism-disable</code> logged</td></tr>
+      <tr><td>Deployed dashboard</td><td><span class="ok">PASS</span></td><td>Production runs current main · E2E 6/6 against prism.syntaxure.dev · all rules visible, toggle verified live</td></tr>
+    </table></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>Syntaxure Labs · Prism Context Engine · prepared Sep 29, 2026</span>
+    <span>Re-verify time-sensitive items on the morning of Sep 30.</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var KEY='prism-demo-runbook-morning-v1';
+  var boxes=[].slice.call(document.querySelectorAll('#tList input[type=checkbox]'));
+  var saved={};
+  try{saved=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+  function update(){
+    var done=boxes.filter(function(b){return b.checked}).length;
+    var pct=boxes.length?Math.round(100*done/boxes.length):0;
+    document.getElementById('tFill').style.width=pct+'%';
+    document.getElementById('tPct').textContent=pct+'% complete · '+done+' of '+boxes.length;
+  }
+  boxes.forEach(function(b){
+    var i=boxes.indexOf(b);
+    b.checked=!!saved[i];
+    b.addEventListener('change',function(){
+      saved[i]=b.checked;
+      try{localStorage.setItem(KEY,JSON.stringify(saved))}catch(e){}
+      update();
+    });
+  });
+  update();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,489 @@
+<title>Prism Open-Source Readiness</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --bg: #f7f5ef;
+    --bg-raised: #fdfcf8;
+    --ink: #1d2029;
+    --ink-soft: #454a56;
+    --muted: #767b87;
+    --border: #ddd7c8;
+    --border-strong: #c7c0ac;
+    --accent: #2b4570;
+    --accent-soft: #e7ecf3;
+    --flag: #a3651f;
+    --flag-soft: #f6ead9;
+    --flag-border: #e0c39a;
+    --ok: #3d6b4f;
+    --ok-soft: #e5efe7;
+    --code-bg: #eeeadd;
+    --shadow: 0 1px 2px rgba(30,25,10,0.06), 0 8px 24px rgba(30,25,10,0.05);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14151a;
+      --bg-raised: #1b1c23;
+      --ink: #e9e7e0;
+      --ink-soft: #c2c2c8;
+      --muted: #8b8d97;
+      --border: #33343d;
+      --border-strong: #45474f;
+      --accent: #8ba7d4;
+      --accent-soft: #202b3d;
+      --flag: #dda05a;
+      --flag-soft: #332619;
+      --flag-border: #4a3a24;
+      --ok: #8fc4a2;
+      --ok-soft: #1c2c22;
+      --code-bg: #21222a;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14151a;
+    --bg-raised: #1b1c23;
+    --ink: #e9e7e0;
+    --ink-soft: #c2c2c8;
+    --muted: #8b8d97;
+    --border: #33343d;
+    --border-strong: #45474f;
+    --accent: #8ba7d4;
+    --accent-soft: #202b3d;
+    --flag: #dda05a;
+    --flag-soft: #332619;
+    --flag-border: #4a3a24;
+    --ok: #8fc4a2;
+    --ok-soft: #1c2c22;
+    --code-bg: #21222a;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+  }
+
+  .page {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 64px 24px 120px;
+  }
+
+  .kicker {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  .kicker::before {
+    content: "";
+    width: 22px;
+    height: 1px;
+    background: var(--border-strong);
+  }
+
+  h1 {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-weight: 600;
+    font-size: 2.35rem;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+    text-wrap: balance;
+  }
+  .subtitle {
+    color: var(--ink-soft);
+    font-size: 1.05rem;
+    margin: 0 0 40px;
+    max-width: 60ch;
+  }
+  .meta-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 0;
+    margin-bottom: 40px;
+    font-family: "JetBrains Mono", monospace;
+  }
+  .meta-row span b { color: var(--ink-soft); font-weight: 500; }
+
+  /* Decision summary callout */
+  .decisions {
+    background: var(--flag-soft);
+    border: 1px solid var(--flag-border);
+    border-radius: 10px;
+    padding: 24px 26px;
+    margin-bottom: 48px;
+  }
+  .decisions .label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--flag);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .decisions p { margin: 0 0 12px; color: var(--ink); font-size: 15.5px; }
+  .decisions p:last-child { margin-bottom: 0; }
+  .decisions ol { margin: 10px 0 0; padding-left: 20px; }
+  .decisions li { margin-bottom: 6px; font-size: 15px; }
+  .decisions strong { color: var(--ink); }
+
+  section { margin-bottom: 56px; }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 6px;
+  }
+  .section-num {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 13px;
+    color: var(--accent);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 2px 8px;
+    background: var(--accent-soft);
+  }
+  h2 {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-weight: 600;
+    font-size: 1.5rem;
+    margin: 0;
+    letter-spacing: -0.005em;
+  }
+  .section-dek {
+    color: var(--muted);
+    font-size: 14.5px;
+    margin: 6px 0 24px 46px;
+    max-width: 58ch;
+  }
+
+  h3 {
+    font-family: "Inter", sans-serif;
+    font-weight: 600;
+    font-size: 1.02rem;
+    color: var(--ink);
+    margin: 32px 0 12px;
+  }
+
+  p { margin: 0 0 14px; color: var(--ink-soft); font-size: 15.5px; }
+  strong { color: var(--ink); font-weight: 600; }
+
+  code, .path {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 0.87em;
+    background: var(--code-bg);
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  ul, ol { padding-left: 22px; margin: 0 0 16px; }
+  li { margin-bottom: 8px; color: var(--ink-soft); font-size: 15.5px; }
+  li strong { color: var(--ink); }
+
+  /* Finding cards */
+  .finding {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-raised);
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .finding-title {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .finding p:last-child { margin-bottom: 0; }
+  .tag {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-weight: 600;
+  }
+  .tag.exposed { background: var(--flag-soft); color: var(--flag); border: 1px solid var(--flag-border); }
+  .tag.ok { background: var(--ok-soft); color: var(--ok); border: 1px solid var(--border); }
+
+  /* Options comparison */
+  .options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0 8px;
+  }
+  @media (max-width: 620px) {
+    .options { grid-template-columns: 1fr; }
+  }
+  .option {
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    background: var(--bg-raised);
+    padding: 20px 20px 22px;
+    box-shadow: var(--shadow);
+  }
+  .option .opt-label {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .option h4 {
+    font-family: "Source Serif 4", serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 10px;
+  }
+  .option .row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 13.5px;
+    padding: 7px 0;
+    border-top: 1px solid var(--border);
+  }
+  .option .row:first-of-type { border-top: none; }
+  .option .row .k { color: var(--muted); }
+  .option .row .v { color: var(--ink-soft); text-align: right; max-width: 60%; }
+
+  /* Table for call sites */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    margin: 8px 0 20px;
+  }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+  th {
+    text-align: left;
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--code-bg);
+    padding: 10px 14px;
+    font-weight: 500;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--ink-soft);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+
+  blockquote {
+    margin: 18px 0;
+    padding: 4px 0 4px 16px;
+    border-left: 3px solid var(--accent);
+    color: var(--ink-soft);
+    font-size: 14.5px;
+  }
+
+  hr.div {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 56px 0;
+  }
+
+  footer {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 13px;
+    font-family: "JetBrains Mono", monospace;
+  }
+</style>
+
+<div class="page">
+
+  <div class="kicker">Decision memo · Prism</div>
+  <h1>Open-Source Readiness: Licensing Boundary &amp; Repo Exposure</h1>
+  <p class="subtitle">Investigation only — nothing below has been executed. Two things need your call before AGPL-3.0 goes live on <code>packages/prism-context-engine</code>.</p>
+
+  <div class="meta-row">
+    <span><b>Prepared</b> 2026-08-24</span>
+    <span><b>Scope</b> coupling + repo exposure</span>
+    <span><b>Status</b> awaiting decision</span>
+  </div>
+
+  <div class="decisions">
+    <div class="label">What needs your decision</div>
+    <p>The dashboard app today imports the CLI's rule engine <strong>in-process</strong> — not over a subprocess or network boundary — so an AGPL-3.0 license on the engine package puts the proprietary dashboard directly on the wrong side of the copyleft line the moment it ships. Separately, the repo is public with no per-app license marking, so the proprietary billing, tier, and admin code in <code>apps/prism-engine</code> is currently unmarked and defaults toward the root MIT grant rather than "all rights reserved."</p>
+    <ol>
+      <li><strong>Coupling:</strong> decide whether Ox executes the arm's-length refactor (Section 1) before or in lockstep with flipping the license, and which boundary style — subprocess or HTTP.</li>
+      <li><strong>Exposure:</strong> decide between a two-repo split or single-repo per-directory licensing (Section 2) for the proprietary SaaS code.</li>
+    </ol>
+  </div>
+
+  <section>
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2>Coupling audit</h2>
+    </div>
+    <p class="section-dek">How <code>apps/prism-engine</code> actually consumes <code>packages/prism-context-engine</code> today, and what it would take to put daylight between them.</p>
+
+    <h3>Current shape: in-process import, not a subprocess</h3>
+    <p>Confirmed directly in the workspace graph and source. <code>apps/prism-engine/package.json</code> depends on <code>@prism-engine/cli</code> via <code>workspace:*</code>, and the CLI package exposes a second export target added in Phase 3:</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>File</th><th>Export</th></tr>
+        <tr><td><code>packages/prism-context-engine/package.json</code></td><td><code>"./rules": "./dist/rules/index.js"</code></td></tr>
+      </table>
+    </div>
+    <p>There is exactly one consumer of that subpath in the whole app, and it's a same-process function call, not a spawned process:</p>
+    <div class="finding">
+      <div class="finding-title"><span class="tag exposed">in-process</span> apps/prism-engine/src/lib/sandbox.ts</div>
+      <p><code>import { parseRuleSet } from "@prism-engine/cli/rules"</code> and <code>import { checkContent, type Finding } from "@prism-engine/cli/rules"</code> — both called synchronously inside <code>runSandbox()</code>, which parses a user-submitted <code>rules.json</code> and runs it against up to 20 sample files. This is the Phase 3 "sandbox preview" feature: it runs the exact parser/matcher the CLI hook uses, in the same Node process as the Next.js API route.</p>
+    </div>
+
+    <h3>Every call site</h3>
+    <p>There is only one production call site. It's exercised by one route and covered by one test file — the surface is small, which makes the refactor tractable.</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Call site</th><th>What it's used for</th></tr>
+        <tr>
+          <td><code>src/lib/sandbox.ts</code> → <code>runSandbox()</code></td>
+          <td><code>parseRuleSet()</code> validates a submitted rules.json v1 envelope; <code>checkContent()</code> runs it line-by-line against sample files and returns findings (block/warn, rule id, message, offending snippet, suggested replacement).</td>
+        </tr>
+        <tr>
+          <td><code>src/app/api/v1/sandbox/run/route.ts</code></td>
+          <td>Only caller of <code>runSandbox()</code>. Adds auth (<code>authenticate()</code>) and a strict per-user rate limit before invoking it — no AI calls, no quota burn, but user-supplied patterns still execute server-side.</td>
+        </tr>
+        <tr>
+          <td><code>src/lib/__tests__/sandbox.test.ts</code></td>
+          <td>Unit tests against the in-process function directly.</td>
+        </tr>
+      </table>
+    </div>
+    <p>Nowhere in <code>apps/prism-engine</code> does the app shell out to the <code>prism</code> binary as a subprocess. The rule engine's parser (<code>parse.ts</code>, 407 lines) and matcher (<code>engine.ts</code>, 410 lines) execute directly inside the dashboard's Node runtime via the barrel export in <code>packages/prism-context-engine/src/rules/index.ts</code>.</p>
+
+    <h3>Proposed refactor: arm's-length invocation</h3>
+    <p>Two viable boundary styles for the single call site. Both remove the in-process linkage; they differ in where the process boundary sits.</p>
+    <div class="options">
+      <div class="option">
+        <div class="opt-label">Option A</div>
+        <h4>Subprocess call</h4>
+        <div class="row"><span class="k">Mechanism</span><span class="v">Route spawns the built <code>prism</code> CLI binary (already has a <code>bin/prism.js</code> entry) with rules.json and sample files piped in/out as JSON over stdio.</span></div>
+        <div class="row"><span class="k">Latency</span><span class="v">+30–100ms typical for Node process spawn, on top of the existing sub-ms in-process call. Sandbox is already rate-limited "strict," so this is unlikely to be user-visible.</span></div>
+        <div class="row"><span class="k">Complexity</span><span class="v">Low-moderate. Needs a stable stdio contract (the CLI doesn't currently expose one for this), temp-file or stdin handling for up to 20 files, and process lifecycle/timeout handling in the route.</span></div>
+        <div class="row"><span class="k">Deployment</span><span class="v">Requires the CLI binary to be present and executable in the app's runtime image (Vercel/Node function) — a packaging change, not just a code change.</span></div>
+      </div>
+      <div class="option">
+        <div class="opt-label">Option B</div>
+        <h4>Thin HTTP boundary</h4>
+        <div class="row"><span class="k">Mechanism</span><span class="v">Rule engine runs as its own small service (or serverless function) with one endpoint; the dashboard route calls it over HTTP instead of importing the package.</span></div>
+        <div class="row"><span class="k">Latency</span><span class="v">+network round-trip — single-digit ms in-region, more cross-region. Predictable, cacheable, easy to put a timeout on.</span></div>
+        <div class="row"><span class="k">Complexity</span><span class="v">Higher upfront: a service to deploy, own, and monitor; auth between the two now needs its own story (internal token or network policy) on top of the existing user auth.</span></div>
+        <div class="row"><span class="k">Deployment</span><span class="v">Cleanest separation for licensing purposes — the AGPL code runs in a genuinely separate process the SaaS app talks to over a network API, which is the clearest reading of "arm's length" under AGPL's linking concerns.</span></div>
+      </div>
+    </div>
+    <blockquote>Honest tradeoff: Option A is less work and ships faster, but "spawns a binary built from the same monorepo at the same commit" is a weaker separation than most conservative AGPL readings want. Option B is the safer legal posture but is real infrastructure work for what is currently a single low-traffic preview endpoint.</blockquote>
+
+    <h3>Effort estimate</h3>
+    <ul>
+      <li><strong>Option A (subprocess):</strong> ~1–2 days — define the CLI's stdio contract, rewrite <code>sandbox.ts</code> to spawn + parse output, update the Dockerfile/build to ship the binary, adjust the test file to mock a process instead of a function.</li>
+      <li><strong>Option B (HTTP):</strong> ~4–6 days — stand up the service (even as a minimal Fastify/Hono wrapper around <code>parseRuleSet</code>/<code>checkContent</code>), deploy pipeline, internal auth, route rewrite, timeout/retry handling, test updates.</li>
+    </ul>
+    <p>This is a plan and estimate only. Whether Ox executes either option — and which one — is your call, not something to greenlight from this document.</p>
+  </section>
+
+  <hr class="div">
+
+  <section>
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2>Repo exposure audit</h2>
+    </div>
+    <p class="section-dek">The monorepo is public. What proprietary logic sits in it today, and how it's currently marked.</p>
+
+    <h3>Directories with genuinely proprietary logic</h3>
+    <div class="finding">
+      <div class="finding-title"><span class="tag exposed">unmarked</span> Billing &amp; subscription</div>
+      <p><code>src/lib/pricing-db.ts</code> (310 lines — plan tiers, USD/PHP pricing, feature/comparison matrices, hardcoded fallback pricing), <code>src/lib/subscriptions.ts</code> (268 lines), <code>src/lib/subscription-actions.ts</code>, <code>src/app/(dashboard)/subscription/*</code>, <code>src/components/subscription/*</code> (pricing cards/grids), <code>src/app/pricing/*</code>.</p>
+    </div>
+    <div class="finding">
+      <div class="finding-title"><span class="tag exposed">unmarked</span> Payment webhook handling</div>
+      <p><code>src/app/api/webhooks/paypal/route.ts</code> (440 lines — the largest single file in this audit), <code>src/app/api/webhooks/n8n/route.ts</code> (138 lines), <code>src/app/api/subscriptions/checkout/route.ts</code>.</p>
+    </div>
+    <div class="finding">
+      <div class="finding-title"><span class="tag exposed">unmarked</span> Quota &amp; rate-limit logic</div>
+      <p><code>src/lib/usage.ts</code>, <code>src/lib/rate-limit.ts</code>, <code>src/app/api/usage/route.ts</code>, <code>src/app/api/subscription-status/route.ts</code> — the mechanics that enforce what a given tier is allowed to do and how hard.</p>
+    </div>
+    <div class="finding">
+      <div class="finding-title"><span class="tag exposed">unmarked</span> Admin internals</div>
+      <p><code>src/app/api/admin/subscription/route.ts</code> — direct subscription overrides outside normal user flows. Small in file count but high-sensitivity by nature.</p>
+    </div>
+    <div class="finding">
+      <div class="finding-title"><span class="tag exposed">unmarked</span> Auth &amp; API-key issuance</div>
+      <p><code>src/lib/api-auth.ts</code>, <code>src/app/api/api-keys/*</code>, <code>src/app/api/auth/verify/route.ts</code> — not "proprietary" in the business-model sense, but the kind of code a competitor or attacker reading in full gives real advantage in probing the auth model.</p>
+    </div>
+
+    <h3>Current licensing state</h3>
+    <p>Confirmed by reading the actual files, not inferred:</p>
+    <ul>
+      <li>Repo root has a single <code>LICENSE</code> file: <strong>MIT</strong>, copyright Syntaxure Labs. It applies to the whole tree with no directory-level carve-out.</li>
+      <li><code>packages/prism-context-engine</code> has its own <code>LICENSE</code> (also MIT today — this is the package about to be relicensed to AGPL-3.0, and its own file hasn't been updated yet either).</li>
+      <li><strong><code>apps/prism-engine</code> has no <code>LICENSE</code> or <code>NOTICE</code> file of its own, and no per-file or per-directory license header anywhere in the directories listed above.</strong> As-is, a reader has no textual signal that this code is different from the MIT-licensed root — the honest reading is that the root MIT grant is the only license notice that applies to it.</li>
+    </ul>
+    <p>This confirms the expectation going in: none of the proprietary code carries an explicit license or notice today.</p>
+
+    <h3>Two options — real tradeoffs, no house recommendation</h3>
+    <div class="options">
+      <div class="option">
+        <div class="opt-label">Option A</div>
+        <h4>Split into two repos</h4>
+        <div class="row"><span class="k">Structure</span><span class="v">Public engine repo (CLI + rule engine, AGPL-3.0) · private SaaS repo (dashboard, admin, billing, payments)</span></div>
+        <div class="row"><span class="k">Exposure</span><span class="v">Strongest — nothing proprietary is ever in a public git history, including old commits and force-push residue.</span></div>
+        <div class="row"><span class="k">Coupling</span><span class="v">Forces Section 1's refactor to actually happen — a private repo can't import a public one in-process without vendoring, so the arm's-length boundary becomes structurally required, not just recommended.</span></div>
+        <div class="row"><span class="k">Ongoing cost</span><span class="v">Two release cadences to keep in sync — a rule-engine schema or API change means a version bump published to the public repo, then a dependency bump in the private one before the SaaS app can use it. More CI, more coordination, more places for drift.</span></div>
+      </div>
+      <div class="option">
+        <div class="opt-label">Option B</div>
+        <h4>One repo, per-directory NOTICE</h4>
+        <div class="row"><span class="k">Structure</span><span class="v">Stay monorepo. Add explicit <code>LICENSE</code>/<code>NOTICE</code> files inside <code>apps/prism-engine</code> (and any other proprietary app/package) marking it All Rights Reserved, distinct from the root grant.</span></div>
+        <div class="row"><span class="k">Exposure</span><span class="v">Legal marking only — the code is still readable by anyone who clones the public repo, including full history. A NOTICE stops a licensing ambiguity claim; it does not stop a competitor from reading pricing logic or webhook handling.</span></div>
+        <div class="row"><span class="k">Coupling</span><span class="v">Doesn't force Section 1's refactor — the in-process import keeps working, license notice or not. AGPL propagation risk from Section 1 is unresolved by this option alone.</span></div>
+        <div class="row"><span class="k">Ongoing cost</span><span class="v">Cheaper to maintain day-to-day — one repo, one CI pipeline, no version-sync tax. Trades that for ongoing vigilance: every new file under a proprietary directory needs the header, and it's an easy thing to forget under deadline pressure with no CI check enforcing it unless one gets built.</span></div>
+      </div>
+    </div>
+    <blockquote>Neither option is free. Option A pays continuously in coordination overhead; Option B pays continuously in exposure risk and requires someone to actually remember to keep the marking current. A hybrid — start with B now to close the immediate unmarked-code gap, move to A only if/when Section 1's refactor lands and gives you a clean seam to split at — is a sequencing choice, not a recommendation to pick B outright.</blockquote>
+  </section>
+
+  <footer>
+    Investigation and proposal only. No LICENSE file added, no public claim made, no refactor executed. Secrets scanning out of scope — handled separately.
+  </footer>
+
+</div>
