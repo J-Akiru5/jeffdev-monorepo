@@ -8,7 +8,7 @@
  * for quick visual scanning of task types.
  */
 
-import { useState, memo } from "react";
+import { useState, memo, useRef } from "react";
 import {
   Star,
   MoreVertical,
@@ -18,6 +18,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { ConfirmDialog } from "@syntaxure/ui";
+import { createPortal } from "react-dom";
 import type { Task } from "@/lib/schemas";
 import { getTaskTypeConfig } from "@/lib/task-types";
 
@@ -38,6 +39,11 @@ export const TaskItem = memo(function TaskItem({
 }: TaskItemProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [menuPosition, setMenuPosition] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const typeConfig = getTaskTypeConfig(task.taskType);
   const isCompleted = task.status === "approved";
   const isInProgress = task.status === "in_progress";
@@ -161,6 +167,7 @@ export const TaskItem = memo(function TaskItem({
         {/* Star */}
         <button
           onClick={() => onToggleStar?.(task.id)}
+          aria-label={task.isStarred ? "Unstar task" : "Star task"}
           className={`rounded p-1 transition-colors ${
             task.isStarred
               ? "text-yellow-400 hover:text-yellow-300"
@@ -176,45 +183,63 @@ export const TaskItem = memo(function TaskItem({
         {/* Menu */}
         <div className="relative">
           <button
+            ref={menuButtonRef}
             onClick={(e) => {
               e.stopPropagation();
+              if (!showMenu) {
+                const rect = menuButtonRef.current?.getBoundingClientRect();
+                if (rect) {
+                  setMenuPosition({
+                    top: rect.bottom + 4,
+                    left: rect.right - 128,
+                  });
+                }
+              }
               setShowMenu(!showMenu);
             }}
+            aria-label="Task actions"
             className="rounded p-1 text-white/30 transition-colors hover:text-white"
           >
             <MoreVertical className="h-4 w-4" />
           </button>
 
-          {/* Dropdown */}
-          {showMenu && (
-            <>
-              <div
-                className="fixed inset-0 z-10"
-                onClick={() => setShowMenu(false)}
-              />
-              <div className="absolute right-0 top-full z-20 mt-1 w-32 rounded-lg border border-white/[0.10] bg-[#0a0a0a] py-1 shadow-xl">
-                <button
-                  onClick={() => {
-                    onClick?.(task.id);
-                    setShowMenu(false);
-                  }}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-white/50 hover:bg-white/[0.04] hover:text-white"
+          {/* Dropdown — portaled so it escapes the virtualized list's
+              stacking context and clipping (rows overlap it otherwise) */}
+          {showMenu &&
+            menuPosition &&
+            createPortal(
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setShowMenu(false)}
+                />
+                <div
+                  className="fixed z-50 w-32 rounded-lg border border-white/[0.10] bg-[#0a0a0a] py-1 shadow-xl"
+                  style={{ top: menuPosition.top, left: menuPosition.left }}
                 >
-                  Edit
-                </button>
-                <button
-                  onClick={() => {
-                    setShowDeleteDialog(true);
-                    setShowMenu(false);
-                  }}
-                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-white/[0.04]"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Delete
-                </button>
-              </div>
-            </>
-          )}
+                  <button
+                    onClick={() => {
+                      onClick?.(task.id);
+                      setShowMenu(false);
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-white/50 hover:bg-white/[0.04] hover:text-white"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowDeleteDialog(true);
+                      setShowMenu(false);
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-white/[0.04]"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </button>
+                </div>
+              </>,
+              document.body,
+            )}
         </div>
       </div>
     </div>

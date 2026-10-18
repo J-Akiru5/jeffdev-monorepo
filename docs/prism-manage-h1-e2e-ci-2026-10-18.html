@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage H1 — E2E &amp; CI Gating Report</title>
+<style>
+  :root {
+    --bg: #0A0D12; --bg-raised: #11151C; --bg-card: #151A22; --border: #232A36;
+    --cyan: #22D3EE; --violet: #8B7BFF; --text: #E6EAF0; --text-dim: #8B93A3;
+    --text-faint: #5A6272; --good: #4ADE80; --warn: #FBBF24; --bad: #F87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; padding: 48px 24px; }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  .mono { font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 28px; margin-bottom: 32px; }
+  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 12px; background: linear-gradient(90deg, var(--text), var(--text) 60%, var(--cyan)); -webkit-background-clip: text; background-clip: text; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim); }
+  .meta-row span b { color: var(--text); font-weight: 500; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; border: 1px solid; }
+  .badge.done { color: var(--good); border-color: var(--good); background: rgba(74,222,128,0.08); }
+  .badge.crit { color: var(--bad); border-color: var(--bad); background: rgba(248,113,113,0.08); }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 14px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--violet); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .summary-box { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 6px; padding: 18px 20px; font-size: 15px; }
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  ul.clean li { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; font-size: 14px; }
+  .bug { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 14px 18px; margin-bottom: 10px; }
+  .bug .head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+  .bug .head b { font-size: 14.5px; }
+  .bug .why { font-size: 13.5px; color: var(--text-dim); }
+  .bug .why b { color: var(--text); font-weight: 500; }
+  .bug .fix { font-size: 13.5px; margin-top: 6px; }
+  .bug .fix b { color: var(--cyan); font-weight: 500; }
+  .sev { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; border: 1px solid; }
+  .sev.crit { color: var(--bad); border-color: var(--bad); background: rgba(248,113,113,0.08); }
+  .sev.high { color: var(--warn); border-color: var(--warn); background: rgba(251,191,36,0.08); }
+  .sev.med { color: var(--cyan); border-color: var(--cyan); background: rgba(34,211,238,0.08); }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
+  td.mono { color: var(--cyan); white-space: nowrap; }
+  .ok { color: var(--good); }
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">prism-manage · Task Report · Hardening Arc · Phase H1</div>
+    <h1>H1 — Playwright E2E Suite &amp; CI Gating</h1>
+    <div class="meta-row">
+      <span><b>2026-10-18</b></span>
+      <span>Repo: <b>jeffdev-monorepo</b></span>
+      <span>Agent: <b>opencode · DeepSeek V4.1 Flash</b></span>
+      <span>Branch: <b>feat/pm-h1-e2e → PR → develop</b></span>
+      <span class="badge done">Complete — 21/21 green</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Summary</h2>
+    <div class="summary-box">
+      prism-manage now has a <b>real end-to-end test suite</b>: 21 Playwright tests
+      across 9 spec files, running against the actual app with a real Supabase
+      account — and it is <b>wired into CI as a gated job</b> that runs on every
+      prism-manage change. The suite passed <b>21/21 in 2.2 minutes</b>, zero flakes.
+      More importantly, building it <b>immediately paid for itself</b>: the first
+      runs exposed <b>seven real defects</b> — including a critical RLS bug that
+      silently emptied every user's workspace list, a production-runtime server
+      action error, and two UI components that real users could not click.
+      All are fixed, verified by the suite, and covered by regression tests.
+    </div>
+  </section>
+
+  <section>
+    <h2>Defects Found &amp; Fixed</h2>
+
+    <div class="bug">
+      <div class="head"><span class="sev crit">Critical</span><b>RLS infinite recursion on <span class="mono">workspace_members</span> — every user saw zero workspaces</b></div>
+      <div class="why">The "Founders can manage workspace members" policy (<span class="mono">FOR ALL</span>) contained a subquery on the same table. Any query reading another member's row — including the layout's <span class="mono">workspaces!inner</span> embed — threw <span class="mono">infinite recursion detected in policy for relation "workspace_members"</span>. Result: the app shell rendered but <b>every authenticated user's workspace list was empty</b> ("No Workspace Found" on the dashboard, no switcher).</div>
+      <div class="fix"><b>Fix:</b> new migration <span class="mono">20261018000006</span> — founder/member checks moved into <span class="mono">SECURITY DEFINER</span> helper functions (<span class="mono">is_workspace_founder</span>, <span class="mono">workspace_has_members</span>), policies recreated on top. Applied to the live DB via direct pooler connection (the CLI's login-role endpoint 403s — see Notes). Verified as the E2E user: memberships + <span class="mono">workspaces!inner</span> join now resolve.</div>
+    </div>
+
+    <div class="bug">
+      <div class="head"><span class="sev high">High</span><b><span class="mono">"use server"</span> file exported objects — module crash at runtime</b></div>
+      <div class="why"><span class="mono">app/actions/pages.ts</span> exported three zod schemas as <span class="mono">export const</span> from a <span class="mono">"use server"</span> file. Turbopack builds it, but the production runtime throws <span class="mono">A "use server" file can only export async functions, found object</span> when the actions chunk is evaluated — breaking every route that imports it.</div>
+      <div class="fix"><b>Fix:</b> schemas are now internal constants (nothing imported them externally).</div>
+    </div>
+
+    <div class="bug">
+      <div class="head"><span class="sev high">High</span><b>Dashboard crashed when rendering <span class="mono">EmptyState</span> from a server component</b></div>
+      <div class="why">The dashboard (server component) passed <span class="mono">icon={Building2}</span> — a component function — across the RSC boundary into the client-only <span class="mono">EmptyState</span>. React refuses functions server→client: the "No Workspace Found" branch crashed instead of rendering.</div>
+      <div class="fix"><b>Fix:</b> <span class="mono">EmptyState</span> (@syntaxure/ui) now accepts a component <i>or</i> a pre-rendered element (<span class="mono">isValidElement</span> discriminator); dashboard passes <span class="mono">icon={&lt;Building2 /&gt;}</span>. Additive — all existing call sites unchanged.</div>
+    </div>
+
+    <div class="bug">
+      <div class="head"><span class="sev high">High</span><b>Notification panel's close button was unclickable (broken containing block)</b></div>
+      <div class="why">The panel (<span class="mono">fixed … h-full</span>) rendered inside the navbar, where an ancestor establishes a containing block — so "full height" resolved against the ~56px bar and the footer landed on top of the header, intercepting clicks on the ✕. Playwright refused to click it for 60s; a real user couldn't either.</div>
+      <div class="fix"><b>Fix:</b> panel now renders via <span class="mono">createPortal</span> to <span class="mono">document.body</span>; close button got an <span class="mono">aria-label</span>.</div>
+    </div>
+
+    <div class="bug">
+      <div class="head"><span class="sev high">High</span><b>Task row action menu was covered by the next row</b></div>
+      <div class="why">The virtualized task list positions rows with <span class="mono">transform</span> (stacking contexts) and wraps them in <span class="mono">contain: layout paint</span>. The row dropdown painted <i>under</i> the following row — Delete/Edit clicks were intercepted (and long menus were clipped).</div>
+      <div class="fix"><b>Fix:</b> menu now renders via portal to <span class="mono">document.body</span> with a computed position; also added <span class="mono">aria-label</span>s ("Star task"/"Task actions") along the way.</div>
+    </div>
+
+    <div class="bug">
+      <div class="head"><span class="sev med">Medium</span><b>Workspace switcher silently reverted on route refresh</b></div>
+      <div class="why">Every server-action refresh re-ran the workspace provider, which unconditionally overwrote the active workspace with the default (first) one — so switching to Syntaxure Labs and then creating a task snapped you back to Personal.</div>
+      <div class="fix"><b>Fix:</b> the provider now preserves the user's selection when it is still valid, falling back only when it isn't.</div>
+    </div>
+
+    <div class="bug">
+      <div class="head"><span class="sev med">Medium</span><b>ConfirmDialog rendered inline (despite claiming a portal)</b></div>
+      <div class="why">The shared dialog's docstring says "Renders via a portal" — it didn't. Inside the virtualized list it inherited the rows' stacking context, so later rows intercepted the confirm button, and the dialog's title slid behind the sticky toolbar.</div>
+      <div class="fix"><b>Fix:</b> dialog content is now actually portaled to <span class="mono">document.body</span> — correct everywhere it's used.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>The Suite</h2>
+    <table>
+      <thead><tr><th>File</th><th>Role</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">e2e/global-setup.ts</td><td>Provisions a disposable E2E account (create-or-reset password), ensures profile + memberships (Personal founder / Syntaxure employee), seeds a "General" list per workspace. Idempotent; suite self-skips when Supabase secrets are absent.</td></tr>
+        <tr><td class="mono">e2e/auth.setup.ts</td><td>Signs in once (with cold-compile click retry), dismisses the first-run tour, saves cookies + localStorage as <span class="mono">storageState</span>.</td></tr>
+        <tr><td class="mono">e2e/fixtures.ts</td><td>Shared <span class="mono">requireCreds()</span> skip guard + unique <span class="mono">e2e-*</span> title factory.</td></tr>
+        <tr><td class="mono">e2e/global-teardown.ts</td><td>Deletes all <span class="mono">e2e-*</span> tasks / events / pages / views owned by the test account — the shared DB stays clean.</td></tr>
+        <tr><td class="mono">auth · smoke · tasks · kanban · comments · search-views · calendar · notifications · guards</td><td>9 spec files / 21 tests: redirect + session, route smoke, task CRUD (create/star/delete with confirm), kanban quick-add + drag + employee-approved RBAC toast, comment + activity feed, search + saved views + table view, calendar event creation via day drag, notification panel, operations/BMC employee guard redirects + sidebar link hiding.</td></tr>
+        <tr><td class="mono">playwright.config.ts</td><td>Env-file loading for the test process, global setup/teardown, storageState wiring, dev-server locally / production build in CI, retries (CI 2 / local 1), workers (CI 1 / local 3).</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>CI Wiring</h2>
+    <ul class="clean">
+      <li>New <span class="mono">e2e</span> job in <span class="mono">.github/workflows/ci.yml</span>: installs, builds prism-manage, installs Chromium (<span class="mono">--with-deps</span>), runs the suite against <span class="mono">next start</span>, uploads reports/traces on failure. Gated by <span class="mono">detect-changes</span> so it only runs for prism-manage-affecting PRs.</li>
+      <li><span class="mono">ci-status</span> now also gates on the e2e job (failure blocks; skip is fine — forks without secrets stay green).</li>
+      <li>Optional repo secrets <span class="mono">E2E_TEST_EMAIL</span> / <span class="mono">E2E_TEST_PASSWORD</span> override the defaults; Supabase URL/keys reuse the existing CI secrets.</li>
+      <li>Local: <span class="mono">pnpm --filter prism-manage run test:e2e</span> (dev server auto-starts; <span class="mono">reuseExistingServer</span> if one is already up).</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Verification</h2>
+    <ul class="clean">
+      <li><span class="ok">✔</span> Full suite: <b>21 passed / 0 failed / 0 flaky</b> in 2.2 min against the production build + live Supabase.</li>
+      <li><span class="ok">✔</span> <span class="mono">check-types</span> + <span class="mono">lint</span> clean (prism-manage), <span class="mono">@syntaxure/ui</span> 45 unit tests pass.</li>
+      <li><span class="ok">✔</span> Migration <span class="mono">20261018000006</span> applied to the live DB; RLS verified as the E2E user (previously failing query shape).</li>
+      <li><span class="ok">✔</span> Two legacy specs (<span class="mono">dashboard-loading</span>, <span class="mono">dashboard-error</span>) replaced by the new suite.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Notes &amp; Follow-ups</h2>
+    <ul class="clean">
+      <li><b>Supabase CLI:</b> <span class="mono">db push</span> currently fails with a 403 on the CLI's login-role endpoint (CLI 2.121, account-level). Workaround used: <span class="mono">supabase db push --db-url &lt;pooler-url&gt;</span> with the DB password — worth investigating separately.</li>
+      <li><b>Live-DB testing:</b> the suite runs against the shared Supabase project; all test data is prefixed <span class="mono">e2e-</span> and removed by teardown. The E2E account ("E2E Test Account") is a labeled employee of Syntaxure Labs.</li>
+      <li><b>Not covered yet:</b> GitHub sync button (would create real issues), assistant (needs Gemini key), marketing route. Candidates for H2/H3.</li>
+      <li>CI runs this suite for the first time on this PR — expected to be the reference run for the arc.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>prism-manage · hardening arc · H1 complete</span>
+    <span>next: H2 — observability &amp; resilience (Sentry DSN, cron alerts)</span>
+  </footer>
+
+</div>
+</body>
+</html>

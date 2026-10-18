@@ -13,12 +13,15 @@
  * />
  */
 
-import type { ReactNode } from "react";
+import { isValidElement, type ReactNode } from "react";
 import { cn } from "./utils";
 
 interface EmptyStateProps {
-  /** Icon component (lucide-react icon) */
-  icon?: React.ComponentType<{ className?: string }>;
+  /**
+   * Icon component (lucide-react) — or a pre-rendered element when used from
+   * a server component (component functions can't cross the RSC boundary).
+   */
+  icon?: React.ComponentType<{ className?: string }> | ReactNode;
   /** Primary message */
   title: string;
   /** Secondary description */
@@ -32,13 +35,19 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({
-  icon: Icon,
+  icon,
   title,
   description,
   action,
   className,
   compact,
 }: EmptyStateProps) {
+  const iconIsElement = isValidElement(icon);
+  const Icon =
+    !iconIsElement && icon && typeof icon !== "string"
+      ? (icon as React.ComponentType<{ className?: string }>)
+      : null;
+
   return (
     <div
       className={cn(
@@ -47,19 +56,23 @@ export function EmptyState({
         className,
       )}
     >
-      {Icon && (
+      {(Icon || iconIsElement) && (
         <div
           className={cn(
             "mb-4 flex items-center justify-center rounded-full border border-white/10 bg-white/[0.03]",
             compact ? "h-10 w-10" : "h-14 w-14",
           )}
         >
-          <Icon
-            className={cn(
-              "text-white/20",
-              compact ? "h-5 w-5" : "h-7 w-7",
-            )}
-          />
+          {iconIsElement ? (
+            icon
+          ) : Icon ? (
+            <Icon
+              className={cn(
+                "text-white/20",
+                compact ? "h-5 w-5" : "h-7 w-7",
+              )}
+            />
+          ) : null}
         </div>
       )}
       <h3

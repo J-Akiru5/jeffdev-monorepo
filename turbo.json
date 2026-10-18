@@ -61,7 +61,10 @@
         "GITHUB_MARKETING_REPO_OWNER",
         "GITHUB_MARKETING_REPO_NAME",
         "CRON_SECRET",
-        "SLACK_WEBHOOK_URL"
+        "SLACK_WEBHOOK_URL",
+        "E2E_TEST_EMAIL",
+        "E2E_TEST_PASSWORD",
+        "E2E_READY"
       ]
     },
     "lint": {
@@ -82,7 +85,10 @@
         "GITHUB_MARKETING_REPO_OWNER",
         "GITHUB_MARKETING_REPO_NAME",
         "CRON_SECRET",
-        "SLACK_WEBHOOK_URL"
+        "SLACK_WEBHOOK_URL",
+        "E2E_TEST_EMAIL",
+        "E2E_TEST_PASSWORD",
+        "E2E_READY"
       ]
     },
     "check-types": {
@@ -136,7 +142,10 @@
         "GITHUB_MARKETING_REPO_OWNER",
         "GITHUB_MARKETING_REPO_NAME",
         "CRON_SECRET",
-        "SLACK_WEBHOOK_URL"
+        "SLACK_WEBHOOK_URL",
+        "E2E_TEST_EMAIL",
+        "E2E_TEST_PASSWORD",
+        "E2E_READY"
       ]
     }
   }

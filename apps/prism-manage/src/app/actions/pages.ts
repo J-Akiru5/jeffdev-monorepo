@@ -8,7 +8,7 @@ import { z } from "zod";
 // SCHEMAS
 // =============================================================================
 
-export const PageSchema = z.object({
+const PageSchema = z.object({
   id: z.string().uuid(),
   workspace_id: z.string().uuid(),
   parent_id: z.string().uuid().nullable(),
@@ -25,14 +25,14 @@ export const PageSchema = z.object({
 
 export type Page = z.infer<typeof PageSchema>;
 
-export const CreatePageSchema = z.object({
+const CreatePageSchema = z.object({
   workspace_id: z.string().uuid(),
   parent_id: z.string().uuid().nullable().optional(),
   title: z.string().min(1).default("Untitled"),
   icon: z.string().optional(),
 });
 
-export const UpdatePageSchema = z.object({
+const UpdatePageSchema = z.object({
   title: z.string().min(1).optional(),
   content: z.array(z.record(z.string(), z.unknown())).optional(),
   icon: z.string().optional(),
