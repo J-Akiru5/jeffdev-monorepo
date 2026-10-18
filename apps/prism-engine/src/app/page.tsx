@@ -1,232 +1,144 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import Image from "next/image";
-import { ArrowRight } from "lucide-react";
 import { PublicNav } from "@/components/layout/public-nav";
-import { AnimatedHero } from "@/components/hero";
+import {
+  AgentCoverage,
+  BackToTop,
+  DispersionField,
+  EnforcementDemo,
+  EvidenceLedger,
+  FeatureGrid,
+  FinalCta,
+  HowItWorks,
+  LandingFooter,
+  LandingHero,
+  PricingStrip,
+  ProductSurface,
+} from "@/components/landing";
+import { metadata as contentMetadata, pricing } from "@/components/landing/content";
 
 const PRISM_URL = process.env.NEXT_PUBLIC_PRISM_URL || "https://prism.syntaxure.dev";
 
 export const metadata: Metadata = {
-    title: 'Prism Context Engine - The Context Operating System for Agentic Developers',
-  description:
-    'Record your architecture. AI learns your rules. Deploy context directly to Cursor, Windsurf, and Claude via MCP. Eliminate context pollution forever.',
+  title: contentMetadata.title,
+  description: contentMetadata.description,
   keywords: [
-    'MCP server',
-    'Model Context Protocol',
-    'Cursor AI',
-    'Windsurf AI',
-    'Claude Code',
-    'AI coding assistant',
-    'context governance',
-    'architectural rules',
-    'design system documentation',
-    'AI hallucination prevention',
-    'code standards enforcement',
+    "MCP server",
+    "Model Context Protocol",
+    "Cursor AI",
+    "Windsurf AI",
+    "Claude Code",
+    "AI coding assistant",
+    "context governance",
+    "architectural rules",
+    "design system documentation",
+    "AI hallucination prevention",
+    "code standards enforcement",
   ],
   openGraph: {
-      title: 'Prism Context Engine - The Context Operating System for Agentic Developers',
-    description:
-      'Record your architecture. AI learns your rules. Deploy to your IDE via MCP. Eliminate context pollution.',
-    url: '/',
-    siteName: 'Prism Context Engine',
+    title: contentMetadata.title,
+    description: contentMetadata.description,
+    url: contentMetadata.url,
+    siteName: "Prism Context Engine",
     images: [
       {
-        url: '/prism-icon.png',
+        url: "/prism-icon.png",
         width: 1200,
         height: 630,
-        alt: 'Prism Context Engine',
+        alt: "Prism Context Engine",
       },
     ],
-    locale: 'en_US',
-    type: 'website',
+    locale: "en_US",
+    type: "website",
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'Prism Context Engine - The Context Operating System',
-    description: 'Record your architecture. AI learns your rules. Deploy to your IDE via MCP.',
-    images: ['/prism-icon.png'],
-    creator: '@syntaxure_dev',
+    card: "summary_large_image",
+    title: "Prism Context Engine",
+    description: contentMetadata.description,
+    images: ["/prism-icon.png"],
+    creator: "@syntaxure_dev",
   },
   alternates: {
-    canonical: '/',
+    canonical: "/",
   },
 };
 
+/**
+ * The landing page, in reading order:
+ *
+ *   hero → the block → the product → capabilities → setup → coverage →
+ *   evidence → pricing → start
+ *
+ * The order is the argument. It answers "what is this", then shows enforcement
+ * firing, then shows the surface it all feeds, before claiming anything, and
+ * only then states what is verified and what is not. `content.ts` holds every
+ * string; the components below only arrange them.
+ */
 export default function HomePage() {
   return (
-    <main className="min-h-screen flex flex-col">
-      {/* JSON-LD Structured Data */}
+    /* `relative` is not decorative: the scroll-linked sections inside resolve
+       their scroll offsets against the nearest positioned ancestor, and without
+       it framer-motion warns that the offsets may be measured against the wrong
+       box. It also gives the fixed dispersion field a defined containing block. */
+    <main className="relative flex min-h-screen flex-col">
+      {/* JSON-LD structured data. Offers are derived from the same pricing source
+          the pricing page reads — they previously advertised $18/$54 while the
+          pricing page showed $8/$7. */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
-            "name": "Prism Context Engine",
-            "applicationCategory": "DeveloperApplication",
-            "operatingSystem": "Web, macOS, Windows, Linux",
-            "description":
-              "Record your architecture. AI learns your rules. Deploy context directly to Cursor, Windsurf, and Claude via MCP. Eliminate context pollution.",
-            "url": PRISM_URL,
-            "author": {
+            name: "Prism Context Engine",
+            applicationCategory: "DeveloperApplication",
+            operatingSystem: "Web, macOS, Windows, Linux",
+            description: contentMetadata.description,
+            url: PRISM_URL,
+            author: {
               "@type": "Organization",
-              "name": "Syntaxure Labs",
-              "url": "https://www.syntaxure.dev",
+              name: "Syntaxure Labs",
+              url: "https://www.syntaxure.dev",
             },
-            "offers": [
-              {
+            offers: pricing
+              .filter((plan) => plan.monthlyUsd !== null)
+              .map((plan) => ({
                 "@type": "Offer",
-                "name": "Free Tier",
-                "price": "0",
-                "priceCurrency": "USD",
-              },
-              {
-                "@type": "Offer",
-                "name": "Pro Tier",
-                "price": "18",
-                "priceCurrency": "USD",
-                "priceSpecification": {
-                  "@type": "UnitPriceSpecification",
-                  "unitText": "month"
-                },
-              },
-              {
-                "@type": "Offer",
-                "name": "Team Tier",
-                "price": "54",
-                "priceCurrency": "USD",
-                "priceSpecification": {
-                  "@type": "UnitPriceSpecification",
-                  "unitText": "month"
-                },
-              },
-            ],
+                name: `${plan.name} Tier`,
+                price: String(plan.monthlyUsd),
+                priceCurrency: "USD",
+                ...(plan.monthlyUsd && plan.monthlyUsd > 0
+                  ? {
+                      priceSpecification: {
+                        "@type": "UnitPriceSpecification",
+                        unitText: "month",
+                      },
+                    }
+                  : {}),
+              })),
           }),
         }}
       />
-      {/* Navigation */}
+
+      {/* The atmosphere. Fixed behind everything, pure CSS, no JavaScript. */}
+      <DispersionField />
+
       <PublicNav />
 
-      {/* Animated Hero Section with ScrollTrigger Pinning */}
-      <AnimatedHero />
+      <LandingHero />
+      <EnforcementDemo />
+      <ProductSurface />
+      <FeatureGrid />
+      <HowItWorks />
+      <AgentCoverage />
+      <EvidenceLedger />
+      <PricingStrip />
+      <FinalCta />
 
-      {/* Footer */}
-      <footer className="border-t border-[var(--border-subtle)] relative z-10 bg-[var(--bg-primary)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {/* Brand */}
-            <div className="col-span-1">
-              <div className="flex items-center gap-2 mb-4">
-                <Image
-                  src="/prism-icon.png"
-                  alt="Prism Context Engine"
-                  width={24}
-                  height={24}
-                />
-                <span className="text-gradient-cyan font-bold">
-                  Prism Context Engine
-                </span>
-              </div>
-              <p className="text-[var(--text-secondary)] text-sm">
-                The Context Operating System for developers who ship fast.
-              </p>
-            </div>
+      <LandingFooter />
 
-            {/* Product */}
-            <div>
-              <h3 className="text-[var(--text-primary)] font-semibold mb-3 text-sm uppercase tracking-wider">
-                Product
-              </h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link
-                    href="/pricing"
-                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm transition-colors"
-                  >
-                    Pricing
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="https://docs.syntaxure.dev"
-                    target="_blank"
-                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm transition-colors"
-                  >
-                    Docs
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div>
-              <h3 className="text-[var(--text-primary)] font-semibold mb-3 text-sm uppercase tracking-wider">
-                Company
-              </h3>
-              <ul className="space-y-2">
-                <li>
-                  <Link
-                    href="https://www.syntaxure.dev"
-                    target="_blank"
-                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm transition-colors"
-                  >
-                    About Syntaxure Labs
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="https://www.syntaxure.dev/contact"
-                    target="_blank"
-                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-sm transition-colors"
-                  >
-                    Contact
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* CTA */}
-            <div>
-              <h3 className="text-[var(--text-primary)] font-semibold mb-3 text-sm uppercase tracking-wider">
-                Get Started
-              </h3>
-              <p className="text-[var(--text-secondary)] text-sm mb-4">
-                Ready to eliminate context pollution?
-              </p>
-              <Link
-                href="/sign-up"
-                className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-md bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-3 font-mono text-sm font-semibold tracking-wider !text-white transition-all hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] active:scale-95"
-              >
-                <span className="relative z-10 uppercase">Start Free</span>
-                <ArrowRight className="relative z-10 w-4 h-4 transition-transform group-hover:translate-x-1" />
-                <div className="absolute inset-0 -z-0 bg-gradient-to-r from-cyan-500 to-blue-600 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-              </Link>
-            </div>
-          </div>
-
-          <div className="border-t border-[var(--border-subtle)] mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-[var(--text-tertiary)] text-xs font-mono">
-              © {new Date().getFullYear()} Syntaxure Labs. Built with Prism
-              Context Engine.
-            </p>
-            <div className="flex gap-6 mt-4 md:mt-0">
-              <Link
-                href="/terms"
-                className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] text-xs transition-colors"
-              >
-                Terms
-              </Link>
-              <Link
-                href="/privacy"
-                className="text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] text-xs transition-colors"
-              >
-                Privacy
-              </Link>
-            </div>
-          </div>
-        </div>
-      </footer>
+      {/* Floating return control, rendered last so it sits above the sections
+          without needing a higher z-index than the fixed navigation. */}
+      <BackToTop />
     </main>
   );
 }
