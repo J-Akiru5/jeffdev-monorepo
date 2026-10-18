@@ -54,6 +54,7 @@ export interface TaskSheetData {
   tags: string[];
   dueDate: string;
   dueTime: string;
+  recurrence?: "daily" | "weekly" | "monthly";
   projectId: string;
   departmentId?: string;
   githubIssueNumber?: number;
@@ -88,6 +89,7 @@ const DEFAULT_DATA: TaskSheetData = {
   tags: [],
   dueDate: "",
   dueTime: "",
+  recurrence: undefined,
   projectId: "",
   departmentId: undefined,
 };
@@ -626,6 +628,32 @@ export function TaskSheet({
                             className="w-full appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2.5 pl-10 text-sm text-white/70 outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
                           />
                         </div>
+                      </div>
+
+                      {/* Repeat (recurring tasks) */}
+                      <div>
+                        <label className="mb-1.5 block text-[11px] text-white/40">
+                          Repeat
+                        </label>
+                        <select
+                          value={data.recurrence ?? ""}
+                          onChange={(e) =>
+                            setData((prev) => ({
+                              ...prev,
+                              recurrence: (e.target.value || undefined) as
+                                | "daily"
+                                | "weekly"
+                                | "monthly"
+                                | undefined,
+                            }))
+                          }
+                          className="w-full appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2.5 text-sm text-white/70 outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
+                        >
+                          <option value="">Does not repeat</option>
+                          <option value="daily">Daily</option>
+                          <option value="weekly">Weekly</option>
+                          <option value="monthly">Monthly</option>
+                        </select>
                       </div>
 
                       {/* Due Time */}

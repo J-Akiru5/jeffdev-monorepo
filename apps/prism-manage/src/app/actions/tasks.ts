@@ -13,6 +13,7 @@ import { notifySlack, taskUrl } from "@/lib/slack";
 import { pushTaskStatusToGitHub } from "@/app/actions/github-sync";
 import { logger } from "@/lib/log";
 import type { Json } from "@/types/database.types";
+import { isRecurrence, nextOccurrenceDate } from "@/lib/recurrence";
 
 async function logAudit(event: {
   action: string;
@@ -165,6 +166,9 @@ function mapTask(raw: Record<string, unknown>): Task {
 
     // Dates
     dueDate: raw.due_date ? String(raw.due_date) : undefined,
+    recurrence: raw.recurrence
+      ? (String(raw.recurrence) as Task["recurrence"])
+      : undefined,
     dueTime: raw.due_time ? String(raw.due_time) : undefined,
     googleEventId: raw.google_event_id ? String(raw.google_event_id) : undefined,
     githubIssueNumber: raw.github_issue_number
@@ -205,6 +209,7 @@ function toDbInsert(task: Partial<Task> & { user_id: string; pm_project_id?: str
   // Phase 1B: tags are managed via task_tags junction table, not the tasks.tags column
   if (task.dueDate !== undefined) db.due_date = task.dueDate;
   if (task.dueTime !== undefined) db.due_time = task.dueTime;
+  if (task.recurrence !== undefined) db.recurrence = task.recurrence;
   if (task.pathIndex !== undefined) db.path_index = task.pathIndex;
 
   return db;
@@ -292,6 +297,7 @@ export async function createTask(input: {
   tags?: string[];
   dueDate?: string;
   dueTime?: string;
+  recurrence?: "daily" | "weekly" | "monthly";
 }) {
   const parsed = CreateTaskSchema.pick({ title: true }).safeParse({
     title: input.title,
@@ -363,6 +369,7 @@ export async function createTask(input: {
     assignedTo: input.assignedTo,
     dueDate: input.dueDate,
     dueTime: input.dueTime,
+    recurrence: input.recurrence,
   });
 
   const { data: inserted, error } = await supabase
@@ -462,7 +469,94 @@ export async function toggleTaskComplete(taskId: string, completed: boolean) {
   // Push status to the linked GitHub issue (best-effort)
   await pushTaskStatusToGitHub(taskId, newStatus);
 
+  // Recurring tasks: completing an occurrence spawns the next one
+  if (completed) {
+    await spawnNextOccurrence(taskId);
+  }
+
   revalidatePath("/tasks");
+}
+
+/**
+ * Recurring tasks (new plan)
+ * --------------------------
+ * Completing an occurrence spawns the next one: same shape, due date
+ * advanced by the recurrence. Skipped when a pending occurrence already
+ * exists (so re-saving a task never duplicates it).
+ */
+export async function spawnNextOccurrence(taskId: string): Promise<void> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: task } = await supabase
+      .from("tasks")
+      .select(
+        "id, title, description, notes, task_type, priority, is_starred, assigned_to, due_date, recurrence, workspace_id, department_id, pm_project_id",
+      )
+      .eq("id", taskId)
+      .maybeSingle();
+    if (!task || !isRecurrence(task.recurrence)) return;
+
+    // One pending occurrence at a time.
+    const { data: existingChild } = await supabase
+      .from("tasks")
+      .select("id")
+      .eq("recurrence_source_id", taskId)
+      .neq("status", "approved")
+      .maybeSingle();
+    if (existingChild) return;
+
+    const nextDue = nextOccurrenceDate(
+      task.due_date ? String(task.due_date) : null,
+      task.recurrence,
+    );
+
+    const { data: spawned, error } = await supabase
+      .from("tasks")
+      .insert({
+        user_id: user.id,
+        title: task.title,
+        description: task.description,
+        notes: task.notes,
+        task_type: task.task_type,
+        priority: task.priority,
+        is_starred: task.is_starred,
+        assigned_to: task.assigned_to,
+        due_date: nextDue,
+        recurrence: task.recurrence,
+        recurrence_source_id: task.id,
+        workspace_id: task.workspace_id,
+        department_id: task.department_id,
+        pm_project_id: task.pm_project_id,
+        status: "backlog",
+      } as never)
+      .select("id")
+      .single();
+
+    if (error || !spawned) {
+      logger.warn("task.recurrence.spawn_failed", {
+        taskId,
+        error: error?.message,
+      });
+      return;
+    }
+
+    logger.info("task.recurrence.spawned", {
+      sourceId: taskId,
+      newId: spawned.id,
+      recurrence: task.recurrence,
+      due: nextDue,
+    });
+  } catch (error) {
+    logger.warn("task.recurrence.spawn_error", {
+      taskId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
 }
 
 export async function toggleTaskStar(taskId: string, isStarred: boolean) {
@@ -531,6 +625,11 @@ export async function updateTaskStatus(taskId: string, status: string) {
   // Push status to the linked GitHub issue (best-effort)
   await pushTaskStatusToGitHub(taskId, status);
 
+  // Recurring tasks: completing an occurrence spawns the next one
+  if (status === "approved") {
+    await spawnNextOccurrence(taskId);
+  }
+
   revalidatePath("/tasks");
 }
 
@@ -583,6 +682,7 @@ export async function updateTask(
   // Phase 1B: tags are managed via task_tags junction table
   if (parsed.data.dueDate !== undefined) updateData.due_date = parsed.data.dueDate;
   if (parsed.data.dueTime !== undefined) updateData.due_time = parsed.data.dueTime;
+  if (parsed.data.recurrence !== undefined) updateData.recurrence = parsed.data.recurrence;
   if (parsed.data.pathIndex !== undefined) updateData.path_index = parsed.data.pathIndex;
   if (parsed.data.workspaceId !== undefined) updateData.workspace_id = parsed.data.workspaceId;
   if (parsed.data.departmentId !== undefined) updateData.department_id = parsed.data.departmentId;
@@ -670,6 +770,11 @@ export async function updateTask(
   // Push status to the linked GitHub issue (best-effort)
   if (parsed.data.status !== undefined) {
     await pushTaskStatusToGitHub(taskId, parsed.data.status);
+  }
+
+  // Recurring tasks: completing an occurrence spawns the next one
+  if (parsed.data.status === "approved") {
+    await spawnNextOccurrence(taskId);
   }
 
   revalidatePath("/tasks");

@@ -1327,14 +1327,14 @@ isOneToOne: false
                   ]
                 },"tasks": {
                   Row: {
-                    "actual_hours": number | null,"assigned_to": string | null,"created_at": string | null,"department_id": string | null,"description": string | null,"due_date": string | null,"due_time": string | null,"estimated_hours": number | null,"github_issue_number": number | null,"google_event_id": string | null,"id": string,"is_starred": boolean,"metadata": Json | null,"notes": string | null,"parent_task_id": string | null,"path_index": number | null,"pm_project_id": string | null,"priority": string | null,"project_id": string | null,"status": string | null,"task_type": string,"title": string,"updated_at": string | null,"user_id": string,"workspace_id": string | null
+                    "actual_hours": number | null,"assigned_to": string | null,"created_at": string | null,"department_id": string | null,"description": string | null,"due_date": string | null,"due_time": string | null,"estimated_hours": number | null,"github_issue_number": number | null,"google_event_id": string | null,"id": string,"is_starred": boolean,"metadata": Json | null,"notes": string | null,"parent_task_id": string | null,"path_index": number | null,"pm_project_id": string | null,"priority": string | null,"project_id": string | null,"recurrence": string | null,"recurrence_source_id": string | null,"status": string | null,"task_type": string,"title": string,"updated_at": string | null,"user_id": string,"workspace_id": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "actual_hours"?: number | null,"assigned_to"?: string | null,"created_at"?: string | null,"department_id"?: string | null,"description"?: string | null,"due_date"?: string | null,"due_time"?: string | null,"estimated_hours"?: number | null,"github_issue_number"?: number | null,"google_event_id"?: string | null,"id"?: string,"is_starred"?: boolean,"metadata"?: Json | null,"notes"?: string | null,"parent_task_id"?: string | null,"path_index"?: number | null,"pm_project_id"?: string | null,"priority"?: string | null,"project_id"?: string | null,"status"?: string | null,"task_type"?: string,"title": string,"updated_at"?: string | null,"user_id": string,"workspace_id"?: string | null
+                    "actual_hours"?: number | null,"assigned_to"?: string | null,"created_at"?: string | null,"department_id"?: string | null,"description"?: string | null,"due_date"?: string | null,"due_time"?: string | null,"estimated_hours"?: number | null,"github_issue_number"?: number | null,"google_event_id"?: string | null,"id"?: string,"is_starred"?: boolean,"metadata"?: Json | null,"notes"?: string | null,"parent_task_id"?: string | null,"path_index"?: number | null,"pm_project_id"?: string | null,"priority"?: string | null,"project_id"?: string | null,"recurrence"?: string | null,"recurrence_source_id"?: string | null,"status"?: string | null,"task_type"?: string,"title": string,"updated_at"?: string | null,"user_id": string,"workspace_id"?: string | null
                   }
                   Update: {
-                    "actual_hours"?: number | null,"assigned_to"?: string | null,"created_at"?: string | null,"department_id"?: string | null,"description"?: string | null,"due_date"?: string | null,"due_time"?: string | null,"estimated_hours"?: number | null,"github_issue_number"?: number | null,"google_event_id"?: string | null,"id"?: string,"is_starred"?: boolean,"metadata"?: Json | null,"notes"?: string | null,"parent_task_id"?: string | null,"path_index"?: number | null,"pm_project_id"?: string | null,"priority"?: string | null,"project_id"?: string | null,"status"?: string | null,"task_type"?: string,"title"?: string,"updated_at"?: string | null,"user_id"?: string,"workspace_id"?: string | null
+                    "actual_hours"?: number | null,"assigned_to"?: string | null,"created_at"?: string | null,"department_id"?: string | null,"description"?: string | null,"due_date"?: string | null,"due_time"?: string | null,"estimated_hours"?: number | null,"github_issue_number"?: number | null,"google_event_id"?: string | null,"id"?: string,"is_starred"?: boolean,"metadata"?: Json | null,"notes"?: string | null,"parent_task_id"?: string | null,"path_index"?: number | null,"pm_project_id"?: string | null,"priority"?: string | null,"project_id"?: string | null,"recurrence"?: string | null,"recurrence_source_id"?: string | null,"status"?: string | null,"task_type"?: string,"title"?: string,"updated_at"?: string | null,"user_id"?: string,"workspace_id"?: string | null
                   }
                   Relationships: [
                     {
@@ -1366,6 +1366,12 @@ isOneToOne: false
       columns: ["project_id"]
 isOneToOne: false
       referencedRelation: "projects"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "tasks_recurrence_source_id_fkey"
+      columns: ["recurrence_source_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
       referencedColumns: ["id"]
     },{
       foreignKeyName: "tasks_user_id_fkey"

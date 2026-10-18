@@ -16,6 +16,7 @@ import {
   Trash2,
   User,
   AlertTriangle,
+  Repeat,
 } from "lucide-react";
 import { ConfirmDialog } from "@syntaxure/ui";
 import { createPortal } from "react-dom";
@@ -138,6 +139,21 @@ export const TaskItem = memo(function TaskItem({
                 month: "short",
                 day: "numeric",
               })}
+            </span>
+          )}
+
+          {/* Recurrence */}
+          {task.recurrence && (
+            <span
+              className="flex items-center gap-1"
+              title={`Repeats ${task.recurrence}`}
+            >
+              <Repeat className="h-3 w-3" />
+              {task.recurrence === "daily"
+                ? "Daily"
+                : task.recurrence === "weekly"
+                  ? "Weekly"
+                  : "Monthly"}
             </span>
           )}
 

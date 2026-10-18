@@ -101,6 +101,7 @@ export const TaskSchema = z.object({
   // Dates
   dueDate: z.string().optional(), // ISO date (YYYY-MM-DD)
   dueTime: z.string().optional(), // HH:mm format
+  recurrence: z.enum(["daily", "weekly", "monthly"]).optional(),
   googleEventId: z.string().optional(), // Linked calendar event
   githubIssueNumber: z.number().optional(), // Linked GitHub issue
 
@@ -141,6 +142,7 @@ export const UpdateTaskSchema = z.object({
   tags: z.array(z.string()).optional(),
   dueDate: z.string().optional(),
   dueTime: z.string().optional(),
+  recurrence: z.enum(["daily", "weekly", "monthly"]).optional(),
   order: z.number().optional(),
   pathIndex: z.number().optional(),
   workspaceId: z.string().optional(),
