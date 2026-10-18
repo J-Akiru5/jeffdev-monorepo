@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage R0 — Company Brain Spike Report</title>
+<style>
+  :root {
+    --bg: #0A0D12; --bg-raised: #11151C; --bg-card: #151A22; --border: #232A36;
+    --cyan: #22D3EE; --violet: #8B7BFF; --text: #E6EAF0; --text-dim: #8B93A3;
+    --text-faint: #5A6272; --good: #4ADE80; --warn: #FBBF24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; padding: 48px 24px; }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  .mono { font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 28px; margin-bottom: 32px; }
+  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 12px; background: linear-gradient(90deg, var(--text), var(--text) 60%, var(--cyan)); -webkit-background-clip: text; background-clip: text; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim); }
+  .meta-row span b { color: var(--text); font-weight: 500; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; border: 1px solid; }
+  .badge.done { color: var(--good); border-color: var(--good); background: rgba(74,222,128,0.08); }
+  .badge.gate { color: var(--warn); border-color: var(--warn); background: rgba(251,191,36,0.08); }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 14px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--violet); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .summary-box { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 6px; padding: 18px 20px; font-size: 15px; }
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  ul.clean li { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; font-size: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
+  td.mono { color: var(--cyan); white-space: nowrap; }
+  .ok { color: var(--good); }
+  .checkpoint { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 14px 18px; margin-bottom: 10px; }
+  .checkpoint .q { font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
+  .checkpoint .q b { color: var(--violet); font-weight: 500; }
+  .checkpoint .a { font-size: 14px; }
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">prism-manage · Task Report · Hardening Arc · R0 Spike</div>
+    <h1>R0 — Company Brain: Ask Why, Get the Receipts</h1>
+    <div class="meta-row">
+      <span><b>2026-10-18</b></span>
+      <span>Repo: <b>jeffdev-monorepo</b></span>
+      <span>Agent: <b>opencode · DeepSeek V4.1 Flash</b></span>
+      <span>Branch: <b>feat/pm-r0-company-brain → PR #101 → develop</b></span>
+      <span class="badge done">Spike shipped — CI green</span>
+      <span class="badge gate">Awaiting GO/NO-GO</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>What Shipped (v0)</h2>
+    <div class="summary-box">
+      A working <b>/brain</b> surface: log a decision in three fields, and it
+      becomes a <b>citable memory</b>. Entries are workspace-scoped, embedded
+      with Gemini (best-effort) into <b>pgvector</b>, searchable semantically
+      (keyword fallback always works), and answerable — "ask the brain"
+      returns an LLM answer <b>with numbered citations</b>, or just the closest
+      matches when no LLM key is configured. This is the spike you asked to
+      judge: <b>does a memory like this earn its keep?</b>
+    </div>
+  </section>
+
+  <section>
+    <h2>The Shape</h2>
+    <table>
+      <thead><tr><th>Piece</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">memory_entries</td><td>Workspace-scoped; <span class="mono">source_type</span> (decision / note / discussion / agent-session / milestone / bmc), <span class="mono">summary</span>, <span class="mono">decisions jsonb</span> (decision + rationale), 768-dim <span class="mono">embedding</span>, <span class="mono">review_status</span>. HNSW cosine index.</td></tr>
+        <tr><td class="mono">RLS</td><td>Members view + capture (own rows); authors and founders update; founders delete. Same three-layer model as the rest of the app.</td></tr>
+        <tr><td class="mono">match_memory_entries()</td><td>Semantic search function (similarity threshold + top-k) — RLS applies (SECURITY INVOKER).</td></tr>
+        <tr><td class="mono">/brain page</td><td>Capture form, ask box with citations, search, and the timeline. Sidebar now has a <b>Brain</b> view.</td></tr>
+        <tr><td class="mono">Actions</td><td><span class="mono">captureMemoryEntry</span> · <span class="mono">getMemoryEntries</span> · <span class="mono">searchMemory</span> (semantic → keyword fallback) · <span class="mono">askBrain</span> (citations always; LLM answer when key present).</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>How to Judge It (GO / NO-GO)</h2>
+    <ul class="clean">
+      <li><b>1 — Log 10 real decisions</b> from the last few weeks (the kind you'd have to dig through Slack/Notion to recover). Two minutes each.</li>
+      <li><b>2 — Ask three questions you genuinely don't remember the answer to</b> ("why did we pick X?", "what did we decide about Y?").</li>
+      <li><b>3 — Grade the receipts:</b> did the right entry come back? Did the citation make the answer trustworthy? Did it save you a search?</li>
+      <li><b>GO if</b> ≥ 2 of 3 questions produced a useful, correctly-cited answer — then R1 adds auto-distillation (comments/activity) and opencode session ingestion.</li>
+      <li><b>NO-GO if</b> the answers were generic or the right memory never surfaced — cheaper to stop here than to build capture pipelines on a surface you won't use.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Verification</h2>
+    <ul class="clean">
+      <li><span class="ok">✔</span> Migration <span class="mono">20261018000007</span> applied to the live DB via <span class="mono">pnpm db:push</span> (dogfooded the new tool).</li>
+      <li><span class="ok">✔</span> E2E <b>24/24</b> locally; CI green — the new <span class="mono">brain.spec</span> covers capture → timeline → search → ask (citations-only in CI, no key needed).</li>
+      <li><span class="ok">✔</span> Teardown extended: <span class="mono">e2e-*</span> memory entries are cleaned like every other artifact.</li>
+      <li><span class="ok">✔</span> Kanban approved-drag flake hardened with a retry (CI noise from H2 runs).</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Deliberately Not in R0</h2>
+    <ul class="clean">
+      <li>Auto-distillation from comments/activity, opencode agent-session ingestion, per-task context digests, the review queue, and merging the brain into the floating assistant — all <b>R1/R2, on GO</b>.</li>
+      <li>Embeddings require <span class="mono">GOOGLE_GEMINI_API_KEY</span> (already set on Vercel); without it everything still works via keyword search.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>prism-manage · hardening arc · R0 spike complete — decision pending</span>
+    <span>on GO: R1 — auto-distill + agent sessions</span>
+  </footer>
+
+</div>
+</body>
+</html>
