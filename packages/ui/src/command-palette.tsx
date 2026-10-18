@@ -65,6 +65,8 @@ export interface CommandPaletteProps {
   placeholder?: string;
   /** Maximum height of results list (default: 320) */
   maxHeight?: number;
+  /** Called with the current query — callers own debouncing/async search */
+  onQueryChange?: (query: string) => void;
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -75,6 +77,7 @@ export function CommandPalette({
   sections,
   placeholder = "Search...",
   maxHeight = 320,
+  onQueryChange,
 }: CommandPaletteProps) {
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -88,6 +91,11 @@ export function CommandPalette({
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [open]);
+
+  // Notify the caller of query changes (callers own debouncing/async search)
+  useEffect(() => {
+    onQueryChange?.(query);
+  }, [query, onQueryChange]);
 
   // Close on Escape (global, not just when input is focused)
   useEffect(() => {
