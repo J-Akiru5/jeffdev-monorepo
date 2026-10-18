@@ -10,7 +10,7 @@
 
 import { useState, useEffect, useMemo, useCallback, memo } from "react";
 import { useProjects } from "@/contexts/project-context";
-import { GripVertical, Plus } from "lucide-react";
+import { ArrowRightLeft, GripVertical, Plus } from "lucide-react";
 import { updateTaskStatus, createTask } from "@/app/actions/tasks";
 import type { Task } from "@/lib/schemas";
 import { getTaskTypeConfig, STAFF_LOCKED_STATUSES } from "@/lib/task-types";
@@ -43,6 +43,7 @@ interface KanbanTaskCardProps {
   isSyntaxureLabs: boolean;
   cpoUserId: string | null;
   onDragStart: (id: string) => void;
+  onMove: (taskId: string, column: KanbanColumn) => void;
 }
 
 /**
@@ -57,15 +58,17 @@ const KanbanTaskCard = memo(function KanbanTaskCard({
   isSyntaxureLabs,
   cpoUserId,
   onDragStart,
+  onMove,
 }: KanbanTaskCardProps) {
   const typeConfig = getTaskTypeConfig(task.taskType);
   const project = projectMap[task.projectId];
+  const [moveOpen, setMoveOpen] = useState(false);
 
   return (
     <div
       draggable
       onDragStart={() => onDragStart(task.id)}
-      className={`cursor-grab rounded-lg border border-glass-05 bg-glass-04 p-3 transition-all hover:border-glass-10 active:cursor-grabbing ${
+      className={`relative cursor-grab rounded-lg border border-glass-05 bg-glass-04 p-3 transition-all hover:border-glass-10 active:cursor-grabbing ${
         isDragged ? "opacity-50" : ""
       }`}
     >
@@ -102,6 +105,48 @@ const KanbanTaskCard = memo(function KanbanTaskCard({
             )}
           </div>
         </div>
+      </div>
+
+      {/* Move menu — touch/keyboard friendly alternative to dragging */}
+      <div className="absolute right-1.5 top-1.5">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setMoveOpen((v) => !v);
+          }}
+          aria-label="Move task"
+          className="rounded p-1 text-white/25 transition-colors hover:bg-white/5 hover:text-white/60"
+        >
+          <ArrowRightLeft className="h-3.5 w-3.5" />
+        </button>
+        {moveOpen && (
+          <>
+            <div
+              className="fixed inset-0 z-10"
+              onClick={() => setMoveOpen(false)}
+            />
+            <div className="absolute right-0 top-full z-20 mt-1 w-36 rounded-lg border border-white/[0.10] bg-[#0a0a0a] py-1 shadow-xl">
+              {columns
+                .filter((col) => col.id !== task.column)
+                .map((col) => (
+                  <button
+                    key={col.id}
+                    onClick={() => {
+                      setMoveOpen(false);
+                      onMove(task.id, col.id);
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-white/60 transition-colors hover:bg-white/[0.04] hover:text-white"
+                  >
+                    <span
+                      className="h-2 w-2 rounded-full"
+                      style={{ backgroundColor: col.color }}
+                    />
+                    {col.title}
+                  </button>
+                ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -243,52 +288,58 @@ export default function KanbanPage() {
     e.preventDefault();
   };
 
+  const moveTaskToColumn = useCallback(
+    async (taskId: string, column: KanbanColumn) => {
+      const task = tasks.find((t) => t.id === taskId);
+      if (!task) return;
+
+      // Skip if moving into the same column
+      if (task.column === column) return;
+
+      // RBAC check: employees cannot move into Approved (only in Syntaxure Labs)
+      if (
+        isSyntaxureLabs &&
+        userRole === "employee" &&
+        STAFF_LOCKED_STATUSES.includes(column)
+      ) {
+        toast.error("Only founders and the CPO can approve tasks");
+        return;
+      }
+
+      try {
+        const dbStatus = column;
+        await updateTaskStatus(taskId, dbStatus);
+        setTasks((prev) =>
+          prev.map((t) =>
+            t.id === taskId
+              ? {
+                  ...t,
+                  column,
+                  status: dbStatus as Task["status"],
+                  updatedAt: new Date().toISOString(),
+                }
+              : t,
+          ),
+        );
+
+        // Show contextual toast based on the target column
+        if (column === "in_review") {
+          toast.success("Sent to CPO for review");
+        } else if (column === "approved") {
+          toast.success("Task approved");
+        } else if (column === "backlog") {
+          toast.info("Moved to backlog");
+        }
+      } catch {
+        toast.error("Failed to update task status");
+      }
+    },
+    [tasks, isSyntaxureLabs, userRole],
+  );
+
   const handleDrop = async (column: KanbanColumn) => {
     if (!draggedTask) return;
-
-    const task = tasks.find((t) => t.id === draggedTask);
-    if (!task) return;
-
-    // Skip if dropping into the same column
-    if (task.column === column) {
-      setDraggedTask(null);
-      return;
-    }
-
-    // RBAC check: employees cannot drop into Approved (only in Syntaxure Labs workspace)
-    if (isSyntaxureLabs && userRole === "employee" && STAFF_LOCKED_STATUSES.includes(column)) {
-      toast.error("Only founders and the CPO can approve tasks");
-      setDraggedTask(null);
-      return;
-    }
-
-    try {
-      const dbStatus = column;
-      await updateTaskStatus(draggedTask, dbStatus);
-      setTasks((prev) =>
-        prev.map((t) =>
-          t.id === draggedTask
-            ? {
-                ...t,
-                column,
-                status: dbStatus as Task["status"],
-                updatedAt: new Date().toISOString(),
-              }
-            : t,
-        ),
-      );
-
-      // Show contextual toast based on the target column
-      if (column === "in_review") {
-        toast.success("Sent to CPO for review");
-      } else if (column === "approved") {
-        toast.success("Task approved");
-      } else if (column === "backlog") {
-        toast.info("Moved to backlog");
-      }
-    } catch {
-      toast.error("Failed to update task status");
-    }
+    await moveTaskToColumn(draggedTask, column);
     setDraggedTask(null);
   };
 
@@ -375,6 +426,7 @@ export default function KanbanPage() {
                     isSyntaxureLabs={isSyntaxureLabs}
                     cpoUserId={cpoUserId}
                     onDragStart={handleDragStart}
+                    onMove={moveTaskToColumn}
                   />
                 ))}
 
@@ -428,6 +480,7 @@ export default function KanbanPage() {
                     isSyntaxureLabs={isSyntaxureLabs}
                     cpoUserId={cpoUserId}
                     onDragStart={handleDragStart}
+                    onMove={moveTaskToColumn}
                   />
                 ))}
 

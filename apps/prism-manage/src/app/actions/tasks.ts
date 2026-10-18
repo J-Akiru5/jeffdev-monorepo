@@ -214,7 +214,10 @@ function toDbInsert(task: Partial<Task> & { user_id: string; pm_project_id?: str
 // ACTIONS
 // =============================================================================
 
-export async function getTasks(workspaceId?: string): Promise<Task[]> {
+export async function getTasks(
+  workspaceId?: string,
+  options?: { limit?: number; cursor?: string },
+): Promise<Task[]> {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -224,7 +227,12 @@ export async function getTasks(workspaceId?: string): Promise<Task[]> {
       .from("tasks")
       .select("*, task_tags(tags(name))")
       .order("created_at", { ascending: false })
-      .limit(500); // safety guard — real pagination lands in a later phase
+      .limit(Math.min(options?.limit ?? 500, 500));
+
+    // Keyset pagination (H5): fetch rows strictly older than the cursor.
+    if (options?.cursor) {
+      query = query.lt("created_at", options.cursor);
+    }
 
     // Filter by workspace if specified
     if (workspaceId) {

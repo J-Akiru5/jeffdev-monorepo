@@ -3,7 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "next-themes";
 import { ThemeDefaultSyncClient } from "@/components/settings/theme-default-sync-client";
-import { ChatAssistant } from "@syntaxure/ui/chat-assistant";
+import { ChatAssistant } from "@/components/chat-assistant-lazy";
 import { AuthWrapper } from "@/components/providers/auth-wrapper";
 import { ThemeBootstrap } from "@/components/theme-bootstrap";
 import "./globals.css";
