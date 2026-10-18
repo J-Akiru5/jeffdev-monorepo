@@ -193,7 +193,7 @@ export function NotificationPanel({
         {/* Notifications List */}
         <div className="overflow-y-auto p-4 space-y-2">
           {loading && (
-            <p className="px-2 py-8 text-center text-xs text-white/30">
+            <p className="px-2 py-8 text-center text-xs text-white/40">
               Loading…
             </p>
           )}
@@ -201,7 +201,7 @@ export function NotificationPanel({
           {!loading && notifications.length === 0 && (
             <div className="flex flex-col items-center gap-2 px-2 py-12 text-center">
               <Bell className="h-6 w-6 text-white/15" />
-              <p className="text-xs text-white/30">You&apos;re all caught up</p>
+              <p className="text-xs text-white/40">You&apos;re all caught up</p>
             </div>
           )}
 

@@ -262,7 +262,7 @@ export function BrainClient() {
                     </span>
                     <span className="font-medium text-white/80">{c.title}</span>
                     {c.similarity !== null && (
-                      <span className="ml-2 font-mono text-[10px] text-white/30">
+                      <span className="ml-2 font-mono text-[10px] text-white/40">
                         {Math.round(c.similarity * 100)}% match
                       </span>
                     )}
@@ -335,7 +335,7 @@ export function BrainClient() {
                       {c.title}
                     </span>
                     {c.similarity !== null && (
-                      <span className="font-mono text-[10px] text-white/30">
+                      <span className="font-mono text-[10px] text-white/40">
                         {Math.round(c.similarity * 100)}% match
                       </span>
                     )}

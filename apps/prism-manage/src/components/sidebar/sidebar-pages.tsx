@@ -102,7 +102,7 @@ function PageTreeItem({
         {/* Expand/collapse toggle */}
         <button
           onClick={() => setExpanded(!expanded)}
-          className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded text-white/30 transition-colors hover:bg-white/[0.04] hover:text-white/60 ${
+          className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded text-white/40 transition-colors hover:bg-white/[0.04] hover:text-white/60 ${
             !hasChildren ? "invisible" : ""
           }`}
         >
@@ -127,7 +127,7 @@ function PageTreeItem({
         <div className="relative">
           <button
             onClick={() => setShowMenu(!showMenu)}
-            className="invisible absolute right-0 top-0 flex h-6 w-6 items-center justify-center rounded text-white/30 transition-colors hover:bg-white/[0.04] hover:text-white/60 group-hover:visible"
+            className="invisible absolute right-0 top-0 flex h-6 w-6 items-center justify-center rounded text-white/40 transition-colors hover:bg-white/[0.04] hover:text-white/60 group-hover:visible"
           >
             <MoreHorizontal className="h-3 w-3" />
           </button>
@@ -235,7 +235,7 @@ export function SidebarPages({
           <button
             onClick={handleCreatePage}
             disabled={creating}
-            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-white/30 transition-colors hover:bg-white/[0.04] hover:text-white/60"
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-white/40 transition-colors hover:bg-white/[0.04] hover:text-white/60"
           >
             <Plus className="h-3 w-3" />
             <span>{creating ? "Creating..." : "New page"}</span>

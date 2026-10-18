@@ -41,7 +41,7 @@ export function MarketingGuard({ children }: MarketingGuardProps) {
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-4 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-glass-10">
-            <ShieldOff className="h-8 w-8 text-white/30" />
+            <ShieldOff className="h-8 w-8 text-white/40" />
           </div>
           <div>
             <h2 className="text-lg font-semibold text-white/70">

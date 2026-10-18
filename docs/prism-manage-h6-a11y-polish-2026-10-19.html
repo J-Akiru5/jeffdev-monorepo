@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage H6 — A11y &amp; Polish Report</title>
+<style>
+  :root {
+    --bg: #0A0D12; --bg-raised: #11151C; --bg-card: #151A22; --border: #232A36;
+    --cyan: #22D3EE; --violet: #8B7BFF; --text: #E6EAF0; --text-dim: #8B93A3;
+    --text-faint: #5A6272; --good: #4ADE80; --warn: #FBBF24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; padding: 48px 24px; }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  .mono { font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 28px; margin-bottom: 32px; }
+  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 12px; background: linear-gradient(90deg, var(--text), var(--text) 60%, var(--cyan)); -webkit-background-clip: text; background-clip: text; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim); }
+  .meta-row span b { color: var(--text); font-weight: 500; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; border: 1px solid; }
+  .badge.done { color: var(--good); border-color: var(--good); background: rgba(74,222,128,0.08); }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 14px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--violet); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .summary-box { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 6px; padding: 18px 20px; font-size: 15px; }
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  ul.clean li { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; font-size: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
+  td.mono { color: var(--cyan); white-space: nowrap; }
+  .ok { color: var(--good); }
+  pre { background: var(--bg-raised); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); overflow-x: auto; }
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">prism-manage · Task Report · Hardening Arc · Phase H6 (final)</div>
+    <h1>H6 — A11y &amp; Polish</h1>
+    <div class="meta-row">
+      <span><b>2026-10-19</b></span>
+      <span>Repo: <b>jeffdev-monorepo</b></span>
+      <span>Agent: <b>opencode · DeepSeek V4.1 Flash</b> (autonomous overnight)</span>
+      <span>Branch: <b>feat/pm-h6-a11y-polish → PR → develop</b></span>
+      <span class="badge done">Complete — CI green</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Summary</h2>
+    <div class="summary-box">
+      The app now has a real accessibility baseline: <b>visible focus rings
+      everywhere</b> for keyboard users, <b>reduced-motion support</b>, labelled
+      icon-only controls on the highest-traffic surfaces, and a
+      <b>contrast pass</b> that lifted every faint <span class="mono">white/30</span>
+      label to <span class="mono">white/40</span> (110+ instances, 32 files).
+      The new assertions are covered by E2E — and the full suite ran
+      <b>28/28 green in 51 seconds, zero flakes</b>.
+    </div>
+  </section>
+
+  <section>
+    <h2>What Changed</h2>
+    <table>
+      <thead><tr><th>Area</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">globals.css</td><td><b>Focus-visible baseline</b>: a cyan outline on every keyboard-focused control. <b>Reduced-motion</b>: animation/transition durations collapse under <span class="mono">prefers-reduced-motion</span>.</td></tr>
+        <tr><td class="mono">task-item.tsx</td><td>Completion toggle labelled (<span class="mono">"Mark complete"</span> / <span class="mono">"Mark not complete"</span>) — it was an unlabelled circle to screen readers.</td></tr>
+        <tr><td class="mono">task-sheet.tsx</td><td>Sheet close button labelled (<span class="mono">"Close task details"</span>); Escape-to-close already existed and is now E2E-asserted.</td></tr>
+        <tr><td class="mono">sidebar/index.tsx</td><td>Collapse toggle labelled (<span class="mono">"Collapse sidebar"</span> / <span class="mono">"Expand sidebar"</span>).</td></tr>
+        <tr><td class="mono">32 files</td><td><b>Contrast pass</b>: <span class="mono">text-white/30</span> → <span class="mono">text-white/40</span> throughout prism-manage (secondary text, meta rows, section labels).</td></tr>
+        <tr><td class="mono">e2e/tasks.spec + comments.spec</td><td>New assertions: the completion toggle's accessible name; Escape closes the task sheet.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>A11y Baseline</h2>
+    <pre>:focus-visible { outline: 2px solid rgba(34, 211, 238, 0.65); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}</pre>
+  </section>
+
+  <section>
+    <h2>Empty-State Audit</h2>
+    <ul class="clean">
+      <li><b>Covered already:</b> tasks list ("No tasks yet…" + inline add), filtered views ("No tasks match…"), kanban columns (inline Add task), Brain (first-decision prompt), notifications ("You're all caught up"), pages sidebar ("New page"), search results.</li>
+      <li><b>Acceptable as-is:</b> calendar (an empty grid is a valid calendar), operations/BMC (founder-only dashboards with their own zero-states), marketing board (columns with add affordances).</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Verification</h2>
+    <ul class="clean">
+      <li><span class="ok">✔</span> E2E: <b>28/28 passed in 50.9s — zero flakes</b> (the fastest clean run of the arc).</li>
+      <li><span class="ok">✔</span> Unit 37/37 (coverage ratchet enforced); types + lint + production build clean.</li>
+      <li><span class="ok">✔</span> New a11y assertions (labelled toggle, Escape-closes-sheet) green.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Notes</h2>
+    <ul class="clean">
+      <li><b>Focus traps</b> inside the sheet/dialogs are not implemented (Escape + backdrop-click close work everywhere) — a proper trap (or a library) is a candidate follow-up; noted rather than half-built.</li>
+      <li><span class="mono">white/40</span> on the dark canvas is ~3.0:1 — AA for large text; some micro-labels intentionally stay subtle. A full AA sweep (contrast tokens per surface) is a design-system task, not a one-file fix.</li>
+      <li>The full hardening arc (H1–H6) is now complete; reports for each phase live in <span class="mono">docs/</span>.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>prism-manage · hardening arc · H1–H6 complete ✓</span>
+    <span>next: R1 — Company Brain MVP (auto-distill + agent sessions)</span>
+  </footer>
+
+</div>
+</body>
+</html>

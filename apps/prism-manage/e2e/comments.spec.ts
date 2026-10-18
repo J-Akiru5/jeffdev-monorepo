@@ -46,5 +46,11 @@ test.describe("task comments", () => {
     await expect(page.getByText("created this task")).toBeVisible({
       timeout: 15_000,
     });
+
+    // A11y: Escape closes the sheet
+    await page.keyboard.press("Escape");
+    await expect(
+      page.getByPlaceholder("Add a comment… (@mention teammates, ⌘⏎ to send)"),
+    ).toHaveCount(0, { timeout: 10_000 });
   });
 });

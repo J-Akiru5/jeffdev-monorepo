@@ -111,7 +111,7 @@ export default function MarketingGithubPage() {
               </p>
               <div className="space-y-2">
                 <div>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-white/30">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-white/40">
                     Repo Owner
                   </span>
                   <p className="text-sm text-white/60">
@@ -119,7 +119,7 @@ export default function MarketingGithubPage() {
                   </p>
                 </div>
                 <div>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-white/30">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-white/40">
                     Repo Name
                   </span>
                   <p className="text-sm text-white/60">
@@ -175,7 +175,7 @@ export default function MarketingGithubPage() {
                       {member.role}
                     </p>
                     {member.focus && (
-                      <p className="mt-1 text-[10px] text-white/30">
+                      <p className="mt-1 text-[10px] text-white/40">
                         {member.focus}
                       </p>
                     )}

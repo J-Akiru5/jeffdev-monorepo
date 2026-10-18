@@ -25,12 +25,12 @@ export function SidebarDepartments({
     <div className="mb-6">
       {!collapsed && (
         <div className="mb-2 flex items-center justify-between px-3">
-          <h3 className="font-mono text-[10px] uppercase tracking-wider text-white/30">
+          <h3 className="font-mono text-[10px] uppercase tracking-wider text-white/40">
             Departments
           </h3>
           {isFounder && (
             <button
-              className="rounded p-1 text-white/30 hover:bg-white/[0.04] hover:text-white/60"
+              className="rounded p-1 text-white/40 hover:bg-white/[0.04] hover:text-white/60"
               title="Add department"
             >
               <Plus className="h-3 w-3" />
