@@ -45,6 +45,7 @@ export default function NewTaskPage() {
           tags: data.tags.length > 0 ? data.tags : undefined,
           dueDate: data.dueDate || undefined,
           dueTime: data.dueTime || undefined,
+          recurrence: data.recurrence,
         });
         toast.success("Task created");
         router.push("/tasks");
