@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage H3 — Security &amp; Data Integrity Report</title>
+<style>
+  :root {
+    --bg: #0A0D12; --bg-raised: #11151C; --bg-card: #151A22; --border: #232A36;
+    --cyan: #22D3EE; --violet: #8B7BFF; --text: #E6EAF0; --text-dim: #8B93A3;
+    --text-faint: #5A6272; --good: #4ADE80; --warn: #FBBF24; --bad: #F87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; padding: 48px 24px; }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  .mono { font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 28px; margin-bottom: 32px; }
+  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 12px; background: linear-gradient(90deg, var(--text), var(--text) 60%, var(--cyan)); -webkit-background-clip: text; background-clip: text; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim); }
+  .meta-row span b { color: var(--text); font-weight: 500; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; border: 1px solid; }
+  .badge.done { color: var(--good); border-color: var(--good); background: rgba(74,222,128,0.08); }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 14px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--violet); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .summary-box { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 6px; padding: 18px 20px; font-size: 15px; }
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  ul.clean li { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; font-size: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
+  td.mono { color: var(--cyan); white-space: nowrap; }
+  td.num { font-family: 'JetBrains Mono', monospace; }
+  .ok { color: var(--good); }
+  .warn { color: var(--warn); }
+  pre { background: var(--bg-raised); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); overflow-x: auto; }
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">prism-manage · Task Report · Hardening Arc · Phase H3</div>
+    <h1>H3 — Security &amp; Data Integrity</h1>
+    <div class="meta-row">
+      <span><b>2026-10-18</b></span>
+      <span>Repo: <b>jeffdev-monorepo</b></span>
+      <span>Agent: <b>opencode · DeepSeek V4.1 Flash</b></span>
+      <span>Branch: <b>feat/pm-h3-security → PR #104 → develop</b></span>
+      <span class="badge done">Complete — CI green</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Summary</h2>
+    <div class="summary-box">
+      Security headers are live and the app is <b>verified working under its own
+      CSP</b> (the E2E suite exercises every page with the headers on). A
+      <b>live-database RLS integration suite</b> now proves the workspace model
+      from the outside — cross-workspace writes fail, reads come back empty,
+      and the memory-entry policy matrix holds. The dependency tree went from
+      <b>7 critical advisories to 0</b> (highs cut 73%) via a Next 16.4.2 bump
+      plus 21 targeted overrides. And structured logging earned its keep: it
+      caught that R0's embeddings were silently failing on a retired model —
+      semantic search is now genuinely semantic.
+    </div>
+  </section>
+
+  <section>
+    <h2>What Changed</h2>
+    <table>
+      <thead><tr><th>File</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">next.config.ts</td><td><b>CSP</b> (self + Supabase https/wss + Sentry tunnel; <span class="mono">unsafe-inline</span> scripts as Next requires, <span class="mono">unsafe-eval</span> dev-only), <b>Permissions-Policy</b> (camera/mic/geo/payment off), <span class="mono">X-Content-Type-Options: nosniff</span>, <span class="mono">X-Frame-Options: DENY</span>, <span class="mono">Referrer-Policy: strict-origin-when-cross-origin</span> — applied to all routes.</td></tr>
+        <tr><td class="mono">lib/__tests__/rls.integration.test.ts <em>(new)</em></td><td>Live-DB RLS suite (skipIf pattern): membership visibility follows self-or-founder, cross-workspace memory writes are denied, cross-workspace reads are empty, founder delete works. Creates a throwaway workspace per run, cascade-cleans it.</td></tr>
+        <tr><td class="mono">lib/postgrest.ts <em>(new)</em> + tests</td><td>One canonical <span class="mono">sanitizeIlikeTerm</span>/<span class="mono">toIlikePattern</span> for PostgREST filter strings; wired into workspace search + brain keyword fallback (7 unit tests).</td></tr>
+        <tr><td class="mono">e2e/api.spec.ts</td><td>Auth contract: calendar cron 401, GitHub sync 401 (true unauthenticated context), and the security-header contract asserted on a live response.</td></tr>
+        <tr><td class="mono">vitest.config.ts</td><td>Loads <span class="mono">.env.local</span> + <span class="mono">.env.e2e.local</span> so DB integration tests run locally; CI stays skip-safe.</td></tr>
+        <tr><td class="mono">package.json (×8) + pnpm-lock + overrides</td><td>Next <span class="mono">16.1.4 → 16.4.2</span> across all apps/packages; 21 scoped <span class="mono">pnpm.overrides</span> patch transitive criticals/highs within their major lines.</td></tr>
+        <tr><td class="mono">actions/brain.ts</td><td><b>Bug fix:</b> embeddings called a retired model (<span class="mono">text-embedding-004</span> → 404). Now <span class="mono">gemini-embedding-001</span> via REST with <span class="mono">outputDimensionality: 768</span> to match the schema. Verified: <span class="mono">brain.captured … hasEmbedding:true</span>.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Dependency Audit</h2>
+    <table>
+      <thead><tr><th>Severity</th><th>Before</th><th>After</th><th>Δ</th></tr></thead>
+      <tbody>
+        <tr><td>Critical</td><td class="num">7</td><td class="num ok">0</td><td class="num ok">−7</td></tr>
+        <tr><td>High</td><td class="num">103</td><td class="num">28</td><td class="num ok">−75</td></tr>
+        <tr><td>Moderate</td><td class="num">119</td><td class="num">63</td><td class="num ok">−56</td></tr>
+        <tr><td>Low</td><td class="num">21</td><td class="num">14</td><td class="num ok">−7</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:13px;color:var(--text-dim);margin-top:10px;">
+      Remaining highs are majors that need dedicated migrations
+      (<span class="mono">serialize-javascript 6→7</span>,
+      <span class="mono">deepmerge-ts 7→8</span>) plus other apps' transitive
+      trees — tracked as backlog, not blockers.
+    </p>
+  </section>
+
+  <section>
+    <h2>Service-Role Inventory</h2>
+    <ul class="clean">
+      <li>All <b>27</b> <span class="mono">getAdminClient()</span> call sites live in server-only files: <span class="mono">api/*</span> routes, <span class="mono">lib/google-calendar.ts</span>, and <span class="mono">app/actions/*</span> (tasks, collaboration, projects, members, audit).</li>
+      <li>None are reachable from client bundles (no "use client" file imports it) — the service key never leaves the server runtime. RLS remains the boundary for every user-scoped query.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>CSP (production)</h2>
+    <pre>default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
+img-src 'self' data: blob: https:; font-src 'self' data:;
+connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.sentry.io https://*.ingest.sentry.io;
+worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'</pre>
+  </section>
+
+  <section>
+    <h2>Verification</h2>
+    <ul class="clean">
+      <li><span class="ok">✔</span> E2E: <b>26 passed</b> locally (55s — faster on Next 16.4.2) with CSP active; CI green incl. the E2E job.</li>
+      <li><span class="ok">✔</span> Unit + integration: <b>37 passed</b> locally (RLS suite hits the live DB); CI: 33 passed + 4 skipped (integration skips without secrets, by design).</li>
+      <li><span class="ok">✔</span> Header contract asserted end-to-end (<span class="mono">/</span> response carries CSP + all companion headers).</li>
+      <li><span class="ok">✔</span> Embeddings verified real: capture log shows <span class="mono">hasEmbedding:true</span>; search returns similarity scores.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Notes</h2>
+    <ul class="clean">
+      <li><span class="mono">/api/github/sync</span> returns <b>500</b> for a signed-in non-founder (permission denial) — pre-existing quirk, harmless (the 401 path is now tested); candidate for a 403 cleanup later.</li>
+      <li>RLS integration tests can run in CI by passing Supabase secrets to the test job — deliberately left out for now (the E2E job already exercises the live DB end-to-end).</li>
+      <li>Vercel's build rate limit (Hobby quota) may delay production deploys after heavy merge days; the release PR's previews were rate-limited but code + CI are unaffected.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>prism-manage · hardening arc · H3 complete</span>
+    <span>next: H4 — type safety &amp; drift guards</span>
+  </footer>
+
+</div>
+</body>
+</html>
