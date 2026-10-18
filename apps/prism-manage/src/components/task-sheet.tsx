@@ -18,6 +18,7 @@ import {
   Clock,
   MessageSquare,
   Send,
+  GitBranch,
 } from "lucide-react";
 import { TASK_TYPES, PRIORITY_CONFIG, STATUS_CONFIG, STAFF_LOCKED_STATUSES } from "@/lib/task-types";
 import type { TaskTypeKey, StatusKey } from "@/lib/task-types";
@@ -32,6 +33,7 @@ import {
   type TaskActivityEntry,
   type TaskComment,
 } from "@/app/actions/collaboration";
+import { createIssueForTask } from "@/app/actions/github-sync";
 import { createClient } from "@/lib/supabase/browser";
 import { toast } from "sonner";
 
@@ -52,6 +54,7 @@ export interface TaskSheetData {
   dueTime: string;
   projectId: string;
   departmentId?: string;
+  githubIssueNumber?: number;
 }
 
 interface TaskSheetProps {
@@ -114,6 +117,7 @@ export function TaskSheet({
   const [activity, setActivity] = useState<TaskActivityEntry[]>([]);
   const [newComment, setNewComment] = useState("");
   const [sendingComment, setSendingComment] = useState(false);
+  const [creatingIssue, setCreatingIssue] = useState(false);
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
 
@@ -215,6 +219,24 @@ export function TaskSheet({
       setNewComment("");
     } finally {
       setSendingComment(false);
+    }
+  };
+
+  const handleCreateIssue = async () => {
+    if (!taskId || creatingIssue) return;
+    setCreatingIssue(true);
+    try {
+      const result = await createIssueForTask(taskId);
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      if (result.issueNumber) {
+        setData((prev) => ({ ...prev, githubIssueNumber: result.issueNumber }));
+        toast.success(`GitHub issue #${result.issueNumber} created`);
+      }
+    } finally {
+      setCreatingIssue(false);
     }
   };
 
@@ -692,9 +714,37 @@ export function TaskSheet({
                     />
                   </div>
 
-                  {/* Comments + Activity (edit mode only) */}
+                  {/* Comments + Activity + GitHub (edit mode only) */}
                   {mode === "edit" && taskId && (
                     <div className="space-y-6 border-t border-border pt-6">
+                      {/* GitHub */}
+                      <div>
+                        <label className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-white/40">
+                          <GitBranch className="h-3.5 w-3.5" />
+                          GitHub
+                        </label>
+                        {data.githubIssueNumber ? (
+                          <a
+                            href={`https://github.com/${process.env.NEXT_PUBLIC_GITHUB_MARKETING_REPO_OWNER || ""}/${process.env.NEXT_PUBLIC_GITHUB_MARKETING_REPO_NAME || ""}/issues/${data.githubIssueNumber}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-2 rounded-lg border border-border bg-glass-04 px-3 py-2 text-xs text-cyan-400 transition-colors hover:border-border-active"
+                          >
+                            <GitBranch className="h-3.5 w-3.5" />
+                            Linked issue #{data.githubIssueNumber}
+                          </a>
+                        ) : (
+                          <button
+                            onClick={handleCreateIssue}
+                            disabled={creatingIssue}
+                            className="inline-flex items-center gap-2 rounded-lg border border-border bg-glass-04 px-3 py-2 text-xs text-white/60 transition-colors hover:border-border-active hover:text-white/80 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <GitBranch className="h-3.5 w-3.5" />
+                            {creatingIssue ? "Creating…" : "Create GitHub issue"}
+                          </button>
+                        )}
+                      </div>
+
                       {/* Comments */}
                       <div>
                         <label className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-white/40">

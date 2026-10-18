@@ -59,7 +59,9 @@
         "UPSTASH_REDIS_REST_TOKEN",
         "GITHUB_PAT",
         "GITHUB_MARKETING_REPO_OWNER",
-        "GITHUB_MARKETING_REPO_NAME"
+        "GITHUB_MARKETING_REPO_NAME",
+        "CRON_SECRET",
+        "SLACK_WEBHOOK_URL"
       ]
     },
     "lint": {
@@ -78,7 +80,9 @@
         "UPSTASH_REDIS_REST_TOKEN",
         "GITHUB_PAT",
         "GITHUB_MARKETING_REPO_OWNER",
-        "GITHUB_MARKETING_REPO_NAME"
+        "GITHUB_MARKETING_REPO_NAME",
+        "CRON_SECRET",
+        "SLACK_WEBHOOK_URL"
       ]
     },
     "check-types": {
@@ -130,7 +134,9 @@
         "UPSTASH_REDIS_REST_TOKEN",
         "GITHUB_PAT",
         "GITHUB_MARKETING_REPO_OWNER",
-        "GITHUB_MARKETING_REPO_NAME"
+        "GITHUB_MARKETING_REPO_NAME",
+        "CRON_SECRET",
+        "SLACK_WEBHOOK_URL"
       ]
     }
   }

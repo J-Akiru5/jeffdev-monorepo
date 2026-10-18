@@ -4,6 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { CalendarEventSchema, UpdateCalendarEventSchema } from "@/lib/schemas";
 import type { CalendarEvent } from "@/lib/schemas";
+import {
+  deleteEventFromGoogleCalendar,
+  pushEventToGoogleCalendar,
+  pullGoogleEvents,
+} from "@/lib/google-calendar";
 
 export async function fetchEvents(): Promise<CalendarEvent[]> {
   try {
@@ -65,6 +70,17 @@ export async function createEvent(event: {
     .single();
 
   if (error) throw error;
+
+  // Mirror to Google Calendar (best-effort — never blocks the local save)
+  await pushEventToGoogleCalendar(user.id, {
+    id: String(data.id),
+    title: parsed.data.title,
+    start: parsed.data.start,
+    end: parsed.data.end,
+    allDay: parsed.data.allDay,
+    description: event.description || null,
+  });
+
   revalidatePath("/calendar");
   return normalizeEvent(data);
 }
@@ -98,6 +114,17 @@ export async function updateEvent(
     .single();
 
   if (error) throw error;
+
+  // Mirror the change to Google Calendar (best-effort)
+  await pushEventToGoogleCalendar(user.id, {
+    id: String(updated.id),
+    title: String(updated.title || ""),
+    start: String(updated.start_time || ""),
+    end: String(updated.end_time || ""),
+    allDay: Boolean(updated.all_day),
+    description: (updated.description as string) || null,
+  });
+
   revalidatePath("/calendar");
   return normalizeEvent(updated);
 }
@@ -109,6 +136,13 @@ export async function deleteEvent(eventId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
+  const { data: row } = await supabase
+    .from("calendar_events")
+    .select("google_calendar_id")
+    .eq("id", eventId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
   const { error } = await supabase
     .from("calendar_events")
     .delete()
@@ -116,9 +150,18 @@ export async function deleteEvent(eventId: string) {
     .eq("user_id", user.id);
 
   if (error) throw error;
+
+  if (row?.google_calendar_id) {
+    await deleteEventFromGoogleCalendar(user.id, String(row.google_calendar_id));
+  }
+
   revalidatePath("/calendar");
 }
 
+/**
+ * Real two-way sync: pull Google events and reconcile local rows.
+ * prism-manage stays authoritative for task-mirrored events.
+ */
 export async function syncCalendar(): Promise<CalendarEvent[]> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -126,13 +169,43 @@ export async function syncCalendar(): Promise<CalendarEvent[]> {
     throw new Error("Not authenticated. Connect Google Calendar first.");
   }
 
-  const { data: events } = await supabase
-    .from("calendar_events")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("start_time", { ascending: true });
+  const result = await pullGoogleEvents(user.id);
+  if (result.error) {
+    throw new Error(result.error);
+  }
 
-  return (events || []).map(normalizeEvent);
+  return fetchEvents();
+}
+
+/** Connection + last-sync status for the UI. */
+export async function getCalendarSyncStatus(): Promise<{
+  connected: boolean;
+  lastSyncedAt: string | null;
+  lastError: string | null;
+}> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { connected: false, lastSyncedAt: null, lastError: null };
+
+    const { data: token } = await supabase
+      .from("user_tokens")
+      .select("metadata")
+      .eq("user_id", user.id)
+      .eq("provider", "google")
+      .maybeSingle();
+
+    const metadata = (token?.metadata as Record<string, unknown>) || {};
+    return {
+      connected: !!token,
+      lastSyncedAt: metadata.last_synced_at
+        ? String(metadata.last_synced_at)
+        : null,
+      lastError: metadata.last_sync_error ? String(metadata.last_sync_error) : null,
+    };
+  } catch {
+    return { connected: false, lastSyncedAt: null, lastError: null };
+  }
 }
 
 function normalizeEvent(raw: Record<string, unknown>): CalendarEvent {
@@ -162,4 +235,3 @@ export async function disconnectCalendar() {
   if (error) throw error;
   revalidatePath("/settings");
 }
-

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage Phase 5 — Task Report</title>
+<style>
+  :root {
+    --bg: #0A0D12; --bg-raised: #11151C; --bg-card: #151A22; --border: #232A36;
+    --cyan: #22D3EE; --violet: #8B7BFF; --text: #E6EAF0; --text-dim: #8B93A3;
+    --text-faint: #5A6272; --good: #4ADE80; --warn: #FBBF24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; padding: 48px 24px; }
+  .wrap { max-width: 820px; margin: 0 auto; }
+  .mono { font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 28px; margin-bottom: 32px; }
+  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 12px; background: linear-gradient(90deg, var(--text), var(--text) 60%, var(--cyan)); -webkit-background-clip: text; background-clip: text; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim); }
+  .meta-row span b { color: var(--text); font-weight: 500; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; border: 1px solid; }
+  .badge.done { color: var(--good); border-color: var(--good); background: rgba(74,222,128,0.08); }
+  .badge.followup { color: var(--warn); border-color: var(--warn); background: rgba(251,191,36,0.08); }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 14px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--violet); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .summary-box { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 6px; padding: 18px 20px; font-size: 15px; }
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  ul.clean li { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; font-size: 14px; }
+  .checkpoint { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 14px 18px; margin-bottom: 10px; }
+  .checkpoint .q { font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
+  .checkpoint .q b { color: var(--violet); font-weight: 500; }
+  .checkpoint .a { font-size: 14px; }
+  .checkpoint .a b { color: var(--cyan); font-weight: 500; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  th { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
+  td.mono { color: var(--cyan); }
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">prism-manage · Task Report</div>
+    <h1>Phase 5 — Integrations (GitHub Write-Back + Slack)</h1>
+    <div class="meta-row">
+      <span><b>2026-10-18</b></span>
+      <span>Repo: <b>jeffdev-monorepo</b></span>
+      <span>Agent: <b>opencode · DeepSeek V4.1 Flash</b></span>
+      <span>Branch: <b>feat/pm-4-calendar (local, unpushed)</b></span>
+      <span class="badge done">Complete</span>
+      <span class="badge followup">No migration needed</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Summary</h2>
+    <div class="summary-box">
+      Work now flows <b>out</b> of prism-manage: any task can spawn a labeled
+      GitHub issue in one click (linked back to the task), and task status
+      changes push to that issue — approved tasks close it. Slack posts
+      assignments and comments with deep links when
+      <span class="mono">SLACK_WEBHOOK_URL</span> is set. Everything is
+      best-effort: GitHub/Slack being down never blocks task work.
+      <b>No migration required</b> — the task↔issue link lives in the
+      existing <span class="mono">tasks.github_issue_number</span> column.
+    </div>
+  </section>
+
+  <section>
+    <h2>What Changed</h2>
+    <table>
+      <thead><tr><th>File</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">src/app/actions/github-sync.ts</td><td>New task-oriented functions: <span class="mono">createIssueForTask</span> (labels: task / Type- / Priority- / status-; body includes description, notes, task reference) and <span class="mono">pushTaskStatusToGitHub</span> (status mapping + issue open/close).</td></tr>
+        <tr><td class="mono">src/app/actions/tasks.ts</td><td>Status changes push to the linked issue (sheet, kanban, checkbox paths); Slack pings on assignment (create + reassignment); task mapper carries <span class="mono">githubIssueNumber</span>.</td></tr>
+        <tr><td class="mono">src/app/actions/collaboration.ts</td><td>One Slack post per comment (with mention count) and a deep link.</td></tr>
+        <tr><td class="mono">src/lib/slack.ts <em>(new)</em></td><td><span class="mono">notifySlack()</span> webhook helper + <span class="mono">taskUrl()</span> deep links. Silently disabled when unset.</td></tr>
+        <tr><td class="mono">src/components/task-sheet.tsx</td><td>GitHub block in edit mode: "Create GitHub issue" button → linked-issue badge (opens the issue).</td></tr>
+        <tr><td class="mono">src/lib/schemas.ts + edit pages</td><td>Task schema + both edit pages carry <span class="mono">githubIssueNumber</span>.</td></tr>
+        <tr><td class="mono">.env.example + turbo.json</td><td><span class="mono">SLACK_WEBHOOK_URL</span> + <span class="mono">CRON_SECRET</span> documented and declared.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Decisions &amp; Checkpoints</h2>
+    <div class="checkpoint">
+      <div class="q"><b>Decision:</b> who can create issues from tasks?</div>
+      <div class="a"><b>Any member who can see the task</b> (RLS proves access) — the existing marketing gate was kept only for the marketing pipeline. Task→issue is now a general work integration, not a marketing-campaign action.</div>
+    </div>
+    <div class="checkpoint">
+      <div class="q"><b>Decision:</b> Slack config model</div>
+      <div class="a"><b>Single env webhook</b> (<span class="mono">SLACK_WEBHOOK_URL</span>) — zero schema changes, works immediately for the team. Per-workspace webhook config is a future enhancement (needs a workspace-settings column).</div>
+    </div>
+    <div class="checkpoint">
+      <div class="q"><b>Deferred:</b> email digest</div>
+      <div class="a">Resend needs a verified sending-domain decision (which domain, from-address) plus an email-preferences story. Parked as its own small task rather than half-shipped — noted in next steps.</div>
+    </div>
+    <div class="checkpoint">
+      <div class="q"><b>Small find:</b> lucide-react v1 dropped brand icons</div>
+      <div class="a">The <span class="mono">Github</span> icon no longer exists — the UI uses <span class="mono">GitBranch</span> (already the repo's GitHub iconography).</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Next Steps</h2>
+    <ul class="clean">
+      <li><span class="badge followup">Env</span> &nbsp;Set <span class="mono">SLACK_WEBHOOK_URL</span> in prism-manage's Vercel env to enable Slack pings (GitHub env vars already exist).</li>
+      <li><span class="badge followup">Smoke test</span> &nbsp;Open a task → Create GitHub issue → check labels + link badge → move the task to Approved → issue closes.</li>
+      <li><span class="badge followup">Phase 6</span> &nbsp;COO hub + BMC (the June blueprint, corrected to four-person facts).</li>
+      <li><span class="badge followup">Deferred</span> &nbsp;Email digest (Resend + domain decision); GitHub webhook for instant reverse-sync (poll-only today).</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>Generated by opencode · DeepSeek V4.1 Flash</span>
+    <span>2026-10-18</span>
+  </footer>
+
+</div>
+</body>
+</html>
