@@ -35,10 +35,13 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Check for NPM_TOKEN secret
-        if: ${{ secrets.NPM_TOKEN == '' }}
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          echo "::error::NPM_TOKEN secret is not set. Add a granular npm token (scoped to @prism-engine, read+write) to repository secrets."
-          exit 1
+          if [ -z "$NPM_TOKEN" ]; then
+            echo "::error::NPM_TOKEN secret is not set. Add a granular npm token (scoped to @prism-engine, read+write) to repository secrets."
+            exit 1
+          fi
 
       - uses: pnpm/action-setup@v4
 
