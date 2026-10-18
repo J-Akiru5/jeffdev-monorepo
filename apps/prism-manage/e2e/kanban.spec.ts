@@ -110,11 +110,23 @@ test.describe("kanban", () => {
       { hasText: title },
     );
     const approved = desktopColumn(page, "Approved");
-    await card.dragTo(approved);
 
-    await expect(
-      page.getByText("Only founders and the CPO can approve tasks"),
-    ).toBeVisible({ timeout: 10_000 });
+    // Drag to Approved — the RBAC block must fire. Retry once if the board
+    // refetched mid-drag and swallowed the drop.
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      await card.dragTo(approved);
+      try {
+        await expect(
+          page.getByText("Only founders and the CPO can approve tasks"),
+        ).toBeVisible({ timeout: 6_000 });
+        break;
+      } catch {
+        if (attempt === 2) {
+          throw new Error("approved-drag RBAC toast never appeared");
+        }
+      }
+    }
+
     await expect(
       approved.locator('div[draggable="true"]', { hasText: title }),
     ).toHaveCount(0);
