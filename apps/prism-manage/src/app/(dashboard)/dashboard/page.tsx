@@ -30,7 +30,7 @@ export default async function HQLandingPage() {
   if (!wsData) {
     return (
       <EmptyState
-        icon={Building2}
+        icon={<Building2 className="h-7 w-7 text-white/20" />}
         title="No Workspace Found"
         description="Syntaxure Labs workspace has not been set up yet. Contact an admin."
       />

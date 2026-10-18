@@ -279,12 +279,65 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-role-key' }}
 
+  # ─── Step 3b: E2E (prism-manage — Playwright) ────────────────────────────
+  e2e:
+    name: E2E (prism-manage)
+    needs: [install, detect-changes]
+    if: needs.detect-changes.outputs.prism-manage == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+      - name: Restore pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Restore turbo cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ github.sha }}
+      - run: npm install -g napi-postinstall
+      - run: pnpm install --frozen-lockfile --prefer-offline
+      - name: Build prism-manage
+        run: pnpm --filter prism-manage run build
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-role-key' }}
+      - name: Install Playwright browser
+        run: pnpm --filter prism-manage exec playwright install --with-deps chromium
+      - name: Run E2E suite
+        run: pnpm --filter prism-manage run test:e2e
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-role-key' }}
+          NEXT_PUBLIC_SITE_URL: http://localhost:3007
+          E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL || 'e2e-test@manage.syntaxure.dev' }}
+          E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD || 'E2e-Password-2026!' }}
+      - name: Upload Playwright artifacts
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            apps/prism-manage/playwright-report
+            apps/prism-manage/test-results
+          retention-days: 7
+
   # ─── Step 4: Status Gate (aggregate check for branch protection) ─────────
   # This job always runs and checks all dependencies — if any upstream job
   # failed or was skipped, this fails so the PR cannot merge.
   ci-status:
-    name: CI Status (typecheck, lint, test, build)
-    needs: [install, typecheck, lint, test, detect-changes, build]
+    name: CI Status (typecheck, lint, test, build, e2e)
+    needs: [install, typecheck, lint, test, detect-changes, build, e2e]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -316,6 +369,12 @@ jobs:
         run: |
           if [ "${{ needs.build.result }}" == "failure" ]; then
             echo "Result: ${{ needs.build.result }}"
+            exit 1
+          fi
+      - name: "Check: e2e"
+        run: |
+          if [ "${{ needs.e2e.result }}" == "failure" ]; then
+            echo "Result: ${{ needs.e2e.result }}"
             exit 1
           fi
       - name: All checks passed

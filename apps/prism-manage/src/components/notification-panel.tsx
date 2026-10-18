@@ -8,6 +8,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import {
   X,
@@ -149,7 +150,7 @@ export function NotificationPanel({
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <>
       {/* Backdrop */}
       <div
@@ -181,6 +182,7 @@ export function NotificationPanel({
             )}
             <button
               onClick={onClose}
+              aria-label="Close notifications"
               className="rounded-md p-1.5 text-white/40 hover:bg-white/[0.04] hover:text-white/70 transition-colors"
             >
               <X className="h-4 w-4" />
@@ -251,6 +253,7 @@ export function NotificationPanel({
           </p>
         </div>
       </div>
-    </>
+    </>,
+    document.body,
   );
 }

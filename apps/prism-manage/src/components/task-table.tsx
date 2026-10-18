@@ -41,14 +41,6 @@ export function TaskTable({ tasks, projects, members, onTaskClick }: TaskTablePr
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  if (tasks.length === 0) {
-    return (
-      <div className="rounded-xl border border-border py-12 text-center">
-        <p className="text-white/40">No tasks match the current filters.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="overflow-x-auto rounded-xl border border-border">
       <table className="w-full text-left text-sm">
@@ -63,6 +55,13 @@ export function TaskTable({ tasks, projects, members, onTaskClick }: TaskTablePr
           </tr>
         </thead>
         <tbody>
+          {tasks.length === 0 && (
+            <tr className="border-t border-border/60">
+              <td colSpan={6} className="px-4 py-12 text-center text-white/40">
+                No tasks match the current filters.
+              </td>
+            </tr>
+          )}
           {tasks.map((task) => {
             const due = task.dueDate ? new Date(task.dueDate) : null;
             const isOverdue =

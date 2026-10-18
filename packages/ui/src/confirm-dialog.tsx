@@ -20,6 +20,7 @@
  */
 
 import { useState, useEffect, useCallback, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "./utils";
 import { Button, type ButtonProps } from "./button";
 
@@ -120,7 +121,7 @@ export function ConfirmDialog({
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
@@ -185,6 +186,7 @@ export function ConfirmDialog({
           </Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
