@@ -12,6 +12,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useProjects } from "@/contexts/project-context";
+import { PromptDialog } from "@/components/prompt-dialog";
 import {
   createEvent,
   fetchEvents,
@@ -32,6 +33,11 @@ export default function CalendarPage() {
     lastSyncedAt: string | null;
     lastError: string | null;
   }>({ connected: false, lastSyncedAt: null, lastError: null });
+  const [titleDialog, setTitleDialog] = useState<
+    | { kind: "create"; startStr: string; endStr: string; allDay: boolean }
+    | { kind: "edit"; eventId: string; currentTitle: string }
+    | null
+  >(null);
 
   const refreshSyncStatus = useCallback(async () => {
     const status = await getCalendarSyncStatus();
@@ -72,37 +78,19 @@ export default function CalendarPage() {
   }, [events]);
 
   const handleDateSelect = useCallback(
-    async (selectInfo: {
-      startStr: string;
-      endStr: string;
-      allDay: boolean;
-    }) => {
-      const title = prompt("Event title:");
-      if (!title) return;
-
-      const newEvent: CalendarEvent = {
-        id: Date.now().toString(),
-        title,
-        start: selectInfo.startStr,
-        end: selectInfo.endStr,
+    (selectInfo: { startStr: string; endStr: string; allDay: boolean }) => {
+      setTitleDialog({
+        kind: "create",
+        startStr: selectInfo.startStr,
+        endStr: selectInfo.endStr,
         allDay: selectInfo.allDay,
-        googleCalendarId: "",
-        syncedAt: new Date().toISOString(),
-      };
-
-      try {
-        const created = await createEvent(newEvent);
-        setEvents((prev) => [...prev, created]);
-        toast.success("Event created");
-      } catch {
-        toast.error("Failed to create event");
-      }
+      });
     },
     [],
   );
 
   const handleEventClick = useCallback(
-    async (info: {
+    (info: {
       event: {
         id: string;
         title: string;
@@ -110,20 +98,46 @@ export default function CalendarPage() {
         end: Date | null;
       };
     }) => {
-      const newTitle = prompt("Edit title:", info.event.title);
-      if (!newTitle || newTitle === info.event.title) return;
-
-      try {
-        const updated = await updateEvent(info.event.id, { title: newTitle });
-        setEvents((prev) =>
-          prev.map((e) => (e.id === info.event.id ? updated : e)),
-        );
-        toast.success("Event updated");
-      } catch {
-        toast.error("Failed to update event");
-      }
+      setTitleDialog({
+        kind: "edit",
+        eventId: info.event.id,
+        currentTitle: info.event.title,
+      });
     },
     [],
+  );
+
+  const handleTitleSubmit = useCallback(
+    async (title: string) => {
+      const dialog = titleDialog;
+      if (!dialog) return;
+
+      if (dialog.kind === "create") {
+        try {
+          const created = await createEvent({
+            title,
+            start: dialog.startStr,
+            end: dialog.endStr,
+            allDay: dialog.allDay,
+          });
+          setEvents((prev) => [...prev, created]);
+          toast.success("Event created");
+        } catch {
+          toast.error("Failed to create event");
+        }
+      } else {
+        try {
+          const updated = await updateEvent(dialog.eventId, { title });
+          setEvents((prev) =>
+            prev.map((e) => (e.id === dialog.eventId ? updated : e)),
+          );
+          toast.success("Event updated");
+        } catch {
+          toast.error("Failed to update event");
+        }
+      }
+    },
+    [titleDialog],
   );
 
   const handleSync = useCallback(async () => {
@@ -222,6 +236,16 @@ export default function CalendarPage() {
           </button>
         </div>
       </div>
+
+      <PromptDialog
+        open={titleDialog !== null}
+        onClose={() => setTitleDialog(null)}
+        onSubmit={handleTitleSubmit}
+        title={titleDialog?.kind === "edit" ? "Edit event title" : "New event"}
+        placeholder="Event title…"
+        defaultValue={titleDialog?.kind === "edit" ? titleDialog.currentTitle : ""}
+        confirmLabel={titleDialog?.kind === "edit" ? "Save" : "Create"}
+      />
     </div>
   );
 }

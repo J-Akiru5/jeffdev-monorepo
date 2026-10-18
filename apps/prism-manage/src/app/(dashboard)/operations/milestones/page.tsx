@@ -9,6 +9,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { OperationsGuard } from "@/components/operations-guard";
+import { ConfirmDialog } from "@syntaxure/ui";
 import {
   createMilestone,
   deleteMilestone,
@@ -52,6 +53,7 @@ function MilestonesManager() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<Milestone | null>(null);
 
   // Form state
   const [title, setTitle] = useState("");
@@ -123,8 +125,14 @@ function MilestonesManager() {
     }
   };
 
-  const handleDelete = async (m: Milestone) => {
-    if (!confirm(`Delete milestone "${m.title}"?`)) return;
+  const handleDelete = (m: Milestone) => {
+    setPendingDelete(m);
+  };
+
+  const executeDelete = async () => {
+    const m = pendingDelete;
+    setPendingDelete(null);
+    if (!m) return;
     const result = await deleteMilestone(m.id);
     if (result.error) {
       toast.error(result.error);
@@ -300,6 +308,16 @@ function MilestonesManager() {
           </div>
         ))}
       </div>
+
+      <ConfirmDialog
+        open={pendingDelete !== null}
+        onOpenChange={() => setPendingDelete(null)}
+        title={`Delete "${pendingDelete?.title || "milestone"}"?`}
+        description="This removes the milestone and its deliverables list."
+        confirmLabel="Delete"
+        confirmVariant="danger"
+        onConfirm={executeDelete}
+      />
     </div>
   );
 }

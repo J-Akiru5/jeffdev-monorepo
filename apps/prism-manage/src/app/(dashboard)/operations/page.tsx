@@ -26,6 +26,7 @@ import {
   type Milestone,
 } from "@/app/actions/operations";
 import { useWorkspaceStore } from "@/stores/workspace-store";
+import { isSyntaxureWorkspaceName } from "@/lib/workspace-names";
 import type { Task } from "@/lib/schemas";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -62,7 +63,7 @@ function OperationsHub() {
   const workspaces = useWorkspaceStore((s) => s.workspaces);
   const departments = useWorkspaceStore((s) => s.departments);
   const syntaxureId = workspaces.find((w) =>
-    w.name.startsWith("Syntaxure Labs"),
+    isSyntaxureWorkspaceName(w.name),
   )?.id;
 
   const [milestones, setMilestones] = useState<Milestone[]>([]);

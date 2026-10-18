@@ -6,6 +6,7 @@
 
 import type { WorkspaceAccess } from "@/lib/authorization";
 import { isBmcViewAuthorized, isMarketingAuthorized, isOperationsAuthorized } from "@/lib/authorization";
+import { isSyntaxureWorkspaceName } from "@/lib/workspace-names";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SupabaseClientLike = any;
@@ -31,7 +32,7 @@ export async function getSyntaxureWorkspaceAccess(
   const membership = memberships.find((m: any) => {
     const ws = m.workspaces;
     if (!ws) return false;
-    return ws.name === "Syntaxure Labs" || ws.name === "Syntaxure Labs, Inc.";
+    return isSyntaxureWorkspaceName(ws.name);
   });
 
   if (!membership) return null;

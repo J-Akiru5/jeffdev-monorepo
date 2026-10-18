@@ -11,6 +11,7 @@ import { ProfileSection } from "@/components/settings/profile-section";
 import { WorkspaceMembersSettings } from "@/components/settings/workspace-members";
 import { AuditTrailSection } from "@/components/settings/audit-trail";
 import { getWorkspaceMembers } from "@/app/actions/workspace";
+import { isSyntaxureWorkspaceName } from "@/lib/workspace-names";
 import { disconnectCalendar } from "@/app/actions/calendar";
 
 export default async function SettingsPage() {
@@ -66,8 +67,7 @@ export default async function SettingsPage() {
 
     const syntaxureWs = (wsMemberships || []).find(
       (m: Record<string, unknown>) =>
-        (m.workspaces as { name: string }).name === "Syntaxure Labs" ||
-        (m.workspaces as { name: string }).name === "Syntaxure Labs, Inc."
+        isSyntaxureWorkspaceName((m.workspaces as { name: string }).name)
     ) as { workspaces: { id: string } } | undefined;
 
     if (syntaxureWs) {

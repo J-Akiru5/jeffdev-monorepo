@@ -28,6 +28,7 @@ import { MANAGE_HELP_SHORTCUTS, MODE_TOGGLE_SHORTCUT } from "@/lib/keyboard-shor
 import { useManageModeStore } from "@/stores/manage-mode-store";
 import { useProjects } from "@/contexts/project-context";
 import { useWorkspaceStore } from "@/stores/workspace-store";
+import { isSyntaxureWorkspaceName } from "@/lib/workspace-names";
 import { createProject as createProjectAction, updateProject as updateProjectAction } from "@/app/actions/projects";
 import { toast } from "sonner";
 import { SidebarNavItem } from "./sidebar-nav-item";
@@ -75,7 +76,7 @@ export function Sidebar() {
   const manageMode = useManageModeStore((s) => s.mode);
 
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId);
-  const isSyntaxureLabs = activeWorkspace?.name === "Syntaxure Labs" || activeWorkspace?.name === "Syntaxure Labs, Inc.";
+  const isSyntaxureLabs = isSyntaxureWorkspaceName(activeWorkspace?.name);
   const isPersonal = activeWorkspace?.name === "Personal";
   const isFounder = userRole === "founder";
   const operationsAuthorized =
