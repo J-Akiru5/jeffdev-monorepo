@@ -114,6 +114,9 @@
         "MONGODB_URI",
         "DATABASE_URL",
         "SUPABASE_*",
+        "NEXT_PUBLIC_*",
+        "E2E_TEST_EMAIL",
+        "E2E_TEST_PASSWORD",
         "NODE_OPTIONS",
         "UPSTASH_REDIS_REST_URL",
         "UPSTASH_REDIS_REST_TOKEN"

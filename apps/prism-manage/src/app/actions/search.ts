@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { sanitizeIlikeTerm, toIlikePattern } from "@/lib/postgrest";
 
 export interface TaskSearchResult {
   id: string;
@@ -15,14 +16,6 @@ export interface PageSearchResult {
 }
 
 /**
- * Sanitize user input before it goes into a PostgREST `.or()` filter string.
- * Strips wildcard/reserved characters; RLS remains the real protection.
- */
-function sanitize(term: string): string {
-  return term.replace(/[%_,()*"\\]/g, " ").replace(/\s+/g, " ").trim().slice(0, 80);
-}
-
-/**
  * Workspace-wide search across tasks (title/description/notes) and pages (title).
  * Used by the command palette. Returns empty results for queries under 2 chars.
  */
@@ -31,14 +24,14 @@ export async function searchWorkspace(
   rawQuery: string,
 ): Promise<{ tasks: TaskSearchResult[]; pages: PageSearchResult[] }> {
   try {
-    const q = sanitize(rawQuery);
+    const q = sanitizeIlikeTerm(rawQuery);
     if (!workspaceId || q.length < 2) return { tasks: [], pages: [] };
 
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { tasks: [], pages: [] };
 
-    const like = `%${q}%`;
+    const like = toIlikePattern(rawQuery);
 
     const { data: tasks } = await supabase
       .from("tasks")
