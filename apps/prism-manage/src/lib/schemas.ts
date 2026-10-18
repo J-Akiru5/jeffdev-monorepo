@@ -151,13 +151,6 @@ export type UpdateTaskInput = z.infer<typeof UpdateTaskSchema>;
 // ──────────────────────────────────────────────
 // Workspace + Department Helpers
 // ──────────────────────────────────────────────
-export const PERSONAL_LISTS = [
-  { name: "My Tasks", color: "var(--color-cyan)", icon: "CheckSquare" },
-  { name: "Academics", color: "var(--color-purple)", icon: "BookOpen" },
-  { name: "Student Council", color: "var(--color-emerald)", icon: "Users" },
-  { name: "USC", color: "var(--color-amber)", icon: "GraduationCap" },
-  { name: "SineAI Guild", color: "#ef4444", icon: "Bot" },
-] as const;
 
 export const SYNTAXURE_DEPARTMENTS = [
   "Executive",

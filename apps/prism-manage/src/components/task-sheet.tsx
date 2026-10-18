@@ -22,6 +22,7 @@ import type { TaskTypeKey, StatusKey } from "@/lib/task-types";
 import type { Task, Project, Department } from "@/lib/schemas";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { Select } from "@syntaxure/ui";
+import { getWorkspaceMembers } from "@/app/actions/workspace";
 
 // ──────────────────────────────────────────────
 // Types
@@ -94,11 +95,13 @@ export function TaskSheet({
   });
   const [tagInput, setTagInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [members, setMembers] = useState<{ userId: string; name: string; email: string }[]>([]);
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
 
   /** Is the current user a founder? Reads from workspace store (hydrated from DB) */
   const userRole = useWorkspaceStore((s) => s.userRole);
+  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
   const cLevelTitle = useWorkspaceStore((s) => s.cLevelTitle);
   const isFounder = userRole === "founder";
   const isEmployee = userRole === "employee";
@@ -126,6 +129,18 @@ export function TaskSheet({
       setTimeout(() => titleRef.current?.focus(), 150);
     }
   }, [isOpen, initialData, projects, departments]);
+
+  // Load workspace members for the assignee picker
+  useEffect(() => {
+    if (!isOpen || !activeWorkspaceId) return;
+    let cancelled = false;
+    getWorkspaceMembers(activeWorkspaceId).then((result) => {
+      if (!cancelled) setMembers(result.members);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, activeWorkspaceId]);
 
   // Handle escape key
   useEffect(() => {
@@ -485,9 +500,8 @@ export function TaskSheet({
                           Assignee
                         </label>
                         <div className="relative">
-                          <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
-                          <input
-                            type="text"
+                          <User className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-white/30" />
+                          <select
                             value={data.assignedTo}
                             onChange={(e) =>
                               setData((prev) => ({
@@ -495,9 +509,15 @@ export function TaskSheet({
                                 assignedTo: e.target.value,
                               }))
                             }
-                            placeholder="User ID"
-                            className="w-full rounded-lg border border-border bg-glass-04 px-3 py-2.5 pl-10 text-sm text-white/70 outline-none transition-colors placeholder:text-text-faint hover:border-border-active focus:border-cyan-500/50"
-                          />
+                            className="w-full appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2.5 pl-10 text-sm text-white/70 outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
+                          >
+                            <option value="">Unassigned</option>
+                            {members.map((member) => (
+                              <option key={member.userId} value={member.userId}>
+                                {member.name || member.email}
+                              </option>
+                            ))}
+                          </select>
                         </div>
                       </div>
 

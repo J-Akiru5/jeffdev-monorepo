@@ -29,7 +29,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useProjects } from "@/contexts/project-context";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { createClient } from "@/lib/supabase/browser";
-import { PERSONAL_LISTS } from "@/lib/schemas";
 import { getDepartmentColor } from "@/lib/constants";
 
 function SignOutButton() {
@@ -238,15 +237,9 @@ export function MobileNav() {
                   </div>
                   <div className="space-y-2">
                     {projects.length === 0 ? (
-                      PERSONAL_LISTS.map((list) => (
-                        <button
-                          key={list.name}
-                          disabled
-                          className="flex w-full items-center gap-3 rounded-xl border border-white/[0.06] glass-subtle p-3 text-white/40"
-                        >
-                          <span className="text-sm font-medium">{list.name}</span>
-                        </button>
-                      ))
+                      <p className="px-2 py-2 text-xs text-white/30">
+                        No lists yet
+                      </p>
                     ) : (
                       projects.map((project) => (
                         <button

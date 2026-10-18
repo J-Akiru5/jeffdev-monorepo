@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
+import { getOrCreateDefaultProject } from "@/lib/pm-projects";
 
 async function logAudit(event: {
   action: string;
@@ -128,11 +129,13 @@ function extractTags(raw: Record<string, unknown>): string[] {
 
 /**
  * Map a raw Supabase row (snake_case) to the Task type (camelCase).
+ * `pm_project_id` is the real workspace list; `project_id` is the legacy
+ * agency-project column and is only used as a fallback.
  */
 function mapTask(raw: Record<string, unknown>): Task {
   return {
     id: String(raw.id || ""),
-    projectId: String(raw.project_id || raw.projectId || ""),
+    projectId: String(raw.pm_project_id || raw.project_id || raw.projectId || ""),
     workspaceId: raw.workspace_id ? String(raw.workspace_id) : undefined,
     departmentId: raw.department_id ? String(raw.department_id) : undefined,
     title: String(raw.title || ""),
@@ -168,11 +171,12 @@ function mapTask(raw: Record<string, unknown>): Task {
 
 /**
  * Map Task to Supabase insert format (snake_case).
+ * Writes `pm_project_id` (real workspace list) only — the legacy `project_id`
+ * column is never written by this app anymore.
  */
-function toDbInsert(task: Partial<Task> & { user_id: string; project_id: string }) {
+function toDbInsert(task: Partial<Task> & { user_id: string; pm_project_id?: string }) {
   const db: Record<string, unknown> = {
     user_id: task.user_id,
-    project_id: task.project_id,
     title: task.title,
     task_type: task.taskType || "uncategorized",
     status: task.status || "backlog",
@@ -180,6 +184,7 @@ function toDbInsert(task: Partial<Task> & { user_id: string; project_id: string 
     is_starred: task.isStarred || false,
   };
 
+  if (task.pm_project_id) db.pm_project_id = task.pm_project_id;
   if (task.workspaceId !== undefined) db.workspace_id = task.workspaceId;
   if (task.departmentId !== undefined) db.department_id = task.departmentId;
   if (task.description !== undefined) db.description = task.description;
@@ -188,7 +193,6 @@ function toDbInsert(task: Partial<Task> & { user_id: string; project_id: string 
   // Phase 1B: tags are managed via task_tags junction table, not the tasks.tags column
   if (task.dueDate !== undefined) db.due_date = task.dueDate;
   if (task.dueTime !== undefined) db.due_time = task.dueTime;
-  if (task.order !== undefined) db.order = task.order;
   if (task.pathIndex !== undefined) db.path_index = task.pathIndex;
 
   return db;
@@ -213,7 +217,7 @@ export async function getTasks(workspaceId?: string): Promise<Task[]> {
     if (workspaceId) {
       query = query.eq("workspace_id", workspaceId);
     } else {
-      // Default: tasks owned by user or in their workspaces
+      // Default: tasks in the user's workspaces
       const { data: memberships } = await supabase
         .from("workspace_members")
         .select("workspace_id")
@@ -234,9 +238,27 @@ export async function getTasks(workspaceId?: string): Promise<Task[]> {
   }
 }
 
+export async function getTask(taskId: string): Promise<Task | null> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const { data } = await supabase
+      .from("tasks")
+      .select("*, task_tags(tags(name))")
+      .eq("id", taskId)
+      .maybeSingle();
+
+    return data ? mapTask(data) : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function createTask(input: {
   title: string;
-  projectId: string | number;
+  projectId?: string;
   workspaceId?: string;
   departmentId?: string;
   taskType?: Task["taskType"];
@@ -271,11 +293,45 @@ export async function createTask(input: {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
+  // Resolve the target list (pm_projects). Prefer the explicit list; otherwise
+  // fall back to the workspace's default "General" list.
+  let projectId = input.projectId || null;
+  let workspaceId = input.workspaceId || null;
+
+  if (projectId) {
+    const { data: project } = await supabase
+      .from("pm_projects")
+      .select("id, workspace_id")
+      .eq("id", projectId)
+      .maybeSingle();
+    if (!project) throw new Error("List not found or you don't have access");
+    workspaceId = String(project.workspace_id);
+  } else if (workspaceId) {
+    const project = await getOrCreateDefaultProject(supabase, workspaceId, user.id);
+    if (!project) throw new Error("Could not resolve a list for this workspace");
+    projectId = project.id;
+  } else {
+    throw new Error("A workspace or list is required to create a task");
+  }
+
+  // Assignee must be a member of the workspace
+  if (input.assignedTo) {
+    const { data: assigneeMembership } = await supabase
+      .from("workspace_members")
+      .select("user_id")
+      .eq("workspace_id", workspaceId)
+      .eq("user_id", input.assignedTo)
+      .maybeSingle();
+    if (!assigneeMembership) {
+      throw new Error("Assignee must be a member of this workspace");
+    }
+  }
+
   const dbRecord = toDbInsert({
     user_id: user.id,
-    project_id: String(input.projectId),
+    pm_project_id: projectId ?? undefined,
     title: parsed.data.title,
-    workspaceId: input.workspaceId,
+    workspaceId: workspaceId ?? undefined,
     departmentId: input.departmentId,
     taskType: input.taskType || "uncategorized",
     status: input.status || "backlog",
@@ -300,6 +356,13 @@ export async function createTask(input: {
     await syncTaskTags(supabase, inserted.id, input.tags);
   }
 
+  logAudit({
+    action: "CREATE",
+    resource: "tasks",
+    resourceId: inserted?.id || "unknown",
+    details: { title: parsed.data.title, workspaceId, projectId },
+  });
+
   revalidatePath("/tasks");
 }
 
@@ -317,13 +380,24 @@ export async function toggleTaskComplete(taskId: string, completed: boolean) {
     await assertCanApproveTask(supabase, user.id, taskId);
   }
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("tasks")
     .update({ status: newStatus })
     .eq("id", taskId)
-    .eq("user_id", user.id);
+    .select("id");
 
   if (error) throw error;
+  if (!updated || updated.length === 0) {
+    throw new Error("Task not found or you don't have permission");
+  }
+
+  logAudit({
+    action: "UPDATE",
+    resource: "tasks",
+    resourceId: taskId,
+    details: { status: newStatus },
+  });
+
   revalidatePath("/tasks");
 }
 
@@ -334,13 +408,24 @@ export async function toggleTaskStar(taskId: string, isStarred: boolean) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("tasks")
     .update({ is_starred: isStarred })
     .eq("id", taskId)
-    .eq("user_id", user.id);
+    .select("id");
 
   if (error) throw error;
+  if (!updated || updated.length === 0) {
+    throw new Error("Task not found or you don't have permission");
+  }
+
+  logAudit({
+    action: "UPDATE",
+    resource: "tasks",
+    resourceId: taskId,
+    details: { is_starred: isStarred },
+  });
+
   revalidatePath("/tasks");
 }
 
@@ -361,13 +446,24 @@ export async function updateTaskStatus(taskId: string, status: string) {
     await assertCanApproveTask(supabase, user.id, taskId);
   }
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("tasks")
     .update({ status })
     .eq("id", taskId)
-    .eq("user_id", user.id);
+    .select("id");
 
   if (error) throw error;
+  if (!updated || updated.length === 0) {
+    throw new Error("Task not found or you don't have permission");
+  }
+
+  logAudit({
+    action: "UPDATE",
+    resource: "tasks",
+    resourceId: taskId,
+    details: { status },
+  });
+
   revalidatePath("/tasks");
 }
 
@@ -401,23 +497,32 @@ export async function updateTask(
   // Phase 1B: tags are managed via task_tags junction table
   if (parsed.data.dueDate !== undefined) updateData.due_date = parsed.data.dueDate;
   if (parsed.data.dueTime !== undefined) updateData.due_time = parsed.data.dueTime;
-  if (parsed.data.order !== undefined) updateData.order = parsed.data.order;
   if (parsed.data.pathIndex !== undefined) updateData.path_index = parsed.data.pathIndex;
   if (parsed.data.workspaceId !== undefined) updateData.workspace_id = parsed.data.workspaceId;
   if (parsed.data.departmentId !== undefined) updateData.department_id = parsed.data.departmentId;
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("tasks")
     .update(updateData)
     .eq("id", taskId)
-    .eq("user_id", user.id);
+    .select("id");
 
   if (error) throw error;
+  if (!updated || updated.length === 0) {
+    throw new Error("Task not found or you don't have permission");
+  }
 
   // Sync tags via junction table if provided
   if (parsed.data.tags !== undefined) {
     await syncTaskTags(supabase, taskId, parsed.data.tags ?? []);
   }
+
+  logAudit({
+    action: "UPDATE",
+    resource: "tasks",
+    resourceId: taskId,
+    details: { fields: Object.keys(updateData) },
+  });
 
   revalidatePath("/tasks");
 }
@@ -436,16 +541,19 @@ export async function deleteTask(taskId: string) {
     .eq("id", taskId)
     .single();
 
-  // Delete junction rows first (CASCADE may handle this, but be explicit)
-  await supabase.from("task_tags").delete().eq("task_id", taskId);
-
-  const { error } = await supabase
+  const { data: deleted, error } = await supabase
     .from("tasks")
     .delete()
     .eq("id", taskId)
-    .eq("user_id", user.id);
+    .select("id");
 
   if (error) throw error;
+  if (!deleted || deleted.length === 0) {
+    throw new Error("Task not found or you don't have permission");
+  }
+
+  // Delete junction rows (CASCADE may handle this, but be explicit)
+  await supabase.from("task_tags").delete().eq("task_id", taskId);
 
   // Fire audit asynchronously (never blocks the response)
   logAudit({
