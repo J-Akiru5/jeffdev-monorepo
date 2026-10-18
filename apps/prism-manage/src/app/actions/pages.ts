@@ -5,25 +5,23 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 // =============================================================================
-// SCHEMAS
+// TYPES
 // =============================================================================
 
-const PageSchema = z.object({
-  id: z.string().uuid(),
-  workspace_id: z.string().uuid(),
-  parent_id: z.string().uuid().nullable(),
-  title: z.string(),
-  content: z.array(z.record(z.string(), z.unknown())).default([]),
-  icon: z.string().default("📄"),
-  icon_color: z.string().default("#6366f1"),
-  cover_url: z.string().nullable(),
-  sort_order: z.number().int().default(0),
-  created_by: z.string().uuid(),
-  created_at: z.string(),
-  updated_at: z.string(),
-});
-
-export type Page = z.infer<typeof PageSchema>;
+export type Page = {
+  id: string;
+  workspace_id: string;
+  parent_id: string | null;
+  title: string;
+  content: Record<string, unknown>[];
+  icon: string;
+  icon_color: string;
+  cover_url: string | null;
+  sort_order: number;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+};
 
 const CreatePageSchema = z.object({
   workspace_id: z.string().uuid(),

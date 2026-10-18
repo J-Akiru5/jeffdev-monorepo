@@ -11,6 +11,7 @@ import {
 import { notifyUsers } from "@/lib/notify";
 import { notifySlack, taskUrl } from "@/lib/slack";
 import { pushTaskStatusToGitHub } from "@/app/actions/github-sync";
+import { logger } from "@/lib/log";
 
 async function logAudit(event: {
   action: string;
@@ -362,6 +363,13 @@ export async function createTask(input: {
     .single();
   if (error) throw error;
 
+  logger.info("task.created", {
+    taskId: inserted?.id,
+    workspaceId,
+    projectId,
+    userId: user.id,
+  });
+
   // Sync tags via junction table
   if (input.tags && input.tags.length > 0 && inserted) {
     await syncTaskTags(supabase, inserted.id, input.tags);
@@ -682,6 +690,12 @@ export async function deleteTask(taskId: string) {
   if (!deleted || deleted.length === 0) {
     throw new Error("Task not found or you don't have permission");
   }
+
+  logger.info("task.deleted", {
+    taskId,
+    userId: user.id,
+    title: (task?.title as string) || null,
+  });
 
   // Delete junction rows (CASCADE may handle this, but be explicit)
   await supabase.from("task_tags").delete().eq("task_id", taskId);
