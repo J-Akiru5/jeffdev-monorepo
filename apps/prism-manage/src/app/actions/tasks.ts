@@ -212,7 +212,8 @@ export async function getTasks(workspaceId?: string): Promise<Task[]> {
     let query = supabase
       .from("tasks")
       .select("*, task_tags(tags(name))")
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(500); // safety guard — real pagination lands in a later phase
 
     // Filter by workspace if specified
     if (workspaceId) {
