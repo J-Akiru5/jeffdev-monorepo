@@ -4,7 +4,8 @@ import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import { ConfirmDialog } from "@syntaxure/ui";
 import { useProjects } from "@/contexts/project-context";
-import { logAuditEvent } from "@/lib/audit";
+import { deleteProject as deleteProjectAction } from "@/app/actions/projects";
+import { toast } from "sonner";
 
 interface SidebarProjectItemProps {
   project: {
@@ -38,15 +39,15 @@ export function SidebarProjectItem({
   const { removeProject } = useProjects();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  const handleDelete = () => {
-    removeProject(project.id);
-    logAuditEvent({
-      action: "DELETE",
-      resource: "projects",
-      resourceId: project.id,
-      details: { name: project.name },
-    });
+  const handleDelete = async () => {
     setShowDeleteDialog(false);
+    const result = await deleteProjectAction(project.id);
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+    removeProject(project.id);
+    toast.success(`List "${project.name}" deleted`);
   };
 
   if (editing && !collapsed) {

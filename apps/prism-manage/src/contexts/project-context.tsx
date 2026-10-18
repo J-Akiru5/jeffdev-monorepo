@@ -2,22 +2,42 @@
 
 import { useEffect, type ReactNode } from "react";
 import { useProjectStore } from "@/stores/project-store";
-import type { Project } from "@/lib/schemas";
+import { useWorkspaceStore } from "@/stores/workspace-store";
+import { getProjects } from "@/app/actions/projects";
 
-export function ProjectProvider({
-  children,
-  initialProjects = [],
-}: {
-  children: ReactNode;
-  initialProjects?: Project[];
-}) {
+/**
+ * ProjectProvider
+ * ---------------
+ * Loads the real workspace lists (pm_projects) whenever the active workspace
+ * changes, and hydrates the Zustand project store. Replaces the old fake
+ * client-side "list-N" defaults.
+ */
+export function ProjectProvider({ children }: { children: ReactNode }) {
   const setProjects = useProjectStore((s) => s.setProjects);
+  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
 
   useEffect(() => {
-    if (initialProjects.length > 0) {
-      setProjects(initialProjects);
+    if (!activeWorkspaceId) {
+      setProjects([]);
+      useProjectStore.getState().setActiveProjectId(null);
+      return;
     }
-  }, [initialProjects, setProjects]);
+
+    let cancelled = false;
+    getProjects(activeWorkspaceId).then((projects) => {
+      if (cancelled) return;
+      setProjects(projects);
+      // Keep the user's selected list if it still exists in the new workspace.
+      const { activeProjectId, setActiveProjectId } = useProjectStore.getState();
+      if (activeProjectId && !projects.some((p) => p.id === activeProjectId)) {
+        setActiveProjectId(null);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeWorkspaceId, setProjects]);
 
   return <>{children}</>;
 }

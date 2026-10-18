@@ -16,11 +16,6 @@ import {
   LayoutGrid,
   TrendingUp,
   Building2,
-  FolderKanban,
-  BookOpen,
-  Users,
-  GraduationCap,
-  Bot,
   LayoutDashboard,
   FileText,
   ChevronLeft,
@@ -32,7 +27,8 @@ import { MANAGE_HELP_SHORTCUTS, MODE_TOGGLE_SHORTCUT } from "@/lib/keyboard-shor
 import { useManageModeStore } from "@/stores/manage-mode-store";
 import { useProjects } from "@/contexts/project-context";
 import { useWorkspaceStore } from "@/stores/workspace-store";
-import { PERSONAL_LISTS } from "@/lib/schemas";
+import { createProject as createProjectAction, updateProject as updateProjectAction } from "@/app/actions/projects";
+import { toast } from "sonner";
 import { SidebarNavItem } from "./sidebar-nav-item";
 import { SidebarSection } from "./sidebar-section";
 import { SidebarInlineInput } from "./sidebar-inline-input";
@@ -61,21 +57,6 @@ const views: NavItem[] = [
 ];
 
 const marketingItem: NavItem = { label: "Marketing", href: "/marketing", icon: TrendingUp };
-
-function getPersonalListIcon(name: string) {
-  const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-    "My Tasks": FolderKanban,
-    Academics: BookOpen,
-    "Student Council": Users,
-    USC: GraduationCap,
-    "SineAI Guild": Bot,
-  };
-  return iconMap[name] || FolderKanban;
-}
-
-function generateId(): string {
-  return `list-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -147,19 +128,21 @@ export function Sidebar() {
     [pathname],
   );
 
-  const handleCreateList = () => {
-    if (newListName.trim()) {
-      addProject({
-        id: generateId(),
-        name: newListName.trim(),
-        color: `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`,
-        order: projects.length,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      });
-      setNewListName("");
-      setShowNewListInput(false);
+  const handleCreateList = async () => {
+    const name = newListName.trim();
+    if (!name || !activeWorkspaceId) return;
+    setNewListName("");
+    setShowNewListInput(false);
+
+    const result = await createProjectAction({
+      workspaceId: activeWorkspaceId,
+      name,
+    });
+    if (result.error) {
+      toast.error(result.error);
+      return;
     }
+    if (result.project) addProject(result.project);
   };
 
   const renderProjectLists = () => (
@@ -183,10 +166,17 @@ export function Sidebar() {
           editName={editName}
           onEditNameChange={setEditName}
           onStartEdit={() => { setEditingId(project.id); setEditName(project.name); }}
-          onSaveEdit={() => {
-            if (editName.trim()) updateProject(project.id, { name: editName.trim() });
+          onSaveEdit={async () => {
+            const name = editName.trim();
             setEditingId(null);
             setEditName("");
+            if (!name || name === project.name) return;
+            updateProject(project.id, { name });
+            const result = await updateProjectAction(project.id, { name });
+            if (result.error) {
+              toast.error(result.error);
+              updateProject(project.id, { name: project.name });
+            }
           }}
           onCancelEdit={() => setEditingId(null)}
           onSelect={() => setActiveProjectId(project.id)}
@@ -293,23 +283,9 @@ export function Sidebar() {
             }
           >
             {renderProjectLists()}
-            {projects.length === 0 &&
-              PERSONAL_LISTS.map((list) => {
-                const Icon = getPersonalListIcon(list.name);
-                return (
-                  <li key={list.name}>
-                    <button
-                      className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-white/50 transition-all hover:bg-white/[0.04] hover:text-white/80 ${
-                        collapsed ? "justify-center" : ""
-                      }`}
-                      title={collapsed ? list.name : undefined}
-                    >
-                      <Icon className="h-4 w-4 flex-shrink-0" />
-                      {!collapsed && <span className="truncate">{list.name}</span>}
-                    </button>
-                  </li>
-                );
-              })}
+            {projects.length === 0 && !collapsed && (
+              <p className="px-3 py-2 text-xs text-white/30">No lists yet</p>
+            )}
           </SidebarSection>
         )}
 

@@ -19,10 +19,13 @@ import {
   toggleTaskStar,
 } from "@/app/actions/tasks";
 import type { Task } from "@/lib/schemas";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 import { toast } from "sonner";
 
-async function fetchTasks(): Promise<Task[]> {
-  const res = await fetch("/api/tasks");
+async function fetchTasks(workspaceId: string): Promise<Task[]> {
+  const res = await fetch(
+    `/api/tasks?workspaceId=${encodeURIComponent(workspaceId)}`,
+  );
   if (!res.ok) return [];
   const data = await res.json();
   return (data || []) as Task[];
@@ -35,19 +38,27 @@ function TasksContent() {
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const filter = searchParams.get("filter");
+  const departmentId = searchParams.get("department");
   const isStarredFilter = filter === "starred";
+  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
 
   // Keep a ref to the latest tasks so callbacks can read current state
   // without depending on tasks (which would invalidate memo guards on every toggle).
   const tasksRef = useRef(tasks);
   tasksRef.current = tasks;
 
-  // Load tasks from Supabase
+  // Load tasks from Supabase for the active workspace
   useEffect(() => {
+    const wsId = activeWorkspaceId;
+    if (!wsId) {
+      setTasks([]);
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
-    async function loadTasks() {
+    async function loadTasks(workspaceId: string) {
       try {
-        const data = await fetchTasks();
+        const data = await fetchTasks(workspaceId);
         if (!cancelled) setTasks(data);
       } catch (err) {
         console.error("Failed to load tasks:", err);
@@ -55,19 +66,21 @@ function TasksContent() {
         if (!cancelled) setLoading(false);
       }
     }
-    loadTasks();
+    loadTasks(wsId);
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [activeWorkspaceId]);
 
-  // Filter tasks by active project and/or starred filter (memoized)
+  // Filter tasks by active project, starred filter, and department (memoized)
   const filteredTasks = useMemo(() => {
-    const byProject = activeProjectId
+    let list = activeProjectId
       ? tasks.filter((t) => t.projectId === activeProjectId)
       : tasks;
-    return isStarredFilter ? byProject.filter((t) => t.isStarred) : byProject;
-  }, [tasks, activeProjectId, isStarredFilter]);
+    if (isStarredFilter) list = list.filter((t) => t.isStarred);
+    if (departmentId) list = list.filter((t) => t.departmentId === departmentId);
+    return list;
+  }, [tasks, activeProjectId, isStarredFilter, departmentId]);
 
   // Group tasks by project (memoized)
   const tasksByProject = useMemo(() => {
@@ -157,16 +170,24 @@ function TasksContent() {
     }
   }, []);
 
-  const handleAdd = useCallback(async (title: string, projectId: string) => {
-    try {
-      await createTask({ title, projectId: projectId.toString() });
-      const data = await fetchTasks();
-      setTasks(data);
-      toast.success("Task created");
-    } catch {
-      toast.error("Failed to create task");
-    }
-  }, []);
+  const handleAdd = useCallback(
+    async (title: string, projectId: string) => {
+      if (!activeWorkspaceId) return;
+      try {
+        await createTask({
+          title,
+          projectId,
+          workspaceId: activeWorkspaceId,
+        });
+        const data = await fetchTasks(activeWorkspaceId);
+        setTasks(data);
+        toast.success("Task created");
+      } catch {
+        toast.error("Failed to create task");
+      }
+    },
+    [activeWorkspaceId],
+  );
 
   const handleExpand = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -206,6 +227,7 @@ function TasksContent() {
           <p className="mt-1 text-sm text-white/40">
             {filteredTasks.filter((t) => t.status !== "approved").length} tasks
             remaining
+            {departmentId ? " · filtered by department" : ""}
           </p>
         </div>
 

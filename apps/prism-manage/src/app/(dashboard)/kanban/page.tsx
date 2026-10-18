@@ -135,12 +135,18 @@ export default function KanbanPage() {
     return map;
   }, [projects]);
 
-  // Fetch tasks from Supabase
-  useEffect(() => {
-    async function loadTasks() {
-      try {
-        const res = await fetch("/api/tasks");
-        const data = await res.json();
+  // Fetch tasks from Supabase for the active workspace
+  const loadTasks = useCallback(async () => {
+    if (!activeWorkspaceId) {
+      setTasks([]);
+      setLoading(false);
+      return;
+    }
+    try {
+      const res = await fetch(
+        `/api/tasks?workspaceId=${encodeURIComponent(activeWorkspaceId)}`,
+      );
+      const data = await res.json();
         // API returns camelCase Task[] — map to KanbanTask
         const mapped: KanbanTask[] = (data || []).map(
           (t: Record<string, unknown>) => ({
@@ -171,14 +177,16 @@ export default function KanbanPage() {
           }),
         );
         setTasks(mapped);
-      } catch {
-        console.error("Failed to load tasks");
-      } finally {
-        setLoading(false);
-      }
+    } catch {
+      console.error("Failed to load tasks");
+    } finally {
+      setLoading(false);
     }
+  }, [activeWorkspaceId]);
+
+  useEffect(() => {
     loadTasks();
-  }, []);
+  }, [loadTasks]);
 
   const filteredTasks = useMemo(
     () =>
@@ -257,29 +265,21 @@ export default function KanbanPage() {
     const title = prompt("Task title:");
     if (!title) return;
 
-    const projectId = activeProjectId || projects[0]?.id || "1";
+    const projectId = activeProjectId || projects[0]?.id;
+    if (!projectId) {
+      toast.error("Create a list first");
+      return;
+    }
+
     try {
-      await createTask({ title, projectId: projectId.toString() });
-      const newTask: KanbanTask = {
-        id: Date.now().toString(),
-        projectId: projectId.toString(),
-        title,
-        taskType: "feature",
-        status: "todo",
-        priority: "medium",
-        isStarred: false,
-        pathIndex: 0,
-        order: tasks.filter((t) => t.projectId === projectId).length,
-        column,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      setTasks((prev) => [newTask, ...prev]);
+      await createTask({ title, projectId, status: column });
+      // Refetch so the board reflects the real row (id, timestamps, ordering)
+      await loadTasks();
       toast.success("Task added");
     } catch {
       toast.error("Failed to create task");
     }
-  }, [activeProjectId, projects, tasks]);
+  }, [activeProjectId, projects, loadTasks]);
 
   if (loading) {
     return (
