@@ -31,7 +31,14 @@ CI order: `check-types` → `lint` → `test` → `build`. Run in that sequence 
 | `apps/prism-mcp-server` | —    | Node.js + MCP SDK (stdio transport)     |
 | `apps/syntaxure-labs`   | 3000 | Next.js 16 + Supabase                   |
 | `apps/prism-analytics`  | 8000 | Python FastAPI + Supabase + pandas      |
-| `apps/syntaxure-pm`     | 3008 | Next.js 16 + Supabase (docs + PM)       |
+
+## App Status — as of 2026-10-18
+
+- **Active focus:** `apps/prism-engine` + `packages/prism-context-engine`.
+- **Default internal ops tool:** `apps/prism-manage` — the canonical internal ops hub (tasks, kanban, calendar, GitHub sync, marketing ops, pages).
+- **Paused (not abandoned):** `apps/prism-admin`, `apps/prism-docs`, `apps/prism-mcp-server`, `apps/prism-analytics` — deprioritized for bandwidth, to be resumed later. `prism-analytics` is earmarked as a possible future token-consumption / usage-metrics tracker for Prism.
+- **Retired:** `apps/syntaxure-pm` — deprecated and discontinued; removed 2026-10-18. It duplicated `prism-manage`'s tasks/dashboard/settings shape and never got past a two-week build-out. See `docs/architecture-audit-2026-08-20.md`.
+- **Deploys:** Vercel-native Git integration handles app deploys (per-project links in `.vercel/repo.json`). The GH Actions deploy pipeline (`deploy.yml` + `amondnet/vercel-action`) is retired. `prism-mcp-server` runs locally only — hosting TBD.
 
 ## Architecture Rules
 
