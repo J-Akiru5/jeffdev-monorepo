@@ -88,7 +88,7 @@ export function WorkspaceMembersSettings({
       );
     });
 
-    const result = await updateMemberRole(workspaceId, userId, newRole, manageMode);
+    const result = await updateMemberRole(workspaceId, userId, newRole);
     if (result.error) {
       // Revert on error
       setOptimisticMembers(members);
@@ -98,7 +98,7 @@ export function WorkspaceMembersSettings({
 
   const handleDepartmentChange = async (userId: string, departmentId: string | null) => {
     setLoadingMap((prev) => ({ ...prev, [`dept-${userId}`]: true }));
-    const result = await assignMemberDepartment(workspaceId, userId, departmentId, manageMode);
+    const result = await assignMemberDepartment(workspaceId, userId, departmentId);
     if (result.error) {
       alert(result.error);
     }
@@ -117,7 +117,7 @@ export function WorkspaceMembersSettings({
       setOptimisticMembers((prev) => prev.filter((m) => m.userId !== userId));
     });
 
-    const result = await removeMember(workspaceId, userId, manageMode);
+    const result = await removeMember(workspaceId, userId);
     if (result.error) {
       setOptimisticMembers(members);
       toast.error(result.error);
