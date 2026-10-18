@@ -68,10 +68,12 @@ export default async function globalSetup() {
     // resolves and responds — only network-level failures mean "unreachable".
     await fetch(`${supabaseUrl}/auth/v1/health`);
   } catch (error) {
+    const cause =
+      error instanceof Error && "cause" in error
+        ? String((error as { cause?: unknown }).cause)
+        : String(error);
     console.error(
-      `[e2e] Supabase project unreachable (${
-        error instanceof Error ? error.message : String(error)
-      }) — the E2E suite will self-skip.`,
+      `[e2e] Supabase project unreachable (${supabaseUrl}) — ${cause}. The E2E suite will self-skip.`,
     );
     return;
   }
