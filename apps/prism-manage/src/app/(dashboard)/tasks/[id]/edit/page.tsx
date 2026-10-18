@@ -102,6 +102,7 @@ export default function EditTaskPage() {
           projects={projects}
           departments={departments}
           mode="edit"
+          taskId={taskId}
           isIntercepted={false}
         />
       </div>

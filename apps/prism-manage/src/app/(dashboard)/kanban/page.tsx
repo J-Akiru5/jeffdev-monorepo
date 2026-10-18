@@ -15,6 +15,7 @@ import { updateTaskStatus, createTask } from "@/app/actions/tasks";
 import type { Task } from "@/lib/schemas";
 import { getTaskTypeConfig, STAFF_LOCKED_STATUSES } from "@/lib/task-types";
 import { useWorkspaceStore } from "@/stores/workspace-store";
+import { createClient } from "@/lib/supabase/browser";
 import { toast } from "sonner";
 
 type KanbanColumn = "backlog" | "todo" | "in_progress" | "in_review" | "approved";
@@ -187,6 +188,33 @@ export default function KanbanPage() {
   useEffect(() => {
     loadTasks();
   }, [loadTasks]);
+
+  // Live updates: refresh when tasks change in this workspace
+  useEffect(() => {
+    if (!activeWorkspaceId) return;
+    const supabase = createClient();
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const channel = supabase
+      .channel(`kanban-tasks-${activeWorkspaceId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "tasks",
+          filter: `workspace_id=eq.${activeWorkspaceId}`,
+        },
+        () => {
+          if (timer) clearTimeout(timer);
+          timer = setTimeout(() => loadTasks(), 400);
+        },
+      )
+      .subscribe();
+    return () => {
+      if (timer) clearTimeout(timer);
+      supabase.removeChannel(channel);
+    };
+  }, [activeWorkspaceId, loadTasks]);
 
   const filteredTasks = useMemo(
     () =>
