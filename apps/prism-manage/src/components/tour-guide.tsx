@@ -10,7 +10,6 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
 import { Compass, X } from "lucide-react";
 
@@ -24,7 +23,7 @@ export function TourGuide() {
   // Only show the tour card on the dashboard page, where most tour targets exist
   const isDashboard = pathname === "/dashboard";
 
-  const startTour = useCallback(() => {
+  const startTour = useCallback(async () => {
     // Navigate to dashboard first if not already there, then start tour
     if (pathname !== "/dashboard") {
       router.push("/dashboard");
@@ -34,6 +33,8 @@ export function TourGuide() {
       return;
     }
 
+    // Code-split: driver.js only loads when the tour actually starts.
+    const { driver } = await import("driver.js");
     const driverObj = driver({
       showProgress: true,
       animate: true,

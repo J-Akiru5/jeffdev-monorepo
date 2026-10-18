@@ -94,6 +94,29 @@ test.describe("kanban", () => {
     await dragCardToColumn("Backlog", "In Progress", title, page);
   });
 
+  test("move menu relocates a task without dragging", async ({ page }) => {
+    const title = e2eTitle("move");
+    await page.goto("/kanban");
+    await expect(
+      page.getByRole("heading", { name: "Kanban Board" }),
+    ).toBeVisible({ timeout: 20_000 });
+
+    await quickAdd(page, "Backlog", title);
+
+    const card = desktopColumn(page, "Backlog").locator(
+      'div[draggable="true"]',
+      { hasText: title },
+    );
+    await card.getByRole("button", { name: "Move task" }).click();
+    await page.getByRole("button", { name: "In Progress", exact: true }).click();
+
+    await expect(
+      desktopColumn(page, "In Progress").locator('div[draggable="true"]', {
+        hasText: title,
+      }),
+    ).toBeVisible({ timeout: 15_000 });
+  });
+
   test("employees cannot move tasks into Approved", async ({ page }) => {
     const title = e2eTitle("approved");
     await page.goto("/kanban");

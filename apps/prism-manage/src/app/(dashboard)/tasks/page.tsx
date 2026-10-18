@@ -31,10 +31,18 @@ import { useWorkspaceStore } from "@/stores/workspace-store";
 import { createClient } from "@/lib/supabase/browser";
 import { toast } from "sonner";
 
-async function fetchTasks(workspaceId: string): Promise<Task[]> {
-  const res = await fetch(
-    `/api/tasks?workspaceId=${encodeURIComponent(workspaceId)}`,
-  );
+const TASKS_PAGE_SIZE = 50;
+
+async function fetchTasks(
+  workspaceId: string,
+  cursor?: string,
+): Promise<Task[]> {
+  const params = new URLSearchParams({
+    workspaceId,
+    limit: String(TASKS_PAGE_SIZE),
+  });
+  if (cursor) params.set("cursor", cursor);
+  const res = await fetch(`/api/tasks?${params.toString()}`);
   if (!res.ok) return [];
   const data = await res.json();
   return (data || []) as Task[];
@@ -48,6 +56,8 @@ function TasksContent() {
   const { projects, activeProjectId } = useProjects();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const searchParams = useSearchParams();
   const filter = searchParams.get("filter");
   const departmentId = searchParams.get("department");
@@ -81,6 +91,7 @@ function TasksContent() {
     try {
       const data = await fetchTasks(wsId);
       setTasks(data);
+      setHasMore(data.length >= TASKS_PAGE_SIZE);
     } catch (err) {
       console.error("Failed to load tasks:", err);
     } finally {
@@ -385,6 +396,7 @@ function TasksContent() {
         });
         const data = await fetchTasks(activeWorkspaceId);
         setTasks(data);
+        setHasMore(data.length >= TASKS_PAGE_SIZE);
         toast.success("Task created");
       } catch {
         toast.error("Failed to create task");
@@ -392,6 +404,22 @@ function TasksContent() {
     },
     [activeWorkspaceId],
   );
+
+  const handleLoadMore = useCallback(async () => {
+    if (!activeWorkspaceId || loadingMore) return;
+    const last = tasksRef.current[tasksRef.current.length - 1];
+    if (!last) return;
+    setLoadingMore(true);
+    try {
+      const more = await fetchTasks(activeWorkspaceId, last.createdAt);
+      setTasks((prev) => [...prev, ...more]);
+      setHasMore(more.length >= TASKS_PAGE_SIZE);
+    } catch (err) {
+      console.error("Failed to load more tasks:", err);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [activeWorkspaceId, loadingMore]);
 
   const handleExpand = useCallback(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -622,6 +650,18 @@ function TasksContent() {
               />
             );
           })}
+
+          {hasMore && (
+            <div className="flex justify-center pt-2">
+              <button
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm text-white/60 transition-colors hover:border-border-active hover:text-white/80 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loadingMore ? "Loading…" : "Load more"}
+              </button>
+            </div>
+          )}
 
           {Object.keys(tasksByProject).length === 0 && (
             <div className="py-12 text-center">

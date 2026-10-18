@@ -81,7 +81,10 @@ export const TaskList = memo(function TaskList({
         className="overflow-auto"
         style={{
           maxHeight: incompleteTasks.length > 20 ? "60vh" : "none",
-          contain: incompleteTasks.length > 20 ? "strict" : "layout paint",
+          // `contain: strict` includes SIZE containment — with no explicit
+          // height the container collapses to 0 and the virtualizer renders
+          // nothing. layout+paint keeps the perf wins without the collapse.
+          contain: "layout paint",
         }}
       >
         <div
