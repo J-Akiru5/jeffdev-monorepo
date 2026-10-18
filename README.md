@@ -51,7 +51,6 @@ This monorepo powers **Syntaxure Labs** — a technology startup building high-p
 │  ├── prism-docs          → Multi-language documentation (:3002)     │
 │  ├── prism-admin         → Agency admin panel           (:3004)     │
 │  ├── prism-manage        → Internal project management  (:3007)     │
-│  ├── syntaxure-pm        → Docs + project management    (:3008)     │
 │  ├── prism-mcp-server    → AI context server (MCP)      (stdio)     │
 │  └── prism-analytics     → Python FastAPI analytics      (:8000)     │
 ├──────────────────────────────────────────────────────────────────────┤
@@ -150,17 +149,6 @@ Agency admin panel with subscription management, pricing controls, and user admi
 Internal project management with kanban boards, marketing tools, and workspace collaboration.
 
 **Stack**: Next.js 16, Supabase, Zustand
-
-</td>
-<td width="50%" valign="top">
-
-### ◈ Syntaxure PM
-
-`apps/syntaxure-pm` · Port `3008`
-
-Documentation site and project management platform with Supabase backend, Upstash Redis caching, and Sentry monitoring.
-
-**Stack**: Next.js 16, Supabase, Upstash Redis
 
 </td>
 </tr>
@@ -296,7 +284,6 @@ check-types → lint → test → build
 | Prism Docs      | 3002 | http://localhost:3002 |
 | Prism Admin     | 3004 | http://localhost:3004 |
 | Prism Manage    | 3007 | http://localhost:3007 |
-| Syntaxure PM    | 3008 | http://localhost:3008 |
 | Prism Analytics | 8000 | http://localhost:8000 |
 
 ---
