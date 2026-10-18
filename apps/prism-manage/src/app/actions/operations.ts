@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { requireBmcViewAccess, requireOperationsAccess } from "@/lib/authorization-server";
 import { BMC_BLOCK_KEYS, BMC_SEED, type BmcBlockKey } from "@/lib/bmc-blocks";
+import type { Json } from "@/types/database.types";
 
 // =============================================================================
 // TYPES
@@ -116,7 +117,7 @@ export async function createMilestone(input: {
       department_id: input.departmentId || null,
       title,
       description: input.description || null,
-      due_date: input.dueDate || null,
+      ...(input.dueDate ? { due_date: input.dueDate } : {}),
       status: input.status || "pending",
       deliverables: input.deliverables || [],
       created_by: user?.id || null,
@@ -163,7 +164,8 @@ export async function updateMilestone(
 
     const { data, error } = await supabase
       .from("milestones")
-      .update(update)
+      // Dynamic update builder — loose cast until payload types are tightened.
+      .update(update as never)
       .eq("id", id)
       .select("id");
     if (error) return { error: error.message };
@@ -266,7 +268,7 @@ export async function upsertCost(input: {
     } else {
       const { error } = await supabase
         .from("infrastructure_costs")
-        .insert({ ...row, created_by: user?.id || null });
+        .insert({ id: crypto.randomUUID(), ...row, created_by: user?.id || null });
       if (error) return { error: error.message };
     }
 
@@ -351,9 +353,10 @@ export async function upsertBmcSection(
       .from("bmc_sections")
       .upsert(
         {
+          id: crypto.randomUUID(),
           workspace_id: access.workspaceId,
           block,
-          content,
+          content: content as Json,
           updated_by: user?.id || null,
         },
         { onConflict: "workspace_id,block" },
@@ -386,9 +389,10 @@ export async function seedBmcData(): Promise<{ success?: boolean; error?: string
 
     const { error } = await supabase.from("bmc_sections").insert(
       missing.map((block) => ({
+        id: crypto.randomUUID(),
         workspace_id: access.workspaceId,
         block,
-        content: BMC_SEED[block],
+        content: BMC_SEED[block] as Json,
         updated_by: user?.id || null,
       })),
     );

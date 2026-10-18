@@ -123,7 +123,9 @@ export async function captureMemoryEntry(input: {
       title,
       summary,
       decisions,
-      ...(embedding ? { embedding } : {}),
+      // pgvector columns surface as `string` in generated types; the runtime
+      // accepts the numeric array (proven working) — cast is type-only.
+      ...(embedding ? { embedding: embedding as unknown as string } : {}),
     })
     .select("id")
     .single();
@@ -170,7 +172,8 @@ export async function searchMemory(
   const embedding = await embedText(q);
   if (embedding) {
     const { data } = await supabase.rpc("match_memory_entries", {
-      query_embedding: embedding,
+      // Type-only cast: vector params surface as `string` in generated types.
+      query_embedding: embedding as unknown as string,
       match_workspace: workspaceId,
       match_count: 8,
       min_similarity: 0.2,

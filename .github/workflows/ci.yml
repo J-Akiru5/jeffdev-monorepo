@@ -88,6 +88,8 @@ jobs:
       - run: npm install -g napi-postinstall
       - run: pnpm install --frozen-lockfile --prefer-offline
       - run: pnpm run check-types
+      - name: Dependency version consistency (syncpack)
+        run: npx syncpack list-mismatches
 
   # ─── Step 2b: Lint (parallel with typecheck) ─────────────────────────────
   lint:
@@ -304,6 +306,10 @@ jobs:
           key: turbo-${{ github.sha }}
       - run: npm install -g napi-postinstall
       - run: pnpm install --frozen-lockfile --prefer-offline
+      - name: Check schema drift (generated DB types)
+        run: pnpm db:types:check
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
       - name: Build prism-manage
         run: pnpm --filter prism-manage run build
         env:

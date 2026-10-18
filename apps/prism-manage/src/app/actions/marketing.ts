@@ -22,7 +22,14 @@ export async function getMarketingPhases(): Promise<MarketingPhase[]> {
       .from("marketing_phases")
       .select("*")
       .order("order", { ascending: true });
-    return data || [];
+    return (data || []).map((row) => ({
+      id: String(row.id),
+      name: String(row.name),
+      order: row.order ?? 0,
+      timeframe: row.timeframe ?? undefined,
+      description: row.description ?? undefined,
+      color: row.color ?? undefined,
+    }));
   } catch {
     return [];
   }
@@ -35,7 +42,14 @@ export async function getMarketingTeam(): Promise<MarketingTeamMember[]> {
     if (!user) return [];
 
     const { data } = await supabase.from("marketing_team").select("*");
-    return data || [];
+    return (data || []).map((row) => ({
+      id: String(row.id),
+      name: String(row.name),
+      initials: row.initials ?? "",
+      color: row.color ?? "#22D3EE",
+      role: row.role ?? undefined,
+      focus: row.focus ?? undefined,
+    }));
   } catch {
     return [];
   }
@@ -95,7 +109,8 @@ export async function updateKpi(
 
   const { error } = await supabase
     .from("marketing_kpis")
-    .upsert({ id, ...doc }, { onConflict: "id" });
+    .update(doc as never)
+    .eq("id", id);
 
   if (error) throw error;
   revalidatePath("/marketing");
@@ -221,7 +236,7 @@ export async function updateMarketingTask(
 
   const { error } = await supabase
     .from("marketing_tasks")
-    .update(updateData)
+    .update(updateData as never)
     .eq("id", taskId);
 
   if (error) throw error;

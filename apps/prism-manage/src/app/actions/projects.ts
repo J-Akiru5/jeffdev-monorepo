@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
+import type { Json } from "@/types/database.types";
 import { mapProject, getOrCreateDefaultProject } from "@/lib/pm-projects";
 import type { Project } from "@/lib/schemas";
 
@@ -20,7 +21,7 @@ async function logAudit(event: {
       action: event.action,
       resource_type: event.resource,
       resource_id: event.resourceId,
-      changes: event.details || null,
+      changes: (event.details ?? null) as Json,
       user_id: user?.id || null,
       created_at: new Date().toISOString(),
     });
@@ -131,7 +132,7 @@ export async function updateProject(
 
   const { data, error } = await supabase
     .from("pm_projects")
-    .update(update)
+    .update(update as never)
     .eq("id", id)
     .select("id");
 

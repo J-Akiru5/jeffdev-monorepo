@@ -9,6 +9,7 @@
  */
 
 import { createClient } from "@/lib/supabase/browser";
+import type { Json } from "@/types/database.types";
 
 export interface AuditEvent {
   action: "CREATE" | "UPDATE" | "DELETE" | "STATUS_CHANGE" | "TOGGLE";
@@ -33,7 +34,7 @@ export async function logAuditEvent(event: AuditEvent): Promise<void> {
       action: event.action,
       resource_type: event.resource,
       resource_id: event.resourceId || null,
-      changes: event.details || null,
+      changes: (event.details ?? null) as Json,
       user_id: user?.id || null,
       created_at: new Date().toISOString(),
     });

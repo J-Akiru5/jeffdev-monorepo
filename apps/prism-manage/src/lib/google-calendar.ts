@@ -437,7 +437,10 @@ export async function pullGoogleEvents(userId: string): Promise<PullResult> {
       };
 
       if (existing) {
-        await admin.from("calendar_events").update(row).eq("id", existing.id);
+        await admin
+          .from("calendar_events")
+          .update(row)
+          .eq("id", String(existing.id));
       } else {
         await admin.from("calendar_events").insert(row);
       }
@@ -447,7 +450,7 @@ export async function pullGoogleEvents(userId: string): Promise<PullResult> {
     // Sweep google-sourced rows that no longer exist in Google
     for (const [googleId, row] of localByGoogleId) {
       if (!seen.has(googleId) && !row.linked_task_id) {
-        await admin.from("calendar_events").delete().eq("id", row.id);
+        await admin.from("calendar_events").delete().eq("id", String(row.id));
         removed++;
       }
     }
