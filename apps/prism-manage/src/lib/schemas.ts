@@ -102,6 +102,7 @@ export const TaskSchema = z.object({
   dueDate: z.string().optional(), // ISO date (YYYY-MM-DD)
   dueTime: z.string().optional(), // HH:mm format
   googleEventId: z.string().optional(), // Linked calendar event
+  githubIssueNumber: z.number().optional(), // Linked GitHub issue
 
   // Ordering
   order: z.number().default(0),

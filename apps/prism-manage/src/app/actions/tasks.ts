@@ -9,6 +9,8 @@ import {
   pushTaskToGoogleCalendar,
 } from "@/lib/google-calendar";
 import { notifyUsers } from "@/lib/notify";
+import { notifySlack, taskUrl } from "@/lib/slack";
+import { pushTaskStatusToGitHub } from "@/app/actions/github-sync";
 
 async function logAudit(event: {
   action: string;
@@ -163,6 +165,9 @@ function mapTask(raw: Record<string, unknown>): Task {
     dueDate: raw.due_date ? String(raw.due_date) : undefined,
     dueTime: raw.due_time ? String(raw.due_time) : undefined,
     googleEventId: raw.google_event_id ? String(raw.google_event_id) : undefined,
+    githubIssueNumber: raw.github_issue_number
+      ? Number(raw.github_issue_number)
+      : undefined,
 
     // Ordering
     order: Number(raw.order || 0),
@@ -395,6 +400,13 @@ export async function createTask(input: {
     });
   }
 
+  // Slack ping for assignments (best-effort)
+  if (input.assignedTo && input.assignedTo !== user.id && inserted?.id) {
+    await notifySlack(
+      `:inbox_tray: *Task assigned* — "${parsed.data.title}" <${taskUrl(inserted.id)}|open task>`,
+    );
+  }
+
   revalidatePath("/tasks");
 }
 
@@ -429,6 +441,9 @@ export async function toggleTaskComplete(taskId: string, completed: boolean) {
     resourceId: taskId,
     details: { status: newStatus },
   });
+
+  // Push status to the linked GitHub issue (best-effort)
+  await pushTaskStatusToGitHub(taskId, newStatus);
 
   revalidatePath("/tasks");
 }
@@ -495,6 +510,9 @@ export async function updateTaskStatus(taskId: string, status: string) {
     resourceId: taskId,
     details: { status },
   });
+
+  // Push status to the linked GitHub issue (best-effort)
+  await pushTaskStatusToGitHub(taskId, status);
 
   revalidatePath("/tasks");
 }
@@ -596,6 +614,9 @@ export async function updateTask(
       entityType: "task",
       entityId: taskId,
     });
+    await notifySlack(
+      `:inbox_tray: *Task assigned* — "${updatedTask?.title || "a task"}" <${taskUrl(taskId)}|open task>`,
+    );
   }
 
   // Mirror to Google Calendar (best-effort): push when scheduling fields
@@ -627,6 +648,11 @@ export async function updateTask(
       await deleteTaskFromGoogleCalendar(user.id, String(currentTask.google_event_id));
       await supabase.from("tasks").update({ google_event_id: null }).eq("id", taskId);
     }
+  }
+
+  // Push status to the linked GitHub issue (best-effort)
+  if (parsed.data.status !== undefined) {
+    await pushTaskStatusToGitHub(taskId, parsed.data.status);
   }
 
   revalidatePath("/tasks");

@@ -49,6 +49,7 @@ export default function InterceptedEditTask() {
             dueTime: t.dueTime || t.due_time || "",
             projectId: t.projectId || t.project_id || "",
             departmentId: t.departmentId || t.department_id || undefined,
+            githubIssueNumber: t.githubIssueNumber || undefined,
           });
         }
       } catch (err) {

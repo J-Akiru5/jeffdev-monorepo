@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { notifyUsers } from "@/lib/notify";
+import { notifySlack, taskUrl } from "@/lib/slack";
 
 export interface TaskComment {
   id: string;
@@ -210,6 +211,11 @@ export async function addComment(
     entityType: "task",
     entityId: taskId,
   });
+
+  // Slack ping for the comment (best-effort — one post per comment)
+  await notifySlack(
+    `:speech_balloon: *New comment* on "${task.title}"${mentionIds.length > 0 ? ` (${mentionIds.length} mention${mentionIds.length === 1 ? "" : "s"})` : ""} — ${snippet} <${taskUrl(taskId)}|open task>`,
+  );
 
   const { data: profile } = await admin
     .from("user_profiles")

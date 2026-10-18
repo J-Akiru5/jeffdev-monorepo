@@ -47,6 +47,7 @@ export default function EditTaskPage() {
             dueTime: t.dueTime || t.due_time || "",
             projectId: t.projectId || t.project_id || "",
             departmentId: t.departmentId || t.department_id || undefined,
+            githubIssueNumber: t.githubIssueNumber || undefined,
           });
         }
       } catch {
