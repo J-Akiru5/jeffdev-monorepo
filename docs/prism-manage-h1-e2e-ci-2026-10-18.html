@@ -58,7 +58,7 @@
       <span>Repo: <b>jeffdev-monorepo</b></span>
       <span>Agent: <b>opencode · DeepSeek V4.1 Flash</b></span>
       <span>Branch: <b>feat/pm-h1-e2e → PR → develop</b></span>
-      <span class="badge done">Complete — 21/21 green</span>
+      <span class="badge done">Complete — green locally + in CI</span>
     </div>
   </header>
 
@@ -121,6 +121,11 @@
       <div class="why">The shared dialog's docstring says "Renders via a portal" — it didn't. Inside the virtualized list it inherited the rows' stacking context, so later rows intercepted the confirm button, and the dialog's title slid behind the sticky toolbar.</div>
       <div class="fix"><b>Fix:</b> dialog content is now actually portaled to <span class="mono">document.body</span> — correct everywhere it's used.</div>
     </div>
+    <div class="bug">
+      <div class="head"><span class="sev med">Medium</span><b>Empty boards hid the inline add input (found by CI)</b></div>
+      <div class="why">The tasks page only rendered a list's group when that list had tasks — on a fresh workspace there was no inline "Add a task" input anywhere (the CI suite, running sequentially against an empty DB, timed out on its first task creation).</div>
+      <div class="fix"><b>Fix:</b> every list now renders its group (with its inline add input) in the unfiltered view; filtered and selected-list views stay scoped (PR #97).</div>
+    </div>
   </section>
 
   <section>
@@ -162,10 +167,10 @@
     <h2>Notes &amp; Follow-ups</h2>
     <ul class="clean">
       <li><b>Supabase CLI:</b> <span class="mono">db push</span> currently fails with a 403 on the CLI's login-role endpoint (CLI 2.121, account-level). Workaround used: <span class="mono">supabase db push --db-url &lt;pooler-url&gt;</span> with the DB password — worth investigating separately.</li>
-      <li><b>CI Supabase secrets are stale:</b> they point at a retired project whose DNS no longer resolves — the first CI run proved it (build + browser install green; suite skipped loudly after the fail-soft patch). Update the repo secrets (<span class="mono">NEXT_PUBLIC_SUPABASE_URL</span>, <span class="mono">ANON_KEY</span>, <span class="mono">SERVICE_ROLE_KEY</span>) to the live project to switch CI into real end-to-end runs.</li>
+      <li><b>CI Supabase secrets:</b> were stale (retired project, DNS dead) — now refreshed with the live project's URL / anon / service-role values. CI provisions the E2E account and runs the suite for real.</li>
       <li><b>Live-DB testing:</b> the suite runs against the shared Supabase project; all test data is prefixed <span class="mono">e2e-</span> and removed by teardown. The E2E account ("E2E Test Account") is a labeled employee of Syntaxure Labs.</li>
       <li><b>Not covered yet:</b> GitHub sync button (would create real issues), assistant (needs Gemini key), marketing route. Candidates for H2/H3.</li>
-      <li>CI runs this suite for the first time on this PR — expected to be the reference run for the arc.</li>
+      <li><b>CI E2E is live:</b> reference run on develop — <b>20 passed + 1 flaky</b> (kanban Approved drag, recovered on retry). <span class="mono">publish.yml</span> was also repaired (invalid workflow file had been failing a 0-second run on every push).</li>
     </ul>
   </section>
 
