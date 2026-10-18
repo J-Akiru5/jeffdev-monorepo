@@ -56,3 +56,22 @@ export function canApproveTaskStatus(
   if (!taskHasWorkspace) return true;
   return role !== "employee";
 }
+
+/**
+ * Whether the user may view and manage the Operations hub (milestones +
+ * infrastructure costs). CEO/COO only, plus an unrefined founder.
+ * Mirrors the sidebar visibility rule from docs/role-plan.md.
+ */
+export function isOperationsAuthorized(access: WorkspaceAccess): boolean {
+  if (access.role !== "founder") return false;
+  if (!access.cLevelTitle) return true;
+  return access.cLevelTitle === "ceo" || access.cLevelTitle === "coo";
+}
+
+/**
+ * Whether the user may VIEW the Business Model Canvas. All founders (any
+ * C-level) may view; employees may not. Editing follows isOperationsAuthorized.
+ */
+export function isBmcViewAuthorized(access: WorkspaceAccess): boolean {
+  return access.role === "founder";
+}

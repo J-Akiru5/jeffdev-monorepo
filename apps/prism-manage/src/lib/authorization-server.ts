@@ -5,7 +5,7 @@
  */
 
 import type { WorkspaceAccess } from "@/lib/authorization";
-import { isMarketingAuthorized } from "@/lib/authorization";
+import { isBmcViewAuthorized, isMarketingAuthorized, isOperationsAuthorized } from "@/lib/authorization";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SupabaseClientLike = any;
@@ -83,6 +83,34 @@ export async function requireMarketingAccess(
     throw new Error(
       "Only founders or Marketing department members can manage marketing",
     );
+  }
+  return access;
+}
+
+/** Require CEO/COO (or unrefined founder) access for Operations hub data. */
+export async function requireOperationsAccess(supabase: SupabaseClientLike) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const access = await getSyntaxureWorkspaceAccess(supabase, user.id);
+  if (!access || !isOperationsAuthorized(access)) {
+    throw new Error("Only the CEO and COO can manage operations");
+  }
+  return access;
+}
+
+/** Require founder/C-level access for viewing the Business Model Canvas. */
+export async function requireBmcViewAccess(supabase: SupabaseClientLike) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Unauthorized");
+
+  const access = await getSyntaxureWorkspaceAccess(supabase, user.id);
+  if (!access || !isBmcViewAuthorized(access)) {
+    throw new Error("Only founders and C-levels can view the business canvas");
   }
   return access;
 }

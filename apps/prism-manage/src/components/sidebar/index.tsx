@@ -21,6 +21,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Plus,
+  Target,
 } from "lucide-react";
 import { KeyboardShortcutsHelp } from "@syntaxure/ui";
 import { MANAGE_HELP_SHORTCUTS, MODE_TOGGLE_SHORTCUT } from "@/lib/keyboard-shortcuts";
@@ -77,6 +78,9 @@ export function Sidebar() {
   const isSyntaxureLabs = activeWorkspace?.name === "Syntaxure Labs" || activeWorkspace?.name === "Syntaxure Labs, Inc.";
   const isPersonal = activeWorkspace?.name === "Personal";
   const isFounder = userRole === "founder";
+  const operationsAuthorized =
+    isFounder && (!cLevelTitle || cLevelTitle === "ceo" || cLevelTitle === "coo");
+  const bmcAuthorized = isFounder;
 
   const cLevelDepartment = cLevelTitle
     ? ({ ceo: null, cto: "Engineering", cpo: "Product", coo: "Operations", cmo: "Marketing" } as const)[cLevelTitle]
@@ -244,6 +248,30 @@ export function Sidebar() {
             )}
           </SidebarSection>
           </div>
+        )}
+
+        {/* Operations — CEO/COO hub + BMC */}
+        {(operationsAuthorized || bmcAuthorized) && (
+          <SidebarSection title="Operations" collapsed={collapsed}>
+            {operationsAuthorized && (
+              <SidebarNavItem
+                label="Operations"
+                href="/operations"
+                icon={Target}
+                active={isActive("/operations")}
+                collapsed={collapsed}
+              />
+            )}
+            {bmcAuthorized && (
+              <SidebarNavItem
+                label="Business Canvas"
+                href="/bmc"
+                icon={LayoutGrid}
+                active={isActive("/bmc")}
+                collapsed={collapsed}
+              />
+            )}
+          </SidebarSection>
         )}
 
         {/* Pages — both modes */}
