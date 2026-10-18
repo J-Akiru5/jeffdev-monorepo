@@ -16,6 +16,8 @@ import type { Task } from "@/lib/schemas";
 import { getTaskTypeConfig, STAFF_LOCKED_STATUSES } from "@/lib/task-types";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { createClient } from "@/lib/supabase/browser";
+import { isSyntaxureWorkspaceName } from "@/lib/workspace-names";
+import { PromptDialog } from "@/components/prompt-dialog";
 import { toast } from "sonner";
 
 type KanbanColumn = "backlog" | "todo" | "in_progress" | "in_review" | "approved";
@@ -114,13 +116,14 @@ export default function KanbanPage() {
   const workspaces = useWorkspaceStore((s) => s.workspaces);
   const cpoUserId = useWorkspaceStore((s) => s.cpoUserId);
   // Find Syntaxure Labs workspace — only there does the RBAC apply
-  const syntaxureWorkspaceId = workspaces.find(
-    (w) => w.name === "Syntaxure Labs" || w.name === "Syntaxure Labs, Inc."
+  const syntaxureWorkspaceId = workspaces.find((w) =>
+    isSyntaxureWorkspaceName(w.name),
   )?.id;
   const isSyntaxureLabs = !!(syntaxureWorkspaceId && activeWorkspaceId === syntaxureWorkspaceId);
   const [tasks, setTasks] = useState<KanbanTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [draggedTask, setDraggedTask] = useState<string | null>(null);
+  const [quickAddColumn, setQuickAddColumn] = useState<KanbanColumn | null>(null);
 
   // Stable drag-start handler — setter is guaranteed stable by React
   const handleDragStart = useCallback((taskId: string) => {
@@ -289,25 +292,32 @@ export default function KanbanPage() {
     setDraggedTask(null);
   };
 
-  const handleAddTask = useCallback(async (column: KanbanColumn) => {
-    const title = prompt("Task title:");
-    if (!title) return;
+  const handleAddTask = useCallback((column: KanbanColumn) => {
+    setQuickAddColumn(column);
+  }, []);
 
-    const projectId = activeProjectId || projects[0]?.id;
-    if (!projectId) {
-      toast.error("Create a list first");
-      return;
-    }
+  const submitQuickAdd = useCallback(
+    async (title: string) => {
+      const column = quickAddColumn;
+      if (!column) return;
 
-    try {
-      await createTask({ title, projectId, status: column });
-      // Refetch so the board reflects the real row (id, timestamps, ordering)
-      await loadTasks();
-      toast.success("Task added");
-    } catch {
-      toast.error("Failed to create task");
-    }
-  }, [activeProjectId, projects, loadTasks]);
+      const projectId = activeProjectId || projects[0]?.id;
+      if (!projectId) {
+        toast.error("Create a list first");
+        return;
+      }
+
+      try {
+        await createTask({ title, projectId, status: column });
+        // Refetch so the board reflects the real row (id, timestamps, ordering)
+        await loadTasks();
+        toast.success("Task added");
+      } catch {
+        toast.error("Failed to create task");
+      }
+    },
+    [quickAddColumn, activeProjectId, projects, loadTasks],
+  );
 
   if (loading) {
     return (
@@ -434,6 +444,15 @@ export default function KanbanPage() {
           );
         })}
       </div>
+
+      <PromptDialog
+        open={quickAddColumn !== null}
+        onClose={() => setQuickAddColumn(null)}
+        onSubmit={submitQuickAdd}
+        title="Add task"
+        placeholder="Task title…"
+        confirmLabel="Add task"
+      />
     </div>
   );
 }

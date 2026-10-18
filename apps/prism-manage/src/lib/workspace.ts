@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { isSyntaxureWorkspaceName } from "@/lib/workspace-names";
 
 /**
  * Resolved workspace data for the Syntaxure Labs workspace.
@@ -43,7 +44,7 @@ export const resolveSyntaxureWorkspace = cache(async (): Promise<ResolvedWorkspa
   const syntaxureMembership = memberships.find((m: any) => {
     const ws = m.workspaces;
     if (!ws) return false;
-    return ws.name === "Syntaxure Labs" || ws.name === "Syntaxure Labs, Inc.";
+    return isSyntaxureWorkspaceName(ws.name);
   });
 
   if (!syntaxureMembership) return null;

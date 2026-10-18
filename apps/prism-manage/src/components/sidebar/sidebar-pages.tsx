@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import type { Page } from "@/app/actions/pages";
 import { createPage, deletePage } from "@/app/actions/pages";
+import { ConfirmDialog } from "@syntaxure/ui";
 
 interface SidebarPagesProps {
   workspaceId: string;
@@ -45,6 +46,7 @@ function PageTreeItem({
 }: PageTreeItemProps) {
   const [expanded, setExpanded] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const children = pages.filter((p) => p.parent_id === page.id);
   const hasChildren = children.length > 0;
 
@@ -60,8 +62,13 @@ function PageTreeItem({
     }
   };
 
-  const handleDelete = async () => {
-    if (!confirm("Delete this page and all sub-pages?")) return;
+  const handleDelete = () => {
+    setShowMenu(false);
+    setConfirmDelete(true);
+  };
+
+  const executeDelete = async () => {
+    setConfirmDelete(false);
     const result = await deletePage(page.id);
     if (result.success) {
       // Remove page and all descendants
@@ -73,7 +80,6 @@ function PageTreeItem({
       collectIds(page.id);
       onPagesChange(pages.filter((p) => !idsToRemove.has(p.id)));
     }
-    setShowMenu(false);
   };
 
   if (collapsed) {
@@ -171,6 +177,16 @@ function PageTreeItem({
             ))}
         </ul>
       )}
+
+      <ConfirmDialog
+        open={confirmDelete}
+        onOpenChange={setConfirmDelete}
+        title={`Delete "${page.title}"?`}
+        description="This deletes the page and all sub-pages. This cannot be undone."
+        confirmLabel="Delete"
+        confirmVariant="danger"
+        onConfirm={executeDelete}
+      />
     </li>
   );
 }

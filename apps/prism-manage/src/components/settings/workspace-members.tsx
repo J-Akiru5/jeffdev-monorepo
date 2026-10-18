@@ -100,7 +100,7 @@ export function WorkspaceMembersSettings({
     setLoadingMap((prev) => ({ ...prev, [`dept-${userId}`]: true }));
     const result = await assignMemberDepartment(workspaceId, userId, departmentId);
     if (result.error) {
-      alert(result.error);
+      toast.error(result.error);
     }
     setLoadingMap((prev) => ({ ...prev, [`dept-${userId}`]: false }));
   };
