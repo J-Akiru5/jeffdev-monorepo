@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { getOrCreateDefaultProject } from "@/lib/pm-projects";
+import { notifyUsers } from "@/lib/notify";
 
 async function logAudit(event: {
   action: string;
@@ -363,6 +364,20 @@ export async function createTask(input: {
     details: { title: parsed.data.title, workspaceId, projectId },
   });
 
+  // Notify the assignee (best-effort)
+  if (input.assignedTo && input.assignedTo !== user.id && inserted?.id) {
+    await notifyUsers(getAdminClient(), [input.assignedTo], {
+      title: "Task assigned to you",
+      message: parsed.data.title,
+      type: "assignment",
+      relatedId: inserted.id,
+      actionUrl: `/tasks/${inserted.id}/edit`,
+      actorId: user.id,
+      entityType: "task",
+      entityId: inserted.id,
+    });
+  }
+
   revalidatePath("/tasks");
 }
 
@@ -485,6 +500,17 @@ export async function updateTask(
     await assertCanApproveTask(supabase, user.id, taskId);
   }
 
+  // Capture the current assignee so we can notify only on actual changes
+  let previousAssignee: string | null = null;
+  if (parsed.data.assignedTo !== undefined) {
+    const { data: current } = await supabase
+      .from("tasks")
+      .select("assigned_to")
+      .eq("id", taskId)
+      .maybeSingle();
+    previousAssignee = (current?.assigned_to as string) || null;
+  }
+
   const updateData: Record<string, unknown> = {};
   if (parsed.data.title !== undefined) updateData.title = parsed.data.title;
   if (parsed.data.taskType !== undefined) updateData.task_type = parsed.data.taskType;
@@ -523,6 +549,29 @@ export async function updateTask(
     resourceId: taskId,
     details: { fields: Object.keys(updateData) },
   });
+
+  // Notify a newly-assigned member (best-effort)
+  if (
+    parsed.data.assignedTo &&
+    parsed.data.assignedTo !== user.id &&
+    parsed.data.assignedTo !== previousAssignee
+  ) {
+    const { data: updatedTask } = await supabase
+      .from("tasks")
+      .select("title")
+      .eq("id", taskId)
+      .maybeSingle();
+    await notifyUsers(getAdminClient(), [parsed.data.assignedTo], {
+      title: "Task assigned to you",
+      message: updatedTask?.title || "A task was assigned to you",
+      type: "assignment",
+      relatedId: taskId,
+      actionUrl: `/tasks/${taskId}/edit`,
+      actorId: user.id,
+      entityType: "task",
+      entityId: taskId,
+    });
+  }
 
   revalidatePath("/tasks");
 }

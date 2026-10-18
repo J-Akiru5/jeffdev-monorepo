@@ -20,6 +20,7 @@ import {
 } from "@/app/actions/tasks";
 import type { Task } from "@/lib/schemas";
 import { useWorkspaceStore } from "@/stores/workspace-store";
+import { createClient } from "@/lib/supabase/browser";
 import { toast } from "sonner";
 
 async function fetchTasks(workspaceId: string): Promise<Task[]> {
@@ -47,30 +48,54 @@ function TasksContent() {
   const tasksRef = useRef(tasks);
   tasksRef.current = tasks;
 
-  // Load tasks from Supabase for the active workspace
-  useEffect(() => {
+  const loadTasks = useCallback(async () => {
     const wsId = activeWorkspaceId;
     if (!wsId) {
       setTasks([]);
       setLoading(false);
       return;
     }
-    let cancelled = false;
-    async function loadTasks(workspaceId: string) {
-      try {
-        const data = await fetchTasks(workspaceId);
-        if (!cancelled) setTasks(data);
-      } catch (err) {
-        console.error("Failed to load tasks:", err);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+    try {
+      const data = await fetchTasks(wsId);
+      setTasks(data);
+    } catch (err) {
+      console.error("Failed to load tasks:", err);
+    } finally {
+      setLoading(false);
     }
-    loadTasks(wsId);
-    return () => {
-      cancelled = true;
-    };
   }, [activeWorkspaceId]);
+
+  useEffect(() => {
+    loadTasks();
+  }, [loadTasks]);
+
+  // Live updates: refresh when tasks change in this workspace
+  useEffect(() => {
+    const wsId = activeWorkspaceId;
+    if (!wsId) return;
+    const supabase = createClient();
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const channel = supabase
+      .channel(`tasks-${wsId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "tasks",
+          filter: `workspace_id=eq.${wsId}`,
+        },
+        () => {
+          if (timer) clearTimeout(timer);
+          timer = setTimeout(() => loadTasks(), 400);
+        },
+      )
+      .subscribe();
+    return () => {
+      if (timer) clearTimeout(timer);
+      supabase.removeChannel(channel);
+    };
+  }, [activeWorkspaceId, loadTasks]);
 
   // Filter tasks by active project, starred filter, and department (memoized)
   const filteredTasks = useMemo(() => {

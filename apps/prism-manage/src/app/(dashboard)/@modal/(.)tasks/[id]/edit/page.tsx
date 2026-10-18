@@ -103,6 +103,7 @@ export default function InterceptedEditTask() {
       projects={projects}
       departments={departments}
       mode="edit"
+      taskId={taskId}
     />
   );
 }

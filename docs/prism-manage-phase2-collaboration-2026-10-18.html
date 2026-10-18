@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage Phase 2 — Task Report</title>
+<style>
+  :root {
+    --bg: #0A0D12; --bg-raised: #11151C; --bg-card: #151A22; --border: #232A36;
+    --cyan: #22D3EE; --violet: #8B7BFF; --text: #E6EAF0; --text-dim: #8B93A3;
+    --text-faint: #5A6272; --good: #4ADE80; --warn: #FBBF24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; padding: 48px 24px; }
+  .wrap { max-width: 820px; margin: 0 auto; }
+  .mono { font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 28px; margin-bottom: 32px; }
+  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 12px; background: linear-gradient(90deg, var(--text), var(--text) 60%, var(--cyan)); -webkit-background-clip: text; background-clip: text; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim); }
+  .meta-row span b { color: var(--text); font-weight: 500; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; border: 1px solid; }
+  .badge.done { color: var(--good); border-color: var(--good); background: rgba(74,222,128,0.08); }
+  .badge.followup { color: var(--warn); border-color: var(--warn); background: rgba(251,191,36,0.08); }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 14px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--violet); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .summary-box { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 6px; padding: 18px 20px; font-size: 15px; }
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  ul.clean li { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; font-size: 14px; }
+  .checkpoint { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 14px 18px; margin-bottom: 10px; }
+  .checkpoint .q { font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
+  .checkpoint .q b { color: var(--violet); font-weight: 500; }
+  .checkpoint .a { font-size: 14px; }
+  .checkpoint .a b { color: var(--cyan); font-weight: 500; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  th { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
+  td.mono { color: var(--cyan); }
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">prism-manage · Task Report</div>
+    <h1>Phase 2 — Collaboration Layer</h1>
+    <div class="meta-row">
+      <span><b>2026-10-18</b></span>
+      <span>Repo: <b>jeffdev-monorepo</b></span>
+      <span>Agent: <b>opencode · DeepSeek V4.1 Flash</b></span>
+      <span>Branch: <b>feat/pm-2-collaboration → PR → develop</b></span>
+      <span class="badge done">Complete</span>
+      <span class="badge followup">Migrations pending</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Summary</h2>
+    <div class="summary-box">
+      Work conversations now happen in the app. Tasks have threaded
+      <b>comments with @mentions</b> and an <b>activity feed</b> built from the
+      audit trail; the notification bell shows <b>real notifications</b>
+      (read/unread, click-through, live updates); and the tasks page + kanban
+      <b>update live</b> via Supabase Realtime. Fan-out is app-side through the
+      service-role client because the notifications table is owner-read-only by
+      RLS. Two migrations are pending — run <span class="mono">supabase db push</span>
+      before using the new code.
+    </div>
+  </section>
+
+  <section>
+    <h2>What Changed</h2>
+    <table>
+      <thead><tr><th>File</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">supabase/migrations/…0003_pm_phase2… <em>(new)</em></td><td>Additive, idempotent: <span class="mono">task_comments</span> + <span class="mono">task_watchers</span> (workspace-member RLS), notifications upgrades (actor/entity columns, unread index, extended type CHECK), realtime publication for tasks / task_comments / notifications.</td></tr>
+        <tr><td class="mono">src/app/actions/collaboration.ts <em>(new)</em></td><td>Comments CRUD + @mention resolution + activity feed + notification actions. Reads that RLS blocks (profiles, audit) go through the admin client only after an RLS-visibility check on the task.</td></tr>
+        <tr><td class="mono">src/lib/notify.ts <em>(new)</em></td><td>Best-effort notification fan-out helper (dedupes recipients, never throws).</td></tr>
+        <tr><td class="mono">src/components/notification-panel.tsx</td><td>Demo data → real <span class="mono">notifications</span> table: read/unread, mark-all-read, click-through, live updates, empty state, relative timestamps.</td></tr>
+        <tr><td class="mono">src/components/task-sheet.tsx</td><td>Edit mode gains Comments (⌘⏎ to send, @mentions, live updates) + Activity sections; new <span class="mono">taskId</span> prop.</td></tr>
+        <tr><td class="mono">src/app/actions/tasks.ts</td><td>Assignment notifications on create + reassignment (fires only when the assignee actually changes).</td></tr>
+        <tr><td class="mono">(dashboard)/tasks/page.tsx + kanban/page.tsx</td><td>Realtime subscriptions on the active workspace's tasks → debounced live refresh.</td></tr>
+        <tr><td class="mono">@modal/(.)tasks/[id]/edit + tasks/[id]/edit</td><td>Pass <span class="mono">taskId</span> to the sheet (enables comments/activity).</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Decisions &amp; Checkpoints</h2>
+    <div class="checkpoint">
+      <div class="q"><b>Decision:</b> app-side notification fan-out vs DB triggers</div>
+      <div class="a"><b>App-side.</b> <span class="mono">notifications</span> is owner-read-only by RLS — a member can't insert rows for teammates. Server actions fan out via the service-role client (same pattern as <span class="mono">audit_logs</span>), which keeps dedup + mention-resolution logic in TypeScript. All write paths go through server actions, so no trigger is needed. The existing CPO review trigger stays as-is.</div>
+    </div>
+    <div class="checkpoint">
+      <div class="q"><b>Decision:</b> reading other members' names/avatars for comments</div>
+      <div class="a"><b>Two-step read.</b> The task is first fetched through the user's RLS-scoped client (proving access); only then does the admin client read comment author profiles and audit rows. No bypass of task visibility.</div>
+    </div>
+    <div class="checkpoint">
+      <div class="q"><b>Realtime:</b> publication changes are guarded</div>
+      <div class="a">The migration adds each table to <span class="mono">supabase_realtime</span> only if not already present (<span class="mono">pg_publication_tables</span> check), so re-running is safe and it can't error on tables Supabase already publishes.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Next Steps</h2>
+    <ul class="clean">
+      <li><span class="badge followup">Required</span> &nbsp;Apply both pending migrations (<span class="mono">supabase db push</span>), then smoke-test: comment + @mention, reassignment notification, live board in two browsers, bell read/unread.</li>
+      <li><span class="badge followup">Phase 3</span> &nbsp;Search, views &amp; speed: global data search, command palette, filter bar + saved views, table view, pagination.</li>
+      <li><span class="badge followup">Small</span> &nbsp;Deferred: unread count badge on the navbar bell (needs an API on the shared UI component); comment edit/delete UI (RLS allows it, no UI yet); email/Slack delivery lands in Phase 5.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>Generated by opencode · DeepSeek V4.1 Flash</span>
+    <span>2026-10-18</span>
+  </footer>
+
+</div>
+</body>
+</html>

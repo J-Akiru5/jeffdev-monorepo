@@ -16,6 +16,8 @@ import {
   Tag,
   Calendar,
   Clock,
+  MessageSquare,
+  Send,
 } from "lucide-react";
 import { TASK_TYPES, PRIORITY_CONFIG, STATUS_CONFIG, STAFF_LOCKED_STATUSES } from "@/lib/task-types";
 import type { TaskTypeKey, StatusKey } from "@/lib/task-types";
@@ -23,6 +25,15 @@ import type { Task, Project, Department } from "@/lib/schemas";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { Select } from "@syntaxure/ui";
 import { getWorkspaceMembers } from "@/app/actions/workspace";
+import {
+  addComment,
+  getTaskActivity,
+  getTaskComments,
+  type TaskActivityEntry,
+  type TaskComment,
+} from "@/app/actions/collaboration";
+import { createClient } from "@/lib/supabase/browser";
+import { toast } from "sonner";
 
 // ──────────────────────────────────────────────
 // Types
@@ -51,6 +62,8 @@ interface TaskSheetProps {
   projects: Project[];
   departments?: Department[];
   mode?: "create" | "edit";
+  /** Task being edited — enables the comments + activity sections */
+  taskId?: string;
   /** Whether the sheet is rendering inside an intercepting route modal (no layout wrapper) */
   isIntercepted?: boolean;
 }
@@ -86,6 +99,7 @@ export function TaskSheet({
   projects,
   departments = [],
   mode = "create",
+  taskId,
   isIntercepted = true,
 }: TaskSheetProps) {
   const [data, setData] = useState<TaskSheetData>({
@@ -96,6 +110,10 @@ export function TaskSheet({
   const [tagInput, setTagInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [members, setMembers] = useState<{ userId: string; name: string; email: string }[]>([]);
+  const [comments, setComments] = useState<TaskComment[]>([]);
+  const [activity, setActivity] = useState<TaskActivityEntry[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [sendingComment, setSendingComment] = useState(false);
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
 
@@ -141,6 +159,98 @@ export function TaskSheet({
       cancelled = true;
     };
   }, [isOpen, activeWorkspaceId]);
+
+  // Load comments + activity when editing an existing task
+  useEffect(() => {
+    if (!isOpen || !taskId) return;
+    let cancelled = false;
+    getTaskComments(taskId).then((items) => {
+      if (!cancelled) setComments(items);
+    });
+    getTaskActivity(taskId).then((items) => {
+      if (!cancelled) setActivity(items);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, taskId]);
+
+  // Live-update comments while the sheet is open
+  useEffect(() => {
+    if (!isOpen || !taskId) return;
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`task-comments-${taskId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "task_comments",
+          filter: `task_id=eq.${taskId}`,
+        },
+        () => {
+          getTaskComments(taskId).then(setComments);
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isOpen, taskId]);
+
+  const handleAddComment = async () => {
+    const body = newComment.trim();
+    if (!body || !taskId || sendingComment) return;
+    setSendingComment(true);
+    try {
+      const result = await addComment(taskId, body);
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      if (result.comment) {
+        setComments((prev) => [...prev, result.comment!]);
+      }
+      setNewComment("");
+    } finally {
+      setSendingComment(false);
+    }
+  };
+
+  const formatRelative = (iso: string): string => {
+    const then = new Date(iso).getTime();
+    if (Number.isNaN(then)) return "";
+    const diff = Date.now() - then;
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 1) return "just now";
+    if (minutes < 60) return `${minutes} min ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}d ago`;
+    return new Date(iso).toLocaleDateString();
+  };
+
+  const describeActivity = (entry: TaskActivityEntry): string => {
+    const details = entry.changes || {};
+    switch (entry.action) {
+      case "CREATE":
+        return "created this task";
+      case "DELETE":
+        return "deleted this task";
+      case "UPDATE": {
+        if ("status" in details) return `changed status to ${String(details.status)}`;
+        if ("is_starred" in details) return "updated the star";
+        if ("fields" in details && Array.isArray(details.fields)) {
+          return `updated ${(details.fields as string[]).join(", ")}`;
+        }
+        return "updated this task";
+      }
+      default:
+        return entry.action.toLowerCase();
+    }
+  };
 
   // Handle escape key
   useEffect(() => {
@@ -581,6 +691,91 @@ export function TaskSheet({
                       className="w-full resize-none rounded-xl border border-border glass-subtle px-4 py-3 text-sm text-white/50 placeholder:text-text-faint focus:border-cyan-500/30 focus:outline-none"
                     />
                   </div>
+
+                  {/* Comments + Activity (edit mode only) */}
+                  {mode === "edit" && taskId && (
+                    <div className="space-y-6 border-t border-border pt-6">
+                      {/* Comments */}
+                      <div>
+                        <label className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-white/40">
+                          <MessageSquare className="h-3.5 w-3.5" />
+                          Comments ({comments.length})
+                        </label>
+                        <div className="space-y-3">
+                          {comments.length === 0 && (
+                            <p className="text-xs text-white/30">
+                              No comments yet — start the discussion.
+                            </p>
+                          )}
+                          {comments.map((comment) => (
+                            <div
+                              key={comment.id}
+                              className="rounded-lg border border-border bg-glass-04 p-3"
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-medium text-white/80">
+                                  {comment.authorName}
+                                </span>
+                                <span className="text-[10px] font-mono text-white/25">
+                                  {formatRelative(comment.createdAt)}
+                                </span>
+                              </div>
+                              <p className="mt-1 whitespace-pre-wrap text-sm text-white/60">
+                                {comment.body}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="mt-3 flex items-start gap-2">
+                          <textarea
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            onKeyDown={(e) => {
+                              if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                                e.preventDefault();
+                                handleAddComment();
+                              }
+                            }}
+                            placeholder="Add a comment… (@mention teammates, ⌘⏎ to send)"
+                            rows={2}
+                            className="flex-1 resize-none rounded-lg border border-border bg-glass-04 px-3 py-2 text-sm text-white/70 placeholder:text-text-faint focus:border-cyan-500/50 focus:outline-none"
+                          />
+                          <button
+                            onClick={handleAddComment}
+                            disabled={!newComment.trim() || sendingComment}
+                            className="flex h-9 items-center gap-1.5 rounded-lg bg-cyan-500 px-3 text-xs font-medium text-white transition-all hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <Send className="h-3.5 w-3.5" />
+                            {sendingComment ? "Sending…" : "Send"}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Activity */}
+                      {activity.length > 0 && (
+                        <div>
+                          <label className="mb-3 block text-xs font-medium uppercase tracking-wider text-white/40">
+                            Activity
+                          </label>
+                          <div className="space-y-2">
+                            {activity.slice(0, 8).map((entry) => (
+                              <div
+                                key={entry.id}
+                                className="flex items-center gap-2 text-xs text-white/40"
+                              >
+                                <span className="h-1 w-1 flex-shrink-0 rounded-full bg-white/20" />
+                                <span className="text-white/60">{entry.actorName}</span>
+                                <span>{describeActivity(entry)}</span>
+                                <span className="ml-auto font-mono text-[10px] text-white/25">
+                                  {formatRelative(entry.createdAt)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
