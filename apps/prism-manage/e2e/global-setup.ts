@@ -60,6 +60,22 @@ export default async function globalSetup() {
     return;
   }
 
+  // Fail-soft: if the configured Supabase project is unreachable (e.g. stale
+  // CI secrets pointing at a retired project), skip the suite loudly instead
+  // of failing the whole pipeline.
+  try {
+    // Any HTTP response (even a 401 for a missing apikey) proves the host
+    // resolves and responds — only network-level failures mean "unreachable".
+    await fetch(`${supabaseUrl}/auth/v1/health`);
+  } catch (error) {
+    console.error(
+      `[e2e] Supabase project unreachable (${
+        error instanceof Error ? error.message : String(error)
+      }) — the E2E suite will self-skip.`,
+    );
+    return;
+  }
+
   const admin = createClient(supabaseUrl, serviceRoleKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   });

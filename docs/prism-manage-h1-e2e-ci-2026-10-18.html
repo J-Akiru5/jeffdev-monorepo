@@ -143,7 +143,7 @@
     <ul class="clean">
       <li>New <span class="mono">e2e</span> job in <span class="mono">.github/workflows/ci.yml</span>: installs, builds prism-manage, installs Chromium (<span class="mono">--with-deps</span>), runs the suite against <span class="mono">next start</span>, uploads reports/traces on failure. Gated by <span class="mono">detect-changes</span> so it only runs for prism-manage-affecting PRs.</li>
       <li><span class="mono">ci-status</span> now also gates on the e2e job (failure blocks; skip is fine — forks without secrets stay green).</li>
-      <li>Optional repo secrets <span class="mono">E2E_TEST_EMAIL</span> / <span class="mono">E2E_TEST_PASSWORD</span> override the defaults; Supabase URL/keys reuse the existing CI secrets.</li>
+      <li>Optional repo secrets <span class="mono">E2E_TEST_EMAIL</span> / <span class="mono">E2E_TEST_PASSWORD</span> override the defaults; Supabase URL/keys reuse the existing CI secrets. The job is <b>fail-soft</b>: missing <i>or unreachable</i> Supabase config skips the suite with a loud log instead of failing the pipeline.</li>
       <li>Local: <span class="mono">pnpm --filter prism-manage run test:e2e</span> (dev server auto-starts; <span class="mono">reuseExistingServer</span> if one is already up).</li>
     </ul>
   </section>
@@ -162,6 +162,7 @@
     <h2>Notes &amp; Follow-ups</h2>
     <ul class="clean">
       <li><b>Supabase CLI:</b> <span class="mono">db push</span> currently fails with a 403 on the CLI's login-role endpoint (CLI 2.121, account-level). Workaround used: <span class="mono">supabase db push --db-url &lt;pooler-url&gt;</span> with the DB password — worth investigating separately.</li>
+      <li><b>CI Supabase secrets are stale:</b> they point at a retired project whose DNS no longer resolves — the first CI run proved it (build + browser install green; suite skipped loudly after the fail-soft patch). Update the repo secrets (<span class="mono">NEXT_PUBLIC_SUPABASE_URL</span>, <span class="mono">ANON_KEY</span>, <span class="mono">SERVICE_ROLE_KEY</span>) to the live project to switch CI into real end-to-end runs.</li>
       <li><b>Live-DB testing:</b> the suite runs against the shared Supabase project; all test data is prefixed <span class="mono">e2e-</span> and removed by teardown. The E2E account ("E2E Test Account") is a labeled employee of Syntaxure Labs.</li>
       <li><b>Not covered yet:</b> GitHub sync button (would create real issues), assistant (needs Gemini key), marketing route. Candidates for H2/H3.</li>
       <li>CI runs this suite for the first time on this PR — expected to be the reference run for the arc.</li>
