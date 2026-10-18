@@ -1,3 +1,4 @@
+import { withSentry } from "@syntaxure/sentry-config";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -5,4 +6,4 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@syntaxure/ui"],
 };
 
-export default nextConfig;
+export default withSentry(nextConfig, "prism-manage");

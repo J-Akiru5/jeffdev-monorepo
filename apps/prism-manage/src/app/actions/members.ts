@@ -30,25 +30,17 @@ async function logAudit(event: {
 
 /**
  * Update a workspace member's role.
- * Only founders in Workspace mode can change roles.
- *
- * @param mode - The current manage mode ("focus" | "workspace"). Must be "workspace" for founders to act.
+ * Only founders can change roles (enforced server-side).
  */
 export async function updateMemberRole(
   workspaceId: string,
   userId: string,
   newRole: "founder" | "employee",
-  mode?: string,
 ) {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: "Unauthorized" };
-
-    // Mode check: member management requires Workspace mode
-    if (mode && mode !== "workspace") {
-      return { error: "Member management requires Workspace mode" };
-    }
 
     // Verify the requester is a founder of this workspace
     const { data: membership } = await supabase
@@ -79,25 +71,17 @@ export async function updateMemberRole(
 
 /**
  * Assign a department to a workspace member.
- * Only founders in Workspace mode can assign departments.
- *
- * @param mode - The current manage mode ("focus" | "workspace"). Must be "workspace" for founders to act.
+ * Only founders can assign departments (enforced server-side).
  */
 export async function assignMemberDepartment(
   workspaceId: string,
   userId: string,
   departmentId: string | null,
-  mode?: string,
 ) {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: "Unauthorized" };
-
-    // Mode check: member management requires Workspace mode
-    if (mode && mode !== "workspace") {
-      return { error: "Member management requires Workspace mode" };
-    }
 
     // Verify the requester is a founder
     const { data: membership } = await supabase
@@ -128,14 +112,11 @@ export async function assignMemberDepartment(
 
 /**
  * Remove a member from a workspace.
- * Only founders in Workspace mode can remove members. Cannot remove yourself.
- *
- * @param mode - The current manage mode ("focus" | "workspace"). Must be "workspace" for founders to act.
+ * Only founders can remove members (enforced server-side). Cannot remove yourself.
  */
 export async function removeMember(
   workspaceId: string,
   userId: string,
-  mode?: string,
 ) {
   try {
     const supabase = await createClient();
@@ -144,11 +125,6 @@ export async function removeMember(
 
     if (user.id === userId) {
       return { error: "Cannot remove yourself" };
-    }
-
-    // Mode check: member management requires Workspace mode
-    if (mode && mode !== "workspace") {
-      return { error: "Member management requires Workspace mode" };
     }
 
     // Verify the requester is a founder

@@ -12,10 +12,10 @@ export const runtime = "edge";
 const MANAGE_CONTEXT = `
 # Prism Manage — Knowledge Base
 
-You are the Prism Manage assistant, built into the task management application. Help users manage their tasks, projects, calendars, and workspaces effectively.
+You are the Prism Manage assistant, built into the task management application. Help users manage their tasks, lists, calendars, and workspaces effectively.
 
 ## What is Prism Manage?
-Prism Manage is a personal and team project management application with Google Calendar integration, Kanban boards, department-based workflow management, and keyboard-first navigation. It serves both personal task tracking and team collaboration for Syntaxure Labs.
+Prism Manage is a personal and team project management application with a calendar view, Kanban boards, department-based workflow management, and keyboard-first navigation. It serves both personal task tracking and team collaboration for Syntaxure Labs.
 
 ## Key Features & Pages
 
@@ -25,21 +25,18 @@ Prism Manage is a personal and team project management application with Google C
 - Quick actions for founders (manage members, marketing, tasks)
 
 ### Tasks (/tasks)
-- Full task list with status, priority, assignee, and project tags
+- Full task list with status, priority, assignee, and tags
 - Starred tasks filter for quick access
 - Task creation via inline form or dedicated page
 - Task completion toggling with optimistic UI
-- Department-based filtering for Syntaxure Labs workspace
 - Virtualized task list for large datasets (using @tanstack/react-virtual)
 
 ### Calendar (/calendar)
-- Integrated calendar view synced with Google Calendar
-- Task due date visualization
-- Drag-and-drop scheduling
+- Calendar view for your events and deadlines
+- Google Calendar connection available (two-way sync not yet implemented)
 
 ### Kanban (/kanban)
-- Drag-and-drop Kanban board with columns (To Do, In Progress, Review, Approved)
-- Project-based filtering
+- Drag-and-drop Kanban board with columns (Backlog, To Do, In Progress, In Review, Approved)
 - Optimized with React.memo for smooth drag performance
 - Department scoping for team workspaces
 
@@ -81,11 +78,10 @@ Prism Manage is a personal and team project management application with Google C
 - **State**: Zustand for global state, React context for projects
 - **UI**: Shared components from @syntaxure/ui
 - **Virtualization**: @tanstack/react-virtual for large lists
-- **Calendar**: Google Calendar API integration
+- **Calendar**: FullCalendar UI with a Google Calendar OAuth connection
 
 ## Architecture Rules
 - Tasks are scoped to workspaces and optionally departments
-- Real-time updates via Supabase subscriptions
 - Optimistic updates for task mutations (toggle complete, star)
 - Data is fetched server-side and hydrated into Zustand stores
 `;
