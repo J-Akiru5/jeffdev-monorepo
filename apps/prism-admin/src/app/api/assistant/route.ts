@@ -6,8 +6,9 @@ import {
   getCachedResponse,
   cacheResponse,
 } from "@syntaxure/redis";
+import { createClient } from "@/lib/supabase/server";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
 const ADMIN_CONTEXT = `
 # Prism Admin — Knowledge Base
@@ -105,10 +106,29 @@ function getClientIP(request: NextRequest): string {
 
 export async function POST(request: NextRequest) {
   try {
+    // Authentication: any authenticated Supabase user may use the assistant.
+    // Anonymous callers are rejected to prevent paid Gemini quota abuse.
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Authentication required" }, { status: 401 });
+    }
+
     const clientIP = getClientIP(request);
     const rlResult = await checkRateLimit(clientIP, "assistant");
     if (!rlResult.allowed) {
       return NextResponse.json({ error: "Rate limit exceeded. Please wait a moment before trying again." }, { status: 429, headers: getRateLimitHeaders(rlResult) });
+    }
+
+    // Fail-open is a development convenience only. In production, an
+    // unconfigured/unreachable Redis must NOT silently remove the rate limit.
+    if (rlResult.degraded && process.env.NODE_ENV === "production") {
+      return NextResponse.json(
+        { error: "Rate limiting is unavailable. Please try again later." },
+        { status: 503 },
+      );
     }
 
     const body = await request.json();

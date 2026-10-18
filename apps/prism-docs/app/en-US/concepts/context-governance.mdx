@@ -59,19 +59,20 @@ Context Pollution leads to:
 ├─────────────────┬─────────────────┬─────────────────────────┤
 │   DEFINITION    │   MANAGEMENT    │      ENFORCEMENT        │
 │                 │                 │                         │
-│ • Write rules   │ • Version rules │ • IDE integration       │
-│ • Extract from  │ • Organize by   │ • Real-time delivery    │
-│   video         │   project       │ • Validation            │
-│ • Templates     │ • Share w/ team │ • Feedback loop         │
+│ • Write rules   │ • Version rules │ • Agent hooks           │
+│ • Generate from │ • Organize by   │ • prism check           │
+│   project CSS   │   project       │ • Correction feedback   │
+│ • Templates     │ • Share w/ team │ • MCP delivery          │
 └─────────────────┴─────────────────┴─────────────────────────┘
 ```
 
 ### Definition
 
-Rules must be **written** before they can be enforced. Prism offers two paths:
+Rules must be **written** before they can be enforced. Prism offers these paths:
 
-1. **Manual Writing**: Write rules in Markdown format
-2. **Video Extraction**: Record yourself explaining, AI extracts rules
+1. **Manual writing**: Edit `.prism/rules.json` directly
+2. **`prism init`**: Generates a starter rule set from your project's own CSS and Tailwind config
+3. **Dashboard**: Add rules in the project's Rules tab (Add Rule, Browse Templates), then `prism pull`
 
 ### Management
 
@@ -97,35 +98,28 @@ Rules are useless if AI doesn't follow them. Enforcement happens through:
 ### Rule Capture
 
 ```
-┌──────────────────┐     ┌──────────────────┐
-│   Video Upload   │────▶│  Azure OpenAI    │
-│   (Mux)          │     │  Transcript      │
-└──────────────────┘     │  Analysis        │
-                         └────────┬─────────┘
-                                  │
-                                  ▼
-                         ┌──────────────────┐
-                         │   Structured     │
-                         │   Rules (JSON)   │
-                         └──────────────────┘
+┌──────────────────────┐     ┌──────────────────────┐
+│ prism init           │────▶│ .prism/rules.json    │
+│ (reads your CSS /    │     │ (version 1 schema)   │
+│  Tailwind config)    │     └──────────────────────┘
+└──────────────────────┘
 ```
 
 ### Rule Storage
 
-Rules are stored in **Azure Cosmos DB** with:
-- Full-text search capability
-- Vector embeddings for semantic search
-- Version history
-- Team sharing permissions
+Local rules live in `.prism/rules.json` in your repo (version-controlled with your code). Cloud-side rules for the dashboard live in **Supabase Postgres** (the `prism_*` tables) and are fetched with `prism pull`.
 
 ### Rule Delivery
 
 ```
 ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
-│   Prism Cloud    │────▶│   MCP Server     │────▶│   Your IDE       │
-│   (Rules DB)     │     │   (Local)        │     │   (Cursor, etc)  │
-└──────────────────┘     └──────────────────┘     └──────────────────┘
+│ .prism/rules.json│────▶│ prism check      │────▶│ Your agent       │
+│ (local rules)    │     │ (hook)           │     │ (reads the       │
+└──────────────────┘     └──────────────────┘     │  correction)     │
+                                                   └──────────────────┘
 ```
+
+Optionally, `prism pull` refreshes `.prism/rules.json` from the dashboard, and MCP serves rules to editors without hook support.
 
 ---
 
@@ -183,15 +177,14 @@ cannot be themed, and are harder to maintain.
 **Instead**: Use Tailwind classes or CSS modules.
 ```
 
-### 4. Prioritize Rules
+### 4. Set the Severity
 
-Not all rules are equal. Prism supports priority levels:
+Local rules use two severities:
 
-| Priority | Enforcement | Example |
+| Severity | Enforcement | Example |
 |----------|-------------|---------|
-| **Critical** | Must follow | "Never use `any` type" |
-| **Important** | Should follow | "Prefer named exports" |
-| **Suggested** | Nice to have | "Add JSDoc comments" |
+| **block** | Hook exits 2; the agent must fix the violation | "Never hardcode hex colors" |
+| **warn** | Reported as a finding; the agent keeps going | "Prefer named exports" |
 
 ---
 

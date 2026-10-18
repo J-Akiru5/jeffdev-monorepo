@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ErrorReporter } from "@/components/error-reporter";
 
 export default function DashboardGroupError({
   error,
@@ -11,6 +12,7 @@ export default function DashboardGroupError({
 }) {
   return (
     <div className="flex min-h-[50vh] items-center justify-center p-6">
+      <ErrorReporter error={error} />
       <div className="max-w-md text-center">
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10">
           <span className="text-2xl text-red-400">!</span>

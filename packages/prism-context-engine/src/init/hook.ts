@@ -1,12 +1,19 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { join } from "path";
 
-/** The command `prism init` wires into .claude/settings.json's PostToolUse
- *  hook. Uses `npx` rather than a relative path into this monorepo's own
- *  bin/prism.js — the generated file has to work in any real end-user
- *  project that installed @prism-engine/cli, not just here. */
+/** The command `prism init` wires into all three Claude Code hooks
+ *  (PreToolUse / PostToolUse / Stop). Uses `npx` rather than a relative
+ *  path into this monorepo's own bin/prism.js — the generated file has to
+ *  work in any real end-user project that installed @prism-engine/cli,
+ *  not just here. */
 export const HOOK_COMMAND =
   "npx @prism-engine/cli check --hook --format claude-code";
+
+/** PreToolUse must match every edit tool whose proposed content the engine
+ *  can reconstruct (see extractProposedContent in commands/check.ts). */
+export const CLAUDE_PRE_MATCHER = "Write|Edit|MultiEdit";
+/** PostToolUse keeps the original, demo-verified matcher byte-identical. */
+export const CLAUDE_POST_MATCHER = "Write|Edit";
 
 /** Phase 4: per-agent variants of the same command. The engine reads the
  *  agent's own payload shape via --format. */
@@ -40,7 +47,9 @@ interface HookMatcher {
 
 interface ClaudeSettings {
   hooks?: {
+    PreToolUse?: HookMatcher[];
     PostToolUse?: HookMatcher[];
+    Stop?: HookMatcher[];
     [key: string]: unknown;
   };
   [key: string]: unknown;
@@ -55,22 +64,30 @@ function isPrismCheckHookCommand(command: unknown): boolean {
   );
 }
 
-function hasPrismHook(settings: ClaudeSettings): boolean {
-  const postToolUse = settings.hooks?.PostToolUse;
-  if (!Array.isArray(postToolUse)) return false;
-  return postToolUse.some(
+function hasPrismHookIn(entries: unknown): boolean {
+  if (!Array.isArray(entries)) return false;
+  return entries.some(
     (entry) =>
-      Array.isArray(entry.hooks) &&
-      entry.hooks.some((hook) => isPrismCheckHookCommand(hook.command)),
+      entry !== null &&
+      typeof entry === "object" &&
+      Array.isArray((entry as HookMatcher).hooks) &&
+      (entry as HookMatcher).hooks!.some((hook) =>
+        isPrismCheckHookCommand(hook.command),
+      ),
   );
 }
 
 /**
- * Wire the Claude Code PostToolUse hook into `.claude/settings.json`,
- * merging with whatever's already there. Never overwrites an existing
- * key — only adds a PostToolUse matcher entry for the Pass, and only if
- * one isn't already present. Malformed existing JSON is left untouched
- * (returns "invalid-json" so the caller can warn) rather than clobbered.
+ * Wire the Claude Code hooks into `.claude/settings.json`, merging with
+ * whatever's already there:
+ *   - PreToolUse  (Write|Edit|MultiEdit) — halt a violating write pre-disk
+ *   - PostToolUse (Write|Edit)           — original safety net, unchanged
+ *   - Stop                               — refuse session end on violations
+ * Never overwrites an existing key — only appends the Pass entry for each
+ * event that lacks one. Malformed existing JSON is left untouched (returns
+ * "invalid-json" so the caller can warn) rather than clobbered. Idempotent:
+ * any existing config, including one that only has the original PostToolUse
+ * hook, upgrades in place on the next `prism init`.
  */
 export function wireClaudeHook(cwd: string): HookWireResult {
   const dir = join(cwd, ".claude");
@@ -80,9 +97,19 @@ export function wireClaudeHook(cwd: string): HookWireResult {
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
     const fresh: ClaudeSettings = {
       hooks: {
-        PostToolUse: [
-          { matcher: "Write|Edit", hooks: [{ type: "command", command: HOOK_COMMAND }] },
+        PreToolUse: [
+          {
+            matcher: CLAUDE_PRE_MATCHER,
+            hooks: [{ type: "command", command: HOOK_COMMAND }],
+          },
         ],
+        PostToolUse: [
+          {
+            matcher: CLAUDE_POST_MATCHER,
+            hooks: [{ type: "command", command: HOOK_COMMAND }],
+          },
+        ],
+        Stop: [{ hooks: [{ type: "command", command: HOOK_COMMAND }] }],
       },
     };
     writeFileSync(path, `${JSON.stringify(fresh, null, 2)}\n`);
@@ -96,20 +123,38 @@ export function wireClaudeHook(cwd: string): HookWireResult {
     return { outcome: "invalid-json", path };
   }
 
-  if (hasPrismHook(settings)) {
+  const hooks = settings.hooks ?? {};
+  const pre = Array.isArray(hooks.PreToolUse) ? [...hooks.PreToolUse] : [];
+  const post = Array.isArray(hooks.PostToolUse) ? [...hooks.PostToolUse] : [];
+  const stop = Array.isArray(hooks.Stop) ? [...hooks.Stop] : [];
+
+  const missingPre = !hasPrismHookIn(pre);
+  const missingPost = !hasPrismHookIn(post);
+  const missingStop = !hasPrismHookIn(stop);
+
+  if (!missingPre && !missingPost && !missingStop) {
     return { outcome: "already-present", path };
   }
 
-  const postToolUse = Array.isArray(settings.hooks?.PostToolUse)
-    ? [...settings.hooks!.PostToolUse!]
-    : [];
-  postToolUse.push({
-    matcher: "Write|Edit",
-    hooks: [{ type: "command", command: HOOK_COMMAND }],
-  });
+  if (missingPre) {
+    pre.push({
+      matcher: CLAUDE_PRE_MATCHER,
+      hooks: [{ type: "command", command: HOOK_COMMAND }],
+    });
+  }
+  if (missingPost) {
+    post.push({
+      matcher: CLAUDE_POST_MATCHER,
+      hooks: [{ type: "command", command: HOOK_COMMAND }],
+    });
+  }
+  if (missingStop) {
+    stop.push({ hooks: [{ type: "command", command: HOOK_COMMAND }] });
+  }
+
   const merged: ClaudeSettings = {
     ...settings,
-    hooks: { ...settings.hooks, PostToolUse: postToolUse },
+    hooks: { ...settings.hooks, PreToolUse: pre, PostToolUse: post, Stop: stop },
   };
   writeFileSync(path, `${JSON.stringify(merged, null, 2)}\n`);
   return { outcome: "merged", path };

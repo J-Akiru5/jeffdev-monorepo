@@ -7,8 +7,6 @@ import { ProjectProvider } from "@/contexts/project-context";
 import { WorkspaceProvider } from "@/components/workspace-provider";
 import { TourGuide } from "@/components/tour-guide";
 import { resolveSyntaxureWorkspace } from "@/lib/workspace";
-import { PERSONAL_LISTS } from "@/lib/schemas";
-import type { Project } from "@/lib/schemas";
 
 /**
  * Dashboard Layout
@@ -110,7 +108,7 @@ export default async function DashboardLayout({
       cpoUserId={cpoUserId}
       cLevelTitle={cLevelTitle}
     >
-      <ProjectProvider initialProjects={getDefaultProjects()}>
+      <ProjectProvider>
         <div className="min-h-screen bg-surface">
           {/* Top Navigation Bar */}
           <TopNavbar />
@@ -139,17 +137,3 @@ export default async function DashboardLayout({
   );
 }
 
-/**
- * Generate default projects from the PERSONAL_LISTS constant.
- * These serve as initialized project data when no projects exist in Supabase yet.
- */
-function getDefaultProjects(): Project[] {
-  return PERSONAL_LISTS.map((list, i) => ({
-    id: `list-${i + 1}`,
-    name: list.name,
-    color: list.color,
-    order: i,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }));
-}

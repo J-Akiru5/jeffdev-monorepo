@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Business Model Canvas v3.1 — Syntaxure Labs</title>
+  <meta name="description" content="Syntaxure Labs BMC — forward-looking infrastructure cost projection, dual-engine strategy, Prism Context Engine SaaS." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--void:#050505;--surface:#0a0a0a;--surface2:#141414;--ink:#ededed;--sec:rgba(255,255,255,0.6);--ter:rgba(255,255,255,0.38);--cyan:#06b6d4;--purple:#8b5cf6;--emerald:#10b981;--amber:#f59e0b;--rose:#f43f5e;--bsub:rgba(255,255,255,0.08);--fs:'Inter',ui-sans-serif,system-ui,sans-serif;--fm:'JetBrains Mono',ui-monospace,monospace;}
+    *,*::before,*::after{box-sizing:border-box;}
+    html{-webkit-font-smoothing:antialiased;color-scheme:dark;}
+    body{margin:0;background:var(--void);color:var(--ink);font-family:var(--fs);line-height:1.6;min-height:100vh;overflow-x:hidden;}
+    .wrap{max-width:1620px;margin:0 auto;padding:2rem 1.5rem 5rem;}
+    .hdr{margin-bottom:1.75rem;}
+    .hdr-top{display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;}
+    .badge{display:inline-flex;align-items:center;gap:.4rem;padding:.22rem .75rem;border-radius:9999px;border:1px solid var(--bsub);background:var(--surface2);font-family:var(--fm);font-size:.6rem;letter-spacing:.08em;color:var(--ter);text-transform:uppercase;}
+    .bdot{width:6px;height:6px;border-radius:50%;background:var(--emerald);box-shadow:0 0 6px var(--emerald);animation:pulse 2s ease-in-out infinite;}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+    h1.title{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:900;letter-spacing:-.03em;line-height:1.1;margin:0 0 .35rem;}
+    h1.title .cy{color:var(--cyan);}
+    .sub{font-size:.82rem;color:var(--sec);font-family:var(--fm);margin:0 0 .9rem;}
+    .etabs{display:flex;gap:.45rem;flex-wrap:wrap;}
+    .etab{padding:.28rem .85rem;border-radius:5px;border:1px solid var(--bsub);font-family:var(--fm);font-size:.62rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:default;}
+    .etab.a{border-color:rgba(6,182,212,.4);color:var(--cyan);background:rgba(6,182,212,.08);}
+    .etab.p{border-color:rgba(139,92,246,.4);color:var(--purple);background:rgba(139,92,246,.08);}
+    .etab.n{border-color:rgba(245,158,11,.3);color:var(--amber);background:rgba(245,158,11,.06);}
+    .etab.dot{color:var(--ter);border:none;background:none;padding:.28rem 0;}
+    .g5{display:grid;grid-template-columns:1fr 1.05fr 1.2fr 1.05fr 1fr;gap:.7rem;margin-bottom:.7rem;}
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:.7rem;}
+    .cell{background:var(--surface);border:1px solid var(--bsub);border-radius:8px;padding:1.2rem 1rem 1rem;position:relative;overflow:hidden;}
+    .cell::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+    .cell.ca::before{background:linear-gradient(90deg,var(--cyan),transparent);}
+    .cell.cp::before{background:linear-gradient(90deg,var(--purple),transparent);}
+    .cell.cs::before{background:linear-gradient(90deg,var(--emerald),transparent);}
+    .cell.cc::before{background:linear-gradient(90deg,var(--rose),transparent);}
+    .cell.cr::before{background:linear-gradient(90deg,var(--emerald),transparent);}
+    .clabel{font-family:var(--fm);font-size:.58rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ter);margin-bottom:.35rem;}
+    h2.ct{font-size:.95rem;font-weight:700;letter-spacing:-.02em;color:var(--ink);margin:0 0 .85rem;}
+    .et{display:inline-block;padding:.16rem .48rem;border-radius:4px;font-family:var(--fm);font-size:.57rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:.42rem;}
+    .et.a{background:rgba(6,182,212,.12);color:var(--cyan);border:1px solid rgba(6,182,212,.25);}
+    .et.p{background:rgba(139,92,246,.12);color:var(--purple);border:1px solid rgba(139,92,246,.25);}
+    .et.s{background:rgba(16,185,129,.1);color:var(--emerald);border:1px solid rgba(16,185,129,.2);}
+    .et.i{background:rgba(245,158,11,.1);color:var(--amber);border:1px solid rgba(245,158,11,.2);}
+    .et.n{background:rgba(244,63,94,.1);color:var(--rose);border:1px solid rgba(244,63,94,.2);}
+    .ig{margin-bottom:.8rem;}
+    .ig:last-child{margin-bottom:0;}
+    .item{font-size:.74rem;color:var(--sec);line-height:1.5;margin-bottom:.18rem;padding-left:.75rem;position:relative;}
+    .item::before{content:'·';position:absolute;left:0;color:var(--ter);font-weight:700;}
+    .item b{color:var(--ink);font-weight:600;}
+    .mc{font-family:var(--fm);font-size:.67rem;color:var(--cyan);}
+    .mp{font-family:var(--fm);font-size:.67rem;color:var(--purple);}
+    .me{font-family:var(--fm);font-size:.67rem;color:var(--emerald);}
+    .ma{font-family:var(--fm);font-size:.67rem;color:var(--amber);}
+    .div{width:100%;height:1px;background:var(--bsub);margin:.65rem 0;}
+    .vp{border:1px solid var(--bsub);border-radius:6px;padding:.65rem;margin-bottom:.6rem;background:rgba(255,255,255,.015);}
+    .vp:last-child{margin-bottom:0;}
+    .vph{font-size:.8rem;font-weight:700;color:var(--ink);margin-bottom:.25rem;}
+    .vpd{font-size:.71rem;color:var(--sec);line-height:1.5;}
+    .hc{color:var(--cyan);font-weight:600;}
+    .hp{color:var(--purple);font-weight:600;}
+    .he{color:var(--emerald);font-weight:600;}
+    /* COST PHASES */
+    .cost-phases{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.65rem;margin-bottom:.85rem;}
+    .phase-card{border:1px solid var(--bsub);border-radius:7px;padding:.85rem;background:rgba(255,255,255,.02);position:relative;overflow:hidden;}
+    .phase-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+    .ph1::before{background:linear-gradient(90deg,var(--cyan),transparent);}
+    .ph2::before{background:linear-gradient(90deg,var(--purple),transparent);}
+    .ph3::before{background:linear-gradient(90deg,var(--emerald),transparent);}
+    .phase-label{font-family:var(--fm);font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.5rem;}
+    .ph1 .phase-label{color:var(--cyan);}
+    .ph2 .phase-label{color:var(--purple);}
+    .ph3 .phase-label{color:var(--emerald);}
+    .phase-users{font-size:.67rem;color:var(--ter);font-family:var(--fm);margin-bottom:.6rem;}
+    .pline{display:flex;justify-content:space-between;margin-bottom:.3rem;gap:.4rem;}
+    .pname{font-size:.71rem;color:var(--sec);flex:1;}
+    .pcost{font-family:var(--fm);font-size:.69rem;font-weight:600;white-space:nowrap;}
+    .ph1 .pcost{color:var(--cyan);}
+    .ph2 .pcost{color:var(--purple);}
+    .ph3 .pcost{color:var(--emerald);}
+    .ptotal{margin-top:.55rem;padding-top:.55rem;border-top:1px solid var(--bsub);display:flex;justify-content:space-between;align-items:center;}
+    .ptlabel{font-size:.67rem;font-weight:700;color:var(--ink);font-family:var(--fm);text-transform:uppercase;letter-spacing:.05em;}
+    .ptval{font-family:var(--fm);font-size:.8rem;font-weight:700;}
+    .ph1 .ptval{color:var(--cyan);}
+    .ph2 .ptval{color:var(--purple);}
+    .ph3 .ptval{color:var(--emerald);}
+    .pnote{font-size:.64rem;color:var(--ter);margin-top:.35rem;line-height:1.45;}
+    /* CAPEX */
+    .capex{border:1px solid rgba(244,63,94,.28);border-radius:8px;padding:.9rem;background:rgba(244,63,94,.04);margin-bottom:.85rem;}
+    .capex-title{font-family:var(--fm);font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--rose);margin-bottom:.55rem;}
+    .capex-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;}
+    .cspec{font-size:.7rem;color:var(--sec);line-height:1.45;margin-bottom:.12rem;}
+    .cspec b{color:var(--ink);}
+    .croi{font-size:.7rem;color:var(--emerald);margin-top:.4rem;line-height:1.45;}
+    /* COST DRIVERS */
+    .dg{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+    .dr{border:1px solid var(--bsub);border-radius:5px;padding:.6rem;background:rgba(255,255,255,.015);}
+    .dt{font-family:var(--fm);font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ter);margin-bottom:.35rem;}
+    .di{font-size:.7rem;color:var(--sec);margin-bottom:.12rem;line-height:1.4;}
+    .di b{color:var(--ink);}
+    /* REVENUE */
+    .rt{display:flex;justify-content:space-between;align-items:flex-start;padding:.42rem 0;border-bottom:1px solid rgba(255,255,255,.04);gap:.45rem;}
+    .rt:last-of-type{border-bottom:none;}
+    .rn{font-size:.74rem;font-weight:600;white-space:nowrap;min-width:65px;}
+    .rd{font-size:.65rem;color:var(--sec);flex:1;padding:0 .6rem;line-height:1.4;}
+    .rp{font-family:var(--fm);font-size:.69rem;font-weight:700;white-space:nowrap;text-align:right;line-height:1.4;}
+    .rb{height:2px;border-radius:1px;margin:.55rem 0 .1rem;background:var(--bsub);position:relative;}
+    .rbf{height:100%;border-radius:1px;position:absolute;top:0;left:0;}
+    /* FOOTER */
+    .ftr{margin-top:2rem;padding-top:1.2rem;border-top:1px solid var(--bsub);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem;}
+    .ftl{font-family:var(--fm);font-size:.65rem;color:var(--ter);}
+    .ftr-r{display:flex;gap:1.5rem;}
+    .ftr-r a{font-family:var(--fm);font-size:.62rem;color:var(--ter);text-decoration:none;transition:color .2s;}
+    .ftr-r a:hover{color:var(--cyan);}
+    @media(max-width:1200px){.g5{grid-template-columns:1fr 1fr;}.cost-phases{grid-template-columns:1fr;}}
+    @media(max-width:768px){.g5,.g2{grid-template-columns:1fr;}.cost-phases,.capex-grid,.dg{grid-template-columns:1fr;}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hdr">
+  <div class="hdr-top"><span class="badge"><span class="bdot"></span>Business Model Canvas · v3.1 · August 2026</span></div>
+  <h1 class="title">Syntaxure Labs <span class="cy">Business Model Canvas</span></h1>
+  <p class="sub">// Governance over Generation — A dual-engine technology company architecting high-performance systems &amp; AI context governance for the SEA startup economy.</p>
+  <div class="etabs">
+    <span class="etab a">Engine A — The Agency</span><span class="etab dot">·</span>
+    <span class="etab n">Cash Cow → R&amp;D Runway</span><span class="etab dot">·</span>
+    <span class="etab p">Engine B — Prism Context Engine</span>
+  </div>
+</div>
+
+<!-- TOP ROW -->
+<div class="g5">
+
+<div class="cell ca">
+  <div class="clabel">01 / Partners</div><h2 class="ct">Key Partners</h2>
+  <div class="ig"><div class="et a">Infrastructure</div>
+    <div class="item"><b>Supabase</b> — primary database (Postgres), Auth SSR, Storage across all production apps</div>
+    <div class="item"><b>Vercel</b> — Next.js 16 deployment, edge CDN, serverless functions</div>
+    <div class="item"><b>Cloudflare R2</b> — object storage + CDN; eliminates Vercel egress costs at scale</div>
+  </div>
+  <div class="ig"><div class="et a">AI Providers</div>
+    <div class="item"><b>OpenCode Zen</b> — primary LLM gateway <span class="mc">(opencode.ai/zen/v1)</span>; multi-model routing: mimo-v2.5, deepseek-v4-flash, nemotron-3-ultra, big-pickle</div>
+    <div class="item"><b>Google Gemini</b> — component generation &amp; embeddings <span class="mc">(gemini-2.5-flash)</span></div>
+    <div class="item"><b>Azure OpenAI / OpenAI</b> — configurable fallback via <span class="mc">AI_PROVIDER</span> env var</div>
+  </div>
+  <div class="ig"><div class="et i">Caching &amp; Rate Limiting</div>
+    <div class="item"><b>Upstash Redis</b> — <span class="mc">@upstash/ratelimit</span>; distributed rate limiting across all API &amp; MCP endpoints</div>
+  </div>
+  <div class="ig"><div class="et p">Protocol Ecosystem</div>
+    <div class="item"><b>MCP</b> (Anthropic) — <span class="mc">@modelcontextprotocol/sdk v1.12.1</span></div>
+    <div class="item"><b>IDE Partners:</b> Cursor, Windsurf, VS Code, Claude Desktop, GitHub Copilot</div>
+  </div>
+  <div class="ig"><div class="et s">Operations &amp; GTM</div>
+    <div class="item"><b>Doppler</b> — secret injection pipeline; mandatory across all environments</div>
+    <div class="item"><b>PayPal</b> — subscription billing REST API, idempotent webhook processing</div>
+    <div class="item"><b>Resend</b> — transactional email delivery at scale</div>
+    <div class="item"><b>Sentry</b> — error monitoring <span class="mc">(@syntaxure/sentry-config)</span></div>
+    <div class="item"><b>GitHub</b> — CI/CD pipeline, Changesets, automated release management</div>
+    <div class="item"><b>Kwadra TBI</b> — Cohort 5 incubator; Iloilo &amp; Western Visayas GTM network</div>
+  </div>
+  <div class="ig"><div class="et n">Self-Hosted Roadmap</div>
+    <div class="item"><b>ASUS Ascent GX10</b> — NVIDIA GB10 Grace Blackwell; on-prem AI inference + self-hosted Supabase to eliminate cloud dependency at scale</div>
+  </div>
+</div>
+
+<div class="cell cs">
+  <div class="clabel">02 / Activities</div><h2 class="ct">Key Activities</h2>
+  <div class="ig"><div class="et a">Engine A — Agency</div>
+    <div class="item">Custom web &amp; SaaS development for SEA clients</div>
+    <div class="item">Productized templates: Next.js 16, Supabase, RBAC, multi-tenancy, PayPal billing</div>
+    <div class="item">Client onboarding, delivery governance, Care Plan maintenance</div>
+  </div>
+  <div class="ig"><div class="et p">Engine B — Prism</div>
+    <div class="item">Context rule extraction &amp; MCP server development (stdio + REST gateway transports)</div>
+    <div class="item">AI orchestration via OpenCode Zen multi-model routing + Gemini fallback</div>
+    <div class="item">CLI/TUI open-source publishing: <span class="mc">@prism-engine/cli</span> on npm</div>
+    <div class="item">Cross-IDE integration: Cursor, VS Code, Windsurf, Claude Desktop</div>
+    <div class="item">Rule marketplace curation, team governance features, Phase 6 audit trail</div>
+  </div>
+  <div class="ig"><div class="et s">Shared Core</div>
+    <div class="item">Reusable SaaS template cores (RBAC, multi-tenancy, billing, Supabase migrations) — customized per agency client</div>
+    <div class="item">Ghost Glow design system <span class="mc">(@syntaxure/ui)</span> — 40+ components, holographic constitution</div>
+    <div class="item">Turborepo monorepo stewardship: 7 apps + 8 packages, full CI/CD pipeline</div>
+  </div>
+  <div class="ig"><div class="et i">Dogfooding Protocol</div>
+    <div class="item">Prism governs every agency project. Agency revenue funds Prism R&amp;D. The flywheel is operational.</div>
+  </div>
+  <div class="ig"><div class="et n">Self-Hosted Migration (Roadmap)</div>
+    <div class="item">Ascent GX10: local LLM inference at $0/query, self-hosted Supabase, Nginx reverse proxy — eliminating cloud variable costs permanently</div>
+  </div>
+</div>
+
+<div class="cell cp">
+  <div class="clabel">03 / Value Props</div><h2 class="ct">Value Propositions</h2>
+  <div class="vp"><div class="et a" style="margin-bottom:.25rem;">Agency</div>
+    <div class="vph">Zero to One in Weeks</div>
+    <div class="vpd">Production-ready SaaS templates customized to business logic. Skip months of boilerplate. <span class="hc">Weeks, not months.</span></div>
+  </div>
+  <div class="vp"><div class="et a" style="margin-bottom:.25rem;">Agency</div>
+    <div class="vph">Fixed Investment, No Surprises</div>
+    <div class="vpd">Productized pricing with transparent deliverables. No hourly billing. 100% source code ownership on delivery.</div>
+  </div>
+  <div class="vp"><div class="et p" style="margin-bottom:.25rem;">Prism</div>
+    <div class="vph">Governance over Generation</div>
+    <div class="vpd">A context operating system that forces AI coding agents to follow your design systems and architectural constraints — not hallucinate past them.</div>
+  </div>
+  <div class="vp"><div class="et p" style="margin-bottom:.25rem;">Prism</div>
+    <div class="vph">64% Token Reduction</div>
+    <div class="vpd"><span class="hp">prism_fix</span> intercepts violations before git. Progressive disclosure: ~60,000 → ~1,800 tokens. <span class="he">$55–150 → $20–55/dev/mo</span> AI spend reduction.</div>
+  </div>
+  <div class="vp"><div class="et p" style="margin-bottom:.25rem;">Prism</div>
+    <div class="vph">Free Forever, Not Freemium Bait</div>
+    <div class="vpd">Unlimited local enforcement, unlimited rules, full CLI — <span class="he">$0 permanently</span>. Sync, AI Kitchen &amp; team governance unlock on paid tiers.</div>
+  </div>
+  <div class="vp"><div class="et s" style="margin-bottom:.25rem;">Shared</div>
+    <div class="vph">Partnership, Not Vendorship</div>
+    <div class="vpd">Human-in-the-loop approvals, open standards (MCP), enterprise security by default. Open source CLI — no proprietary lock-in.</div>
+  </div>
+</div>
+
+<div class="cell ca">
+  <div class="clabel">04 / Relations</div><h2 class="ct">Customer Relationships</h2>
+  <div class="ig"><div class="et a">Agency</div>
+    <div class="item">Long-term partnerships (6–24 months per engagement)</div>
+    <div class="item">Phase-gate delivery with client sign-offs at each milestone</div>
+    <div class="item">Mandatory Care Plan retainers: priority scheduling &amp; upgrade discounts</div>
+  </div>
+  <div class="ig"><div class="et p">Prism</div>
+    <div class="item">Self-service — no credit card required; frictionless developer onboarding</div>
+    <div class="item"><b>"Vibecoder" authority building</b> — anti-hype, radical technical honesty</div>
+    <div class="item">7-day trials for Pro &amp; Team; rule lock-in drives structural retention</div>
+    <div class="item">Enterprise: dedicated support + custom integrations + on-prem deployment</div>
+  </div>
+  <div class="ig"><div class="et s">Trust Protocol</div>
+    <div class="item"><b>Case studies with measured metrics</b> — never generic testimonials</div>
+    <div class="item">Open standards (MCP). Open source CLI. No proprietary dependency.</div>
+  </div>
+  <div class="ig"><div class="et p">Retention Mechanics</div>
+    <div class="item">Care Plans (12–18 mo): recurring revenue + ecosystem stickiness</div>
+    <div class="item">Rule library growth: each synced rule deepens switching cost structurally</div>
+    <div class="item">Team constitution: AI governance becomes a business asset, not a config file</div>
+  </div>
+  <div class="ig"><div class="et s">SLA Tiers</div>
+    <div class="item">Business: 24h · Custom: 12h · Enterprise: 1h response commitment</div>
+    <div class="item">PayPal subscription lifecycle via signed webhook handlers — zero manual operations</div>
+  </div>
+</div>
+
+<div class="cell cp">
+  <div class="clabel">05 / Segments</div><h2 class="ct">Customer Segments</h2>
+  <div class="ig"><div class="et a">Agency Clients</div>
+    <div class="item">Startups &amp; founders (0-to-1 product builds)</div>
+    <div class="item">Growing SMBs seeking scalable digital infrastructure</div>
+    <div class="item">Enterprise teams requiring dedicated engineering capacity</div>
+    <div class="item">SEA market: cost-sensitive, high-growth, underserved by premium dev agencies</div>
+  </div>
+  <div class="ig"><div class="et p">Prism Users</div>
+    <div class="item"><b>"Alpha" developers &amp; CTOs</b> — precision-focused, anti-hype</div>
+    <div class="item">Senior engineers enforcing standards across distributed teams</div>
+    <div class="item">AI-native engineering organizations (agent-first development)</div>
+    <div class="item">Enterprise compliance &amp; AI governance pilots</div>
+  </div>
+  <div class="ig"><div class="et s">Primary Market</div>
+    <div class="item"><b>Southeast Asia</b> — Philippine Peso pricing is first-class, not an afterthought</div>
+    <div class="item">HQ: Iloilo City, Philippines — Kwadra TBI Cohort 5</div>
+    <div class="item">International expansion: US &amp; EU via USD pricing tier</div>
+  </div>
+  <div class="ig"><div class="et i">Alpha Filter</div>
+    <div class="item">Target users who value <b>Sovereignty</b>, <b>Context Entropy reduction</b>, and <b>Dogfoodability</b>. Reject vanity metrics.</div>
+  </div>
+  <div class="div"></div>
+  <div class="ig"><div class="et p">Prism Pricing Tiers</div>
+    <div class="item"><span class="me">Free</span> — ₱0 forever, unlimited local enforcement</div>
+    <div class="item"><span class="mp">Pro</span> — ₱299/mo (~$8) individual developers</div>
+    <div class="item"><span class="mp">Team</span> — ₱249/seat/mo (~$7), min 3 seats</div>
+    <div class="item"><span class="ma">Enterprise</span> — Custom annual, dedicated SLA</div>
+  </div>
+</div>
+</div>
+
+<!-- MIDDLE ROW -->
+<div class="g2">
+
+<div class="cell cs">
+  <div class="clabel">06 / Resources</div><h2 class="ct">Key Resources</h2>
+  <div class="ig"><div class="et p">Intellectual Property</div>
+    <div class="item"><b>Prism Context Engine</b> — MCP server, 9+ enforcement tools, smart rule selection, 139+ tests, npm CLI <span class="mc">(@prism-engine/cli)</span></div>
+    <div class="item"><b>Ghost Glow Design System</b> <span class="mc">(@syntaxure/ui)</span> — 40+ components, holographic constitution, dark/light dual-mode</div>
+    <div class="item"><b>SaaS Template Monorepo</b> — 7 production apps + 8 shared packages; RBAC, PayPal billing, Supabase multi-tenancy, MCP protocol baked in</div>
+  </div>
+  <div class="ig"><div class="et s">Human Capital</div>
+    <div class="item"><b>Jeff Edrick Martinez</b> — Founder &amp; Lead Architect; 5+ years systems engineering, Next.js, cloud infrastructure, AI orchestration</div>
+    <div class="item">Solo founder model: incubator-subsidized runway, low burn, high execution velocity</div>
+  </div>
+  <div class="ig"><div class="et s">Platform Stack</div>
+    <div class="item"><b>Supabase</b> — Auth SSR, Postgres, Storage; consolidated single data plane across all apps</div>
+    <div class="item">Turborepo — <span class="mc">pnpm@9</span>, Node 20+, TypeScript 5.9; shared config inheritance, CI/CD via GitHub Actions</div>
+    <div class="item">Packages: <span class="mc">@syntaxure/ui</span> · <span class="mc">@syntaxure-labs/db</span> · <span class="mc">@syntaxure/redis</span> · <span class="mc">@syntaxure/supabase</span> · <span class="mc">prism-context-engine</span></div>
+  </div>
+  <div class="ig"><div class="et n">Strategic Capital Asset (Planned)</div>
+    <div class="item"><b>ASUS Ascent GX10</b> — NVIDIA GB10 Grace Blackwell Superchip</div>
+    <div class="item">1,000 TOPS (FP4) · 128 GB LPDDR5x unified · 4 TB NVMe PCIe 5.0 · 200 Gbps ConnectX-7 NIC</div>
+    <div class="item">27W idle – 130W peak · 240W PSU · 150×150×51 mm form factor · DGX OS</div>
+    <div class="item">~₱575,350 one-time CapEx; eliminates AI inference &amp; cloud DB costs permanently at scale</div>
+  </div>
+</div>
+
+<div class="cell ca">
+  <div class="clabel">07 / Channels</div><h2 class="ct">Channels</h2>
+  <div class="ig"><div class="et a">Agency</div>
+    <div class="item"><b>syntaxure.dev</b> — services, pricing, project portfolio, contact &amp; quote forms</div>
+    <div class="item">Kwadra TBI Cohort 5 — warm introductions, Iloilo &amp; Visayas business ecosystem</div>
+    <div class="item">Targeted outreach to SEA founders and technical decision-makers</div>
+  </div>
+  <div class="ig"><div class="et p">Prism</div>
+    <div class="item"><b>prism.syntaxure.dev</b> (port 3001) — self-serve sign-up, transparent pricing, instant CLI onboarding</div>
+    <div class="item">CLI: <span class="mc">prism init &amp;&amp; prism serve</span> — stdio MCP transport, zero configuration IDE integration</div>
+    <div class="item">VS Code, Cursor, Windsurf IDE extensions — active development &amp; marketplace listing</div>
+    <div class="item">PayPal checkout → subscription activation → webhook lifecycle, fully automated</div>
+    <div class="item">Dual-currency: ₱ PHP (local) / $ USD (international) — auto-detected per visitor</div>
+  </div>
+  <div class="ig"><div class="et s">Docs &amp; Content</div>
+    <div class="item"><b>docs.syntaxure.dev</b> — Nextra 4, 8 locales, MCP integration guides, SEO for "AI context governance"</div>
+    <div class="item">npm — <span class="mc">@prism-engine/cli</span> open-source package drives organic inbound developer discovery</div>
+    <div class="item">GitHub — open-source CLI stars, issue-driven feature roadmap visibility</div>
+  </div>
+  <div class="ig"><div class="et s">Distribution</div>
+    <div class="item">VS Code Marketplace · npm registry · GitHub Marketplace</div>
+    <div class="item">Developer community: Discord, X/Twitter, technical case studies</div>
+    <div class="item">Agency → Prism pipeline: every agency client is a qualified Prism prospect</div>
+  </div>
+</div>
+</div>
+
+<!-- BOTTOM ROW -->
+<div class="g2">
+
+<div class="cell cc">
+  <div class="clabel">08 / Cost Structure</div><h2 class="ct">Cost Structure</h2>
+  <p style="font-size:.72rem;color:var(--ter);margin:-.4rem 0 .85rem;font-family:var(--fm);">Forward-looking infrastructure projection — three operational phases at scale</p>
+
+  <div class="cost-phases">
+
+    <div class="phase-card ph1">
+      <div class="phase-label">Phase 1 — Growth</div>
+      <div class="phase-users">100–500 paying users · Cloud-native</div>
+      <div class="pline"><span class="pname">Supabase Pro</span><span class="pcost">$25/mo</span></div>
+      <div class="pline"><span class="pname">Vercel Pro (2 seats)</span><span class="pcost">$40/mo</span></div>
+      <div class="pline"><span class="pname">AI API (OpenCode / Gemini)</span><span class="pcost">$80–150/mo</span></div>
+      <div class="pline"><span class="pname">Upstash Redis PAYG</span><span class="pcost">~$20/mo</span></div>
+      <div class="pline"><span class="pname">Resend Pro (50K emails)</span><span class="pcost">$20/mo</span></div>
+      <div class="pline"><span class="pname">Sentry Team</span><span class="pcost">$26/mo</span></div>
+      <div class="pline"><span class="pname">Doppler Team</span><span class="pcost">$10/mo</span></div>
+      <div class="pline"><span class="pname">PayPal Transaction Fees</span><span class="pcost">3.49% + ₱15/txn</span></div>
+      <div class="ptotal"><span class="ptlabel">Fixed OpEx</span><span class="ptval">$221–291/mo</span></div>
+      <div class="pnote">Healthy unit economics at 50+ Pro subscribers. PayPal fees variable, scale with MRR — a good problem.</div>
+    </div>
+
+    <div class="phase-card ph2">
+      <div class="phase-label">Phase 2 — Scale (Cloud)</div>
+      <div class="phase-users">500–2,000 users · Pre–self-hosted</div>
+      <div class="pline"><span class="pname">Supabase Pro + Compute Upgrade</span><span class="pcost">$85–160/mo</span></div>
+      <div class="pline"><span class="pname">Vercel Pro (usage-scaled)</span><span class="pcost">$60–200/mo</span></div>
+      <div class="pline"><span class="pname">AI API (volume growth)</span><span class="pcost">$300–600/mo</span></div>
+      <div class="pline"><span class="pname">Upstash Redis Pro</span><span class="pcost">$40/mo</span></div>
+      <div class="pline"><span class="pname">Resend Business</span><span class="pcost">$90/mo</span></div>
+      <div class="pline"><span class="pname">Sentry Business</span><span class="pcost">$80/mo</span></div>
+      <div class="pline"><span class="pname">Doppler + Tooling</span><span class="pcost">$50/mo</span></div>
+      <div class="pline"><span class="pname">PayPal Transaction Fees</span><span class="pcost">3.49% + ₱15/txn</span></div>
+      <div class="ptotal"><span class="ptlabel">Fixed OpEx</span><span class="ptval">$705–1,220/mo</span></div>
+      <div class="pnote">GX10 acquisition trigger: AI API costs exceeding ₱20,000/mo sustained. CapEx recovers in &lt;18 months.</div>
+    </div>
+
+    <div class="phase-card ph3">
+      <div class="phase-label">Phase 3 — Self-Hosted</div>
+      <div class="phase-users">2,000+ users · Ascent GX10 on-prem</div>
+      <div class="pline"><span class="pname">GX10 Amortized (36 mo)</span><span class="pcost">₱15,982/mo</span></div>
+      <div class="pline"><span class="pname">Electricity (115W avg · 24/7)</span><span class="pcost">₱1,980/mo</span></div>
+      <div class="pline"><span class="pname">Business Fiber (Converge/PLDT)</span><span class="pcost">₱3,000/mo</span></div>
+      <div class="pline"><span class="pname">AI Inference</span><span class="pcost" style="color:var(--emerald);">₱0 — local</span></div>
+      <div class="pline"><span class="pname">Database (self-hosted Supabase)</span><span class="pcost" style="color:var(--emerald);">₱0</span></div>
+      <div class="pline"><span class="pname">Hosting (Nginx on GX10)</span><span class="pcost" style="color:var(--emerald);">₱0</span></div>
+      <div class="pline"><span class="pname">Resend + Sentry + Doppler</span><span class="pcost">~$56/mo</span></div>
+      <div class="pline"><span class="pname">PayPal Transaction Fees</span><span class="pcost">3.49% + ₱15/txn</span></div>
+      <div class="ptotal"><span class="ptlabel">Fixed OpEx</span><span class="ptval">~₱23,130/mo</span></div>
+      <div class="pnote">~$407/mo equivalent. Eliminates cloud AI + DB costs. Enables on-prem Enterprise tier. Maximum gross margin.</div>
+    </div>
+
+  </div>
+
+  <div class="capex">
+    <div class="capex-title">⚡ Capital Expenditure — Self-Hosted AI Infrastructure (Non-Recurring)</div>
+    <div class="capex-grid">
+      <div>
+        <div class="cspec"><b>ASUS Ascent GX10</b> — On-Premises AI Workstation</div>
+        <div class="cspec">Processor: <b>NVIDIA GB10 Grace Blackwell Superchip</b></div>
+        <div class="cspec">CPU: <b>20-core ARM v9.2-A</b> · GPU: <b>Integrated Blackwell</b></div>
+        <div class="cspec">AI Performance: <b>1,000 TOPS (FP4)</b></div>
+        <div class="cspec">Memory: <b>128 GB LPDDR5x Unified</b></div>
+        <div class="cspec">Storage: <b>4 TB NVMe PCIe 5.0</b></div>
+        <div class="cspec">Network: <b>200 Gbps ConnectX-7 NIC</b> + 10GbE + Wi-Fi 7</div>
+        <div class="cspec">Power Envelope: <b>27W idle — 130W peak</b> (240W PSU)</div>
+      </div>
+      <div>
+        <div class="cspec"><b>Acquisition Cost</b></div>
+        <div class="cspec" style="font-size:.82rem;color:var(--rose);font-family:var(--fm);font-weight:700;margin:.2rem 0 .45rem;">~₱575,350 (~$10,000 USD)</div>
+        <div class="cspec">36-month amortization: <b>₱15,982/mo</b></div>
+        <div class="cspec">Electricity (24/7 · 115W avg · ₱12/kWh PH rate): <b>~₱1,980/mo</b></div>
+        <div class="cspec">Business fiber (Converge FlexiBIZ / PLDT FiberBiz Iloilo): <b>~₱3,000/mo</b></div>
+        <div class="croi"><b>Strategic ROI:</b> Eliminates all cloud AI inference costs permanently. Enables self-hosted Supabase ($0 DB/auth/storage). Unlocks on-prem Enterprise tier. Break-even vs. Phase 2 cloud spend within 12–18 months at projected scale.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dg">
+    <div class="dr">
+      <div class="dt">Primary Cost Drivers</div>
+      <div class="di"><b>AI API Costs</b> — dominant variable cost at scale; controlled via OpenCode free-model priority routing + LRU cache (40%+ hit rate)</div>
+      <div class="di"><b>Database Compute</b> — Supabase scales with MAU; self-hosted GX10 eliminates this entirely in Phase 3</div>
+      <div class="di"><b>PayPal Fees</b> — 3.49% + ₱15/txn (PH rate); priced into subscription margins by design</div>
+      <div class="di"><b>Vercel Bandwidth</b> — mitigated via Cloudflare R2 CDN for all static &amp; media assets</div>
+    </div>
+    <div class="dr">
+      <div class="dt">Cost Optimization Strategy</div>
+      <div class="di"><b>Progressive disclosure</b> — context from ~60,000 → ~1,800 tokens per session; 97% overhead reduction per query</div>
+      <div class="di"><b>Free-model priority routing</b> — mimo-v2.5, deepseek-v4-flash consumed first; paid models are structured fallback-only</div>
+      <div class="di"><b>Self-hosted migration trigger</b> — GX10 acquisition when cloud AI + DB exceeds ₱20K/mo sustained</div>
+      <div class="di"><b>SEA cost discipline</b> — zero tolerance for cloud waste; every infrastructure line item justified against revenue</div>
+    </div>
+  </div>
+</div>
+
+<div class="cell cr">
+  <div class="clabel">09 / Revenue Streams</div><h2 class="ct">Revenue Streams</h2>
+
+  <div class="et a" style="margin-bottom:.6rem;">Engine A — Agency (Project Fees)</div>
+
+  <div class="rt"><div class="rn">Starter</div><div class="rd">5-page web presence, static or landing site, 2-week delivery</div><div class="rp" style="color:var(--cyan);">≥ ₱25,000</div></div>
+  <div class="rb"><div class="rbf" style="width:10%;background:var(--cyan)"></div></div>
+  <div class="rt"><div class="rn">Business</div><div class="rd">15 pages + CMS + Auth + full deployment, 4-week delivery</div><div class="rp" style="color:var(--cyan);">≥ ₱65,000</div></div>
+  <div class="rb"><div class="rbf" style="width:28%;background:var(--cyan)"></div></div>
+  <div class="rt"><div class="rn">Custom SaaS</div><div class="rd">Full-stack SaaS, multi-tenant architecture, RBAC, payment integration</div><div class="rp" style="color:var(--cyan);">≥ ₱180,000</div></div>
+  <div class="rb"><div class="rbf" style="width:58%;background:var(--cyan)"></div></div>
+  <div class="rt"><div class="rn">Enterprise</div><div class="rd">Dedicated engineering team, architecture audit, 8+ week engagement</div><div class="rp" style="color:var(--cyan);">Custom</div></div>
+  <div class="rb" style="margin-bottom:.4rem;"><div class="rbf" style="width:90%;background:var(--cyan)"></div></div>
+  <div class="rt"><div class="rn">Care Plan</div><div class="rd">12–18 mo recurring maintenance retainer; priority scheduling</div><div class="rp" style="color:var(--emerald);">₱2,000–5,000/mo</div></div>
+  <div class="rt"><div class="rn">AI Integration</div><div class="rd">LLM orchestration &amp; context governance add-on to any agency project</div><div class="rp" style="color:var(--amber);">≥ ₱100,000</div></div>
+
+  <div class="div" style="margin:1rem 0;"></div>
+
+  <div class="et p" style="margin-bottom:.6rem;">Engine B — Prism Context Engine (SaaS Subscriptions)</div>
+
+  <div class="rt"><div class="rn" style="color:var(--emerald);">Free</div><div class="rd">Unlimited local rules + enforcement, 1 synced project, 25 AI gen/mo, full CLI + TUI. No credit card. <b>Free permanently.</b></div><div class="rp" style="color:var(--emerald);">$0 / mo<br><span style="font-size:.59rem;color:var(--ter);font-weight:400;">Forever</span></div></div>
+  <div class="rb"><div class="rbf" style="width:0%;background:var(--emerald)"></div></div>
+  <div class="rt"><div class="rn" style="color:var(--cyan);">Pro</div><div class="rd">Unlimited synced projects, AI Kitchen dashboard, 500 AI gen/mo, IDE auto-sync (MCP), cross-machine sync, REST gateway, priority support. 7-day trial.</div><div class="rp" style="color:var(--cyan);">₱299/mo<br><span style="font-size:.59rem;color:var(--ter);">~$8 USD</span></div></div>
+  <div class="rb"><div class="rbf" style="width:26%;background:var(--cyan)"></div></div>
+  <div class="rt"><div class="rn" style="color:var(--purple);">Team</div><div class="rd">Everything in Pro + shared team constitution, governance rules, 2,000 AI gen/mo pooled, full audit trail, up to 10 seats. Min 3 seats. 7-day trial.</div><div class="rp" style="color:var(--purple);">₱249/seat/mo<br><span style="font-size:.59rem;color:var(--ter);">~$7/seat USD</span></div></div>
+  <div class="rb"><div class="rbf" style="width:50%;background:var(--purple)"></div></div>
+  <div class="rt"><div class="rn" style="color:var(--amber);">Enterprise</div><div class="rd">Unlimited members + AI gen, SSO/SAML, full audit logs, dedicated support, custom integrations, on-prem deployment (Ascent GX10-ready).</div><div class="rp" style="color:var(--amber);">Custom<br><span style="font-size:.59rem;color:var(--ter);">Annual</span></div></div>
+
+  <div class="div" style="margin:.9rem 0;"></div>
+
+  <div class="ig"><div class="et p">ARR Milestones &amp; Unit Economics</div>
+    <div class="item">Team minimum entry (3 seats): ₱747/mo = <b>₱8,964/yr ARR per team customer</b></div>
+    <div class="item">Pro annual: ₱2,990/yr · Team annual: ₱2,490/seat/yr (~17% discount vs. monthly billing)</div>
+    <div class="item"><span style="color:var(--emerald);font-weight:600;">64% token reduction</span> per developer per month — primary enterprise sales proof point ($55–150 → $20–55/mo)</div>
+    <div class="item">Rule lock-in flywheel: synced rules increase switching cost structurally — churn minimized by design</div>
+  </div>
+  <div class="ig"><div class="et s">Payment Infrastructure</div>
+    <div class="item"><b>PayPal REST API</b> — subscription creation, webhook-verified lifecycle events at <span class="mc">/api/webhooks/paypal</span>, full HMAC signature validation + idempotency</div>
+    <div class="item">Dual-currency: ₱ PHP (Philippine market) / $ USD (international) — auto-detected via <span class="mc">getVisitorCurrency()</span></div>
+    <div class="item">Transaction cost ~3.49% + ₱15 per PayPal payment; absorbed in gross margin at designed price points</div>
+  </div>
+</div>
+
+</div>
+
+<div class="ftr">
+  <div class="ftl">
+    Syntaxure Labs · Governance over Generation · Est. 2025 · Iloilo City, Philippines · Kwadra TBI Cohort 5<br>
+    <span style="font-size:.59rem;opacity:.55;">syntaxure.dev · prism.syntaxure.dev · docs.syntaxure.dev · BMC v3.1 · August 2026 · All cost figures are forward-looking projections; actual costs depend on scale trajectory</span>
+  </div>
+  <div class="ftr-r">
+    <a href="https://syntaxure.dev">Agency</a>
+    <a href="https://prism.syntaxure.dev">Prism</a>
+    <a href="https://docs.syntaxure.dev">Docs</a>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

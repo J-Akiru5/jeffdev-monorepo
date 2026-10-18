@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage Phase 4 — Task Report</title>
+<style>
+  :root {
+    --bg: #0A0D12; --bg-raised: #11151C; --bg-card: #151A22; --border: #232A36;
+    --cyan: #22D3EE; --violet: #8B7BFF; --text: #E6EAF0; --text-dim: #8B93A3;
+    --text-faint: #5A6272; --good: #4ADE80; --warn: #FBBF24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; padding: 48px 24px; }
+  .wrap { max-width: 820px; margin: 0 auto; }
+  .mono { font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 28px; margin-bottom: 32px; }
+  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 12px; background: linear-gradient(90deg, var(--text), var(--text) 60%, var(--cyan)); -webkit-background-clip: text; background-clip: text; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim); }
+  .meta-row span b { color: var(--text); font-weight: 500; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; border: 1px solid; }
+  .badge.done { color: var(--good); border-color: var(--good); background: rgba(74,222,128,0.08); }
+  .badge.followup { color: var(--warn); border-color: var(--warn); background: rgba(251,191,36,0.08); }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 14px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--violet); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .summary-box { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 6px; padding: 18px 20px; font-size: 15px; }
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  ul.clean li { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; font-size: 14px; }
+  .checkpoint { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 14px 18px; margin-bottom: 10px; }
+  .checkpoint .q { font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
+  .checkpoint .q b { color: var(--violet); font-weight: 500; }
+  .checkpoint .a { font-size: 14px; }
+  .checkpoint .a b { color: var(--cyan); font-weight: 500; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  th { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
+  td.mono { color: var(--cyan); }
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">prism-manage · Task Report</div>
+    <h1>Phase 4 — Calendar, For Real</h1>
+    <div class="meta-row">
+      <span><b>2026-10-18</b></span>
+      <span>Repo: <b>jeffdev-monorepo</b></span>
+      <span>Agent: <b>opencode · DeepSeek V4.1 Flash</b></span>
+      <span>Branch: <b>feat/pm-4-calendar (local, unpushed)</b></span>
+      <span class="badge done">Complete</span>
+      <span class="badge followup">No migration needed</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Summary</h2>
+    <div class="summary-box">
+      The fake "Sync Now" is gone. prism-manage now does <b>real two-way Google
+      Calendar sync</b>: tasks with due dates mirror to Google (timed or
+      all-day, in your timezone), app events push on create/update/delete,
+      <b>Sync Now</b> pulls and reconciles Google events, tokens refresh
+      automatically with rotation, and a <b>daily Vercel cron</b> reconciles
+      every connected user. prism-manage stays authoritative for work items —
+      Google edits to task-mirrored events never overwrite your tasks.
+      <b>No migration required</b> — everything rides on existing columns +
+      <span class="mono">user_tokens.metadata</span>.
+    </div>
+  </section>
+
+  <section>
+    <h2>What Changed</h2>
+    <table>
+      <thead><tr><th>File</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">src/lib/google-calendar.ts <em>(new)</em></td><td>Authorized client with auto token refresh + rotation; push/pull/delete for tasks and app events; sync metadata in <span class="mono">user_tokens.metadata</span>. Everything best-effort — never throws.</td></tr>
+        <tr><td class="mono">src/app/actions/calendar.ts</td><td>Events push to Google on create/update/delete; <span class="mono">syncCalendar</span> is now a real pull + reconcile; new <span class="mono">getCalendarSyncStatus</span>.</td></tr>
+        <tr><td class="mono">src/app/api/calendar/sync/route.ts <em>(new)</em></td><td>POST = manual session sync; GET = cron reconciliation for all connected users (<span class="mono">Bearer CRON_SECRET</span>).</td></tr>
+        <tr><td class="mono">src/app/actions/tasks.ts</td><td>Task create/update/delete mirror to Google when scheduled; clearing a due date removes the mirror; deleted-in-Google events are recreated on next save.</td></tr>
+        <tr><td class="mono">(dashboard)/calendar/page.tsx</td><td>Real connection / last-synced / error status; sync failures show their actual message.</td></tr>
+        <tr><td class="mono">vercel.json</td><td>Daily cron: <span class="mono">/api/calendar/sync</span> at 16:00 UTC (~midnight PH).</td></tr>
+        <tr><td class="mono">turbo.json</td><td><span class="mono">CRON_SECRET</span> declared for build/lint/dev env passthrough.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Decisions &amp; Checkpoints</h2>
+    <div class="checkpoint">
+      <div class="q"><b>Decision:</b> where does sync state live?</div>
+      <div class="a"><b>user_tokens.metadata (JSONB)</b> — last_synced_at + last_sync_error. Zero schema changes: the phase needed no migration at all, answering the open question directly.</div>
+    </div>
+    <div class="checkpoint">
+      <div class="q"><b>Conflict policy (ADR-5):</b> who wins?</div>
+      <div class="a"><b>prism-manage wins for work items.</b> Pull skips task-mirrored rows entirely — Google edits to them are ignored, external deletions trigger a recreate on the next task save. Google-sourced rows follow Google (updates overwrite; externally deleted rows are swept). Window: -30d .. +90d.</div>
+    </div>
+    <div class="checkpoint">
+      <div class="q"><b>Timezone handling:</b> wall-clock without a tz library</div>
+      <div class="a">Timed events use <span class="mono">{ dateTime, timeZone }</span> pairs (Google interprets the wall clock in the given zone); end times are computed with pure UTC arithmetic so no DST/offset math is needed. Zone comes from <span class="mono">user_profiles.timezone</span>, defaulting to Asia/Manila.</div>
+    </div>
+    <div class="checkpoint">
+      <div class="q"><b>Trade-off:</b> task writes now include a Google API call</div>
+      <div class="a">Best-effort and only when a due date exists + Google is connected; the lib never throws and failures record a sync error for visibility. Keeps the "zero silent failures" rule without blocking core task writes on Google availability.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Next Steps</h2>
+    <ul class="clean">
+      <li><span class="badge followup">Env</span> &nbsp;Set <span class="mono">CRON_SECRET</span> in prism-manage's Vercel env (cron auth). <span class="mono">GOOGLE_CLIENT_ID/SECRET</span> + <span class="mono">NEXT_PUBLIC_SITE_URL</span> already exist from the OAuth flow.</li>
+      <li><span class="badge followup">Smoke test</span> &nbsp;Connect Calendar → create a task with a due date → see it in Google → edit/complete/delete → "Sync Now" pulls external events.</li>
+      <li><span class="badge followup">Phase 5</span> &nbsp;Integrations: GitHub write-back (create issues from tasks), Slack notifications, email digest.</li>
+      <li><span class="badge followup">Small</span> &nbsp;Deferred: Google "changed in Google" conflict badge for task-mirrored events; per-event reminders sync; multi-calendar support.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>Generated by opencode · DeepSeek V4.1 Flash</span>
+    <span>2026-10-18</span>
+  </footer>
+
+</div>
+</body>
+</html>

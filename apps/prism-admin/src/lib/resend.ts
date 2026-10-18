@@ -21,10 +21,18 @@ export async function sendEmail(options: EmailOptions) {
     return { success: false, error: "RESEND_API_KEY is not set" };
   }
 
+  const fromEmail = process.env.RESEND_FROM_EMAIL;
+  if (!fromEmail) {
+    console.warn(
+      "[Resend] RESEND_FROM_EMAIL is not set. Skipping email send — no hardcoded fallback sender.",
+    );
+    return { success: false, error: "RESEND_FROM_EMAIL is not set" };
+  }
+
   try {
     const resend = new Resend(apiKey);
     const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "noreply@prism.jeffdev.io",
+      from: fromEmail,
       ...options,
     });
 
@@ -105,7 +113,7 @@ export async function sendInquiryResponse({
     subject: `Re: ${subject}`,
     html,
     text: message,
-    replyTo: process.env.ADMIN_EMAIL || "admin@jeffdev.io",
+    replyTo: process.env.ADMIN_EMAIL || undefined,
     tags: [{ name: "type", value: "inquiry-response" }],
   });
 }

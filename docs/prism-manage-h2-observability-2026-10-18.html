@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage H2 — Observability &amp; Resilience Report</title>
+<style>
+  :root {
+    --bg: #0A0D12; --bg-raised: #11151C; --bg-card: #151A22; --border: #232A36;
+    --cyan: #22D3EE; --violet: #8B7BFF; --text: #E6EAF0; --text-dim: #8B93A3;
+    --text-faint: #5A6272; --good: #4ADE80; --warn: #FBBF24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; padding: 48px 24px; }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  .mono { font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 28px; margin-bottom: 32px; }
+  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 12px; background: linear-gradient(90deg, var(--text), var(--text) 60%, var(--cyan)); -webkit-background-clip: text; background-clip: text; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim); }
+  .meta-row span b { color: var(--text); font-weight: 500; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; border: 1px solid; }
+  .badge.done { color: var(--good); border-color: var(--good); background: rgba(74,222,128,0.08); }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 14px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--violet); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .summary-box { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 6px; padding: 18px 20px; font-size: 15px; }
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  ul.clean li { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; font-size: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
+  td.mono { color: var(--cyan); white-space: nowrap; }
+  .ok { color: var(--good); }
+  pre { background: var(--bg-raised); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); overflow-x: auto; }
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">prism-manage · Task Report · Hardening Arc · Phase H2</div>
+    <h1>H2 — Observability &amp; Resilience</h1>
+    <div class="meta-row">
+      <span><b>2026-10-18</b></span>
+      <span>Repo: <b>jeffdev-monorepo</b></span>
+      <span>Agent: <b>opencode · DeepSeek V4.1 Flash</b></span>
+      <span>Branch: <b>feat/pm-h2-observability → PR #99 → develop</b></span>
+      <span class="badge done">Complete — CI green</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Summary</h2>
+    <div class="summary-box">
+      The app can now <b>tell you when it breaks</b>. A deep health endpoint
+      verifies the database round-trip and reports which integrations are
+      configured; every error boundary (plus a new <b>global-error</b>) reports
+      to Sentry; the daily calendar-sync cron retries transient failures,
+      logs structured JSON, and alerts Slack when users fail; and mutations
+      emit structured logs. Ops tooling got a working
+      <b><span class="mono">pnpm db:push</span></b> that bypasses the broken CLI
+      login flow. <b>23/23 E2E tests green locally and in CI.</b>
+    </div>
+  </section>
+
+  <section>
+    <h2>What Changed</h2>
+    <table>
+      <thead><tr><th>File</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">api/health/route.ts</td><td>Deep check: DB round-trip + latency; <span class="mono">503</span> when degraded; integration flags (sentry / slack / cron / gemini / github / google) — booleans only, never values.</td></tr>
+        <tr><td class="mono">global-error.tsx <em>(new)</em></td><td>Root-level error boundary — catches anything that escapes every other boundary, reports to Sentry, renders a self-contained fallback (inline styles; no layout dependency).</td></tr>
+        <tr><td class="mono">components/error-reporter.tsx <em>(new)</em></td><td>Tiny client component: <span class="mono">Sentry.captureException</span> once per error. Wired into <b>all 7 route error boundaries</b> + dashboard group boundary.</td></tr>
+        <tr><td class="mono">api/calendar/sync/route.ts</td><td>Cron hardening: one retry per user on transient failures, structured start/done/failures logs, Slack alert when any user fails or the run crashes, <span class="mono">maxDuration</span> set.</td></tr>
+        <tr><td class="mono">lib/log.ts <em>(new)</em> + tests</td><td>Structured JSON logging (one line per event) + <span class="mono">timed()</span> wrapper; never throws. Unit-tested (27 tests total in the app).</td></tr>
+        <tr><td class="mono">actions/tasks.ts</td><td>Structured logs for <span class="mono">task.created</span> / <span class="mono">task.deleted</span> (ids, workspace, actor — no PII beyond titles where useful).</td></tr>
+        <tr><td class="mono">actions/pages.ts</td><td>Dead zod schema removed (lint clean) — the H1 use-server fix's leftover.</td></tr>
+        <tr><td class="mono">scripts/db-push.mjs <em>(new)</em> + root script</td><td><span class="mono">pnpm db:push</span>: builds the pooler connection from the linked project + local DB password, auto-selects a working Supabase CLI (workspace → global → PATH), and never echoes the connection string. Verified: "Remote database is up to date."</td></tr>
+        <tr><td class="mono">e2e/api.spec.ts <em>(new)</em></td><td>Health contract (status shape, db check, integration flags) + cron rejects unauthenticated calls (401). Suite now 23 tests.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Ops State (Vercel)</h2>
+    <ul class="clean">
+      <li><b>Sentry:</b> <span class="mono">NEXT_PUBLIC_SENTRY_DSN</span> + org/project/auth token were already configured in production — with the new boundaries, errors now actually flow to Sentry.</li>
+      <li><b>Cron:</b> <span class="mono">CRON_SECRET</span> was missing — <b>set by the agent</b> across Production / Preview / Development. The daily 16:00 UTC sync now authenticates and alerts.</li>
+      <li><b>Slack:</b> <span class="mono">SLACK_WEBHOOK_URL</span> still unset — all alerts no-op silently until a webhook URL is added (one Vercel env var).</li>
+      <li><b>Health:</b> <span class="mono">GET /api/health</span> is public by design (no secrets); point an uptime monitor at it — <span class="mono">200 ok</span> / <span class="mono">503 degraded</span>.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Log Format</h2>
+    <pre>{"ts":"2026-10-18T13:44:02.114Z","level":"info","service":"prism-manage",
+ "msg":"calendar.sync.done","users":3,"failed":0,"durationMs":1841}</pre>
+  </section>
+
+  <section>
+    <h2>Verification</h2>
+    <ul class="clean">
+      <li><span class="ok">✔</span> E2E: <b>23 passed</b> locally (1.4 min) and in CI (real account provisioning, live DB).</li>
+      <li><span class="ok">✔</span> Unit: 27 passed (incl. new logging tests). <span class="mono">check-types</span> + <span class="mono">lint</span> clean.</li>
+      <li><span class="ok">✔</span> <span class="mono">pnpm db:push</span> verified against the live project ("up to date").</li>
+      <li><span class="ok">✔</span> <span class="mono">CRON_SECRET</span> confirmed present for all three Vercel environments.</li>
+      <li><span class="ok">✔</span> CI run green on develop (all jobs incl. E2E + status gate).</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Notes</h2>
+    <ul class="clean">
+      <li>During debugging, a crashed CLI attempt printed the DB password inside its own error dump (local terminal only). Consider rotating the Supabase DB password if that concerns you; <span class="mono">db:push</span> now sanitizes its error path.</li>
+      <li>The workspace devDependency <span class="mono">supabase@2.101</span> is missing its Windows binary on this machine — <span class="mono">db:push</span> auto-falls back to the global CLI; a <span class="mono">pnpm rebuild</span> didn't restore it.</li>
+      <li>Follow-ups: set <span class="mono">SLACK_WEBHOOK_URL</span>; add Sentry alert rules (issue → email/Slack) in the Sentry UI; wire uptime monitoring to <span class="mono">/api/health</span>.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>prism-manage · hardening arc · H2 complete</span>
+    <span>next: R0 — Company Brain spike (GO/NO-GO)</span>
+  </footer>
+
+</div>
+</body>
+</html>

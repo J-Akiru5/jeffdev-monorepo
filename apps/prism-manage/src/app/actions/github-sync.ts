@@ -3,8 +3,9 @@
 import { Octokit } from "@octokit/rest";
 import { revalidatePath } from "next/cache";
 import type { MarketingTask } from "@/lib/schemas";
-import { buildLabels, issueToMarketingTask, extractLabels } from "@/lib/github-utils";
+import { buildLabels, issueToMarketingTask, extractLabels, toTitleCase } from "@/lib/github-utils";
 import { createClient } from "@/lib/supabase/server";
+import { requireMarketingAccess } from "@/lib/authorization-server";
 
 function getOctokit() {
   const token = process.env.GITHUB_PAT;
@@ -30,6 +31,12 @@ async function requireAuth() {
   return supabase;
 }
 
+async function requireMarketingAuth() {
+  const supabase = await requireAuth();
+  await requireMarketingAccess(supabase);
+  return supabase;
+}
+
 export async function fetchGitHubIssues(): Promise<
   Array<{
     number: number;
@@ -41,7 +48,7 @@ export async function fetchGitHubIssues(): Promise<
     labels: (string | { name?: string })[];
   }>
 > {
-  await requireAuth();
+  await requireMarketingAuth();
   const octokit = getOctokit();
   const { owner, repo } = getRepoConfig();
 
@@ -77,6 +84,7 @@ export async function syncGitHubIssuesToSupabase(): Promise<{
   if (!user) return { imported: 0, error: "Unauthorized" };
 
   try {
+    await requireMarketingAccess(supabase);
     const issues = await fetchGitHubIssues();
     if (issues.length === 0) return { imported: 0 };
 
@@ -118,7 +126,7 @@ export async function createGitHubIssue(task: {
   ownerIds: string[];
   platform?: string;
 }): Promise<MarketingTask> {
-  await requireAuth();
+  await requireMarketingAuth();
   const octokit = getOctokit();
   const { owner, repo } = getRepoConfig();
 
@@ -155,7 +163,7 @@ export async function updateGitHubIssueStatus(
   issueNumber: number,
   newStatus: "todo" | "in-progress" | "done"
 ): Promise<void> {
-  await requireAuth();
+  await requireMarketingAuth();
   const octokit = getOctokit();
   const { owner, repo } = getRepoConfig();
 
@@ -188,4 +196,133 @@ export async function updateGitHubIssueStatus(
   }
 
   revalidatePath("/marketing");
+}
+
+// =============================================================================
+// TASK <-> GITHUB (phase 5 — write-back)
+// =============================================================================
+
+const TASK_STATUS_TO_GITHUB: Record<string, "todo" | "in-progress" | "done"> = {
+  backlog: "todo",
+  todo: "todo",
+  in_progress: "in-progress",
+  in_review: "in-progress",
+  approved: "done",
+};
+
+function buildTaskLabels(task: {
+  taskType?: string | null;
+  priority?: string | null;
+  status?: string | null;
+}): string[] {
+  const labels = ["task"];
+  if (task.taskType) labels.push(`Type-${toTitleCase(task.taskType)}`);
+  if (task.priority) labels.push(`Priority-${toTitleCase(task.priority)}`);
+  labels.push(`status-${TASK_STATUS_TO_GITHUB[task.status || "todo"] || "todo"}`);
+  return labels;
+}
+
+/**
+ * Create a GitHub issue from a task and link it (stores the issue number on
+ * the task). Any workspace member who can see the task may create the issue.
+ */
+export async function createIssueForTask(taskId: string): Promise<{
+  success?: boolean;
+  error?: string;
+  issueNumber?: number;
+  issueUrl?: string;
+}> {
+  try {
+    const supabase = await requireAuth();
+    const { data: task } = await supabase
+      .from("tasks")
+      .select("id, title, description, notes, task_type, priority, status, github_issue_number")
+      .eq("id", taskId)
+      .maybeSingle();
+    if (!task) return { error: "Task not found or you don't have access" };
+    if (task.github_issue_number) {
+      return { error: `This task is already linked to issue #${task.github_issue_number}` };
+    }
+
+    const octokit = getOctokit();
+    const { owner, repo } = getRepoConfig();
+
+    const body = [
+      task.description || "",
+      task.notes ? `\n\n---\n**Internal notes:** ${task.notes}` : "",
+      `\n\n---\n_Created from prism-manage task \`${task.id}\`_`,
+    ].join("");
+
+    const { data: issue } = await octokit.issues.create({
+      owner,
+      repo,
+      title: String(task.title || "Task"),
+      body,
+      labels: buildTaskLabels(task),
+    });
+
+    const { error: updateError } = await supabase
+      .from("tasks")
+      .update({ github_issue_number: issue.number })
+      .eq("id", taskId);
+
+    if (updateError) return { error: updateError.message };
+
+    revalidatePath("/tasks");
+    return { success: true, issueNumber: issue.number, issueUrl: issue.html_url };
+  } catch (err) {
+    return {
+      error: err instanceof Error ? err.message : "Failed to create GitHub issue",
+    };
+  }
+}
+
+/**
+ * Push a task's status to its linked GitHub issue (best-effort).
+ * Mapping: backlog/todo -> todo, in_progress/in_review -> in-progress,
+ * approved -> done (issue closed).
+ */
+export async function pushTaskStatusToGitHub(
+  taskId: string,
+  status: string,
+): Promise<void> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: task } = await supabase
+      .from("tasks")
+      .select("github_issue_number")
+      .eq("id", taskId)
+      .maybeSingle();
+
+    const issueNumber = task?.github_issue_number as number | undefined;
+    if (!issueNumber) return;
+
+    const octokit = getOctokit();
+    const { owner, repo } = getRepoConfig();
+
+    const { data: issue } = await octokit.issues.get({
+      owner,
+      repo,
+      issue_number: issueNumber,
+    });
+
+    const currentLabels = extractLabels(
+      issue.labels as (string | { name?: string })[],
+    ).filter((l) => !l.startsWith("status-"));
+
+    const mapped = TASK_STATUS_TO_GITHUB[status] || "todo";
+
+    await octokit.issues.update({
+      owner,
+      repo,
+      issue_number: issueNumber,
+      labels: [...currentLabels, `status-${mapped}`],
+      state: mapped === "done" ? "closed" : "open",
+    });
+  } catch {
+    // best-effort — GitHub is not a source of truth for tasks
+  }
 }

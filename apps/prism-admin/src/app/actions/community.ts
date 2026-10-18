@@ -1,6 +1,7 @@
 "use server";
 
 import { getAdminClient } from "@/lib/supabase/admin";
+import { requireRole } from "@/lib/authz";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { randomBytes } from "crypto";
@@ -145,6 +146,7 @@ const sb = () => getAdminClient();
 
 export async function getCommunityMembers() {
   try {
+    await requireRole();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (sb() as any)
       .from("community_members")
@@ -165,6 +167,7 @@ export async function getCommunityMembers() {
 
 export async function getCommunityMember(id: string) {
   try {
+    await requireRole();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (sb() as any)
       .from("community_members")
@@ -191,6 +194,7 @@ export async function createCommunityMember(
   input: CommunityMemberInput
 ): Promise<{ success: boolean; data?: CommunityMember; error?: string }> {
   try {
+    await requireRole();
     const parsed = memberSchema.safeParse(input);
     if (!parsed.success) {
       return {
@@ -231,6 +235,7 @@ export async function updateCommunityMember(
   input: Partial<CommunityMemberInput>
 ): Promise<{ success: boolean; data?: CommunityMember; error?: string }> {
   try {
+    await requireRole();
     const updates: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
     };
@@ -265,6 +270,7 @@ export async function updateCommunityMember(
 
 export async function deleteCommunityMember(id: string) {
   try {
+    await requireRole();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (sb() as any)
       .from("community_members")
@@ -293,6 +299,7 @@ export async function getCommunityPosts(filters?: {
   search?: string;
 }) {
   try {
+    await requireRole();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let query = (sb() as any)
       .from("community_posts")
@@ -328,6 +335,7 @@ export async function getCommunityPosts(filters?: {
 
 export async function getCommunityPost(id: string) {
   try {
+    await requireRole();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (sb() as any)
       .from("community_posts")
@@ -357,6 +365,7 @@ export async function createCommunityPost(
   input: CommunityPostInput
 ): Promise<{ success: boolean; data?: CommunityPost; error?: string }> {
   try {
+    await requireRole();
     const parsed = postSchema.safeParse(input);
     if (!parsed.success) {
       return {
@@ -415,6 +424,7 @@ export async function updateCommunityPost(
   input: Partial<CommunityPostInput>
 ): Promise<{ success: boolean; data?: CommunityPost; error?: string }> {
   try {
+    await requireRole();
     const updates: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
     };
@@ -467,6 +477,7 @@ export async function updateCommunityPost(
 
 export async function deleteCommunityPost(id: string) {
   try {
+    await requireRole();
     // Delete junction rows first (CASCADE may handle this, but be explicit)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (sb() as any).from("community_post_tags").delete().eq("post_id", id);
@@ -492,6 +503,7 @@ export async function deleteCommunityPost(id: string) {
 
 export async function togglePostPinned(id: string, isPinned: boolean) {
   try {
+    await requireRole();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (sb() as any)
       .from("community_posts")
@@ -513,6 +525,7 @@ export async function togglePostPinned(id: string, isPinned: boolean) {
 
 export async function togglePostPublished(id: string, isPublished: boolean) {
   try {
+    await requireRole();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (sb() as any)
       .from("community_posts")
@@ -541,6 +554,7 @@ export async function inviteCommunityMember(
   name: string
 ): Promise<{ success: boolean; token?: string; error?: string }> {
   try {
+    await requireRole();
     if (!email || !name) {
       return { success: false, error: "Email and name are required" };
     }
@@ -573,6 +587,7 @@ export async function inviteCommunityMember(
 
 export async function getCommunityInvites() {
   try {
+    await requireRole();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (sb() as any)
       .from("community_invites")
@@ -593,6 +608,7 @@ export async function getCommunityInvites() {
 
 export async function deleteCommunityInvite(id: string) {
   try {
+    await requireRole();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (sb() as any)
       .from("community_invites")

@@ -8,6 +8,7 @@
 
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logAuditEvent } from "@/lib/audit";
+import { requireRole } from "@/lib/authz";
 import { revalidatePath } from "next/cache";
 
 interface ActionResult {
@@ -17,6 +18,7 @@ interface ActionResult {
 
 export async function getAgencyAvailability(): Promise<{ success: boolean; data?: any[]; error?: string }> {
   try {
+    await requireRole();
     const supabase = getAdminClient();
     const { data, error } = await supabase
       .from("agency_availability")
@@ -38,6 +40,7 @@ export async function createAvailabilitySlot(slot: {
   note?: string;
 }): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const { error } = await supabase.from("agency_availability").insert({
       date: slot.date,
@@ -48,7 +51,7 @@ export async function createAvailabilitySlot(slot: {
     });
     if (error) throw error;
 
-    await logAuditEvent({ action: "CREATE", resource: "agency_availability", resourceId: slot.date });
+    await logAuditEvent({ action: "CREATE", resource: "agency_availability", resourceId: slot.date }, actor);
     revalidatePath("/admin/agency/availability");
     return { success: true };
   } catch (error) {
@@ -62,6 +65,7 @@ export async function updateAvailabilitySlot(
   slot: { startTime: string; endTime: string; type: string; note: string }
 ): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const { error } = await supabase
       .from("agency_availability")
@@ -74,7 +78,7 @@ export async function updateAvailabilitySlot(
       .eq("id", id);
     if (error) throw error;
 
-    await logAuditEvent({ action: "UPDATE", resource: "agency_availability", resourceId: id });
+    await logAuditEvent({ action: "UPDATE", resource: "agency_availability", resourceId: id }, actor);
     revalidatePath("/admin/agency/availability");
     return { success: true };
   } catch (error) {
@@ -85,11 +89,12 @@ export async function updateAvailabilitySlot(
 
 export async function deleteAvailabilitySlot(id: string): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const { error } = await supabase.from("agency_availability").delete().eq("id", id);
     if (error) throw error;
 
-    await logAuditEvent({ action: "DELETE", resource: "agency_availability", resourceId: id });
+    await logAuditEvent({ action: "DELETE", resource: "agency_availability", resourceId: id }, actor);
     revalidatePath("/admin/agency/availability");
     return { success: true };
   } catch (error) {

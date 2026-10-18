@@ -8,8 +8,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { requireRole, AuthzError } from "@/lib/authz";
 import { revalidatePath } from "next/cache";
 import type { PricingFAQRow } from "@/lib/database.types";
 
@@ -20,11 +20,7 @@ function faqs() {
 // GET — List FAQs
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    await requireRole();
 
     const { searchParams } = new URL(request.url);
     const app = searchParams.get("app");
@@ -41,6 +37,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: data || [] });
   } catch (error) {
+    if (error instanceof AuthzError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error("[pricing-faqs GET] Error:", error);
     return NextResponse.json(
       { error: "Failed to fetch FAQs" },
@@ -52,11 +51,7 @@ export async function GET(request: NextRequest) {
 // POST — Create FAQ
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    await requireRole();
 
     const body = await request.json();
 
@@ -75,6 +70,9 @@ export async function POST(request: NextRequest) {
     revalidatePath("/admin/pricing");
     return NextResponse.json({ data });
   } catch (error) {
+    if (error instanceof AuthzError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error("[pricing-faqs POST] Error:", error);
     return NextResponse.json(
       { error: "Failed to create FAQ" },
@@ -86,11 +84,7 @@ export async function POST(request: NextRequest) {
 // PATCH — Update FAQ
 export async function PATCH(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    await requireRole();
 
     const body = await request.json();
     const { id, ...updates } = body;
@@ -124,6 +118,9 @@ export async function PATCH(request: NextRequest) {
     revalidatePath("/admin/pricing");
     return NextResponse.json({ data });
   } catch (error) {
+    if (error instanceof AuthzError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error("[pricing-faqs PATCH] Error:", error);
     return NextResponse.json(
       { error: "Failed to update FAQ" },
@@ -135,11 +132,7 @@ export async function PATCH(request: NextRequest) {
 // DELETE — Delete FAQ
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    await requireRole();
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -158,6 +151,9 @@ export async function DELETE(request: NextRequest) {
     revalidatePath("/admin/pricing");
     return NextResponse.json({ success: true });
   } catch (error) {
+    if (error instanceof AuthzError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     console.error("[pricing-faqs DELETE] Error:", error);
     return NextResponse.json(
       { error: "Failed to delete FAQ" },

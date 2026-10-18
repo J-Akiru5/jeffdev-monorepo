@@ -8,7 +8,7 @@
  * notifications, quick-add, and account dropdown.
  */
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
@@ -20,6 +20,7 @@ import {
   CommandPalette,
   KeyboardShortcutsHelp,
   type AppNavLink,
+  type CommandPaletteItem,
   type CommandPaletteSection,
 } from "@syntaxure/ui";
 import { ManageShortcutsProvider } from "@/components/keyboard-shortcuts-provider";
@@ -40,10 +41,12 @@ import {
   LayoutGrid,
   Keyboard,
   GitBranch,
+  FileText,
 } from "lucide-react";
 import { WorkspaceSwitcher } from "@/components/workspace-switcher";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { NotificationPanel } from "@/components/notification-panel";
+import { searchWorkspace } from "@/app/actions/search";
 
 function AccountMenu() {
   const { user, loading, signOut } = useAuth();
@@ -79,7 +82,7 @@ function NotificationBell({ onClick }: { onClick: () => void }) {
     <button
       onClick={onClick}
       className="relative flex h-8 w-8 items-center justify-center rounded-lg text-white/50 transition-colors hover:bg-white/5 hover:text-white"
-      title="Notifications (coming soon)"
+      title="Notifications"
     >
       <Bell className="h-4 w-4" />
     </button>
@@ -141,15 +144,57 @@ export function TopNavbar() {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState<CommandPaletteItem[]>([]);
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const workspaces = useWorkspaceStore((s) => s.workspaces);
+  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
   const setActiveWorkspace = useWorkspaceStore((s) => s.setActiveWorkspace);
 
   const openPalette = useCallback(() => setPaletteOpen(true), []);
   const closePalette = useCallback(() => setPaletteOpen(false), []);
   const openHelp = useCallback(() => setHelpOpen(true), []);
   const closeHelp = useCallback(() => setHelpOpen(false), []);
+
+  // Debounced workspace search for the command palette
+  const handlePaletteQuery = useCallback(
+    (query: string) => {
+      const q = query.trim();
+      if (searchTimer.current) clearTimeout(searchTimer.current);
+      if (q.length < 2 || !activeWorkspaceId) {
+        setSearchResults([]);
+        return;
+      }
+      searchTimer.current = setTimeout(async () => {
+        const results = await searchWorkspace(activeWorkspaceId, q);
+        const items: CommandPaletteItem[] = [
+          ...results.tasks.map((t) => ({
+            id: `task-${t.id}`,
+            label: t.title,
+            description: `Task · ${t.status.replace("_", " ")}`,
+            icon: CheckSquare,
+            action: () => {
+              router.push(`/tasks/${t.id}/edit`);
+              closePalette();
+            },
+          })),
+          ...results.pages.map((p) => ({
+            id: `page-${p.id}`,
+            label: p.title || "Untitled page",
+            description: "Page",
+            icon: FileText,
+            action: () => {
+              router.push(`/pages/${p.id}`);
+              closePalette();
+            },
+          })),
+        ];
+        setSearchResults(items);
+      }, 250);
+    },
+    [activeWorkspaceId, router, closePalette],
+  );
 
   const manageMode = useManageModeStore((s) => s.mode);
   const toggleManageMode = useManageModeStore((s) => s.toggleMode);
@@ -239,6 +284,21 @@ export function TopNavbar() {
 
   const paletteSections: CommandPaletteSection[] = useMemo(
     () => [
+      ...(searchResults.length > 0
+        ? [
+            {
+              id: "search",
+              label: "Search Results",
+              icon: ({ className }: { className?: string }) => (
+                <span
+                  className={`h-3 w-3 rounded-full bg-emerald-400 ${className ?? ""}`}
+                />
+              ),
+              iconColor: "text-emerald-400",
+              items: searchResults,
+            },
+          ]
+        : []),
       {
         id: "general",
         label: "General",
@@ -312,7 +372,7 @@ export function TopNavbar() {
         iconColor: "text-emerald-400",
       },
     ],
-    [workspaceItems, viewItems, actionItems, manageMode, router, closePalette],
+    [searchResults, workspaceItems, viewItems, actionItems, manageMode, router, closePalette],
   );
 
   return (
@@ -376,7 +436,8 @@ export function TopNavbar() {
           open={paletteOpen}
           onClose={closePalette}
           sections={paletteSections}
-          placeholder="Search workspaces, views, actions..."
+          placeholder="Search tasks, pages, views, actions..."
+          onQueryChange={handlePaletteQuery}
         />
 
         <KeyboardShortcutsHelp

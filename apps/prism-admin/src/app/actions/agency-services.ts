@@ -10,6 +10,7 @@ import { z } from "zod";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { serializeDescription } from "@/lib/services-utils";
 import { logAuditEvent } from "@/lib/audit";
+import { requireRole } from "@/lib/authz";
 import { revalidatePath } from "next/cache";
 
 const serviceSchema = z.object({
@@ -33,6 +34,7 @@ interface ActionResult {
 
 export async function createAgencyService(data: ServiceFormData): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const validated = serviceSchema.parse(data);
     const supabase = getAdminClient();
 
@@ -61,7 +63,7 @@ export async function createAgencyService(data: ServiceFormData): Promise<Action
       resource: "services",
       resourceId: validated.name,
       details: { name: validated.name },
-    });
+    }, actor);
 
     revalidatePath("/admin/agency/services");
     return { success: true };
@@ -74,6 +76,7 @@ export async function createAgencyService(data: ServiceFormData): Promise<Action
 
 export async function updateAgencyService(id: string, data: ServiceFormData): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const validated = serviceSchema.parse(data);
     const supabase = getAdminClient();
 
@@ -104,7 +107,7 @@ export async function updateAgencyService(id: string, data: ServiceFormData): Pr
       resource: "services",
       resourceId: id,
       details: { name: validated.name },
-    });
+    }, actor);
 
     revalidatePath("/admin/agency/services");
     return { success: true };
@@ -117,6 +120,7 @@ export async function updateAgencyService(id: string, data: ServiceFormData): Pr
 
 export async function deleteAgencyService(id: string): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const { error } = await supabase.from("services").delete().eq("id", id);
     if (error) throw error;
@@ -125,7 +129,7 @@ export async function deleteAgencyService(id: string): Promise<ActionResult> {
       action: "DELETE",
       resource: "services",
       resourceId: id,
-    });
+    }, actor);
 
     revalidatePath("/admin/agency/services");
     return { success: true };

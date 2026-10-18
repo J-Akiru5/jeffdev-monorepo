@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage Phase 6 — Task Report</title>
+<style>
+  :root {
+    --bg: #0A0D12; --bg-raised: #11151C; --bg-card: #151A22; --border: #232A36;
+    --cyan: #22D3EE; --violet: #8B7BFF; --text: #E6EAF0; --text-dim: #8B93A3;
+    --text-faint: #5A6272; --good: #4ADE80; --warn: #FBBF24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; padding: 48px 24px; }
+  .wrap { max-width: 820px; margin: 0 auto; }
+  .mono { font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 28px; margin-bottom: 32px; }
+  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 12px; background: linear-gradient(90deg, var(--text), var(--text) 60%, var(--cyan)); -webkit-background-clip: text; background-clip: text; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim); }
+  .meta-row span b { color: var(--text); font-weight: 500; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; border: 1px solid; }
+  .badge.done { color: var(--good); border-color: var(--good); background: rgba(74,222,128,0.08); }
+  .badge.followup { color: var(--warn); border-color: var(--warn); background: rgba(251,191,36,0.08); }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 14px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--violet); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .summary-box { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 6px; padding: 18px 20px; font-size: 15px; }
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  ul.clean li { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; font-size: 14px; }
+  .checkpoint { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 14px 18px; margin-bottom: 10px; }
+  .checkpoint .q { font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
+  .checkpoint .q b { color: var(--violet); font-weight: 500; }
+  .checkpoint .a { font-size: 14px; }
+  .checkpoint .a b { color: var(--cyan); font-weight: 500; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  th { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
+  td.mono { color: var(--cyan); }
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">prism-manage · Task Report</div>
+    <h1>Phase 6 — COO Operations Hub + BMC</h1>
+    <div class="meta-row">
+      <span><b>2026-10-18</b></span>
+      <span>Repo: <b>jeffdev-monorepo</b></span>
+      <span>Agent: <b>opencode · DeepSeek V4.1 Flash</b></span>
+      <span>Branch: <b>feat/pm-6-operations → PR → develop</b></span>
+      <span class="badge done">Complete</span>
+      <span class="badge followup">Migration pending</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Summary</h2>
+    <div class="summary-box">
+      The June COO blueprint is live: <b>/operations</b> gives Hazel a company
+      command center (milestones, task throughput, department allocation,
+      infrastructure spend) and <b>/bmc</b> is the editable Business Model
+      Canvas — pre-seeded with the four-person, dual-engine business facts and
+      correct peso-first pricing. RBAC runs three layers deep: pure rules,
+      server-side gates on every action, and a client guard; the sidebar only
+      shows these to authorized roles. One migration pending —
+      <span class="mono">supabase db push</span>.
+    </div>
+  </section>
+
+  <section>
+    <h2>What Changed</h2>
+    <table>
+      <thead><tr><th>File</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">supabase/migrations/…0005_pm_phase6… <em>(new)</em></td><td>Additive, idempotent: <span class="mono">milestones</span>, <span class="mono">bmc_sections</span>, <span class="mono">infrastructure_costs</span> — UUID PKs, member RLS, indexes, updated_at triggers.</td></tr>
+        <tr><td class="mono">src/app/actions/operations.ts <em>(new)</em></td><td>All three domains in one cohesive action module — CEO/COO-gated (BMC reads: any founder). 0-row checks surfaced, every write validated.</td></tr>
+        <tr><td class="mono">src/lib/authorization.ts + authorization-server.ts</td><td>Pure rules <span class="mono">isOperationsAuthorized</span> / <span class="mono">isBmcViewAuthorized</span> + server gates.</td></tr>
+        <tr><td class="mono">src/components/operations-guard.tsx <em>(new)</em></td><td>Client guard — operations: CEO/COO; BMC: any founder; employees redirect.</td></tr>
+        <tr><td class="mono">(dashboard)/operations/page.tsx + milestones/page.tsx <em>(new)</em></td><td>Hub (stats, milestones, throughput, allocation, costs) + milestone CRUD.</td></tr>
+        <tr><td class="mono">(dashboard)/bmc/page.tsx <em>(new)</em></td><td>9-block canvas, inline editing for COO/CEO, one-click seed.</td></tr>
+        <tr><td class="mono">src/lib/bmc-blocks.ts <em>(new)</em></td><td>Block keys/labels + seed content (four-person team, dual-engine, peso-first pricing).</td></tr>
+        <tr><td class="mono">components/sidebar/index.tsx</td><td>New "Operations" nav section (Operations + Business Canvas) for authorized roles.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Decisions &amp; Checkpoints</h2>
+    <div class="checkpoint">
+      <div class="q"><b>Blueprint corrections:</b> two deliberate deviations</div>
+      <div class="a"><b>UUID PKs + workspace-member RLS.</b> The blueprint specified app-generated text ids and "any authenticated user" policies — both out of step with every other table. RLS now matches the project standard; app actions still gate operations writes to CEO/COO.</div>
+    </div>
+    <div class="checkpoint">
+      <div class="q"><b>Decision:</b> one action module instead of the blueprint's three files</div>
+      <div class="a">Milestones + costs + BMC share one access model and one workspace — a single <span class="mono">operations.ts</span> keeps the gates consistent and the surface small. Page structure follows the blueprint.</div>
+    </div>
+    <div class="checkpoint">
+      <div class="q"><b>Decision:</b> operations data is Syntaxure-scoped</div>
+      <div class="a">Actions ignore the client's active workspace and always operate on the resolved Syntaxure Labs workspace — the hub can't accidentally write company data into Personal.</div>
+    </div>
+    <div class="checkpoint">
+      <div class="q"><b>Seed content:</b> current facts, not the blueprint's outdated ones</div>
+      <div class="a">Seeded with the four-person founding team (CEO/CTO/CPO/COO), dual-engine strategy, Kwadra TBI partnership, and the peso-first pricing tiers — matching the canonical BMC doc, not the June draft's five-person line.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Next Steps</h2>
+    <ul class="clean">
+      <li><span class="badge followup">Required</span> &nbsp;Apply migration <span class="mono">…0005</span>, then smoke-test: add a milestone as CEO/COO, seed the canvas, verify an employee is redirected.</li>
+      <li><span class="badge followup">Phase 7</span> &nbsp;Polish &amp; portability: dialogs replacing prompt()/confirm(), keyboard shortcuts, a11y/mobile pass, tenancy seams, docs refresh.</li>
+      <li><span class="badge followup">Small</span> &nbsp;Deferred: cost-entry UI on the hub (data model + actions are in; the hub reads them — a dedicated cost editor lands with Phase 7 polish); mobile nav parity for the Operations section.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>Generated by opencode · DeepSeek V4.1 Flash</span>
+    <span>2026-10-18</span>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -10,6 +10,7 @@ import {
 } from "@/lib/schemas";
 import type { MarketingKpi, MarketingPhase, MarketingTask, MarketingTeamMember } from "@/lib/schemas";
 import { issueToMarketingTask } from "@/lib/github-utils";
+import { requireMarketingAccess } from "@/lib/authorization-server";
 
 export async function getMarketingPhases(): Promise<MarketingPhase[]> {
   try {
@@ -86,6 +87,8 @@ export async function updateKpi(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
+  await requireMarketingAccess(supabase);
+
   const doc: Record<string, unknown> = {};
   if (updates.current !== undefined) doc.current_value = updates.current;
   if (updates.target !== undefined) doc.target_value = updates.target;
@@ -149,6 +152,8 @@ export async function createMarketingTask(input: {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
+  await requireMarketingAccess(supabase);
+
   const { error } = await supabase.from("marketing_tasks").insert({
     id: `mt-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     title: parsed.data.title,
@@ -177,6 +182,8 @@ export async function updateMarketingTaskStatus(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
+  await requireMarketingAccess(supabase);
+
   const { error } = await supabase
     .from("marketing_tasks")
     .update({ status, updated_at: new Date().toISOString() })
@@ -198,6 +205,8 @@ export async function updateMarketingTask(
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
+
+  await requireMarketingAccess(supabase);
 
   const updateData: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
@@ -225,6 +234,8 @@ export async function deleteMarketingTask(taskId: string): Promise<void> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
+
+  await requireMarketingAccess(supabase);
 
   const { error } = await supabase
     .from("marketing_tasks")
@@ -265,6 +276,8 @@ export async function seedMarketingData(): Promise<void> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
+
+  await requireMarketingAccess(supabase);
 
   // Check if data already exists to prevent double-seeding
   const { data: existing } = await supabase.from("marketing_phases").select("id").limit(1);
@@ -381,6 +394,8 @@ export async function syncGitHubToSupabase(
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
+
+  await requireMarketingAccess(supabase);
 
   const tasks = validIssues
     .map((issue) => {

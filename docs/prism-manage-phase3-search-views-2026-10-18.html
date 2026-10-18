@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage Phase 3 — Task Report</title>
+<style>
+  :root {
+    --bg: #0A0D12; --bg-raised: #11151C; --bg-card: #151A22; --border: #232A36;
+    --cyan: #22D3EE; --violet: #8B7BFF; --text: #E6EAF0; --text-dim: #8B93A3;
+    --text-faint: #5A6272; --good: #4ADE80; --warn: #FBBF24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; padding: 48px 24px; }
+  .wrap { max-width: 820px; margin: 0 auto; }
+  .mono { font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 28px; margin-bottom: 32px; }
+  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 12px; background: linear-gradient(90deg, var(--text), var(--text) 60%, var(--cyan)); -webkit-background-clip: text; background-clip: text; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim); }
+  .meta-row span b { color: var(--text); font-weight: 500; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; border: 1px solid; }
+  .badge.done { color: var(--good); border-color: var(--good); background: rgba(74,222,128,0.08); }
+  .badge.followup { color: var(--warn); border-color: var(--warn); background: rgba(251,191,36,0.08); }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 14px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--violet); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .summary-box { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 6px; padding: 18px 20px; font-size: 15px; }
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  ul.clean li { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; font-size: 14px; }
+  .checkpoint { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 14px 18px; margin-bottom: 10px; }
+  .checkpoint .q { font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
+  .checkpoint .q b { color: var(--violet); font-weight: 500; }
+  .checkpoint .a { font-size: 14px; }
+  .checkpoint .a b { color: var(--cyan); font-weight: 500; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  th { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
+  td.mono { color: var(--cyan); }
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">prism-manage · Task Report</div>
+    <h1>Phase 3 — Search, Views &amp; Speed</h1>
+    <div class="meta-row">
+      <span><b>2026-10-18</b></span>
+      <span>Repo: <b>jeffdev-monorepo</b></span>
+      <span>Agent: <b>opencode · DeepSeek V4.1 Flash</b></span>
+      <span>Branch: <b>feat/pm-3-search-views → PR → develop</b></span>
+      <span class="badge done">Complete</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Summary</h2>
+    <div class="summary-box">
+      You can now <b>find anything in seconds</b>: ⌘K searches tasks and pages
+      from the command palette, the tasks page has instant search + a full
+      filter bar (status / priority / assignee / due) + a <b>table view</b>,
+      and filter combos can be saved as <b>saved views</b>. The shared
+      CommandPalette gained one optional prop (zero impact on other apps).
+      One additive migration (<span class="mono">saved_views</span> + a query
+      index) is pending — <span class="mono">supabase db push</span>.
+    </div>
+  </section>
+
+  <section>
+    <h2>What Changed</h2>
+    <table>
+      <thead><tr><th>File</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">packages/ui/src/command-palette.tsx</td><td>Additive optional <span class="mono">onQueryChange</span> prop — callers own debouncing/async search. No behavior change for existing consumers.</td></tr>
+        <tr><td class="mono">src/app/actions/search.ts <em>(new)</em></td><td>Workspace search: tasks (title/description/notes, filter-string sanitized) + pages (title). RLS-scoped.</td></tr>
+        <tr><td class="mono">src/app/actions/views.ts <em>(new)</em></td><td>Saved views CRUD (get / create / delete).</td></tr>
+        <tr><td class="mono">src/components/task-table.tsx <em>(new)</em></td><td>Table view: Title / Status / Priority / Assignee / Due (overdue highlighted) / List, due-sorted, click-through.</td></tr>
+        <tr><td class="mono">src/app/(dashboard)/tasks/page.tsx</td><td>Toolbar (search, 4 filters, clear, Views dropdown, List⇄Table toggle), filter pipeline, saved-views apply/save/delete.</td></tr>
+        <tr><td class="mono">src/components/top-navbar.tsx</td><td>Palette data search (debounced 250ms) wired via the new prop; bell tooltip fixed.</td></tr>
+        <tr><td class="mono">src/app/actions/tasks.ts</td><td>getTasks 500-row safety guard.</td></tr>
+        <tr><td class="mono">supabase/migrations/…0004_pm_phase3… <em>(new)</em></td><td>Additive, idempotent: <span class="mono">saved_views</span> (own + shared RLS) + <span class="mono">(workspace_id, created_at DESC)</span> task index.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Decisions &amp; Checkpoints</h2>
+    <div class="checkpoint">
+      <div class="q"><b>Decision:</b> client-side vs server-side search on the tasks page</div>
+      <div class="a"><b>Both, split by role.</b> The tasks page filters the already-loaded workspace tasks instantly (zero latency); the palette uses the server-side <span class="mono">searchWorkspace</span> action because it must search beyond the visible list (pages too). RLS scopes every query.</div>
+    </div>
+    <div class="checkpoint">
+      <div class="q"><b>Decision:</b> modifying shared <span class="mono">@syntaxure/ui</span> in an app phase</div>
+      <div class="a">The palette needed a data-search hook. The change is <b>one optional prop with a no-op default</b> — other apps compile and behave identically (verified: UI package check-types + lint with <span class="mono">--max-warnings 0</span>).</div>
+    </div>
+    <div class="checkpoint">
+      <div class="q"><b>Safety:</b> user input in PostgREST filter strings</div>
+      <div class="a">The palette search builds an <span class="mono">.or()</span> filter; input is sanitized (wildcards, commas, parens, quotes stripped, 80-char cap) and RLS remains the real boundary. Pages search uses a bound <span class="mono">ilike</span> parameter — no string building at all.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Next Steps</h2>
+    <ul class="clean">
+      <li><span class="badge followup">Required</span> &nbsp;Apply migration <span class="mono">…0004</span> (<span class="mono">supabase db push</span>), then smoke-test: ⌘K search, filters, table view, save/apply a view.</li>
+      <li><span class="badge followup">Phase 4</span> &nbsp;Calendar, for real: two-way Google Calendar sync (push-first), refresh-token rotation, scheduled reconciliation.</li>
+      <li><span class="badge followup">Small</span> &nbsp;Deferred: true load-more pagination (500-row guard in place for now); tag filter chip; saved views share toggle in the UI (RLS supports shared, UI saves private).</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>Generated by opencode · DeepSeek V4.1 Flash</span>
+    <span>2026-10-18</span>
+  </footer>
+
+</div>
+</body>
+</html>

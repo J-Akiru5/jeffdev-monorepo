@@ -23,16 +23,16 @@ Tags: stack, backend, framework, infrastructure
 
 | Use Case | Technology |
 |----------|------------|
-| Agency (Marketing/Admin) | Firebase Firestore |
-| Prism (SaaS) | Azure Cosmos DB (MongoDB API) |
+| Prism dashboard data | Supabase Postgres (via `@syntaxure-labs/db/prism`) |
+| Prism dashboard auth | Supabase Auth |
+| Dashboard hosting | Vercel |
 | Rate Limiting | Upstash Redis |
-| File Storage | Cloudflare R2 |
 
 ### AI Stack
 
-- **SDK**: Vercel AI SDK
-- **Models**: Claude 3.5 Sonnet, GPT-4o
-- **Vectors**: Azure AI Search (prod), ChromaDB (dev)
+- **Semantic check layer (CLI, opt-in)**: Gemini (`gemini-3.6-flash` default)
+- **MCP server AI tools**: Gemini by default (`AI_PROVIDER` in `apps/prism-mcp-server`), Azure OpenAI as an opt-in fallback
+- **Dashboard AI features**: Gemini (`GOOGLE_GEMINI_API_KEY`)
 
 ### Frontend Engineering
 

@@ -45,7 +45,7 @@ export default async function RuleEditPage({ params }: Props) {
   // Fetch rule
   const { data: rule } = await db
     .from("prism_rules")
-    .select("id, name, category, priority, content, description")
+    .select("id, name, category, priority, content, description, severity")
     .eq("id", ruleId)
     .eq("project_id", project.id)
     .maybeSingle();
@@ -62,6 +62,7 @@ export default async function RuleEditPage({ params }: Props) {
     priority: rule.priority || 50,
     content: rule.content || "",
     description: rule.description,
+    severity: rule.severity || "warning",
   };
 
   return <RuleEditForm rule={serializedRule} />;

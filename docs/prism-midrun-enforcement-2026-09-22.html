@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Prism Mid-Run Enforcement — 2026-09-22</title>
+<style>
+  :root {
+    --bg: #0b1020; --panel: #141a2e; --panel2: #1b2340; --ink: #e8ecf8;
+    --muted: #9aa6c4; --line: #2a3454; --brand: #6ea8fe; --ok: #3ddc97;
+    --warn: #ffc857; --bad: #ff6b7a; --code: #c9d4f2;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1 { font-size: 30px; margin: 0 0 6px; letter-spacing: -0.02em; }
+  h2 { font-size: 20px; margin: 42px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 16px; margin: 24px 0 8px; color: var(--brand); }
+  p, li { color: var(--ink); }
+  .sub { color: var(--muted); margin: 0 0 18px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin: 18px 0; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .card .k { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+  .card .v { font-size: 18px; font-weight: 650; margin-top: 4px; }
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 650; }
+  .pass { background: rgba(61,220,151,.15); color: var(--ok); border: 1px solid rgba(61,220,151,.4); }
+  .warn { background: rgba(255,200,87,.12); color: var(--warn); border: 1px solid rgba(255,200,87,.4); }
+  .fail { background: rgba(255,107,122,.12); color: var(--bad); border: 1px solid rgba(255,107,122,.4); }
+  code, pre { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; }
+  code { background: var(--panel2); border: 1px solid var(--line); border-radius: 6px; padding: 1px 5px; font-size: 13px; color: var(--code); }
+  pre { background: #0e1428; border: 1px solid var(--line); border-radius: 10px; padding: 14px; overflow-x: auto; font-size: 12.5px; color: var(--code); }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12.5px; text-transform: uppercase; letter-spacing: .05em; }
+  .muted { color: var(--muted); }
+  .ok { color: var(--ok); font-weight: 600; }
+  .bad { color: var(--bad); font-weight: 600; }
+  .callout { background: var(--panel); border-left: 3px solid var(--brand); border-radius: 8px; padding: 12px 16px; margin: 14px 0; }
+  .callout.warnc { border-left-color: var(--warn); }
+  .callout.badc { border-left-color: var(--bad); }
+  ul { margin: 8px 0 8px 20px; }
+  .small { font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Prism Mid-Run Enforcement</h1>
+  <p class="sub">PreToolUse halt · PostToolUse correction · Stop gate · live activity log — for Claude Code<br>
+  Branch <code>feat/prism-midrun-enforcement</code> · 2026-09-22 · prepared for KWADRA Demo Day 2026-09-30</p>
+
+  <div class="grid">
+    <div class="card"><div class="k">Step 1 gate</div><div class="v"><span class="pill pass">PASS</span></div></div>
+    <div class="card"><div class="k">Tests</div><div class="v">251 passed · 2 skipped</div></div>
+    <div class="card"><div class="k">Typecheck / Lint</div><div class="v">clean / 0 errors</div></div>
+    <div class="card"><div class="k">Live E2E</div><div class="v">blocks verified</div></div>
+  </div>
+
+  <div class="callout">
+    <strong>One-line summary.</strong> The Pass now stops a violating write <em>before it lands</em> (PreToolUse exit 2),
+    keeps the old after-the-fact correction as a safety net (PostToolUse, byte-identical), refuses to let the agent finish
+    while violations remain (Stop, loop-guarded), and appends every invocation to <code>.prism/activity.log</code> so
+    enforcement is observable live. Correction text and fail-open semantics are unchanged.
+  </div>
+
+  <h2>1 · What changed</h2>
+  <table>
+    <tr><th>File</th><th>Change</th></tr>
+    <tr><td><code>commands/check.ts</code></td><td>Event dispatch (<code>PreToolUse</code>/<code>PostToolUse</code>/<code>Stop</code>), proposed-content reconstruction for Write/Edit/MultiEdit, Stop gate with transcript + source-dir fallback, activity logging on every path. PostToolUse behavior and messages preserved.</td></tr>
+    <tr><td><code>rules/activity.ts</code> <span class="muted">(new)</span></td><td>Tab-separated one-line log (<code>timestamp · event · file · result</code>) with total failure isolation.</td></tr>
+    <tr><td><code>rules/transcript.ts</code> <span class="muted">(new)</span></td><td>Best-effort extraction of session-edited files from <code>transcript_path</code> JSONL (Write/Edit/MultiEdit tool_use entries).</td></tr>
+    <tr><td><code>rules/semantic.ts</code></td><td>Reliability hardening only: <code>temperature: 0</code>, one bounded retry on 5xx/network within the same timeout budget. Fail-open contract untouched.</td></tr>
+    <tr><td><code>init/hook.ts</code></td><td>Idempotent wiring of all three hooks; upgrades a PostToolUse-only config in place; malformed JSON still left untouched.</td></tr>
+    <tr><td><code>commands/init.ts</code>, <code>index.ts</code></td><td>Output text + CLI descriptions updated for the three-hook install.</td></tr>
+    <tr><td>Tests</td><td><code>check.test.ts</code> (+24), <code>activity.test.ts</code> (8), <code>transcript.test.ts</code> (4), <code>hook.test.ts</code> (+3); full suite green.</td></tr>
+  </table>
+
+  <h3>Hook wiring written by <code>prism init</code></h3>
+<pre>{
+  "hooks": {
+    "PreToolUse":  [{ "matcher": "Write|Edit|MultiEdit", "hooks": [{ "type": "command", "command": "npx @prism-engine/cli check --hook --format claude-code" }] }],
+    "PostToolUse": [{ "matcher": "Write|Edit",            "hooks": [{ "type": "command", "command": "npx @prism-engine/cli check --hook --format claude-code" }] }],
+    "Stop":        [{                                     "hooks": [{ "type": "command", "command": "npx @prism-engine/cli check --hook --format claude-code" }] }]
+  }
+}</pre>
+
+  <h2>2 · How it works</h2>
+  <ul>
+    <li><strong>PreToolUse.</strong> Write → checks <code>tool_input.content</code> without touching disk. Edit → reads the file and applies <code>old_string → new_string</code> in memory. MultiEdit → applies <code>edits[]</code> in order. The deterministic engine runs first; the semantic layer only if regex is clean (same order as before). Any ambiguity (missing payload content, <code>old_string</code> not found, unreadable base file) fails open and logs <code>SKIPPED &lt;reason&gt;</code>.</li>
+    <li><strong>PostToolUse.</strong> Unchanged safety net: re-checks the file on disk after the write and returns the same correction if the write already landed.</li>
+    <li><strong>Stop.</strong> Derives the session's edited files from <code>transcript_path</code>; if none can be derived, scans the source dir (<code>PRISM_STOP_SCAN_DIR</code> override, 500-file cap). Deterministic-only — one Gemini call per changed file could exceed the hook ceiling. Any remaining block exits 2 with the standard per-file correction. If <code>stop_hook_active</code> is true, it never blocks again (loop guard).</li>
+    <li><strong>Activity log.</strong> <code>.prism/activity.log</code>, one tab-separated line per invocation: <code>2026-09-22T03:18:55Z&nbsp;&nbsp;pre&nbsp;&nbsp;&lt;path&gt;&nbsp;&nbsp;BLOCKED &lt;rule-id&gt;</code>. Results are <code>CLEAN</code>, <code>BLOCKED …</code>, or <code>SKIPPED &lt;reason&gt;</code>. Logging failures are swallowed and never change the exit code.</li>
+    <li><strong>Kill switches.</strong> <code>PRISM_DISABLE=1</code> wins everywhere; semantic additionally requires <code>PRISM_GEMINI_CHECK=1</code> + a key.</li>
+  </ul>
+
+  <h2>3 · Step 1 feasibility evidence <span class="pill pass">PASS</span></h2>
+  <p class="small muted">Claude Code 2.1.278 on Windows, trivial always-exit-2 hooks in a scratch folder, live agent runs. Exact payloads captured from the hooks' stdin.</p>
+
+  <h3>PreToolUse · Write</h3>
+  <p>Agent asked to write <code>canary.txt</code>. Hook payload (abridged):</p>
+<pre>{"hook_event_name":"PreToolUse","tool_name":"Write","cwd":"…\\hook-feasibility\\pre",
+ "tool_input":{"file_path":"…\\canary.txt","content":"hello"},"tool_use_id":"toolu_01WN…"}</pre>
+  <p><strong>File on disk after the run: <span class="bad">never created</span>.</strong> Agent output:</p>
+  <blockquote class="callout">“The write was blocked by a PreToolUse hook (<code>gate.js</code>)… I won't retry the identical write.”</blockquote>
+
+  <h3>PreToolUse · Edit</h3>
+<pre>{"hook_event_name":"PreToolUse","tool_name":"Edit",
+ "tool_input":{"file_path":"…\\edit-target.txt","old_string":"line one","new_string":"line one changed","replace_all":false}}</pre>
+  <p><strong>File content unchanged (<code>line one</code>).</strong> Agent output: “The edit was blocked by a PreToolUse hook… I haven't made any changes to the file.”</p>
+
+  <h3>Stop</h3>
+  <p>Hook blocked the first stop, allowed the second. Both payloads captured:</p>
+<pre>#1  {"hook_event_name":"Stop","stop_hook_active":false,"last_assistant_message":"READY"}
+#2  {"hook_event_name":"Stop","stop_hook_active":true, "last_assistant_message":"Acknowledged — stop was blocked once…"}</pre>
+  <p>Agent output: “Acknowledged — stop was blocked once by the gate; stopping again now.” The <code>stop_hook_active</code> transition is the loop guard the design depends on.</p>
+  <div class="callout warnc small">Notes: the filed GitHub issue about PreToolUse not blocking concerns the <em>Bash</em> tool. Write and Edit both verified blocked on this version. MultiEdit was not exposed in this run; the matcher includes it defensively.</div>
+
+  <h2>4 · Live E2E — copy of the demo folder</h2>
+  <p class="small muted">Sandbox: <code>C:\Users\Lenovo\AppData\Local\Temp\opencode\prism-demo-midrun</code> (copy; the original <code>prism-demo-semantic</code> folder was not modified). Hooks invoked the locally built CLI via absolute path. Real Claude Code (<code>claude -p</code>) did the edits.</p>
+
+  <h3>Run A — deterministic halt on a hex literal</h3>
+  <p>Prompt: set the button color to the literal <code>#ef4444</code>. Result:</p>
+  <blockquote class="callout">“A pre-write hook (PRISM PASS) is blocking this edit because it bans raw hex colors… I won't bypass the hook.”</blockquote>
+  <p><code>DangerButton.tsx</code> remained byte-identical on disk. Log:</p>
+<pre>03:17:31  pre   …/src/DangerButton.tsx   BLOCKED 101e52b0-5191-46ea-80a7-161530e13f9a
+03:17:34  stop  …/src/DangerButton.tsx   CLEAN</pre>
+
+  <h3>Run B — semantic halt on the rgb equivalent</h3>
+  <p>Prompt: set the color to the literal <code>rgb(6, 182, 212)</code> (= <code>#06b6d4</code>). The regex pattern cannot match rgb; the Gemini intent check caught it. Result:</p>
+  <blockquote class="callout">“A pre-commit hook (PRISM PASS) is blocking this edit — it enforces a design-token-only policy and rejects raw color values, including the literal <code>rgb(6, 182, 212)</code>…”</blockquote>
+  <p><code>Button.tsx</code> unchanged on disk. Log:</p>
+<pre>03:18:55  pre   …/src/Button.tsx   BLOCKED 101e52b0-5191-46ea-80a7-161530e13f9a
+03:18:59  stop  …/src/Button.tsx   CLEAN</pre>
+
+  <h3>Run C — Stop gate with a violation already on disk</h3>
+  <p>For this run only, the sandbox settings exposed <em>Stop alone</em> (no Pre/Post), so the violating edit landed. The Stop gate then refused session end until the agent dealt with it:</p>
+<pre>03:19:41  stop  …/src/DangerButton.tsx   BLOCKED 101e52b0-5191-46ea-80a7-161530e13f9a
+03:19:48  stop  -                        SKIPPED stop-hook-active</pre>
+  <p>The first line is the gate blocking; the second is the loop guard allowing the session to end rather than trapping it. The agent surfaced the block to the user. The sandbox was then restored (<code>DangerButton.tsx</code> back to tokens, all three hooks re-wired).</p>
+
+  <h2>5 · Verification</h2>
+  <table>
+    <tr><th>Check</th><th>Result</th></tr>
+    <tr><td><code>tsc --noEmit</code></td><td class="ok">clean</td></tr>
+    <tr><td><code>eslint .</code></td><td class="ok">0 errors (5 pre-existing warnings)</td></tr>
+    <tr><td><code>vitest run</code></td><td class="ok">23 files · 251 passed · 2 skipped</td></tr>
+    <tr><td><code>tsc</code> build</td><td class="ok">dist emitted</td></tr>
+    <tr><td>Unit coverage added</td><td>proposed-content extraction (Write/Edit/MultiEdit, failures), Stop loop guard, transcript parsing, log failure isolation, three-hook wiring</td></tr>
+  </table>
+
+  <h2>6 · Known limits &amp; Demo-Day risks</h2>
+  <div class="callout badc">
+    <strong>Gemini quota is the main demo risk.</strong> The demo key is on the free tier: <code>generate_content_free_tier_requests</code> limit <strong>20 for gemini-3.6-flash</strong>. Under repeated checks the API returns <strong>429</strong>, the semantic layer fails open, and a semantic violation can silently pass as <code>CLEAN</code> in the log. Observed live during testing (503s too). Mitigations now in code: <code>temperature: 0</code> (stable verdicts) and one retry on 5xx/network within the same timeout. 429 is intentionally not retried. <strong>Recommendation: use a billed key or a raised-quota key for Demo Day, and budget the number of semantic checks in the script.</strong>
+  </div>
+  <ul>
+    <li><strong>Stop gate is deterministic-only.</strong> Semantic checks per changed file could exceed the hook timeout; the Stop gate therefore cannot catch intent-level violations — only the deterministic engine.</li>
+    <li><strong>Transcript parsing is best-effort.</strong> Unknown/malformed transcript shapes degrade to the source-dir fallback, which is capped at 500 files and skips <code>node_modules</code>/dot-dirs.</li>
+    <li><strong>Bash is not covered.</strong> Claude Code's known PreToolUse/Bash issue was not re-tested; enforcement is for Write/Edit/MultiEdit.</li>
+    <li><strong>MultiEdit not live-exercised</strong> (not exposed in the test run); its extraction is unit-tested.</li>
+    <li><strong>Fail-open everywhere</strong> remains the contract: a hook failure can never block work, by design.</li>
+    <li><strong>Correction format and PostToolUse bytes unchanged</strong> — the published, demo-verified contract is intact.</li>
+  </ul>
+
+  <h2>7 · Reference</h2>
+  <h3>Environment variables</h3>
+  <table>
+    <tr><th>Var</th><th>Meaning</th></tr>
+    <tr><td><code>PRISM_DISABLE=1</code></td><td>Kill switch — all hook modes exit 0.</td></tr>
+    <tr><td><code>PRISM_GEMINI_CHECK=1</code> + <code>GEMINI_API_KEY</code>/<code>GOOGLE_GEMINI_API_KEY</code></td><td>Enable the semantic layer.</td></tr>
+    <tr><td><code>PRISM_GEMINI_MODEL</code></td><td>Override model (default <code>gemini-3.6-flash</code>).</td></tr>
+    <tr><td><code>PRISM_GEMINI_TIMEOUT_MS</code></td><td>Total semantic budget (default 12000, clamped 1s–29s).</td></tr>
+    <tr><td><code>PRISM_GEMINI_DEBUG=1</code></td><td>Print semantic skip reasons to stderr.</td></tr>
+    <tr><td><code>PRISM_STOP_SCAN_DIR</code></td><td>Override the Stop fallback scan root (default: payload cwd).</td></tr>
+  </table>
+  <h3>Artifacts</h3>
+  <ul class="small">
+    <li>Branch/worktree: <code>C:\dev\Next Js\jeffdev-monorepo-midrun-wt</code> — <code>feat/prism-midrun-enforcement</code> (baseline commit <code>163ee9c</code> + this work; nothing pushed).</li>
+    <li>Feasibility harness: <code>C:\Users\Lenovo\AppData\Local\Temp\opencode\hook-feasibility\</code> (payloads, transcripts).</li>
+    <li>E2E sandbox: <code>C:\Users\Lenovo\AppData\Local\Temp\opencode\prism-demo-midrun\</code> (activity log preserved).</li>
+    <li>Original semantic worktree and demo folder: untouched.</li>
+  </ul>
+
+  <p class="muted small">Generated 2026-09-22 as part of the post-demo-2026-08-23 mid-run enforcement upgrade. No deployment, merge, or shared-system write was performed.</p>
+</div>
+</body>
+</html>

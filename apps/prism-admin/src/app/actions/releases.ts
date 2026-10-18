@@ -1,6 +1,7 @@
 "use server";
 
 import { getAdminClient } from "@/lib/supabase/admin";
+import { requireRole } from "@/lib/authz";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -102,13 +103,14 @@ const sb = () => getAdminClient();
 
 export async function getReleases() {
   try {
+    await requireRole();
     const { data, error } = await sb()
       .from("releases")
       .select("*, release_tags(tags(name))")
       .order("date", { ascending: false });
 
     if (error) throw error;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const releases = (data ?? []).map((r: Record<string, unknown>) => ({
       ...(r as Record<string, any>),
       tags: extractTags(r),
@@ -127,6 +129,7 @@ export async function getReleases() {
 
 export async function getRelease(id: string) {
   try {
+    await requireRole();
     const { data, error } = await sb()
       .from("releases")
       .select("*, release_tags(tags(name))")
@@ -154,6 +157,7 @@ export async function createRelease(
   formData: ReleaseFormData,
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireRole();
     const parsed = releaseSchema.safeParse(formData);
     if (!parsed.success) {
       return {
@@ -200,6 +204,7 @@ export async function updateRelease(
   formData: ReleaseFormData,
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireRole();
     const parsed = releaseSchema.safeParse(formData);
     if (!parsed.success) {
       return {
@@ -244,6 +249,7 @@ export async function deleteRelease(
   id: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireRole();
     // Delete junction rows first (CASCADE may handle this, but be explicit)
     await sb().from("release_tags").delete().eq("release_id", id);
 

@@ -290,14 +290,16 @@ Manage multiple brand profiles for:
 - Client projects
 - Sub-brands
 
-### Switching Brands
+### Viewing Brands
 
 ```bash
-# Via MCP
-prism-mcp --api-key KEY --brand brand_abc123
+# CLI (requires prism login)
+prism brands list
+prism brands view <slug>
 
-# Via API
-curl https://api.prismcontext.com/v1/brands/brand_abc123
+# REST API
+curl https://prism.syntaxure.dev/api/v1/brands \
+  -H "x-api-key: YOUR_API_KEY"
 ```
 
 ### Brand Inheritance
@@ -324,7 +326,7 @@ Create variants that inherit from a base:
 ### Export to CSS
 
 ```bash
-prism brands export --format css --output tokens.css
+prism brands export <slug> --format css --output tokens.css
 ```
 
 ```css
@@ -339,8 +341,10 @@ prism brands export --format css --output tokens.css
 ### Export to Tailwind
 
 ```bash
-prism brands export --format tailwind --output tailwind.config.js
+prism brands export <slug> --format tailwind --output tailwind.config.js
 ```
+
+Export formats: `cursor`, `windsurf`, `vscode`, `claude`, `css`, `tailwind` (default `cursor`).
 
 ```javascript
 module.exports = {
@@ -356,54 +360,25 @@ module.exports = {
 }
 ```
 
-### Export to Design Tool
-
-- **Figma**: Export as Figma Tokens
-- **Sketch**: Export as Sketch Library
-- **Style Dictionary**: Export as SD format
-
-### Import from Figma
-
-1. Go to **Brands** → **Import**
-2. Connect Figma account
-3. Select file with Variables/Tokens
-4. Map tokens to brand profile
+TODO(confirm): Figma/Sketch/Style Dictionary export and Figma import are not implemented in the CLI or dashboard code found in this repository. Restore this section only if those flows exist somewhere else.
 
 ---
 
 ## API Reference
 
-### Get Brand
+Brands are part of the REST API. Authenticate with the `x-api-key` header:
 
 ```bash
-curl https://api.prismcontext.com/v1/brands/brand_123 \
-  -H "Authorization: Bearer YOUR_API_KEY"
+# List brands
+curl https://prism.syntaxure.dev/api/v1/brands \
+  -H "x-api-key: YOUR_API_KEY"
+
+# Get one brand
+curl https://prism.syntaxure.dev/api/v1/brands/<id> \
+  -H "x-api-key: YOUR_API_KEY"
 ```
 
-### List Brands
-
-```bash
-curl https://api.prismcontext.com/v1/brands \
-  -H "Authorization: Bearer YOUR_API_KEY"
-```
-
-### Create Brand
-
-```bash
-curl -X POST https://api.prismcontext.com/v1/brands \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"name": "New Brand", "colors": {...}}'
-```
-
-### Update Brand
-
-```bash
-curl -X PATCH https://api.prismcontext.com/v1/brands/brand_123 \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"colors": {"primary": "#new-color"}}'
-```
+See the [API Reference](/advanced/api-reference) for the endpoint index.
 
 ---
 
@@ -459,6 +434,6 @@ Semantic names help AI understand usage.
 
 ## Related
 
-- [Semantic Search](/advanced/semantic-search)
+- [CLI Reference](/cli-reference) — `prism brands` commands
 - [Creating Rules](/rules/creating-rules)
 - [API Reference](/advanced/api-reference)

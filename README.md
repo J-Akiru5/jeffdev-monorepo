@@ -109,7 +109,7 @@ The primary marketing site, CRM, and client-facing platform. Handles quotes, inv
 
 `apps/prism-engine` · Port `3001`
 
-SaaS platform for developers to manage AI context rules. Brand management, video context pipeline, and AI component generation.
+SaaS platform for developers to manage AI context rules. Projects, brand profiles, AI component generation, and team rule sync.
 
 **Stack**: Next.js 16, Supabase Auth, Supabase Postgres
 
@@ -193,7 +193,7 @@ Python FastAPI analytics service for business intelligence, reporting, and data-
 | `packages/supabase`             | **@syntaxure/supabase**      | Supabase SSR client with server, browser, admin, and middleware exports for Next.js 16                                             |
 | `packages/redis`                | **@syntaxure/redis**         | Upstash Redis integration with rate-limiting and caching utilities                                                                 |
 | `packages/sentry-config`        | **@syntaxure/sentry-config** | Sentry error monitoring configuration for Next.js applications                                                                     |
-| `packages/prism-context-engine` | **prism-context-engine**     | Context governance engine for LLMs — rule storage, validation, and retrieval for AI coding assistants                              |
+| `packages/prism-context-engine` | **@prism-engine/cli**        | Prism CLI — local rule enforcement for AI coding agents (the Pass): `prism init`, `prism check`, hooks, MCP wiring                 |
 | `packages/eslint-config`        | **@repo/eslint-config**      | Shared ESLint configuration across all workspaces                                                                                  |
 | `packages/typescript-config`    | **@repo/typescript-config**  | Shared TypeScript compiler configuration                                                                                           |
 
@@ -292,7 +292,7 @@ check-types → lint → test → build
 
 <div align="center">
 
-**MIT License** · Copyright (c) 2026 Syntaxure Labs
+**Proprietary** · Copyright (c) 2026 Syntaxure Labs. All rights reserved.
 
 <br />
 

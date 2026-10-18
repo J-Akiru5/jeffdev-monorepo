@@ -8,6 +8,7 @@
 
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logAuditEvent } from "@/lib/audit";
+import { requireRole } from "@/lib/authz";
 import type { UserProfileRow } from "@/lib/database.types";
 import { randomBytes } from "crypto";
 import { revalidatePath } from "next/cache";
@@ -36,6 +37,7 @@ type ActionResult = { success: boolean; error?: string; inviteId?: string; token
 
 export async function getAgencyUserProfile(uid: string): Promise<UserProfile | null> {
   try {
+    await requireRole();
     const supabase = getAdminClient();
     const { data, error } = await supabase.from("user_profiles").select("*").eq("id", uid).single();
     if (error || !data) return null;
@@ -65,6 +67,7 @@ export async function getAgencyUserProfile(uid: string): Promise<UserProfile | n
 
 export async function updateAgencyUserProfile(uid: string, data: Partial<UserProfile>): Promise<ActionResult> {
   try {
+    await requireRole("admin");
     const supabase = getAdminClient();
     const { data: existing } = await supabase.from("user_profiles").select("preferences").eq("id", uid).maybeSingle();
     const existingPrefs = (existing?.preferences || {}) as Record<string, unknown>;
@@ -98,6 +101,7 @@ export async function updateAgencyUserProfile(uid: string, data: Partial<UserPro
 
 export async function getAgencyAllUsers(): Promise<UserProfile[]> {
   try {
+    await requireRole();
     const supabase = getAdminClient();
     const { data, error } = await supabase.from("user_profiles").select("*").order("created_at", { ascending: false });
     if (error || !data) return [];
@@ -128,6 +132,7 @@ function generateInviteToken(): string {
 
 export async function createAgencyInvite(data: { email: string; role: string; invitedBy: string; projectName?: string }): Promise<ActionResult> {
   try {
+    const actor = await requireRole("admin");
     const supabase = getAdminClient();
     if (data.role === "founder") return { success: false, error: "Cannot create founder invites" };
 
@@ -154,7 +159,7 @@ export async function createAgencyInvite(data: { email: string; role: string; in
 
     if (error) throw error;
 
-    await logAuditEvent({ action: "CREATE", resource: "users", resourceId: inviteResult.id, details: { email: data.email, role: data.role, type: "invite" } });
+    await logAuditEvent({ action: "CREATE", resource: "users", resourceId: inviteResult.id, details: { email: data.email, role: data.role, type: "invite" } }, actor);
     revalidatePath("/admin/agency/users");
 
     return { success: true, inviteId: inviteResult.id, token };
@@ -166,6 +171,7 @@ export async function createAgencyInvite(data: { email: string; role: string; in
 
 export async function getAgencyInvites(): Promise<{ id: string; email: string; role: string; status: string; expiresAt: string; createdAt: string }[]> {
   try {
+    await requireRole();
     const supabase = getAdminClient();
     const { data, error } = await supabase.from("invites").select("*").order("created_at", { ascending: false });
     if (error || !data) return [];
@@ -185,6 +191,7 @@ export async function getAgencyInvites(): Promise<{ id: string; email: string; r
 
 export async function revokeAgencyInvite(inviteId: string): Promise<ActionResult> {
   try {
+    await requireRole("admin");
     const supabase = getAdminClient();
     const { error } = await supabase.from("invites").update({ status: "expired" }).eq("id", inviteId);
     if (error) throw error;
@@ -198,11 +205,16 @@ export async function revokeAgencyInvite(inviteId: string): Promise<ActionResult
 
 export async function updateAgencyUserRole(uid: string, newRole: string): Promise<ActionResult> {
   try {
+    const actor = await requireRole("admin");
+    // Only a founder may grant the founder (Super Admin) role.
+    if (newRole === "founder" && actor.role !== "founder") {
+      return { success: false, error: "Only a founder can grant the founder role" };
+    }
     const supabase = getAdminClient();
     const { error } = await supabase.from("user_profiles").update({ role: newRole, updated_at: new Date().toISOString() }).eq("id", uid);
     if (error) throw error;
     await supabase.auth.admin.updateUserById(uid, { app_metadata: { role: newRole } });
-    await logAuditEvent({ action: "UPDATE", resource: "users", resourceId: uid, details: { newRole } });
+    await logAuditEvent({ action: "UPDATE", resource: "users", resourceId: uid, details: { newRole } }, actor);
     revalidatePath("/admin/agency/users");
     return { success: true };
   } catch (error) {
@@ -213,6 +225,7 @@ export async function updateAgencyUserRole(uid: string, newRole: string): Promis
 
 export async function deactivateAgencyUser(uid: string): Promise<ActionResult> {
   try {
+    await requireRole("admin");
     const supabase = getAdminClient();
     const { data: existing } = await supabase.from("user_profiles").select("preferences").eq("id", uid).maybeSingle();
     const existingPrefs = (existing?.preferences || {}) as Record<string, unknown>;

@@ -25,11 +25,16 @@ export async function logAuditEvent(event: AuditEvent): Promise<void> {
   try {
     const supabase = createClient();
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
     const { error } = await supabase.from("audit_logs").insert({
       action: event.action,
       resource_type: event.resource,
       resource_id: event.resourceId || null,
       changes: event.details || null,
+      user_id: user?.id || null,
       created_at: new Date().toISOString(),
     });
 

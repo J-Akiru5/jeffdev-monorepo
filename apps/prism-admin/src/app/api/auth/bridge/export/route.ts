@@ -2,12 +2,18 @@
  * Auth Bridge Export (Dev Only)
  * Exports the current user's Supabase session tokens as JSON.
  * Only available in development mode for cross-app session sharing.
+ *
+ * Gates (all required — fails closed): NODE_ENV=development,
+ * AUTH_BRIDGE_ENABLED=true, active authenticated session.
  */
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  if (process.env.NODE_ENV !== "development") {
+  if (
+    process.env.NODE_ENV !== "development" ||
+    process.env.AUTH_BRIDGE_ENABLED !== "true"
+  ) {
     return NextResponse.json({ error: "Only available in development mode" }, { status: 403 });
   }
 

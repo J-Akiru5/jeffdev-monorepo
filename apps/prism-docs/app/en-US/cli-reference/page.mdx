@@ -1,0 +1,257 @@
+# CLI Reference
+
+Every command below is verified against the source of `@prism-engine/cli` v1.2.0. The binary is `prism`.
+
+```bash
+prism --help
+prism --version   # 1.2.0
+```
+
+Global conventions:
+
+- Most commands accept `--json` for programmatic output.
+- `prism <command> --help` shows per-command flags.
+
+---
+
+## prism init
+
+Local onboarding. Scans your project (package.json, globals.css, Tailwind config), generates `.prism/rules.json`, and wires the Claude Code hooks (PreToolUse + PostToolUse + Stop). No network, no account.
+
+```bash
+prism init [options]
+```
+
+| Flag | Description |
+|------|-------------|
+| `--yes` | Skip prompts and accept defaults (for CI) |
+| `--force` | Overwrite an existing `.prism/rules.json` without prompting |
+
+Example:
+
+```bash
+prism init
+```
+
+## prism pull
+
+Synced onboarding. Fetches `.prism/rules.json` from Prism Cloud for your team. Fails safe — never breaks an existing rules file.
+
+```bash
+prism pull [options]
+```
+
+| Flag | Description |
+|------|-------------|
+| `-p, --project <slug>` | Project slug to pull rules for |
+| `--yes` | Skip prompts; auto-pick a project if needed (for CI) |
+
+Requires an API key: set `PRISM_API_KEY` or add `"apiKey"` to `.prism/config.json`.
+
+Example:
+
+```bash
+prism pull --project my-app
+```
+
+## prism login
+
+Opens the browser for authentication with Prism Cloud. The token is saved to `~/.prism/token` after you complete the flow.
+
+```bash
+prism login
+```
+
+## prism check
+
+The Pass — enforce local rules against files. Two modes:
+
+```bash
+# Lint mode: check files or directories. Exit 1 on blocking violations.
+prism check <files...> [options]
+
+# Agent hook mode: read a hook event JSON from stdin. Exit 2 on blocking violations.
+prism check --hook [--format <format>]
+```
+
+| Flag | Description |
+|------|-------------|
+| `--rules <path>` | Path to `.prism/rules.json` (default: nearest ancestor of the checked file) |
+| `--hook` | Agent hook mode (PreToolUse / PostToolUse / Stop events) |
+| `--format <format>` | Hook message format (default: `claude-code`; also `cursor`, `antigravity`) |
+
+Hook mode fails open: missing or malformed rules, unreadable files, engine errors, and `PRISM_DISABLE=1` all exit 0 without blocking.
+
+Example:
+
+```bash
+prism check src/App.tsx
+```
+
+## prism ide-setup
+
+Auto-detects IDEs (Cursor, Windsurf, VS Code, Claude Desktop) and configures the MCP connection for each. Asks before touching each IDE. Claude Desktop gets MCP only (no hooks system).
+
+```bash
+prism ide-setup
+```
+
+## prism doctor
+
+Full health check on all Prism systems.
+
+```bash
+prism doctor [--json]
+```
+
+## prism status
+
+Quick snapshot of your current Prism state (auth, active project, rule count, last sync, cache warmth, server state).
+
+```bash
+prism status [--json]
+```
+
+## prism serve
+
+Starts the MCP server for IDE integration (stdio transport). Tries the full `prism-mcp-server` first; falls back to a built-in lite server that reads the local cache.
+
+```bash
+prism serve [--offline]
+```
+
+| Flag | Description |
+|------|-------------|
+| `--offline` | Force offline/cache-only mode |
+
+## prism sync
+
+Syncs projects, rules, brands, and components from Prism Cloud to the local cache (`~/.prism/`).
+
+```bash
+prism sync [options]
+```
+
+| Flag | Description |
+|------|-------------|
+| `--full` | Force full re-sync instead of delta |
+| `--repo [path]` | Scan a local repository for naming conventions, import patterns, and config files |
+
+## prism connect
+
+Launches the MCP proxy for IDE integration, or scans a URL for rule extraction.
+
+```bash
+prism connect [-u, --url <url>]
+```
+
+## prism rules
+
+Manage rules (cloud-side rules stored on your account).
+
+```bash
+prism rules list   [-c, --category <category>] [-p, --project <project>] [--json]
+prism rules create [-n, --name <name>] [-c, --category <category>] [--content <content>] [-p, --priority <number>] [--project <project>] [--json]
+prism rules edit <id>    [--name <name>] [--category <category>] [--content <content>] [--json]
+prism rules delete <id>  [--force] [--json]
+```
+
+Note: this manages rules on Prism Cloud. Local rules live in `.prism/rules.json` and are edited directly.
+
+## prism projects
+
+Manage projects.
+
+```bash
+prism projects list   [--stack <stack>] [--design <design>] [--json]
+prism projects view <slug> [--json]
+prism projects create [-n, --name <name>] [-d, --design <design>] [-s, --stack <stack>] [--json]
+prism projects delete <slug> [--force] [--json]
+```
+
+## prism brands
+
+Manage brand profiles.
+
+```bash
+prism brands list   [--json]
+prism brands view <slug> [--json]
+prism brands create [--json]
+prism brands export <slug> [-f, --format <format>] [-o, --output <file>] [--json]
+prism brands delete <slug> [--force] [--json]
+```
+
+Export formats: `cursor`, `windsurf`, `vscode`, `claude`, `css`, `tailwind` (default: `cursor`).
+
+## prism generate
+
+Generate a component with AI.
+
+```bash
+prism generate [--prompt <prompt>] [-d, --design <design>] [-s, --stack <stack>] [--rules] [-o, --output <file>] [--json]
+```
+
+Defaults: `--design jdstudio`, `--stack nextjs`.
+
+## prism marketplace
+
+Browse and install rule sets.
+
+```bash
+prism marketplace list [-s, --search <query>] [--json]
+prism marketplace install <id> [--json]
+```
+
+## prism kitchen
+
+Context Kitchen — analyze, preview, trim, and optimize AI context.
+
+```bash
+prism kitchen analyze  [-t, --task <task>] [-b, --budget <number>] [--json]
+prism kitchen preview  [-t, --task <task>] [--json]
+prism kitchen trim     [-b, --budget <number>] [--json]
+prism kitchen history  [--json]
+prism kitchen optimize [--json]
+```
+
+Budgets default to 4000 (analyze) and 2000 (trim).
+
+## prism analytics
+
+View usage stats and limits.
+
+```bash
+prism analytics [--json]
+```
+
+## prism telemetry
+
+View token telemetry and baseline data.
+
+```bash
+prism telemetry [--json]
+```
+
+## prism api-keys
+
+Manage API keys.
+
+```bash
+prism api-keys list            [--json]
+prism api-keys create          [--json]
+prism api-keys revoke <id>     [--force] [--json]
+```
+
+## sandbox-eval
+
+Advanced: evaluate a rules.json envelope against sample files from a JSON stdin contract (v1). Intended for subprocess callers. Exit code 3 on error.
+
+```bash
+prism sandbox-eval
+```
+
+## Related
+
+- [Quick Start](/quick-start) — The no-account workflow
+- [Rules](/rules) — Rule types and format
+- [Hooks and IDE Setup](/integrations) — How enforcement wires into agents

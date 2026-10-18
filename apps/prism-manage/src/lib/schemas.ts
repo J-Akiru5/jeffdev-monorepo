@@ -102,6 +102,7 @@ export const TaskSchema = z.object({
   dueDate: z.string().optional(), // ISO date (YYYY-MM-DD)
   dueTime: z.string().optional(), // HH:mm format
   googleEventId: z.string().optional(), // Linked calendar event
+  githubIssueNumber: z.number().optional(), // Linked GitHub issue
 
   // Ordering
   order: z.number().default(0),
@@ -151,13 +152,6 @@ export type UpdateTaskInput = z.infer<typeof UpdateTaskSchema>;
 // ──────────────────────────────────────────────
 // Workspace + Department Helpers
 // ──────────────────────────────────────────────
-export const PERSONAL_LISTS = [
-  { name: "My Tasks", color: "var(--color-cyan)", icon: "CheckSquare" },
-  { name: "Academics", color: "var(--color-purple)", icon: "BookOpen" },
-  { name: "Student Council", color: "var(--color-emerald)", icon: "Users" },
-  { name: "USC", color: "var(--color-amber)", icon: "GraduationCap" },
-  { name: "SineAI Guild", color: "#ef4444", icon: "Bot" },
-] as const;
 
 export const SYNTAXURE_DEPARTMENTS = [
   "Executive",

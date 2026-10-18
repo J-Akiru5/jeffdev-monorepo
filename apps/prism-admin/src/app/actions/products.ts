@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { requireRole } from "@/lib/authz";
 import { z } from "zod";
 
 // =============================================================================
@@ -41,6 +42,7 @@ export async function getProductTemplates(
   filters?: { category?: string; status?: string }
 ): Promise<{ success: boolean; data?: unknown[]; error?: string }> {
   try {
+    await requireRole();
     const adminClient = getAdminClient();
     let query = adminClient
       .from("product_templates")
@@ -70,6 +72,7 @@ export async function getProductTemplateById(
   id: string
 ): Promise<{ success: boolean; data?: unknown; error?: string }> {
   try {
+    await requireRole();
     const adminClient = getAdminClient();
     const { data, error } = await adminClient
       .from("product_templates")
@@ -92,6 +95,7 @@ export async function createProductTemplate(
   input: ProductTemplateInput
 ): Promise<{ success: boolean; data?: unknown; error?: string }> {
   try {
+    await requireRole();
     const parsed = productTemplateSchema.safeParse(input);
     if (!parsed.success) {
       return { success: false, error: parsed.error.issues[0]?.message };
@@ -142,6 +146,7 @@ export async function updateProductTemplate(
   input: Partial<ProductTemplateInput>
 ): Promise<{ success: boolean; data?: unknown; error?: string }> {
   try {
+    await requireRole();
     const adminClient = getAdminClient();
     const updates: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
@@ -191,6 +196,7 @@ export async function deleteProductTemplate(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireRole();
     const adminClient = getAdminClient();
     const { error } = await adminClient
       .from("product_templates")
@@ -235,6 +241,7 @@ export async function getContractTerms(
   templateId: string
 ): Promise<{ success: boolean; data?: unknown[]; error?: string }> {
   try {
+    await requireRole();
     const adminClient = getAdminClient();
     const { data, error } = await adminClient
       .from("contract_terms")
@@ -257,6 +264,7 @@ export async function createContractTerm(
   input: ContractTermInput
 ): Promise<{ success: boolean; data?: unknown; error?: string }> {
   try {
+    await requireRole();
     const parsed = contractTermSchema.safeParse(input);
     if (!parsed.success) {
       return { success: false, error: parsed.error.issues[0]?.message };
@@ -300,6 +308,7 @@ export async function updateContractTerm(
   input: Partial<ContractTermInput>
 ): Promise<{ success: boolean; data?: unknown; error?: string }> {
   try {
+    await requireRole();
     const adminClient = getAdminClient();
     const updates: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
@@ -342,6 +351,7 @@ export async function deleteContractTerm(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireRole();
     const adminClient = getAdminClient();
     const { error } = await adminClient
       .from("contract_terms")
@@ -386,6 +396,7 @@ export async function getCustomizationServices(): Promise<{
   error?: string;
 }> {
   try {
+    await requireRole();
     const adminClient = getAdminClient();
     const { data, error } = await adminClient
       .from("customization_services")
@@ -407,6 +418,7 @@ export async function createCustomizationService(
   input: CustomizationServiceInput
 ): Promise<{ success: boolean; data?: unknown; error?: string }> {
   try {
+    await requireRole();
     const parsed = customizationServiceSchema.safeParse(input);
     if (!parsed.success) {
       return { success: false, error: parsed.error.issues[0]?.message };
@@ -448,6 +460,7 @@ export async function updateCustomizationService(
   input: Partial<CustomizationServiceInput>
 ): Promise<{ success: boolean; data?: unknown; error?: string }> {
   try {
+    await requireRole();
     const adminClient = getAdminClient();
     const updates: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
@@ -488,6 +501,7 @@ export async function deleteCustomizationService(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireRole();
     const adminClient = getAdminClient();
     const { error } = await adminClient
       .from("customization_services")

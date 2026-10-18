@@ -3,6 +3,15 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
+import { getOrCreateDefaultProject } from "@/lib/pm-projects";
+import {
+  deleteTaskFromGoogleCalendar,
+  pushTaskToGoogleCalendar,
+} from "@/lib/google-calendar";
+import { notifyUsers } from "@/lib/notify";
+import { notifySlack, taskUrl } from "@/lib/slack";
+import { pushTaskStatusToGitHub } from "@/app/actions/github-sync";
+import { logger } from "@/lib/log";
 
 async function logAudit(event: {
   action: string;
@@ -28,6 +37,38 @@ async function logAudit(event: {
 }
 import { CreateTaskSchema, UpdateTaskSchema } from "@/lib/schemas";
 import type { Task } from "@/lib/schemas";
+import { canApproveTaskStatus } from "@/lib/authorization";
+
+/**
+ * Server-side RBAC for the 'approved' status.
+ *
+ * Mirrors the founder/employee rule that has always existed in
+ * `updateTaskStatus`: employees may never approve workspace tasks.
+ * Personal tasks (no workspace_id) are the owner's own workflow.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function assertCanApproveTask(supabase: any, userId: string, taskId: string) {
+  const { data: task } = await supabase
+    .from("tasks")
+    .select("workspace_id")
+    .eq("id", taskId)
+    .maybeSingle();
+
+  if (!task?.workspace_id) return;
+
+  const { data: membership } = await supabase
+    .from("workspace_members")
+    .select("role")
+    .eq("workspace_id", task.workspace_id)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  const role = (membership?.role as "founder" | "employee" | undefined) ?? null;
+
+  if (!canApproveTaskStatus(role, true)) {
+    throw new Error("Only founders and the CPO can approve tasks");
+  }
+}
 
 // =============================================================================
 // TAG HELPERS (Phase 1B — junction tables)
@@ -96,11 +137,13 @@ function extractTags(raw: Record<string, unknown>): string[] {
 
 /**
  * Map a raw Supabase row (snake_case) to the Task type (camelCase).
+ * `pm_project_id` is the real workspace list; `project_id` is the legacy
+ * agency-project column and is only used as a fallback.
  */
 function mapTask(raw: Record<string, unknown>): Task {
   return {
     id: String(raw.id || ""),
-    projectId: String(raw.project_id || raw.projectId || ""),
+    projectId: String(raw.pm_project_id || raw.project_id || raw.projectId || ""),
     workspaceId: raw.workspace_id ? String(raw.workspace_id) : undefined,
     departmentId: raw.department_id ? String(raw.department_id) : undefined,
     title: String(raw.title || ""),
@@ -123,6 +166,9 @@ function mapTask(raw: Record<string, unknown>): Task {
     dueDate: raw.due_date ? String(raw.due_date) : undefined,
     dueTime: raw.due_time ? String(raw.due_time) : undefined,
     googleEventId: raw.google_event_id ? String(raw.google_event_id) : undefined,
+    githubIssueNumber: raw.github_issue_number
+      ? Number(raw.github_issue_number)
+      : undefined,
 
     // Ordering
     order: Number(raw.order || 0),
@@ -136,11 +182,12 @@ function mapTask(raw: Record<string, unknown>): Task {
 
 /**
  * Map Task to Supabase insert format (snake_case).
+ * Writes `pm_project_id` (real workspace list) only — the legacy `project_id`
+ * column is never written by this app anymore.
  */
-function toDbInsert(task: Partial<Task> & { user_id: string; project_id: string }) {
+function toDbInsert(task: Partial<Task> & { user_id: string; pm_project_id?: string }) {
   const db: Record<string, unknown> = {
     user_id: task.user_id,
-    project_id: task.project_id,
     title: task.title,
     task_type: task.taskType || "uncategorized",
     status: task.status || "backlog",
@@ -148,6 +195,7 @@ function toDbInsert(task: Partial<Task> & { user_id: string; project_id: string 
     is_starred: task.isStarred || false,
   };
 
+  if (task.pm_project_id) db.pm_project_id = task.pm_project_id;
   if (task.workspaceId !== undefined) db.workspace_id = task.workspaceId;
   if (task.departmentId !== undefined) db.department_id = task.departmentId;
   if (task.description !== undefined) db.description = task.description;
@@ -156,7 +204,6 @@ function toDbInsert(task: Partial<Task> & { user_id: string; project_id: string 
   // Phase 1B: tags are managed via task_tags junction table, not the tasks.tags column
   if (task.dueDate !== undefined) db.due_date = task.dueDate;
   if (task.dueTime !== undefined) db.due_time = task.dueTime;
-  if (task.order !== undefined) db.order = task.order;
   if (task.pathIndex !== undefined) db.path_index = task.pathIndex;
 
   return db;
@@ -175,13 +222,14 @@ export async function getTasks(workspaceId?: string): Promise<Task[]> {
     let query = supabase
       .from("tasks")
       .select("*, task_tags(tags(name))")
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(500); // safety guard — real pagination lands in a later phase
 
     // Filter by workspace if specified
     if (workspaceId) {
       query = query.eq("workspace_id", workspaceId);
     } else {
-      // Default: tasks owned by user or in their workspaces
+      // Default: tasks in the user's workspaces
       const { data: memberships } = await supabase
         .from("workspace_members")
         .select("workspace_id")
@@ -202,9 +250,27 @@ export async function getTasks(workspaceId?: string): Promise<Task[]> {
   }
 }
 
+export async function getTask(taskId: string): Promise<Task | null> {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const { data } = await supabase
+      .from("tasks")
+      .select("*, task_tags(tags(name))")
+      .eq("id", taskId)
+      .maybeSingle();
+
+    return data ? mapTask(data) : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function createTask(input: {
   title: string;
-  projectId: string | number;
+  projectId?: string;
   workspaceId?: string;
   departmentId?: string;
   taskType?: Task["taskType"];
@@ -239,11 +305,45 @@ export async function createTask(input: {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
+  // Resolve the target list (pm_projects). Prefer the explicit list; otherwise
+  // fall back to the workspace's default "General" list.
+  let projectId = input.projectId || null;
+  let workspaceId = input.workspaceId || null;
+
+  if (projectId) {
+    const { data: project } = await supabase
+      .from("pm_projects")
+      .select("id, workspace_id")
+      .eq("id", projectId)
+      .maybeSingle();
+    if (!project) throw new Error("List not found or you don't have access");
+    workspaceId = String(project.workspace_id);
+  } else if (workspaceId) {
+    const project = await getOrCreateDefaultProject(supabase, workspaceId, user.id);
+    if (!project) throw new Error("Could not resolve a list for this workspace");
+    projectId = project.id;
+  } else {
+    throw new Error("A workspace or list is required to create a task");
+  }
+
+  // Assignee must be a member of the workspace
+  if (input.assignedTo) {
+    const { data: assigneeMembership } = await supabase
+      .from("workspace_members")
+      .select("user_id")
+      .eq("workspace_id", workspaceId)
+      .eq("user_id", input.assignedTo)
+      .maybeSingle();
+    if (!assigneeMembership) {
+      throw new Error("Assignee must be a member of this workspace");
+    }
+  }
+
   const dbRecord = toDbInsert({
     user_id: user.id,
-    project_id: String(input.projectId),
+    pm_project_id: projectId ?? undefined,
     title: parsed.data.title,
-    workspaceId: input.workspaceId,
+    workspaceId: workspaceId ?? undefined,
     departmentId: input.departmentId,
     taskType: input.taskType || "uncategorized",
     status: input.status || "backlog",
@@ -263,9 +363,56 @@ export async function createTask(input: {
     .single();
   if (error) throw error;
 
+  logger.info("task.created", {
+    taskId: inserted?.id,
+    workspaceId,
+    projectId,
+    userId: user.id,
+  });
+
   // Sync tags via junction table
   if (input.tags && input.tags.length > 0 && inserted) {
     await syncTaskTags(supabase, inserted.id, input.tags);
+  }
+
+  logAudit({
+    action: "CREATE",
+    resource: "tasks",
+    resourceId: inserted?.id || "unknown",
+    details: { title: parsed.data.title, workspaceId, projectId },
+  });
+
+  // Notify the assignee (best-effort)
+  if (input.assignedTo && input.assignedTo !== user.id && inserted?.id) {
+    await notifyUsers(getAdminClient(), [input.assignedTo], {
+      title: "Task assigned to you",
+      message: parsed.data.title,
+      type: "assignment",
+      relatedId: inserted.id,
+      actionUrl: `/tasks/${inserted.id}/edit`,
+      actorId: user.id,
+      entityType: "task",
+      entityId: inserted.id,
+    });
+  }
+
+  // Mirror to Google Calendar when a due date exists (best-effort)
+  if (input.dueDate && inserted?.id) {
+    await pushTaskToGoogleCalendar(user.id, {
+      id: inserted.id,
+      title: parsed.data.title,
+      due_date: input.dueDate,
+      due_time: input.dueTime || null,
+      description: input.description || null,
+      google_event_id: null,
+    });
+  }
+
+  // Slack ping for assignments (best-effort)
+  if (input.assignedTo && input.assignedTo !== user.id && inserted?.id) {
+    await notifySlack(
+      `:inbox_tray: *Task assigned* — "${parsed.data.title}" <${taskUrl(inserted.id)}|open task>`,
+    );
   }
 
   revalidatePath("/tasks");
@@ -280,13 +427,32 @@ export async function toggleTaskComplete(taskId: string, completed: boolean) {
 
   const newStatus = completed ? "approved" : "backlog";
 
-  const { error } = await supabase
+  // Server-side RBAC: only founders/CPO can move a task to "approved"
+  if (completed) {
+    await assertCanApproveTask(supabase, user.id, taskId);
+  }
+
+  const { data: updated, error } = await supabase
     .from("tasks")
     .update({ status: newStatus })
     .eq("id", taskId)
-    .eq("user_id", user.id);
+    .select("id");
 
   if (error) throw error;
+  if (!updated || updated.length === 0) {
+    throw new Error("Task not found or you don't have permission");
+  }
+
+  logAudit({
+    action: "UPDATE",
+    resource: "tasks",
+    resourceId: taskId,
+    details: { status: newStatus },
+  });
+
+  // Push status to the linked GitHub issue (best-effort)
+  await pushTaskStatusToGitHub(taskId, newStatus);
+
   revalidatePath("/tasks");
 }
 
@@ -297,13 +463,24 @@ export async function toggleTaskStar(taskId: string, isStarred: boolean) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("tasks")
     .update({ is_starred: isStarred })
     .eq("id", taskId)
-    .eq("user_id", user.id);
+    .select("id");
 
   if (error) throw error;
+  if (!updated || updated.length === 0) {
+    throw new Error("Task not found or you don't have permission");
+  }
+
+  logAudit({
+    action: "UPDATE",
+    resource: "tasks",
+    resourceId: taskId,
+    details: { is_starred: isStarred },
+  });
+
   revalidatePath("/tasks");
 }
 
@@ -321,33 +498,30 @@ export async function updateTaskStatus(taskId: string, status: string) {
 
   // Server-side RBAC: only founders/CPO can set status to "approved"
   if (status === "approved") {
-    const { data: task } = await supabase
-      .from("tasks")
-      .select("workspace_id")
-      .eq("id", taskId)
-      .single();
-
-    if (task?.workspace_id) {
-      const { data: membership } = await supabase
-        .from("workspace_members")
-        .select("role")
-        .eq("workspace_id", task.workspace_id)
-        .eq("user_id", user.id)
-        .single();
-
-      if (membership && membership.role === "employee") {
-        throw new Error("Only founders and the CPO can approve tasks");
-      }
-    }
+    await assertCanApproveTask(supabase, user.id, taskId);
   }
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("tasks")
     .update({ status })
     .eq("id", taskId)
-    .eq("user_id", user.id);
+    .select("id");
 
   if (error) throw error;
+  if (!updated || updated.length === 0) {
+    throw new Error("Task not found or you don't have permission");
+  }
+
+  logAudit({
+    action: "UPDATE",
+    resource: "tasks",
+    resourceId: taskId,
+    details: { status },
+  });
+
+  // Push status to the linked GitHub issue (best-effort)
+  await pushTaskStatusToGitHub(taskId, status);
+
   revalidatePath("/tasks");
 }
 
@@ -364,6 +538,30 @@ export async function updateTask(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
+  // Server-side RBAC: generic updates must not bypass the approval rule
+  if (parsed.data.status === "approved") {
+    await assertCanApproveTask(supabase, user.id, taskId);
+  }
+
+  // Capture the current row so we can notify only on actual changes and
+  // decide whether Google Calendar needs updating
+  let previousAssignee: string | null = null;
+  let currentTask: {
+    google_event_id?: string | null;
+    due_date?: string | null;
+    due_time?: string | null;
+    title?: string | null;
+  } | null = null;
+  {
+    const { data: current } = await supabase
+      .from("tasks")
+      .select("assigned_to, google_event_id, due_date, due_time, title")
+      .eq("id", taskId)
+      .maybeSingle();
+    currentTask = current;
+    previousAssignee = (current?.assigned_to as string) || null;
+  }
+
   const updateData: Record<string, unknown> = {};
   if (parsed.data.title !== undefined) updateData.title = parsed.data.title;
   if (parsed.data.taskType !== undefined) updateData.task_type = parsed.data.taskType;
@@ -376,22 +574,93 @@ export async function updateTask(
   // Phase 1B: tags are managed via task_tags junction table
   if (parsed.data.dueDate !== undefined) updateData.due_date = parsed.data.dueDate;
   if (parsed.data.dueTime !== undefined) updateData.due_time = parsed.data.dueTime;
-  if (parsed.data.order !== undefined) updateData.order = parsed.data.order;
   if (parsed.data.pathIndex !== undefined) updateData.path_index = parsed.data.pathIndex;
   if (parsed.data.workspaceId !== undefined) updateData.workspace_id = parsed.data.workspaceId;
   if (parsed.data.departmentId !== undefined) updateData.department_id = parsed.data.departmentId;
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("tasks")
     .update(updateData)
     .eq("id", taskId)
-    .eq("user_id", user.id);
+    .select("id");
 
   if (error) throw error;
+  if (!updated || updated.length === 0) {
+    throw new Error("Task not found or you don't have permission");
+  }
 
   // Sync tags via junction table if provided
   if (parsed.data.tags !== undefined) {
     await syncTaskTags(supabase, taskId, parsed.data.tags ?? []);
+  }
+
+  logAudit({
+    action: "UPDATE",
+    resource: "tasks",
+    resourceId: taskId,
+    details: { fields: Object.keys(updateData) },
+  });
+
+  // Notify a newly-assigned member (best-effort)
+  if (
+    parsed.data.assignedTo &&
+    parsed.data.assignedTo !== user.id &&
+    parsed.data.assignedTo !== previousAssignee
+  ) {
+    const { data: updatedTask } = await supabase
+      .from("tasks")
+      .select("title")
+      .eq("id", taskId)
+      .maybeSingle();
+    await notifyUsers(getAdminClient(), [parsed.data.assignedTo], {
+      title: "Task assigned to you",
+      message: updatedTask?.title || "A task was assigned to you",
+      type: "assignment",
+      relatedId: taskId,
+      actionUrl: `/tasks/${taskId}/edit`,
+      actorId: user.id,
+      entityType: "task",
+      entityId: taskId,
+    });
+    await notifySlack(
+      `:inbox_tray: *Task assigned* — "${updatedTask?.title || "a task"}" <${taskUrl(taskId)}|open task>`,
+    );
+  }
+
+  // Mirror to Google Calendar (best-effort): push when scheduling fields
+  // changed; remove the mirror when the due date is cleared.
+  const newDueDate =
+    parsed.data.dueDate !== undefined
+      ? parsed.data.dueDate
+      : (currentTask?.due_date as string | null);
+  const newDueTime =
+    parsed.data.dueTime !== undefined
+      ? parsed.data.dueTime
+      : (currentTask?.due_time as string | null);
+  const schedulingChanged =
+    parsed.data.dueDate !== undefined ||
+    parsed.data.dueTime !== undefined ||
+    parsed.data.title !== undefined;
+
+  if (schedulingChanged) {
+    if (newDueDate) {
+      await pushTaskToGoogleCalendar(user.id, {
+        id: taskId,
+        title: parsed.data.title || (currentTask?.title as string) || "Task",
+        due_date: newDueDate,
+        due_time: newDueTime || null,
+        description: (parsed.data.description as string) || null,
+        google_event_id: (currentTask?.google_event_id as string) || null,
+      });
+    } else if (currentTask?.google_event_id) {
+      await deleteTaskFromGoogleCalendar(user.id, String(currentTask.google_event_id));
+      await supabase.from("tasks").update({ google_event_id: null }).eq("id", taskId);
+    }
+  }
+
+  // Push status to the linked GitHub issue (best-effort)
+  if (parsed.data.status !== undefined) {
+    await pushTaskStatusToGitHub(taskId, parsed.data.status);
   }
 
   revalidatePath("/tasks");
@@ -404,23 +673,35 @@ export async function deleteTask(taskId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  // Fetch the task title before deleting for audit
+  // Fetch the task title + Google mirror id before deleting
   const { data: task } = await supabase
     .from("tasks")
-    .select("title")
+    .select("title, google_event_id")
     .eq("id", taskId)
     .single();
 
-  // Delete junction rows first (CASCADE may handle this, but be explicit)
-  await supabase.from("task_tags").delete().eq("task_id", taskId);
-
-  const { error } = await supabase
+  const { data: deleted, error } = await supabase
     .from("tasks")
     .delete()
     .eq("id", taskId)
-    .eq("user_id", user.id);
+    .select("id");
 
   if (error) throw error;
+  if (!deleted || deleted.length === 0) {
+    throw new Error("Task not found or you don't have permission");
+  }
+
+  logger.info("task.deleted", {
+    taskId,
+    userId: user.id,
+    title: (task?.title as string) || null,
+  });
+
+  // Delete junction rows (CASCADE may handle this, but be explicit)
+  await supabase.from("task_tags").delete().eq("task_id", taskId);
+
+  // Remove the Google Calendar mirror (best-effort)
+  await deleteTaskFromGoogleCalendar(user.id, (task?.google_event_id as string) || null);
 
   // Fire audit asynchronously (never blocks the response)
   logAudit({

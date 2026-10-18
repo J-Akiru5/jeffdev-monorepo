@@ -33,6 +33,7 @@ import { useWorkspaceStore } from "@/stores/workspace-store";
 import { createClient } from "@/lib/supabase/browser";
 import { updateProfile, changePassword, updateAvatarUrl } from "@/app/actions/profile";
 import type { CLevelTitle } from "@/lib/schemas";
+import { toast } from "sonner";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -938,7 +939,7 @@ function DevSessionBridge() {
       setCopied(true);
       setTimeout(() => setCopied(false), 3000);
     } catch (err) {
-      alert("Export failed: " + (err instanceof Error ? err.message : err));
+      toast.error("Export failed: " + (err instanceof Error ? err.message : err));
     }
   };
 

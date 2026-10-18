@@ -9,6 +9,7 @@
 import { z } from "zod";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logAuditEvent } from "@/lib/audit";
+import { requireRole } from "@/lib/authz";
 import { revalidatePath } from "next/cache";
 
 const quoteSchema = z.object({
@@ -31,6 +32,7 @@ interface ActionResult {
 
 export async function getAgencyQuotes(): Promise<{ success: boolean; data?: unknown[]; error?: string }> {
   try {
+    await requireRole();
     const supabase = getAdminClient();
     const { data, error } = await supabase
       .from("quotes")
@@ -46,6 +48,7 @@ export async function getAgencyQuotes(): Promise<{ success: boolean; data?: unkn
 
 export async function getAgencyQuote(id: string): Promise<unknown | null> {
   try {
+    await requireRole();
     const supabase = getAdminClient();
     const { data, error } = await supabase
       .from("quotes")
@@ -62,6 +65,7 @@ export async function getAgencyQuote(id: string): Promise<unknown | null> {
 
 export async function updateAgencyQuote(id: string, data: Partial<QuoteFormData>): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const updatePayload: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
@@ -79,7 +83,7 @@ export async function updateAgencyQuote(id: string, data: Partial<QuoteFormData>
     const { error } = await supabase.from("quotes").update(updatePayload).eq("id", id);
     if (error) throw error;
 
-    await logAuditEvent({ action: "UPDATE", resource: "quotes", resourceId: id, details: { status: data.status } });
+    await logAuditEvent({ action: "UPDATE", resource: "quotes", resourceId: id, details: { status: data.status } }, actor);
     revalidatePath("/admin/agency/quotes");
     return { success: true };
   } catch (error) {
@@ -90,6 +94,7 @@ export async function updateAgencyQuote(id: string, data: Partial<QuoteFormData>
 
 export async function updateQuoteStatus(id: string, status: string): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const { error } = await supabase
       .from("quotes")
@@ -97,7 +102,7 @@ export async function updateQuoteStatus(id: string, status: string): Promise<Act
       .eq("id", id);
     if (error) throw error;
 
-    await logAuditEvent({ action: "UPDATE", resource: "quotes", resourceId: id, details: { status } });
+    await logAuditEvent({ action: "UPDATE", resource: "quotes", resourceId: id, details: { status } }, actor);
     revalidatePath("/admin/agency/quotes");
     return { success: true };
   } catch (error) {
@@ -108,11 +113,12 @@ export async function updateQuoteStatus(id: string, status: string): Promise<Act
 
 export async function deleteAgencyQuote(id: string): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const { error } = await supabase.from("quotes").delete().eq("id", id);
     if (error) throw error;
 
-    await logAuditEvent({ action: "DELETE", resource: "quotes", resourceId: id });
+    await logAuditEvent({ action: "DELETE", resource: "quotes", resourceId: id }, actor);
     revalidatePath("/admin/agency/quotes");
     return { success: true };
   } catch (error) {

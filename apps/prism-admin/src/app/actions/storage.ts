@@ -7,6 +7,7 @@
  */
 
 import { getAdminClient } from "@/lib/supabase/admin";
+import { requireRole } from "@/lib/authz";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/svg+xml"];
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
@@ -22,6 +23,7 @@ export async function uploadToStorage(
   path?: string
 ): Promise<{ success: boolean; url?: string; error?: string }> {
   try {
+    await requireRole();
     // Validate file type
     if (!ALLOWED_TYPES.includes(file.type)) {
       return { success: false, error: "Invalid file type. Allowed: JPEG, PNG, WebP, SVG" };
@@ -74,6 +76,7 @@ export async function deleteFromStorage(
   path: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireRole();
     const adminClient = getAdminClient();
 
     const { error } = await adminClient.storage
@@ -99,6 +102,7 @@ export async function listStorageFiles(
   folder?: string
 ): Promise<{ success: boolean; files?: { name: string; url: string }[]; error?: string }> {
   try {
+    await requireRole();
     const adminClient = getAdminClient();
 
     const { data, error } = await adminClient.storage

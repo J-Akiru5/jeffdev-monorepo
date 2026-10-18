@@ -22,6 +22,7 @@
     "typecheck": "turbo run check-types",
     "test": "turbo run test",
     "clean": "node scripts/clean.js",
+    "db:push": "node scripts/db-push.mjs",
     "changeset": "changeset",
     "prepare": "husky",
     "prisma:generate": "pnpm --filter @syntaxure-labs/db run prisma:generate",

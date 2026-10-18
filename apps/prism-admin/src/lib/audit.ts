@@ -30,16 +30,32 @@ export interface AuditEvent {
   timestamp?: string;
 }
 
+/** Identity of the acting user, as returned by requireRole(). */
+export interface AuditActor {
+  id?: string;
+  email?: string | null;
+  role?: string;
+}
+
 export interface AuditLog extends AuditEvent {
   id: string;
   timestamp: string;
   userEmail?: string;
+  actorId?: string;
+  actorRole?: string;
 }
 
 /**
- * Log an audit event to Supabase
+ * Log an audit event to Supabase.
+ *
+ * `actor` is the authenticated caller identity from requireRole(). When
+ * omitted (legacy call sites), attribution falls back to event.userEmail
+ * and ultimately "unknown" — privileged callers should always pass it.
  */
-export async function logAuditEvent(event: AuditEvent): Promise<void> {
+export async function logAuditEvent(
+  event: AuditEvent,
+  actor?: AuditActor,
+): Promise<void> {
   try {
     const supabase = getAdminClient();
 
@@ -51,7 +67,9 @@ export async function logAuditEvent(event: AuditEvent): Promise<void> {
         resource_id: event.resourceId,
         changes: {
           ...(event.details || {}),
-          userEmail: event.userEmail || "admin@syntaxure.dev",
+          userEmail: actor?.email || event.userEmail || "unknown",
+          actorId: actor?.id,
+          actorRole: actor?.role,
         },
         created_at: new Date().toISOString(),
       } satisfies Partial<AuditLogRow> & Record<string, unknown>);
@@ -94,6 +112,12 @@ export async function getAuditLogs(limit = 50): Promise<AuditLog[]> {
         userEmail:
           ((row.changes as Record<string, unknown>)?.userEmail as string) ||
           "unknown",
+        actorId:
+          ((row.changes as Record<string, unknown>)?.actorId as string) ||
+          undefined,
+        actorRole:
+          ((row.changes as Record<string, unknown>)?.actorRole as string) ||
+          undefined,
         timestamp: row.created_at || new Date().toISOString(),
       }),
     );

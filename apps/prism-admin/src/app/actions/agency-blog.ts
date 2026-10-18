@@ -9,6 +9,7 @@
 import { z } from "zod";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logAuditEvent } from "@/lib/audit";
+import { requireRole } from "@/lib/authz";
 import { revalidatePath } from "next/cache";
 
 const blogPostSchema = z.object({
@@ -31,6 +32,7 @@ interface ActionResult {
 
 export async function getAgencyBlogPosts(): Promise<{ success: boolean; data?: unknown[]; error?: string }> {
   try {
+    await requireRole();
     const supabase = getAdminClient();
     const { data, error } = await (supabase as any)
       .from("blog_posts")
@@ -46,6 +48,7 @@ export async function getAgencyBlogPosts(): Promise<{ success: boolean; data?: u
 
 export async function getAgencyBlogPost(id: string): Promise<unknown | null> {
   try {
+    await requireRole();
     const supabase = getAdminClient();
     const { data, error } = await (supabase as any)
       .from("blog_posts")
@@ -62,6 +65,7 @@ export async function getAgencyBlogPost(id: string): Promise<unknown | null> {
 
 export async function createAgencyBlogPost(data: BlogPostFormData): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const validated = blogPostSchema.parse(data);
     const supabase = getAdminClient();
 
@@ -78,7 +82,7 @@ export async function createAgencyBlogPost(data: BlogPostFormData): Promise<Acti
       resource: "blog_posts",
       resourceId: validated.slug,
       details: { title: validated.title, status: validated.status },
-    });
+    }, actor);
 
     revalidatePath("/admin/agency/blog");
     revalidatePath("/blog");
@@ -91,6 +95,7 @@ export async function createAgencyBlogPost(data: BlogPostFormData): Promise<Acti
 
 export async function updateAgencyBlogPost(id: string, data: Partial<BlogPostFormData>): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const updatePayload: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
@@ -119,7 +124,7 @@ export async function updateAgencyBlogPost(id: string, data: Partial<BlogPostFor
       resource: "blog_posts",
       resourceId: id,
       details: data,
-    });
+    }, actor);
 
     revalidatePath("/admin/agency/blog");
     revalidatePath("/blog");
@@ -132,6 +137,7 @@ export async function updateAgencyBlogPost(id: string, data: Partial<BlogPostFor
 
 export async function deleteAgencyBlogPost(id: string): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const { error } = await (supabase as any).from("blog_posts").delete().eq("id", id);
     if (error) throw error;
@@ -140,7 +146,7 @@ export async function deleteAgencyBlogPost(id: string): Promise<ActionResult> {
       action: "DELETE",
       resource: "blog_posts",
       resourceId: id,
-    });
+    }, actor);
 
     revalidatePath("/admin/agency/blog");
     revalidatePath("/blog");

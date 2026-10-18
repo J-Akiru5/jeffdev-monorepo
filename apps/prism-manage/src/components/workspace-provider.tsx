@@ -43,7 +43,12 @@ export function WorkspaceProvider({
 
   useEffect(() => {
     setWorkspaces(workspaces);
-    if (activeWorkspaceId) {
+    // Preserve the user's workspace selection across route refreshes —
+    // only fall back to the default when nothing valid is selected.
+    const current = useWorkspaceStore.getState().activeWorkspaceId;
+    const stillValid =
+      current !== null && workspaces.some((w) => w.id === current);
+    if (!stillValid && activeWorkspaceId) {
       setActiveWorkspace(activeWorkspaceId);
     }
     setDepartments(departments);

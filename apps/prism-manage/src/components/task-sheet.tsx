@@ -16,12 +16,26 @@ import {
   Tag,
   Calendar,
   Clock,
+  MessageSquare,
+  Send,
+  GitBranch,
 } from "lucide-react";
 import { TASK_TYPES, PRIORITY_CONFIG, STATUS_CONFIG, STAFF_LOCKED_STATUSES } from "@/lib/task-types";
 import type { TaskTypeKey, StatusKey } from "@/lib/task-types";
 import type { Task, Project, Department } from "@/lib/schemas";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { Select } from "@syntaxure/ui";
+import { getWorkspaceMembers } from "@/app/actions/workspace";
+import {
+  addComment,
+  getTaskActivity,
+  getTaskComments,
+  type TaskActivityEntry,
+  type TaskComment,
+} from "@/app/actions/collaboration";
+import { createIssueForTask } from "@/app/actions/github-sync";
+import { createClient } from "@/lib/supabase/browser";
+import { toast } from "sonner";
 
 // ──────────────────────────────────────────────
 // Types
@@ -40,6 +54,7 @@ export interface TaskSheetData {
   dueTime: string;
   projectId: string;
   departmentId?: string;
+  githubIssueNumber?: number;
 }
 
 interface TaskSheetProps {
@@ -50,6 +65,8 @@ interface TaskSheetProps {
   projects: Project[];
   departments?: Department[];
   mode?: "create" | "edit";
+  /** Task being edited — enables the comments + activity sections */
+  taskId?: string;
   /** Whether the sheet is rendering inside an intercepting route modal (no layout wrapper) */
   isIntercepted?: boolean;
 }
@@ -85,6 +102,7 @@ export function TaskSheet({
   projects,
   departments = [],
   mode = "create",
+  taskId,
   isIntercepted = true,
 }: TaskSheetProps) {
   const [data, setData] = useState<TaskSheetData>({
@@ -94,11 +112,18 @@ export function TaskSheet({
   });
   const [tagInput, setTagInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [members, setMembers] = useState<{ userId: string; name: string; email: string }[]>([]);
+  const [comments, setComments] = useState<TaskComment[]>([]);
+  const [activity, setActivity] = useState<TaskActivityEntry[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [sendingComment, setSendingComment] = useState(false);
+  const [creatingIssue, setCreatingIssue] = useState(false);
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
 
   /** Is the current user a founder? Reads from workspace store (hydrated from DB) */
   const userRole = useWorkspaceStore((s) => s.userRole);
+  const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId);
   const cLevelTitle = useWorkspaceStore((s) => s.cLevelTitle);
   const isFounder = userRole === "founder";
   const isEmployee = userRole === "employee";
@@ -126,6 +151,128 @@ export function TaskSheet({
       setTimeout(() => titleRef.current?.focus(), 150);
     }
   }, [isOpen, initialData, projects, departments]);
+
+  // Load workspace members for the assignee picker
+  useEffect(() => {
+    if (!isOpen || !activeWorkspaceId) return;
+    let cancelled = false;
+    getWorkspaceMembers(activeWorkspaceId).then((result) => {
+      if (!cancelled) setMembers(result.members);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, activeWorkspaceId]);
+
+  // Load comments + activity when editing an existing task
+  useEffect(() => {
+    if (!isOpen || !taskId) return;
+    let cancelled = false;
+    getTaskComments(taskId).then((items) => {
+      if (!cancelled) setComments(items);
+    });
+    getTaskActivity(taskId).then((items) => {
+      if (!cancelled) setActivity(items);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, taskId]);
+
+  // Live-update comments while the sheet is open
+  useEffect(() => {
+    if (!isOpen || !taskId) return;
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`task-comments-${taskId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "task_comments",
+          filter: `task_id=eq.${taskId}`,
+        },
+        () => {
+          getTaskComments(taskId).then(setComments);
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isOpen, taskId]);
+
+  const handleAddComment = async () => {
+    const body = newComment.trim();
+    if (!body || !taskId || sendingComment) return;
+    setSendingComment(true);
+    try {
+      const result = await addComment(taskId, body);
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      if (result.comment) {
+        setComments((prev) => [...prev, result.comment!]);
+      }
+      setNewComment("");
+    } finally {
+      setSendingComment(false);
+    }
+  };
+
+  const handleCreateIssue = async () => {
+    if (!taskId || creatingIssue) return;
+    setCreatingIssue(true);
+    try {
+      const result = await createIssueForTask(taskId);
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      if (result.issueNumber) {
+        setData((prev) => ({ ...prev, githubIssueNumber: result.issueNumber }));
+        toast.success(`GitHub issue #${result.issueNumber} created`);
+      }
+    } finally {
+      setCreatingIssue(false);
+    }
+  };
+
+  const formatRelative = (iso: string): string => {
+    const then = new Date(iso).getTime();
+    if (Number.isNaN(then)) return "";
+    const diff = Date.now() - then;
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 1) return "just now";
+    if (minutes < 60) return `${minutes} min ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}d ago`;
+    return new Date(iso).toLocaleDateString();
+  };
+
+  const describeActivity = (entry: TaskActivityEntry): string => {
+    const details = entry.changes || {};
+    switch (entry.action) {
+      case "CREATE":
+        return "created this task";
+      case "DELETE":
+        return "deleted this task";
+      case "UPDATE": {
+        if ("status" in details) return `changed status to ${String(details.status)}`;
+        if ("is_starred" in details) return "updated the star";
+        if ("fields" in details && Array.isArray(details.fields)) {
+          return `updated ${(details.fields as string[]).join(", ")}`;
+        }
+        return "updated this task";
+      }
+      default:
+        return entry.action.toLowerCase();
+    }
+  };
 
   // Handle escape key
   useEffect(() => {
@@ -485,9 +632,8 @@ export function TaskSheet({
                           Assignee
                         </label>
                         <div className="relative">
-                          <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
-                          <input
-                            type="text"
+                          <User className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-white/30" />
+                          <select
                             value={data.assignedTo}
                             onChange={(e) =>
                               setData((prev) => ({
@@ -495,9 +641,15 @@ export function TaskSheet({
                                 assignedTo: e.target.value,
                               }))
                             }
-                            placeholder="User ID"
-                            className="w-full rounded-lg border border-border bg-glass-04 px-3 py-2.5 pl-10 text-sm text-white/70 outline-none transition-colors placeholder:text-text-faint hover:border-border-active focus:border-cyan-500/50"
-                          />
+                            className="w-full appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2.5 pl-10 text-sm text-white/70 outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
+                          >
+                            <option value="">Unassigned</option>
+                            {members.map((member) => (
+                              <option key={member.userId} value={member.userId}>
+                                {member.name || member.email}
+                              </option>
+                            ))}
+                          </select>
                         </div>
                       </div>
 
@@ -561,6 +713,119 @@ export function TaskSheet({
                       className="w-full resize-none rounded-xl border border-border glass-subtle px-4 py-3 text-sm text-white/50 placeholder:text-text-faint focus:border-cyan-500/30 focus:outline-none"
                     />
                   </div>
+
+                  {/* Comments + Activity + GitHub (edit mode only) */}
+                  {mode === "edit" && taskId && (
+                    <div className="space-y-6 border-t border-border pt-6">
+                      {/* GitHub */}
+                      <div>
+                        <label className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-white/40">
+                          <GitBranch className="h-3.5 w-3.5" />
+                          GitHub
+                        </label>
+                        {data.githubIssueNumber ? (
+                          <a
+                            href={`https://github.com/${process.env.NEXT_PUBLIC_GITHUB_MARKETING_REPO_OWNER || ""}/${process.env.NEXT_PUBLIC_GITHUB_MARKETING_REPO_NAME || ""}/issues/${data.githubIssueNumber}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-2 rounded-lg border border-border bg-glass-04 px-3 py-2 text-xs text-cyan-400 transition-colors hover:border-border-active"
+                          >
+                            <GitBranch className="h-3.5 w-3.5" />
+                            Linked issue #{data.githubIssueNumber}
+                          </a>
+                        ) : (
+                          <button
+                            onClick={handleCreateIssue}
+                            disabled={creatingIssue}
+                            className="inline-flex items-center gap-2 rounded-lg border border-border bg-glass-04 px-3 py-2 text-xs text-white/60 transition-colors hover:border-border-active hover:text-white/80 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <GitBranch className="h-3.5 w-3.5" />
+                            {creatingIssue ? "Creating…" : "Create GitHub issue"}
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Comments */}
+                      <div>
+                        <label className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-white/40">
+                          <MessageSquare className="h-3.5 w-3.5" />
+                          Comments ({comments.length})
+                        </label>
+                        <div className="space-y-3">
+                          {comments.length === 0 && (
+                            <p className="text-xs text-white/30">
+                              No comments yet — start the discussion.
+                            </p>
+                          )}
+                          {comments.map((comment) => (
+                            <div
+                              key={comment.id}
+                              className="rounded-lg border border-border bg-glass-04 p-3"
+                            >
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-medium text-white/80">
+                                  {comment.authorName}
+                                </span>
+                                <span className="text-[10px] font-mono text-white/25">
+                                  {formatRelative(comment.createdAt)}
+                                </span>
+                              </div>
+                              <p className="mt-1 whitespace-pre-wrap text-sm text-white/60">
+                                {comment.body}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="mt-3 flex items-start gap-2">
+                          <textarea
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            onKeyDown={(e) => {
+                              if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                                e.preventDefault();
+                                handleAddComment();
+                              }
+                            }}
+                            placeholder="Add a comment… (@mention teammates, ⌘⏎ to send)"
+                            rows={2}
+                            className="flex-1 resize-none rounded-lg border border-border bg-glass-04 px-3 py-2 text-sm text-white/70 placeholder:text-text-faint focus:border-cyan-500/50 focus:outline-none"
+                          />
+                          <button
+                            onClick={handleAddComment}
+                            disabled={!newComment.trim() || sendingComment}
+                            className="flex h-9 items-center gap-1.5 rounded-lg bg-cyan-500 px-3 text-xs font-medium text-white transition-all hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <Send className="h-3.5 w-3.5" />
+                            {sendingComment ? "Sending…" : "Send"}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Activity */}
+                      {activity.length > 0 && (
+                        <div>
+                          <label className="mb-3 block text-xs font-medium uppercase tracking-wider text-white/40">
+                            Activity
+                          </label>
+                          <div className="space-y-2">
+                            {activity.slice(0, 8).map((entry) => (
+                              <div
+                                key={entry.id}
+                                className="flex items-center gap-2 text-xs text-white/40"
+                              >
+                                <span className="h-1 w-1 flex-shrink-0 rounded-full bg-white/20" />
+                                <span className="text-white/60">{entry.actorName}</span>
+                                <span>{describeActivity(entry)}</span>
+                                <span className="ml-auto font-mono text-[10px] text-white/25">
+                                  {formatRelative(entry.createdAt)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 

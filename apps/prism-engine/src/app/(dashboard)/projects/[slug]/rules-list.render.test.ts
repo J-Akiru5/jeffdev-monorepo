@@ -2,12 +2,15 @@ import { describe, it, expect, vi } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
-// next/link needs an app-router context; render it as a plain anchor.
+// next/link needs an app-router context; render it as a plain anchor,
+// passing through href/title/etc so link semantics stay assertable.
 vi.mock("next/link", async () => {
   const react = await import("react");
   return {
-    default: (props: { href?: string; children?: unknown }) =>
-      react.createElement("a", { href: props.href }, props.children as never),
+    default: (props: Record<string, unknown>) => {
+      const { children, ...rest } = props;
+      return react.createElement("a", rest, children as never);
+    },
   };
 });
 
@@ -77,5 +80,18 @@ describe("RulesList render (26-rule project)", () => {
     // Rows start collapsed — full instruction text is not in the initial markup
     expect(html).not.toContain("Instruction for Rule 01");
     expect(html).not.toContain("Instruction for Rule 26");
+  });
+
+  it("links every rule to its view page and edit page", () => {
+    for (const rule of rules) {
+      expect(html).toContain(
+        `href="/projects/microplastic-ai-b/rules/${rule.id}"`,
+      );
+      expect(html).toContain(
+        `href="/projects/microplastic-ai-b/rules/${rule.id}/edit"`,
+      );
+    }
+    expect(html).toContain('title="View rule"');
+    expect(html).toContain('title="Edit rule"');
   });
 });

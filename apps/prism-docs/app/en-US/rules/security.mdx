@@ -103,8 +103,8 @@ service cloud.firestore {
 }
 ```
 
-### Cosmos DB
+### Supabase (dashboard data)
 
-- Use singleton client from `packages/db`
+- Use the service-role client from `@syntaxure-labs/db/prism` (server only)
 - Never concatenate strings into queries (injection risk)
-- Use parameterized queries
+- Use parameterized/typed queries

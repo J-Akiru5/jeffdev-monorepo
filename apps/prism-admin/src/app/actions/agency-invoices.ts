@@ -8,8 +8,8 @@
 
 import { z } from "zod";
 import { getAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
 import { logAuditEvent } from "@/lib/audit";
+import { requireRole } from "@/lib/authz";
 import type { InvoiceRow } from "@/lib/database.types";
 import { revalidatePath } from "next/cache";
 import { generateInvoiceRef, generatePaymentRef } from "@/lib/ref-generator";
@@ -163,6 +163,7 @@ function normalizeInvoiceRow(row: InvoiceRow): Invoice {
 
 export async function getAgencyInvoices(): Promise<Invoice[]> {
   try {
+    await requireRole();
     const supabase = getAdminClient();
     const { data, error } = await supabase.from("invoices").select("*").order("created_at", { ascending: false });
     if (error || !data) return [];
@@ -175,6 +176,7 @@ export async function getAgencyInvoices(): Promise<Invoice[]> {
 
 export async function getAgencyInvoiceById(id: string): Promise<Invoice | null> {
   try {
+    await requireRole();
     const supabase = getAdminClient();
     const { data, error } = await supabase.from("invoices").select("*").eq("id", id).maybeSingle();
     if (error || !data) return null;
@@ -189,17 +191,14 @@ export async function getAgencyInvoiceById(id: string): Promise<Invoice | null> 
 
 export async function createAgencyInvoice(data: z.infer<typeof createInvoiceSchema>): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const validated = createInvoiceSchema.parse(data);
     const { subtotal, tax, total } = calculateInvoiceTotals(validated.items, validated.taxRate, validated.discount);
     const refNo = generateInvoiceRef();
 
-    const authClient = await createClient();
-    const { data: { user } } = await authClient.auth.getUser();
-    if (!user) return { success: false, error: "Authentication required" };
-
     const supabase = getAdminClient();
     const { data: result, error } = await supabase.from("invoices").insert({
-      user_id: user.id,
+      user_id: actor.id,
       invoice_number: refNo,
       amount: subtotal.toString(),
       tax_amount: tax.toString(),
@@ -231,7 +230,7 @@ export async function createAgencyInvoice(data: z.infer<typeof createInvoiceSche
 
     if (error) throw error;
 
-    await logAuditEvent({ action: "CREATE", resource: "invoices", resourceId: result.id, details: { refNo, total, currency: validated.currency } });
+    await logAuditEvent({ action: "CREATE", resource: "invoices", resourceId: result.id, details: { refNo, total, currency: validated.currency } }, actor);
     revalidatePath("/admin/agency/invoices");
 
     return { success: true, id: result.id, refNo };
@@ -249,6 +248,7 @@ export async function createAgencyInvoice(data: z.infer<typeof createInvoiceSche
 
 export async function updateAgencyInvoice(id: string, data: Partial<z.infer<typeof createInvoiceSchema>>): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const { data: existing } = await supabase.from("invoices").select("*").eq("id", id).maybeSingle();
     if (!existing) return { success: false, error: "Invoice not found" };
@@ -285,7 +285,7 @@ export async function updateAgencyInvoice(id: string, data: Partial<z.infer<type
     const { error } = await supabase.from("invoices").update(updates).eq("id", id);
     if (error) throw error;
 
-    await logAuditEvent({ action: "UPDATE", resource: "invoices", resourceId: id, details: validated });
+    await logAuditEvent({ action: "UPDATE", resource: "invoices", resourceId: id, details: validated }, actor);
     revalidatePath("/admin/agency/invoices");
     revalidatePath(`/admin/agency/invoices/${id}`);
 
@@ -300,6 +300,7 @@ export async function updateAgencyInvoice(id: string, data: Partial<z.infer<type
 
 export async function sendAgencyInvoice(id: string): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const { data: existing } = await supabase.from("invoices").select("*").eq("id", id).maybeSingle();
     if (!existing) return { success: false, error: "Invoice not found" };
@@ -311,7 +312,7 @@ export async function sendAgencyInvoice(id: string): Promise<ActionResult> {
     const { error } = await supabase.from("invoices").update({ status: "sent", metadata, updated_at: new Date().toISOString() }).eq("id", id);
     if (error) throw error;
 
-    await logAuditEvent({ action: "STATUS_CHANGE", resource: "invoices", resourceId: id, details: { oldStatus: "draft", newStatus: "sent" } });
+    await logAuditEvent({ action: "STATUS_CHANGE", resource: "invoices", resourceId: id, details: { oldStatus: "draft", newStatus: "sent" } }, actor);
     revalidatePath("/admin/agency/invoices");
     revalidatePath(`/admin/agency/invoices/${id}`);
 
@@ -326,6 +327,7 @@ export async function sendAgencyInvoice(id: string): Promise<ActionResult> {
 
 export async function recordAgencyPayment(invoiceId: string, data: z.infer<typeof paymentSchema>): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const validated = paymentSchema.parse(data);
     const supabase = getAdminClient();
     const { data: existing } = await supabase.from("invoices").select("*").eq("id", invoiceId).maybeSingle();
@@ -362,7 +364,7 @@ export async function recordAgencyPayment(invoiceId: string, data: z.infer<typeo
     const { error } = await supabase.from("invoices").update(updates).eq("id", invoiceId);
     if (error) throw error;
 
-    await logAuditEvent({ action: "UPDATE", resource: "invoices", resourceId: invoiceId, details: { paymentId: payment.id, amount: validated.amount, method: validated.method } });
+    await logAuditEvent({ action: "UPDATE", resource: "invoices", resourceId: invoiceId, details: { paymentId: payment.id, amount: validated.amount, method: validated.method } }, actor);
     revalidatePath("/admin/agency/invoices");
     revalidatePath(`/admin/agency/invoices/${invoiceId}`);
 
@@ -377,6 +379,7 @@ export async function recordAgencyPayment(invoiceId: string, data: z.infer<typeo
 
 export async function deleteAgencyInvoice(id: string): Promise<ActionResult> {
   try {
+    const actor = await requireRole();
     const supabase = getAdminClient();
     const { data: existing } = await supabase.from("invoices").select("id, status").eq("id", id).maybeSingle();
     if (!existing) return { success: false, error: "Invoice not found" };
@@ -385,7 +388,7 @@ export async function deleteAgencyInvoice(id: string): Promise<ActionResult> {
     const { error } = await supabase.from("invoices").delete().eq("id", id);
     if (error) throw error;
 
-    await logAuditEvent({ action: "DELETE", resource: "invoices", resourceId: id });
+    await logAuditEvent({ action: "DELETE", resource: "invoices", resourceId: id }, actor);
     revalidatePath("/admin/agency/invoices");
 
     return { success: true };

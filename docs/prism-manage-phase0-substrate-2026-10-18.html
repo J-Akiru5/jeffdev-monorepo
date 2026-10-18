@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage Phase 0 — Task Report</title>
+<style>
+  :root {
+    --bg: #0A0D12;
+    --bg-raised: #11151C;
+    --bg-card: #151A22;
+    --border: #232A36;
+    --cyan: #22D3EE;
+    --violet: #8B7BFF;
+    --text: #E6EAF0;
+    --text-dim: #8B93A3;
+    --text-faint: #5A6272;
+    --good: #4ADE80;
+    --warn: #FBBF24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.6;
+    padding: 48px 24px;
+  }
+  .wrap { max-width: 820px; margin: 0 auto; }
+  .mono { font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; }
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 28px;
+    margin-bottom: 32px;
+  }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-bottom: 10px;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
+    background: linear-gradient(90deg, var(--text), var(--text) 60%, var(--cyan));
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  .meta-row span b { color: var(--text); font-weight: 500; }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border: 1px solid;
+  }
+  .badge.done { color: var(--good); border-color: var(--good); background: rgba(74,222,128,0.08); }
+  .badge.followup { color: var(--warn); border-color: var(--warn); background: rgba(251,191,36,0.08); }
+  section { margin-bottom: 36px; }
+  h2 {
+    font-size: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--violet);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .summary-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--cyan);
+    border-radius: 6px;
+    padding: 18px 20px;
+    font-size: 15px;
+    color: var(--text);
+  }
+  ul.clean, ol.clean { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  ul.clean li, ol.clean li {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+  .file-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--cyan);
+    background: rgba(34,211,238,0.08);
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 8px;
+    display: inline-block;
+  }
+  .checkpoint {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+  }
+  .checkpoint .q { font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
+  .checkpoint .q b { color: var(--violet); font-weight: 500; }
+  .checkpoint .a { font-size: 14px; color: var(--text); }
+  .checkpoint .a b { color: var(--cyan); font-weight: 500; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-weight: 500;
+  }
+  td.mono { color: var(--cyan); }
+  footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-faint);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">prism-manage · Task Report</div>
+    <h1>Phase 0 — Substrate &amp; Seatbelts</h1>
+    <div class="meta-row">
+      <span><b>2026-10-18</b></span>
+      <span>Repo: <b>jeffdev-monorepo</b></span>
+      <span>Agent: <b>opencode · DeepSeek V4.1 Flash</b></span>
+      <span>Branch: <b>feat/pm-0-substrate → PR → develop</b></span>
+      <span class="badge done">Complete</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Summary</h2>
+    <div class="summary-box">
+      Phase 0 of the prism-manage industry-grade plan: the app now has its vitest suite
+      gated in CI, full Sentry error monitoring (wired to the prism-engine pattern,
+      fail-open without a DSN), its dead code and unused deps removed, the bypassable
+      client-side <span class="mono">mode</span> gate removed from member management
+      (server-side founder enforcement unchanged), and an honest assistant knowledge
+      base. Everything verified locally — types, lint, 23/23 tests, and production
+      builds with and without a Sentry DSN.
+    </div>
+  </section>
+
+  <section>
+    <h2>What Changed</h2>
+    <table>
+      <thead>
+        <tr><th>File</th><th>Change</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">.github/workflows/ci.yml</td><td>Added <span class="mono">prism-manage</span> to the CI test matrix — its vitest suite now runs on every CI run (previously excluded).</td></tr>
+        <tr><td class="mono">sentry.client.config.ts <em>(new)</em></td><td>Client Sentry init with error-replay integration, mirroring prism-engine.</td></tr>
+        <tr><td class="mono">sentry.server.config.ts <em>(new)</em></td><td>Server Sentry init.</td></tr>
+        <tr><td class="mono">sentry.edge.config.ts <em>(new)</em></td><td>Edge-runtime Sentry init (covers the assistant route).</td></tr>
+        <tr><td class="mono">src/instrumentation.ts <em>(new)</em></td><td>Next.js instrumentation hook — loads server/edge configs; <span class="mono">onRequestError</span> capture.</td></tr>
+        <tr><td class="mono">next.config.ts</td><td>Wrapped with <span class="mono">withSentry(nextConfig, "prism-manage")</span> — sourcemap upload stays gated on <span class="mono">SENTRY_ORG</span> + <span class="mono">SENTRY_AUTH_TOKEN</span>.</td></tr>
+        <tr><td class="mono">package.json + pnpm-lock.yaml</td><td>Added <span class="mono">@sentry/nextjs</span> + <span class="mono">@syntaxure/sentry-config</span>; removed unused <span class="mono">clsx</span>, <span class="mono">nanoid</span>, <span class="mono">tailwind-merge</span> (lockfile diff: 15 lines, importer-only).</td></tr>
+        <tr><td class="mono">src/app/actions/members.ts</td><td>Removed the client-supplied <span class="mono">mode</span> parameter from <span class="mono">updateMemberRole</span> / <span class="mono">assignMemberDepartment</span> / <span class="mono">removeMember</span>. Founder-only enforcement (server-side) unchanged.</td></tr>
+        <tr><td class="mono">src/components/settings/workspace-members.tsx</td><td>Updated the 3 call sites; the UI-level "workspace mode required" gate is retained.</td></tr>
+        <tr><td class="mono">src/app/actions/projects.ts</td><td>Deleted — never imported anywhere (148 lines of dead code).</td></tr>
+        <tr><td class="mono">src/app/api/assistant/route.ts</td><td>Knowledge-base truth pass: removed claims for realtime subscriptions, calendar sync / drag-scheduling, project &amp; department filtering; fixed the kanban column list.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Decisions &amp; Checkpoints</h2>
+    <div class="checkpoint">
+      <div class="q"><b>Judgment call:</b> was the <span class="mono">mode</span> param in members.ts load-bearing?</div>
+      <div class="a"><b>No.</b> The check (<span class="mono">if (mode &amp;&amp; mode !== "workspace")</span>) was a bypassable client signal layered on top of a real server-side founder check — the param is optional, so any caller could simply omit it. Removed per plan; the genuine authorization (founder-only) is untouched, and the UI still gates member editing on workspace mode. No mid-task check-ins were needed — the task direction was unambiguous throughout.</div>
+    </div>
+    <div class="checkpoint">
+      <div class="q"><b>Conflict note:</b> <span class="mono">chore/architecture-simplification</span> also touches ci.yml</div>
+      <div class="a">That branch's ci.yml diff removes the same retired <span class="mono">syntaxure-pm</span> entries already gone from develop — identical effect, so no merge conflict is expected. Flagged for awareness when that branch lands.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Next Steps</h2>
+    <ul class="clean">
+      <li><span class="badge followup">Phase 1</span> &nbsp;Team-usable core: real <span class="mono">pm_projects</span> entity, permission-aware task mutations (the owner-scoped blocker), schema-drift migrations — the milestone phase.</li>
+      <li><span class="badge followup">Ops</span> &nbsp;To activate Sentry in production, add <span class="mono">SENTRY_DSN</span> (plus optional <span class="mono">SENTRY_ORG</span> / <span class="mono">SENTRY_AUTH_TOKEN</span> / <span class="mono">SENTRY_PROJECT</span>) to prism-manage's env in Doppler/Vercel.</li>
+      <li><span class="badge followup">Small</span> &nbsp;Optional follow-ups: <span class="mono">global-error.tsx</span> with Sentry capture; Playwright e2e wiring into CI (deferred from Phase 0 by design).</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>Generated by opencode · DeepSeek V4.1 Flash</span>
+    <span>2026-10-18</span>
+  </footer>
+
+</div>
+</body>
+</html>

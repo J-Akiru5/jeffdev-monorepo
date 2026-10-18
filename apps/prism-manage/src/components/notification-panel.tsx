@@ -3,81 +3,76 @@
 /**
  * Notification Panel
  * ------------------
- * Slide-out panel showing recent notifications.
- * Glass morphism styling with Syntaxure Labs branding.
+ * Slide-out panel showing real notifications from the `notifications` table,
+ * with live updates via Supabase Realtime.
  */
 
-import { useState } from "react";
-import { X, Bell, CheckSquare, User, Settings, Sparkles } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { useRouter } from "next/navigation";
+import {
+  X,
+  Bell,
+  CheckSquare,
+  UserCheck,
+  MessageSquare,
+  AtSign,
+  Sparkles,
+} from "lucide-react";
+import { createClient } from "@/lib/supabase/browser";
+import {
+  getNotifications,
+  markAllNotificationsRead,
+  markNotificationRead,
+  type NotificationItem,
+} from "@/app/actions/collaboration";
 
-interface Notification {
-  id: string;
-  type: "task" | "member" | "system" | "achievement";
-  title: string;
-  message: string;
-  timestamp: string;
-  read: boolean;
-}
-
-const DEMO_NOTIFICATIONS: Notification[] = [
-  {
-    id: "1",
-    type: "task",
-    title: "Task assigned",
-    message: "You've been assigned to 'Implement auth flow'",
-    timestamp: "2 min ago",
-    read: false,
-  },
-  {
-    id: "2",
-    type: "member",
-    title: "New member",
-    message: "Alex joined the Engineering department",
-    timestamp: "1 hour ago",
-    read: false,
-  },
-  {
-    id: "3",
-    type: "system",
-    title: "System update",
-    message: "Prism Engine v2.0 has been deployed",
-    timestamp: "3 hours ago",
-    read: true,
-  },
-  {
-    id: "4",
-    type: "achievement",
-    title: "Milestone reached",
-    message: "100 tasks completed this month!",
-    timestamp: "1 day ago",
-    read: true,
-  },
-];
-
-function getNotificationIcon(type: Notification["type"]) {
+function getNotificationIcon(type: string) {
   switch (type) {
+    case "comment":
+      return MessageSquare;
+    case "mention":
+      return AtSign;
+    case "assignment":
+      return UserCheck;
+    case "approval":
+      return Sparkles;
     case "task":
       return CheckSquare;
-    case "member":
-      return User;
-    case "system":
-      return Settings;
-    case "achievement":
-      return Sparkles;
+    default:
+      return Bell;
   }
 }
 
-function getNotificationColor(type: Notification["type"]) {
+function getNotificationColor(type: string) {
   switch (type) {
+    case "comment":
+      return "text-cyan-400 bg-cyan-500/10";
+    case "mention":
+      return "text-purple-400 bg-purple-500/10";
+    case "assignment":
+      return "text-amber-400 bg-amber-500/10";
+    case "approval":
+      return "text-emerald-400 bg-emerald-500/10";
     case "task":
       return "text-cyan-400 bg-cyan-500/10";
-    case "member":
-      return "text-purple-400 bg-purple-500/10";
-    case "system":
+    default:
       return "text-white/50 bg-white/5";
-    case "achievement":
-      return "text-amber-400 bg-amber-500/10";
   }
+}
+
+function formatRelative(iso: string): string {
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return "";
+  const diff = Date.now() - then;
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days} day${days === 1 ? "" : "s"} ago`;
+  return new Date(iso).toLocaleDateString();
 }
 
 export function NotificationPanel({
@@ -87,17 +82,75 @@ export function NotificationPanel({
   open: boolean;
   onClose: () => void;
 }) {
-  const [notifications, setNotifications] = useState(DEMO_NOTIFICATIONS);
+  const router = useRouter();
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const refresh = useCallback(async () => {
+    const items = await getNotifications(30);
+    setNotifications(items);
+  }, []);
+
+  // Load on open + subscribe to live inserts while open
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    setLoading(true);
+    refresh().finally(() => {
+      if (!cancelled) setLoading(false);
+    });
+
+    const supabase = createClient();
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user || cancelled) return;
+      channel = supabase
+        .channel(`notifications-${user.id}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "notifications",
+            filter: `user_id=eq.${user.id}`,
+          },
+          () => {
+            refresh();
+          },
+        )
+        .subscribe();
+    });
+
+    return () => {
+      cancelled = true;
+      if (channel) supabase.removeChannel(channel);
+    };
+  }, [open, refresh]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const markAllRead = () => {
+  const handleMarkAllRead = async () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    await markAllNotificationsRead();
+  };
+
+  const handleClick = async (notification: NotificationItem) => {
+    if (!notification.read) {
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notification.id ? { ...n, read: true } : n)),
+      );
+      await markNotificationRead(notification.id);
+    }
+    if (notification.actionUrl) {
+      onClose();
+      router.push(notification.actionUrl);
+    }
   };
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <>
       {/* Backdrop */}
       <div
@@ -121,7 +174,7 @@ export function NotificationPanel({
           <div className="flex items-center gap-2">
             {unreadCount > 0 && (
               <button
-                onClick={markAllRead}
+                onClick={handleMarkAllRead}
                 className="text-[10px] font-mono uppercase tracking-wider text-white/40 hover:text-white/70 transition-colors"
               >
                 Mark all read
@@ -129,6 +182,7 @@ export function NotificationPanel({
             )}
             <button
               onClick={onClose}
+              aria-label="Close notifications"
               className="rounded-md p-1.5 text-white/40 hover:bg-white/[0.04] hover:text-white/70 transition-colors"
             >
               <X className="h-4 w-4" />
@@ -138,50 +192,68 @@ export function NotificationPanel({
 
         {/* Notifications List */}
         <div className="overflow-y-auto p-4 space-y-2">
-          {notifications.map((notification) => {
-            const Icon = getNotificationIcon(notification.type);
-            const colorClass = getNotificationColor(notification.type);
+          {loading && (
+            <p className="px-2 py-8 text-center text-xs text-white/30">
+              Loading…
+            </p>
+          )}
 
-            return (
-              <div
-                key={notification.id}
-                className={`group flex items-start gap-3 rounded-lg border p-3 transition-all cursor-pointer ${
-                  notification.read
-                    ? "border-white/[0.04] bg-white/[0.01] hover:bg-white/[0.03]"
-                    : "border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.05]"
-                }`}
-              >
-                <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg ${colorClass}`}>
-                  <Icon className="h-4 w-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-white truncate">
-                      {notification.title}
-                    </p>
-                    {!notification.read && (
-                      <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-cyan-400" />
-                    )}
+          {!loading && notifications.length === 0 && (
+            <div className="flex flex-col items-center gap-2 px-2 py-12 text-center">
+              <Bell className="h-6 w-6 text-white/15" />
+              <p className="text-xs text-white/30">You&apos;re all caught up</p>
+            </div>
+          )}
+
+          {!loading &&
+            notifications.map((notification) => {
+              const Icon = getNotificationIcon(notification.type);
+              const colorClass = getNotificationColor(notification.type);
+
+              return (
+                <div
+                  key={notification.id}
+                  onClick={() => handleClick(notification)}
+                  className={`group flex items-start gap-3 rounded-lg border p-3 transition-all cursor-pointer ${
+                    notification.read
+                      ? "border-white/[0.04] bg-white/[0.01] hover:bg-white/[0.03]"
+                      : "border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.05]"
+                  }`}
+                >
+                  <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg ${colorClass}`}>
+                    <Icon className="h-4 w-4" />
                   </div>
-                  <p className="text-xs text-white/40 mt-0.5 line-clamp-2">
-                    {notification.message}
-                  </p>
-                  <p className="text-[10px] font-mono text-white/20 mt-1">
-                    {notification.timestamp}
-                  </p>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium text-white truncate">
+                        {notification.title}
+                      </p>
+                      {!notification.read && (
+                        <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-cyan-400" />
+                      )}
+                    </div>
+                    <p className="text-xs text-white/40 mt-0.5 line-clamp-2">
+                      {notification.message}
+                    </p>
+                    <p className="text-[10px] font-mono text-white/20 mt-1">
+                      {formatRelative(notification.createdAt)}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
         </div>
 
         {/* Footer */}
         <div className="absolute bottom-0 left-0 right-0 border-t border-white/[0.06] bg-[#0a0a0a]/80 px-6 py-3">
           <p className="text-center text-[10px] font-mono uppercase tracking-wider text-white/20">
-            Notifications coming soon
+            {notifications.length > 0
+              ? `Latest ${notifications.length}`
+              : "Live updates enabled"}
           </p>
         </div>
       </div>
-    </>
+    </>,
+    document.body,
   );
 }

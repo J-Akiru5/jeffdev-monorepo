@@ -15,7 +15,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { Button, GlassPanel, Badge } from "@syntaxure/ui";
-import { updateRule, enhanceRule } from "./actions";
+import { updateRule, enhanceRule, type UpdateRuleState } from "./actions";
 import { useActionFeedback } from "@/lib/hooks/use-action-feedback";
 
 interface RuleEditFormProps {
@@ -26,8 +26,26 @@ interface RuleEditFormProps {
     priority: number;
     content: string;
     description?: string;
+    severity: string;
   };
 }
+
+const CATEGORY_OPTIONS = [
+  "architecture",
+  "styling",
+  "components",
+  "data-fetching",
+  "security",
+  "performance",
+  "testing",
+  "other",
+];
+
+const SEVERITY_OPTIONS = [
+  { value: "error", label: "Error — fail the check" },
+  { value: "warning", label: "Warning — surface a warning" },
+  { value: "info", label: "Info — context only" },
+];
 
 export function RuleEditForm({ rule }: RuleEditFormProps) {
   const params = useParams();
@@ -44,10 +62,24 @@ export function RuleEditForm({ rule }: RuleEditFormProps) {
   const [enhanceError, setEnhanceError] = useState<string | null>(null);
 
   const [state, formAction, isPending] = useActionState<
-    { success?: boolean; error?: string } | null,
+    UpdateRuleState,
     FormData
   >(updateRule, null);
-  useActionFeedback(state, { successMessage: "Rule updated!" });
+  // The hook catches every outcome: success → toast, string errors → toast,
+  // field-error objects → fallback toast (details render inline below).
+  useActionFeedback(state, {
+    successMessage: "Rule saved!",
+    fallbackErrorMessage: "Please fix the form errors.",
+  });
+
+  const fieldErrors =
+    state?.error && typeof state.error !== "string" ? state.error : null;
+  const viewHref = `/projects/${slug}/rules/${rule._id}`;
+  // Categories from the create form, plus the rule's current value in case it
+  // predates the option list (templates ship free-form categories).
+  const categoryOptions = CATEGORY_OPTIONS.includes(rule.category)
+    ? CATEGORY_OPTIONS
+    : [rule.category, ...CATEGORY_OPTIONS];
 
   const handleEnhance = async () => {
     setIsEnhancing(true);
@@ -101,11 +133,11 @@ export function RuleEditForm({ rule }: RuleEditFormProps) {
     <div className="space-y-8">
       {/* Back Link */}
       <Link
-        href={`/projects/${slug}`}
+        href={viewHref}
         className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to Project
+        Back to Rule
       </Link>
 
       {/* Header */}
@@ -169,6 +201,119 @@ export function RuleEditForm({ rule }: RuleEditFormProps) {
         <input type="hidden" name="ruleId" value={rule._id} />
         <input type="hidden" name="slug" value={slug} />
 
+        {/* Metadata */}
+        <GlassPanel className="p-6">
+          <h2 className="text-sm font-medium text-white mb-4">Rule Details</h2>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            {/* Name */}
+            <div className="space-y-2 sm:col-span-2">
+              <label htmlFor="name" className="block text-sm font-medium text-white">
+                Rule Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                required
+                defaultValue={rule.name}
+                maxLength={100}
+                className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none transition-colors"
+              />
+              {fieldErrors?.name?.[0] && (
+                <p className="text-xs text-red-400">{fieldErrors.name[0]}</p>
+              )}
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2 sm:col-span-2">
+              <label htmlFor="description" className="block text-sm font-medium text-white">
+                Description{" "}
+                <span className="font-normal text-white/40">(optional)</span>
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                rows={2}
+                defaultValue={rule.description ?? ""}
+                maxLength={500}
+                placeholder="Short summary of what this rule enforces..."
+                className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none transition-colors resize-none"
+              />
+              {fieldErrors?.description?.[0] && (
+                <p className="text-xs text-red-400">{fieldErrors.description[0]}</p>
+              )}
+            </div>
+
+            {/* Category */}
+            <div className="space-y-2">
+              <label htmlFor="category" className="block text-sm font-medium text-white">
+                Category
+              </label>
+              <select
+                id="category"
+                name="category"
+                required
+                defaultValue={rule.category}
+                className="w-full rounded-md border border-white/10 bg-[#0a0a0a] px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
+              >
+                {categoryOptions.map((c) => (
+                  <option key={c} value={c} className="bg-[#0b0e14]">
+                    {c}
+                  </option>
+                ))}
+              </select>
+              {fieldErrors?.category?.[0] && (
+                <p className="text-xs text-red-400">{fieldErrors.category[0]}</p>
+              )}
+            </div>
+
+            {/* Severity */}
+            <div className="space-y-2">
+              <label htmlFor="severity" className="block text-sm font-medium text-white">
+                Severity
+              </label>
+              <select
+                id="severity"
+                name="severity"
+                defaultValue={rule.severity}
+                className="w-full rounded-md border border-white/10 bg-[#0a0a0a] px-4 py-3 text-white focus:border-cyan-500/50 focus:outline-none transition-colors"
+              >
+                {SEVERITY_OPTIONS.map((s) => (
+                  <option key={s.value} value={s.value} className="bg-[#0b0e14]">
+                    {s.label}
+                  </option>
+                ))}
+              </select>
+              {fieldErrors?.severity?.[0] && (
+                <p className="text-xs text-red-400">{fieldErrors.severity[0]}</p>
+              )}
+            </div>
+
+            {/* Priority */}
+            <div className="space-y-2 sm:col-span-2">
+              <label htmlFor="priority" className="block text-sm font-medium text-white">
+                Priority (1–100)
+              </label>
+              <input
+                type="number"
+                id="priority"
+                name="priority"
+                min={1}
+                max={100}
+                defaultValue={rule.priority}
+                className="w-full rounded-md border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-white/30 focus:border-cyan-500/50 focus:outline-none transition-colors sm:max-w-[10rem]"
+              />
+              <p className="text-xs text-white/40">
+                1–3 = high priority (always included). 4–7 = medium. 8+ = low
+                (summary only).
+              </p>
+              {fieldErrors?.priority?.[0] && (
+                <p className="text-xs text-red-400">{fieldErrors.priority[0]}</p>
+              )}
+            </div>
+          </div>
+        </GlassPanel>
+
         {/* Rule Content */}
         <GlassPanel className="p-6">
           <label
@@ -191,15 +336,25 @@ export function RuleEditForm({ rule }: RuleEditFormProps) {
           </p>
         </GlassPanel>
 
+        {/* Content field error (inline) */}
+        {fieldErrors?.content?.[0] && (
+          <p className="text-sm text-red-400">{fieldErrors.content[0]}</p>
+        )}
+
         {/* Status Messages */}
-        {state?.error && <p className="text-sm text-red-400">{state.error}</p>}
+        {typeof state?.error === "string" && (
+          <p className="text-sm text-red-400">{state.error}</p>
+        )}
+        {fieldErrors?.general && (
+          <p className="text-sm text-red-400">{fieldErrors.general}</p>
+        )}
 
         {/* Actions */}
         <div className="flex items-center justify-end gap-3">
           <Button
             type="button"
             variant="secondary"
-            onClick={() => router.push(`/projects/${slug}`)}
+            onClick={() => router.push(viewHref)}
           >
             Cancel
           </Button>

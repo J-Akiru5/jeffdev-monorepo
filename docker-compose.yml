@@ -31,15 +31,9 @@ services:
     networks:
       - jeffdev
 
-  prism-admin:
-    build:
-      context: .
-      dockerfile: apps/prism-admin/Dockerfile
-    ports:
-      - "3004:3004"
-    env_file: apps/prism-admin/.env
-    networks:
-      - jeffdev
+  # NOTE: prism-admin is deployed on Vercel (see apps/prism-admin/vercel.json
+  # and vercel-ignore.sh). Its stale Dockerfile was removed — the Vercel
+  # pipeline is the canonical deployment path for this app.
 
   prism-manage:
     build:

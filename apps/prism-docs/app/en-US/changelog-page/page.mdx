@@ -6,7 +6,30 @@ All notable changes to Prism Context Engine across all applications.
 
 ---
 
-## 📦 Version 1.0.3 - January 3, 2026
+## Version 1.2.0
+
+The local enforcement release. Verified against the CLI source and git history.
+
+### CLI
+
+- **`prism init`** — local onboarding. Scans the project (package.json, globals.css, Tailwind config), generates `.prism/rules.json`, and wires the Claude Code hooks (PreToolUse + PostToolUse + Stop) into `.claude/settings.json`. No network, no account. Flags: `--yes`, `--force`.
+- **`prism check`** — the Pass. Lint mode (`prism check <files...>`, exit 1 on blocks) and agent hook mode (`prism check --hook`, reads a hook event from stdin, exit 2 on blocks). Fails open on errors; honors `PRISM_DISABLE=1`.
+- **`prism pull`** — synced onboarding. Fetches `.prism/rules.json` from the dashboard; never breaks an existing rules file on error.
+- **`prism ide-setup`** — auto-detects Cursor, Windsurf, VS Code, and Claude Desktop and writes MCP configuration (renamed from `prism init`, which was claimed by the local onboarding path).
+- **Three new check types** — `naming_pattern`, `file_placement`, `required_import`, alongside the original four.
+- **Hook formats for Cursor and Antigravity** — `--format cursor` and `--format antigravity`, wired into `.cursor/hooks.json` and `.agents/hooks.json` by `prism init`.
+- **Gemini semantic layer (opt-in)** — `PRISM_GEMINI_CHECK=1` plus a Gemini key adds an intent-level check after the deterministic pass. Strictly additive, 12-second hard cap, fails open. Skip reasons are recorded in `.prism/activity.log`.
+- **Activity log** — every hook run appends one line to `.prism/activity.log`.
+- **Subprocess sandbox boundary** — `prism sandbox-eval` evaluates a rules envelope from a JSON stdin contract (exit 3 on error).
+- **Example rule packs** — executable Flutter, Kotlin, and Python packs under `examples/`, loaded by the test suite.
+
+### Migration
+
+- Prism's data store moved from Azure Cosmos DB (MongoDB API) to Supabase Postgres. See `docs/prism/PRISM_MIGRATION.md`.
+
+---
+
+## Version 1.0.3 - January 3, 2026
 
 A comprehensive update bringing production-ready features, unified branding, and enhanced user experience across the entire platform.
 

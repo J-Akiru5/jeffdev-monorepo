@@ -1,48 +1,142 @@
-# IDE Integrations
+# Hooks and IDE Setup
 
-Connect Prism Context Engine to your favorite code editor and AI assistant.
+Prism checks every write your agent makes and sends corrections back to the agent. This page explains how the hook behaves and how to wire it per agent.
 
-Prism supports real-time rule synchronization via **MCP (Model Context Protocol)**, as well as manual export for editors that don't support MCP yet.
+## How the hook works
 
-## Supported Editors
+`prism init` installs a hook that runs this command:
 
-| Editor | MCP Support | Manual Export | Status |
-|--------|-------------|---------------|--------|
-| Cursor | ✅ Yes | ✅ Yes | Full Support |
-| Windsurf | ✅ Yes | ✅ Yes | Full Support |
-| VS Code | ✅ Yes | ✅ Yes | Full Support |
-| Claude Desktop | ✅ Yes | ❌ | Full Support |
-| GitHub Copilot | ❌ | ❌ | Coming Soon |
+```
+npx @prism-engine/cli check --hook --format claude-code
+```
 
-## Setup Guides
+The agent sends a tool event as JSON on stdin. `prism check --hook` finds the nearest `.prism/rules.json` (walking up from the target file), checks the content, and responds:
+
+- **Clean** — exit 0, the write proceeds.
+- **Blocking violation** — a correction message on stderr and exit 2. The agent reads the correction and fixes the file.
+
+For Claude Code, `prism init` wires three hook events:
+
+| Event | Matcher | What happens |
+|-------|---------|--------------|
+| PreToolUse | `Write\|Edit\|MultiEdit` | The proposed content is reconstructed and checked. A block exits 2 and halts the write before it lands |
+| PostToolUse | `Write\|Edit` | The written file is re-checked from disk as a safety net |
+| Stop | — | Files changed in the session are checked; a block exits 2 and the session cannot end until they are fixed |
+
+The hook command is identical for all three events; it dispatches on the event name in the payload.
+
+## Fails open by design
+
+Enforcement never breaks your workflow. The hook exits 0 (no blocking) when:
+
+- No `.prism/rules.json` is found
+- The rules file is invalid JSON or fails validation
+- A file cannot be read
+- The engine errors out
+- The event payload is malformed or the tool shape is unknown
+
+Hook errors are printed to stderr (`[prism] check skipped: ...`) and recorded in `.prism/activity.log`.
+
+## Kill switch
+
+Disable all hook enforcement for a session:
+
+```bash
+export PRISM_DISABLE=1
+```
+
+The hook exits immediately without checking. Unset it to re-enable.
+
+## Per-agent wiring
+
+### Claude Code
+
+Wired automatically by `prism init` into `.claude/settings.json` (PreToolUse + PostToolUse + Stop). Existing entries are merged, never overwritten. If the existing settings file is invalid JSON, it is left untouched and the hook snippets are printed for manual paste.
+
+### Cursor
+
+`prism init` writes a `--format cursor` hook into `.cursor/hooks.json` as an `afterFileEdit` command (config verified against Cursor's public docs; end-to-end firing inside Cursor is unverified). Cursor can also auto-map `.claude/settings.json` hooks when third-party skill mapping is enabled — do not run both, or you get duplicate corrections.
+
+```json
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      { "command": "npx @prism-engine/cli check --hook --format cursor" }
+    ]
+  }
+}
+```
+
+### Antigravity
+
+`prism init` writes a `--format antigravity` PostToolUse handler into `.agents/hooks.json` (config verified against the Antigravity 2.0 docs; in-agent firing unverified):
+
+```json
+{
+  "prism-pass": {
+    "PostToolUse": [
+      { "hooks": [{ "type": "command", "command": "npx @prism-engine/cli check --hook --format antigravity" }] }
+    ]
+  }
+}
+```
+
+### Claude Desktop
+
+Claude Desktop has no hooks system. It gets MCP only (advisory rules through the assistant).
+
+## MCP setup for other editors
+
+`prism ide-setup` auto-detects **Cursor, Windsurf, VS Code, and Claude Desktop**, asks before touching each, and writes the MCP server config:
+
+```json
+{
+  "mcpServers": {
+    "prism": {
+      "command": "npx",
+      "args": ["@prism-engine/cli", "serve"],
+      "env": { "PRISM_TOKEN": "<your token>" }
+    }
+  }
+}
+```
+
+Config files it writes:
+
+| Editor | File |
+|--------|------|
+| Cursor | `~/.cursor/mcp.json` |
+| Windsurf | `~/.windsurf/mcp.json` |
+| Claude Desktop | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| VS Code | User `settings.json` (`prism.token`); install the Prism extension from the marketplace for full support |
+
+`prism ide-setup` asks for `prism login` first (or set `PRISM_TOKEN`). Restart your IDE after setup. Run `prism doctor` to verify.
+
+## Per-editor guides
 
 <Cards>
   <Card title="Cursor" href="/integrations/cursor">
-    Configure Cursor with MCP and .cursorrules
+    Hooks + MCP via prism ide-setup
   </Card>
   <Card title="Windsurf" href="/integrations/windsurf">
-    Set up Windsurf with MCP integration
+    MCP via prism ide-setup
   </Card>
   <Card title="VS Code" href="/integrations/vscode">
-    Install the MCP extension for VS Code
+    MCP via prism ide-setup
   </Card>
   <Card title="Claude Desktop" href="/integrations/claude-desktop">
-    Connect Claude Desktop to Prism
+    MCP (advisory) via prism ide-setup
   </Card>
 </Cards>
 
-## Integration Methods
+## Troubleshooting hooks
 
-### MCP (Recommended)
+| Symptom | Cause |
+|---------|-------|
+| Nothing enforces | `.prism/rules.json` missing or invalid — the hook fails open. Run `prism check <file>` to see the error |
+| Enforcement stopped | `PRISM_DISABLE=1` is set |
+| Duplicate corrections | Both the Cursor hook and the mapped Claude hooks are active — remove one |
+| `check skipped: no .prism/rules.json found` | The rules file is not in the checked file's directory tree |
 
-The **Model Context Protocol** provides real-time synchronization:
-- Rules update automatically when you change them in the dashboard
-- No need to re-export files
-- Works across all your projects
-
-### Manual Export
-
-For quick setup or editors without MCP:
-- Export `.cursorrules` or `.windsurfrules` from dashboard
-- Place the file in your project root
-- Re-export when rules change
+More in [Troubleshooting](/troubleshooting/common-issues).

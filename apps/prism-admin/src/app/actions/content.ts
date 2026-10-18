@@ -1,6 +1,7 @@
 "use server";
 
 import { getAdminClient } from "@/lib/supabase/admin";
+import { requireRole } from "@/lib/authz";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -105,6 +106,7 @@ export async function saveAboutContent(
   content: AboutContent,
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireRole();
     const parsed = aboutContentSchema.safeParse(content);
     if (!parsed.success) {
       return {
@@ -155,6 +157,7 @@ export async function getPageContent(
   slug: string,
 ): Promise<{ success: boolean; data?: Record<string, any>; error?: string }> {
   try {
+    await requireRole();
     const adminClient = getAdminClient();
     // Phase 1D: Read from page_sections instead of site_pages.content
     const { data: rows, error } = await adminClient
@@ -182,6 +185,7 @@ export async function savePageContent(
   content: Record<string, any>,
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    await requireRole();
     const adminClient = getAdminClient();
     const now = new Date().toISOString();
     // Phase 1D: Write to page_sections instead of site_pages.content
@@ -214,6 +218,7 @@ export async function savePageContent(
 
 export async function getAboutContent(): Promise<AboutContent | null> {
   try {
+    await requireRole();
     const adminClient = getAdminClient();
 
     // Phase 1D: Reassemble about content from page_sections rows.
