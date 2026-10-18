@@ -76,6 +76,12 @@ export default async function globalTeardown() {
       .eq("user_id", testUser.id)
       .like("name", "e2e-%");
 
+    await admin
+      .from("memory_entries")
+      .delete()
+      .eq("created_by", testUser.id)
+      .like("title", "e2e-%");
+
     console.log("[e2e] test data cleaned up");
   } catch {
     // best-effort

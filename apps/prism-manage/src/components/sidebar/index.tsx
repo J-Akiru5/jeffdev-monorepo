@@ -16,6 +16,7 @@ import {
   LayoutGrid,
   TrendingUp,
   Building2,
+  Brain,
   LayoutDashboard,
   FileText,
   ChevronLeft,
@@ -56,6 +57,7 @@ const views: NavItem[] = [
   { label: "Tasks", href: "/tasks", icon: CheckSquare },
   { label: "Calendar", href: "/calendar", icon: Calendar },
   { label: "Kanban", href: "/kanban", icon: LayoutGrid },
+  { label: "Brain", href: "/brain", icon: Brain },
 ];
 
 const marketingItem: NavItem = { label: "Marketing", href: "/marketing", icon: TrendingUp };
