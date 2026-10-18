@@ -12,6 +12,7 @@ import { revalidatePath } from "next/cache";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/log";
+import { sanitizeIlikeTerm } from "@/lib/postgrest";
 
 export interface MemoryEntry {
   id: string;
@@ -30,17 +31,33 @@ export interface BrainCitation {
   similarity: number | null;
 }
 
-const EMBEDDING_MODEL = "text-embedding-004";
+const EMBEDDING_MODEL = "gemini-embedding-001";
+const EMBEDDING_DIMENSIONS = 768;
 
 async function embedText(text: string): Promise<number[] | null> {
   const apiKey =
     process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: EMBEDDING_MODEL });
-    const result = await model.embedContent(text);
-    return result.embedding.values;
+    // Direct REST call: the SDK doesn't expose outputDimensionality, and the
+    // schema stores 768-dim vectors.
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${EMBEDDING_MODEL}:embedContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: { parts: [{ text }] },
+          outputDimensionality: EMBEDDING_DIMENSIONS,
+        }),
+      },
+    );
+    if (!res.ok) {
+      const detail = await res.text();
+      throw new Error(`embedContent ${res.status}: ${detail.slice(0, 200)}`);
+    }
+    const json = (await res.json()) as { embedding?: { values?: number[] } };
+    return json.embedding?.values ?? null;
   } catch (error) {
     logger.warn("brain.embed.failed", {
       error: error instanceof Error ? error.message : String(error),
@@ -170,7 +187,7 @@ export async function searchMemory(
   }
 
   // Keyword fallback (no API key, no embedding, or nothing above threshold)
-  const safe = q.replace(/[%,()]/g, " ").trim();
+  const safe = sanitizeIlikeTerm(q);
   const { data } = await supabase
     .from("memory_entries")
     .select("id, title, summary")

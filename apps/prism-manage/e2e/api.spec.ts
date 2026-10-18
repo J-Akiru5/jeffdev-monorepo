@@ -21,4 +21,32 @@ test.describe("api", () => {
     const res = await request.get("/api/calendar/sync");
     expect(res.status()).toBe(401);
   });
+
+  test("github sync rejects unauthenticated calls", async ({
+    playwright,
+    baseURL,
+  }) => {
+    // Fresh context WITHOUT the stored session — the route must 401.
+    // (newContext inherits the project's storageState unless overridden.)
+    const ctx = await playwright.request.newContext({
+      baseURL,
+      storageState: { cookies: [], origins: [] },
+    });
+    const res = await ctx.post("/api/github/sync");
+    expect(res.status()).toBe(401);
+    await ctx.dispose();
+  });
+
+  test("security headers are present", async ({ request }) => {
+    const res = await request.get("/");
+    const headers = res.headers();
+    expect(headers["content-security-policy"]).toContain("default-src 'self'");
+    expect(headers["content-security-policy"]).toContain(
+      "frame-ancestors 'none'",
+    );
+    expect(headers["x-content-type-options"]).toBe("nosniff");
+    expect(headers["x-frame-options"]).toBe("DENY");
+    expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
+    expect(headers["permissions-policy"]).toContain("camera=()");
+  });
 });
