@@ -26,6 +26,12 @@ test.describe("company brain", () => {
       timeout: 15_000,
     });
 
+    // Source filters (R1): agent sessions exclude the decision; Decisions re-includes it
+    await page.getByRole("button", { name: "Agent sessions" }).click();
+    await expect(page.getByText(title)).toHaveCount(0);
+    await page.getByRole("button", { name: "Decisions", exact: true }).click();
+    await expect(page.getByText(title).first()).toBeVisible();
+
     // Search
     await page.getByPlaceholder("Search memories…").fill(title);
     await page.getByRole("button", { name: "Search", exact: true }).click();

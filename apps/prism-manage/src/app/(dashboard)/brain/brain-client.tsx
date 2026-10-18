@@ -11,6 +11,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Brain, Loader2, Plus, Search, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
 import { useWorkspaceStore } from "@/stores/workspace-store";
+import { createClient } from "@/lib/supabase/browser";
 import {
   askBrain,
   captureMemoryEntry,
@@ -62,6 +63,7 @@ export function BrainClient() {
 
   const [entries, setEntries] = useState<MemoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sourceFilter, setSourceFilter] = useState<string>("all");
 
   const [captureOpen, setCaptureOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -98,6 +100,30 @@ export function BrainClient() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  // Live updates: refresh when memories change in this workspace
+  useEffect(() => {
+    if (!activeWorkspaceId) return;
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`brain-${activeWorkspaceId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "memory_entries",
+          filter: `workspace_id=eq.${activeWorkspaceId}`,
+        },
+        () => {
+          void load();
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [activeWorkspaceId, load]);
 
   const handleCapture = useCallback(async () => {
     if (!activeWorkspaceId) return;
@@ -136,6 +162,11 @@ export function BrainClient() {
     setAnswer(result);
     setAsking(false);
   }, [activeWorkspaceId, question]);
+
+  const visibleEntries =
+    sourceFilter === "all"
+      ? entries
+      : entries.filter((entry) => entry.sourceType === sourceFilter);
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -352,7 +383,30 @@ export function BrainClient() {
 
       {/* Timeline */}
       <div className="space-y-3">
-        <h3 className="text-sm font-semibold text-white/70">Timeline</h3>
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="text-sm font-semibold text-white/70">Timeline</h3>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {[
+              { value: "all", label: "All" },
+              { value: "decision", label: "Decisions" },
+              { value: "comment-thread", label: "Discussions" },
+              { value: "agent-session", label: "Agent sessions" },
+              { value: "manual", label: "Notes" },
+            ].map((f) => (
+              <button
+                key={f.value}
+                onClick={() => setSourceFilter(f.value)}
+                className={`rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                  sourceFilter === f.value
+                    ? "border-cyan-500/40 bg-cyan-500/10 text-cyan-400"
+                    : "border-border text-white/40 hover:text-white/70"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {loading && (
           <div className="flex items-center justify-center py-10">
@@ -370,7 +424,7 @@ export function BrainClient() {
         )}
 
         {!loading &&
-          entries.map((entry) => (
+          visibleEntries.map((entry) => (
             <div
               key={entry.id}
               className="rounded-xl border border-border glass-subtle p-4"
