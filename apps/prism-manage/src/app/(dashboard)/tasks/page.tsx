@@ -205,18 +205,34 @@ function TasksContent() {
   ]);
 
   // Group tasks by project (list view)
+  // In the unfiltered view every list renders its group — even empty ones —
+  // so the inline "Add a task" input is always available. With filters or a
+  // selected list, only lists that have matches are shown.
   const tasksByProject = useMemo(() => {
     const map: Record<string, Task[]> = {};
+    const showAllLists =
+      !activeProjectId && !hasActiveFilters && !isStarredFilter && !departmentId;
     for (const project of projects) {
       const projectTasks = filteredTasks.filter(
         (t) => t.projectId === project.id,
       );
-      if (projectTasks.length > 0 || activeProjectId === project.id) {
+      if (
+        projectTasks.length > 0 ||
+        activeProjectId === project.id ||
+        showAllLists
+      ) {
         map[project.id] = projectTasks;
       }
     }
     return map;
-  }, [filteredTasks, projects, activeProjectId]);
+  }, [
+    filteredTasks,
+    projects,
+    activeProjectId,
+    hasActiveFilters,
+    isStarredFilter,
+    departmentId,
+  ]);
 
   // Sorted flat list (table view)
   const tableTasks = useMemo(
