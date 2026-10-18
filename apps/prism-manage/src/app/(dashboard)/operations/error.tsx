@@ -1,5 +1,7 @@
 "use client";
 
+import { ErrorReporter } from "@/components/error-reporter";
+
 export default function Error({
   error,
   reset,
@@ -9,6 +11,7 @@ export default function Error({
 }) {
   return (
     <div className="mx-auto max-w-6xl">
+      <ErrorReporter error={error} />
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <h2 className="text-lg font-semibold text-white">
           Unable to load Operations
