@@ -12,8 +12,13 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useProjects } from "@/contexts/project-context";
-import { createEvent, updateEvent, syncCalendar } from "@/app/actions/calendar";
-import { fetchEvents } from "@/app/actions/calendar";
+import {
+  createEvent,
+  fetchEvents,
+  getCalendarSyncStatus,
+  syncCalendar,
+  updateEvent,
+} from "@/app/actions/calendar";
 import type { CalendarEvent } from "@/lib/schemas";
 import { toast } from "sonner";
 
@@ -22,6 +27,16 @@ export default function CalendarPage() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<{
+    connected: boolean;
+    lastSyncedAt: string | null;
+    lastError: string | null;
+  }>({ connected: false, lastSyncedAt: null, lastError: null });
+
+  const refreshSyncStatus = useCallback(async () => {
+    const status = await getCalendarSyncStatus();
+    setSyncStatus(status);
+  }, []);
 
   // Fetch events from Supabase on mount
   useEffect(() => {
@@ -36,7 +51,8 @@ export default function CalendarPage() {
       }
     }
     loadEvents();
-  }, []);
+    refreshSyncStatus();
+  }, [refreshSyncStatus]);
 
   // Convert events to FullCalendar format
   const calendarEvents = useMemo(() => {
@@ -118,11 +134,16 @@ export default function CalendarPage() {
       toast.success("Calendar synced");
     } catch (err) {
       console.error("Sync error:", err);
-      toast.error("Sync failed. Connect Google Calendar first.");
+      toast.error(
+        err instanceof Error && err.message
+          ? err.message
+          : "Sync failed. Connect Google Calendar first.",
+      );
     } finally {
       setSyncing(false);
+      refreshSyncStatus();
     }
-  }, []);
+  }, [refreshSyncStatus]);
 
   if (loading) {
     return (
@@ -173,8 +194,17 @@ export default function CalendarPage() {
             Google Calendar Sync
           </h3>
           <p className="text-xs text-white/40">
-            {syncing ? "Syncing..." : "Connect to sync your events"}
+            {syncing
+              ? "Syncing..."
+              : syncStatus.connected
+                ? syncStatus.lastSyncedAt
+                  ? `Last synced ${new Date(syncStatus.lastSyncedAt).toLocaleString()}`
+                  : "Connected — run a sync to pull events"
+                : "Connect to sync your events"}
           </p>
+          {syncStatus.lastError && (
+            <p className="mt-1 text-xs text-amber-400/70">{syncStatus.lastError}</p>
+          )}
         </div>
         <div className="flex gap-3">
           <a

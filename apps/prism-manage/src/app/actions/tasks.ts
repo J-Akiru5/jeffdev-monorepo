@@ -4,6 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { getOrCreateDefaultProject } from "@/lib/pm-projects";
+import {
+  deleteTaskFromGoogleCalendar,
+  pushTaskToGoogleCalendar,
+} from "@/lib/google-calendar";
 import { notifyUsers } from "@/lib/notify";
 
 async function logAudit(event: {
@@ -379,6 +383,18 @@ export async function createTask(input: {
     });
   }
 
+  // Mirror to Google Calendar when a due date exists (best-effort)
+  if (input.dueDate && inserted?.id) {
+    await pushTaskToGoogleCalendar(user.id, {
+      id: inserted.id,
+      title: parsed.data.title,
+      due_date: input.dueDate,
+      due_time: input.dueTime || null,
+      description: input.description || null,
+      google_event_id: null,
+    });
+  }
+
   revalidatePath("/tasks");
 }
 
@@ -501,14 +517,22 @@ export async function updateTask(
     await assertCanApproveTask(supabase, user.id, taskId);
   }
 
-  // Capture the current assignee so we can notify only on actual changes
+  // Capture the current row so we can notify only on actual changes and
+  // decide whether Google Calendar needs updating
   let previousAssignee: string | null = null;
-  if (parsed.data.assignedTo !== undefined) {
+  let currentTask: {
+    google_event_id?: string | null;
+    due_date?: string | null;
+    due_time?: string | null;
+    title?: string | null;
+  } | null = null;
+  {
     const { data: current } = await supabase
       .from("tasks")
-      .select("assigned_to")
+      .select("assigned_to, google_event_id, due_date, due_time, title")
       .eq("id", taskId)
       .maybeSingle();
+    currentTask = current;
     previousAssignee = (current?.assigned_to as string) || null;
   }
 
@@ -574,6 +598,37 @@ export async function updateTask(
     });
   }
 
+  // Mirror to Google Calendar (best-effort): push when scheduling fields
+  // changed; remove the mirror when the due date is cleared.
+  const newDueDate =
+    parsed.data.dueDate !== undefined
+      ? parsed.data.dueDate
+      : (currentTask?.due_date as string | null);
+  const newDueTime =
+    parsed.data.dueTime !== undefined
+      ? parsed.data.dueTime
+      : (currentTask?.due_time as string | null);
+  const schedulingChanged =
+    parsed.data.dueDate !== undefined ||
+    parsed.data.dueTime !== undefined ||
+    parsed.data.title !== undefined;
+
+  if (schedulingChanged) {
+    if (newDueDate) {
+      await pushTaskToGoogleCalendar(user.id, {
+        id: taskId,
+        title: parsed.data.title || (currentTask?.title as string) || "Task",
+        due_date: newDueDate,
+        due_time: newDueTime || null,
+        description: (parsed.data.description as string) || null,
+        google_event_id: (currentTask?.google_event_id as string) || null,
+      });
+    } else if (currentTask?.google_event_id) {
+      await deleteTaskFromGoogleCalendar(user.id, String(currentTask.google_event_id));
+      await supabase.from("tasks").update({ google_event_id: null }).eq("id", taskId);
+    }
+  }
+
   revalidatePath("/tasks");
 }
 
@@ -584,10 +639,10 @@ export async function deleteTask(taskId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Unauthorized");
 
-  // Fetch the task title before deleting for audit
+  // Fetch the task title + Google mirror id before deleting
   const { data: task } = await supabase
     .from("tasks")
-    .select("title")
+    .select("title, google_event_id")
     .eq("id", taskId)
     .single();
 
@@ -604,6 +659,9 @@ export async function deleteTask(taskId: string) {
 
   // Delete junction rows (CASCADE may handle this, but be explicit)
   await supabase.from("task_tags").delete().eq("task_id", taskId);
+
+  // Remove the Google Calendar mirror (best-effort)
+  await deleteTaskFromGoogleCalendar(user.id, (task?.google_event_id as string) || null);
 
   // Fire audit asynchronously (never blocks the response)
   logAudit({

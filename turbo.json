@@ -59,7 +59,8 @@
         "UPSTASH_REDIS_REST_TOKEN",
         "GITHUB_PAT",
         "GITHUB_MARKETING_REPO_OWNER",
-        "GITHUB_MARKETING_REPO_NAME"
+        "GITHUB_MARKETING_REPO_NAME",
+        "CRON_SECRET"
       ]
     },
     "lint": {
@@ -78,7 +79,8 @@
         "UPSTASH_REDIS_REST_TOKEN",
         "GITHUB_PAT",
         "GITHUB_MARKETING_REPO_OWNER",
-        "GITHUB_MARKETING_REPO_NAME"
+        "GITHUB_MARKETING_REPO_NAME",
+        "CRON_SECRET"
       ]
     },
     "check-types": {
@@ -130,7 +132,8 @@
         "UPSTASH_REDIS_REST_TOKEN",
         "GITHUB_PAT",
         "GITHUB_MARKETING_REPO_OWNER",
-        "GITHUB_MARKETING_REPO_NAME"
+        "GITHUB_MARKETING_REPO_NAME",
+        "CRON_SECRET"
       ]
     }
   }
