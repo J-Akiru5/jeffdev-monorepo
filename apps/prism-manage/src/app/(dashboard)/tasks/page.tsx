@@ -476,7 +476,7 @@ function TasksContent() {
       {/* Toolbar: search, filters, views, view toggle */}
       <div className="mb-5 flex flex-wrap items-center gap-2">
         <div className="relative min-w-[200px] flex-1">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/30" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-white/40" />
           <input
             type="text"
             value={searchQuery}
@@ -567,7 +567,7 @@ function TasksContent() {
                     ))}
                   </ul>
                 ) : (
-                  <p className="px-2 py-1.5 text-xs text-white/30">
+                  <p className="px-2 py-1.5 text-xs text-white/40">
                     No saved views yet.
                   </p>
                 )}

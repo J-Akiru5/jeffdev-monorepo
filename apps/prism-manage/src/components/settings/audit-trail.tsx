@@ -226,7 +226,7 @@ export function AuditTrailSection() {
               <p className="mt-1 text-sm text-white/40">
                 Recent actions and changes across the workspace
                 {total > 0 && (
-                  <span className="ml-2 text-xs text-white/30">
+                  <span className="ml-2 text-xs text-white/40">
                     ({total} total entries)
                   </span>
                 )}
@@ -244,8 +244,8 @@ export function AuditTrailSection() {
 
           {loading && logs.length === 0 ? (
             <div className="mt-6 flex items-center justify-center py-12">
-              <Loader2 className="h-5 w-5 animate-spin text-white/30" />
-              <span className="ml-2 text-sm text-white/30">Loading audit trail…</span>
+              <Loader2 className="h-5 w-5 animate-spin text-white/40" />
+              <span className="ml-2 text-sm text-white/40">Loading audit trail…</span>
             </div>
           ) : error ? (
             <div className="mt-6 flex items-center gap-3 rounded-lg border border-red-500/20 bg-red-500/5 p-4">
@@ -262,7 +262,7 @@ export function AuditTrailSection() {
             <div className="mt-6 rounded-lg border border-glass-10 bg-white/[0.02] p-8 text-center">
               <History className="mx-auto h-8 w-8 text-white/20" />
               <p className="mt-3 text-sm text-white/40">No audit logs yet.</p>
-              <p className="mt-1 text-xs text-white/30">
+              <p className="mt-1 text-xs text-white/40">
                 Actions like creating tasks, managing members, and toggling modes will appear here.
               </p>
             </div>
@@ -293,7 +293,7 @@ export function AuditTrailSection() {
                           transform: `translateY(${virtualRow.start}px)`,
                         }}
                       >
-                        <h3 className="text-xs font-semibold uppercase tracking-wider text-white/30 px-3 py-2">
+                        <h3 className="text-xs font-semibold uppercase tracking-wider text-white/40 px-3 py-2">
                           {item.label}
                         </h3>
                       </div>
@@ -358,7 +358,7 @@ export function AuditTrailSection() {
                       {/* Timestamp */}
                       <time
                         dateTime={log.createdAt}
-                        className="flex-shrink-0 text-xs text-white/30 group-hover:text-white/50 transition-colors"
+                        className="flex-shrink-0 text-xs text-white/40 group-hover:text-white/50 transition-colors"
                         title={new Date(log.createdAt).toLocaleString()}
                       >
                         {formatRelativeTime(log.createdAt)}

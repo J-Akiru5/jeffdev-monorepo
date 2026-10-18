@@ -27,7 +27,7 @@ export default async function MarketingSettingsPage() {
             phases, KPIs, team members, and 47 initial tasks covering the
             full 6-month GTM plan.
           </p>
-          <div className="text-xs text-white/30 mb-4 space-y-1">
+          <div className="text-xs text-white/40 mb-4 space-y-1">
             <p>
               Phases: Foundation, Authority Building, Launch, Ongoing
             </p>
@@ -85,15 +85,15 @@ export default async function MarketingSettingsPage() {
           <div className="space-y-2 font-mono text-xs">
             <div className="flex items-center justify-between p-2 bg-glass-05 rounded">
               <span className="text-white/60">GITHUB_MARKETING_REPO_OWNER</span>
-              <span className="text-white/30">e.g., J-Akiru5</span>
+              <span className="text-white/40">e.g., J-Akiru5</span>
             </div>
             <div className="flex items-center justify-between p-2 bg-glass-05 rounded">
               <span className="text-white/60">GITHUB_MARKETING_REPO_NAME</span>
-              <span className="text-white/30">e.g., jeffdev-monorepo</span>
+              <span className="text-white/40">e.g., jeffdev-monorepo</span>
             </div>
             <div className="flex items-center justify-between p-2 bg-glass-05 rounded">
               <span className="text-white/60">GITHUB_PAT</span>
-              <span className="text-white/30">Personal Access Token (fine-grained)</span>
+              <span className="text-white/40">Personal Access Token (fine-grained)</span>
             </div>
           </div>
         </div>

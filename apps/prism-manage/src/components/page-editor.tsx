@@ -131,7 +131,7 @@ export function PageEditor({ pageId }: PageEditorProps) {
       />
 
       {/* Meta */}
-      <div className="mt-2 flex items-center gap-4 text-xs text-white/30">
+      <div className="mt-2 flex items-center gap-4 text-xs text-white/40">
         <span>
           Last edited{" "}
           {new Date(page.updated_at).toLocaleDateString("en-US", {

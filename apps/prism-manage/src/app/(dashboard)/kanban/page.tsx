@@ -410,7 +410,7 @@ export default function KanbanPage() {
                 <h2 className="text-sm font-semibold text-white">
                   {column.title}
                 </h2>
-                <span className="ml-auto font-mono text-xs text-white/30">
+                <span className="ml-auto font-mono text-xs text-white/40">
                   {columnTasks.length}
                 </span>
               </div>
@@ -433,7 +433,7 @@ export default function KanbanPage() {
                 {/* Add Task Button */}
                 <button
                   onClick={() => handleAddTask(column.id)}
-                  className="flex w-full items-center gap-2 rounded-lg border border-dashed border-border p-3 text-sm text-white/30 transition-colors hover:border-border-active hover:text-white/50"
+                  className="flex w-full items-center gap-2 rounded-lg border border-dashed border-border p-3 text-sm text-white/40 transition-colors hover:border-border-active hover:text-white/50"
                 >
                   <Plus className="h-4 w-4" />
                   Add task
@@ -464,7 +464,7 @@ export default function KanbanPage() {
                 <h2 className="text-sm font-semibold text-white">
                   {column.title}
                 </h2>
-                <span className="ml-auto font-mono text-xs text-white/30">
+                <span className="ml-auto font-mono text-xs text-white/40">
                   {columnTasks.length}
                 </span>
               </div>
@@ -487,7 +487,7 @@ export default function KanbanPage() {
                 {/* Add Task Button */}
                 <button
                   onClick={() => handleAddTask(column.id)}
-                  className="flex w-full items-center gap-2 rounded-lg border border-dashed border-border p-3 text-sm text-white/30 transition-colors hover:border-border-active hover:text-white/50"
+                  className="flex w-full items-center gap-2 rounded-lg border border-dashed border-border p-3 text-sm text-white/40 transition-colors hover:border-border-active hover:text-white/50"
                 >
                   <Plus className="h-4 w-4" />
                   Add task

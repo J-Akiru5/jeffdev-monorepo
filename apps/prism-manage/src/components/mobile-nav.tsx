@@ -204,7 +204,7 @@ export function MobileNav() {
               {/* Quick Filters — Focus mode only */}
               {manageMode === "focus" && (
                 <div className="mb-6">
-                  <h3 className="mb-3 px-2 font-mono text-xs uppercase tracking-wider text-white/30">
+                  <h3 className="mb-3 px-2 font-mono text-xs uppercase tracking-wider text-white/40">
                     Quick Access
                   </h3>
                   <div className="grid grid-cols-2 gap-3">
@@ -233,7 +233,7 @@ export function MobileNav() {
               {(isPersonal || !activeWorkspace) && (
                 <div className="mb-6">
                   <div className="mb-3 flex items-center justify-between px-2">
-                    <h3 className="font-mono text-xs uppercase tracking-wider text-white/30">
+                    <h3 className="font-mono text-xs uppercase tracking-wider text-white/40">
                       {isPersonal ? "Your Lists" : "Lists"}
                     </h3>
                     <button className="rounded-lg p-2 text-cyan-400 hover:bg-cyan-400/10">
@@ -242,7 +242,7 @@ export function MobileNav() {
                   </div>
                   <div className="space-y-2">
                     {projects.length === 0 ? (
-                      <p className="px-2 py-2 text-xs text-white/30">
+                      <p className="px-2 py-2 text-xs text-white/40">
                         No lists yet
                       </p>
                     ) : (
@@ -276,7 +276,7 @@ export function MobileNav() {
               {(operationsAuthorized || bmcAuthorized) && (
                 <div className="mb-6">
                   <div className="mb-3 flex items-center justify-between px-2">
-                    <h3 className="font-mono text-xs uppercase tracking-wider text-white/30">
+                    <h3 className="font-mono text-xs uppercase tracking-wider text-white/40">
                       Operations
                     </h3>
                   </div>
@@ -309,7 +309,7 @@ export function MobileNav() {
               {isSyntaxureLabs && departments.length > 0 && (
                 <div className="mb-6">
                   <div className="mb-3 flex items-center justify-between px-2">
-                    <h3 className="font-mono text-xs uppercase tracking-wider text-white/30">
+                    <h3 className="font-mono text-xs uppercase tracking-wider text-white/40">
                       Departments
                     </h3>
                   </div>
@@ -343,7 +343,7 @@ export function MobileNav() {
               {!isPersonal && !isSyntaxureLabs && projects.length > 0 && (
                 <div className="mb-6">
                   <div className="mb-3 flex items-center justify-between px-2">
-                    <h3 className="font-mono text-xs uppercase tracking-wider text-white/30">
+                    <h3 className="font-mono text-xs uppercase tracking-wider text-white/40">
                       Your Lists
                     </h3>
                   </div>

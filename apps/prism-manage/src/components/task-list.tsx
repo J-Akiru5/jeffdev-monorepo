@@ -63,7 +63,7 @@ export const TaskList = memo(function TaskList({
           style={{ backgroundColor: project.color || "var(--color-cyan)" }}
         />
         <h2 className="text-lg font-semibold text-white">{project.name}</h2>
-        <span className="font-mono text-xs text-white/30">
+        <span className="font-mono text-xs text-white/40">
           {incompleteTasks.length}
         </span>
       </div>

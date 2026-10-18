@@ -421,6 +421,7 @@ export function TaskSheet({
                   </button>
                   <button
                     onClick={onClose}
+                    aria-label="Close task details"
                     className="rounded-lg p-2 text-white/40 transition-colors hover:bg-white/[0.04] hover:text-white"
                   >
                     <X className="h-5 w-5" />
@@ -590,7 +591,7 @@ export function TaskSheet({
                           Due Date
                         </label>
                         <div className="relative">
-                          <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+                          <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
                           <input
                             type="date"
                             value={data.dueDate}
@@ -611,7 +612,7 @@ export function TaskSheet({
                           Due Time
                         </label>
                         <div className="relative">
-                          <Clock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+                          <Clock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
                           <input
                             type="time"
                             value={data.dueTime}
@@ -632,7 +633,7 @@ export function TaskSheet({
                           Assignee
                         </label>
                         <div className="relative">
-                          <User className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-white/30" />
+                          <User className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-white/40" />
                           <select
                             value={data.assignedTo}
                             onChange={(e) =>
@@ -659,7 +660,7 @@ export function TaskSheet({
                           Tags
                         </label>
                         <div className="relative">
-                          <Tag className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+                          <Tag className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
                           <input
                             type="text"
                             value={tagInput}
@@ -685,7 +686,7 @@ export function TaskSheet({
                                 {tag}
                                 <button
                                   onClick={() => removeTag(tag)}
-                                  className="ml-0.5 text-white/30 hover:text-white/50"
+                                  className="ml-0.5 text-white/40 hover:text-white/50"
                                 >
                                   <X className="h-3 w-3" />
                                 </button>
@@ -753,7 +754,7 @@ export function TaskSheet({
                         </label>
                         <div className="space-y-3">
                           {comments.length === 0 && (
-                            <p className="text-xs text-white/30">
+                            <p className="text-xs text-white/40">
                               No comments yet — start the discussion.
                             </p>
                           )}
@@ -831,7 +832,7 @@ export function TaskSheet({
 
               {/* ── Footer ── */}
               <div className="border-t border-border px-6 py-3">
-                <p className="text-xs text-white/30">
+                <p className="text-xs text-white/40">
                   <kbd className="rounded border border-border bg-glass-04 px-1.5 py-0.5 font-mono text-[11px]">
                     ⌘⏎
                   </kbd>{" "}

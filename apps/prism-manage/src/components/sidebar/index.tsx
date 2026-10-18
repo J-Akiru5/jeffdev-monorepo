@@ -202,6 +202,7 @@ export function Sidebar() {
       <div className="flex items-center justify-end border-b border-white/[0.06] px-4 py-2">
         <button
           onClick={() => setCollapsed(!collapsed)}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           className="rounded-md p-1.5 text-white/40 transition-colors hover:bg-white/[0.04] hover:text-white/70"
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
@@ -305,7 +306,7 @@ export function Sidebar() {
               !collapsed ? (
                 <button
                   onClick={() => setShowNewListInput(true)}
-                  className="rounded p-1 text-white/30 transition-colors hover:bg-white/[0.04] hover:text-white/60"
+                  className="rounded p-1 text-white/40 transition-colors hover:bg-white/[0.04] hover:text-white/60"
                   title="Create new list"
                 >
                   <Plus className="h-3 w-3" />
@@ -315,7 +316,7 @@ export function Sidebar() {
           >
             {renderProjectLists()}
             {projects.length === 0 && !collapsed && (
-              <p className="px-3 py-2 text-xs text-white/30">No lists yet</p>
+              <p className="px-3 py-2 text-xs text-white/40">No lists yet</p>
             )}
           </SidebarSection>
         )}
@@ -340,7 +341,7 @@ export function Sidebar() {
               !collapsed ? (
                 <button
                   onClick={() => setShowNewListInput(true)}
-                  className="rounded p-1 text-white/30 transition-colors hover:bg-white/[0.04] hover:text-white/60"
+                  className="rounded p-1 text-white/40 transition-colors hover:bg-white/[0.04] hover:text-white/60"
                   title="Create new list"
                 >
                   <Plus className="h-3 w-3" />

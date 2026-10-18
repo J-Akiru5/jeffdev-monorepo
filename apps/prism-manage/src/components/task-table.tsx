@@ -45,7 +45,7 @@ export function TaskTable({ tasks, projects, members, onTaskClick }: TaskTablePr
     <div className="overflow-x-auto rounded-xl border border-border">
       <table className="w-full text-left text-sm">
         <thead>
-          <tr className="text-[11px] uppercase tracking-wider text-white/30">
+          <tr className="text-[11px] uppercase tracking-wider text-white/40">
             <th className="px-4 py-3 font-medium">Title</th>
             <th className="px-4 py-3 font-medium">Status</th>
             <th className="px-4 py-3 font-medium">Priority</th>

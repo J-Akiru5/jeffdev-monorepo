@@ -371,7 +371,7 @@ export function SignInForm() {
               Your Role
             </label>
             <div className="relative">
-              <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 pointer-events-none" />
+              <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40 pointer-events-none" />
               <select
                 value={oAuthPosition}
                 onChange={(e) => setOAuthPosition(e.target.value)}
@@ -388,7 +388,7 @@ export function SignInForm() {
                   </option>
                 ))}
               </select>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/30">
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">
                 <svg
                   className="h-4 w-4"
                   fill="none"
@@ -529,7 +529,7 @@ export function SignInForm() {
               <div className="w-full border-t border-white/5" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-[#0a0a0a]/85 px-3 text-white/30 font-mono uppercase tracking-wider">
+              <span className="bg-[#0a0a0a]/85 px-3 text-white/40 font-mono uppercase tracking-wider">
                 Or continue with email
               </span>
             </div>
@@ -550,7 +550,7 @@ export function SignInForm() {
                   <>
                     {/* Full Name */}
                     <div className="relative">
-                      <User className="absolute left-3 top-[34px] h-4 w-4 text-white/30 pointer-events-none" />
+                      <User className="absolute left-3 top-[34px] h-4 w-4 text-white/40 pointer-events-none" />
                       <Input
                         label="Full Name"
                         type="text"
@@ -566,7 +566,7 @@ export function SignInForm() {
 
                     {/* Position */}
                     <div className="relative">
-                      <Briefcase className="absolute left-3 top-[34px] h-4 w-4 text-white/30 pointer-events-none" />
+                      <Briefcase className="absolute left-3 top-[34px] h-4 w-4 text-white/40 pointer-events-none" />
                       <div className="space-y-1.5">
                         <label
                           htmlFor="position-select"
@@ -597,7 +597,7 @@ export function SignInForm() {
                               </option>
                             ))}
                           </select>
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/30">
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">
                             <svg
                               className="h-4 w-4"
                               fill="none"
@@ -625,7 +625,7 @@ export function SignInForm() {
 
                 {/* Email */}
                 <div className="relative">
-                  <Mail className="absolute left-3 top-[34px] h-4 w-4 text-white/30 pointer-events-none" />
+                  <Mail className="absolute left-3 top-[34px] h-4 w-4 text-white/40 pointer-events-none" />
                   <Input
                     label="Email Address"
                     type="email"
@@ -645,7 +645,7 @@ export function SignInForm() {
                     Password
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30 pointer-events-none z-10" />
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40 pointer-events-none z-10" />
                     <input
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
@@ -662,7 +662,7 @@ export function SignInForm() {
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       aria-label={showPassword ? "Hide password" : "Show password"}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors z-10"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60 transition-colors z-10"
                     >
                       {showPassword ? (
                         <EyeOff className="h-4 w-4" />

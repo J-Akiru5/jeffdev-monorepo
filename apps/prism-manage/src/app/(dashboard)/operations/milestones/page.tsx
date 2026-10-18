@@ -263,7 +263,7 @@ function MilestonesManager() {
       {/* List */}
       <div className="space-y-2">
         {milestones.length === 0 && (
-          <p className="py-8 text-center text-sm text-white/30">
+          <p className="py-8 text-center text-sm text-white/40">
             No milestones yet — add the first one above.
           </p>
         )}
@@ -283,7 +283,7 @@ function MilestonesManager() {
                   {STATUS_OPTIONS.find((o) => o.value === m.status)?.label || m.status}
                 </span>
               </div>
-              <p className="mt-0.5 text-[10px] font-mono text-white/30">
+              <p className="mt-0.5 text-[10px] font-mono text-white/40">
                 {m.dueDate ? `Due ${m.dueDate}` : "No due date"} ·{" "}
                 {departmentName(m.departmentId)}
                 {m.deliverables.length > 0
@@ -293,14 +293,14 @@ function MilestonesManager() {
             </div>
             <button
               onClick={() => startEdit(m)}
-              className="rounded p-1.5 text-white/30 transition-colors hover:text-white/70"
+              className="rounded p-1.5 text-white/40 transition-colors hover:text-white/70"
               title="Edit"
             >
               <Pencil className="h-3.5 w-3.5" />
             </button>
             <button
               onClick={() => handleDelete(m)}
-              className="rounded p-1.5 text-white/30 transition-colors hover:text-red-400"
+              className="rounded p-1.5 text-white/40 transition-colors hover:text-red-400"
               title="Delete"
             >
               <Trash2 className="h-3.5 w-3.5" />

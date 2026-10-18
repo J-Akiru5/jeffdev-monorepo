@@ -77,6 +77,7 @@ export const TaskItem = memo(function TaskItem({
       {/* Checkbox */}
       <button
         onClick={() => onToggleComplete?.(task.id)}
+        aria-label={isCompleted ? "Mark not complete" : "Mark complete"}
         className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all ${
           isCompleted
             ? "border-cyan-500 bg-cyan-500"
@@ -155,7 +156,7 @@ export const TaskItem = memo(function TaskItem({
 
           {/* Description preview */}
           {task.description && !task.dueDate && (
-            <span className="max-w-[150px] truncate text-white/30">
+            <span className="max-w-[150px] truncate text-white/40">
               {task.description}
             </span>
           )}
@@ -171,7 +172,7 @@ export const TaskItem = memo(function TaskItem({
           className={`rounded p-1 transition-colors ${
             task.isStarred
               ? "text-yellow-400 hover:text-yellow-300"
-              : "text-white/30 hover:text-yellow-400"
+              : "text-white/40 hover:text-yellow-400"
           }`}
         >
           <Star
@@ -198,7 +199,7 @@ export const TaskItem = memo(function TaskItem({
               setShowMenu(!showMenu);
             }}
             aria-label="Task actions"
-            className="rounded p-1 text-white/30 transition-colors hover:text-white"
+            className="rounded p-1 text-white/40 transition-colors hover:text-white"
           >
             <MoreVertical className="h-4 w-4" />
           </button>

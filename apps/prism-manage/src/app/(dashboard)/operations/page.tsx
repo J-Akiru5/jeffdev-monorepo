@@ -231,7 +231,7 @@ function OperationsHub() {
             Upcoming Milestones
           </h2>
           {upcoming.length === 0 ? (
-            <p className="text-xs text-white/30">
+            <p className="text-xs text-white/40">
               No open milestones — add one in Manage Milestones.
             </p>
           ) : (
@@ -243,7 +243,7 @@ function OperationsHub() {
                 >
                   <div className="min-w-0">
                     <p className="truncate text-sm text-white/80">{m.title}</p>
-                    <p className="text-[10px] font-mono text-white/30">
+                    <p className="text-[10px] font-mono text-white/40">
                       {m.dueDate ? `Due ${m.dueDate}` : "No due date"}
                     </p>
                   </div>
@@ -277,7 +277,7 @@ function OperationsHub() {
             Resource Allocation
           </h2>
           {allocation.rows.length === 0 ? (
-            <p className="text-xs text-white/30">
+            <p className="text-xs text-white/40">
               No department-assigned tasks yet.
             </p>
           ) : (
@@ -306,7 +306,7 @@ function OperationsHub() {
             Infrastructure Costs
           </h2>
           {costByCategory.length === 0 ? (
-            <p className="text-xs text-white/30">
+            <p className="text-xs text-white/40">
               No cost entries yet — track them in Manage Milestones&apos;
               sibling table via the API, or add via the Operations data model.
             </p>
@@ -354,7 +354,7 @@ function StatCard({
       >
         {icon}
       </div>
-      <p className="font-mono text-[10px] uppercase tracking-wider text-white/30">
+      <p className="font-mono text-[10px] uppercase tracking-wider text-white/40">
         {label}
       </p>
       <p className="mt-0.5 text-xl font-semibold text-white">{value}</p>
@@ -365,7 +365,7 @@ function StatCard({
 function Metric({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-lg border border-border bg-glass-04 px-3 py-2">
-      <p className="font-mono text-[10px] uppercase tracking-wider text-white/30">
+      <p className="font-mono text-[10px] uppercase tracking-wider text-white/40">
         {label}
       </p>
       <p className="mt-0.5 text-lg font-semibold text-white">{value}</p>
