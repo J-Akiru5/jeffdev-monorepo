@@ -34,6 +34,24 @@ export default defineConfig({
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
     exclude: ["node_modules", ".next", "e2e"],
     setupFiles: [],
+    coverage: {
+      provider: "v8",
+      reporter: ["text-summary", "text"],
+      exclude: [
+        "src/types/**",
+        "src/**/*.test.ts",
+        "src/**/*.test.tsx",
+        "src/**/__tests__/**",
+      ],
+      // Ratchet floor (H4): slightly below the current baseline so the
+      // number can only go up. Raise these as coverage improves.
+      thresholds: {
+        statements: 75,
+        branches: 60,
+        functions: 70,
+        lines: 78,
+      },
+    },
   },
   resolve: {
     alias: {

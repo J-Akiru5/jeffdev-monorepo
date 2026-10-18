@@ -108,12 +108,15 @@ export async function createPage(input: {
     return { success: false, error: parsed.error?.issues[0]?.message ?? "Invalid input" };
   }
 
-  // Get max sort_order for siblings
-  const { data: siblings } = await supabase
+  // Get max sort_order for siblings (NULL parents need `.is`, not `.eq`)
+  const siblingQuery = supabase
     .from("pages")
     .select("sort_order")
-    .eq("workspace_id", parsed.data.workspace_id)
-    .eq("parent_id", parsed.data.parent_id || null)
+    .eq("workspace_id", parsed.data.workspace_id);
+  const scoped = parsed.data.parent_id
+    ? siblingQuery.eq("parent_id", parsed.data.parent_id)
+    : siblingQuery.is("parent_id", null);
+  const { data: siblings } = await scoped
     .order("sort_order", { ascending: false })
     .limit(1);
 
@@ -160,7 +163,7 @@ export async function updatePage(
 
   const { error } = await supabase
     .from("pages")
-    .update({ ...parsed.data, updated_at: new Date().toISOString() })
+    .update({ ...parsed.data, updated_at: new Date().toISOString() } as never)
     .eq("id", pageId);
 
   if (error) {

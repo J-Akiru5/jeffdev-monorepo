@@ -12,6 +12,7 @@ import { notifyUsers } from "@/lib/notify";
 import { notifySlack, taskUrl } from "@/lib/slack";
 import { pushTaskStatusToGitHub } from "@/app/actions/github-sync";
 import { logger } from "@/lib/log";
+import type { Json } from "@/types/database.types";
 
 async function logAudit(event: {
   action: string;
@@ -27,7 +28,7 @@ async function logAudit(event: {
       action: event.action,
       resource_type: event.resource,
       resource_id: event.resourceId,
-      changes: event.details || null,
+      changes: (event.details ?? null) as Json,
       user_id: user?.id || null,
       created_at: new Date().toISOString(),
     });
@@ -358,7 +359,7 @@ export async function createTask(input: {
 
   const { data: inserted, error } = await supabase
     .from("tasks")
-    .insert(dbRecord)
+    .insert(dbRecord as never)
     .select("id")
     .single();
   if (error) throw error;
@@ -580,7 +581,7 @@ export async function updateTask(
 
   const { data: updated, error } = await supabase
     .from("tasks")
-    .update(updateData)
+    .update(updateData as never)
     .eq("id", taskId)
     .select("id");
 

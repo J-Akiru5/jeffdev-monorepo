@@ -56,8 +56,8 @@ importers:
         specifier: ^21.0.1
         version: 21.0.1
       "@next/bundle-analyzer":
-        specifier: ^15.1.0
-        version: 15.5.18
+        specifier: ^16.4.2
+        version: 16.4.2
       eslint:
         specifier: ^9.39.1
         version: 9.39.2(jiti@2.6.1)
@@ -83,7 +83,7 @@ importers:
         specifier: ^2.9.0
         version: 2.9.16
       typescript:
-        specifier: ^5.9.2
+        specifier: ^5.9.3
         version: 5.9.3
 
   apps/prism-admin:
@@ -137,8 +137,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(react@19.2.3)
       resend:
-        specifier: ^6.6.0
-        version: 6.7.0
+        specifier: ^6.12.4
+        version: 6.12.4
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -274,7 +274,7 @@ importers:
         specifier: ^4.1.18
         version: 4.1.18
       typescript:
-        specifier: ^5.9.2
+        specifier: ^5.9.3
         version: 5.9.3
 
   apps/prism-engine:
@@ -286,7 +286,7 @@ importers:
         specifier: ^0.24.1
         version: 0.24.1
       "@next/bundle-analyzer":
-        specifier: 16.4.2
+        specifier: ^16.4.2
         version: 16.4.2
       "@prism-engine/cli":
         specifier: workspace:*
@@ -401,7 +401,7 @@ importers:
         specifier: ^4.21.0
         version: 4.21.0
       typescript:
-        specifier: ^5.9.2
+        specifier: ^5.9.3
         version: 5.9.3
       vitest:
         specifier: ^4.0.16
@@ -509,6 +509,9 @@ importers:
       "@types/react-dom":
         specifier: ^19.2.2
         version: 19.2.2(@types/react@19.2.8)
+      "@vitest/coverage-v8":
+        specifier: ^4.0.17
+        version: 4.0.17(vitest@4.0.17(@opentelemetry/api@1.9.1)(@types/node@22.19.7)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.9.0))
       eslint:
         specifier: ^9.39.1
         version: 9.39.2(jiti@2.6.1)
@@ -519,7 +522,7 @@ importers:
         specifier: ^4.1.18
         version: 4.1.18
       typescript:
-        specifier: ^5.9.2
+        specifier: ^5.9.3
         version: 5.9.3
       vitest:
         specifier: ^4.0.16
@@ -566,7 +569,7 @@ importers:
         specifier: ^4.21.0
         version: 4.21.0
       typescript:
-        specifier: ^5.9.2
+        specifier: ^5.9.3
         version: 5.9.3
       vitest:
         specifier: ^4.0.16
@@ -602,8 +605,8 @@ importers:
         specifier: ^4.3.2
         version: 4.3.2(react@19.2.3)
       "@supabase/ssr":
-        specifier: ^0.4.1
-        version: 0.4.1(@supabase/supabase-js@2.106.1)
+        specifier: ^0.10.0
+        version: 0.10.3(@supabase/supabase-js@2.106.1)
       "@supabase/supabase-js":
         specifier: ^2.47.0
         version: 2.106.1
@@ -647,8 +650,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(react@19.2.3)
       resend:
-        specifier: ^6.6.0
-        version: 6.7.0
+        specifier: ^6.12.4
+        version: 6.12.4
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -711,7 +714,7 @@ importers:
         specifier: ^4.21.0
         version: 4.21.0
       typescript:
-        specifier: ^5.9.2
+        specifier: ^5.9.3
         version: 5.9.3
       vitest:
         specifier: ^4.0.16
@@ -746,7 +749,7 @@ importers:
         version: 7.8.0
       "@prisma/client":
         specifier: ^7.8.0
-        version: 7.8.0(prisma@7.8.0(@types/react-dom@19.2.2(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3))(typescript@5.9.3)
+        version: 7.8.0(prisma@7.8.0(@types/react-dom@19.2.2(@types/react@19.2.8))(@types/react@19.2.8)(magicast@0.5.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3))(typescript@5.9.3)
       "@supabase/supabase-js":
         specifier: ^2.47.0
         version: 2.106.1
@@ -758,7 +761,7 @@ importers:
         version: 8.21.0
       prisma:
         specifier: ^7.8.0
-        version: 7.8.0(@types/react-dom@19.2.2(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
+        version: 7.8.0(@types/react-dom@19.2.2(@types/react@19.2.8))(@types/react@19.2.8)(magicast@0.5.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
       zod:
         specifier: ^4.2.1
         version: 4.3.5
@@ -779,7 +782,7 @@ importers:
         specifier: ^4.21.0
         version: 4.21.0
       typescript:
-        specifier: ^5.9.2
+        specifier: ^5.9.3
         version: 5.9.3
 
   packages/eslint-config:
@@ -812,7 +815,7 @@ importers:
         specifier: ^16.5.0
         version: 16.5.0
       typescript:
-        specifier: ^5.9.2
+        specifier: ^5.9.3
         version: 5.9.3
       typescript-eslint:
         specifier: ^8.50.0
@@ -846,7 +849,7 @@ importers:
         specifier: ^9.39.1
         version: 9.39.2(jiti@2.6.1)
       typescript:
-        specifier: ^5.9.2
+        specifier: ^5.9.3
         version: 5.9.3
       vitest:
         specifier: ^4.0.16
@@ -999,7 +1002,7 @@ importers:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       typescript:
-        specifier: ^5.9.2
+        specifier: ^5.9.3
         version: 5.9.3
       vitest:
         specifier: ^4.0.16
@@ -1146,10 +1149,24 @@ packages:
       }
     engines: { node: ">=6.9.0" }
 
+  "@babel/helper-string-parser@7.29.7":
+    resolution:
+      {
+        integrity: sha512-Pb5ijPrZ89GDH8223L4UP8i6QApWxs04RbPQJTeWDV0/keR2E36MeKnyr6LYmUUvqRRI+Iv87SuF1W6ErINzYw==,
+      }
+    engines: { node: ">=6.9.0" }
+
   "@babel/helper-validator-identifier@7.28.5":
     resolution:
       {
         integrity: sha512-qSs4ifwzKJSV39ucNjsvc6WVHs6b7S03sOh2OcHF9UHfVPqWWALUsNUVzhSBiItjRZoLHx7nIarVjqKVusUZ1Q==,
+      }
+    engines: { node: ">=6.9.0" }
+
+  "@babel/helper-validator-identifier@7.29.7":
+    resolution:
+      {
+        integrity: sha512-qehxGkRj55h/ff8EMaJ+cYhyaKlHIxqYDn682wQD7RNp9UujOQsHog2uS0r2vzr4pW+sXf90NeeayjcNaX3fFg==,
       }
     engines: { node: ">=6.9.0" }
 
@@ -1173,6 +1190,14 @@ packages:
         integrity: sha512-TeR9zWR18BvbfPmGbLampPMW+uW1NZnJlRuuHso8i87QZNq2JRF9i6RgxRqtEq+wQGsS19NNTWr2duhnE49mfQ==,
       }
     engines: { node: ">=6.0.0" }
+
+  "@babel/parser@7.29.9":
+    resolution:
+      {
+        integrity: sha512-CjXrNHTnvqBVqHgdBysY3vk2T8tpJHb5/RMeHJBTyVa9xgugCB0CJTx/3oO8RV2QRQP391RWpB7D6hLjm8V9uA==,
+      }
+    engines: { node: ">=6.0.0" }
+    hasBin: true
 
   "@babel/plugin-transform-react-jsx-self@7.27.1":
     resolution:
@@ -1219,6 +1244,20 @@ packages:
         integrity: sha512-0ZrskXVEHSWIqZM/sQZ4EV3jZJXRkio/WCxaqKZP1g//CEWEPSfeZFcms4XeKBCHU0ZKnIkdJeU/kF+eRp5lBg==,
       }
     engines: { node: ">=6.9.0" }
+
+  "@babel/types@7.29.8":
+    resolution:
+      {
+        integrity: sha512-Vj1jF3cPfxg7OAfoI7QnVKLoILlm2JF9pnVHrX8qx7AHMiYWT+NDAA7jChlNgRS4WTLc/fD1lXLmPixluj+3Gg==,
+      }
+    engines: { node: ">=6.9.0" }
+
+  "@bcoe/v8-coverage@1.0.2":
+    resolution:
+      {
+        integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==,
+      }
+    engines: { node: ">=18" }
 
   "@braintree/sanitize-url@7.1.1":
     resolution:
@@ -2710,12 +2749,6 @@ packages:
     resolution:
       {
         integrity: sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ==,
-      }
-
-  "@next/bundle-analyzer@15.5.18":
-    resolution:
-      {
-        integrity: sha512-v5/UNFwYbBlRQg/Bt+wU65XuxCxPu1AeCOI6s4s6Cludsj7FdVO9E9uzr7GIj8OykSrYtGuEQAUX0Ulje8W2yw==,
       }
 
   "@next/bundle-analyzer@16.4.2":
@@ -4382,14 +4415,6 @@ packages:
     peerDependencies:
       "@supabase/supabase-js": ^2.105.3
 
-  "@supabase/ssr@0.4.1":
-    resolution:
-      {
-        integrity: sha512-000i7y4ITXjXU0T1JytZYU33VbUNklX9YN47hCweaLKsTBAEigJJJCeq3G+/IiwEggBt58Vu0KQ3UGXON7OmDQ==,
-      }
-    peerDependencies:
-      "@supabase/supabase-js": ^2.43.4
-
   "@supabase/storage-js@2.106.1":
     resolution:
       {
@@ -5571,6 +5596,18 @@ packages:
     peerDependencies:
       vite: ^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
 
+  "@vitest/coverage-v8@4.0.17":
+    resolution:
+      {
+        integrity: sha512-/6zU2FLGg0jsd+ePZcwHRy3+WpNTBBhDY56P4JTRqUN/Dp6CvOEa9HrikcQ4KfV2b2kAHUFB4dl1SuocWXSFEw==,
+      }
+    peerDependencies:
+      "@vitest/browser": 4.0.17
+      vitest: 4.0.17
+    peerDependenciesMeta:
+      "@vitest/browser":
+        optional: true
+
   "@vitest/expect@4.0.17":
     resolution:
       {
@@ -6025,6 +6062,12 @@ packages:
     resolution:
       {
         integrity: sha512-OH/2E5Fg20h2aPrbe+QL8JZQFko0YZaF+j4mnQ7BGhfavO7OpSLa8a0y9sBwomHdSbkhTS8TQNayBfnW5DwbvQ==,
+      }
+
+  ast-v8-to-istanbul@0.3.12:
+    resolution:
+      {
+        integrity: sha512-BRRC8VRZY2R4Z4lFIL35MwNXmwVqBityvOIwETtsCSwvjl0IdgFsy9NhdaA6j74nUdtJJlIypeRhpDam19Wq3g==,
       }
 
   astring@1.9.0:
@@ -6669,13 +6712,6 @@ packages:
         integrity: sha512-D76uU73ulSXrD1UXF4KE2TMxVVwhsnCgfAyTg9k8P6KGZjlXKrOLe4dJQKI3Bxi5wjesZoFXJWElNWBjPZMbhg==,
       }
     engines: { node: ">=6.6.0" }
-
-  cookie@0.6.0:
-    resolution:
-      {
-        integrity: sha512-U71cyTamuh1CRNCfpGY6to28lxvNwPG4Guz/EVjgf3Jmzv0vlDp1atT9eS5dDjMYHucpHbWns6Lwf3BKz6svdw==,
-      }
-    engines: { node: ">= 0.6" }
 
   cookie@0.7.2:
     resolution:
@@ -9492,6 +9528,27 @@ packages:
         integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==,
       }
 
+  istanbul-lib-coverage@3.2.2:
+    resolution:
+      {
+        integrity: sha512-O8dpsF+r0WV/8MNRKfnmrtCWhuKjxrq2w+jpzBL5UZKTi2LeVWnWOmWRxFlesJONmc+wLAGvKQZEOanko0LFTg==,
+      }
+    engines: { node: ">=8" }
+
+  istanbul-lib-report@3.0.1:
+    resolution:
+      {
+        integrity: sha512-GCfE1mtsHGOELCU8e/Z7YWzpmybrx/+dSTfLrvY8qRmaY6zXTKWn6WQIjaAFw069icm6GVMNkgu0NzI4iPZUNw==,
+      }
+    engines: { node: ">=10" }
+
+  istanbul-reports@3.2.0:
+    resolution:
+      {
+        integrity: sha512-HGYWWS/ehqTV3xN10i23tkPkpH46MLCIMFNCaaKNavAXTF1RkqxawEPtnjnGZ6XKSInBKkiOA5BKS+aZiY3AvA==,
+      }
+    engines: { node: ">=8" }
+
   iterator.prototype@1.1.5:
     resolution:
       {
@@ -9528,6 +9585,12 @@ packages:
     resolution:
       {
         integrity: sha512-0TpaTfihd4QMNwrz/ob2Bp7X04yuxJkjRGi4aKmOqwhov54i6u79oCv7T+C7lo70MKH6BesI3vscD1yb/yzKXQ==,
+      }
+
+  js-tokens@10.0.0:
+    resolution:
+      {
+        integrity: sha512-lM/UBzQmfJRo9ABXbPWemivdCW8V2G8FHaHdypQaIy523snUjog0W71ayWXTjiR+ixeMyVHN2XcpnTd/liPg/Q==,
       }
 
   js-tokens@4.0.0:
@@ -9990,6 +10053,19 @@ packages:
       {
         integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==,
       }
+
+  magicast@0.5.5:
+    resolution:
+      {
+        integrity: sha512-UicdXN8zQ3JHlxVq+28afMXPr1z7WNY6+7EJnzTdQWkTAlMLF5fNCCKxJHBQwGaNGR11581EiQmQzx73+MvszA==,
+      }
+
+  make-dir@4.0.0:
+    resolution:
+      {
+        integrity: sha512-hXdUTZYIVOt1Ex//jAQi+wTZZpUpwBj/0QsOzqegb3rGMMeJiSEu5xLHnYfBrRV4RH2+OCSOO95Is/7x1WJ4bw==,
+      }
+    engines: { node: ">=10" }
 
   make-error@1.3.6:
     resolution:
@@ -11967,18 +12043,6 @@ packages:
       "@react-email/render":
         optional: true
 
-  resend@6.7.0:
-    resolution:
-      {
-        integrity: sha512-2ZV0NDZsh4Gh+Nd1hvluZIitmGJ59O4+OxMufymG6Y8uz1Jgt2uS1seSENnkIUlmwg7/dwmfIJC9rAufByz7wA==,
-      }
-    engines: { node: ">=20" }
-    peerDependencies:
-      "@react-email/render": "*"
-    peerDependenciesMeta:
-      "@react-email/render":
-        optional: true
-
   resolve-from@4.0.0:
     resolution:
       {
@@ -12776,12 +12840,6 @@ packages:
         integrity: sha512-djbJ/vZKZO+gPoSDThGNpKDO+o+bAeA4XQKovvkNCqnIS2t+S4qnLAGQhyyrulhCFRl1WWzAp0wUDV8PpTVU3g==,
       }
 
-  svix@1.84.1:
-    resolution:
-      {
-        integrity: sha512-K8DPPSZaW/XqXiz1kEyzSHYgmGLnhB43nQCMeKjWGCUpLIpAMMM8kx3rVVOSm6Bo6EHyK1RQLPT4R06skM/MlQ==,
-      }
-
   symbol-tree@3.2.4:
     resolution:
       {
@@ -12918,6 +12976,13 @@ packages:
     resolution:
       {
         integrity: sha512-PSkbLUoxOFRzJYjjxHJt9xro7D+iilgMX/C9lawzVuYiIdcihh9DXmVibBe8lmcFrRi/VzlPjBxbN7rH24q8/Q==,
+      }
+    engines: { node: ">=14.0.0" }
+
+  tinyrainbow@3.2.0:
+    resolution:
+      {
+        integrity: sha512-LgO3D9yZJjApUiuUfl9iFAwrtaX4+lok3wJIqttGoKCHlWUqHqbQpnxCf82L8FjgKsh4iGo78hqJwgL8F6To2A==,
       }
     engines: { node: ">=14.0.0" }
 
@@ -13375,12 +13440,6 @@ packages:
     resolution:
       {
         integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==,
-      }
-
-  uuid@10.0.0:
-    resolution:
-      {
-        integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==,
       }
 
   uuid@11.1.0:
@@ -14072,7 +14131,11 @@ snapshots:
 
   "@babel/helper-string-parser@7.27.1": {}
 
+  "@babel/helper-string-parser@7.29.7": {}
+
   "@babel/helper-validator-identifier@7.28.5": {}
+
+  "@babel/helper-validator-identifier@7.29.7": {}
 
   "@babel/helper-validator-option@7.27.1": {}
 
@@ -14084,6 +14147,10 @@ snapshots:
   "@babel/parser@7.28.6":
     dependencies:
       "@babel/types": 7.28.6
+
+  "@babel/parser@7.29.9":
+    dependencies:
+      "@babel/types": 7.29.8
 
   "@babel/plugin-transform-react-jsx-self@7.27.1(@babel/core@7.28.6)":
     dependencies:
@@ -14119,6 +14186,13 @@ snapshots:
     dependencies:
       "@babel/helper-string-parser": 7.27.1
       "@babel/helper-validator-identifier": 7.28.5
+
+  "@babel/types@7.29.8":
+    dependencies:
+      "@babel/helper-string-parser": 7.29.7
+      "@babel/helper-validator-identifier": 7.29.7
+
+  "@bcoe/v8-coverage@1.0.2": {}
 
   "@braintree/sanitize-url@7.1.1": {}
 
@@ -15147,13 +15221,6 @@ snapshots:
       "@tybys/wasm-util": 0.10.1
     optional: true
 
-  "@next/bundle-analyzer@15.5.18":
-    dependencies:
-      webpack-bundle-analyzer: 4.10.1
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-
   "@next/bundle-analyzer@16.4.2":
     dependencies:
       webpack-bundle-analyzer: 4.10.1
@@ -15559,16 +15626,16 @@ snapshots:
 
   "@prisma/client-runtime-utils@7.8.0": {}
 
-  "@prisma/client@7.8.0(prisma@7.8.0(@types/react-dom@19.2.2(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3))(typescript@5.9.3)":
+  "@prisma/client@7.8.0(prisma@7.8.0(@types/react-dom@19.2.2(@types/react@19.2.8))(@types/react@19.2.8)(magicast@0.5.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3))(typescript@5.9.3)":
     dependencies:
       "@prisma/client-runtime-utils": 7.8.0
     optionalDependencies:
-      prisma: 7.8.0(@types/react-dom@19.2.2(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
+      prisma: 7.8.0(@types/react-dom@19.2.2(@types/react@19.2.8))(@types/react@19.2.8)(magicast@0.5.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
       typescript: 5.9.3
 
-  "@prisma/config@7.8.0":
+  "@prisma/config@7.8.0(magicast@0.5.5)":
     dependencies:
-      c12: 3.3.4
+      c12: 3.3.4(magicast@0.5.5)
       deepmerge-ts: 7.1.5
       effect: 3.20.0
       empathic: 2.0.0
@@ -16300,13 +16367,6 @@ snapshots:
     dependencies:
       "@supabase/supabase-js": 2.106.1
       cookie: 1.1.1
-
-  "@supabase/ssr@0.4.1(@supabase/supabase-js@2.106.1)":
-    dependencies:
-      "@supabase/supabase-js": 2.106.1
-      cookie: 0.6.0
-    optionalDependencies:
-      "@rollup/rollup-linux-x64-gnu": 4.60.4
 
   "@supabase/storage-js@2.106.1":
     dependencies:
@@ -17042,6 +17102,20 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  "@vitest/coverage-v8@4.0.17(vitest@4.0.17(@opentelemetry/api@1.9.1)(@types/node@22.19.7)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.9.0))":
+    dependencies:
+      "@bcoe/v8-coverage": 1.0.2
+      "@vitest/utils": 4.0.17
+      ast-v8-to-istanbul: 0.3.12
+      istanbul-lib-coverage: 3.2.2
+      istanbul-lib-report: 3.0.1
+      istanbul-reports: 3.2.0
+      magicast: 0.5.5
+      obug: 2.1.1
+      std-env: 3.10.0
+      tinyrainbow: 3.2.0
+      vitest: 4.0.17(@opentelemetry/api@1.9.1)(@types/node@22.19.7)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.9.0)
+
   "@vitest/expect@4.0.17":
     dependencies:
       "@standard-schema/spec": 1.1.0
@@ -17079,7 +17153,7 @@ snapshots:
   "@vitest/utils@4.0.17":
     dependencies:
       "@vitest/pretty-format": 4.0.17
-      tinyrainbow: 3.0.3
+      tinyrainbow: 3.2.0
 
   "@webassemblyjs/ast@1.14.1":
     dependencies:
@@ -17344,6 +17418,12 @@ snapshots:
 
   ast-types-flow@0.0.8: {}
 
+  ast-v8-to-istanbul@0.3.12:
+    dependencies:
+      "@jridgewell/trace-mapping": 0.3.31
+      estree-walker: 3.0.3
+      js-tokens: 10.0.0
+
   astring@1.9.0: {}
 
   async-function@1.0.0: {}
@@ -17471,7 +17551,7 @@ snapshots:
 
   bytes@3.1.2: {}
 
-  c12@3.3.4:
+  c12@3.3.4(magicast@0.5.5):
     dependencies:
       chokidar: 5.0.0
       confbox: 0.2.4
@@ -17485,6 +17565,8 @@ snapshots:
       perfect-debounce: 2.1.0
       pkg-types: 2.3.1
       rc9: 3.0.1
+    optionalDependencies:
+      magicast: 0.5.5
 
   call-bind-apply-helpers@1.0.2:
     dependencies:
@@ -17673,8 +17755,6 @@ snapshots:
   convert-source-map@2.0.0: {}
 
   cookie-signature@1.2.2: {}
-
-  cookie@0.6.0: {}
 
   cookie@0.7.2: {}
 
@@ -19597,6 +19677,19 @@ snapshots:
 
   isexe@2.0.0: {}
 
+  istanbul-lib-coverage@3.2.2: {}
+
+  istanbul-lib-report@3.0.1:
+    dependencies:
+      istanbul-lib-coverage: 3.2.2
+      make-dir: 4.0.0
+      supports-color: 7.2.0
+
+  istanbul-reports@3.2.0:
+    dependencies:
+      html-escaper: 2.0.2
+      istanbul-lib-report: 3.0.1
+
   iterator.prototype@1.1.5:
     dependencies:
       define-data-property: 1.1.4
@@ -19625,6 +19718,8 @@ snapshots:
   jiti@2.6.1: {}
 
   jose@6.1.3: {}
+
+  js-tokens@10.0.0: {}
 
   js-tokens@4.0.0: {}
 
@@ -19888,6 +19983,16 @@ snapshots:
   magic-string@0.30.21:
     dependencies:
       "@jridgewell/sourcemap-codec": 1.5.5
+
+  magicast@0.5.5:
+    dependencies:
+      "@babel/parser": 7.29.9
+      "@babel/types": 7.29.8
+      source-map-js: 1.2.1
+
+  make-dir@4.0.0:
+    dependencies:
+      semver: 7.8.5
 
   make-error@1.3.6: {}
 
@@ -21001,9 +21106,9 @@ snapshots:
       ansi-styles: 5.2.0
       react-is: 17.0.2
 
-  prisma@7.8.0(@types/react-dom@19.2.2(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3):
+  prisma@7.8.0(@types/react-dom@19.2.2(@types/react@19.2.8))(@types/react@19.2.8)(magicast@0.5.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3):
     dependencies:
-      "@prisma/config": 7.8.0
+      "@prisma/config": 7.8.0(magicast@0.5.5)
       "@prisma/dev": 0.24.3(typescript@5.9.3)
       "@prisma/engines": 7.8.0
       "@prisma/studio-core": 0.27.3(@types/react-dom@19.2.2(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -21434,10 +21539,6 @@ snapshots:
     dependencies:
       postal-mime: 2.7.4
       standardwebhooks: 1.0.0
-
-  resend@6.7.0:
-    dependencies:
-      svix: 1.84.1
 
   resolve-from@4.0.0: {}
 
@@ -22009,11 +22110,6 @@ snapshots:
 
   svg-arc-to-cubic-bezier@3.2.0: {}
 
-  svix@1.84.1:
-    dependencies:
-      standardwebhooks: 1.0.0
-      uuid: 10.0.0
-
   symbol-tree@3.2.4: {}
 
   syncpack@13.0.4(typescript@5.9.3):
@@ -22093,6 +22189,8 @@ snapshots:
       picomatch: 4.0.4
 
   tinyrainbow@3.0.3: {}
+
+  tinyrainbow@3.2.0: {}
 
   title@4.0.1:
     dependencies:
@@ -22425,8 +22523,6 @@ snapshots:
       react: 19.2.3
 
   util-deprecate@1.0.2: {}
-
-  uuid@10.0.0: {}
 
   uuid@11.1.0: {}
 

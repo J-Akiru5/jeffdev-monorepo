@@ -8,7 +8,7 @@
     "start": "next start --port 3007",
     "lint": "eslint",
     "check-types": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "vitest run --coverage",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui"
@@ -24,10 +24,10 @@
     "@sentry/nextjs": "^10.53.1",
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.47.0",
-    "@syntaxure/ui": "workspace:*",
-    "@syntaxure/supabase": "workspace:*",
     "@syntaxure/redis": "workspace:*",
     "@syntaxure/sentry-config": "workspace:*",
+    "@syntaxure/supabase": "workspace:*",
+    "@syntaxure/ui": "workspace:*",
     "@tanstack/react-virtual": "^3.13.26",
     "driver.js": "^1.4.0",
     "framer-motion": "^12.23.26",
@@ -49,10 +49,11 @@
     "@types/node": "^22.15.3",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
+    "@vitest/coverage-v8": "^4.0.17",
     "eslint": "^9.39.1",
     "eslint-config-next": "16.4.2",
     "tailwindcss": "^4.1.18",
-    "typescript": "^5.9.2",
+    "typescript": "^5.9.3",
     "vitest": "^4.0.16"
   }
 }

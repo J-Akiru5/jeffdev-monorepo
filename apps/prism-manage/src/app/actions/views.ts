@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import type { Json } from "@/types/database.types";
 
 export interface SavedView {
   id: string;
@@ -59,7 +60,7 @@ export async function createSavedView(input: {
       user_id: user.id,
       workspace_id: input.workspaceId,
       name,
-      config: input.config,
+      config: input.config as NonNullable<Json>,
     })
     .select("*")
     .single();

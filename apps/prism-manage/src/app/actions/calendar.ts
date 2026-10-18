@@ -107,7 +107,7 @@ export async function updateEvent(
 
   const { data: updated, error } = await supabase
     .from("calendar_events")
-    .update(updateData)
+    .update(updateData as never)
     .eq("id", eventId)
     .eq("user_id", user.id)
     .select()
