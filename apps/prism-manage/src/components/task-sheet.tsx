@@ -19,6 +19,7 @@ import {
   MessageSquare,
   Send,
   GitBranch,
+  Brain,
 } from "lucide-react";
 import { TASK_TYPES, PRIORITY_CONFIG, STATUS_CONFIG, STAFF_LOCKED_STATUSES } from "@/lib/task-types";
 import type { TaskTypeKey, StatusKey } from "@/lib/task-types";
@@ -33,6 +34,7 @@ import {
   type TaskActivityEntry,
   type TaskComment,
 } from "@/app/actions/collaboration";
+import { distillTaskThread } from "@/app/actions/brain";
 import { createIssueForTask } from "@/app/actions/github-sync";
 import { createClient } from "@/lib/supabase/browser";
 import { toast } from "sonner";
@@ -118,6 +120,7 @@ export function TaskSheet({
   const [newComment, setNewComment] = useState("");
   const [sendingComment, setSendingComment] = useState(false);
   const [creatingIssue, setCreatingIssue] = useState(false);
+  const [distilling, setDistilling] = useState(false);
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
 
@@ -219,6 +222,25 @@ export function TaskSheet({
       setNewComment("");
     } finally {
       setSendingComment(false);
+    }
+  };
+
+  const handleDistillThread = async () => {
+    if (!taskId || distilling) return;
+    setDistilling(true);
+    try {
+      const result = await distillTaskThread(taskId);
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success(
+        result.mode === "ai"
+          ? "Thread distilled to the Brain"
+          : "Thread saved to the Brain",
+      );
+    } finally {
+      setDistilling(false);
     }
   };
 
@@ -748,10 +770,20 @@ export function TaskSheet({
 
                       {/* Comments */}
                       <div>
-                        <label className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-white/40">
+                        <div className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-white/40">
                           <MessageSquare className="h-3.5 w-3.5" />
                           Comments ({comments.length})
-                        </label>
+                          {comments.length > 0 && (
+                            <button
+                              onClick={handleDistillThread}
+                              disabled={distilling}
+                              className="ml-auto inline-flex items-center gap-1 rounded border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-medium normal-case tracking-normal text-cyan-400 transition-colors hover:bg-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <Brain className="h-3 w-3" />
+                              {distilling ? "Saving…" : "Save to Brain"}
+                            </button>
+                          )}
+                        </div>
                         <div className="space-y-3">
                           {comments.length === 0 && (
                             <p className="text-xs text-white/40">
