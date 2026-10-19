@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage — Arc 3 "Daily Driver" Plan</title>
+<style>
+  :root {
+    --bg: #0A0D12; --bg-raised: #11151C; --bg-card: #151A22; --border: #232A36;
+    --cyan: #22D3EE; --violet: #8B7BFF; --text: #E6EAF0; --text-dim: #8B93A3;
+    --text-faint: #5A6272; --good: #4ADE80; --warn: #FBBF24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; padding: 48px 24px; }
+  .wrap { max-width: 880px; margin: 0 auto; }
+  .mono { font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 28px; margin-bottom: 32px; }
+  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 12px; background: linear-gradient(90deg, var(--text), var(--text) 60%, var(--cyan)); -webkit-background-clip: text; background-clip: text; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim); }
+  .meta-row span b { color: var(--text); font-weight: 500; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; border: 1px solid; }
+  .badge.gate { color: var(--warn); border-color: var(--warn); background: rgba(251,191,36,0.08); }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 14px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--violet); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .summary-box { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 6px; padding: 18px 20px; font-size: 15px; }
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  ul.clean li { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; font-size: 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
+  td.mono { color: var(--cyan); white-space: nowrap; }
+  .ok { color: var(--good); }
+  .checkpoint { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 14px 18px; margin-bottom: 10px; }
+  .checkpoint .q { font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
+  .checkpoint .q b { color: var(--violet); font-weight: 500; }
+  .checkpoint .a { font-size: 14px; }
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">prism-manage · Arc Plan · Proposed</div>
+    <h1>Arc 3 — "Daily Driver"</h1>
+    <div class="meta-row">
+      <span><b>2026-10-19</b></span>
+      <span>Prepared by <b>opencode · DeepSeek V4.1 Flash</b></span>
+      <span>Status: <b>awaiting GO / priority tweaks</b></span>
+      <span class="badge gate">Proposed</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Goal</h2>
+    <div class="summary-box">
+      Make prism-manage the <b>default daily tool</b> for the founder and the
+      team — faster capture, deeper workflow, compounding knowledge — without
+      regressing the quality bar (30 E2E tests, drift guard, coverage ratchet,
+      RLS suite, all CI-enforced).
+    </div>
+  </section>
+
+  <section>
+    <h2>Phases</h2>
+    <table>
+      <thead><tr><th>#</th><th>Phase</th><th>Scope</th><th>Size</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">D1</td><td><b>Task templates</b></td><td>Workspace-scoped templates (name, type, priority, description, tags, default list); "Save as template" from the sheet; "Start from template" picker fills create flows; E2E.</td><td>0.5–1 session</td></tr>
+        <tr><td class="mono">D2</td><td><b>Bulk actions</b></td><td>Multi-select in list/table; bulk move list, status, priority, assign, complete, delete — routed through the existing RBAC-checked actions; E2E with seeded tasks.</td><td>0.5–1</td></tr>
+        <tr><td class="mono">D3</td><td><b>GitHub webhook reverse-sync</b></td><td><span class="mono">POST /api/github/webhook</span> with HMAC verification (fail-closed); issues.closed/reopened/labeled → task updates; mapper unit tests; rejection E2E; wiring docs.</td><td>1</td></tr>
+        <tr><td class="mono">D4</td><td><b>Task dependencies</b></td><td><span class="mono">task_dependencies</span> (blocker → blocked) with cycle prevention + RLS; sheet "Blocked by" section; Blocked badge + filter; E2E.</td><td>1</td></tr>
+        <tr><td class="mono">D5</td><td><b>Brain context digest</b> <em>(if GO)</em></td><td>"Related memories" panel in the task sheet — semantic lookup on the task, top 3 with similarity; E2E.</td><td>0.5–1</td></tr>
+        <tr><td class="mono">D6</td><td><b>Pages block editor</b> <em>(big bet — explicit GO)</em></td><td>Structured blocks (heading/text/checklist/code/divider), drag-reorder, autosave.</td><td>2–3</td></tr>
+        <tr><td class="mono">D7</td><td><b>Brain R2</b> <em>(if GO)</em></td><td>Review queue, memory detail/edit/archive; distillation spend logging + caps; ingestion limits.</td><td>1–2</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Sequencing</h2>
+    <ul class="clean">
+      <li><b>D1 → D2 → D3 → D4 → (D5 if GO) → (D7 if GO) → (D6 on request).</b> Capture velocity first, then workflow depth, then knowledge; the big bet last.</li>
+      <li>Each phase ships standalone: branch → PR → CI green → HTML report. Migrations additive + drift-checked. Stopping after any phase is safe.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Risks &amp; Guards</h2>
+    <table>
+      <thead><tr><th>Risk</th><th>Guard</th></tr></thead>
+      <tbody>
+        <tr><td>Schema sprawl from templates/dependencies</td><td>Additive migrations only; drift check fails CI on divergence; every new table RLS'd</td></tr>
+        <tr><td>Webhook abuse</td><td>HMAC verification, fail-closed without the secret, rejection tests</td></tr>
+        <tr><td>Bulk ops bypassing RBAC</td><td>Every bulk action routes through the existing per-task actions and their gates</td></tr>
+        <tr><td>Brain cost creep</td><td>Opt-in flags stay; R2 adds explicit spend logging + caps</td></tr>
+        <tr><td>Scope creep into the block editor</td><td>D6 needs explicit GO; everything else ships without it</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Open Decisions</h2>
+    <div class="checkpoint">
+      <div class="q"><b>1 — R0 verdict (GO/NO-GO)</b></div>
+      <div class="a">Gates D5 and D7; auto-distill stays off until then.</div>
+    </div>
+    <div class="checkpoint">
+      <div class="q"><b>2 — Priority order</b></div>
+      <div class="a">Confirm D1→D4, or reshuffle.</div>
+    </div>
+    <div class="checkpoint">
+      <div class="q"><b>3 — D6 in or out?</b></div>
+      <div class="a">The pages block editor is the arc's biggest single item — in this arc, or a later one?</div>
+    </div>
+    <div class="checkpoint">
+      <div class="q"><b>4 — Small ops</b></div>
+      <div class="a"><span class="mono">SLACK_WEBHOOK_URL</span>, <span class="mono">BRAIN_INGEST_SECRET</span> (Vercel), and the GitHub webhook secret (D3).</div>
+    </div>
+  </section>
+
+  <footer>
+    <span>prism-manage · arc 3 plan · proposed 2026-10-19</span>
+    <span>working copy: ~/.opencode/plan/prism-manage-arc-3-daily-driver.md</span>
+  </footer>
+
+</div>
+</body>
+</html>
