@@ -59,7 +59,7 @@ describe("generateText (OpenCode)", () => {
 
     const call = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(call[0]).toBe(
-      "https://opencode.ai/inference/go/openai/v1/chat/completions",
+      "https://opencode.ai/inference/openai/v1/chat/completions",
     );
     const headers = call[1].headers as Record<string, string>;
     expect(headers.Authorization).toBe("Bearer test-key");

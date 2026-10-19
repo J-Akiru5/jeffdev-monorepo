@@ -8,10 +8,10 @@
  * degrade deterministically (thread-mode summaries, closest-match answers).
  *
  * Env:
- *   OPENCODE_API_KEY  — Go / Console key (Bearer token)
+ *   OPENCODE_API_KEY  — Console service-account key (Bearer token)
  *   OPENCODE_MODEL    — default "deepseek-v4.1-flash"
- *   OPENCODE_BASE_URL — default "https://opencode.ai/inference/go/openai/v1"
- *                       (Console inference: "https://opencode.ai/inference/openai/v1")
+ *   OPENCODE_BASE_URL — default "https://opencode.ai/inference/openai/v1"
+ *                       (Go plan endpoints use "https://opencode.ai/inference/go/openai/v1")
  *   GEMINI_API_KEY / GOOGLE_GEMINI_API_KEY — Gemini fallback
  */
 
@@ -31,7 +31,7 @@ export interface LlmResult {
   model: string;
 }
 
-const OPENCODE_DEFAULT_BASE = "https://opencode.ai/inference/go/openai/v1";
+const OPENCODE_DEFAULT_BASE = "https://opencode.ai/inference/openai/v1";
 const OPENCODE_DEFAULT_MODEL = "deepseek-v4.1-flash";
 const GEMINI_DEFAULT_MODEL = "gemini-2.5-flash";
 
