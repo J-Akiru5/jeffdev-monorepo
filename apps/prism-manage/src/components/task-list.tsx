@@ -23,6 +23,7 @@ interface TaskListProps {
   onAdd?: (title: string, projectId: string) => void;
   onExpand?: (title: string, projectId: string) => void;
   onTaskClick?: (id: string) => void;
+  blockedIds?: Set<string>;
 }
 
 export const TaskList = memo(function TaskList({
@@ -34,6 +35,7 @@ export const TaskList = memo(function TaskList({
   onAdd,
   onExpand,
   onTaskClick,
+  blockedIds,
 }: TaskListProps) {
   const incompleteTasks = useMemo(
     () => tasks.filter((t) => t.status !== "approved"),
@@ -116,6 +118,7 @@ export const TaskList = memo(function TaskList({
                   onToggleStar={onToggleStar}
                   onDelete={onDelete}
                   onClick={onTaskClick}
+                  isBlocked={blockedIds?.has(task.id)}
                 />
               </div>
             );
@@ -153,6 +156,7 @@ export const TaskList = memo(function TaskList({
                 onToggleStar={onToggleStar}
                 onDelete={onDelete}
                 onClick={onTaskClick}
+                isBlocked={blockedIds?.has(task.id)}
               />
             ))}
           </div>
