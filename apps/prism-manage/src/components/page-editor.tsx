@@ -1,18 +1,23 @@
 "use client";
 
 /**
- * Page Editor
- * -----------
- * A clean, Notion-like page editor with title, icon, and content area.
- * Uses a simple textarea for content (MVP) — can be upgraded to a block
- * editor later.
+ * Page Editor (arc 3 · D6)
+ * ------------------------
+ * Title, icon, and a block-based content area (PageBlocks). Content autosaves
+ * 800ms after the last edit; the title saves on blur; Ctrl/Cmd+S saves now.
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import type { Page } from "@/app/actions/pages";
 import { getPage, updatePage } from "@/app/actions/pages";
+import {
+  PageBlocks,
+  normalizeBlocks,
+  serializeBlocks,
+  type Block,
+} from "@/components/page-blocks";
 
 interface PageEditorProps {
   pageId: string;
@@ -22,9 +27,11 @@ export function PageEditor({ pageId }: PageEditorProps) {
   const router = useRouter();
   const [page, setPage] = useState<Page | null>(null);
   const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
+  const [blocks, setBlocks] = useState<Block[]>([]);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const loadedRef = useRef(false);
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     async function loadPage() {
@@ -32,57 +39,62 @@ export function PageEditor({ pageId }: PageEditorProps) {
       if (data) {
         setPage(data);
         setTitle(data.title);
-        // Convert content array to text (MVP: simple text)
-        if (Array.isArray(data.content) && data.content.length > 0) {
-          const textContent = data.content
-            .map((block: Record<string, unknown>) => {
-              if (typeof block === "object" && block !== null) {
-                return (block.text as string) || JSON.stringify(block);
-              }
-              return String(block);
-            })
-            .join("\n");
-          setContent(textContent);
-        }
+        setBlocks(normalizeBlocks(data.content));
       }
+      loadedRef.current = true;
       setLoading(false);
     }
     loadPage();
   }, [pageId]);
 
-  const handleSave = useCallback(async () => {
-    if (!page) return;
-    setSaving(true);
+  const persist = useCallback(
+    async (nextTitle: string, nextBlocks: Block[]) => {
+      if (!page) return;
+      setSaving(true);
+      await updatePage(page.id, {
+        title: nextTitle || "Untitled",
+        content: serializeBlocks(nextBlocks),
+      });
+      setSaving(false);
+    },
+    [page],
+  );
 
-    // Convert text to content array (MVP: simple text blocks)
-    const contentBlocks = content
-      .split("\n")
-      .filter((line) => line.trim())
-      .map((line) => ({ type: "text", text: line }));
+  const handleBlocksChange = useCallback(
+    (next: Block[]) => {
+      setBlocks(next);
+      if (!loadedRef.current) return;
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+      saveTimer.current = setTimeout(() => {
+        void persist(title, next);
+      }, 800);
+    },
+    [persist, title],
+  );
 
-    await updatePage(page.id, {
-      title: title || "Untitled",
-      content: contentBlocks,
-    });
-    setSaving(false);
-  }, [page, title, content]);
-
-  // Auto-save on blur
-  const handleBlur = useCallback(() => {
-    handleSave();
-  }, [handleSave]);
+  // Save the title on blur
+  const handleTitleBlur = useCallback(() => {
+    void persist(title, blocks);
+  }, [persist, title, blocks]);
 
   // Save on Cmd/Ctrl+S
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "s") {
         e.preventDefault();
-        handleSave();
+        void persist(title, blocks);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleSave]);
+  }, [persist, title, blocks]);
+
+  // Clear a pending autosave on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimer.current) clearTimeout(saveTimer.current);
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -125,8 +137,9 @@ export function PageEditor({ pageId }: PageEditorProps) {
         type="text"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        onBlur={handleBlur}
+        onBlur={handleTitleBlur}
         placeholder="Untitled"
+        aria-label="Page title"
         className="w-full bg-transparent text-3xl font-bold text-white placeholder-white/20 outline-none"
       />
 
@@ -150,14 +163,12 @@ export function PageEditor({ pageId }: PageEditorProps) {
 
       {/* Content */}
       <div className="mt-8">
-        <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          onBlur={handleBlur}
-          placeholder="Start writing..."
-          className="min-h-[400px] w-full resize-none bg-transparent text-base leading-relaxed text-white/70 placeholder-white/20 outline-none"
-          rows={20}
-        />
+        {blocks.length === 0 && (
+          <p className="px-2 pb-1 text-sm text-white/25">
+            Start writing — press Enter for a new block.
+          </p>
+        )}
+        <PageBlocks blocks={blocks} onChange={handleBlocksChange} />
       </div>
     </div>
   );

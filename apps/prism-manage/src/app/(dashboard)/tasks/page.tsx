@@ -18,8 +18,10 @@ import {
   deleteTask,
   toggleTaskComplete,
   toggleTaskStar,
+  updateTask,
 } from "@/app/actions/tasks";
 import { getWorkspaceMembers } from "@/app/actions/workspace";
+import { getBlockedTaskIds } from "@/app/actions/dependencies";
 import {
   createSavedView,
   deleteSavedView,
@@ -58,6 +60,8 @@ function TasksContent() {
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [blockedIds, setBlockedIds] = useState<Set<string>>(new Set());
   const searchParams = useSearchParams();
   const filter = searchParams.get("filter");
   const departmentId = searchParams.get("department");
@@ -92,6 +96,10 @@ function TasksContent() {
       const data = await fetchTasks(wsId);
       setTasks(data);
       setHasMore(data.length >= TASKS_PAGE_SIZE);
+      setSelectedIds(new Set());
+      setBlockedIds(
+        new Set(await getBlockedTaskIds(data.map((t) => t.id))),
+      );
     } catch (err) {
       console.error("Failed to load tasks:", err);
     } finally {
@@ -332,7 +340,11 @@ function TasksContent() {
         const task = tasksRef.current.find((t) => t.id === taskId);
         if (!task) return;
         const completed = task.status !== "approved";
-        await toggleTaskComplete(taskId, completed);
+        const result = await toggleTaskComplete(taskId, completed);
+        if (result.error) {
+          toast.error(result.error);
+          return;
+        }
         setTasks((prev) =>
           prev.map((t) =>
             t.id === taskId
@@ -344,8 +356,10 @@ function TasksContent() {
               : t,
           ),
         );
-      } catch {
-        toast.error("Failed to update task");
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : "Failed to update task",
+        );
       }
     },
     [],
@@ -368,8 +382,10 @@ function TasksContent() {
               : t,
           ),
         );
-      } catch {
-        toast.error("Failed to update task");
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : "Failed to update task",
+        );
       }
     },
     [],
@@ -384,6 +400,48 @@ function TasksContent() {
       toast.error("Failed to delete task");
     }
   }, []);
+
+  // ── Bulk actions (arc 3 · D2) ──
+
+  const handleToggleSelect = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const handleToggleSelectAll = useCallback(() => {
+    setSelectedIds((prev) =>
+      prev.size === tableTasks.length
+        ? new Set()
+        : new Set(tableTasks.map((t) => t.id)),
+    );
+  }, [tableTasks]);
+
+  const runBulk = useCallback(
+    async (
+      label: string,
+      fn: (id: string) => Promise<unknown>,
+      ids: string[],
+    ) => {
+      const results = await Promise.allSettled(ids.map((id) => fn(id)));
+      const failed = results.filter((r) => r.status === "rejected").length;
+      if (failed > 0) {
+        toast.error(
+          `${label}: ${ids.length - failed} succeeded, ${failed} failed`,
+        );
+      } else {
+        toast.success(
+          `${label}: ${ids.length} task${ids.length === 1 ? "" : "s"}`,
+        );
+      }
+      setSelectedIds(new Set());
+      await loadTasks();
+    },
+    [loadTasks],
+  );
 
   const handleAdd = useCallback(
     async (title: string, projectId: string) => {
@@ -624,12 +682,121 @@ function TasksContent() {
 
       {/* Views */}
       {viewMode === "table" ? (
-        <TaskTable
-          tasks={tableTasks}
-          projects={projects}
-          members={members}
-          onTaskClick={handleTaskClick}
-        />
+        <div className="space-y-3">
+          {selectedIds.size > 0 && (
+            <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border glass-subtle p-3">
+              <span className="text-xs font-medium text-white/70">
+                {selectedIds.size} selected
+              </span>
+              <select
+                value=""
+                aria-label="Bulk status"
+                onChange={(e) => {
+                  const status = e.target.value;
+                  if (status) {
+                    void runBulk(
+                      "Status updated",
+                      (id) => updateTask(id, { status }),
+                      [...selectedIds],
+                    );
+                  }
+                }}
+                className={selectClass}
+              >
+                <option value="">Set status…</option>
+                <option value="backlog">Backlog</option>
+                <option value="todo">To Do</option>
+                <option value="in_progress">In Progress</option>
+                <option value="in_review">In Review</option>
+                <option value="approved">Approved</option>
+              </select>
+              <select
+                value=""
+                aria-label="Bulk priority"
+                onChange={(e) => {
+                  const priority = e.target.value;
+                  if (priority) {
+                    void runBulk(
+                      "Priority updated",
+                      (id) => updateTask(id, { priority }),
+                      [...selectedIds],
+                    );
+                  }
+                }}
+                className={selectClass}
+              >
+                <option value="">Set priority…</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+              <select
+                value=""
+                aria-label="Bulk assign"
+                onChange={(e) => {
+                  const assignedTo = e.target.value;
+                  if (assignedTo) {
+                    void runBulk(
+                      "Assigned",
+                      (id) => updateTask(id, { assignedTo }),
+                      [...selectedIds],
+                    );
+                  }
+                }}
+                className={selectClass}
+              >
+                <option value="">Assign…</option>
+                {members.map((m) => (
+                  <option key={m.userId} value={m.userId}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() =>
+                  void runBulk(
+                    "Completed",
+                    (id) =>
+                      toggleTaskComplete(id, true).then((r) => {
+                        if (r.error) throw new Error(r.error);
+                      }),
+                    [...selectedIds],
+                  )
+                }
+                className="h-9 rounded-lg border border-border px-3 text-xs text-white/60 transition-colors hover:border-border-active hover:text-white/80"
+              >
+                Complete
+              </button>
+              <button
+                onClick={() =>
+                  void runBulk(
+                    "Deleted",
+                    (id) => deleteTask(id),
+                    [...selectedIds],
+                  )
+                }
+                className="h-9 rounded-lg border border-red-500/30 bg-red-500/10 px-3 text-xs text-red-400 transition-colors hover:bg-red-500/20"
+              >
+                Delete
+              </button>
+              <button
+                onClick={() => setSelectedIds(new Set())}
+                className="h-9 rounded-lg px-3 text-xs text-white/40 transition-colors hover:text-white/70"
+              >
+                Clear
+              </button>
+            </div>
+          )}
+          <TaskTable
+            tasks={tableTasks}
+            projects={projects}
+            members={members}
+            onTaskClick={handleTaskClick}
+            selectedIds={selectedIds}
+            onToggleSelect={handleToggleSelect}
+            onToggleSelectAll={handleToggleSelectAll}
+          />
+        </div>
       ) : (
         <div className="space-y-8">
           {Object.entries(tasksByProject).map(([projectId, projectTasks]) => {
@@ -641,6 +808,7 @@ function TasksContent() {
                 key={projectId}
                 tasks={projectTasks}
                 project={project}
+                blockedIds={blockedIds}
                 onToggleComplete={handleToggleComplete}
                 onToggleStar={handleToggleStar}
                 onDelete={handleDelete}

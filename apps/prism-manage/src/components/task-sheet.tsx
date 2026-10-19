@@ -34,7 +34,24 @@ import {
   type TaskActivityEntry,
   type TaskComment,
 } from "@/app/actions/collaboration";
-import { distillTaskThread } from "@/app/actions/brain";
+import {
+  distillTaskThread,
+  searchMemory,
+  type BrainCitation,
+} from "@/app/actions/brain";
+import {
+  getTaskTemplates,
+  saveTaskAsTemplate,
+  type TaskTemplate,
+} from "@/app/actions/templates";
+import { PromptDialog } from "@/components/prompt-dialog";
+import {
+  addTaskDependency,
+  getTaskDependencies,
+  removeTaskDependency,
+  type DependencyTask,
+} from "@/app/actions/dependencies";
+import { getTasks } from "@/app/actions/tasks";
 import { createIssueForTask } from "@/app/actions/github-sync";
 import { createClient } from "@/lib/supabase/browser";
 import { toast } from "sonner";
@@ -123,6 +140,13 @@ export function TaskSheet({
   const [sendingComment, setSendingComment] = useState(false);
   const [creatingIssue, setCreatingIssue] = useState(false);
   const [distilling, setDistilling] = useState(false);
+  const [templates, setTemplates] = useState<TaskTemplate[]>([]);
+  const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+  const [blockers, setBlockers] = useState<DependencyTask[]>([]);
+  const [blockerCandidates, setBlockerCandidates] = useState<
+    { id: string; title: string }[]
+  >([]);
+  const [relatedMemories, setRelatedMemories] = useState<BrainCitation[]>([]);
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
 
@@ -225,6 +249,101 @@ export function TaskSheet({
     } finally {
       setSendingComment(false);
     }
+  };
+
+  // Load workspace templates for the create-mode picker (arc 3 · D1)
+  useEffect(() => {
+    if (!isOpen || !activeWorkspaceId) return;
+    let cancelled = false;
+    getTaskTemplates(activeWorkspaceId).then((list) => {
+      if (!cancelled) setTemplates(list);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, activeWorkspaceId]);
+
+  const handleSaveTemplate = async (name: string) => {
+    if (!taskId) return;
+    const result = await saveTaskAsTemplate(taskId, name);
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+    toast.success("Template saved");
+    if (activeWorkspaceId) {
+      setTemplates(await getTaskTemplates(activeWorkspaceId));
+    }
+  };
+
+  // Related memories (arc 3 · D5): semantic search over the brain for this task
+  useEffect(() => {
+    if (!isOpen || mode !== "edit" || !taskId || !activeWorkspaceId) return;
+    const query = `${initialData?.title ?? ""} ${initialData?.description ?? ""}`
+      .trim()
+      .slice(0, 300);
+    if (query.length < 3) {
+      setRelatedMemories([]);
+      return;
+    }
+    let cancelled = false;
+    searchMemory(activeWorkspaceId, query).then((results) => {
+      if (!cancelled) setRelatedMemories(results.slice(0, 3));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    isOpen,
+    mode,
+    taskId,
+    activeWorkspaceId,
+    initialData?.title,
+    initialData?.description,
+  ]);
+
+  // Dependencies (arc 3 · D4): this task's blockers + add-candidates
+  useEffect(() => {
+    if (!isOpen || !taskId || !activeWorkspaceId) return;
+    let cancelled = false;
+    getTaskDependencies(taskId).then((d) => {
+      if (!cancelled) setBlockers(d.blockers);
+    });
+    getTasks(activeWorkspaceId, { limit: 100 }).then((all) => {
+      if (!cancelled) {
+        setBlockerCandidates(
+          all
+            .filter((t) => t.id !== taskId && t.status !== "approved")
+            .map((t) => ({ id: t.id, title: t.title })),
+        );
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, taskId, activeWorkspaceId]);
+
+  const handleAddBlocker = async (blockerId: string) => {
+    if (!taskId) return;
+    const result = await addTaskDependency(blockerId, taskId);
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+    toast.success("Blocker added");
+    const d = await getTaskDependencies(taskId);
+    setBlockers(d.blockers);
+  };
+
+  const handleRemoveBlocker = async (blockerId: string) => {
+    if (!taskId) return;
+    const result = await removeTaskDependency(blockerId, taskId);
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+    const d = await getTaskDependencies(taskId);
+    setBlockers(d.blockers);
   };
 
   const handleDistillThread = async () => {
@@ -432,6 +551,14 @@ export function TaskSheet({
                 </div>
 
                 <div className="flex items-center gap-2">
+                  {mode === "edit" && taskId && (
+                    <button
+                      onClick={() => setTemplateDialogOpen(true)}
+                      className="rounded-lg border border-border px-3 py-2 text-xs text-white/50 transition-colors hover:border-border-active hover:text-white/80"
+                    >
+                      Save as template
+                    </button>
+                  )}
                   <button
                     onClick={handleSubmit}
                     disabled={!data.title.trim() || submitting}
@@ -453,9 +580,57 @@ export function TaskSheet({
                 </div>
               </div>
 
+              <PromptDialog
+                open={templateDialogOpen}
+                onClose={() => setTemplateDialogOpen(false)}
+                title="Save as template"
+                placeholder="Template name…"
+                confirmLabel="Save template"
+                onSubmit={handleSaveTemplate}
+              />
+
               {/* ── Content ── */}
               <div className="flex-1 overflow-y-auto px-6 py-6">
                 <div className="space-y-6">
+                  {/* Start from template (create mode · arc 3 · D1) */}
+                  {mode === "create" && templates.length > 0 && (
+                    <div>
+                      <label
+                        htmlFor="template-picker"
+                        className="mb-1.5 block text-[11px] text-white/40"
+                      >
+                        Start from template
+                      </label>
+                      <select
+                        id="template-picker"
+                        value=""
+                        onChange={(e) => {
+                          const t = templates.find(
+                            (x) => x.id === e.target.value,
+                          );
+                          if (!t) return;
+                          setData((prev) => ({
+                            ...prev,
+                            title: t.title,
+                            taskType: t.taskType as Task["taskType"],
+                            priority: t.priority as Task["priority"],
+                            description: t.description ?? "",
+                            tags: t.tags,
+                            projectId: t.projectId ?? prev.projectId,
+                          }));
+                        }}
+                        className="w-full appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2.5 text-sm text-white/70 outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
+                      >
+                        <option value="">Choose a template…</option>
+                        {templates.map((t) => (
+                          <option key={t.id} value={t.id}>
+                            {t.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
                   {/* Title */}
                   <div>
                     <textarea
@@ -795,6 +970,102 @@ export function TaskSheet({
                           </button>
                         )}
                       </div>
+
+                      {/* Blocked by (arc 3 · D4) */}
+                      {mode === "edit" && taskId && (
+                        <div>
+                          <label className="mb-3 block text-xs font-medium uppercase tracking-wider text-white/40">
+                            Blocked by
+                          </label>
+                          <div className="space-y-2">
+                            {blockers.length === 0 && (
+                              <p className="text-xs text-white/40">
+                                No blockers — this task is free to move.
+                              </p>
+                            )}
+                            {blockers.map((b) => (
+                              <div
+                                key={b.id}
+                                className="flex items-center gap-2 rounded-lg border border-border bg-glass-04 px-3 py-2"
+                              >
+                                <span className="truncate text-sm text-white/80">
+                                  {b.title}
+                                </span>
+                                <span className="ml-auto shrink-0 text-[10px] uppercase tracking-wider text-white/40">
+                                  {b.status.replace("_", " ")}
+                                </span>
+                                <button
+                                  onClick={() => handleRemoveBlocker(b.id)}
+                                  aria-label={`Remove blocker ${b.title}`}
+                                  className="shrink-0 rounded p-1 text-white/30 transition-colors hover:text-red-400"
+                                >
+                                  <X className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="mt-2">
+                            <label
+                              htmlFor="blocker-picker"
+                              className="mb-1.5 block text-[11px] text-white/40"
+                            >
+                              Add a blocker
+                            </label>
+                            <select
+                              id="blocker-picker"
+                              value=""
+                              onChange={(e) => {
+                                const blockerId = e.target.value;
+                                if (blockerId) void handleAddBlocker(blockerId);
+                              }}
+                              className="w-full appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2.5 text-sm text-white/70 outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
+                            >
+                              <option value="">Choose a task…</option>
+                              {blockerCandidates
+                                .filter(
+                                  (t) =>
+                                    !blockers.some((b) => b.id === t.id),
+                                )
+                                .map((t) => (
+                                  <option key={t.id} value={t.id}>
+                                    {t.title}
+                                  </option>
+                                ))}
+                            </select>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Related memories (arc 3 · D5) */}
+                      {mode === "edit" && relatedMemories.length > 0 && (
+                        <div>
+                          <label className="mb-3 block text-xs font-medium uppercase tracking-wider text-white/40">
+                            Related memories
+                          </label>
+                          <div className="space-y-2">
+                            {relatedMemories.map((m) => (
+                              <div
+                                key={m.id}
+                                className="rounded-lg border border-border bg-glass-04 px-3 py-2"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <p className="truncate text-sm text-white/80">
+                                    {m.title}
+                                  </p>
+                                  {typeof m.similarity === "number" && (
+                                    <span className="ml-auto shrink-0 font-mono text-[10px] text-cyan-300/70">
+                                      {Math.round(m.similarity * 100)}%
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="mt-0.5 line-clamp-2 text-xs text-white/50">
+                                  {m.summary}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
                       {/* Comments */}
                       <div>

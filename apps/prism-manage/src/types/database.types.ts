@@ -1279,6 +1279,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"task_dependencies": {
+                  Row: {
+                    "blocked_id": string,"blocker_id": string,"created_at": string,"created_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "blocked_id": string,"blocker_id": string,"created_at"?: string,"created_by"?: string | null
+                  }
+                  Update: {
+                    "blocked_id"?: string,"blocker_id"?: string,"created_at"?: string,"created_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "task_dependencies_blocked_id_fkey"
+      columns: ["blocked_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "task_dependencies_blocker_id_fkey"
+      columns: ["blocker_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"task_tags": {
                   Row: {
                     "created_at": string | null,"tag_id": string,"task_id": string
@@ -1302,6 +1328,32 @@ isOneToOne: false
       columns: ["task_id"]
 isOneToOne: false
       referencedRelation: "tasks"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"task_templates": {
+                  Row: {
+                    "created_at": string,"created_by": string | null,"description": string | null,"id": string,"name": string,"pm_project_id": string | null,"priority": string,"tags": NonNullable<Json>,"task_type": string,"title": string,"updated_at": string,"workspace_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string | null,"description"?: string | null,"id"?: string,"name": string,"pm_project_id"?: string | null,"priority"?: string,"tags"?: NonNullable<Json>,"task_type"?: string,"title": string,"updated_at"?: string,"workspace_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string | null,"description"?: string | null,"id"?: string,"name"?: string,"pm_project_id"?: string | null,"priority"?: string,"tags"?: NonNullable<Json>,"task_type"?: string,"title"?: string,"updated_at"?: string,"workspace_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "task_templates_pm_project_id_fkey"
+      columns: ["pm_project_id"]
+isOneToOne: false
+      referencedRelation: "pm_projects"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "task_templates_workspace_id_fkey"
+      columns: ["workspace_id"]
+isOneToOne: false
+      referencedRelation: "workspaces"
       referencedColumns: ["id"]
     }
                   ]

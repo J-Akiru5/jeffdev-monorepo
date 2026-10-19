@@ -434,8 +434,12 @@ export async function createTask(input: {
   revalidatePath("/tasks");
 }
 
-export async function toggleTaskComplete(taskId: string, completed: boolean) {
-  if (!taskId) throw new Error("Task ID is required");
+export async function toggleTaskComplete(
+  taskId: string,
+  completed: boolean,
+): Promise<{ success?: boolean; error?: string }> {
+  try {
+    if (!taskId) throw new Error("Task ID is required");
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -446,6 +450,12 @@ export async function toggleTaskComplete(taskId: string, completed: boolean) {
   // Server-side RBAC: only founders/CPO can move a task to "approved"
   if (completed) {
     await assertCanApproveTask(supabase, user.id, taskId);
+    const blockers = await countOpenBlockers(supabase, taskId);
+    if (blockers > 0) {
+      throw new Error(
+        `Task is blocked by ${blockers} open task${blockers === 1 ? "" : "s"}`,
+      );
+    }
   }
 
   const { data: updated, error } = await supabase
@@ -475,6 +485,14 @@ export async function toggleTaskComplete(taskId: string, completed: boolean) {
   }
 
   revalidatePath("/tasks");
+    return { success: true };
+  } catch (err) {
+    // Return-based errors (not throws): Next masks thrown server-action
+    // messages in production, so the real reason must travel as data.
+    return {
+      error: err instanceof Error ? err.message : "Failed to update task",
+    };
+  }
 }
 
 /**
@@ -559,6 +577,23 @@ export async function spawnNextOccurrence(taskId: string): Promise<void> {
   }
 }
 
+/**
+ * Open blockers (arc 3 · D4): the number of non-approved tasks blocking this one.
+ */
+async function countOpenBlockers(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  taskId: string,
+): Promise<number> {
+  const { data } = await supabase
+    .from("task_dependencies")
+    .select("blocker:tasks!blocker_id(status)")
+    .eq("blocked_id", taskId);
+  return (data || []).filter((row) => {
+    const blocker = row.blocker as { status?: string } | null;
+    return blocker && blocker.status !== "approved";
+  }).length;
+}
+
 export async function toggleTaskStar(taskId: string, isStarred: boolean) {
   if (!taskId) throw new Error("Task ID is required");
 
@@ -602,6 +637,12 @@ export async function updateTaskStatus(taskId: string, status: string) {
   // Server-side RBAC: only founders/CPO can set status to "approved"
   if (status === "approved") {
     await assertCanApproveTask(supabase, user.id, taskId);
+    const blockers = await countOpenBlockers(supabase, taskId);
+    if (blockers > 0) {
+      throw new Error(
+        `Task is blocked by ${blockers} open task${blockers === 1 ? "" : "s"}`,
+      );
+    }
   }
 
   const { data: updated, error } = await supabase
@@ -649,6 +690,12 @@ export async function updateTask(
   // Server-side RBAC: generic updates must not bypass the approval rule
   if (parsed.data.status === "approved") {
     await assertCanApproveTask(supabase, user.id, taskId);
+    const blockers = await countOpenBlockers(supabase, taskId);
+    if (blockers > 0) {
+      throw new Error(
+        `Task is blocked by ${blockers} open task${blockers === 1 ? "" : "s"}`,
+      );
+    }
   }
 
   // Capture the current row so we can notify only on actual changes and

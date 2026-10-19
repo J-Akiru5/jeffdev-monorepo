@@ -52,6 +52,23 @@ test.describe("api", () => {
     await ctx.dispose();
   });
 
+  test("github webhook rejects unsigned calls", async ({
+    playwright,
+    baseURL,
+  }) => {
+    // Unset secret → 503 (disabled); configured + bad signature → 401.
+    const ctx = await playwright.request.newContext({
+      baseURL,
+      storageState: { cookies: [], origins: [] },
+    });
+    const res = await ctx.post("/api/github/webhook", {
+      data: { action: "closed", issue: { number: 1 } },
+      headers: { "x-github-event": "issues", "x-hub-signature-256": "sha256=bad" },
+    });
+    expect([401, 503]).toContain(res.status());
+    await ctx.dispose();
+  });
+
   test("security headers are present", async ({ request }) => {
     const res = await request.get("/");
     const headers = res.headers();

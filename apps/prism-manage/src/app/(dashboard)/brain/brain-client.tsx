@@ -17,6 +17,7 @@ import {
   captureMemoryEntry,
   getMemoryEntries,
   searchMemory,
+  updateMemoryStatus,
   type BrainCitation,
   type MemoryEntry,
 } from "@/app/actions/brain";
@@ -64,6 +65,7 @@ export function BrainClient() {
   const [entries, setEntries] = useState<MemoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [sourceFilter, setSourceFilter] = useState<string>("all");
+  const [needsReviewOnly, setNeedsReviewOnly] = useState(false);
 
   const [captureOpen, setCaptureOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -163,10 +165,37 @@ export function BrainClient() {
     setAsking(false);
   }, [activeWorkspaceId, question]);
 
-  const visibleEntries =
-    sourceFilter === "all"
-      ? entries
-      : entries.filter((entry) => entry.sourceType === sourceFilter);
+  const needsReviewCount = entries.filter(
+    (entry) => entry.reviewStatus === "captured",
+  ).length;
+
+  const visibleEntries = entries.filter((entry) => {
+    const matchesSource =
+      sourceFilter === "all" || entry.sourceType === sourceFilter;
+    const matchesReview =
+      !needsReviewOnly || entry.reviewStatus === "captured";
+    return matchesSource && matchesReview;
+  });
+
+  const handleReviewAction = useCallback(
+    async (id: string, status: "reviewed" | "archived") => {
+      const result = await updateMemoryStatus(id, status);
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      if (status === "archived") {
+        setEntries((prev) => prev.filter((e) => e.id !== id));
+        toast.success("Memory archived");
+      } else {
+        setEntries((prev) =>
+          prev.map((e) => (e.id === id ? { ...e, reviewStatus: "reviewed" } : e)),
+        );
+        toast.success("Marked reviewed");
+      }
+    },
+    [],
+  );
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -405,6 +434,19 @@ export function BrainClient() {
                 {f.label}
               </button>
             ))}
+            {needsReviewCount > 0 && (
+              <button
+                onClick={() => setNeedsReviewOnly((v) => !v)}
+                aria-pressed={needsReviewOnly}
+                className={`rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                  needsReviewOnly
+                    ? "border-amber-500/40 bg-amber-500/10 text-amber-400"
+                    : "border-border text-white/40 hover:text-white/70"
+                }`}
+              >
+                Needs review ({needsReviewCount})
+              </button>
+            )}
           </div>
         </div>
 
@@ -439,10 +481,31 @@ export function BrainClient() {
                 <span className="font-mono text-[10px] text-white/25">
                   {formatRelative(entry.createdAt)}
                 </span>
+                {entry.reviewStatus === "reviewed" && (
+                  <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-emerald-400">
+                    Reviewed
+                  </span>
+                )}
               </div>
               <p className="mt-1 whitespace-pre-wrap text-sm text-white/50">
                 {entry.summary}
               </p>
+              {entry.reviewStatus === "captured" && (
+                <div className="mt-2 flex items-center gap-2">
+                  <button
+                    onClick={() => handleReviewAction(entry.id, "reviewed")}
+                    className="rounded-lg border border-border px-2.5 py-1 text-[11px] text-white/50 transition-colors hover:border-emerald-500/40 hover:text-emerald-400"
+                  >
+                    Mark reviewed
+                  </button>
+                  <button
+                    onClick={() => handleReviewAction(entry.id, "archived")}
+                    className="rounded-lg border border-border px-2.5 py-1 text-[11px] text-white/40 transition-colors hover:border-red-500/40 hover:text-red-400"
+                  >
+                    Archive
+                  </button>
+                </div>
+              )}
             </div>
           ))}
       </div>

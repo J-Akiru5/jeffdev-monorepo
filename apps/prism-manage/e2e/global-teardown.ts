@@ -82,6 +82,12 @@ export default async function globalTeardown() {
       .eq("created_by", testUser.id)
       .like("title", "e2e-%");
 
+    await admin
+      .from("task_templates")
+      .delete()
+      .eq("created_by", testUser.id)
+      .like("name", "e2e-%");
+
     console.log("[e2e] test data cleaned up");
   } catch {
     // best-effort

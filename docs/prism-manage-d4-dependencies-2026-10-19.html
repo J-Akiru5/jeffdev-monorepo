@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage Arc 3 · D4 — Task Dependencies</title>
+<style>
+  :root { --bg:#0A0D12; --bg-card:#151A22; --border:#232A36; --cyan:#22D3EE; --violet:#8B7BFF; --text:#E6EAF0; --text-dim:#8B93A3; --text-faint:#5A6272; --good:#4ADE80; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; line-height:1.6; padding:48px 24px; }
+  .wrap { max-width:820px; margin:0 auto; }
+  .mono { font-family:'JetBrains Mono','SF Mono',Consolas,monospace; }
+  header { border-bottom:1px solid var(--border); padding-bottom:28px; margin-bottom:32px; }
+  .eyebrow { font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--cyan); margin-bottom:10px; }
+  h1 { font-size:26px; font-weight:700; margin-bottom:12px; background:linear-gradient(90deg,var(--text),var(--text) 60%,var(--cyan)); -webkit-background-clip:text; background-clip:text; }
+  .meta-row { display:flex; flex-wrap:wrap; gap:16px; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text-dim); }
+  .meta-row b { color:var(--text); font-weight:500; }
+  .badge { display:inline-block; padding:3px 10px; border-radius:999px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.04em; text-transform:uppercase; border:1px solid; color:var(--good); border-color:var(--good); background:rgba(74,222,128,.08); }
+  section { margin-bottom:32px; }
+  h2 { font-size:13px; font-family:'JetBrains Mono',monospace; letter-spacing:.06em; text-transform:uppercase; color:var(--violet); margin-bottom:14px; display:flex; align-items:center; gap:10px; }
+  h2::after { content:''; flex:1; height:1px; background:var(--border); }
+  .summary-box { background:var(--bg-card); border:1px solid var(--border); border-left:3px solid var(--cyan); border-radius:6px; padding:18px 20px; font-size:15px; }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; }
+  th,td { text-align:left; padding:10px 14px; border-bottom:1px solid var(--border); vertical-align:top; }
+  th { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-faint); font-weight:500; }
+  td.mono { color:var(--cyan); white-space:nowrap; }
+  .ok { color:var(--good); }
+  ul.clean { list-style:none; display:flex; flex-direction:column; gap:10px; }
+  ul.clean li { background:var(--bg-card); border:1px solid var(--border); border-radius:6px; padding:12px 16px; font-size:14px; }
+  footer { margin-top:44px; padding-top:20px; border-top:1px solid var(--border); font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-faint); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">prism-manage · Arc 3 "Daily Driver" · D4</div>
+    <h1>D4 — Task Dependencies</h1>
+    <div class="meta-row">
+      <span><b>2026-10-19</b></span>
+      <span>Branch: <b>feat/pm-d4-dependencies → PR → develop</b></span>
+      <span class="badge">Complete</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Summary</h2>
+    <div class="summary-box">
+      Tasks can now declare <b>blockers</b>. A blocked task shows a red
+      <b>Blocked</b> badge on its row, and <b>approval is gated</b> — moving a
+      blocked task to Approved fails with the exact reason
+      ("Task is blocked by N open task(s)") until every blocker is completed.
+      Cycles are rejected at the edge level.
+    </div>
+  </section>
+
+  <section>
+    <h2>What Changed</h2>
+    <table>
+      <thead><tr><th>Piece</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">task_dependencies</td><td>blocker → blocked edges (PK pair + self-edge check); RLS scoped to the tasks' workspace members. Migration <span class="mono">20261019000004</span> applied live.</td></tr>
+        <tr><td class="mono">actions/dependencies.ts</td><td><span class="mono">getTaskDependencies</span> (blockers + blocking), <span class="mono">getBlockedTaskIds</span> (badge data), <span class="mono">addTaskDependency</span> with a <b>transitive cycle guard</b> (DFS over existing edges), <span class="mono">removeTaskDependency</span>.</td></tr>
+        <tr><td class="mono">tasks.ts</td><td>All three approval paths (checkbox, status update, generic update) now count open blockers and refuse with the specific reason.</td></tr>
+        <tr><td class="mono">Task sheet</td><td>"Blocked by" section: blocker list with remove, plus an add-picker of open workspace tasks.</td></tr>
+        <tr><td class="mono">Task list</td><td>Blocked rows carry a lock badge; the page loads blocked ids with each refresh.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Fixed Along the Way</h2>
+    <ul class="clean">
+      <li><b>Masked server-action errors (production).</b> Next redacts thrown server-action messages in prod builds, so the "blocked by…" reason never reached the UI. <span class="mono">toggleTaskComplete</span> now follows the codebase's return-based contract (<span class="mono">{ success?, error? }</span>) and the checkbox path toasts the real reason.</li>
+      <li><b>E2E robustness.</b> The new spec reloads and drives several server actions; it now marks itself slow and allows for loaded-suite page loads. 34/34 green in the full suite.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Verification</h2>
+    <ul class="clean">
+      <li><span class="ok">✔</span> E2E: <b>34/34 passed</b> — the dependencies spec proves: wire a blocker from the sheet → badge appears → completion fails with the exact reason → completing the blocker unlocks it.</li>
+      <li><span class="ok">✔</span> Types/lint clean; migration applied; types regenerated (drift in sync); production build green.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>arc 3 · D4 complete</span>
+    <span>next: D5 — brain digest in the task sheet</span>
+  </footer>
+</div>
+</body>
+</html>

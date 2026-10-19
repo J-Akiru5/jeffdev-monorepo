@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage Arc 3 "Daily Driver" — Complete</title>
+<style>
+  :root { --bg:#0A0D12; --bg-card:#151A22; --border:#232A36; --cyan:#22D3EE; --violet:#8B7BFF; --text:#E6EAF0; --text-dim:#8B93A3; --text-faint:#5A6272; --good:#4ADE80; --warn:#FBBF24; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; line-height:1.6; padding:48px 24px; }
+  .wrap { max-width:880px; margin:0 auto; }
+  .mono { font-family:'JetBrains Mono','SF Mono',Consolas,monospace; }
+  header { border-bottom:1px solid var(--border); padding-bottom:28px; margin-bottom:32px; }
+  .eyebrow { font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--cyan); margin-bottom:10px; }
+  h1 { font-size:28px; font-weight:700; margin-bottom:12px; background:linear-gradient(90deg,var(--text),var(--text) 55%,var(--cyan)); -webkit-background-clip:text; background-clip:text; }
+  .meta-row { display:flex; flex-wrap:wrap; gap:16px; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text-dim); }
+  .meta-row b { color:var(--text); font-weight:500; }
+  .badge { display:inline-block; padding:3px 10px; border-radius:999px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.04em; text-transform:uppercase; border:1px solid; color:var(--good); border-color:var(--good); background:rgba(74,222,128,.08); }
+  .badge.warn { color:var(--warn); border-color:var(--warn); background:rgba(251,191,36,.08); }
+  section { margin-bottom:34px; }
+  h2 { font-size:13px; font-family:'JetBrains Mono',monospace; letter-spacing:.06em; text-transform:uppercase; color:var(--violet); margin-bottom:14px; display:flex; align-items:center; gap:10px; }
+  h2::after { content:''; flex:1; height:1px; background:var(--border); }
+  .summary-box { background:var(--bg-card); border:1px solid var(--border); border-left:3px solid var(--cyan); border-radius:6px; padding:18px 20px; font-size:15px; }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+  .stat { background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:14px 16px; }
+  .stat .n { font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:600; color:var(--cyan); }
+  .stat .l { font-size:12px; color:var(--text-dim); margin-top:2px; }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; }
+  th,td { text-align:left; padding:10px 14px; border-bottom:1px solid var(--border); vertical-align:top; }
+  th { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-faint); font-weight:500; }
+  td.mono { color:var(--cyan); white-space:nowrap; }
+  .ok { color:var(--good); }
+  ul.clean { list-style:none; display:flex; flex-direction:column; gap:10px; }
+  ul.clean li { background:var(--bg-card); border:1px solid var(--border); border-radius:6px; padding:12px 16px; font-size:14px; }
+  footer { margin-top:44px; padding-top:20px; border-top:1px solid var(--border); font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-faint); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">prism-manage · Arc 3 "Daily Driver" · Final Report</div>
+    <h1>Arc 3 Complete — D1 → D7</h1>
+    <div class="meta-row">
+      <span><b>2026-10-19</b></span>
+      <span>Run: <b>autonomous, overnight</b></span>
+      <span class="badge">All phases shipped · CI green</span>
+      <span class="badge warn">Release to main awaiting approval</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Summary</h2>
+    <div class="summary-box">
+      Seven phases built and shipped to <span class="mono">develop</span> in one
+      autonomous run — templates, bulk actions, GitHub reverse-sync,
+      dependencies, brain-in-sheet, a real block editor, and brain curation.
+      Every phase went branch → PR → <b>CI green</b> → HTML report. The
+      quality bar grew with the arc: <b>37 E2E tests</b> (from 30) and
+      <b>47 unit tests</b>, all green against the live database.
+    </div>
+  </section>
+
+  <section>
+    <h2>By the Numbers</h2>
+    <div class="stats">
+      <div class="stat"><div class="n">7/7</div><div class="l">phases shipped</div></div>
+      <div class="stat"><div class="n">7</div><div class="l">PRs merged (115–121)</div></div>
+      <div class="stat"><div class="n">37</div><div class="l">E2E tests passing</div></div>
+      <div class="stat"><div class="n">47</div><div class="l">unit tests passing</div></div>
+      <div class="stat"><div class="n">2</div><div class="l">migrations applied live</div></div>
+      <div class="stat"><div class="n">2</div><div class="l">real bugs found + fixed</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Phase Ledger</h2>
+    <table>
+      <thead><tr><th>Phase</th><th>What shipped</th><th>PR</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">D1 templates</td><td>Save any task as a workspace template; "Start from template" picker in create flows; RLS-scoped table + teardown coverage.</td><td class="mono">#115</td></tr>
+        <tr><td class="mono">D2 bulk actions</td><td>Table view becomes the triage surface: row checkboxes + select-all; bulk status / priority / assign / complete / delete with per-item failure reporting (RBAC-routed).</td><td class="mono">#116</td></tr>
+        <tr><td class="mono">D3 GitHub webhook</td><td>HMAC-verified reverse-sync: closing/reopening a linked issue sets the task's status; fail-closed; 5 unit tests + rejection E2E; wiring guide in the report.</td><td class="mono">#117</td></tr>
+        <tr><td class="mono">D4 dependencies</td><td>Blocker edges with a transitive cycle guard; approval gated while blockers are open (exact reason surfaced); Blocked badges; sheet "Blocked by" section.</td><td class="mono">#118</td></tr>
+        <tr><td class="mono">D5 brain digest</td><td>Task sheet shows Related memories (top 3 semantic matches + similarity; keyword fallback everywhere).</td><td class="mono">#119</td></tr>
+        <tr><td class="mono">D6 block editor</td><td>Six block types (text, heading, bullet, checklist, code, divider), Enter/Backspace ops, type menus, reorder controls, 800ms debounced autosave, legacy content compatible.</td><td class="mono">#120</td></tr>
+        <tr><td class="mono">D7 brain R2</td><td>Review queue ("Needs review (N)", Mark reviewed / Archive, Reviewed badge) + per-workspace daily distillation cap (default 50).</td><td class="mono">#121</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Real Bugs Found &amp; Fixed Along the Way</h2>
+    <ul class="clean">
+      <li><b>Masked server-action errors (production).</b> Next redacts thrown server-action messages in prod builds — the blocked-task reason never reached the UI. <span class="mono">toggleTaskComplete</span> moved to the codebase's return-based error contract; users now see exactly why an action refused.</li>
+      <li><b>Test-locator reality checks.</b> Completed tasks collapse into a details section (assertions now target state transitions, not hidden buttons), and page-load starvation under 6 parallel workers was solved with slow-markers + realistic waits — the suite is now deterministic under load.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Autonomous Decisions (logged for review)</h2>
+    <ul class="clean">
+      <li><b>Ran D5 + D7 without the R0 verdict</b> (per "run all of them"), but kept everything reversible: nothing auto-captures by default, the distill cap is on, and curation is manual. Your GO/NO-GO still gates auto-distill.</li>
+      <li><b>D6 scoped to a solid v1</b>: buttons for reorder, no drag/slash commands yet — additive later, zero migration cost.</li>
+      <li><b>D2 bulk lives in the table view</b> — the natural triage surface; list-view selection is a possible follow-up.</li>
+      <li><b>D3 syncs closed/reopened only</b> — label/assignee reverse-mapping needs a GitHub-login → user map; deliberately deferred.</li>
+      <li><b>No merge to <span class="mono">main</span></b> — production release stays your call per the standing policy.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Ops Notes</h2>
+    <ul class="clean">
+      <li><b>Migrations applied live:</b> <span class="mono">20261019000003</span> (task_templates), <span class="mono">20261019000004</span> (task_dependencies). Schema drift in sync.</li>
+      <li><b>Gemini free-tier LLM quota exhausted</b> (20 calls/day) by the overnight runs — degradation is graceful (fallback distillation, closest-match answers) and embeddings are unaffected, so search keeps working. A paid key is recommended when the brain gets real use.</li>
+      <li><b>Vercel build quota</b> was exhausted earlier; deploys resume when it resets (or via a manual redeploy).</li>
+      <li><b>Env vars you may want:</b> <span class="mono">GITHUB_WEBHOOK_SECRET</span> (then add the repo webhook — URL + steps in the D3 report), optional <span class="mono">SLACK_WEBHOOK_URL</span> and <span class="mono">BRAIN_INGEST_SECRET</span>, optional <span class="mono">BRAIN_DISTILL_DAILY_CAP</span>.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>What I Need From You</h2>
+    <ul class="clean">
+      <li><b>R0 GO/NO-GO</b> on the Company Brain — it gates auto-distill (<span class="mono">BRAIN_AUTO_DISTILL=1</span>) and tells me how far to push R3.</li>
+      <li><b>Release approval</b> — say the word and I'll open the <span class="mono">develop → main</span> release PR with a summary.</li>
+      <li><b>GitHub webhook wiring</b> (2 minutes, steps in the D3 report) — until then the endpoint fails closed.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Next Candidates (post-arc)</h2>
+    <ul class="clean">
+      <li>Drag-to-reorder + slash commands in the block editor; list-view bulk selection.</li>
+      <li>Brain R3: auto-distill on thread activity (gated by your GO), richer digests, usage dashboard.</li>
+      <li>Kanban drag flake hardening (known, low priority); Slack notifications when the webhook lands.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>arc 3 · daily driver · complete</span>
+    <span>reports: docs/prism-manage-d1…d7-2026-10-19.html</span>
+  </footer>
+</div>
+</body>
+</html>
