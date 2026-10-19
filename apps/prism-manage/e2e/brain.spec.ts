@@ -128,4 +128,44 @@ test.describe("company brain", () => {
       page.getByText("e2e context for the related-memories check."),
     ).toBeVisible({ timeout: 20_000 });
   });
+
+  test("review queue: mark reviewed clears Needs review (arc 3 · D7)", async ({
+    page,
+  }) => {
+    test.slow();
+    const title = e2eTitle("review");
+
+    await page.goto("/brain");
+    await expect(
+      page.getByRole("heading", { name: "Company Brain", exact: true }),
+    ).toBeVisible({ timeout: 20_000 });
+
+    // Capture a fresh memory (starts as "captured")
+    await page.getByRole("button", { name: "Log decision" }).click();
+    await page.getByPlaceholder("What was decided?").fill(title);
+    await page
+      .getByPlaceholder("Context — what changed and why it matters")
+      .fill("e2e review-queue context.");
+    await page.getByRole("button", { name: "Save decision" }).click();
+    await expect(page.getByText(title).first()).toBeVisible({
+      timeout: 15_000,
+    });
+
+    const card = page
+      .locator("div.rounded-xl.border.border-border.glass-subtle")
+      .filter({ hasText: title });
+
+    // The Needs review queue includes it
+    await page.getByRole("button", { name: /Needs review/ }).click();
+    await expect(card).toBeVisible();
+
+    // Mark reviewed → it leaves the queue
+    await card.getByRole("button", { name: "Mark reviewed" }).click();
+    await expect(card).toHaveCount(0, { timeout: 15_000 });
+
+    // Clear the filter → back in the timeline with the Reviewed badge
+    await page.getByRole("button", { name: /Needs review/ }).click();
+    await expect(card).toBeVisible();
+    await expect(card.getByText("Reviewed")).toBeVisible();
+  });
 });

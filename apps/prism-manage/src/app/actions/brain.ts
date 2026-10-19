@@ -128,6 +128,34 @@ export async function getMemoryEntries(
   return (data || []).map(mapEntry);
 }
 
+/**
+ * Curation (R2 · D7): mark a memory reviewed or archive it.
+ * RLS limits this to the author or a workspace founder.
+ */
+export async function updateMemoryStatus(
+  id: string,
+  status: "reviewed" | "archived",
+): Promise<{ success?: boolean; error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  const { error } = await supabase
+    .from("memory_entries")
+    .update({ review_status: status } as never)
+    .eq("id", id);
+  if (error) {
+    logger.error("brain.status.failed", { id, status, error: error.message });
+    return { error: error.message };
+  }
+
+  logger.info("brain.status.updated", { id, status });
+  revalidatePath("/brain");
+  return { success: true };
+}
+
 export async function searchMemory(
   workspaceId: string,
   query: string,
@@ -287,6 +315,28 @@ export async function distillTaskThread(
       options.throttleMs
   ) {
     return { success: true, entryId: String(existing.id), skipped: true };
+  }
+
+  // Cost guardrail (D7): cap distillations per workspace per day
+  const distillCap = Number(process.env.BRAIN_DISTILL_DAILY_CAP || "50");
+  if (Number.isFinite(distillCap) && distillCap > 0) {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const { count } = await supabase
+      .from("memory_entries")
+      .select("id", { count: "exact", head: true })
+      .eq("workspace_id", task.workspace_id)
+      .eq("source_type", "comment-thread")
+      .gte("updated_at", startOfDay.toISOString());
+    if ((count ?? 0) >= distillCap) {
+      logger.warn("brain.distill.cap_reached", {
+        workspaceId: task.workspace_id,
+        cap: distillCap,
+      });
+      return {
+        error: `Daily distillation cap reached (${distillCap}). Try again tomorrow.`,
+      };
+    }
   }
 
   const thread = comments
