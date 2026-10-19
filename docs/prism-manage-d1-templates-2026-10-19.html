@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage Arc 3 · D1 — Task Templates</title>
+<style>
+  :root { --bg:#0A0D12; --bg-card:#151A22; --border:#232A36; --cyan:#22D3EE; --violet:#8B7BFF; --text:#E6EAF0; --text-dim:#8B93A3; --text-faint:#5A6272; --good:#4ADE80; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; line-height:1.6; padding:48px 24px; }
+  .wrap { max-width:820px; margin:0 auto; }
+  .mono { font-family:'JetBrains Mono','SF Mono',Consolas,monospace; }
+  header { border-bottom:1px solid var(--border); padding-bottom:28px; margin-bottom:32px; }
+  .eyebrow { font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--cyan); margin-bottom:10px; }
+  h1 { font-size:26px; font-weight:700; margin-bottom:12px; background:linear-gradient(90deg,var(--text),var(--text) 60%,var(--cyan)); -webkit-background-clip:text; background-clip:text; }
+  .meta-row { display:flex; flex-wrap:wrap; gap:16px; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text-dim); }
+  .meta-row b { color:var(--text); font-weight:500; }
+  .badge { display:inline-block; padding:3px 10px; border-radius:999px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.04em; text-transform:uppercase; border:1px solid; color:var(--good); border-color:var(--good); background:rgba(74,222,128,.08); }
+  section { margin-bottom:32px; }
+  h2 { font-size:13px; font-family:'JetBrains Mono',monospace; letter-spacing:.06em; text-transform:uppercase; color:var(--violet); margin-bottom:14px; display:flex; align-items:center; gap:10px; }
+  h2::after { content:''; flex:1; height:1px; background:var(--border); }
+  .summary-box { background:var(--bg-card); border:1px solid var(--border); border-left:3px solid var(--cyan); border-radius:6px; padding:18px 20px; font-size:15px; }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; }
+  th,td { text-align:left; padding:10px 14px; border-bottom:1px solid var(--border); vertical-align:top; }
+  th { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-faint); font-weight:500; }
+  td.mono { color:var(--cyan); white-space:nowrap; }
+  .ok { color:var(--good); }
+  ul.clean { list-style:none; display:flex; flex-direction:column; gap:10px; }
+  ul.clean li { background:var(--bg-card); border:1px solid var(--border); border-radius:6px; padding:12px 16px; font-size:14px; }
+  footer { margin-top:44px; padding-top:20px; border-top:1px solid var(--border); font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-faint); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">prism-manage · Arc 3 "Daily Driver" · D1</div>
+    <h1>D1 — Task Templates</h1>
+    <div class="meta-row">
+      <span><b>2026-10-19</b></span>
+      <span>Branch: <b>feat/pm-d1-templates → PR → develop</b></span>
+      <span class="badge">Complete</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Summary</h2>
+    <div class="summary-box">
+      Any task can be saved as a <b>workspace template</b> ("Save as template" in
+      the sheet), and create flows gained a <b>"Start from template"</b> picker
+      that prefills title, type, priority, description, tags, and default list.
+    </div>
+  </section>
+
+  <section>
+    <h2>What Changed</h2>
+    <table>
+      <thead><tr><th>Piece</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">task_templates</td><td>Workspace-scoped (name + task shape + tags JSONB + default list); RLS: members view/create, creators &amp; founders update/delete. Migration <span class="mono">20261019000003</span> applied live.</td></tr>
+        <tr><td class="mono">actions/templates.ts</td><td><span class="mono">saveTaskAsTemplate</span> (snapshots the task + junction tags), <span class="mono">getTaskTemplates</span>, <span class="mono">deleteTaskTemplate</span>.</td></tr>
+        <tr><td class="mono">Task sheet</td><td>Create mode: accessible template picker (labelled select). Edit mode: "Save as template" (PromptDialog for the name).</td></tr>
+        <tr><td class="mono">e2e/templates.spec.ts</td><td>Create → save as template → create-from-template → title prefills. Teardown also cleans <span class="mono">e2e-*</span> templates.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Verification</h2>
+    <ul class="clean">
+      <li><span class="ok">✔</span> E2E: <b>31/31 passed</b> (new templates spec included).</li>
+      <li><span class="ok">✔</span> Types/lint clean; migration applied; types regenerated (drift in sync).</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>arc 3 · D1 complete</span>
+    <span>next: D2 — bulk actions</span>
+  </footer>
+</div>
+</body>
+</html>
