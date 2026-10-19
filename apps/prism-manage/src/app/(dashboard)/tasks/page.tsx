@@ -21,6 +21,7 @@ import {
   updateTask,
 } from "@/app/actions/tasks";
 import { getWorkspaceMembers } from "@/app/actions/workspace";
+import { getBlockedTaskIds } from "@/app/actions/dependencies";
 import {
   createSavedView,
   deleteSavedView,
@@ -60,6 +61,7 @@ function TasksContent() {
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [blockedIds, setBlockedIds] = useState<Set<string>>(new Set());
   const searchParams = useSearchParams();
   const filter = searchParams.get("filter");
   const departmentId = searchParams.get("department");
@@ -95,6 +97,9 @@ function TasksContent() {
       setTasks(data);
       setHasMore(data.length >= TASKS_PAGE_SIZE);
       setSelectedIds(new Set());
+      setBlockedIds(
+        new Set(await getBlockedTaskIds(data.map((t) => t.id))),
+      );
     } catch (err) {
       console.error("Failed to load tasks:", err);
     } finally {
@@ -335,7 +340,11 @@ function TasksContent() {
         const task = tasksRef.current.find((t) => t.id === taskId);
         if (!task) return;
         const completed = task.status !== "approved";
-        await toggleTaskComplete(taskId, completed);
+        const result = await toggleTaskComplete(taskId, completed);
+        if (result.error) {
+          toast.error(result.error);
+          return;
+        }
         setTasks((prev) =>
           prev.map((t) =>
             t.id === taskId
@@ -347,8 +356,10 @@ function TasksContent() {
               : t,
           ),
         );
-      } catch {
-        toast.error("Failed to update task");
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : "Failed to update task",
+        );
       }
     },
     [],
@@ -371,8 +382,10 @@ function TasksContent() {
               : t,
           ),
         );
-      } catch {
-        toast.error("Failed to update task");
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : "Failed to update task",
+        );
       }
     },
     [],
@@ -743,7 +756,10 @@ function TasksContent() {
                 onClick={() =>
                   void runBulk(
                     "Completed",
-                    (id) => toggleTaskComplete(id, true),
+                    (id) =>
+                      toggleTaskComplete(id, true).then((r) => {
+                        if (r.error) throw new Error(r.error);
+                      }),
                     [...selectedIds],
                   )
                 }
@@ -792,6 +808,7 @@ function TasksContent() {
                 key={projectId}
                 tasks={projectTasks}
                 project={project}
+                blockedIds={blockedIds}
                 onToggleComplete={handleToggleComplete}
                 onToggleStar={handleToggleStar}
                 onDelete={handleDelete}

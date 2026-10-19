@@ -1279,6 +1279,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"task_dependencies": {
+                  Row: {
+                    "blocked_id": string,"blocker_id": string,"created_at": string,"created_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "blocked_id": string,"blocker_id": string,"created_at"?: string,"created_by"?: string | null
+                  }
+                  Update: {
+                    "blocked_id"?: string,"blocker_id"?: string,"created_at"?: string,"created_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "task_dependencies_blocked_id_fkey"
+      columns: ["blocked_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "task_dependencies_blocker_id_fkey"
+      columns: ["blocker_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"task_tags": {
                   Row: {
                     "created_at": string | null,"tag_id": string,"task_id": string

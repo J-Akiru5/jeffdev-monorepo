@@ -17,6 +17,7 @@ import {
   User,
   AlertTriangle,
   Repeat,
+  Lock,
 } from "lucide-react";
 import { ConfirmDialog } from "@syntaxure/ui";
 import { createPortal } from "react-dom";
@@ -29,6 +30,7 @@ interface TaskItemProps {
   onToggleStar?: (id: string) => void;
   onDelete?: (id: string) => void;
   onClick?: (id: string) => void;
+  isBlocked?: boolean;
 }
 
 export const TaskItem = memo(function TaskItem({
@@ -37,6 +39,7 @@ export const TaskItem = memo(function TaskItem({
   onToggleStar,
   onDelete,
   onClick,
+  isBlocked,
 }: TaskItemProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -154,6 +157,14 @@ export const TaskItem = memo(function TaskItem({
                 : task.recurrence === "weekly"
                   ? "Weekly"
                   : "Monthly"}
+            </span>
+          )}
+
+          {/* Blocked (arc 3 · D4) */}
+          {isBlocked && (
+            <span className="flex items-center gap-1 rounded bg-red-500/10 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
+              <Lock className="h-3 w-3" />
+              Blocked
             </span>
           )}
 

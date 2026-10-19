@@ -41,6 +41,13 @@ import {
   type TaskTemplate,
 } from "@/app/actions/templates";
 import { PromptDialog } from "@/components/prompt-dialog";
+import {
+  addTaskDependency,
+  getTaskDependencies,
+  removeTaskDependency,
+  type DependencyTask,
+} from "@/app/actions/dependencies";
+import { getTasks } from "@/app/actions/tasks";
 import { createIssueForTask } from "@/app/actions/github-sync";
 import { createClient } from "@/lib/supabase/browser";
 import { toast } from "sonner";
@@ -131,6 +138,10 @@ export function TaskSheet({
   const [distilling, setDistilling] = useState(false);
   const [templates, setTemplates] = useState<TaskTemplate[]>([]);
   const [templateDialogOpen, setTemplateDialogOpen] = useState(false);
+  const [blockers, setBlockers] = useState<DependencyTask[]>([]);
+  const [blockerCandidates, setBlockerCandidates] = useState<
+    { id: string; title: string }[]
+  >([]);
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
 
@@ -258,6 +269,50 @@ export function TaskSheet({
     if (activeWorkspaceId) {
       setTemplates(await getTaskTemplates(activeWorkspaceId));
     }
+  };
+
+  // Dependencies (arc 3 · D4): this task's blockers + add-candidates
+  useEffect(() => {
+    if (!isOpen || !taskId || !activeWorkspaceId) return;
+    let cancelled = false;
+    getTaskDependencies(taskId).then((d) => {
+      if (!cancelled) setBlockers(d.blockers);
+    });
+    getTasks(activeWorkspaceId, { limit: 100 }).then((all) => {
+      if (!cancelled) {
+        setBlockerCandidates(
+          all
+            .filter((t) => t.id !== taskId && t.status !== "approved")
+            .map((t) => ({ id: t.id, title: t.title })),
+        );
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, taskId, activeWorkspaceId]);
+
+  const handleAddBlocker = async (blockerId: string) => {
+    if (!taskId) return;
+    const result = await addTaskDependency(blockerId, taskId);
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+    toast.success("Blocker added");
+    const d = await getTaskDependencies(taskId);
+    setBlockers(d.blockers);
+  };
+
+  const handleRemoveBlocker = async (blockerId: string) => {
+    if (!taskId) return;
+    const result = await removeTaskDependency(blockerId, taskId);
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+    const d = await getTaskDependencies(taskId);
+    setBlockers(d.blockers);
   };
 
   const handleDistillThread = async () => {
@@ -884,6 +939,71 @@ export function TaskSheet({
                           </button>
                         )}
                       </div>
+
+                      {/* Blocked by (arc 3 · D4) */}
+                      {mode === "edit" && taskId && (
+                        <div>
+                          <label className="mb-3 block text-xs font-medium uppercase tracking-wider text-white/40">
+                            Blocked by
+                          </label>
+                          <div className="space-y-2">
+                            {blockers.length === 0 && (
+                              <p className="text-xs text-white/40">
+                                No blockers — this task is free to move.
+                              </p>
+                            )}
+                            {blockers.map((b) => (
+                              <div
+                                key={b.id}
+                                className="flex items-center gap-2 rounded-lg border border-border bg-glass-04 px-3 py-2"
+                              >
+                                <span className="truncate text-sm text-white/80">
+                                  {b.title}
+                                </span>
+                                <span className="ml-auto shrink-0 text-[10px] uppercase tracking-wider text-white/40">
+                                  {b.status.replace("_", " ")}
+                                </span>
+                                <button
+                                  onClick={() => handleRemoveBlocker(b.id)}
+                                  aria-label={`Remove blocker ${b.title}`}
+                                  className="shrink-0 rounded p-1 text-white/30 transition-colors hover:text-red-400"
+                                >
+                                  <X className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="mt-2">
+                            <label
+                              htmlFor="blocker-picker"
+                              className="mb-1.5 block text-[11px] text-white/40"
+                            >
+                              Add a blocker
+                            </label>
+                            <select
+                              id="blocker-picker"
+                              value=""
+                              onChange={(e) => {
+                                const blockerId = e.target.value;
+                                if (blockerId) void handleAddBlocker(blockerId);
+                              }}
+                              className="w-full appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2.5 text-sm text-white/70 outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
+                            >
+                              <option value="">Choose a task…</option>
+                              {blockerCandidates
+                                .filter(
+                                  (t) =>
+                                    !blockers.some((b) => b.id === t.id),
+                                )
+                                .map((t) => (
+                                  <option key={t.id} value={t.id}>
+                                    {t.title}
+                                  </option>
+                                ))}
+                            </select>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Comments */}
                       <div>
