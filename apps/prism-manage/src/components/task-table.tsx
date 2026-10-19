@@ -29,12 +29,25 @@ interface TaskTableProps {
   projects: Project[];
   members: { userId: string; name: string }[];
   onTaskClick: (id: string) => void;
+  selectedIds?: Set<string>;
+  onToggleSelect?: (id: string) => void;
+  onToggleSelectAll?: () => void;
 }
 
 /**
  * Compact table view of tasks — an alternative to the project-grouped list.
+ * Doubles as the bulk-action surface (arc 3 · D2): rows carry checkboxes and
+ * the header selects everything currently in view.
  */
-export function TaskTable({ tasks, projects, members, onTaskClick }: TaskTableProps) {
+export function TaskTable({
+  tasks,
+  projects,
+  members,
+  onTaskClick,
+  selectedIds,
+  onToggleSelect,
+  onToggleSelectAll,
+}: TaskTableProps) {
   const projectMap = new Map(projects.map((p) => [p.id, p]));
   const memberMap = new Map(members.map((m) => [m.userId, m.name]));
 
@@ -46,6 +59,19 @@ export function TaskTable({ tasks, projects, members, onTaskClick }: TaskTablePr
       <table className="w-full text-left text-sm">
         <thead>
           <tr className="text-[11px] uppercase tracking-wider text-white/40">
+            <th className="w-10 px-4 py-3">
+              <input
+                type="checkbox"
+                aria-label="Select all tasks"
+                checked={
+                  !!selectedIds &&
+                  tasks.length > 0 &&
+                  selectedIds.size === tasks.length
+                }
+                onChange={() => onToggleSelectAll?.()}
+                className="h-3.5 w-3.5 rounded border-border accent-cyan-500"
+              />
+            </th>
             <th className="px-4 py-3 font-medium">Title</th>
             <th className="px-4 py-3 font-medium">Status</th>
             <th className="px-4 py-3 font-medium">Priority</th>
@@ -57,7 +83,7 @@ export function TaskTable({ tasks, projects, members, onTaskClick }: TaskTablePr
         <tbody>
           {tasks.length === 0 && (
             <tr className="border-t border-border/60">
-              <td colSpan={6} className="px-4 py-12 text-center text-white/40">
+              <td colSpan={7} className="px-4 py-12 text-center text-white/40">
                 No tasks match the current filters.
               </td>
             </tr>
@@ -72,6 +98,18 @@ export function TaskTable({ tasks, projects, members, onTaskClick }: TaskTablePr
                 onClick={() => onTaskClick(task.id)}
                 className="cursor-pointer border-t border-border/60 transition-colors hover:bg-white/[0.03]"
               >
+                <td
+                  className="px-4 py-2.5"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <input
+                    type="checkbox"
+                    aria-label={`Select ${task.title}`}
+                    checked={!!selectedIds?.has(task.id)}
+                    onChange={() => onToggleSelect?.(task.id)}
+                    className="h-3.5 w-3.5 rounded border-border accent-cyan-500"
+                  />
+                </td>
                 <td className="max-w-[320px] truncate px-4 py-2.5">
                   <span className={task.status === "approved" ? "text-white/40 line-through" : "text-white/80"}>
                     {task.title}

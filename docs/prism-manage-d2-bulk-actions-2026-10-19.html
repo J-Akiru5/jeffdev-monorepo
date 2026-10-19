@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage Arc 3 · D2 — Bulk Actions</title>
+<style>
+  :root { --bg:#0A0D12; --bg-card:#151A22; --border:#232A36; --cyan:#22D3EE; --violet:#8B7BFF; --text:#E6EAF0; --text-dim:#8B93A3; --text-faint:#5A6272; --good:#4ADE80; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; line-height:1.6; padding:48px 24px; }
+  .wrap { max-width:820px; margin:0 auto; }
+  .mono { font-family:'JetBrains Mono','SF Mono',Consolas,monospace; }
+  header { border-bottom:1px solid var(--border); padding-bottom:28px; margin-bottom:32px; }
+  .eyebrow { font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--cyan); margin-bottom:10px; }
+  h1 { font-size:26px; font-weight:700; margin-bottom:12px; background:linear-gradient(90deg,var(--text),var(--text) 60%,var(--cyan)); -webkit-background-clip:text; background-clip:text; }
+  .meta-row { display:flex; flex-wrap:wrap; gap:16px; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text-dim); }
+  .meta-row b { color:var(--text); font-weight:500; }
+  .badge { display:inline-block; padding:3px 10px; border-radius:999px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.04em; text-transform:uppercase; border:1px solid; color:var(--good); border-color:var(--good); background:rgba(74,222,128,.08); }
+  section { margin-bottom:32px; }
+  h2 { font-size:13px; font-family:'JetBrains Mono',monospace; letter-spacing:.06em; text-transform:uppercase; color:var(--violet); margin-bottom:14px; display:flex; align-items:center; gap:10px; }
+  h2::after { content:''; flex:1; height:1px; background:var(--border); }
+  .summary-box { background:var(--bg-card); border:1px solid var(--border); border-left:3px solid var(--cyan); border-radius:6px; padding:18px 20px; font-size:15px; }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; }
+  th,td { text-align:left; padding:10px 14px; border-bottom:1px solid var(--border); vertical-align:top; }
+  th { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-faint); font-weight:500; }
+  td.mono { color:var(--cyan); white-space:nowrap; }
+  .ok { color:var(--good); }
+  ul.clean { list-style:none; display:flex; flex-direction:column; gap:10px; }
+  ul.clean li { background:var(--bg-card); border:1px solid var(--border); border-radius:6px; padding:12px 16px; font-size:14px; }
+  footer { margin-top:44px; padding-top:20px; border-top:1px solid var(--border); font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-faint); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">prism-manage · Arc 3 "Daily Driver" · D2</div>
+    <h1>D2 — Bulk Actions</h1>
+    <div class="meta-row">
+      <span><b>2026-10-19</b></span>
+      <span>Branch: <b>feat/pm-d2-bulk-actions → PR → develop</b></span>
+      <span class="badge">Complete</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Summary</h2>
+    <div class="summary-box">
+      The table view is now the <b>triage surface</b>: per-row checkboxes +
+      select-all, and a bulk bar that sets <b>status, priority, assignee</b>,
+      or <b>completes/deletes</b> the selection. Every bulk action routes
+      through the existing RBAC-checked task actions — per-item failures are
+      counted and surfaced, never silent.
+    </div>
+  </section>
+
+  <section>
+    <h2>What Changed</h2>
+    <table>
+      <thead><tr><th>Piece</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">task-table.tsx</td><td>Selection column + select-all header (accessible names: "Select &lt;title&gt;", "Select all tasks").</td></tr>
+        <tr><td class="mono">tasks/page.tsx</td><td>Selection state + bulk bar (status/priority/assign selects, Complete, Delete, Clear). <span class="mono">runBulk()</span> runs <span class="mono">Promise.allSettled</span> over the existing actions and reports "N succeeded, M failed". Selection clears on refresh to avoid stale ids.</td></tr>
+        <tr><td class="mono">e2e/bulk.spec.ts</td><td>Seeds 3 tasks → selects them in the table → bulk status → asserts the rows show the new status.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Verification</h2>
+    <ul class="clean">
+      <li><span class="ok">✔</span> E2E: <b>32/32 passed</b> (new bulk spec included).</li>
+      <li><span class="ok">✔</span> Types/lint clean; production build green.</li>
+      <li><span class="ok">✔</span> Bonus resilience evidence: a real Gemini 503 during the run produced <span class="mono">mode:"fallback"</span> distillation — no user-visible failure.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>arc 3 · D2 complete</span>
+    <span>next: D3 — GitHub webhook reverse-sync</span>
+  </footer>
+</div>
+</body>
+</html>
