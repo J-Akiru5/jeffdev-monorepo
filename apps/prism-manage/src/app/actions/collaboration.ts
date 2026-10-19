@@ -2,6 +2,8 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { after } from "next/server";
+import { distillTaskThread } from "@/app/actions/brain";
 import { revalidatePath } from "next/cache";
 import { notifyUsers } from "@/lib/notify";
 import { notifySlack, taskUrl } from "@/lib/slack";
@@ -167,6 +169,14 @@ export async function addComment(
   await supabase
     .from("task_watchers")
     .upsert({ task_id: taskId, user_id: user.id }, { onConflict: "task_id,user_id" });
+
+  // Company Brain (opt-in via BRAIN_AUTO_DISTILL=1): refresh the thread's
+  // memory entry after the response, throttled per thread.
+  if (process.env.BRAIN_AUTO_DISTILL === "1") {
+    after(() =>
+      distillTaskThread(taskId, { throttleMs: 60_000 }).catch(() => {}),
+    );
+  }
 
   // Fan out notifications (best-effort, admin client — notifications are
   // owner-read-only so members can't write rows for each other)

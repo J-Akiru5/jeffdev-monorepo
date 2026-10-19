@@ -23,6 +23,8 @@
     "test": "turbo run test",
     "clean": "node scripts/clean.js",
     "db:push": "node scripts/db-push.mjs",
+    "db:types": "node scripts/db-types.mjs",
+    "db:types:check": "node scripts/db-types.mjs --check",
     "changeset": "changeset",
     "prepare": "husky",
     "prisma:generate": "pnpm --filter @syntaxure-labs/db run prisma:generate",
@@ -36,16 +38,16 @@
     "@changesets/cli": "^2.31.0",
     "@commitlint/cli": "^21.0.1",
     "@commitlint/config-conventional": "^21.0.1",
-    "@next/bundle-analyzer": "^15.1.0",
+    "@next/bundle-analyzer": "^16.4.2",
     "eslint": "^9.39.1",
     "husky": "^9.1.7",
     "lint-staged": "^17.0.5",
     "napi-postinstall": "^0.3.4",
     "prettier": "^3.7.4",
-    "supabase": "^2.101.0",
+    "supabase": "^2.121.0",
     "syncpack": "^13.0.4",
     "turbo": "^2.9.0",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=20"

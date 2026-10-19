@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
+import type { Json } from "@/types/database.types";
 
 async function logAudit(event: {
   action: string;
@@ -19,7 +20,7 @@ async function logAudit(event: {
       action: event.action,
       resource_type: event.resource,
       resource_id: event.resourceId,
-      changes: event.details || null,
+      changes: (event.details ?? null) as Json,
       user_id: event.userId || user?.id || null,
       created_at: new Date().toISOString(),
     });

@@ -91,7 +91,7 @@ export function AddTaskInput({
             if (!value.trim()) setIsExpanded(false);
           }}
           placeholder='Task title... (press Enter for quick-add)'
-          className="flex-1 bg-transparent py-3 text-sm text-white placeholder:text-white/30 focus:outline-none"
+          className="flex-1 bg-transparent py-3 text-sm text-white placeholder:text-white/40 focus:outline-none"
         />
 
         {/* Expand to sheet button */}
@@ -99,7 +99,7 @@ export function AddTaskInput({
           onClick={handleOpenSheet}
           disabled={!value.trim()}
           title="Open full task form"
-          className="flex-shrink-0 rounded-md p-1.5 text-white/30 transition-colors hover:bg-white/[0.04] hover:text-cyan-400 disabled:cursor-not-allowed disabled:opacity-30"
+          className="flex-shrink-0 rounded-md p-1.5 text-white/40 transition-colors hover:bg-white/[0.04] hover:text-cyan-400 disabled:cursor-not-allowed disabled:opacity-30"
         >
           <Maximize2 className="h-4 w-4" />
         </button>

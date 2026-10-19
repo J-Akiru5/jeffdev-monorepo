@@ -19,6 +19,7 @@ import {
   MessageSquare,
   Send,
   GitBranch,
+  Brain,
 } from "lucide-react";
 import { TASK_TYPES, PRIORITY_CONFIG, STATUS_CONFIG, STAFF_LOCKED_STATUSES } from "@/lib/task-types";
 import type { TaskTypeKey, StatusKey } from "@/lib/task-types";
@@ -33,6 +34,7 @@ import {
   type TaskActivityEntry,
   type TaskComment,
 } from "@/app/actions/collaboration";
+import { distillTaskThread } from "@/app/actions/brain";
 import { createIssueForTask } from "@/app/actions/github-sync";
 import { createClient } from "@/lib/supabase/browser";
 import { toast } from "sonner";
@@ -52,6 +54,7 @@ export interface TaskSheetData {
   tags: string[];
   dueDate: string;
   dueTime: string;
+  recurrence?: "daily" | "weekly" | "monthly";
   projectId: string;
   departmentId?: string;
   githubIssueNumber?: number;
@@ -86,6 +89,7 @@ const DEFAULT_DATA: TaskSheetData = {
   tags: [],
   dueDate: "",
   dueTime: "",
+  recurrence: undefined,
   projectId: "",
   departmentId: undefined,
 };
@@ -118,6 +122,7 @@ export function TaskSheet({
   const [newComment, setNewComment] = useState("");
   const [sendingComment, setSendingComment] = useState(false);
   const [creatingIssue, setCreatingIssue] = useState(false);
+  const [distilling, setDistilling] = useState(false);
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
 
@@ -219,6 +224,25 @@ export function TaskSheet({
       setNewComment("");
     } finally {
       setSendingComment(false);
+    }
+  };
+
+  const handleDistillThread = async () => {
+    if (!taskId || distilling) return;
+    setDistilling(true);
+    try {
+      const result = await distillTaskThread(taskId);
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success(
+        result.mode === "ai"
+          ? "Thread distilled to the Brain"
+          : "Thread saved to the Brain",
+      );
+    } finally {
+      setDistilling(false);
     }
   };
 
@@ -421,6 +445,7 @@ export function TaskSheet({
                   </button>
                   <button
                     onClick={onClose}
+                    aria-label="Close task details"
                     className="rounded-lg p-2 text-white/40 transition-colors hover:bg-white/[0.04] hover:text-white"
                   >
                     <X className="h-5 w-5" />
@@ -590,7 +615,7 @@ export function TaskSheet({
                           Due Date
                         </label>
                         <div className="relative">
-                          <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+                          <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
                           <input
                             type="date"
                             value={data.dueDate}
@@ -605,13 +630,39 @@ export function TaskSheet({
                         </div>
                       </div>
 
+                      {/* Repeat (recurring tasks) */}
+                      <div>
+                        <label className="mb-1.5 block text-[11px] text-white/40">
+                          Repeat
+                        </label>
+                        <select
+                          value={data.recurrence ?? ""}
+                          onChange={(e) =>
+                            setData((prev) => ({
+                              ...prev,
+                              recurrence: (e.target.value || undefined) as
+                                | "daily"
+                                | "weekly"
+                                | "monthly"
+                                | undefined,
+                            }))
+                          }
+                          className="w-full appearance-none rounded-lg border border-border bg-glass-04 px-3 py-2.5 text-sm text-white/70 outline-none transition-colors hover:border-border-active focus:border-cyan-500/50"
+                        >
+                          <option value="">Does not repeat</option>
+                          <option value="daily">Daily</option>
+                          <option value="weekly">Weekly</option>
+                          <option value="monthly">Monthly</option>
+                        </select>
+                      </div>
+
                       {/* Due Time */}
                       <div>
                         <label className="mb-1.5 block text-[11px] text-white/40">
                           Due Time
                         </label>
                         <div className="relative">
-                          <Clock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+                          <Clock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
                           <input
                             type="time"
                             value={data.dueTime}
@@ -632,7 +683,7 @@ export function TaskSheet({
                           Assignee
                         </label>
                         <div className="relative">
-                          <User className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-white/30" />
+                          <User className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-white/40" />
                           <select
                             value={data.assignedTo}
                             onChange={(e) =>
@@ -659,7 +710,7 @@ export function TaskSheet({
                           Tags
                         </label>
                         <div className="relative">
-                          <Tag className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
+                          <Tag className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
                           <input
                             type="text"
                             value={tagInput}
@@ -685,7 +736,7 @@ export function TaskSheet({
                                 {tag}
                                 <button
                                   onClick={() => removeTag(tag)}
-                                  className="ml-0.5 text-white/30 hover:text-white/50"
+                                  className="ml-0.5 text-white/40 hover:text-white/50"
                                 >
                                   <X className="h-3 w-3" />
                                 </button>
@@ -747,13 +798,23 @@ export function TaskSheet({
 
                       {/* Comments */}
                       <div>
-                        <label className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-white/40">
+                        <div className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-white/40">
                           <MessageSquare className="h-3.5 w-3.5" />
                           Comments ({comments.length})
-                        </label>
+                          {comments.length > 0 && (
+                            <button
+                              onClick={handleDistillThread}
+                              disabled={distilling}
+                              className="ml-auto inline-flex items-center gap-1 rounded border border-cyan-500/30 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-medium normal-case tracking-normal text-cyan-400 transition-colors hover:bg-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <Brain className="h-3 w-3" />
+                              {distilling ? "Saving…" : "Save to Brain"}
+                            </button>
+                          )}
+                        </div>
                         <div className="space-y-3">
                           {comments.length === 0 && (
-                            <p className="text-xs text-white/30">
+                            <p className="text-xs text-white/40">
                               No comments yet — start the discussion.
                             </p>
                           )}
@@ -831,7 +892,7 @@ export function TaskSheet({
 
               {/* ── Footer ── */}
               <div className="border-t border-border px-6 py-3">
-                <p className="text-xs text-white/30">
+                <p className="text-xs text-white/40">
                   <kbd className="rounded border border-border bg-glass-04 px-1.5 py-0.5 font-mono text-[11px]">
                     ⌘⏎
                   </kbd>{" "}

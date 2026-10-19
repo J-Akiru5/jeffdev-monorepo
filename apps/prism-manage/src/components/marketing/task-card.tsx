@@ -100,7 +100,7 @@ export function TaskCard({
           </span>
         ))}
         {task.platform && (
-          <span className="text-[10px] font-mono text-white/30">{task.platform}</span>
+          <span className="text-[10px] font-mono text-white/40">{task.platform}</span>
         )}
         <span className="text-[10px] font-mono text-white/20">
           {task.phaseId.replace("-", " ")}
@@ -111,7 +111,7 @@ export function TaskCard({
         <div className="mt-2">
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-1 text-[10px] text-white/30 hover:text-white/60 transition-colors"
+            className="flex items-center gap-1 text-[10px] text-white/40 hover:text-white/60 transition-colors"
           >
             {expanded ? (
               <>

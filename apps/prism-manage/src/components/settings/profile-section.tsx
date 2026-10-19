@@ -391,7 +391,7 @@ export function ProfileSection({
                     Remove photo
                   </button>
                 )}
-                <p className="text-[10px] text-white/30">PNG, JPG or WebP. Max 2MB.</p>
+                <p className="text-[10px] text-white/40">PNG, JPG or WebP. Max 2MB.</p>
               </div>
             </div>
             {avatarError && (
@@ -411,7 +411,7 @@ export function ProfileSection({
                 Email Address
               </label>
               <p className="text-sm text-white/70">{userEmail}</p>
-              <p className="mt-0.5 text-[10px] text-white/30">
+              <p className="mt-0.5 text-[10px] text-white/40">
                 Email cannot be changed here. Contact support for email updates.
               </p>
             </div>
@@ -428,7 +428,7 @@ export function ProfileSection({
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full rounded-lg border border-white/[0.10] bg-glass-04 px-3 py-2 text-sm text-white outline-none transition-colors placeholder:text-white/30 focus:border-cyan-500/50"
+                className="w-full rounded-lg border border-white/[0.10] bg-glass-04 px-3 py-2 text-sm text-white outline-none transition-colors placeholder:text-white/40 focus:border-cyan-500/50"
                 placeholder="Your name"
               />
             </div>
@@ -445,7 +445,7 @@ export function ProfileSection({
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 rows={3}
-                className="w-full resize-none rounded-lg border border-white/[0.10] bg-glass-04 px-3 py-2 text-sm text-white outline-none transition-colors placeholder:text-white/30 focus:border-cyan-500/50"
+                className="w-full resize-none rounded-lg border border-white/[0.10] bg-glass-04 px-3 py-2 text-sm text-white outline-none transition-colors placeholder:text-white/40 focus:border-cyan-500/50"
                 placeholder="A short description about yourself"
               />
             </div>
@@ -464,7 +464,7 @@ export function ProfileSection({
                   type="text"
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
-                  className="w-full rounded-lg border border-white/[0.10] bg-glass-04 px-3 py-2 text-sm text-white outline-none transition-colors placeholder:text-white/30 focus:border-cyan-500/50"
+                  className="w-full rounded-lg border border-white/[0.10] bg-glass-04 px-3 py-2 text-sm text-white outline-none transition-colors placeholder:text-white/40 focus:border-cyan-500/50"
                   placeholder="Company name"
                 />
               </div>
@@ -482,7 +482,7 @@ export function ProfileSection({
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full rounded-lg border border-white/[0.10] bg-glass-04 px-3 py-2 text-sm text-white outline-none transition-colors placeholder:text-white/30 focus:border-cyan-500/50"
+                  className="w-full rounded-lg border border-white/[0.10] bg-glass-04 px-3 py-2 text-sm text-white outline-none transition-colors placeholder:text-white/40 focus:border-cyan-500/50"
                   placeholder="+1 (555) 000-0000"
                 />
               </div>
@@ -727,7 +727,7 @@ export function ProfileSection({
                       {isFounder ? "Founder" : "Employee"}
                     </span>
                     {isFounder && (
-                      <p className="mt-1 text-[10px] text-white/30">
+                      <p className="mt-1 text-[10px] text-white/40">
                         Founders have full access to all departments, members, and settings.
                       </p>
                     )}
@@ -761,7 +761,7 @@ export function ProfileSection({
                           </span>
                           <div>
                             <span className="font-medium">None</span>
-                            <p className="text-[11px] text-white/30">
+                            <p className="text-[11px] text-white/40">
                               Full founder access
                             </p>
                           </div>
@@ -788,7 +788,7 @@ export function ProfileSection({
                             </span>
                             <div>
                               <span className="font-medium">{opt.label}</span>
-                              <p className="text-[11px] text-white/30">
+                              <p className="text-[11px] text-white/40">
                                 {opt.description}
                               </p>
                             </div>
@@ -858,7 +858,7 @@ export function ProfileSection({
                     </span>
                     <div>
                       <span className="font-medium text-white/70">Manage</span>
-                      <p className="text-[10px] text-white/30">Task management</p>
+                      <p className="text-[10px] text-white/40">Task management</p>
                     </div>
                   </a>
 
@@ -872,7 +872,7 @@ export function ProfileSection({
                     </span>
                     <div>
                       <span className="font-medium text-white/70">Admin</span>
-                      <p className="text-[10px] text-white/30">Platform admin</p>
+                      <p className="text-[10px] text-white/40">Platform admin</p>
                     </div>
                   </a>
 
@@ -886,7 +886,7 @@ export function ProfileSection({
                     </span>
                     <div>
                       <span className="font-medium text-white/70">Engine</span>
-                      <p className="text-[10px] text-white/30">Prism product</p>
+                      <p className="text-[10px] text-white/40">Prism product</p>
                     </div>
                   </a>
 
@@ -900,7 +900,7 @@ export function ProfileSection({
                     </span>
                     <div>
                       <span className="font-medium text-white/70">Labs</span>
-                      <p className="text-[10px] text-white/30">Company site</p>
+                      <p className="text-[10px] text-white/40">Company site</p>
                     </div>
                   </a>
                 </div>
@@ -978,7 +978,7 @@ function DevSessionBridge() {
       <p className="text-xs font-medium uppercase tracking-wider text-amber-400">
         Dev Auth Bridge
       </p>
-      <p className="mt-1 text-[11px] text-white/30">
+      <p className="mt-1 text-[11px] text-white/40">
         Localhost cookies don&apos;t share across ports. Export your session from one
         app and import it into another.
       </p>
@@ -1017,7 +1017,7 @@ function DevSessionBridge() {
             onChange={(e) => setPasteValue(e.target.value)}
             placeholder='{"access_token": "...", "refresh_token": "..."}'
             rows={3}
-            className="w-full resize-none rounded-lg border border-white/[0.10] bg-glass-04 px-3 py-2 font-mono text-[11px] text-white outline-none transition-colors placeholder:text-white/30 focus:border-amber-500/50"
+            className="w-full resize-none rounded-lg border border-white/[0.10] bg-glass-04 px-3 py-2 font-mono text-[11px] text-white outline-none transition-colors placeholder:text-white/40 focus:border-amber-500/50"
           />
           <div className="flex items-center gap-2">
             <button

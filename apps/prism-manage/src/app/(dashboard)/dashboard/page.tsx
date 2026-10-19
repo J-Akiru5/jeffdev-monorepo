@@ -113,7 +113,7 @@ export default async function HQLandingPage() {
               >
                 <div className={`flex items-center gap-2 ${stat.color}`}>
                   <Icon className="h-4 w-4" />
-                  <span className="text-xs font-mono uppercase tracking-wider text-white/30">
+                  <span className="text-xs font-mono uppercase tracking-wider text-white/40">
                     {stat.label}
                   </span>
                 </div>
@@ -129,7 +129,7 @@ export default async function HQLandingPage() {
       {/* Departments Grid */}
       <section data-tour="dashboard-departments">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-sm font-mono uppercase tracking-wider text-white/30">
+          <h2 className="text-sm font-mono uppercase tracking-wider text-white/40">
             Departments
           </h2>
         </div>
@@ -155,7 +155,7 @@ export default async function HQLandingPage() {
                       {dept.name}
                     </h3>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-white/30 transition-transform group-hover:translate-x-0.5 group-hover:text-white/60" />
+                  <ArrowRight className="h-4 w-4 text-white/40 transition-transform group-hover:translate-x-0.5 group-hover:text-white/60" />
                 </div>
                 {description && (
                   <p className="mt-2 text-xs text-white/40">{description}</p>
@@ -172,7 +172,7 @@ export default async function HQLandingPage() {
       {/* Quick Actions (Founders only) */}
       {isFounder && (
         <section className="mt-10">
-          <h2 className="mb-4 text-sm font-mono uppercase tracking-wider text-white/30">
+          <h2 className="mb-4 text-sm font-mono uppercase tracking-wider text-white/40">
             Quick Actions
           </h2>
           <div className="flex flex-wrap gap-3">

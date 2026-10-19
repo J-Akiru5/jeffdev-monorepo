@@ -21,6 +21,11 @@ test.describe("task CRUD", () => {
     const row = page.locator("div.group.flex.items-start", { hasText: title });
     await expect(row).toBeVisible({ timeout: 15_000 });
 
+    // A11y: the completion toggle is labelled
+    await expect(
+      row.getByRole("button", { name: "Mark complete" }),
+    ).toBeVisible();
+
     // Star it — the icon fills in
     await row.hover();
     const star = row.getByRole("button", { name: /^(Star|Unstar) task$/ });

@@ -49,6 +49,9 @@ export async function GET(request: NextRequest) {
 
   try {
     const { tokens } = await oauth2Client.getToken(code);
+    if (!tokens.access_token) {
+      throw new Error("Google did not return an access token");
+    }
 
     // Store tokens in user_tokens table
     const { error: upsertError } = await supabase.from("user_tokens").upsert(

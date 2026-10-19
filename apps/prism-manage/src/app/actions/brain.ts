@@ -13,6 +13,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/log";
 import { sanitizeIlikeTerm } from "@/lib/postgrest";
+import { embedText } from "@/lib/embeddings";
+import type { Json } from "@/types/database.types";
 
 export interface MemoryEntry {
   id: string;
@@ -29,41 +31,6 @@ export interface BrainCitation {
   title: string;
   summary: string;
   similarity: number | null;
-}
-
-const EMBEDDING_MODEL = "gemini-embedding-001";
-const EMBEDDING_DIMENSIONS = 768;
-
-async function embedText(text: string): Promise<number[] | null> {
-  const apiKey =
-    process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
-  if (!apiKey) return null;
-  try {
-    // Direct REST call: the SDK doesn't expose outputDimensionality, and the
-    // schema stores 768-dim vectors.
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${EMBEDDING_MODEL}:embedContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          content: { parts: [{ text }] },
-          outputDimensionality: EMBEDDING_DIMENSIONS,
-        }),
-      },
-    );
-    if (!res.ok) {
-      const detail = await res.text();
-      throw new Error(`embedContent ${res.status}: ${detail.slice(0, 200)}`);
-    }
-    const json = (await res.json()) as { embedding?: { values?: number[] } };
-    return json.embedding?.values ?? null;
-  } catch (error) {
-    logger.warn("brain.embed.failed", {
-      error: error instanceof Error ? error.message : String(error),
-    });
-    return null;
-  }
 }
 
 function mapEntry(row: Record<string, unknown>): MemoryEntry {
@@ -123,7 +90,9 @@ export async function captureMemoryEntry(input: {
       title,
       summary,
       decisions,
-      ...(embedding ? { embedding } : {}),
+      // pgvector columns surface as `string` in generated types; the runtime
+      // accepts the numeric array (proven working) — cast is type-only.
+      ...(embedding ? { embedding: embedding as unknown as string } : {}),
     })
     .select("id")
     .single();
@@ -170,7 +139,8 @@ export async function searchMemory(
   const embedding = await embedText(q);
   if (embedding) {
     const { data } = await supabase.rpc("match_memory_entries", {
-      query_embedding: embedding,
+      // Type-only cast: vector params surface as `string` in generated types.
+      query_embedding: embedding as unknown as string,
       match_workspace: workspaceId,
       match_count: 8,
       min_similarity: 0.2,
@@ -254,4 +224,148 @@ Answer in 2-5 sentences, with citations.`;
     });
     return { answer: "", citations, mode: "keyword" };
   }
+}
+
+export interface DistillResult {
+  success?: boolean;
+  error?: string;
+  entryId?: string;
+  mode?: "ai" | "fallback";
+  skipped?: boolean;
+}
+
+/**
+ * Distill a task's comment thread into a memory entry (R1).
+ * - One entry per thread: refreshed in place as the discussion grows.
+ * - AI summary when a Gemini key is configured; deterministic fallback
+ *   otherwise (so the feature works everywhere, including CI).
+ * - `throttleMs` skips re-distillation that happened too recently (used by
+ *   the opt-in auto path so bursts of comments don't fan out API calls).
+ */
+export async function distillTaskThread(
+  taskId: string,
+  options?: { throttleMs?: number },
+): Promise<DistillResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Unauthorized" };
+
+  const { data: task } = await supabase
+    .from("tasks")
+    .select("id, title, workspace_id")
+    .eq("id", taskId)
+    .maybeSingle();
+  if (!task || !task.workspace_id) {
+    return { error: "Task not found or you don't have access" };
+  }
+
+  const { data: comments } = await supabase
+    .from("task_comments")
+    .select("body, created_at")
+    .eq("task_id", taskId)
+    .order("created_at", { ascending: true })
+    .limit(50);
+  if (!comments || comments.length === 0) {
+    return { error: "No comments to distill yet" };
+  }
+
+  // Existing entry for this thread?
+  const { data: existing } = await supabase
+    .from("memory_entries")
+    .select("id, updated_at")
+    .eq("workspace_id", task.workspace_id)
+    .eq("source_type", "comment-thread")
+    .eq("source_id", taskId)
+    .maybeSingle();
+
+  if (
+    existing &&
+    options?.throttleMs &&
+    Date.now() - new Date(existing.updated_at as string).getTime() <
+      options.throttleMs
+  ) {
+    return { success: true, entryId: String(existing.id), skipped: true };
+  }
+
+  const thread = comments
+    .map((c, i) => `(${i + 1}) ${String(c.body)}`)
+    .join("\n");
+
+  let summary = "";
+  let mode: "ai" | "fallback" = "fallback";
+  const apiKey =
+    process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
+  if (apiKey) {
+    try {
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      const prompt = `Summarize this task discussion into a decision record for a company memory. Respond in 2-4 sentences: what was discussed, what was decided, and why. Do not add anything that is not present in the thread.
+
+Task: ${task.title}
+
+Thread:
+${thread}`;
+      const result = await model.generateContent(prompt);
+      summary = result.response.text().trim();
+      if (summary) mode = "ai";
+    } catch (error) {
+      logger.warn("brain.distill.ai_failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+  if (!summary) {
+    summary = `Discussion on "${task.title}": ${thread.slice(0, 600)}${
+      thread.length > 600 ? "…" : ""
+    }`;
+  }
+
+  const embedding = await embedText(`${task.title}\n${summary}`);
+
+  const payload = {
+    workspace_id: task.workspace_id,
+    created_by: user.id,
+    source_type: "comment-thread",
+    source_id: taskId,
+    title: task.title,
+    summary,
+    decisions: [] as Json,
+    // pgvector columns surface as `string` in generated types (type-only cast).
+    ...(embedding ? { embedding: embedding as unknown as string } : {}),
+  };
+
+  if (existing) {
+    const { error } = await supabase
+      .from("memory_entries")
+      .update(payload as never)
+      .eq("id", existing.id);
+    if (error) return { error: error.message };
+    logger.info("brain.distilled", {
+      entryId: existing.id,
+      taskId,
+      mode,
+      updated: true,
+    });
+    revalidatePath("/brain");
+    return { success: true, entryId: String(existing.id), mode };
+  }
+
+  const { data, error } = await supabase
+    .from("memory_entries")
+    .insert(payload as never)
+    .select("id")
+    .single();
+  if (error || !data) {
+    return { error: error?.message || "Failed to save memory entry" };
+  }
+  logger.info("brain.distilled", {
+    entryId: data.id,
+    taskId,
+    mode,
+    updated: false,
+  });
+  revalidatePath("/brain");
+  return { success: true, entryId: String(data.id), mode };
 }

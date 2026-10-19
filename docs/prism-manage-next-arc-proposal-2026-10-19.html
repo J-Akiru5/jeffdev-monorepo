@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage — Next Arc Proposal &amp; Overnight Ledger</title>
+<style>
+  :root {
+    --bg: #0A0D12; --bg-raised: #11151C; --bg-card: #151A22; --border: #232A36;
+    --cyan: #22D3EE; --violet: #8B7BFF; --text: #E6EAF0; --text-dim: #8B93A3;
+    --text-faint: #5A6272; --good: #4ADE80; --warn: #FBBF24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; padding: 48px 24px; }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  .mono { font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 28px; margin-bottom: 32px; }
+  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 12px; background: linear-gradient(90deg, var(--text), var(--text) 60%, var(--cyan)); -webkit-background-clip: text; background-clip: text; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim); }
+  .meta-row span b { color: var(--text); font-weight: 500; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; border: 1px solid; }
+  .badge.gate { color: var(--warn); border-color: var(--warn); background: rgba(251,191,36,0.08); }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 14px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--violet); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .summary-box { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 6px; padding: 18px 20px; font-size: 15px; }
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  ul.clean li { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; font-size: 14px; }
+  .checkpoint { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 14px 18px; margin-bottom: 10px; }
+  .checkpoint .q { font-size: 13px; color: var(--text-dim); margin-bottom: 6px; }
+  .checkpoint .q b { color: var(--violet); font-weight: 500; }
+  .checkpoint .a { font-size: 14px; }
+  .checkpoint .a b { color: var(--cyan); font-weight: 500; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
+  td.mono { color: var(--cyan); white-space: nowrap; }
+  .ok { color: var(--good); }
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">prism-manage · Proposal · Morning Brief</div>
+    <h1>Overnight Ledger &amp; Next Arc Proposal</h1>
+    <div class="meta-row">
+      <span><b>2026-10-19 · 04:00</b></span>
+      <span>Agent: <b>opencode · DeepSeek V4.1 Flash</b></span>
+      <span>Everything on <b>develop</b>, CI green</span>
+      <span class="badge gate">3 decisions for you</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>What Shipped Overnight</h2>
+    <table>
+      <thead><tr><th>Phase</th><th>Outcome</th><th>Report</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">H4</td><td>Typed DB clients end-to-end (27 → 0 errors) — surfaced <b>4 real runtime bugs</b> (milestone creation impossible, BMC writes rejected, cost saves failing, NULL page query) — all fixed with migrations. CI schema-drift guard + syncpack guard + coverage ratchet (75/60/70/78).</td><td class="mono">h4-type-safety</td></tr>
+        <tr><td class="mono">H5</td><td>Keyset pagination (50/page + Load more) replacing the 500-row cap; <b>virtualizer bug fixed</b> (zero rows beyond 20 tasks — caught by the new 55-task seed); kanban <b>Move menu</b> for touch/keyboard; members cache; assistant + tour code-split; realtime audit clean.</td><td class="mono">h5-perf-mobile</td></tr>
+        <tr><td class="mono">H6</td><td>A11y baseline: focus-visible rings, reduced-motion, labelled icon controls, 110+ contrast upgrades. Final E2E run: 28/28 in 51s, zero flakes.</td><td class="mono">h6-a11y-polish</td></tr>
+        <tr><td class="mono">R1</td><td>Company Brain MVP: task threads <b>distill into memory entries</b> (AI summary verified live: <span class="mono">mode:"ai"</span>); opt-in auto-distill; secret-gated agent-session ingestion + opencode hook; /brain filters + realtime.</td><td class="mono">r1-brain-mvp</td></tr>
+        <tr><td class="mono">New plan</td><td><b>Recurring tasks</b>: repeat daily/weekly/monthly; completing an occurrence spawns the next (verified: <span class="mono">spawned … due:"2026-10-25"</span>); Repeat select + row badge.</td><td class="mono">recurring-tasks</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Current State</h2>
+    <ul class="clean">
+      <li><span class="ok">✔</span> <b>develop</b>: everything above merged, CI green (E2E 30/30, drift guard, syncpack, coverage).</li>
+      <li><span class="ok">✔</span> <b>main (production)</b>: frozen since the H3 release, as agreed — awaiting your go for the H4→R1+recurring release.</li>
+      <li><span class="ok">✔</span> Every phase has a report in <span class="mono">docs/</span>; every migration applied via <span class="mono">pnpm db:push</span> with types regenerated + drift-checked.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Three Decisions for You</h2>
+    <div class="checkpoint">
+      <div class="q"><b>1 — Company Brain verdict (GO/NO-GO)</b></div>
+      <div class="a">Log ~10 real decisions and ask 3 honest questions on <span class="mono">/brain</span>. GO → R2 (curation queue, per-task digest); NO-GO → we stop the R-track cleanly. Auto-distill stays off until this verdict.</div>
+    </div>
+    <div class="checkpoint">
+      <div class="q"><b>2 — Production release</b></div>
+      <div class="a">Say the word and I merge <span class="mono">develop → main</span> (H4 + H5 + H6 + R1 + recurring tasks). Note: Vercel's build quota was exhausted yesterday — deploys resume when it resets, or trigger a manual redeploy.</div>
+    </div>
+    <div class="checkpoint">
+      <div class="q"><b>3 — Next arc priorities</b></div>
+      <div class="a">Remaining candidates, roughly ordered by daily value: <b>task templates</b> (save/apply task shapes), <b>per-task context digest</b> (brain context inside the sheet), <b>email digest</b> (needs the Resend domain decision), <b>pages block editor</b> (biggest), <b>GitHub webhook reverse-sync</b>. My pick: templates → digest → webhook.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Small Things Awaiting You</h2>
+    <ul class="clean">
+      <li><span class="mono">SLACK_WEBHOOK_URL</span> on Vercel — enables the cron/alerting posts (everything no-ops without it).</li>
+      <li><span class="mono">BRAIN_INGEST_SECRET</span> on Vercel — activates the agent-session ingestion endpoint (fails closed today).</li>
+      <li>Optional: rotate the Supabase DB password (a local crash dump exposed it during H2 debugging — your call, you said it didn't concern you).</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>prism-manage · overnight ledger · 04:00</span>
+    <span>next: your three decisions</span>
+  </footer>
+
+</div>
+</body>
+</html>

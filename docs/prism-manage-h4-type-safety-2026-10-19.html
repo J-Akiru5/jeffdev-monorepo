@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage H4 — Type Safety &amp; Drift Guards Report</title>
+<style>
+  :root {
+    --bg: #0A0D12; --bg-raised: #11151C; --bg-card: #151A22; --border: #232A36;
+    --cyan: #22D3EE; --violet: #8B7BFF; --text: #E6EAF0; --text-dim: #8B93A3;
+    --text-faint: #5A6272; --good: #4ADE80; --warn: #FBBF24; --bad: #F87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; padding: 48px 24px; }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  .mono { font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 28px; margin-bottom: 32px; }
+  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 12px; background: linear-gradient(90deg, var(--text), var(--text) 60%, var(--cyan)); -webkit-background-clip: text; background-clip: text; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim); }
+  .meta-row span b { color: var(--text); font-weight: 500; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; border: 1px solid; }
+  .badge.done { color: var(--good); border-color: var(--good); background: rgba(74,222,128,0.08); }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 14px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--violet); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .summary-box { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 6px; padding: 18px 20px; font-size: 15px; }
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  ul.clean li { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; font-size: 14px; }
+  .bug { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 14px 18px; margin-bottom: 10px; }
+  .bug .head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+  .bug .head b { font-size: 14.5px; }
+  .bug .why { font-size: 13.5px; color: var(--text-dim); }
+  .bug .fix { font-size: 13.5px; margin-top: 6px; }
+  .bug .fix b { color: var(--cyan); font-weight: 500; }
+  .sev { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; border: 1px solid; }
+  .sev.high { color: var(--warn); border-color: var(--warn); background: rgba(251,191,36,0.08); }
+  .sev.med { color: var(--cyan); border-color: var(--cyan); background: rgba(34,211,238,0.08); }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
+  td.mono { color: var(--cyan); white-space: nowrap; }
+  .ok { color: var(--good); }
+  pre { background: var(--bg-raised); border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-dim); overflow-x: auto; }
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">prism-manage · Task Report · Hardening Arc · Phase H4</div>
+    <h1>H4 — Type Safety &amp; Drift Guards</h1>
+    <div class="meta-row">
+      <span><b>2026-10-19</b></span>
+      <span>Repo: <b>jeffdev-monorepo</b></span>
+      <span>Agent: <b>opencode · DeepSeek V4.1 Flash</b> (autonomous overnight)</span>
+      <span>Branch: <b>feat/pm-h4-type-safety → PR → develop</b></span>
+      <span class="badge done">Complete — CI green</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Summary</h2>
+    <div class="summary-box">
+      The database now <b>types the application</b>. Generated schema types
+      (<span class="mono">pnpm db:types</span>) flow into every Supabase client —
+      server, browser, and service-role — and the whole app compiles against
+      them: <b>27 type errors → 0</b>. More importantly, the exercise found and
+      fixed <b>four real runtime bugs</b> where code and schema had drifted
+      apart (milestone creation could never succeed; BMC content writes were
+      rejected; cost entries failed; a NULL page-parent query was wrong).
+      A <b>schema-drift guard</b> now runs in CI, so this class of bug can't
+      come back silently.
+    </div>
+  </section>
+
+  <section>
+    <h2>Real Bugs Found by Typing</h2>
+
+    <div class="bug">
+      <div class="head"><span class="sev high">High</span><b>Milestone creation was impossible (schema/code drift)</b></div>
+      <div class="why"><span class="mono">createMilestone()</span> writes <span class="mono">created_by</span> (column never existed) and omits <span class="mono">project_id</span> / <span class="mono">due_date</span> — both <span class="mono">NOT NULL</span> in the live table. Every insert was rejected at runtime; nobody noticed because Operations is founder-only and rarely exercised.</div>
+      <div class="fix"><b>Fix:</b> migration <span class="mono">20261018000009</span> — added <span class="mono">created_by</span>, dropped <span class="mono">NOT NULL</span> from <span class="mono">project_id</span> and <span class="mono">due_date</span> (the app has no project concept for milestones and allows undated ones).</div>
+    </div>
+
+    <div class="bug">
+      <div class="head"><span class="sev high">High</span><b>BMC block saves were rejected — content column was TEXT</b></div>
+      <div class="why">The Business Model Canvas stores structured JSON per block, but <span class="mono">bmc_sections.content</span> was <span class="mono">TEXT</span> — PostgREST rejected every object write (save + seed).</div>
+      <div class="fix"><b>Fix:</b> same migration — column converted to <span class="mono">JSONB</span> (default swapped around the cast).</div>
+    </div>
+
+    <div class="bug">
+      <div class="head"><span class="sev high">High</span><b>Cost entries failed — <span class="mono">created_by</span> missing</b></div>
+      <div class="why">Saving an infrastructure cost wrote <span class="mono">created_by</span>, which the Phase 6 table never had — every create was rejected.</div>
+      <div class="fix"><b>Fix:</b> migration <span class="mono">20261018000008</span> adds the column (provenance is genuinely useful for an ops cost tracker).</div>
+    </div>
+
+    <div class="bug">
+      <div class="head"><span class="sev med">Medium</span><b>NULL parent lookup used <span class="mono">.eq()</span> instead of <span class="mono">.is()</span></b></div>
+      <div class="why">Creating a top-level page queried <span class="mono">parent_id=eq.null</span>, which is invalid SQL semantics via PostgREST — sibling ordering fell back to 0.</div>
+      <div class="fix"><b>Fix:</b> the query now branches to <span class="mono">.is("parent_id", null)</span> for top-level pages.</div>
+    </div>
+
+    <div class="bug">
+      <div class="head"><span class="sev med">Medium</span><b>KPI updates were upserts that could not insert</b></div>
+      <div class="why"><span class="mono">updateKpi()</span> used <span class="mono">upsert({id, current_value})</span> — the insert arm violates <span class="mono">NOT NULL</span> on <span class="mono">label</span>/<span class="mono">target_value</span> whenever the row didn't exist.</div>
+      <div class="fix"><b>Fix:</b> it's an update of an existing KPI — now <span class="mono">.update(...).eq("id", id)</span>.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What Changed</h2>
+    <table>
+      <thead><tr><th>File</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">src/types/database.types.ts <em>(new, 98 KB)</em></td><td>Generated from the live schema by <span class="mono">pnpm db:types</span> — committed; regenerated after every migration.</td></tr>
+        <tr><td class="mono">lib/supabase/{server,browser,admin}.ts</td><td>All three clients are now typed with <span class="mono">Database</span> (the shared package already supported generics — clean plumbing).</td></tr>
+        <tr><td class="mono">14 action/route/lib files</td><td>27 type errors resolved: JSONB casts (<span class="mono">Json</span>), dynamic payload builders documented with a single escape-hatch comment, pgvector casts (type-only — runtime proven), nullability coalescing, one JSON embed cast.</td></tr>
+        <tr><td class="mono">scripts/db-types.mjs <em>(new)</em> + <span class="mono">pnpm db:types[:check]</span></td><td>Generator + drift checker. Check mode is CI-safe: without <span class="mono">SUPABASE_DB_URL</span> it skips loudly instead of failing.</td></tr>
+        <tr><td class="mono">.github/workflows/ci.yml</td><td>E2E job: <b>schema-drift check</b> (fails CI when committed types ≠ live schema — secret <span class="mono">SUPABASE_DB_URL</span> set). Typecheck job: <b>syncpack</b> consistency guard.</td></tr>
+        <tr><td class="mono">vitest.config.ts + package.json</td><td><b>Coverage ratchet</b>: baseline 80.5% stmts / 83.3% lines; thresholds 75/60/70/78 enforced on every <span class="mono">pnpm test</span> (and in CI).</td></tr>
+        <tr><td class="mono">package.json (repo-wide)</td><td>syncpack auto-fixes (typescript 5.9.3 alignment, 15 mismatches → 0).</td></tr>
+        <tr><td class="mono">supabase/migrations/…0008, …0009</td><td>The drift fixes above — applied live via <span class="mono">pnpm db:push</span>.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>The Drift Guard</h2>
+    <pre>CI (e2e job) → pnpm db:types:check
+  → regenerates types from the LIVE schema
+  → diffs against the committed file
+  → fails with "Run `pnpm db:types` and commit the result."</pre>
+    <p style="font-size:13px;color:var(--text-dim);margin-top:10px;">
+      Any migration applied without regenerating types — or any manual schema
+      edit in Supabase — now surfaces as a red CI job instead of a runtime 400.
+    </p>
+  </section>
+
+  <section>
+    <h2>Verification</h2>
+    <ul class="clean">
+      <li><span class="ok">✔</span> <span class="mono">check-types</span>: <b>0 errors</b> (from 27) across the whole app with typed clients.</li>
+      <li><span class="ok">✔</span> Tests: <b>37 passed</b> with coverage thresholds enforced (80.5% stmts baseline).</li>
+      <li><span class="ok">✔</span> E2E: <b>24 passed</b> (2 known flakes recovered on retry) against the rebuilt app.</li>
+      <li><span class="ok">✔</span> Migrations <span class="mono">000008/000009</span> applied live; types regenerated; <span class="mono">db:types:check</span> reports "in sync".</li>
+      <li><span class="ok">✔</span> syncpack: 0 mismatches; guard added to CI.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Notes</h2>
+    <ul class="clean">
+      <li>Dynamic payload builders (conditional <span class="mono">Record&lt;string, unknown&gt;</span> objects) use a documented <span class="mono">as never</span> escape hatch — the remaining incremental typing work, tracked for later phases.</li>
+      <li>pgvector columns surface as <span class="mono">string</span> in generated types; the numeric-array casts are type-only and proven at runtime (<span class="mono">hasEmbedding: true</span>).</li>
+      <li>Two flaky E2E tests (comments, tasks) both recovered on retry — same board-refetch race family; H5 will harden the specs.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>prism-manage · hardening arc · H4 complete</span>
+    <span>next: H5 — performance &amp; mobile</span>
+  </footer>
+
+</div>
+</body>
+</html>

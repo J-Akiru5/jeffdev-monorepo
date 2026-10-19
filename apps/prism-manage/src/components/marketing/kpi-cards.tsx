@@ -70,7 +70,7 @@ function KpiEditableValue({
         {unit}
         {value.toLocaleString()}
       </span>
-      <Pencil className="h-3 w-3 text-white/0 group-hover:text-white/30 transition-colors" />
+      <Pencil className="h-3 w-3 text-white/0 group-hover:text-white/40 transition-colors" />
     </div>
   );
 }
@@ -99,7 +99,7 @@ export function KpiCards({ kpis }: { kpis: MarketingKpi[] }) {
                   await updateKpi(kpi.id, { current: v });
                 }}
               />
-              <p className="text-xs text-white/30 mt-0.5">
+              <p className="text-xs text-white/40 mt-0.5">
                 target: {kpi.unit}
                 {kpi.target.toLocaleString()}
               </p>

@@ -37,6 +37,21 @@ test.describe("api", () => {
     await ctx.dispose();
   });
 
+  test("brain ingest rejects calls without the shared secret", async ({
+    playwright,
+    baseURL,
+  }) => {
+    const ctx = await playwright.request.newContext({
+      baseURL,
+      storageState: { cookies: [], origins: [] },
+    });
+    const res = await ctx.post("/api/brain/ingest", {
+      data: { workspaceId: "x", title: "x", summary: "x" },
+    });
+    expect(res.status()).toBe(401);
+    await ctx.dispose();
+  });
+
   test("security headers are present", async ({ request }) => {
     const res = await request.get("/");
     const headers = res.headers();

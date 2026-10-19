@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage H5 — Performance &amp; Mobile Report</title>
+<style>
+  :root {
+    --bg: #0A0D12; --bg-raised: #11151C; --bg-card: #151A22; --border: #232A36;
+    --cyan: #22D3EE; --violet: #8B7BFF; --text: #E6EAF0; --text-dim: #8B93A3;
+    --text-faint: #5A6272; --good: #4ADE80; --warn: #FBBF24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.6; padding: 48px 24px; }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  .mono { font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 28px; margin-bottom: 32px; }
+  .eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cyan); margin-bottom: 10px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 12px; background: linear-gradient(90deg, var(--text), var(--text) 60%, var(--cyan)); -webkit-background-clip: text; background-clip: text; }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim); }
+  .meta-row span b { color: var(--text); font-weight: 500; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; border: 1px solid; }
+  .badge.done { color: var(--good); border-color: var(--good); background: rgba(74,222,128,0.08); }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 14px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: var(--violet); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+  h2::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .summary-box { background: var(--bg-card); border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 6px; padding: 18px 20px; font-size: 15px; }
+  ul.clean { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  ul.clean li { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; font-size: 14px; }
+  .bug { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 14px 18px; margin-bottom: 10px; }
+  .bug .head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+  .bug .head b { font-size: 14.5px; }
+  .bug .why { font-size: 13.5px; color: var(--text-dim); }
+  .bug .fix { font-size: 13.5px; margin-top: 6px; }
+  .bug .fix b { color: var(--cyan); font-weight: 500; }
+  .sev { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; border: 1px solid; }
+  .sev.high { color: var(--warn); border-color: var(--warn); background: rgba(251,191,36,0.08); }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); font-weight: 500; }
+  td.mono { color: var(--cyan); white-space: nowrap; }
+  .ok { color: var(--good); }
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-faint); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">prism-manage · Task Report · Hardening Arc · Phase H5</div>
+    <h1>H5 — Performance &amp; Mobile</h1>
+    <div class="meta-row">
+      <span><b>2026-10-19</b></span>
+      <span>Repo: <b>jeffdev-monorepo</b></span>
+      <span>Agent: <b>opencode · DeepSeek V4.1 Flash</b> (autonomous overnight)</span>
+      <span>Branch: <b>feat/pm-h5-perf-mobile → PR → develop</b></span>
+      <span class="badge done">Complete — CI green</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Summary</h2>
+    <div class="summary-box">
+      The task list now <b>pages instead of capping</b> (keyset pagination, 50
+      rows per page, "Load more"), the kanban board gained a
+      <b>touch- and keyboard-friendly "Move" menu</b> (drag was the only way
+      before — broken on touch), the task sheet reuses a <b>members cache</b>
+      instead of re-fetching on every open, and two heavy widgets
+      (<b>assistant, tour</b>) are code-split out of the shared bundle. And the
+      new 55-task E2E seed exposed a <b>real virtualizer bug</b>: with more
+      than 20 tasks the list rendered <i>zero rows</i> — fixed.
+    </div>
+  </section>
+
+  <section>
+    <h2>The Bug H5 Caught</h2>
+    <div class="bug">
+      <div class="head"><span class="sev high">High</span><b>Task list rendered zero rows beyond 20 tasks</b></div>
+      <div class="why">The virtualized container used <span class="mono">contain: strict</span> once a list exceeded 20 tasks — which includes <b>size containment</b>. With no explicit height, the container collapsed to 0px, so the virtualizer "saw" no viewport and rendered nothing. Group headers, counts and the add-input still showed; the rows simply vanished. Invisible in every previous test because no list ever had more than ~20 tasks.</div>
+      <div class="fix"><b>Fix:</b> <span class="mono">contain: layout paint</span> — keeps the performance isolation without collapsing the box. Proven by the new pagination E2E (55 seeded tasks render and page correctly).</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What Changed</h2>
+    <table>
+      <thead><tr><th>Area</th><th>Change</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">Keyset pagination</td><td><span class="mono">getTasks(workspaceId, { limit, cursor })</span> + <span class="mono">/api/tasks?limit=&amp;cursor=</span> (cursor = last <span class="mono">created_at</span>); tasks page fetches 50 at a time with a <b>Load more</b> button; realtime refetch keeps the first page fresh. The old silent 500-row cap is gone.</td></tr>
+        <tr><td class="mono">Kanban "Move" menu</td><td>Every card has a <span class="mono">Move task</span> action listing the other columns — works on touch and by keyboard, reuses the same status-change path <b>including the Approved RBAC gate</b>. Drag remains for mouse users.</td></tr>
+        <tr><td class="mono">Members cache</td><td><span class="mono">getWorkspaceMembers</span> wrapped in a 60s TTL cache — the task sheet no longer re-queries members on every open.</td></tr>
+        <tr><td class="mono">Bundle trims</td><td><span class="mono">ChatAssistant</span> code-split via <span class="mono">next/dynamic</span> (it sat in the root layout on every page); <span class="mono">driver.js</span> (tour) now loads only when a tour actually starts.</td></tr>
+        <tr><td class="mono">Realtime audit</td><td>All four subscriptions (tasks, kanban, task sheet, notifications) verified to remove their channels on unmount — no leaks.</td></tr>
+        <tr><td class="mono">E2E (+2 specs)</td><td><span class="mono">pagination.spec</span> seeds 55 staggered tasks and proves page-1 → Load more → exhausted; kanban <span class="mono">move menu</span> test proves non-drag relocation.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Verification</h2>
+    <ul class="clean">
+      <li><span class="ok">✔</span> E2E: <b>27 passed + 1 recovered flake</b> (28 tests) — including the two new specs against the 55-task seed.</li>
+      <li><span class="ok">✔</span> The virtualizer fix validated by the exact scenario that broke it (50-row page fully rendered).</li>
+      <li><span class="ok">✔</span> Unit 37/37 with coverage ratchet; types/lint clean; production build green.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Notes</h2>
+    <ul class="clean">
+      <li>Cursor ties: tasks sharing a <span class="mono">created_at</span> with the page boundary can be skipped — acceptable for the spike; a composite (created_at, id) cursor is the follow-up if it ever matters.</li>
+      <li>The kanban board still loads up to 200 rows via the API (a board shows everything at once by design); column-level pagination is a candidate for a later phase.</li>
+      <li>Table view virtualization deferred — pagination now bounds it at 50 rows per page.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>prism-manage · hardening arc · H5 complete</span>
+    <span>next: H6 — a11y &amp; polish</span>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -46,5 +46,17 @@ test.describe("task comments", () => {
     await expect(page.getByText("created this task")).toBeVisible({
       timeout: 15_000,
     });
+
+    // R1: save the comment thread to the Company Brain
+    await page.getByRole("button", { name: "Save to Brain" }).click();
+    await expect(
+      page.getByText(/Thread (distilled|saved) to the Brain/),
+    ).toBeVisible({ timeout: 20_000 });
+
+    // A11y: Escape closes the sheet
+    await page.keyboard.press("Escape");
+    await expect(
+      page.getByPlaceholder("Add a comment… (@mention teammates, ⌘⏎ to send)"),
+    ).toHaveCount(0, { timeout: 10_000 });
   });
 });

@@ -20,7 +20,14 @@ export async function GET(request: Request) {
     }
 
     const workspaceId = searchParams.get("workspaceId") || undefined;
-    const tasks = await getTasks(workspaceId);
+    const limitParam = Number(searchParams.get("limit"));
+    const cursor = searchParams.get("cursor") || undefined;
+    const tasks = await getTasks(workspaceId, {
+      ...(Number.isFinite(limitParam) && limitParam > 0
+        ? { limit: Math.min(limitParam, 200) }
+        : {}),
+      ...(cursor ? { cursor } : {}),
+    });
     return NextResponse.json(tasks);
   } catch {
     return NextResponse.json(

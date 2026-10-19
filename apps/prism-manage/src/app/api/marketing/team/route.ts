@@ -29,7 +29,17 @@ export async function GET() {
       return NextResponse.json([]);
     }
 
-    const team = memberships.map(
+    const team = (
+      memberships as unknown as Array<{
+        user_id: string;
+        role: string;
+        user_profiles: {
+          id: string;
+          full_name: string | null;
+          email: string;
+        }[];
+      }>
+    ).map(
       (
         m: {
           user_id: string;

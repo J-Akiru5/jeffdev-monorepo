@@ -21,7 +21,7 @@
   "dependencies": {
     "@codesandbox/sandpack-react": "^2.20.0",
     "@google/generative-ai": "^0.24.1",
-    "@next/bundle-analyzer": "16.4.2",
+    "@next/bundle-analyzer": "^16.4.2",
     "@prism-engine/cli": "workspace:*",
     "@sentry/nextjs": "^10.53.1",
     "@supabase/ssr": "^0.10.0",
@@ -61,7 +61,7 @@
     "eslint-config-next": "16.4.2",
     "tailwindcss": "^4.1.18",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.2",
+    "typescript": "^5.9.3",
     "vitest": "^4.0.16"
   }
 }

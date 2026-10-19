@@ -62,6 +62,7 @@
         "GITHUB_MARKETING_REPO_NAME",
         "CRON_SECRET",
         "SLACK_WEBHOOK_URL",
+        "BRAIN_*",
         "E2E_TEST_EMAIL",
         "E2E_TEST_PASSWORD",
         "E2E_READY"
@@ -89,6 +90,7 @@
         "GITHUB_MARKETING_REPO_NAME",
         "CRON_SECRET",
         "SLACK_WEBHOOK_URL",
+        "BRAIN_*",
         "E2E_TEST_EMAIL",
         "E2E_TEST_PASSWORD",
         "E2E_READY"

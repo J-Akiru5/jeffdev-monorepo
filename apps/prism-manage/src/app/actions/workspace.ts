@@ -70,9 +70,17 @@ export async function getWorkspaceDepartments(workspaceId: string) {
 }
 
 /**
- * Fetch workspace members for a given workspace.
+ * Workspace members cache (H5): the task sheet fetched members on every
+ * open — a short TTL cache removes the repeated round-trip. Module-scoped,
+ * per server instance, best-effort.
  */
-export async function getWorkspaceMembers(workspaceId: string) {
+const MEMBERS_CACHE_TTL_MS = 60_000;
+const membersCache = new Map<
+  string,
+  { at: number; value: Awaited<ReturnType<typeof fetchWorkspaceMembers>> }
+>();
+
+async function fetchWorkspaceMembers(workspaceId: string) {
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -112,6 +120,18 @@ export async function getWorkspaceMembers(workspaceId: string) {
   } catch {
     return { members: [], userRole: "employee" as const };
   }
+}
+
+/** Cached wrapper — see the cache notes above. */
+export async function getWorkspaceMembers(workspaceId: string) {
+  const hit = membersCache.get(workspaceId);
+  if (hit && Date.now() - hit.at < MEMBERS_CACHE_TTL_MS) return hit.value;
+
+  const value = await fetchWorkspaceMembers(workspaceId);
+  if (value.members.length > 0) {
+    membersCache.set(workspaceId, { at: Date.now(), value });
+  }
+  return value;
 }
 
 /**

@@ -77,7 +77,7 @@ export default async function MarketingDashboardPage() {
                   <span className="text-xs text-white/50">
                     {phaseStats.done}/{phaseStats.total} done
                   </span>
-                  <span className="text-xs text-white/30">{percent}%</span>
+                  <span className="text-xs text-white/40">{percent}%</span>
                 </div>
               </Link>
             );
@@ -102,7 +102,7 @@ export default async function MarketingDashboardPage() {
             <p className="text-xs font-mono uppercase tracking-wider text-white/50">
               To Do
             </p>
-            <p className="mt-2 text-3xl font-bold text-white/30">
+            <p className="mt-2 text-3xl font-bold text-white/40">
               {stats.byStatus.todo || 0}
             </p>
           </div>

@@ -41,7 +41,7 @@ export function SidebarInlineInput({
             if (e.key === "Escape") onCancel();
           }}
           placeholder={placeholder}
-          className="flex-1 bg-transparent text-sm text-white placeholder:text-white/30 outline-none"
+          className="flex-1 bg-transparent text-sm text-white placeholder:text-white/40 outline-none"
         />
         <button
           onClick={onSave}
