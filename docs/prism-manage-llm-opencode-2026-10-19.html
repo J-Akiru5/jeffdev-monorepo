@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage — LLM Provider Swap: OpenCode-First</title>
+<style>
+  :root { --bg:#0A0D12; --bg-card:#151A22; --border:#232A36; --cyan:#22D3EE; --violet:#8B7BFF; --text:#E6EAF0; --text-dim:#8B93A3; --text-faint:#5A6272; --good:#4ADE80; --warn:#FBBF24; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; line-height:1.6; padding:48px 24px; }
+  .wrap { max-width:860px; margin:0 auto; }
+  .mono { font-family:'JetBrains Mono','SF Mono',Consolas,monospace; }
+  header { border-bottom:1px solid var(--border); padding-bottom:28px; margin-bottom:32px; }
+  .eyebrow { font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--cyan); margin-bottom:10px; }
+  h1 { font-size:27px; font-weight:700; margin-bottom:12px; background:linear-gradient(90deg,var(--text),var(--text) 55%,var(--cyan)); -webkit-background-clip:text; background-clip:text; }
+  .meta-row { display:flex; flex-wrap:wrap; gap:16px; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text-dim); }
+  .meta-row b { color:var(--text); font-weight:500; }
+  .badge { display:inline-block; padding:3px 10px; border-radius:999px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.04em; text-transform:uppercase; border:1px solid; color:var(--good); border-color:var(--good); background:rgba(74,222,128,.08); }
+  .badge.warn { color:var(--warn); border-color:var(--warn); background:rgba(251,191,36,.08); }
+  section { margin-bottom:32px; }
+  h2 { font-size:13px; font-family:'JetBrains Mono',monospace; letter-spacing:.06em; text-transform:uppercase; color:var(--violet); margin-bottom:14px; display:flex; align-items:center; gap:10px; }
+  h2::after { content:''; flex:1; height:1px; background:var(--border); }
+  .summary-box { background:var(--bg-card); border:1px solid var(--border); border-left:3px solid var(--cyan); border-radius:6px; padding:18px 20px; font-size:15px; }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; }
+  th,td { text-align:left; padding:10px 14px; border-bottom:1px solid var(--border); vertical-align:top; }
+  th { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-faint); font-weight:500; }
+  td.mono { color:var(--cyan); white-space:nowrap; }
+  .ok { color:var(--good); }
+  ul.clean { list-style:none; display:flex; flex-direction:column; gap:10px; }
+  ul.clean li { background:var(--bg-card); border:1px solid var(--border); border-radius:6px; padding:12px 16px; font-size:14px; }
+  pre { background:#11151C; border:1px solid var(--border); border-radius:6px; padding:14px 16px; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-dim); overflow-x:auto; }
+  footer { margin-top:44px; padding-top:20px; border-top:1px solid var(--border); font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-faint); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">prism-manage · Company Brain · LLM Provider Swap</div>
+    <h1>OpenCode Inference — First-Class LLM Provider</h1>
+    <div class="meta-row">
+      <span><b>2026-10-19</b></span>
+      <span>Branch: <b>feat/pm-llm-opencode → PR → develop</b></span>
+      <span class="badge">Code complete · verified</span>
+      <span class="badge warn">Awaiting a valid key to go live</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Summary</h2>
+    <div class="summary-box">
+      The brain's LLM calls (thread distillation + ask-the-brain answers) now go
+      through a <b>provider layer</b> that prefers the <b>OpenCode inference
+      API</b> — the same OpenAI-compatible gateway your Go subscription serves
+      (<span class="mono">deepseek-v4.1-flash</span> by default). Gemini becomes
+      the fallback, and the deterministic thread-mode summary stays as the last
+      resort. Provider selection is env-driven: flipping to a different key or
+      endpoint is a config change, not a code change.
+    </div>
+  </section>
+
+  <section>
+    <h2>What Changed</h2>
+    <table>
+      <thead><tr><th>Piece</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">lib/llm.ts</td><td>New provider layer. OpenCode first (<span class="mono">POST {base}/chat/completions</span>, Bearer auth, <span class="mono">User-Agent: prism-manage/1.0</span>, stable <span class="mono">x-opencode-session</span> per conversation — exactly the client behaviour the Go docs ask for), Gemini second, <span class="mono">null</span> (deterministic fallback) last. 30s timeout; failures are logged, never thrown at callers.</td></tr>
+        <tr><td class="mono">brain.ts</td><td>Distillation and ask now call <span class="mono">generateText()</span> instead of the Google SDK directly. Output contracts unchanged (<span class="mono">mode: "ai" | "fallback"</span>, citations intact).</td></tr>
+        <tr><td class="mono">api/health</td><td>New <span class="mono">integrations.llm</span> field reports the active provider (<span class="mono">"opencode"</span> / <span class="mono">"gemini"</span> / <span class="mono">false</span>).</td></tr>
+        <tr><td class="mono">Env</td><td><span class="mono">OPENCODE_API_KEY</span> · <span class="mono">OPENCODE_MODEL</span> (default <span class="mono">deepseek-v4.1-flash</span>) · <span class="mono">OPENCODE_BASE_URL</span> (Go: <span class="mono">…/inference/go/openai/v1</span> · Console: <span class="mono">…/inference/openai/v1</span>). Documented in <span class="mono">.env.example</span> + turbo env.</td></tr>
+        <tr><td class="mono">lib/llm.test.ts</td><td>6 unit tests pin the request contract: URL, Bearer header, client UA, session header, model/messages/max_tokens body, base-URL + model overrides, failure → null, empty → null, no key → no fetch.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Verification</h2>
+    <ul class="clean">
+      <li><span class="ok">✔</span> Unit: <b>53 passed</b> (6 new) · types/lint clean · production build green.</li>
+      <li><span class="ok">✔</span> E2E: <b>37/37 passed</b> — brain specs exercise the fallback chain end-to-end.</li>
+      <li><span class="warn">▲</span> <b>Live call pending a valid key.</b> The keys stored locally (<span class="mono">opencode-go</span>, <span class="mono">opencode</span>) are rejected by the gateway with <span class="mono">"Invalid credential"</span> — the local OpenCode service itself gets a 401 fetching its provider config, so they are stale, not misused.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>To Go Live (one key, one minute)</h2>
+    <pre>Option A — Go key (what you already pay for):
+  Console → subscribe/refresh Go → copy the API key
+  (or run /connect in the TUI → OpenCode Go → paste)
+  Then: I set OPENCODE_API_KEY on Vercel and verify with a live call.
+
+Option B — Console service-account key (the app-grade route):
+  Console → API → service accounts → create key
+  Endpoint becomes https://opencode.ai/inference/openai/v1 (one env var).
+
+Note: Go's docs frame the plan for coding-agent traffic; a small internal
+tool's summaries are low-volume, but Option B is the by-the-book path for
+application inference if you want zero ambiguity.</pre>
+  </section>
+
+  <footer>
+    <span>llm swap · opencode-first · gemini fallback</span>
+    <span>status: awaiting key → set → verify → release</span>
+  </footer>
+</div>
+</body>
+</html>

@@ -112,7 +112,7 @@
     <ul class="clean">
       <li><b>Migrations applied live:</b> <span class="mono">20261019000003</span> (task_templates), <span class="mono">20261019000004</span> (task_dependencies). Schema drift in sync.</li>
       <li><b>Gemini free-tier LLM quota exhausted</b> (20 calls/day) by the overnight runs — degradation is graceful (fallback distillation, closest-match answers) and embeddings are unaffected, so search keeps working. A paid key is recommended when the brain gets real use.</li>
-      <li><b>Vercel build quota</b> was exhausted earlier; deploys resume when it resets (or via a manual redeploy).</li>
+      <li><b>Vercel deploys were failing</b> on an <span class="mono">INVALID_CRON_SECRET</span> error — the secret had been stored with trailing whitespace. Root-caused, re-set byte-exact, production redeployed and verified (<span class="mono">/api/health</span> ok, webhook armed). Not a quota issue after all.</li>
       <li><b>Env vars you may want:</b> <span class="mono">GITHUB_WEBHOOK_SECRET</span> (then add the repo webhook — URL + steps in the D3 report), optional <span class="mono">SLACK_WEBHOOK_URL</span> and <span class="mono">BRAIN_INGEST_SECRET</span>, optional <span class="mono">BRAIN_DISTILL_DAILY_CAP</span>.</li>
     </ul>
   </section>

@@ -9,11 +9,11 @@
  */
 
 import { revalidatePath } from "next/cache";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from "@/lib/supabase/server";
 import { logger } from "@/lib/log";
 import { sanitizeIlikeTerm } from "@/lib/postgrest";
 import { embedText } from "@/lib/embeddings";
+import { generateText } from "@/lib/llm";
 import type { Json } from "@/types/database.types";
 
 export interface MemoryEntry {
@@ -216,19 +216,10 @@ export async function askBrain(
     return { answer: "", citations, mode: "none" };
   }
 
-  const apiKey =
-    process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    return { answer: "", citations, mode: "keyword" };
-  }
-
-  try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    const context = citations
-      .map((c, i) => `[${i + 1}] ${c.title}\n${c.summary}`)
-      .join("\n\n");
-    const prompt = `You answer questions about this company's history and decisions using ONLY the memory entries below.
+  const context = citations
+    .map((c, i) => `[${i + 1}] ${c.title}\n${c.summary}`)
+    .join("\n\n");
+  const prompt = `You answer questions about this company's history and decisions using ONLY the memory entries below.
 Cite the entries you use as [1], [2], etc. If the entries do not contain the answer, say you don't have a memory of that yet.
 
 ## Memory entries
@@ -238,20 +229,22 @@ ${context}
 ${q}
 
 Answer in 2-5 sentences, with citations.`;
-    const result = await model.generateContent(prompt);
-    return {
-      answer: result.response.text(),
-      citations,
-      mode: citations.some((c) => c.similarity !== null)
-        ? "semantic"
-        : "keyword",
-    };
-  } catch (error) {
-    logger.warn("brain.ask.failed", {
-      error: error instanceof Error ? error.message : String(error),
-    });
+
+  const llm = await generateText(prompt, {
+    sessionId: `brain-ask-${workspaceId}`,
+    maxTokens: 600,
+  });
+  if (!llm) {
     return { answer: "", citations, mode: "keyword" };
   }
+
+  return {
+    answer: llm.text,
+    citations,
+    mode: citations.some((c) => c.similarity !== null)
+      ? "semantic"
+      : "keyword",
+  };
 }
 
 export interface DistillResult {
@@ -265,8 +258,9 @@ export interface DistillResult {
 /**
  * Distill a task's comment thread into a memory entry (R1).
  * - One entry per thread: refreshed in place as the discussion grows.
- * - AI summary when a Gemini key is configured; deterministic fallback
- *   otherwise (so the feature works everywhere, including CI).
+ * - AI summary when an LLM key is configured (OpenCode preferred, Gemini
+ *   fallback); deterministic fallback otherwise (so the feature works
+ *   everywhere, including CI).
  * - `throttleMs` skips re-distillation that happened too recently (used by
  *   the opt-in auto path so bursts of comments don't fan out API calls).
  */
@@ -345,26 +339,19 @@ export async function distillTaskThread(
 
   let summary = "";
   let mode: "ai" | "fallback" = "fallback";
-  const apiKey =
-    process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY;
-  if (apiKey) {
-    try {
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-      const prompt = `Summarize this task discussion into a decision record for a company memory. Respond in 2-4 sentences: what was discussed, what was decided, and why. Do not add anything that is not present in the thread.
+  const prompt = `Summarize this task discussion into a decision record for a company memory. Respond in 2-4 sentences: what was discussed, what was decided, and why. Do not add anything that is not present in the thread.
 
 Task: ${task.title}
 
 Thread:
 ${thread}`;
-      const result = await model.generateContent(prompt);
-      summary = result.response.text().trim();
-      if (summary) mode = "ai";
-    } catch (error) {
-      logger.warn("brain.distill.ai_failed", {
-        error: error instanceof Error ? error.message : String(error),
-      });
-    }
+  const llm = await generateText(prompt, {
+    sessionId: `brain-distill-${taskId}`,
+    maxTokens: 400,
+  });
+  if (llm) {
+    summary = llm.text;
+    mode = "ai";
   }
   if (!summary) {
     summary = `Discussion on "${task.title}": ${thread.slice(0, 600)}${

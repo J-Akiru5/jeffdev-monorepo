@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { llmProviderName } from "@/lib/llm";
 
 /**
  * GET /api/health
@@ -50,6 +51,7 @@ export async function GET() {
         gemini: Boolean(
           process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_API_KEY,
         ),
+        llm: llmProviderName() ?? false,
         github: Boolean(process.env.GITHUB_PAT),
         googleCalendar: Boolean(process.env.GOOGLE_CLIENT_ID),
       },
