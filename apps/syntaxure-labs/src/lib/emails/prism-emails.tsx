@@ -69,10 +69,10 @@ export function prismWaitlistNotification(data: {
       </table>
     </div>
     
-    <div style="margin-top: 20px; text-align: center;">
-      <a href="https://www.syntaxure.dev/admin/prism/waitlist" style="display: inline-block; background: #000; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">
-        View Waitlist
-      </a>
+    <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid #e4e4e7;">
+      <p style="margin: 0; font-size: 12px; color: #71717a;">
+        Signups are stored in the <strong>waitlist_entries</strong> table (Supabase) — check the latest there, or reply directly to the visitor.
+      </p>
     </div>
   </div>
 </body>
