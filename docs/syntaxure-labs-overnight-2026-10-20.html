@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Syntaxure Labs — Overnight Development Report (2026-10-20)</title>
+<style>
+  :root { --bg:#0A0D12; --bg-card:#151A22; --border:#232A36; --cyan:#22D3EE; --violet:#8B7BFF; --text:#E6EAF0; --text-dim:#8B93A3; --text-faint:#5A6272; --good:#4ADE80; --warn:#FBBF24; --bad:#F87171; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; line-height:1.6; padding:48px 24px; }
+  .wrap { max-width:880px; margin:0 auto; }
+  .mono { font-family:'JetBrains Mono','SF Mono',Consolas,monospace; }
+  header { border-bottom:1px solid var(--border); padding-bottom:28px; margin-bottom:32px; }
+  .eyebrow { font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--cyan); margin-bottom:10px; }
+  h1 { font-size:27px; font-weight:700; margin-bottom:12px; background:linear-gradient(90deg,var(--text),var(--text) 55%,var(--cyan)); -webkit-background-clip:text; background-clip:text; }
+  .meta-row { display:flex; flex-wrap:wrap; gap:16px; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text-dim); }
+  .meta-row b { color:var(--text); font-weight:500; }
+  .badge { display:inline-block; padding:3px 10px; border-radius:999px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.04em; text-transform:uppercase; border:1px solid; color:var(--good); border-color:var(--good); background:rgba(74,222,128,.08); }
+  .badge.warn { color:var(--warn); border-color:var(--warn); background:rgba(251,191,36,.08); }
+  section { margin-bottom:34px; }
+  h2 { font-size:13px; font-family:'JetBrains Mono',monospace; letter-spacing:.06em; text-transform:uppercase; color:var(--violet); margin-bottom:14px; display:flex; align-items:center; gap:10px; }
+  h2::after { content:''; flex:1; height:1px; background:var(--border); }
+  .summary-box { background:var(--bg-card); border:1px solid var(--border); border-left:3px solid var(--cyan); border-radius:6px; padding:18px 20px; font-size:15px; }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; }
+  th,td { text-align:left; padding:10px 14px; border-bottom:1px solid var(--border); vertical-align:top; }
+  th { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-faint); font-weight:500; }
+  td.mono { color:var(--cyan); white-space:nowrap; }
+  .ok { color:var(--good); }
+  ul.clean { list-style:none; display:flex; flex-direction:column; gap:10px; }
+  ul.clean li { background:var(--bg-card); border:1px solid var(--border); border-radius:6px; padding:12px 16px; font-size:14px; }
+  pre { background:#11151C; border:1px solid var(--border); border-radius:6px; padding:14px 16px; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-dim); overflow-x:auto; }
+  footer { margin-top:44px; padding-top:20px; border-top:1px solid var(--border); font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-faint); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Syntaxure Labs · autonomous overnight run · 2026-10-20</div>
+    <h1>Overnight Development — 5 PRs, 4 silent production breakages repaired</h1>
+    <div class="meta-row">
+      <span>Branch chain: <b>#130 → #131 → #132 → #133 → #134</b></span>
+      <span class="badge">develop green</span>
+      <span class="badge warn">main release awaiting approval</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Why this mattered</h2>
+    <div class="summary-box">
+      The marketing launch cluster (#21/#22/#24/#31) points at conversion paths that were
+      <b>silently broken in production</b>: the waitlist never stored anyone, the contact form wrote
+      to a table that does not exist, the public payment page could not find a single invoice, and
+      payment proofs could never upload. Every fix below was verified against the live database —
+      not just unit-tested.
+    </div>
+  </section>
+
+  <section>
+    <h2>Shipped</h2>
+    <table>
+      <thead><tr><th>PR</th><th>What</th><th>Evidence</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">#130</td><td><b>Waitlist capture.</b> The action was a stub writing to a nonexistent <span class="mono">waitlist</span> table. Now records into <span class="mono">waitlist_entries</span>, dedupes quietly (unique email), sends the confirmation + team notification (best-effort).</td><td>6 unit tests; live insert/duplicate(409)/cleanup roundtrip.</td></tr>
+        <tr><td class="mono">#131</td><td><b>Launch readiness for /prism.</b> Sitemap now includes <span class="mono">/prism</span>, <span class="mono">/blog</span>, <span class="mono">/community</span>, <span class="mono">/changelog</span>, <span class="mono">/products</span> (exported list + regression test); canonical + OpenGraph/Twitter metadata; removed a dead "View Waitlist" link from the notification email.</td><td>3 unit tests; lint/build green.</td></tr>
+        <tr><td class="mono">#132</td><td><b>Public payment path.</b> Invoice lookup queried <span class="mono">ref_no</span>/<span class="mono">items</span> (never existed) → now <span class="mono">invoice_number</span> + profile join via a tested mapper; created the missing <span class="mono">payments</span> table; implemented signed uploads into a new <b>private</b> <span class="mono">payment-proofs</span> bucket.</td><td>Live roundtrip: invoice → embed lookup → verified payment sum → signed upload PUT 200 → cleanup. 17 unit tests.</td></tr>
+        <tr><td class="mono">#133</td><td><b>Contact form + namecards.</b> Contact wrote to nonexistent <span class="mono">messages</span> with an invalid status → now <span class="mono">contact_messages</span> with <span class="mono">received</span> (constraint probed). Namecards looked up a nonexistent <span class="mono">username</span> column and returned an unrenderable row → now resolve via <span class="mono">preferences.namecard.username</span> with privacy gating (email/phone/socials opt-in only).</td><td>Live JSONB filter + constraint probes; 9 unit tests.</td></tr>
+        <tr><td class="mono">#134</td><td><b>CI gating.</b> syntaxure-labs was missing from the test matrix entirely — its unit tests never ran in CI. Added with a vitest-only command (E2E stays in the app's own Playwright setup). This report rides along.</td><td>New <span class="mono">Test (syntaxure-labs)</span> job runs the 38-test suite.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Schema sweep results</h2>
+    <ul class="clean">
+      <li><span class="ok">✔</span> Verified working: <span class="mono">invites</span>, <span class="mono">blog_posts</span>, <span class="mono">community_posts</span>, <span class="mono">testimonials</span>, <span class="mono">projects</span>, <span class="mono">support_tickets</span>, <span class="mono">quotes</span> (the action already used the live columns), <span class="mono">services</span> (slug derived from name — my initial probe guessed a wrong column; the code was correct).</li>
+      <li><span class="ok">✔</span> Fixed: <span class="mono">waitlist_entries</span>, <span class="mono">contact_messages</span>, <span class="mono">invoices</span> mapping, <span class="mono">payments</span> (created), <span class="mono">payment-proofs</span> (created), <span class="mono">user_profiles</span> namecard path.</li>
+      <li><span class="ok">✔</span> Migrations applied: <span class="mono">20261020000001</span> (bucket), <span class="mono">20261020000002</span> (payments) — both additive. Drift in sync.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Open items / notes for Jeff</h2>
+    <ul class="clean">
+      <li><b>Release to main not performed</b> — production deploys are a Tier C boundary. A ready release PR will be opened; merge when you're comfortable. Note: Vercel has not created any deployment account-wide since ~13:47Z yesterday (likely the free-tier daily limit); production is healthy on the last build.</li>
+      <li><b>Namecards are opt-in</b> — no profile currently sets <span class="mono">preferences.namecard</span>, so /card/* returns 404 until a profile enables one (by design).</li>
+      <li><b>AgentOps backbone</b> — <span class="mono">agentctl</span> is installed but this repo has <b>no <span class="mono">plan/</span> on develop</b>, so task claims/evidence/integration are not active here. Recorded rather than improvised.</li>
+      <li><b>Worktree inventory</b> — 14 worktrees, all retained by <span class="mono">agentctl cleanup</span> (foreign, prunable, or unpreserved heads). No cleanup performed.</li>
+      <li><b>Resources</b> — the machine stayed at red level (≤4.4 GB free, CPU ~100%) all night: builds/E2E intentionally not run locally; CI was the gate.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>syntaxure-labs · overnight · 2026-10-20</span>
+    <span>develop @ #133 · CI green · release PR pending</span>
+  </footer>
+</div>
+</body>
+</html>
