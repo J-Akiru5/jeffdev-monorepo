@@ -64,6 +64,7 @@
         "CRON_SECRET",
         "SLACK_WEBHOOK_URL",
         "BRAIN_*",
+        "OPENCODE_*",
         "E2E_TEST_EMAIL",
         "E2E_TEST_PASSWORD",
         "E2E_READY"
@@ -93,6 +94,7 @@
         "CRON_SECRET",
         "SLACK_WEBHOOK_URL",
         "BRAIN_*",
+        "OPENCODE_*",
         "E2E_TEST_EMAIL",
         "E2E_TEST_PASSWORD",
         "E2E_READY"
