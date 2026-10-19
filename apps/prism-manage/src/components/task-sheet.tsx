@@ -34,7 +34,11 @@ import {
   type TaskActivityEntry,
   type TaskComment,
 } from "@/app/actions/collaboration";
-import { distillTaskThread } from "@/app/actions/brain";
+import {
+  distillTaskThread,
+  searchMemory,
+  type BrainCitation,
+} from "@/app/actions/brain";
 import {
   getTaskTemplates,
   saveTaskAsTemplate,
@@ -142,6 +146,7 @@ export function TaskSheet({
   const [blockerCandidates, setBlockerCandidates] = useState<
     { id: string; title: string }[]
   >([]);
+  const [relatedMemories, setRelatedMemories] = useState<BrainCitation[]>([]);
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
 
@@ -270,6 +275,32 @@ export function TaskSheet({
       setTemplates(await getTaskTemplates(activeWorkspaceId));
     }
   };
+
+  // Related memories (arc 3 · D5): semantic search over the brain for this task
+  useEffect(() => {
+    if (!isOpen || mode !== "edit" || !taskId || !activeWorkspaceId) return;
+    const query = `${initialData?.title ?? ""} ${initialData?.description ?? ""}`
+      .trim()
+      .slice(0, 300);
+    if (query.length < 3) {
+      setRelatedMemories([]);
+      return;
+    }
+    let cancelled = false;
+    searchMemory(activeWorkspaceId, query).then((results) => {
+      if (!cancelled) setRelatedMemories(results.slice(0, 3));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    isOpen,
+    mode,
+    taskId,
+    activeWorkspaceId,
+    initialData?.title,
+    initialData?.description,
+  ]);
 
   // Dependencies (arc 3 · D4): this task's blockers + add-candidates
   useEffect(() => {
@@ -1001,6 +1032,37 @@ export function TaskSheet({
                                   </option>
                                 ))}
                             </select>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Related memories (arc 3 · D5) */}
+                      {mode === "edit" && relatedMemories.length > 0 && (
+                        <div>
+                          <label className="mb-3 block text-xs font-medium uppercase tracking-wider text-white/40">
+                            Related memories
+                          </label>
+                          <div className="space-y-2">
+                            {relatedMemories.map((m) => (
+                              <div
+                                key={m.id}
+                                className="rounded-lg border border-border bg-glass-04 px-3 py-2"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <p className="truncate text-sm text-white/80">
+                                    {m.title}
+                                  </p>
+                                  {typeof m.similarity === "number" && (
+                                    <span className="ml-auto shrink-0 font-mono text-[10px] text-cyan-300/70">
+                                      {Math.round(m.similarity * 100)}%
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="mt-0.5 line-clamp-2 text-xs text-white/50">
+                                  {m.summary}
+                                </p>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       )}
