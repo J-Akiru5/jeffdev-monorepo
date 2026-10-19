@@ -321,7 +321,7 @@ export async function getMessages(limit = 50): Promise<DataMessage[]> {
   try {
     const supabase = getAdminClient();
     const { data, error } = await supabase
-      .from("messages")
+      .from("contact_messages")
       .select("*")
       .order("created_at", { ascending: false });
 
