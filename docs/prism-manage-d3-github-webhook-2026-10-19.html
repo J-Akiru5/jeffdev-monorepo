@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage Arc 3 · D3 — GitHub Webhook Reverse-Sync</title>
+<style>
+  :root { --bg:#0A0D12; --bg-card:#151A22; --border:#232A36; --cyan:#22D3EE; --violet:#8B7BFF; --text:#E6EAF0; --text-dim:#8B93A3; --text-faint:#5A6272; --good:#4ADE80; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; line-height:1.6; padding:48px 24px; }
+  .wrap { max-width:820px; margin:0 auto; }
+  .mono { font-family:'JetBrains Mono','SF Mono',Consolas,monospace; }
+  header { border-bottom:1px solid var(--border); padding-bottom:28px; margin-bottom:32px; }
+  .eyebrow { font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--cyan); margin-bottom:10px; }
+  h1 { font-size:26px; font-weight:700; margin-bottom:12px; background:linear-gradient(90deg,var(--text),var(--text) 60%,var(--cyan)); -webkit-background-clip:text; background-clip:text; }
+  .meta-row { display:flex; flex-wrap:wrap; gap:16px; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text-dim); }
+  .meta-row b { color:var(--text); font-weight:500; }
+  .badge { display:inline-block; padding:3px 10px; border-radius:999px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.04em; text-transform:uppercase; border:1px solid; color:var(--good); border-color:var(--good); background:rgba(74,222,128,.08); }
+  section { margin-bottom:32px; }
+  h2 { font-size:13px; font-family:'JetBrains Mono',monospace; letter-spacing:.06em; text-transform:uppercase; color:var(--violet); margin-bottom:14px; display:flex; align-items:center; gap:10px; }
+  h2::after { content:''; flex:1; height:1px; background:var(--border); }
+  .summary-box { background:var(--bg-card); border:1px solid var(--border); border-left:3px solid var(--cyan); border-radius:6px; padding:18px 20px; font-size:15px; }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; }
+  th,td { text-align:left; padding:10px 14px; border-bottom:1px solid var(--border); vertical-align:top; }
+  th { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-faint); font-weight:500; }
+  td.mono { color:var(--cyan); white-space:nowrap; }
+  .ok { color:var(--good); }
+  ul.clean { list-style:none; display:flex; flex-direction:column; gap:10px; }
+  ul.clean li { background:var(--bg-card); border:1px solid var(--border); border-radius:6px; padding:12px 16px; font-size:14px; }
+  pre { background:#11151C; border:1px solid var(--border); border-radius:6px; padding:14px 16px; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-dim); overflow-x:auto; }
+  footer { margin-top:44px; padding-top:20px; border-top:1px solid var(--border); font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-faint); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">prism-manage · Arc 3 "Daily Driver" · D3</div>
+    <h1>D3 — GitHub Webhook Reverse-Sync</h1>
+    <div class="meta-row">
+      <span><b>2026-10-19</b></span>
+      <span>Branch: <b>feat/pm-d3-github-webhook → PR → develop</b></span>
+      <span class="badge">Complete</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Summary</h2>
+    <div class="summary-box">
+      Closing or reopening a linked GitHub issue now <b>updates the task
+      automatically</b>: <span class="mono">issues.closed → approved</span>,
+      <span class="mono">issues.reopened → backlog</span>. The endpoint is
+      HMAC-verified (<span class="mono">x-hub-signature-256</span>,
+      constant-time compare) and <b>fails closed</b> when the secret is unset.
+    </div>
+  </section>
+
+  <section>
+    <h2>What Changed</h2>
+    <table>
+      <thead><tr><th>Piece</th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">lib/github-webhook.ts</td><td>Pure mapper (action → status) + constant-time signature verifier. 5 unit tests (valid/tampered/wrong-secret/missing/malformed).</td></tr>
+        <tr><td class="mono">api/github/webhook/route.ts</td><td>Verifies the signature, ignores non-issue events (<span class="mono">ping</span> → pong), finds the task by <span class="mono">github_issue_number</span>, updates status, logs every sync. Unset secret → 503 (disabled); bad signature → 401.</td></tr>
+        <tr><td class="mono">e2e/api.spec.ts</td><td>Unsigned webhook calls are rejected (401/503).</td></tr>
+        <tr><td class="mono">.env.example</td><td><span class="mono">GITHUB_WEBHOOK_SECRET</span> documented.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Wiring It Up (for the owner — 2 minutes)</h2>
+    <pre>GitHub repo → Settings → Webhooks → Add webhook
+  Payload URL:  https://manage.syntaxure.dev/api/github/webhook
+  Content type: application/json
+  Secret:       (the GITHUB_WEBHOOK_SECRET you set on Vercel)
+  Events:       Issues  ✓
+Then: set GITHUB_WEBHOOK_SECRET on Vercel (any random string, same value).</pre>
+  </section>
+
+  <section>
+    <h2>Verification</h2>
+    <ul class="clean">
+      <li><span class="ok">✔</span> E2E: <b>33/33 passed</b> (new rejection test included).</li>
+      <li><span class="ok">✔</span> Unit: <b>47 passed</b> (5 new webhook tests); types/lint clean; build green.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Notes</h2>
+    <ul class="clean">
+      <li>The webhook deliberately bypasses the approval RBAC — closing the issue on GitHub is the authoritative act, and the task↔issue link is created by a workspace member (the forward sync).</li>
+      <li>Label/assignee reverse-mapping is deferred (login→user mapping needs a directory link); closed/reopened covers the daily loop.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>arc 3 · D3 complete</span>
+    <span>next: D4 — task dependencies</span>
+  </footer>
+</div>
+</body>
+</html>
