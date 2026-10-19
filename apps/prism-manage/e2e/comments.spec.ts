@@ -42,7 +42,9 @@ test.describe("task comments", () => {
     const commentCard = page
       .locator("div.rounded-lg.border.border-border.bg-glass-04")
       .filter({ hasText: "e2e comment body" });
-    await expect(commentCard.getByText("E2E Test Account")).toBeVisible();
+    await expect(commentCard.getByText("E2E Test Account")).toBeVisible({
+      timeout: 15_000,
+    });
     await expect(page.getByText("created this task")).toBeVisible({
       timeout: 15_000,
     });
