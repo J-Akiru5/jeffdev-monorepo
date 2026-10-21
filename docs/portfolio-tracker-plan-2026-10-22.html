@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage — Portfolio Tracker Plan (2026-10-22)</title>
+<style>
+  :root { --bg:#0A0D12; --bg-card:#151A22; --border:#232A36; --cyan:#22D3EE; --violet:#8B7BFF; --text:#E6EAF0; --text-dim:#8B93A3; --text-faint:#5A6272; --good:#4ADE80; --warn:#FBBF24; --bad:#F87171; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; line-height:1.65; }
+  .bleed { width:100%; padding:0 clamp(20px, 5vw, 80px); }
+  .measure { max-width:760px; margin:0 auto; }
+  .wide { max-width:1120px; margin:0 auto; }
+  .mono { font-family:'JetBrains Mono','SF Mono',Consolas,monospace; }
+  header.hero { border-bottom:1px solid var(--border); padding:56px 0 32px; }
+  .eyebrow { font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--cyan); margin-bottom:10px; }
+  h1 { font-size:clamp(26px, 4.4vw, 38px); font-weight:700; line-height:1.2; margin-bottom:12px; background:linear-gradient(90deg,var(--text),var(--text) 55%,var(--cyan)); -webkit-background-clip:text; background-clip:text; }
+  .meta-row { display:flex; flex-wrap:wrap; gap:14px; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text-dim); }
+  .badge { display:inline-block; padding:3px 10px; border-radius:999px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.04em; text-transform:uppercase; border:1px solid; }
+  .badge.plan { color:var(--warn); border-color:var(--warn); background:rgba(251,191,36,.08); }
+  .badge.ok { color:var(--good); border-color:var(--good); background:rgba(74,222,128,.08); }
+  section { padding:34px 0; border-bottom:1px solid var(--border); }
+  h2 { font-size:13px; font-family:'JetBrains Mono',monospace; letter-spacing:.06em; text-transform:uppercase; color:var(--violet); margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+  h2::after { content:''; flex:1; height:1px; background:var(--border); }
+  h3 { font-size:16px; margin:22px 0 8px; color:var(--text); }
+  p { margin-bottom:12px; }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+  .stat { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:14px 16px; }
+  .stat .n { font-family:'JetBrains Mono',monospace; font-size:23px; font-weight:600; color:var(--cyan); }
+  .stat .l { font-size:12px; color:var(--text-dim); margin-top:2px; }
+  .card { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:16px 18px; }
+  .grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:14px; }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; }
+  .twrap { overflow-x:auto; border:1px solid var(--border); border-radius:10px; }
+  th,td { text-align:left; padding:10px 14px; border-bottom:1px solid var(--border); vertical-align:top; }
+  tr:last-child td { border-bottom:none; }
+  th { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-faint); font-weight:500; background:rgba(255,255,255,.02); }
+  td.mono { color:var(--cyan); white-space:nowrap; }
+  .ok { color:var(--good); } .warn { color:var(--warn); } .bad { color:var(--bad); }
+  ul.clean { list-style:none; display:flex; flex-direction:column; gap:10px; }
+  ul.clean li { background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:12px 16px; font-size:14px; }
+  code { font-family:'JetBrains Mono',monospace; font-size:.92em; color:var(--cyan); }
+  pre { background:#11151C; border:1px solid var(--border); border-radius:8px; padding:14px 16px; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-dim); overflow-x:auto; }
+  /* flow diagram */
+  .flow { display:flex; flex-wrap:wrap; align-items:center; gap:10px; }
+  .node { background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:10px 14px; font-size:13px; }
+  .node.hi { border-color:rgba(34,211,238,.5); box-shadow:0 0 0 1px rgba(34,211,238,.15) inset; }
+  .arrow { color:var(--text-faint); font-family:'JetBrains Mono',monospace; }
+  /* tracker */
+  .tracker { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:18px; }
+  .tracker-bar { height:8px; background:#0d1117; border:1px solid var(--border); border-radius:999px; overflow:hidden; }
+  .tracker-fill { height:100%; width:0; background:linear-gradient(90deg,var(--violet),var(--cyan)); transition:width .2s ease; }
+  .tracker-pct { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-dim); margin:8px 0 12px; }
+  .tracker-list { list-style:none; display:flex; flex-direction:column; gap:8px; }
+  .tracker-list label { display:flex; gap:10px; align-items:flex-start; font-size:14px; cursor:pointer; padding:6px 0; }
+  .tracker-list input[type=checkbox] { margin-top:4px; width:16px; height:16px; accent-color:var(--cyan); }
+  footer { padding:28px 0 60px; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-faint); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+  @media (max-width:640px) { h2 { font-size:12px; } .stat .n { font-size:20px; } }
+</style>
+</head>
+<body>
+
+<header class="hero bleed">
+  <div class="wide">
+    <div class="eyebrow">prism-manage · feature plan · 2026-10-22</div>
+    <h1>The Portfolio Tracker — one home for every Syntaxure project</h1>
+    <div class="meta-row">
+      <span>Status: <b>plan + open decisions</b></span>
+      <span class="badge plan">awaiting your answers</span>
+      <span>Recon: 2 parallel agents · 74 tables surveyed</span>
+    </div>
+  </div>
+</header>
+
+<section class="bleed">
+  <div class="wide">
+    <h2>TL;DR</h2>
+    <p class="measure">You have no single place where a Syntaxure project exists as a business object. Today “projects” means three different things: <b>task lists</b> (<code>pm_projects</code>), the <b>agency projects table</b> (shared with the paused admin + public site), and <b>static marketing copy</b> (LikasLens, RiceConnect). Partners and retainers exist only as free text or pricing copy. The tracker fixes that with one section in prism-manage, one shared data model, and three new building blocks.</p>
+    <div class="stats" style="margin-top:16px">
+      <div class="stat"><div class="n">3</div><div class="l">ventures to seed (LikasLens, RiceConnect, Golf System)</div></div>
+      <div class="stat"><div class="n">2</div><div class="l">partners to seed (Zenlabs, MDM Events Management)</div></div>
+      <div class="stat"><div class="n">0</div><div class="l">partner / venture / retainer models that exist today</div></div>
+      <div class="stat"><div class="n">1</div><div class="l">new prism-manage section: Portfolio</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">new tables + additive columns on <code>projects</code></div></div>
+      <div class="stat"><div class="n">4</div><div class="l">phases, contract-first, CI-gated</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="bleed">
+  <div class="wide">
+    <h2>Frame check — what you actually have vs. what you remember</h2>
+    <p class="measure">The tracker “that we had” is <b>not</b> in the retired syntaxure-pm (that was a flat task board with no projects, clients, partners or retainers). The real predecessor is the <b>prism-admin agency project detail</b>: status, progress bar, client, start/deadline, budget, partner + employees, and milestones. Its app is paused and parts of it are broken (dropped columns, wrong insert shapes). So this work is a <b>re-home + upgrade</b> of that capability into prism-manage — the active ops tool per the repo’s own status notes — with the missing business concepts added properly.</p>
+    <div class="twrap" style="margin-top:14px">
+      <table>
+        <thead><tr><th>Concept</th><th>Exists today?</th><th>Where</th><th>Gap</th></tr></thead>
+        <tbody>
+          <tr><td>Business project record</td><td class="ok">Yes (partially)</td><td><code>projects</code> table (id, title, slug, status, client_id, dates, budget, metadata JSONB)</td><td>Status lacks “in progress / maintenance”; no kind; no partner/assignment/retainer fields; not surfaced in prism-manage</td></tr>
+          <tr><td>Clients</td><td class="ok">Yes</td><td><code>clients</code> (name, email, company, phone)</td><td>No CRUD UI; only auto-created by the paused admin</td></tr>
+          <tr><td>Per-project milestones</td><td class="ok">Yes</td><td><code>milestones</code> (project_id, title, due_date, status)</td><td>Table definition conflicts with workspace milestones; users milestones status unverified</td></tr>
+          <tr><td>Own ventures (LikasLens, RiceConnect, Golf)</td><td class="bad">No</td><td>Static marketing data + one doc line</td><td>Not in the database at all</td></tr>
+          <tr><td>Partners</td><td class="bad">No</td><td><code>projects.metadata.assignedPartner</code> = free text; “partner” is also a legacy user role</td><td>No partner entity, no project↔partner relationship</td></tr>
+          <tr><td>Retainer / maintenance</td><td class="bad">No</td><td>Pricing copy (“Care Plan ₱2–5k/mo”) + <code>client_contracts</code>/<code>contract_terms</code> machinery</td><td>Nothing records “this project has an active retainer at X/month renewing on Y”</td></tr>
+          <tr><td>Assignment</td><td class="warn">Free text</td><td><code>metadata.assignedEmployees</code> (string[])</td><td>Not linked to real users; no per-project roles</td></tr>
+          <tr><td>Public case study</td><td class="ok">Yes</td><td><code>projects.published</code> + slug + <code>published_site_url</code>; site reads published rows</td><td>Publishing stays in the paused admin — fine for v1</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="bleed">
+  <div class="wide">
+    <h2>Recommended architecture</h2>
+    <h3>1 · One source of truth: extend the existing <code>projects</code> table</h3>
+    <p class="measure">The agency <code>projects</code> table is already the business-project record shared by the public site and the paused admin. Creating a second “portfolio projects” table would fork the truth and re-create exactly the drift we keep finding. Instead, add <b>additive columns</b> (no CHECK rewrites, no destructive changes) and new junction tables. The tracker then owns day-to-day portfolio management; the public site keeps reading <code>published</code> rows; the paused admin stays a CMS.</p>
+    <div class="flow" style="margin:14px 0">
+      <div class="node hi">projects (existing)</div><span class="arrow">+</span>
+      <div class="node">kind · portfolio_status · progress</div><span class="arrow">+</span>
+      <div class="node">retainer fields</div><span class="arrow">+</span>
+      <div class="node">pm_project_id (task list)</div>
+    </div>
+    <div class="twrap">
+      <table>
+        <thead><tr><th>New column (additive)</th><th>Type / values</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">kind</td><td>TEXT NOT NULL DEFAULT 'client' CHECK ('venture','client','internal')</td><td>Separates own ventures from customer builds (and internal tools if you want the option)</td></tr>
+          <tr><td class="mono">portfolio_status</td><td>TEXT NOT NULL DEFAULT 'active' CHECK ('planning','in_progress','maintenance','completed','paused','archived')</td><td>The states you actually asked for; <code>projects.status</code> keeps the site’s 4-state contract (mapped: planning/in_progress/maintenance→active, completed→completed, paused→paused, archived→archived)</td></tr>
+          <tr><td class="mono">progress</td><td>INTEGER 0–100 (nullable)</td><td>Promotes metadata.progress to a real column; reads fall back to <code>metadata.progress</code> when null</td></tr>
+          <tr><td class="mono">retainer_status</td><td>TEXT NOT NULL DEFAULT 'none' CHECK ('none','active','paused','ended')</td><td>The maintenance flag you asked for</td></tr>
+          <tr><td class="mono">retainer_monthly_amount</td><td>NUMERIC(12,2)</td><td>Feeds “Active MRR” on the portfolio page</td></tr>
+          <tr><td class="mono">retainer_currency</td><td>TEXT NOT NULL DEFAULT 'PHP'</td><td>₱ / $</td></tr>
+          <tr><td class="mono">retainer_started_on · retainer_renews_on</td><td>DATE</td><td>Renewal awareness (“renews in 21 days”)</td></tr>
+          <tr><td class="mono">pm_project_id</td><td>UUID → pm_projects(id) ON DELETE SET NULL</td><td>Optional: link a portfolio project to its task list so the detail page can show open work</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>2 · Three new tables</h3>
+    <div class="twrap" style="margin-top:10px">
+      <table>
+        <thead><tr><th>Table</th><th>Columns</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">partners</td><td>id, name (unique), kind ('agency','product','events','infrastructure','other'), contact_name, email, phone, website, notes, status ('active','inactive'), created_at, updated_at</td><td>The partner register — Zenlabs and MDM become real entities with a place</td></tr>
+          <tr><td class="mono">project_partners</td><td>project_id → projects (cascade), partner_id → partners (cascade), role TEXT (e.g. “co-development”, “events”, “distribution”), notes, created_at, PK (project_id, partner_id)</td><td>Many partners per project, many projects per partner — with the role said explicitly</td></tr>
+          <tr><td class="mono">project_members</td><td>project_id → projects (cascade), user_id → user_profiles, role TEXT ('lead','developer','designer','qa','marketing','support'), created_at, PK (project_id, user_id)</td><td>Who is assigned — real users, per-project role, one row per person</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>3 · Retainers — v1 depth</h3>
+    <p class="measure">v1 keeps retainers as the four fields on <code>projects</code> plus a derived “maintenance” state. That covers status, monthly amount, and renewal date — enough to run the portfolio. Billing history and per-period invoices can come later by linking to the existing <code>invoices</code>/<code>payments</code> and <code>client_contracts</code>/<code>contract_terms</code> machinery; nothing in v1 blocks that path. (If you want the full ledger on day one, say so — it adds one table and roughly a phase of work.)</p>
+
+    <h3>4 · RBAC</h3>
+    <div class="twrap">
+      <table>
+        <thead><tr><th>Capability</th><th>Founder</th><th>Assigned member</th><th>Other members</th></tr></thead>
+        <tbody>
+          <tr><td>View portfolio (names, status, kind, assignees, partners, milestones)</td><td class="ok">Yes</td><td class="ok">Yes</td><td class="ok">Yes</td></tr>
+          <tr><td>View budget / retainer amounts</td><td class="ok">Yes</td><td class="warn">No</td><td class="warn">No</td></tr>
+          <tr><td>Create / edit projects, partners, assignments, retainer terms</td><td class="ok">Yes</td><td class="warn">No</td><td class="warn">No</td></tr>
+          <tr><td>Update progress + milestones</td><td class="ok">Yes</td><td class="ok">Yes (assigned only)</td><td class="warn">No</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="measure" style="margin-top:10px">Enforced in three layers like the rest of the app: RLS on the new tables (workspace members read; founders write; assigned-member update policy for progress/milestones via a server-action check), the <code>{ success, error }</code> server-action convention, and a client guard on the section.</p>
+  </div>
+</section>
+
+<section class="bleed">
+  <div class="wide">
+    <h2>What you will see</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0">Portfolio (list)</h3>
+        <p><b>Stats:</b> total · ventures · clients · in maintenance · completed · active MRR.</p>
+        <p><b>Filters:</b> kind, status, retainer, partner, assignee, search.</p>
+        <p><b>Cards</b> show kind badge, status pill, name, client/partners, retainer badge + amount, progress bar, assignee avatars, next milestone, live URL. A table toggle gives a dense triage view.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Project detail</h3>
+        <p>Header (name, kind, status, client, partners, live URL, published), progress control, retainer card (status, monthly, renewal), team (assignees + roles), milestones (add / complete / delete), linked task list with open-task counts, and the description/notes.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Partners tab</h3>
+        <p>Partner register with kind, contacts, website, notes, status — and their projects. Create/edit from here; link partners from either side of the relationship.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Sidebar</h3>
+        <p>New section <b>Portfolio</b> beside Operations (with mobile-nav parity). The existing task “Lists” stay where they are — no confusion with task lists.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bleed">
+  <div class="wide">
+    <h2>Seed data (additive migration)</h2>
+    <div class="twrap">
+      <table>
+        <thead><tr><th>Project</th><th>Kind</th><th>Status</th><th>Partners</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>LikasLens</td><td>venture</td><td>in_progress</td><td>—</td><td>Slug <code>likaslens</code>; no client. Currently only static marketing copy.</td></tr>
+          <tr><td>RiceConnect</td><td>venture</td><td>in_progress</td><td>—</td><td>Slug <code>riceconnect</code>; no DB trace today.</td></tr>
+          <tr><td>Golf Management System</td><td>venture</td><td>planning</td><td>Zenlabs (co-development), MDM Events Management (events)</td><td>Slug <code>golf-management-system</code>; the partnership case.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="measure" style="margin-top:10px">Seed only if missing (idempotent by slug / partner name). Client-project seeding (MDM, USC Portal, FieldOps, Suarez Food Hub, Microplastic AI, IRJICT — all listed in the pitch portal) is a separate decision; see the questions.</p>
+  </div>
+</section>
+
+<section class="bleed">
+  <div class="wide">
+    <h2>Multi-agent execution plan</h2>
+    <p class="measure">Contract-first, one owner per file set, sequential integration — parallel writes to the same app are how merge hell starts. I act as the integrator.</p>
+    <div class="twrap">
+      <table>
+        <thead><tr><th>Agent</th><th>Owns (files)</th><th>Deliverable</th><th>Verification</th></tr></thead>
+        <tbody>
+          <tr><td><b>A · Data &amp; actions</b></td><td><code>supabase/migrations/*</code>, <code>src/lib/portfolio*.ts</code>, <code>src/app/actions/portfolio*.ts</code></td><td>Migration (columns + 3 tables + seed), typed mappers, CRUD actions (projects, partners, members, retainers, milestones), unit tests</td><td>Focused vitest; live probes (insert/update/cleanup) like the payment-path repair</td></tr>
+          <tr><td><b>B · UI</b></td><td><code>src/app/(dashboard)/portfolio/**</code>, <code>src/components/portfolio/**</code>, sidebar + mobile-nav entries</td><td>Portfolio list, project detail, partners tab, dialogs; consumes Agent A’s exported types</td><td>Typecheck/lint; CI build; visual sanity</td></tr>
+          <tr><td><b>C · QA &amp; docs</b></td><td><code>e2e/portfolio.spec.ts</code>, docs report</td><td>E2E for create→assign→retainer→milestone→filters; report</td><td>Playwright in CI</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="measure" style="margin-top:10px"><b>Integration order:</b> A merges first (contract live), B builds on it, C closes the loop. Each phase = branch → PR → CI green → merge to <code>develop</code>. No deployment commands are run by agents; the eligible-branch integration handles deploys, and <code>main</code> promotion stays human-only (deployment-governance). Heavy local builds are avoided while the host is amber/red — CI is the gate.</p>
+    <p class="measure"><b>Note on worktrees:</b> the AgentOps backbone (<code>agentctl</code> plan/claims) is not bootstrapped in this repo (no <code>plan/</code> on develop), so orchestration here is contract-first delegation with explicit file ownership, not lease-based claims. I’ll record that in the report.</p>
+  </div>
+</section>
+
+<section class="bleed">
+  <div class="wide">
+    <h2>Roadmap</h2>
+    <div class="tracker" style="margin-top:12px">
+      <div class="tracker-bar"><div class="tracker-fill" id="fill"></div></div>
+      <div class="tracker-pct" id="pct">0% complete</div>
+      <ul class="tracker-list" id="list">
+        <li data-id="p1"><label><input type="checkbox"> Phase 1 — Schema + seed migration + data/actions layer + unit tests (Agent A)</label></li>
+        <li data-id="p2"><label><input type="checkbox"> Phase 2 — Portfolio list, project detail, partners tab (Agent B)</label></li>
+        <li data-id="p3"><label><input type="checkbox"> Phase 3 — Task-list link, notifications on assignment, dashboard summary card</label></li>
+        <li data-id="p4"><label><input type="checkbox"> Phase 4 — E2E suite, release report, seed the delivered client projects (if approved)</label></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="bleed">
+  <div class="wide">
+    <h2>Risks &amp; sharp edges (from recon)</h2>
+    <ul class="clean">
+      <li><b>milestones table conflict</b> — the original project-scoped definition and the workspace-scoped phase-6 definition collide. The tracker will use <code>project_id</code> milestones only. The prism-manage Operations milestones code queries <code>workspace_id</code> and may be silently broken — flagged for a separate verification, not fixed here.</li>
+      <li><b>prism-admin drift</b> — its agency list reads a dropped <code>client_name</code>, and its “manage-projects” surface inserts columns that do not exist. Since prism-admin is paused, the tracker does not depend on it; note it for when that app resumes.</li>
+      <li><b>Two status fields</b> — <code>projects.status</code> (site contract) and <code>portfolio_status</code> (tracker). Mapping is explicit and written by one action; no dual-write paths.</li>
+      <li><b><code>projects.user_id NOT NULL</code></b> — seeded rows need an owner profile; the seed uses the earliest founder profile deterministically.</li>
+      <li><b>Public-site coupling</b> — published projects appear at <code>/work/[slug]</code>; the tracker must never unpublish by accident when editing (publishing remains an explicit toggle).</li>
+    </ul>
+  </div>
+</section>
+
+<footer class="bleed">
+  <div class="wide" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+    <span>prism-manage · portfolio tracker · plan v1</span>
+    <span>awaiting answers → phase 1</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const KEY = 'prism-portfolio-plan-tracker-v1';
+  const boxes = document.querySelectorAll('#list input[type=checkbox]');
+  if (!boxes.length) return;
+  let saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { saved = {}; }
+  function update(){
+    let done = 0;
+    boxes.forEach(b => { if (b.checked) done++; });
+    const pct = Math.round(100 * done / boxes.length);
+    document.getElementById('fill').style.width = pct + '%';
+    document.getElementById('pct').textContent = pct + '% complete';
+  }
+  boxes.forEach((b, i) => {
+    b.checked = !!saved[i];
+    b.addEventListener('change', () => {
+      const state = JSON.parse(localStorage.getItem(KEY) || '{}');
+      state[i] = b.checked;
+      localStorage.setItem(KEY, JSON.stringify(state));
+      update();
+    });
+  });
+  update();
+})();
+</script>
+</body>
+</html>
