@@ -23,6 +23,7 @@ import {
   ChevronRight,
   Plus,
   Target,
+  BriefcaseBusiness,
 } from "lucide-react";
 import { KeyboardShortcutsHelp } from "@syntaxure/ui";
 import { MANAGE_HELP_SHORTCUTS, MODE_TOGGLE_SHORTCUT } from "@/lib/keyboard-shortcuts";
@@ -237,7 +238,11 @@ export function Sidebar() {
                 label={item.label}
                 href={item.href}
                 icon={item.icon}
-                active={isActive(item.href)}
+                active={
+                  item.href === "/portfolio"
+                    ? pathname.startsWith("/portfolio")
+                    : isActive(item.href)
+                }
                 collapsed={collapsed}
               />
             ))}
@@ -253,6 +258,17 @@ export function Sidebar() {
           </SidebarSection>
           </div>
         )}
+
+        {/* Portfolio — business projects, available in both modes */}
+        <SidebarSection title="Portfolio" collapsed={collapsed}>
+          <SidebarNavItem
+            label="Projects"
+            href="/portfolio"
+            icon={BriefcaseBusiness}
+            active={pathname.startsWith("/portfolio")}
+            collapsed={collapsed}
+          />
+        </SidebarSection>
 
         {/* Operations — CEO/COO hub + BMC */}
         {(operationsAuthorized || bmcAuthorized) && (
