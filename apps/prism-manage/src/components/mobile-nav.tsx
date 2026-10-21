@@ -22,6 +22,7 @@ import {
   Settings,
   LogOut,
   Keyboard,
+  BriefcaseBusiness,
 } from "lucide-react";
 import { KeyboardShortcutsHelp } from "@syntaxure/ui";
 import { MANAGE_HELP_SHORTCUTS, MODE_TOGGLE_SHORTCUT } from "@/lib/keyboard-shortcuts";
@@ -271,6 +272,25 @@ export function MobileNav() {
                   </div>
                 </div>
               )}
+
+              {/* ── Workspace (all members) ── */}
+              <div className="mb-6">
+                <div className="mb-3 flex items-center justify-between px-2">
+                  <h3 className="font-mono text-xs uppercase tracking-wider text-white/40">
+                    Workspace
+                  </h3>
+                </div>
+                <div className="space-y-2">
+                  <Link
+                    href="/portfolio"
+                    onClick={() => setIsDrawerOpen(false)}
+                    className="flex w-full items-center gap-3 rounded-xl border border-white/[0.06] glass-subtle p-3 text-white/50 transition-all active:scale-95 hover:bg-white/[0.04] hover:text-white"
+                  >
+                    <BriefcaseBusiness className="h-4 w-4" />
+                    <span className="text-sm font-medium">Portfolio</span>
+                  </Link>
+                </div>
+              </div>
 
               {/* ── Operations (CEO/COO hub + BMC) ── */}
               {(operationsAuthorized || bmcAuthorized) && (
