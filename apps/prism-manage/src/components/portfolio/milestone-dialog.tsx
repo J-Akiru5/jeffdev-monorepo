@@ -10,12 +10,16 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Loader } from "lucide-react";
-import { createProjectMilestone } from "@/app/actions/portfolio";
+import { createProjectMilestone, setProjectMilestoneStatus } from "@/app/actions/portfolio";
+import type { MilestoneStatus } from "@/lib/portfolio";
 import { PortfolioDialog } from "./portfolio-dialog";
 import {
   FIELD_CLASS,
+  FIELD_SELECT_CLASS,
   GHOST_BUTTON_CLASS,
   LABEL_CLASS,
+  MILESTONE_STATUS_LABELS,
+  MILESTONE_STATUS_OPTIONS,
   PRIMARY_BUTTON_CLASS,
 } from "./portfolio-constants";
 
@@ -35,6 +39,7 @@ export function MilestoneDialog({
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [description, setDescription] = useState("");
+  const [status, setStatus] = useState<MilestoneStatus>("pending");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -42,6 +47,7 @@ export function MilestoneDialog({
     setTitle("");
     setDueDate("");
     setDescription("");
+    setStatus("pending");
   }, [open]);
 
   const handleSubmit = async () => {
@@ -65,6 +71,17 @@ export function MilestoneDialog({
         toast.error(result.error);
         return;
       }
+
+      // `createProjectMilestone` always inserts as pending (it is the shared
+      // contract), so a non-default pick is applied with the status action.
+      if (status !== "pending" && result.id) {
+        const statusResult = await setProjectMilestoneStatus(result.id, status);
+        if (statusResult.error) {
+          toast.error(statusResult.error);
+          return;
+        }
+      }
+
       toast.success("Milestone added");
       onAdded();
       onClose();
@@ -131,6 +148,26 @@ export function MilestoneDialog({
             onChange={(event) => setDueDate(event.target.value)}
             className={FIELD_CLASS}
           />
+        </div>
+
+        <div>
+          <label htmlFor="milestone-status" className={LABEL_CLASS}>
+            Status
+          </label>
+          <select
+            id="milestone-status"
+            value={status}
+            onChange={(event) =>
+              setStatus(event.target.value as MilestoneStatus)
+            }
+            className={FIELD_SELECT_CLASS}
+          >
+            {MILESTONE_STATUS_OPTIONS.map((option) => (
+              <option key={option} value={option}>
+                {MILESTONE_STATUS_LABELS[option]}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>

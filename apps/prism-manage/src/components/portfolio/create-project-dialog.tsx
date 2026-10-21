@@ -1,23 +1,28 @@
 "use client";
 
 /**
- * CreateProjectDialog
- * -------------------
- * Founder-only "New project" form. Posts one `createPortfolioProject` call and
- * keeps every optional field optional — v1 has no client picker, so the project
- * is created as an own venture/client without a `clients` row (see the report).
+ * ProjectDialog (create + edit)
+ * -----------------------------
+ * Founder-only project form. With no `project` it calls
+ * `createPortfolioProject`; with one it prefills every field and calls
+ * `updatePortfolioProject(id, input)`.
+ *
+ * Two fields are resolved behind the scenes:
+ *   - `clientName` — free text; the server reuses an existing `clients` row
+ *     (case-insensitive) or creates one, then writes `projects.client_id`.
+ *   - `taskListId` — a real `pm_projects` list loaded from the active
+ *     workspace, so progress/milestones can show open-task counts.
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader } from "lucide-react";
-import { createPortfolioProject } from "@/app/actions/portfolio";
-import type {
-  PortfolioKind,
-  PortfolioStatus,
-  RetainerStatus,
-} from "@/lib/portfolio";
+import { createPortfolioProject, updatePortfolioProject } from "@/app/actions/portfolio";
+import { getProjects } from "@/app/actions/projects";
+import type { PortfolioKind, PortfolioStatus, RetainerStatus, PortfolioProjectSummary } from "@/lib/portfolio";
+import type { Project } from "@/lib/schemas";
+import { useWorkspaceStore } from "@/stores/workspace-store";
 import { PortfolioDialog } from "./portfolio-dialog";
 import {
   FIELD_CLASS,
@@ -33,17 +38,21 @@ import {
   STATUS_OPTIONS,
 } from "./portfolio-constants";
 
-interface CreateProjectDialogProps {
+interface ProjectDialogProps {
   open: boolean;
   onClose: () => void;
+  /** When present the dialog edits this project instead of creating one. */
+  project?: PortfolioProjectSummary | null;
 }
 
-interface CreateFormState {
+interface ProjectFormState {
   title: string;
   kind: PortfolioKind;
   portfolioStatus: PortfolioStatus;
   description: string;
   category: string;
+  clientName: string;
+  taskListId: string;
   startDate: string;
   endDate: string;
   budget: string;
@@ -56,12 +65,14 @@ interface CreateFormState {
   publishedSiteUrl: string;
 }
 
-const EMPTY_FORM: CreateFormState = {
+const EMPTY_FORM: ProjectFormState = {
   title: "",
   kind: "venture",
   portfolioStatus: "planning",
   description: "",
   category: "",
+  clientName: "",
+  taskListId: "",
   startDate: "",
   endDate: "",
   budget: "",
@@ -73,6 +84,38 @@ const EMPTY_FORM: CreateFormState = {
   retainerRenewsOn: "",
   publishedSiteUrl: "",
 };
+
+/** `null`/`undefined` -> ""; `12.5` -> "12.5" (never "12.50"). */
+function numberToField(value: number | null | undefined): string {
+  return value === null || value === undefined ? "" : String(value);
+}
+
+/** Date columns come back as `YYYY-MM-DD`; trim any timestamp tail. */
+function dateToField(value: string | null | undefined): string {
+  return value ? value.slice(0, 10) : "";
+}
+
+function formFromProject(project: PortfolioProjectSummary): ProjectFormState {
+  return {
+    title: project.title,
+    kind: project.kind,
+    portfolioStatus: project.portfolioStatus,
+    description: project.description ?? "",
+    category: project.category ?? "",
+    clientName: project.client?.name ?? "",
+    taskListId: project.taskListId ?? "",
+    startDate: dateToField(project.startDate),
+    endDate: dateToField(project.endDate),
+    budget: numberToField(project.budget),
+    progress: numberToField(project.progress),
+    retainerStatus: project.retainer.status,
+    retainerMonthlyAmount: numberToField(project.retainer.monthlyAmount),
+    retainerCurrency: project.retainer.currency || "PHP",
+    retainerStartedOn: dateToField(project.retainer.startedOn),
+    retainerRenewsOn: dateToField(project.retainer.renewsOn),
+    publishedSiteUrl: project.publishedSiteUrl ?? "",
+  };
+}
 
 /** Empty -> null; throws a message-friendly failure for non-positive input. */
 function parseOptionalNumber(
@@ -88,21 +131,53 @@ function parseOptionalNumber(
   return { value: parsed };
 }
 
-export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps) {
+export function ProjectDialog({ open, onClose, project }: ProjectDialogProps) {
   const router = useRouter();
-  const [form, setForm] = useState<CreateFormState>(EMPTY_FORM);
-  const [submitting, setSubmitting] = useState(false);
+  const isEdit = Boolean(project);
+  const activeWorkspaceId = useWorkspaceStore((state) => state.activeWorkspaceId);
 
-  const update = <K extends keyof CreateFormState>(
+  const [form, setForm] = useState<ProjectFormState>(EMPTY_FORM);
+  const [submitting, setSubmitting] = useState(false);
+  const [taskLists, setTaskLists] = useState<Project[]>([]);
+  const [taskListsLoading, setTaskListsLoading] = useState(false);
+
+  // Re-seed the form every time the dialog opens (create vs edit target).
+  useEffect(() => {
+    if (!open) return;
+    setForm(project ? formFromProject(project) : EMPTY_FORM);
+  }, [open, project]);
+
+  // Task lists come from the active workspace, fetched through the same
+  // action the Operations views use (`pm_projects`, active lists only).
+  useEffect(() => {
+    if (!open || !activeWorkspaceId) return;
+    let cancelled = false;
+    setTaskListsLoading(true);
+    getProjects(activeWorkspaceId)
+      .then((lists) => {
+        if (!cancelled) setTaskLists(lists);
+      })
+      .catch(() => {
+        if (!cancelled) setTaskLists([]);
+      })
+      .finally(() => {
+        if (!cancelled) setTaskListsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, activeWorkspaceId]);
+
+  const update = <K extends keyof ProjectFormState>(
     key: K,
-    value: CreateFormState[K],
+    value: ProjectFormState[K],
   ) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleClose = () => {
     if (submitting) return;
-    setForm(EMPTY_FORM);
+    setForm(project ? formFromProject(project) : EMPTY_FORM);
     onClose();
   };
 
@@ -139,37 +214,49 @@ export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps)
       progress = parsed;
     }
 
+    const input = {
+      title,
+      kind: form.kind,
+      portfolioStatus: form.portfolioStatus,
+      description: form.description.trim() || undefined,
+      category: form.category.trim() || undefined,
+      // Empty means "leave the client alone"; clearing is not a supported
+      // operation on this field (same as before Phase 3).
+      clientName: form.clientName.trim() || undefined,
+      taskListId: form.taskListId || null,
+      startDate: form.startDate || undefined,
+      endDate: form.endDate || undefined,
+      budget: budget.value,
+      progress,
+      retainerStatus: form.retainerStatus,
+      retainerMonthlyAmount: monthly.value,
+      retainerCurrency: form.retainerCurrency.trim().toUpperCase() || "PHP",
+      retainerStartedOn: form.retainerStartedOn || undefined,
+      retainerRenewsOn: form.retainerRenewsOn || undefined,
+      publishedSiteUrl: form.publishedSiteUrl.trim() || undefined,
+    };
+
     setSubmitting(true);
     try {
-      const result = await createPortfolioProject({
-        title,
-        kind: form.kind,
-        portfolioStatus: form.portfolioStatus,
-        description: form.description.trim() || undefined,
-        category: form.category.trim() || undefined,
-        startDate: form.startDate || undefined,
-        endDate: form.endDate || undefined,
-        budget: budget.value,
-        progress,
-        retainerStatus: form.retainerStatus,
-        retainerMonthlyAmount: monthly.value,
-        retainerCurrency: form.retainerCurrency.trim().toUpperCase() || "PHP",
-        retainerStartedOn: form.retainerStartedOn || undefined,
-        retainerRenewsOn: form.retainerRenewsOn || undefined,
-        publishedSiteUrl: form.publishedSiteUrl.trim() || undefined,
-      });
+      const result = project
+        ? await updatePortfolioProject(project.id, input)
+        : await createPortfolioProject(input);
 
       if (result.error) {
         toast.error(result.error);
         return;
       }
 
-      toast.success(`Project "${title}" created`);
-      setForm(EMPTY_FORM);
+      toast.success(
+        project ? `Project "${title}" updated` : `Project "${title}" created`,
+      );
+      setForm(project ? formFromProject(project) : EMPTY_FORM);
       onClose();
       router.refresh();
     } catch {
-      toast.error("Failed to create project");
+      toast.error(
+        project ? "Failed to update project" : "Failed to create project",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -179,8 +266,12 @@ export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps)
     <PortfolioDialog
       open={open}
       onClose={handleClose}
-      title="New project"
-      description="Add a venture, client engagement or internal build to the portfolio."
+      title={isEdit ? "Edit project" : "New project"}
+      description={
+        isEdit
+          ? "Update the portfolio record. Amounts and the client stay founder-only."
+          : "Add a venture, client engagement or internal build to the portfolio."
+      }
       size="lg"
       footer={
         <>
@@ -199,7 +290,13 @@ export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps)
             className={PRIMARY_BUTTON_CLASS}
           >
             {submitting && <Loader className="h-4 w-4 animate-spin" />}
-            {submitting ? "Creating…" : "Create project"}
+            {submitting
+              ? isEdit
+                ? "Saving…"
+                : "Creating…"
+              : isEdit
+                ? "Save changes"
+                : "Create project"}
           </button>
         </>
       }
@@ -289,20 +386,22 @@ export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps)
         </div>
 
         <div>
-          <label htmlFor="pf-progress" className={LABEL_CLASS}>
-            Progress (%)
+          <label htmlFor="pf-client-name" className={LABEL_CLASS}>
+            Client name
           </label>
           <input
-            id="pf-progress"
-            type="number"
-            min={0}
-            max={100}
-            step={1}
-            value={form.progress}
-            onChange={(event) => update("progress", event.target.value)}
-            placeholder="0"
+            id="pf-client-name"
+            type="text"
+            value={form.clientName}
+            onChange={(event) => update("clientName", event.target.value)}
+            placeholder="e.g. MDM Events Management"
+            maxLength={120}
             className={FIELD_CLASS}
           />
+          <p className="mt-1 text-[10px] text-white/30">
+            Matched case-insensitively; a new client is created when the name is
+            unknown.
+          </p>
         </div>
 
         <div>
@@ -332,6 +431,23 @@ export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps)
         </div>
 
         <div>
+          <label htmlFor="pf-progress" className={LABEL_CLASS}>
+            Progress (%)
+          </label>
+          <input
+            id="pf-progress"
+            type="number"
+            min={0}
+            max={100}
+            step={1}
+            value={form.progress}
+            onChange={(event) => update("progress", event.target.value)}
+            placeholder="0"
+            className={FIELD_CLASS}
+          />
+        </div>
+
+        <div>
           <label htmlFor="pf-budget" className={LABEL_CLASS}>
             Budget
           </label>
@@ -345,6 +461,34 @@ export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps)
             placeholder="0"
             className={FIELD_CLASS}
           />
+        </div>
+
+        <div>
+          <label htmlFor="pf-task-list" className={LABEL_CLASS}>
+            Linked task list
+          </label>
+          <select
+            id="pf-task-list"
+            value={form.taskListId}
+            onChange={(event) => update("taskListId", event.target.value)}
+            className={FIELD_SELECT_CLASS}
+            disabled={taskListsLoading}
+          >
+            <option value="">
+              {taskListsLoading ? "Loading lists…" : "No task list"}
+            </option>
+            {form.taskListId &&
+              !taskLists.some((list) => list.id === form.taskListId) && (
+                <option value={form.taskListId}>
+                  {project?.taskListName ?? "Current list (not in this workspace)"}
+                </option>
+              )}
+            {taskLists.map((list) => (
+              <option key={list.id} value={list.id}>
+                {list.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>
@@ -457,8 +601,7 @@ export function CreateProjectDialog({ open, onClose }: CreateProjectDialogProps)
       </div>
 
       <p className="mt-3 text-[11px] text-white/30">
-        Clients, partners and assignees are linked from the project detail after
-        creation.
+        Partners and assignees are linked from the project detail after saving.
       </p>
     </PortfolioDialog>
   );

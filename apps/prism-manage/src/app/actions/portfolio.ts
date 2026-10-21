@@ -95,6 +95,13 @@ const projectFieldsSchema = z.object({
   portfolioStatus: portfolioStatusSchema.default("planning"),
   description: z.string().trim().max(5000).optional(),
   clientId: z.string().uuid().nullable().optional(),
+  /**
+   * Free-text client name from the dialog. Resolved server-side: an existing
+   * `clients` row whose name matches case-insensitively is reused, otherwise
+   * one is created (`email: null`). Takes precedence over `clientId` when
+   * both are present; an empty string means "leave the client alone".
+   */
+  clientName: z.string().trim().max(120).optional(),
   category: z.string().trim().max(80).optional(),
   progress: z.number().int().min(0).max(100).nullable().optional(),
   startDate: dateOnly.nullable().optional(),
@@ -260,6 +267,54 @@ async function uniqueSlug(admin: Db, base: string, excludeId: string | null): Pr
     if (!data) return candidate;
   }
   return `${root}-${Date.now().toString(36)}`;
+}
+
+/** Case-insensitive client lookup by free-text name; creates the row on miss. */
+async function resolveClientId(
+  admin: Db,
+  rawName: string,
+): Promise<{ id?: string; error?: string }> {
+  const name = rawName.trim();
+  if (!name) return {};
+
+  // `ilike` is a SQL pattern match, so an accidental `%`/`_` in the name can
+  // over-match; the JS-side comparison below keeps the result exact.
+  const { data: matches, error: lookupError } = await admin
+    .from("clients")
+    .select("id, name")
+    .ilike("name", name)
+    .limit(10);
+  if (lookupError) return { error: lookupError.message };
+
+  const wanted = name.toLowerCase();
+  const found = (Array.isArray(matches) ? matches : []).find(
+    (row: Record<string, unknown>) =>
+      String(row.name ?? "")
+        .trim()
+        .toLowerCase() === wanted,
+  );
+  if (found) return { id: String(found.id) };
+
+  const { data: created, error } = await admin
+    .from("clients")
+    .insert({ name, email: null })
+    .select("id")
+    .single();
+  if (error || !created) {
+    logger.error("portfolio.client.create_failed", { error: error?.message });
+    return { error: error?.message ?? "Failed to create client" };
+  }
+
+  const clientId = String(created.id);
+  logAudit({
+    action: "CREATE",
+    resource: "clients",
+    resourceId: clientId,
+    details: { name },
+  });
+  logger.info("portfolio.client.created", { clientId, name });
+
+  return { id: clientId };
 }
 
 async function missingIds(
@@ -564,6 +619,16 @@ export async function createPortfolioProject(
         .maybeSingle();
       if (!client) return { error: "Client not found" };
     }
+
+    // Free-text client name wins over an explicit id: the dialog only knows
+    // the name, and resolving it here keeps one writer for `clients`.
+    let clientId = data.clientId ?? null;
+    if (data.clientName) {
+      const resolved = await resolveClientId(admin, data.clientName);
+      if (resolved.error) return { error: resolved.error };
+      clientId = resolved.id ?? null;
+    }
+
     if (data.taskListId) {
       const { data: taskList } = await admin
         .from("pm_projects")
@@ -586,7 +651,7 @@ export async function createPortfolioProject(
       portfolio_status: data.portfolioStatus,
       status: publicStatusFor(data.portfolioStatus),
       description: data.description || null,
-      client_id: data.clientId ?? null,
+      client_id: clientId,
       metadata: metadata as Json,
       progress: data.progress ?? null,
       retainer_status: data.retainerStatus ?? "none",
@@ -639,6 +704,7 @@ export async function createPortfolioProject(
         kind: data.kind,
         portfolioStatus: data.portfolioStatus,
         slug,
+        ...(clientId ? { clientId } : {}),
       },
     });
     logger.info("portfolio.project.created", {
@@ -732,7 +798,13 @@ export async function updatePortfolioProject(
       update.status = publicStatusFor(data.portfolioStatus);
     }
     if (data.description !== undefined) update.description = data.description || null;
-    if (data.clientId !== undefined) update.client_id = data.clientId;
+    if (data.clientName) {
+      const resolved = await resolveClientId(admin, data.clientName);
+      if (resolved.error) return { error: resolved.error };
+      update.client_id = resolved.id ?? null;
+    } else if (data.clientId !== undefined) {
+      update.client_id = data.clientId;
+    }
     if (data.progress !== undefined) update.progress = data.progress;
     if (data.startDate !== undefined) update.start_date = data.startDate;
     if (data.endDate !== undefined) update.end_date = data.endDate;

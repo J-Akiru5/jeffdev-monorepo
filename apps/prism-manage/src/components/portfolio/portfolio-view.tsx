@@ -35,7 +35,7 @@ import {
   type RetainerStatus,
 } from "@/lib/portfolio";
 import { useWorkspaceStore } from "@/stores/workspace-store";
-import { CreateProjectDialog } from "./create-project-dialog";
+import { ProjectDialog } from "./create-project-dialog";
 import { PortfolioTabs } from "./portfolio-tabs";
 import {
   externalHref,
@@ -336,7 +336,7 @@ export function PortfolioView({ data }: PortfolioViewProps) {
       </p>
 
       {isFounder && (
-        <CreateProjectDialog
+        <ProjectDialog
           open={createOpen}
           onClose={() => setCreateOpen(false)}
         />
