@@ -88,6 +88,12 @@ export default async function globalTeardown() {
       .eq("created_by", testUser.id)
       .like("name", "e2e-%");
 
+    // Portfolio (Phase 3): projects cascade to project_partners,
+    // project_members and milestones; delete them before their clients.
+    await admin.from("projects").delete().like("title", "e2e-%");
+
+    await admin.from("clients").delete().like("name", "e2e-%");
+
     console.log("[e2e] test data cleaned up");
   } catch {
     // best-effort

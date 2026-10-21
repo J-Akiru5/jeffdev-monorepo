@@ -17,6 +17,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
+  Archive,
   ArrowLeft,
   CheckCircle2,
   Circle,
@@ -26,6 +27,7 @@ import {
   Link2,
   ListChecks,
   Loader,
+  Pencil,
   Plus,
   Trash2,
   UserPlus,
@@ -35,6 +37,7 @@ import {
 } from "lucide-react";
 import { ConfirmDialog, ProgressBar } from "@syntaxure/ui";
 import {
+  archivePortfolioProject,
   deleteProjectMilestone,
   removeProjectMember,
   removeProjectPartner,
@@ -45,6 +48,7 @@ import {
   canUpdateProjectProgress,
   daysUntilRenewal,
   retainerLabel,
+  type MilestoneStatus,
   type PortfolioMilestone,
   type PortfolioPartnerSummary,
   type PortfolioProjectDetail,
@@ -53,6 +57,7 @@ import { useWorkspaceStore } from "@/stores/workspace-store";
 import { MemberDialog } from "./member-dialog";
 import { MilestoneDialog } from "./milestone-dialog";
 import { PartnerLinkDialog } from "./partner-link-dialog";
+import { ProjectDialog } from "./create-project-dialog";
 import {
   externalHref,
   formatMoney,
@@ -62,6 +67,7 @@ import {
   KIND_STYLES,
   MEMBER_ROLE_LABELS,
   MILESTONE_STATUS_LABELS,
+  MILESTONE_STATUS_OPTIONS,
   MILESTONE_STATUS_STYLES,
   PARTNER_KIND_LABELS,
   RETAINER_STYLES,
@@ -96,6 +102,8 @@ export function ProjectDetail({
   const [memberOpen, setMemberOpen] = useState(false);
   const [partnerOpen, setPartnerOpen] = useState(false);
   const [milestoneOpen, setMilestoneOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [archiveOpen, setArchiveOpen] = useState(false);
   const [removeMemberId, setRemoveMemberId] = useState<string | null>(null);
   const [removePartnerId, setRemovePartnerId] = useState<string | null>(null);
   const [deleteMilestoneId, setDeleteMilestoneId] = useState<string | null>(null);
@@ -136,6 +144,40 @@ export function ProjectDetail({
       refresh();
     } catch {
       toast.error("Failed to update milestone");
+    }
+  };
+
+  /** Explicit status pick from the row select (pending / in progress / …). */
+  const handleMilestoneStatus = async (
+    milestone: PortfolioMilestone,
+    status: MilestoneStatus,
+  ) => {
+    if (status === milestone.status) return;
+    try {
+      const result = await setProjectMilestoneStatus(milestone.id, status);
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success(`${milestone.title} · ${MILESTONE_STATUS_LABELS[status]}`);
+      refresh();
+    } catch {
+      toast.error("Failed to update milestone");
+    }
+  };
+
+  const handleArchive = async () => {
+    try {
+      const result = await archivePortfolioProject(project.id);
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success(`"${project.title}" archived`);
+      refresh();
+      router.push("/portfolio");
+    } catch {
+      toast.error("Failed to archive project");
     }
   };
 
@@ -255,7 +297,27 @@ export function ProjectDetail({
             </p>
           </div>
 
-          <div className="flex flex-col gap-1 text-[10px] text-white/30 sm:items-end">
+          <div className="flex flex-col gap-2 text-[10px] text-white/30 sm:items-end">
+            {isFounder && (
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEditOpen(true)}
+                  className={SMALL_GHOST_BUTTON_CLASS}
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setArchiveOpen(true)}
+                  className={`${SMALL_GHOST_BUTTON_CLASS} hover:text-rose-300`}
+                >
+                  <Archive className="h-3.5 w-3.5" />
+                  Archive
+                </button>
+              </div>
+            )}
             <span>Created {formatPortfolioDate(project.createdAt) ?? "—"}</span>
             <span>Updated {formatPortfolioDate(project.updatedAt) ?? "—"}</span>
             {project.slug && <span className="font-mono">/{project.slug}</span>}
@@ -454,11 +516,35 @@ export function ProjectDetail({
                         </div>
                       </div>
                       <div className="flex flex-shrink-0 items-center gap-1.5">
-                        <span
-                          className={`rounded-full px-2 py-0.5 text-[10px] ${MILESTONE_STATUS_STYLES[milestone.status]}`}
-                        >
-                          {MILESTONE_STATUS_LABELS[milestone.status]}
-                        </span>
+                        {canToggle ? (
+                          <select
+                            aria-label={`Status for ${milestone.title}`}
+                            value={milestone.status}
+                            onChange={(event) =>
+                              void handleMilestoneStatus(
+                                milestone,
+                                event.target.value as MilestoneStatus,
+                              )
+                            }
+                            className={`cursor-pointer rounded-full border-0 px-2 py-0.5 text-[10px] outline-none transition-colors focus:ring-1 focus:ring-cyan-500/40 ${MILESTONE_STATUS_STYLES[milestone.status]}`}
+                          >
+                            {MILESTONE_STATUS_OPTIONS.map((status) => (
+                              <option
+                                key={status}
+                                value={status}
+                                className="bg-[#0a0a0a] text-white"
+                              >
+                                {MILESTONE_STATUS_LABELS[status]}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-[10px] ${MILESTONE_STATUS_STYLES[milestone.status]}`}
+                          >
+                            {MILESTONE_STATUS_LABELS[milestone.status]}
+                          </span>
+                        )}
                         {isFounder && (
                           <button
                             type="button"
@@ -506,7 +592,7 @@ export function ProjectDetail({
             ) : (
               <p className="mt-3 text-xs text-white/30">
                 {isFounder
-                  ? "No task list linked yet. Linking is done from the project edit path, which is not part of this build."
+                  ? "No task list linked yet. Use Edit to link one of this workspace's lists."
                   : "No task list linked yet."}
               </p>
             )}
@@ -702,6 +788,23 @@ export function ProjectDetail({
           onAdded={refresh}
         />
       )}
+
+      {isFounder && (
+        <ProjectDialog
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+          project={project}
+        />
+      )}
+
+      <ConfirmDialog
+        open={archiveOpen}
+        onOpenChange={setArchiveOpen}
+        title="Archive project?"
+        description={`"${project.title}" stays in the portfolio with an Archived badge; set its status back from Edit to restore it.`}
+        confirmLabel="Archive"
+        onConfirm={handleArchive}
+      />
 
       <ConfirmDialog
         open={removeMemberId !== null}
