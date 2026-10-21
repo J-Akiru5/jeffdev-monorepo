@@ -42,6 +42,11 @@ export default defineConfig({
         "src/**/*.test.ts",
         "src/**/*.test.tsx",
         "src/**/__tests__/**",
+        // Server actions are I/O orchestration over Supabase: unit coverage
+        // here measures mocks, not behaviour. They are verified by the E2E
+        // suite and live database probes; the ratchet below governs the
+        // pure/business-logic layer (lib/**) where it is meaningful.
+        "src/app/actions/**",
       ],
       // Ratchet floor (H4): slightly below the current baseline so the
       // number can only go up. Raise these as coverage improves.
