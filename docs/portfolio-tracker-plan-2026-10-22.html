@@ -82,6 +82,7 @@
       <div class="stat"><div class="n">0</div><div class="l">partner / venture / retainer models that exist today</div></div>
       <div class="stat"><div class="n">1</div><div class="l">new prism-manage section: Portfolio</div></div>
       <div class="stat"><div class="n">3</div><div class="l">new tables + additive columns on <code>projects</code></div></div>
+      <div class="stat"><div class="n">K1–K3</div><div class="l">KPI layers: computed · measures + trends · executive</div></div>
       <div class="stat"><div class="n">4</div><div class="l">phases, contract-first, CI-gated</div></div>
     </div>
   </div>
@@ -212,6 +213,104 @@
 
 <section class="bleed">
   <div class="wide">
+    <h2>KPIs — K1 computed · K2 measures + trends · K3 executive</h2>
+    <p class="measure"><b>What exists today:</b> <code>marketing_kpis</code> (<code>id, label, current_value, target_value, unit</code>) with eight funnel measures seeded lazily by <code>getKpis()</code> (waitlist, socials, GitHub stars, MRR, paying customers, Discord) and inline-edit cards showing attainment %. Verified live: the table exists and is empty until the marketing page seeds it. <code>testimonials</code> (uuid id, name, role, company, quote, avatar_url, featured, sort_order) exists for the public site and is empty. <b>Nothing</b> measures portfolio or delivery performance, and client feedback has no path to the public works page.</p>
+
+    <h3>Decisions (confirmed by Jeff, 2026-10-22)</h3>
+    <ul class="clean">
+      <li>K1 → K2 first, new <code>kpi_measures</code> table (do not overload <code>marketing_kpis</code>); marketing KPIs stay where they are until the executive view unifies them.</li>
+      <li><b>Client satisfaction + feedback</b> is captured per project and can be <b>published as a testimonial on the public Syntaxure works page</b> (consent-gated).</li>
+      <li><b>History and trends</b> are required — snapshots per period, charts in the executive view.</li>
+      <li><b>Targets start unset</b> — nullable targets; Jeff fills them in.</li>
+      <li><b>Founders only</b> edit KPIs (and publish testimonials).</li>
+      <li><b>Both</b> the portfolio/project KPIs and the executive KPI view are in scope.</li>
+    </ul>
+
+    <h3>Layer model</h3>
+    <div class="flow" style="margin:14px 0">
+      <div class="node hi">K1 · computed</div><span class="arrow">→</span>
+      <div class="node">K2 · stored targets + snapshots + feedback</div><span class="arrow">→</span>
+      <div class="node">K3 · executive view + trends</div>
+    </div>
+
+    <h3>Data model (one additive migration, K2)</h3>
+    <div class="twrap">
+      <table>
+        <thead><tr><th>Table / column</th><th>Shape</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">kpi_measures</td><td>id uuid · scope <code>('portfolio','project')</code> · project_id uuid nullable → projects (cascade) · key text · label text · unit text · direction <code>('higher','lower')</code> · target numeric <b>nullable</b> · period <code>('monthly','quarterly','one_off')</code> · notes · created_by · timestamps</td><td>One measure row per scope/project/metric. Partial unique indexes: <code>(key) where project_id is null</code> and <code>(project_id, key) where project_id is not null</code> (NULLs are distinct in a plain unique constraint).</td></tr>
+          <tr><td class="mono">kpi_snapshots</td><td>id uuid · measure_id uuid → kpi_measures (cascade) · value numeric not null · period_start date not null · period_end date · recorded_by · created_at · unique (measure_id, period_start)</td><td>Trends: one point per measure per period; month-over-month movement and charts.</td></tr>
+          <tr><td class="mono">project_feedback</td><td>id uuid · project_id uuid not null → projects (cascade) · rating numeric(2,1) check 1–5 · quote text not null · author_name · author_role · consent_to_publish boolean default false · published_at timestamptz · testimonial_id uuid → testimonials (set null) · created_by · timestamps</td><td>Client satisfaction + the testimonial source of truth. The satisfaction KPI derives from the latest rating.</td></tr>
+          <tr><td class="mono">milestones.completed_at</td><td>timestamptz nullable (additive)</td><td>True on-time % needs when a milestone completed, not just due dates. Set on the completed transition.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Metric catalog</h3>
+    <div class="twrap">
+      <table>
+        <thead><tr><th>Scope</th><th>Measure</th><th>Source</th><th>Direction</th></tr></thead>
+        <tbody>
+          <tr><td rowspan="8">Portfolio</td><td>Active MRR</td><td>computed (active retainers, grouped by currency)</td><td>higher</td></tr>
+          <tr><td>Active retainers</td><td>computed</td><td>higher</td></tr>
+          <tr><td>Retainer coverage</td><td>computed (retained ÷ delivered client projects)</td><td>higher</td></tr>
+          <tr><td>Ventures in progress</td><td>computed</td><td>higher</td></tr>
+          <tr><td>Client projects delivered this quarter</td><td>computed</td><td>higher</td></tr>
+          <tr><td>Completion rate</td><td>computed (completed ÷ non-archived)</td><td>higher</td></tr>
+          <tr><td>On-time milestone rate</td><td>computed (completed with completed_at ≤ due_date)</td><td>higher</td></tr>
+          <tr><td>Average client satisfaction</td><td>computed from <code>project_feedback.rating</code></td><td>higher</td></tr>
+          <tr><td rowspan="6">Per project</td><td>Budget variance %</td><td>computed (budget_spent ÷ budget)</td><td>lower</td></tr>
+          <tr><td>Milestones on-time %</td><td>computed</td><td>higher</td></tr>
+          <tr><td>Task completion %</td><td>computed from the linked task list</td><td>higher</td></tr>
+          <tr><td>Days to deadline</td><td>computed (end_date − today)</td><td>higher</td></tr>
+          <tr><td>Renewal due (days)</td><td>computed (retainer_renews_on − today)</td><td>higher</td></tr>
+          <tr><td>Support hours / month · uptime % · NPS</td><td>manual measures (kpi_measures rows)</td><td>lower / higher</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Client feedback → public testimonial</h3>
+    <div class="flow" style="margin:12px 0">
+      <div class="node">founder records feedback (rating + quote + author)</div><span class="arrow">→</span>
+      <div class="node">client consent flag</div><span class="arrow">→</span>
+      <div class="node">Publish (founder)</div><span class="arrow">→</span>
+      <div class="node">testimonials row + <code>projects.metadata.testimonial</code></div><span class="arrow">→</span>
+      <div class="node hi">public /work/[slug] shows it</div>
+    </div>
+    <p class="measure">Publishing requires <code>consent_to_publish = true</code>, inserts a <code>testimonials</code> row (name/role/company from author + client), and writes <code>projects.metadata.testimonial = {quote, author, role}</code> — the field the public works page already renders. Unpublishing clears <code>published_at</code>, removes the metadata key, and deletes the linked testimonial. The satisfaction KPI is derived from feedback, not entered twice.</p>
+
+    <h3>UI</h3>
+    <ul class="clean">
+      <li><b>/portfolio</b> — extend the stat strip with the computed portfolio KPIs (targets and attainment only where a target exists).</li>
+      <li><b>/portfolio/[id]</b> — "Performance" block: computed per-project KPIs + attainment bars + manual measures (founder add/edit) + feedback history with a Publish/Unpublish action.</li>
+      <li><b>/operations/kpis</b> (K3) — executive view: Portfolio · Delivery · Client · Marketing sections, each with current vs target and a trend chart from snapshots (last six periods). Visible to founders + CEO/COO (matches the Operations gate); editing remains founders-only.</li>
+      <li><b>Snapshots</b> — a manual "record snapshot" action plus a monthly cron route so trends accrue without anyone remembering.</li>
+    </ul>
+
+    <h3>Guardrails</h3>
+    <ul class="clean">
+      <li>Targets nullable — no invented numbers; attainment badges appear only when a target is set.</li>
+      <li>Money KPIs (MRR, budget variance, retainer amounts) stay founder-only; existing server-side redaction extends to KPI payloads.</li>
+      <li>Public exposure is always explicit: consent flag first, founder publish second. Nothing is auto-published.</li>
+      <li>No deployment commands; verification via unit tests (KPI math), typecheck/lint/build, and a focused E2E (measure → attainment → publish testimonial → cleanup).</li>
+    </ul>
+
+    <h3>Phases</h3>
+    <div class="twrap">
+      <table>
+        <thead><tr><th>Phase</th><th>Deliverable</th><th>Schema</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">K1</td><td>Computed KPI strip on /portfolio + Performance block on the detail page (incl. overdue milestones and task completion aggregation)</td><td>none</td></tr>
+          <tr><td class="mono">K2</td><td>kpi_measures + kpi_snapshots + project_feedback + milestones.completed_at; actions with founder-only writes; manual measures UI; feedback capture + testimonial publishing</td><td>one additive migration</td></tr>
+          <tr><td class="mono">K3</td><td>Executive KPI view (/operations/kpis) with trends, snapshot cron, marketing KPI unification</td><td>none beyond K2</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="bleed">
+  <div class="wide">
     <h2>Multi-agent execution plan</h2>
     <p class="measure">Contract-first, one owner per file set, sequential integration — parallel writes to the same app are how merge hell starts. I act as the integrator.</p>
     <div class="twrap">
@@ -236,10 +335,13 @@
       <div class="tracker-bar"><div class="tracker-fill" id="fill"></div></div>
       <div class="tracker-pct" id="pct">0% complete</div>
       <ul class="tracker-list" id="list">
-        <li data-id="p1"><label><input type="checkbox"> Phase 1 — Schema + seed migration + data/actions layer + unit tests (Agent A)</label></li>
-        <li data-id="p2"><label><input type="checkbox"> Phase 2 — Portfolio list, project detail, partners tab (Agent B)</label></li>
-        <li data-id="p3"><label><input type="checkbox"> Phase 3 — Task-list link, notifications on assignment, dashboard summary card</label></li>
-        <li data-id="p4"><label><input type="checkbox"> Phase 4 — E2E suite, release report, seed the delivered client projects (if approved)</label></li>
+        <li data-id="p1"><label><input type="checkbox"> Phase 1 — Schema + seed migration + data/actions layer + unit tests (Agent A) — shipped</label></li>
+        <li data-id="p2"><label><input type="checkbox"> Phase 2 — Portfolio list, project detail, partners tab (Agent B) — shipped</label></li>
+        <li data-id="p3"><label><input type="checkbox"> Phase 3 — Edit/client/task-link wiring, dashboard card, E2E — shipped</label></li>
+        <li data-id="p4"><label><input type="checkbox"> Phase 4 — Seed the delivered client projects (optional, awaiting owner)</label></li>
+        <li data-id="k1"><label><input type="checkbox"> K1 — computed portfolio + per-project KPIs (no schema change)</label></li>
+        <li data-id="k2"><label><input type="checkbox"> K2 — kpi_measures + snapshots + feedback → public testimonial publishing</label></li>
+        <li data-id="k3"><label><input type="checkbox"> K3 — executive KPI view with trends + monthly snapshot cron</label></li>
       </ul>
     </div>
   </div>
