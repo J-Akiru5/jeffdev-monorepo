@@ -64,10 +64,10 @@ export async function submitContactForm(data: ContactFormData) {
     const supabase = getAdminClient();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: result, error } = await (supabase as any)
-      .from("messages")
+      .from("contact_messages")
       .insert({
         ...validated,
-        status: "new",
+        status: "received",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })

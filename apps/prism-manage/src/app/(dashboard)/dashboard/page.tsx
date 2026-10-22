@@ -7,6 +7,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import {
+  BriefcaseBusiness,
   Building2,
   Users,
   CheckSquare,
@@ -17,6 +18,7 @@ import {
 import Link from "next/link";
 import { SyntaxureLogo, EmptyState } from "@syntaxure/ui";
 import { resolveSyntaxureWorkspace } from "@/lib/workspace";
+import { getPortfolioData } from "@/app/actions/portfolio";
 import {
   DEPARTMENT_COLORS,
   DEPARTMENT_DESCRIPTIONS,
@@ -79,6 +81,9 @@ export default async function HQLandingPage() {
   const departments = wsData.departments;
   const isFounder = wsData.userRole === "founder";
 
+  // Portfolio summary for the dashboard card (read-only; amounts are not shown).
+  const portfolio = await getPortfolioData();
+
   const stats = [
     { label: "Departments", value: departments.length, icon: Layers, color: "text-cyan-400" },
     { label: "Members", value: totalMembers, icon: Users, color: "text-purple-400" },
@@ -125,6 +130,39 @@ export default async function HQLandingPage() {
           })}
         </div>
       </div>
+
+      {/* Portfolio */}
+      <section className="mb-10">
+        <h2 className="mb-4 text-sm font-mono uppercase tracking-wider text-white/40">
+          Portfolio
+        </h2>
+        <Link
+          href="/portfolio"
+          className="group flex flex-wrap items-center justify-between gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 transition-all hover:border-white/[0.12] hover:bg-white/[0.04] hover:shadow-lg"
+        >
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-cyan-500/20 bg-cyan-500/10 text-cyan-400">
+              <BriefcaseBusiness className="h-4 w-4" />
+            </span>
+            <div>
+              <h3 className="font-semibold text-white">Portfolio overview</h3>
+              <p className="mt-0.5 text-xs text-white/40">
+                Every venture, client engagement and internal build
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <PortfolioCount label="Projects" value={portfolio.stats.total} />
+            <PortfolioCount label="Ventures" value={portfolio.stats.ventures} />
+            <PortfolioCount label="Clients" value={portfolio.stats.clients} />
+            <PortfolioCount
+              label="In maintenance"
+              value={portfolio.stats.maintenance}
+            />
+            <ArrowRight className="h-4 w-4 text-white/40 transition-transform group-hover:translate-x-0.5 group-hover:text-white/60" />
+          </div>
+        </Link>
+      </section>
 
       {/* Departments Grid */}
       <section data-tour="dashboard-departments">
@@ -197,6 +235,18 @@ export default async function HQLandingPage() {
           </div>
         </section>
       )}
+    </div>
+  );
+}
+
+/** Small inline stat for the Portfolio card (keeps the dashboard server-only). */
+function PortfolioCount({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="flex items-baseline gap-1.5">
+      <span className="font-mono text-lg font-semibold text-white">{value}</span>
+      <span className="font-mono text-[10px] uppercase tracking-wider text-white/40">
+        {label}
+      </span>
     </div>
   );
 }

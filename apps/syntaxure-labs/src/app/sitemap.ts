@@ -9,26 +9,39 @@ import { MetadataRoute } from "next";
 
 const BASE_URL = "https://www.syntaxure.dev";
 
+/**
+ * Static routes — exported so a unit test can pin coverage
+ * (the launch page must never silently drop out of the sitemap).
+ */
+export function staticSitemapPages(
+  now: Date = new Date(),
+): MetadataRoute.Sitemap {
+  return [
+    { url: BASE_URL, lastModified: now, changeFrequency: "weekly" as const, priority: 1.0 },
+    { url: `${BASE_URL}/prism`, lastModified: now, changeFrequency: "weekly" as const, priority: 0.9 },
+    { url: `${BASE_URL}/services`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.9 },
+    { url: `${BASE_URL}/work`, lastModified: now, changeFrequency: "weekly" as const, priority: 0.9 },
+    { url: `${BASE_URL}/about`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.8 },
+    { url: `${BASE_URL}/contact`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.8 },
+    { url: `${BASE_URL}/quote`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.9 },
+    { url: `${BASE_URL}/pricing`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.8 },
+    { url: `${BASE_URL}/products`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.8 },
+    { url: `${BASE_URL}/features`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.7 },
+    { url: `${BASE_URL}/blog`, lastModified: now, changeFrequency: "weekly" as const, priority: 0.8 },
+    { url: `${BASE_URL}/community`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.6 },
+    { url: `${BASE_URL}/changelog`, lastModified: now, changeFrequency: "weekly" as const, priority: 0.5 },
+    { url: `${BASE_URL}/llms.txt`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.5 },
+    { url: `${BASE_URL}/llms-full.txt`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.5 },
+    { url: `${BASE_URL}/b2039173526041dc8f9e095c3207c8d8.txt`, lastModified: now, changeFrequency: "yearly" as const, priority: 0.1 },
+    { url: `${BASE_URL}/cookies`, lastModified: now, changeFrequency: "yearly" as const, priority: 0.2 },
+    { url: `${BASE_URL}/terms`, lastModified: now, changeFrequency: "yearly" as const, priority: 0.3 },
+    { url: `${BASE_URL}/privacy`, lastModified: now, changeFrequency: "yearly" as const, priority: 0.3 },
+  ];
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const currentDate = new Date();
-
-  // Static pages
-  const staticPages = [
-    { url: BASE_URL, lastModified: currentDate, changeFrequency: "weekly" as const, priority: 1.0 },
-    { url: `${BASE_URL}/services`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.9 },
-    { url: `${BASE_URL}/work`, lastModified: currentDate, changeFrequency: "weekly" as const, priority: 0.9 },
-    { url: `${BASE_URL}/about`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.8 },
-    { url: `${BASE_URL}/contact`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.8 },
-    { url: `${BASE_URL}/quote`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.9 },
-    { url: `${BASE_URL}/pricing`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.8 },
-    { url: `${BASE_URL}/features`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.7 },
-    { url: `${BASE_URL}/llms.txt`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.5 },
-    { url: `${BASE_URL}/llms-full.txt`, lastModified: currentDate, changeFrequency: "monthly" as const, priority: 0.5 },
-    { url: `${BASE_URL}/b2039173526041dc8f9e095c3207c8d8.txt`, lastModified: currentDate, changeFrequency: "yearly" as const, priority: 0.1 },
-    { url: `${BASE_URL}/cookies`, lastModified: currentDate, changeFrequency: "yearly" as const, priority: 0.2 },
-    { url: `${BASE_URL}/terms`, lastModified: currentDate, changeFrequency: "yearly" as const, priority: 0.3 },
-    { url: `${BASE_URL}/privacy`, lastModified: currentDate, changeFrequency: "yearly" as const, priority: 0.3 },
-  ];
+  const staticPages = staticSitemapPages(currentDate);
 
   // Dynamic service pages
   try {

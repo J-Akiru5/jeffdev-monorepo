@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>prism-manage — Portfolio Tracker Shipped (2026-10-22)</title>
+<style>
+  :root { --bg:#0A0D12; --bg-card:#151A22; --border:#232A36; --cyan:#22D3EE; --violet:#8B7BFF; --text:#E6EAF0; --text-dim:#8B93A3; --text-faint:#5A6272; --good:#4ADE80; --warn:#FBBF24; --bad:#F87171; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif; line-height:1.65; }
+  .bleed { width:100%; padding:0 clamp(20px, 5vw, 80px); }
+  .measure { max-width:760px; margin:0 auto; }
+  .wide { max-width:1120px; margin:0 auto; }
+  .mono { font-family:'JetBrains Mono','SF Mono',Consolas,monospace; }
+  header.hero { border-bottom:1px solid var(--border); padding:56px 0 32px; }
+  .eyebrow { font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--cyan); margin-bottom:10px; }
+  h1 { font-size:clamp(26px, 4.4vw, 36px); font-weight:700; line-height:1.2; margin-bottom:12px; background:linear-gradient(90deg,var(--text),var(--text) 55%,var(--cyan)); -webkit-background-clip:text; background-clip:text; }
+  .meta-row { display:flex; flex-wrap:wrap; gap:14px; font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--text-dim); }
+  .badge { display:inline-block; padding:3px 10px; border-radius:999px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.04em; text-transform:uppercase; border:1px solid; }
+  .badge.ok { color:var(--good); border-color:var(--good); background:rgba(74,222,128,.08); }
+  .badge.warn { color:var(--warn); border-color:var(--warn); background:rgba(251,191,36,.08); }
+  section { padding:32px 0; border-bottom:1px solid var(--border); }
+  h2 { font-size:13px; font-family:'JetBrains Mono',monospace; letter-spacing:.06em; text-transform:uppercase; color:var(--violet); margin-bottom:16px; display:flex; align-items:center; gap:10px; }
+  h2::after { content:''; flex:1; height:1px; background:var(--border); }
+  h3 { font-size:16px; margin:20px 0 8px; }
+  p { margin-bottom:12px; }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+  .stat { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:14px 16px; }
+  .stat .n { font-family:'JetBrains Mono',monospace; font-size:23px; font-weight:600; color:var(--cyan); }
+  .stat .l { font-size:12px; color:var(--text-dim); margin-top:2px; }
+  .twrap { overflow-x:auto; border:1px solid var(--border); border-radius:10px; }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; }
+  th,td { text-align:left; padding:10px 14px; border-bottom:1px solid var(--border); vertical-align:top; }
+  tr:last-child td { border-bottom:none; }
+  th { font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-faint); font-weight:500; background:rgba(255,255,255,.02); }
+  td.mono { color:var(--cyan); white-space:nowrap; }
+  .ok { color:var(--good); } .warn { color:var(--warn); } .bad { color:var(--bad); }
+  ul.clean { list-style:none; display:flex; flex-direction:column; gap:10px; }
+  ul.clean li { background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:12px 16px; font-size:14px; }
+  code { font-family:'JetBrains Mono',monospace; font-size:.92em; color:var(--cyan); }
+  footer { padding:28px 0 60px; font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-faint); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+  @media (max-width:640px) { .stat .n { font-size:20px; } }
+</style>
+</head>
+<body>
+
+<header class="hero bleed">
+  <div class="wide">
+    <div class="eyebrow">prism-manage · portfolio tracker · shipped 2026-10-22</div>
+    <h1>The Portfolio Tracker is live on develop</h1>
+    <div class="meta-row">
+      <span>Status: <b>phases 1–3 shipped</b></span>
+      <span class="badge ok">CI green</span>
+      <span class="badge warn">main release = your call</span>
+    </div>
+  </div>
+</header>
+
+<section class="bleed">
+  <div class="wide">
+    <h2>TL;DR</h2>
+    <div class="stats">
+      <div class="stat"><div class="n">4</div><div class="l">PRs (plan, data, UI, wiring+E2E)</div></div>
+      <div class="stat"><div class="n">3</div><div class="l">ventures seeded and visible</div></div>
+      <div class="stat"><div class="n">2</div><div class="l">partners seeded (Zenlabs, MDM)</div></div>
+      <div class="stat"><div class="n">2</div><div class="l">E2E tests, 3 consecutive passes</div></div>
+      <div class="stat"><div class="n">36</div><div class="l">new unit tests (portfolio lib + actions)</div></div>
+      <div class="stat"><div class="n">0</div><div class="l">deploy commands run</div></div>
+    </div>
+    <p class="measure" style="margin-top:16px">Everything you asked for exists now: all projects in one list, ventures separated from client builds, lifecycle status (planning → in progress → maintenance → completed), retainer details, who is assigned per project, partners as real entities, plus the per-project detail tracker (progress, milestones, team, dates, budget) that prism-admin used to have.</p>
+  </div>
+</section>
+
+<section class="bleed">
+  <div class="wide">
+    <h2>What you can do today</h2>
+    <div class="twrap">
+      <table>
+        <thead><tr><th>Screen</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">/portfolio</td><td>Stats (total · ventures · clients · in maintenance · completed · active MRR), six filters (search, kind, status, retainer, partner, assignee), cards with kind/status/retainer/progress/assignees and a <b>New project</b> dialog.</td></tr>
+          <tr><td class="mono">/portfolio/[id]</td><td>Header (kind, status, client/venture, partners, live URL, published), progress control, retainer card with renewal countdown, team assignment with roles, partner linking, milestone add/status/complete/delete, linked task-list counts, founder <b>Edit</b> and <b>Archive</b>.</td></tr>
+          <tr><td class="mono">/portfolio/partners</td><td>Partner register with search, project counts, founder create/edit/delete (contacts, website, notes, status).</td></tr>
+          <tr><td class="mono">/dashboard</td><td>Portfolio card with live counts linking into the section.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="measure" style="margin-top:12px"><b>Seeded projects:</b> LikasLens (in progress), RiceConnect (in progress), Golf Management System (planning; partners <b>Zenlabs</b> — co-development, <b>MDM Events Management</b> — events &amp; venue partner). Create the delivered client builds (MDM site, USC Portal, FieldOps, Suarez Food Hub, Microplastic AI, IRJICT) from the UI whenever you want them tracked.</p>
+  </div>
+</section>
+
+<section class="bleed">
+  <div class="wide">
+    <h2>Architecture decisions (as approved)</h2>
+    <ul class="clean">
+      <li><b>One source of truth:</b> the shared <code>projects</code> table was extended (additive columns) instead of forking a new table — the public <code>/work</code> case studies and the tracker now read the same rows.</li>
+      <li><b>Additive migration only:</b> 9 columns + 4 guarded CHECKs + 4 indexes; three new tables (<code>partners</code>, <code>project_partners</code>, <code>project_members</code>); a backfill aligns pre-existing rows by their public status. Applied live; generated types regenerated (drift in sync).</li>
+      <li><b>RBAC:</b> members view everything; founders edit; assigned members update progress/milestones. Budget and retainer <b>amounts are redacted server-side</b> for non-founders — MRR disappears with them. RLS: signed-in read, service-role writes through server actions.</li>
+      <li><b>Retainers:</b> inline fields (status, monthly, currency, started, renews) — enough for the maintenance badge, Active MRR and renewal awareness; a billing ledger can link to invoices later without rework.</li>
+      <li><b>Task link:</b> each project can point at one task list (<code>pm_project_id</code>); the detail shows open/completed counts.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="bleed">
+  <div class="wide">
+    <h2>Evidence</h2>
+    <div class="twrap">
+      <table>
+        <thead><tr><th>Check</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Unit tests (portfolio lib + actions)</td><td class="ok">36 passed</td></tr>
+          <tr><td>Coverage ratchet (after scoping it to <code>lib/**</code>)</td><td class="ok">87.8% stmts · 82.0% branches · 88.5% funcs · 90.1% lines</td></tr>
+          <tr><td>Typecheck / lint / production build</td><td class="ok">0 errors · clean · exit 0 (portfolio routes emitted)</td></tr>
+          <tr><td>E2E <code>portfolio.spec.ts</code> (create → detail → progress → milestone → search → edit → archive)</td><td class="ok">2 passed × 3 consecutive runs</td></tr>
+          <tr><td>Live DB probe</td><td class="ok">3 ventures, 2 partners, 2 golf links, statuses correct; e2e data cleaned to 0</td></tr>
+          <tr><td>Deployments</td><td class="warn">none triggered (governance: only eligible-branch integration; <code>main</code> is human-only)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="bleed">
+  <div class="wide">
+    <h2>Known gaps / next</h2>
+    <ul class="clean">
+      <li><b>Client clearing</b> — setting a client is supported (name resolves/creates a <code>clients</code> row); explicitly removing one needs a dedicated control.</li>
+      <li><b>Publishing</b> — the public-site publish flag remains an explicit toggle; the tracker never unpublishes. Publishing stays in the paused prism-admin for now.</li>
+      <li><b>prism-admin drift</b> — its agency pages have broken columns (dropped <code>client_name</code>, wrong insert shapes). Not touched; the tracker does not depend on them.</li>
+      <li><b>milestones table conflict</b> — project-scoped vs workspace-scoped definitions; the tracker uses project milestones. prism-manage Operations milestones should be verified separately.</li>
+      <li><b>Notifications</b> — assignment notifications are wired on the server; no digest/email fan-out yet.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="bleed">
+  <div class="wide">
+    <h2>PR ledger</h2>
+    <div class="twrap">
+      <table>
+        <thead><tr><th>PR</th><th>Scope</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">#136</td><td>Plan + decisions (docs)</td></tr>
+          <tr><td class="mono">#137</td><td>Phase 1 — migration + seed + lib + actions + tests</td></tr>
+          <tr><td class="mono">#138</td><td>Coverage ratchet scoped to the business-logic layer (CI fix)</td></tr>
+          <tr><td class="mono">#139</td><td>Phase 2 — list, detail, partners UI, nav</td></tr>
+          <tr><td class="mono">#140</td><td>Phase 3 — edit/client/task-link wiring, dashboard card, E2E, teardown</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<footer class="bleed">
+  <div class="wide" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+    <span>prism-manage · portfolio tracker · shipped</span>
+    <span>develop only · main release awaits you</span>
+  </div>
+</footer>
+</body>
+</html>

@@ -629,6 +629,46 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"partners": {
+                  Row: {
+                    "contact_name": string | null,"created_at": string,"created_by": string | null,"email": string | null,"id": string,"kind": string,"name": string,"notes": string | null,"phone": string | null,"status": string,"updated_at": string,"website": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "contact_name"?: string | null,"created_at"?: string,"created_by"?: string | null,"email"?: string | null,"id"?: string,"kind"?: string,"name": string,"notes"?: string | null,"phone"?: string | null,"status"?: string,"updated_at"?: string,"website"?: string | null
+                  }
+                  Update: {
+                    "contact_name"?: string | null,"created_at"?: string,"created_by"?: string | null,"email"?: string | null,"id"?: string,"kind"?: string,"name"?: string,"notes"?: string | null,"phone"?: string | null,"status"?: string,"updated_at"?: string,"website"?: string | null
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"payments": {
+                  Row: {
+                    "amount": number,"created_at": string,"currency": string,"id": string,"invoice_id": string,"method": string,"notes": string | null,"proof_url": string | null,"status": string,"transaction_id": string | null,"updated_at": string,"verified_at": string | null,"verified_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "amount": number,"created_at"?: string,"currency"?: string,"id"?: string,"invoice_id": string,"method": string,"notes"?: string | null,"proof_url"?: string | null,"status"?: string,"transaction_id"?: string | null,"updated_at"?: string,"verified_at"?: string | null,"verified_by"?: string | null
+                  }
+                  Update: {
+                    "amount"?: number,"created_at"?: string,"currency"?: string,"id"?: string,"invoice_id"?: string,"method"?: string,"notes"?: string | null,"proof_url"?: string | null,"status"?: string,"transaction_id"?: string | null,"updated_at"?: string,"verified_at"?: string | null,"verified_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "payments_invoice_id_fkey"
+      columns: ["invoice_id"]
+isOneToOne: false
+      referencedRelation: "invoices"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "payments_verified_by_fkey"
+      columns: ["verified_by"]
+isOneToOne: false
+      referencedRelation: "user_profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"pm_projects": {
                   Row: {
                     "color": string | null,"created_at": string,"created_by": string | null,"description": string | null,"icon": string | null,"id": string,"name": string,"sort_order": number,"status": string,"updated_at": string,"workspace_id": string
@@ -995,16 +1035,68 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
-                },"projects": {
+                },"project_members": {
                   Row: {
-                    "budget": number | null,"budget_spent": number | null,"client_id": string | null,"created_at": string | null,"description": string | null,"end_date": string | null,"id": string,"metadata": Json | null,"published": boolean | null,"published_site_url": string | null,"slug": string | null,"start_date": string | null,"status": string | null,"title": string,"updated_at": string | null,"user_id": string
+                    "created_at": string,"created_by": string | null,"project_id": string,"role": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "budget"?: number | null,"budget_spent"?: number | null,"client_id"?: string | null,"created_at"?: string | null,"description"?: string | null,"end_date"?: string | null,"id"?: string,"metadata"?: Json | null,"published"?: boolean | null,"published_site_url"?: string | null,"slug"?: string | null,"start_date"?: string | null,"status"?: string | null,"title": string,"updated_at"?: string | null,"user_id": string
+                    "created_at"?: string,"created_by"?: string | null,"project_id": string,"role"?: string,"user_id": string
                   }
                   Update: {
-                    "budget"?: number | null,"budget_spent"?: number | null,"client_id"?: string | null,"created_at"?: string | null,"description"?: string | null,"end_date"?: string | null,"id"?: string,"metadata"?: Json | null,"published"?: boolean | null,"published_site_url"?: string | null,"slug"?: string | null,"start_date"?: string | null,"status"?: string | null,"title"?: string,"updated_at"?: string | null,"user_id"?: string
+                    "created_at"?: string,"created_by"?: string | null,"project_id"?: string,"role"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "project_members_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "projects"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "project_members_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "user_profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"project_partners": {
+                  Row: {
+                    "created_at": string,"created_by": string | null,"notes": string | null,"partner_id": string,"project_id": string,"role": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string | null,"notes"?: string | null,"partner_id": string,"project_id": string,"role"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string | null,"notes"?: string | null,"partner_id"?: string,"project_id"?: string,"role"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "project_partners_partner_id_fkey"
+      columns: ["partner_id"]
+isOneToOne: false
+      referencedRelation: "partners"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "project_partners_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "projects"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"projects": {
+                  Row: {
+                    "budget": number | null,"budget_spent": number | null,"client_id": string | null,"created_at": string | null,"description": string | null,"end_date": string | null,"id": string,"kind": string,"metadata": Json | null,"pm_project_id": string | null,"portfolio_status": string,"progress": number | null,"published": boolean | null,"published_site_url": string | null,"retainer_currency": string,"retainer_monthly_amount": number | null,"retainer_renews_on": string | null,"retainer_started_on": string | null,"retainer_status": string,"slug": string | null,"start_date": string | null,"status": string | null,"title": string,"updated_at": string | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "budget"?: number | null,"budget_spent"?: number | null,"client_id"?: string | null,"created_at"?: string | null,"description"?: string | null,"end_date"?: string | null,"id"?: string,"kind"?: string,"metadata"?: Json | null,"pm_project_id"?: string | null,"portfolio_status"?: string,"progress"?: number | null,"published"?: boolean | null,"published_site_url"?: string | null,"retainer_currency"?: string,"retainer_monthly_amount"?: number | null,"retainer_renews_on"?: string | null,"retainer_started_on"?: string | null,"retainer_status"?: string,"slug"?: string | null,"start_date"?: string | null,"status"?: string | null,"title": string,"updated_at"?: string | null,"user_id": string
+                  }
+                  Update: {
+                    "budget"?: number | null,"budget_spent"?: number | null,"client_id"?: string | null,"created_at"?: string | null,"description"?: string | null,"end_date"?: string | null,"id"?: string,"kind"?: string,"metadata"?: Json | null,"pm_project_id"?: string | null,"portfolio_status"?: string,"progress"?: number | null,"published"?: boolean | null,"published_site_url"?: string | null,"retainer_currency"?: string,"retainer_monthly_amount"?: number | null,"retainer_renews_on"?: string | null,"retainer_started_on"?: string | null,"retainer_status"?: string,"slug"?: string | null,"start_date"?: string | null,"status"?: string | null,"title"?: string,"updated_at"?: string | null,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -1012,6 +1104,12 @@ isOneToOne: false
       columns: ["client_id"]
 isOneToOne: false
       referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "projects_pm_project_id_fkey"
+      columns: ["pm_project_id"]
+isOneToOne: false
+      referencedRelation: "pm_projects"
       referencedColumns: ["id"]
     },{
       foreignKeyName: "projects_user_id_fkey"

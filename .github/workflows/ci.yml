@@ -124,7 +124,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [prism-context-engine, prism-mcp-server, prism-admin, prism-manage]
+        package: [prism-context-engine, prism-mcp-server, prism-admin, prism-manage, syntaxure-labs]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -151,7 +151,13 @@ jobs:
         if: matrix.package == 'prism-context-engine'
         run: pnpm --filter prism-mcp-server run build
 
+      # syntaxure-labs keeps E2E in its own Playwright setup; CI runs unit tests only
+      - name: Run unit tests (vitest)
+        if: matrix.package == 'syntaxure-labs'
+        run: pnpm --filter syntaxure-labs run test:unit -- --reporter=verbose
+
       - name: Run tests
+        if: matrix.package != 'syntaxure-labs'
         run: pnpm --filter ${{ matrix.package }} run test -- --reporter=verbose
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI || '' }}
